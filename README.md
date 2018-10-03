@@ -26,6 +26,6 @@ To use the sysroot, use the `--sysroot=` option:
 
 ```
 /path/to/wasm/supporting/c/compiler --sysroot=/path/to/the/newly/built/sysroot ...
-``
+```
 
 to run the compiler using the newly built sysroot.

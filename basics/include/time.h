@@ -1,0 +1,10 @@
+#ifndef __wasm_sysroot_time_h
+#define __wasm_sysroot_time_h
+
+#define __need_size_t
+#define __need_NULL
+#include <stddef.h>
+
+#include <__typedef_time_t.h>
+
+#endif

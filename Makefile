@@ -36,5 +36,5 @@ $(SYSROOT):
 	$(RM) *.o
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" -c $(BASICS_LIBC_SOURCES)
 	mkdir -p "$(SYSROOT)/lib"
-	ar crs "$(SYSROOT)/lib/libc.a" *.o
+	$(AR) crs "$(SYSROOT)/lib/libc.a" *.o
 	$(RM) *.o

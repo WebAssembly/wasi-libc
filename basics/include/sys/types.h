@@ -6,6 +6,11 @@
 
 #include <__typedef_clock_t.h>
 #include <__typedef_time_t.h>
+#include <__typedef_blksize_t.h>
+#include <__typedef_off_t.h>
+#include <__typedef_ssize_t.h>
+#include <__typedef_suseconds_t.h>
+#include <__typedef_nlink_t.h>
 
 /* Define these as 64-bit signed integers to support files larger than 2 GiB. */
 typedef long long blksize_t;

@@ -6,5 +6,6 @@
 #include <stddef.h>
 
 #include <__typedef_time_t.h>
+#include <__struct_timespec.h>
 
 #endif

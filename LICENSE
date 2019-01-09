@@ -8,3 +8,4 @@ cows-libc/cloudabi/   - BSD-2-Clause; see cows-libc/cloudabi/LICENSE for details
 cows-libc/cloudlibc/  - BSD-2-Clause; see cows-libc/cloudlibc/LICENSE for details
 cows-libc/libpreopen/ - BSD-2-Clause; see the individual files for details
 cows-libc/headers/    - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+musl-libc/            - MIT; see musl-libc/musl/COPYRIGHT for details

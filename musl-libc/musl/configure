@@ -322,6 +322,7 @@ microblaze*) ARCH=microblaze ;;
 or1k*) ARCH=or1k ;;
 powerpc64*) ARCH=powerpc64 ;;
 powerpc*) ARCH=powerpc ;;
+wasm*) ARCH=wasm32 ;;
 sh[1-9bel-]*|sh|superh*) ARCH=sh ;;
 s390x*) ARCH=s390x ;;
 unknown) fail "$0: unable to detect target arch; try $0 --target=..." ;;

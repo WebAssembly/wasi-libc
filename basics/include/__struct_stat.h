@@ -29,7 +29,7 @@ struct stat {
     struct timespec st_atim;
     struct timespec st_mtim;
     struct timespec st_ctim;
-    long long __unused[3];
+    long long __reserved[3];
 };
 
 #endif

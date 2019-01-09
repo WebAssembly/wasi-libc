@@ -1,7 +1,7 @@
 #ifndef __wasm_sysroot___struct_timespec_h
 #define __wasm_sysroot___struct_timespec_h
 
-#include "__typedef_time_t.h"
+#include <__typedef_time_t.h>
 
 /* As specified in POSIX. */
 struct timespec {

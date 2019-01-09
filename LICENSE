@@ -2,5 +2,9 @@ Please see the LICENSE file in each top-level directory for the terms applicable
 
 The relevant directories and licenses are:
 
-basics/      - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
-dlmalloc/    - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+basics/               - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+dlmalloc/             - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+cows-libc/cloudabi/   - BSD-2-Clause; see cows-libc/cloudabi/LICENSE for details
+cows-libc/cloudlibc/  - BSD-2-Clause; see cows-libc/cloudlibc/LICENSE for details
+cows-libc/libpreopen/ - BSD-2-Clause; see the individual files for details
+cows-libc/headers/    - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication

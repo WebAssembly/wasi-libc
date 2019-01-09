@@ -30,19 +30,7 @@ To use the sysroot, use the `--sysroot=` option:
 
 to run the compiler using the newly built sysroot.
 
-## Why doesn't this contain a full libc implementation?
+## What is the status of the full libc implementation?
 
-In the short term, one of the main goals is just to provide a reference
-point for people already maintaining their own libc codebases, to help
-reduce interface incompatibilities between the several different
-environments out there.
-
-In the long term, there may some day be some form of standardized
-syscall/import layer for wasm which would could support a full
-"reference libc", at which point this repository might make sense as
-a place to host such a thing.
-
-In between, if there are specific pieces of libc functionality which
-people would find useful to have here, and which don't depend on any
-syscalls, we could add them, using code from existing third-party
-codebases as appropriate.
+There is a libc implmentation based on musl included in this repository;
+it is currently experimental.

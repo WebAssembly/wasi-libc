@@ -19,3 +19,5 @@ libpreopen - https://github.com/musec/libpreopen 8265fc50b9db3730c250597bdd084f1
 
 Whole files which are unused are omitted. Changes to upstream code are wrapped
 in preprocessor directives controlled by the macro `__cowslibc_unmodified_upstream__`.
+
+COWS libc currently depends on the basics and dlmalloc components of reference-sysroot.

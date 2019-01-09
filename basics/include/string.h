@@ -1,5 +1,5 @@
-#ifndef __wasm_sysroot_string_h
-#define __wasm_sysroot_string_h
+#ifndef __wasm_basics_string_h
+#define __wasm_basics_string_h
 
 #define __need_size_t
 #define __need_NULL

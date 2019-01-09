@@ -1,5 +1,5 @@
-#ifndef __wasm_sysroot_sys_stat_h
-#define __wasm_sysroot_sys_stat_h
+#ifndef __wasm_basics_sys_stat_h
+#define __wasm_basics_sys_stat_h
 
 #include <__struct_stat.h>
 

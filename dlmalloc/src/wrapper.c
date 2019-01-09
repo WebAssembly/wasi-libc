@@ -10,7 +10,7 @@
 #define ABORT __builtin_unreachable()
 
 /* If threads are enabled, enable support for threads. */
-#ifndef WASM_THREAD_MODEL_SINGLE
+#ifndef __WASM_THREAD_MODEL_SINGLE
 #define USE_LOCKS 1
 #endif
 

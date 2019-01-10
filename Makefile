@@ -43,12 +43,12 @@ endif
 .PHONY: $(SYSROOT)
 $(SYSROOT):
 	$(RM) -r "$(SYSROOT)"
-	mkdir -p "$(SYSROOT)/usr"
+	mkdir -p "$(SYSROOT)"
 
 	#
 	# Install the include files.
 	#
-	cp -r "$(BASICS_INC)" "$(SYSROOT)/usr"
+	cp -r "$(BASICS_INC)" "$(SYSROOT)"
 
 	#
 	# Build the C startup files.
@@ -80,8 +80,8 @@ $(SYSROOT):
 	# Compile and install the COWS source files.
 	#
 	$(RM) *.o
-	cp -r "$(COWS_LIBC_CLOUDABI_HEADERS)"/* "$(SYSROOT)/usr/include"
-	cp -r "$(COWS_LIBC_HEADERS_PUBLIC)"/* "$(SYSROOT)/usr/include"
+	cp -r "$(COWS_LIBC_CLOUDABI_HEADERS)"/* "$(SYSROOT)/include"
+	cp -r "$(COWS_LIBC_HEADERS_PUBLIC)"/* "$(SYSROOT)/include"
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" -c $(COWS_LIBC_ALL_SOURCES) \
 	    -I$(COWS_LIBC_HEADERS_PRIVATE) \
 	    -I$(COWS_LIBC_CLOUDLIBC_SRC_INC) -I$(COWS_LIBC_CLOUDLIBC_SRC) \

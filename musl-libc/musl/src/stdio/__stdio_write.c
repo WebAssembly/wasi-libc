@@ -12,7 +12,11 @@ size_t __stdio_write(FILE *f, const unsigned char *buf, size_t len)
 	int iovcnt = 2;
 	ssize_t cnt;
 	for (;;) {
+#ifdef __wasm_musl_unmodified_upstream__
 		cnt = syscall(SYS_writev, f->fd, iov, iovcnt);
+#else
+		cnt = writev(f->fd, iov, iovcnt);
+#endif
 		if (cnt == rem) {
 			f->wend = f->buf + f->buf_size;
 			f->wpos = f->wbase = f->buf;

@@ -6,9 +6,17 @@ FILE *__fopen_rb_ca(const char *filename, FILE *f, unsigned char *buf, size_t le
 {
 	memset(f, 0, sizeof *f);
 
+#ifdef __wasm_musl_unmodified_upstream__
 	f->fd = sys_open(filename, O_RDONLY|O_CLOEXEC);
+#else
+	f->fd = open(filename, O_RDONLY|O_CLOEXEC);
+#endif
 	if (f->fd < 0) return 0;
+#ifdef __wasm_musl_unmodified_upstream__
 	__syscall(SYS_fcntl, f->fd, F_SETFD, FD_CLOEXEC);
+#else
+	fcntl(f->fd, F_SETFD, FD_CLOEXEC);
+#endif
 
 	f->flags = F_NOWR | F_PERM;
 	f->buf = buf + UNGET;

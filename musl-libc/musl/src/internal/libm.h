@@ -71,6 +71,7 @@ union ldshape {
 #error Unsupported long double representation
 #endif
 
+#ifdef __wasm_musl_unmodified_upstream__
 #define FORCE_EVAL(x) do {                        \
 	if (sizeof(x) == sizeof(float)) {         \
 		volatile float __x;               \
@@ -83,6 +84,13 @@ union ldshape {
 		__x = (x);                        \
 	}                                         \
 } while(0)
+#else
+/*
+ * WebAssembly doesn't have floating-point status flags, so there's no reason
+ * to force evaluations.
+ * */
+#define FORCE_EVAL(x) ((void)(x))
+#endif
 
 /* Get two 32 bit ints from a double.  */
 #define EXTRACT_WORDS(hi,lo,d)                    \

@@ -186,7 +186,11 @@ static const long double MINLOGL = -1.13994985314888605586758E4L;
 static const long double LOGE2L = 6.9314718055994530941723E-1L;
 static const long double huge = 0x1p10000L;
 /* XXX Prevent gcc from erroneously constant folding this. */
+#ifdef __wasm_musl_unmodified_upstream__
 static const volatile long double twom10000 = 0x1p-10000L;
+#else
+static const long double twom10000 = 0x1p-10000L;
+#endif
 
 static long double reducl(long double);
 static long double powil(long double, int);

@@ -55,16 +55,16 @@ $(SYSROOT):
 	#
 	$(RM) *.o
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" -c $(BASICS_LIBC_DIR)/crt*.S
-	mkdir -p "$(SYSROOT)/lib"
-	mv *.o "$(SYSROOT)/lib"
+	mkdir -p "$(SYSROOT)/lib32"
+	mv *.o "$(SYSROOT)/lib32"
 
 	#
 	# Compile and install the basics libc subset source files.
 	#
 	$(RM) *.o
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" -c $(BASICS_LIBC_SOURCES)
-	mkdir -p "$(SYSROOT)/lib"
-	$(AR) crs "$(SYSROOT)/lib/libc-basics.a" *.o
+	mkdir -p "$(SYSROOT)/lib32"
+	$(AR) crs "$(SYSROOT)/lib32/libc-basics.a" *.o
 	$(RM) *.o
 
 	#
@@ -72,8 +72,8 @@ $(SYSROOT):
 	#
 	$(RM) *.o
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" -c $(DLMALLOC_SOURCES) -I$(DLMALLOC_INC)
-	mkdir -p "$(SYSROOT)/lib"
-	$(AR) crs "$(SYSROOT)/lib/libc-dlmalloc.a" *.o
+	mkdir -p "$(SYSROOT)/lib32"
+	$(AR) crs "$(SYSROOT)/lib32/libc-dlmalloc.a" *.o
 	$(RM) *.o
 
 	#
@@ -86,6 +86,6 @@ $(SYSROOT):
 	    -I$(COWS_LIBC_HEADERS_PRIVATE) \
 	    -I$(COWS_LIBC_CLOUDLIBC_SRC_INC) -I$(COWS_LIBC_CLOUDLIBC_SRC) \
 	    -I$(COWS_LIBC_LIBPREOPEN_LIB) -I$(COWS_LIBC_LIBPREOPEN_INC)
-	mkdir -p "$(SYSROOT)/lib"
-	$(AR) crs "$(SYSROOT)/lib/libc-cows.a" *.o
+	mkdir -p "$(SYSROOT)/lib32"
+	$(AR) crs "$(SYSROOT)/lib32/libc-cows.a" *.o
 	$(RM) *.o

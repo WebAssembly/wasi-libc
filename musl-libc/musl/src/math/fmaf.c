@@ -80,7 +80,11 @@ float fmaf(float x, float y, float z)
 #ifdef FE_TOWARDZERO
 	fesetround(FE_TOWARDZERO);
 #endif
+#ifdef __wasm_musl_unmodified_upstream__
 	volatile double vxy = xy;  /* XXX work around gcc CSE bug */
+#else
+	double vxy = xy;
+#endif
 	double adjusted_result = vxy + z;
 	fesetround(FE_TONEAREST);
 	if (result == adjusted_result) {

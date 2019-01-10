@@ -1,3 +1,7 @@
+#ifdef __wasm_musl_unmodified_upstream__
+#else
+#include <unistd.h>
+#endif
 #include "stdio_impl.h"
 #include <fcntl.h>
 #include <string.h>
@@ -18,15 +22,27 @@ FILE *fopen(const char *restrict filename, const char *restrict mode)
 	/* Compute the flags to pass to open() */
 	flags = __fmodeflags(mode);
 
+#ifdef __wasm_musl_unmodified_upstream__
 	fd = sys_open(filename, flags, 0666);
+#else
+	fd = open(filename, flags, 0666);
+#endif
 	if (fd < 0) return 0;
 	if (flags & O_CLOEXEC)
+#ifdef __wasm_musl_unmodified_upstream__
 		__syscall(SYS_fcntl, fd, F_SETFD, FD_CLOEXEC);
+#else
+		fcntl(fd, F_SETFD, FD_CLOEXEC);
+#endif
 
 	f = __fdopen(fd, mode);
 	if (f) return f;
 
+#ifdef __wasm_musl_unmodified_upstream__
 	__syscall(SYS_close, fd);
+#else
+        close(fd);
+#endif
 	return 0;
 }
 

@@ -145,6 +145,8 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/misc/getopt_long.c \
     $(MUSL_LIBC_SRC_DIR)/misc/getsubopt.c \
     $(MUSL_LIBC_SRC_DIR)/misc/login_tty.c \
+    $(MUSL_LIBC_SRC_DIR)/misc/syslog.c \
+    $(MUSL_LIBC_SRC_DIR)/misc/getentropy.c \
     $(MUSL_LIBC_SRC_DIR)/conf/*.c \
     $(MUSL_LIBC_SRC_DIR)/ctype/*.c \
     $(MUSL_LIBC_SRC_DIR)/math/*.c \
@@ -152,7 +154,6 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/crypt/*.c \
     $(MUSL_LIBC_SRC_DIR)/errno/strerror.c \
     $(MUSL_LIBC_SRC_DIR)/fenv/fenv.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/syslog.c \
     $(MUSL_LIBC_SRC_DIR)/exit/exit.c \
     $(MUSL_LIBC_SRC_DIR)/exit/atexit.c
 

@@ -14,7 +14,7 @@
 
 #define TIMER_ABSTIME CLOUDABI_SUBSCRIPTION_CLOCK_ABSTIME
 
-// FIXME: POSIX requires this to be 1000000, and that's what glibc and musl use.
+/* FIXME: POSIX requires this to be 1000000, and that's what glibc and musl use. */
 #define CLOCKS_PER_SEC 1000000000
 
 #define TIME_UTC 1

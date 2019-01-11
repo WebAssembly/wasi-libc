@@ -14,10 +14,14 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
+#ifdef __wasm_musl_unmodified_upstream__
 struct sockaddr_un {
 	sa_family_t sun_family;
 	char sun_path[108];
 };
+#else
+#include <__struct_sockaddr_un.h>
+#endif
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 size_t strlen(const char *);

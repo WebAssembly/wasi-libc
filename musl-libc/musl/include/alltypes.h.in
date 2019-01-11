@@ -34,8 +34,13 @@ TYPEDEF unsigned long wctype_t;
 TYPEDEF void * timer_t;
 TYPEDEF int clockid_t;
 TYPEDEF long clock_t;
+#ifdef __wasm_musl_unmodified_upstream__
 STRUCT timeval { time_t tv_sec; suseconds_t tv_usec; };
 STRUCT timespec { time_t tv_sec; long tv_nsec; };
+#else
+#include <__struct_timeval.h>
+#include <__struct_timespec.h>
+#endif
 
 TYPEDEF int pid_t;
 TYPEDEF unsigned id_t;
@@ -65,7 +70,11 @@ TYPEDEF struct __locale_struct * locale_t;
 
 TYPEDEF struct __sigset_t { unsigned long __bits[128/sizeof(long)]; } sigset_t;
 
+#ifdef __wasm_musl_unmodified_upstream__
 STRUCT iovec { void *iov_base; size_t iov_len; };
+#else
+#include <__struct_iovec.h>
+#endif
 
 TYPEDEF unsigned socklen_t;
 TYPEDEF unsigned short sa_family_t;

@@ -25,13 +25,11 @@ TYPEDEF unsigned char sigset_t;
 
 TYPEDEF long long clock_t;
 
-#ifndef __WASM_THREAD_MODEL_SINGLE
-#error "multiple threads not supported in musl yet"
-#endif
-TYPEDEF struct { union { int __i[9]; volatile int __vi[9]; unsigned __s[9]; } __u; } pthread_attr_t;
-TYPEDEF struct { union { int __i[6]; volatile int __vi[6]; volatile void *volatile __p[6]; } __u; } pthread_mutex_t;
-TYPEDEF struct { union { int __i[6]; volatile int __vi[6]; volatile void *volatile __p[6]; } __u; } mtx_t;
-TYPEDEF struct { union { int __i[12]; volatile int __vi[12]; void *__p[12]; } __u; } pthread_cond_t;
-TYPEDEF struct { union { int __i[12]; volatile int __vi[12]; void *__p[12]; } __u; } cnd_t;
-TYPEDEF struct { union { int __i[8]; volatile int __vi[8]; void *__p[8]; } __u; } pthread_rwlock_t;
-TYPEDEF struct { union { int __i[5]; volatile int __vi[5]; void *__p[5]; } __u; } pthread_barrier_t;
+// TODO: Threads support.
+TYPEDEF unsigned char pthread_attr_t;
+TYPEDEF unsigned char pthread_mutex_t;
+TYPEDEF unsigned char mtx_t;
+TYPEDEF unsigned char pthread_cond_t;
+TYPEDEF unsigned char cnd_t;
+TYPEDEF unsigned char pthread_rwlock_t;
+TYPEDEF unsigned char pthread_barrier_t;

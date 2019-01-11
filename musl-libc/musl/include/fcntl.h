@@ -1,6 +1,11 @@
 #ifndef	_FCNTL_H
 #define	_FCNTL_H
 
+#ifdef __wasm_musl_unmodified_upstream__
+#else
+#include <__fcntl.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,6 +41,7 @@ int openat(int, const char *, int, ...);
 int posix_fadvise(int, off_t, off_t, int);
 int posix_fallocate(int, off_t, off_t);
 
+#ifdef __wasm_musl_unmodified_upstream__
 #define O_SEARCH  O_PATH
 #define O_EXEC    O_PATH
 
@@ -148,6 +154,7 @@ int posix_fallocate(int, off_t, off_t);
 #define DN_MULTISHOT	0x80000000
 
 int lockf(int, int, off_t);
+#endif
 #endif
 
 #if defined(_GNU_SOURCE)

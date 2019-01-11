@@ -7,6 +7,7 @@ extern "C" {
 
 #include <features.h>
 
+#ifdef __wasm_musl_unmodified_upstream__ // setjmp
 #include <bits/setjmp.h>
 
 typedef struct __jmp_buf_tag {
@@ -33,6 +34,9 @@ int setjmp (jmp_buf);
 _Noreturn void longjmp (jmp_buf, int);
 
 #define setjmp setjmp
+#else
+#warning setjmp is not yet implemented for wasm32-unknown-cows
+#endif
 
 #ifdef __cplusplus
 }

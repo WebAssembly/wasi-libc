@@ -221,6 +221,7 @@ int vfscanf(FILE *restrict f, const char *restrict fmt, va_list ap)
 			s = 0;
 			i = 0;
 			k = t=='c' ? width+1U : 31;
+#ifdef __wasm_musl_unmodified_upstream__ // locales
 			if (size == SIZE_l) {
 				if (alloc) {
 					wcs = malloc(k*sizeof(wchar_t));
@@ -246,6 +247,9 @@ int vfscanf(FILE *restrict f, const char *restrict fmt, va_list ap)
 				}
 				if (!mbsinit(&st)) goto input_fail;
 			} else if (alloc) {
+#else
+			if (alloc) {
+#endif
 				s = malloc(k);
 				if (!s) goto alloc_fail;
 				while (scanset[(c=shgetc(f))+1]) {
@@ -267,8 +271,12 @@ int vfscanf(FILE *restrict f, const char *restrict fmt, va_list ap)
 			if (!shcnt(f)) goto match_fail;
 			if (t == 'c' && shcnt(f) != width) goto match_fail;
 			if (alloc) {
+#ifdef __wasm_musl_unmodified_upstream__ // locales
 				if (size == SIZE_l) *(wchar_t **)dest = wcs;
 				else *(char **)dest = s;
+#else
+				*(char **)dest = s;
+#endif
 			}
 			if (t != 'c') {
 				if (wcs) wcs[i] = 0;

@@ -24,6 +24,7 @@ struct rlimit {
 	rlim_t rlim_max;
 };
 
+#ifdef __wasm_musl_unmodified_upstream__
 struct rusage {
 	struct timeval ru_utime;
 	struct timeval ru_stime;
@@ -45,6 +46,9 @@ struct rusage {
 	/* room for more... */
 	long    __reserved[16];
 };
+#else
+#include <__struct_rusage.h>
+#endif
 
 int getrlimit (int, struct rlimit *);
 int setrlimit (int, const struct rlimit *);

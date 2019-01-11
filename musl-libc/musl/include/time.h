@@ -35,6 +35,7 @@ extern "C" {
 #define __tm_zone tm_zone
 #endif
 
+#ifdef __wasm_musl_unmodified_upstream__
 struct tm {
 	int tm_sec;
 	int tm_min;
@@ -48,6 +49,9 @@ struct tm {
 	long __tm_gmtoff;
 	const char *__tm_zone;
 };
+#else
+#include <__struct_tm.h>
+#endif
 
 clock_t clock (void);
 time_t time (time_t *);

@@ -28,11 +28,15 @@ extern "C" {
 
 typedef unsigned long nfds_t;
 
+#ifdef __wasm_musl_unmodified_upstream__
 struct pollfd {
 	int fd;
 	short events;
 	short revents;
 };
+#else
+#include <__struct_pollfd.h>
+#endif
 
 int poll (struct pollfd *, nfds_t, int);
 

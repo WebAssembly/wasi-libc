@@ -3,7 +3,9 @@
 #include <string.h>
 #include <limits.h>
 #include <stdlib.h>
+#ifdef __wasm_musl_unmodified_upstream__ // locales
 #include "locale_impl.h"
+#endif
 #include "stdio_impl.h"
 
 char *optarg;
@@ -15,7 +17,9 @@ weak_alias(__optreset, optreset);
 void __getopt_msg(const char *a, const char *b, const char *c, size_t l)
 {
 	FILE *f = stderr;
+#ifdef __wasm_musl_unmodified_upstream__ // locales
 	b = __lctrans_cur(b);
+#endif
 	FLOCK(f);
 	fputs(a, f)>=0
 	&& fwrite(b, strlen(b), 1, f)

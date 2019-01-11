@@ -17,8 +17,11 @@ extern "C" {
 
 #define FD_SETSIZE 1024
 
+#ifdef __wasm_musl_unmodified_upstream__
 typedef unsigned long fd_mask;
+#endif
 
+#ifdef __wasm_musl_unmodified_upstream__
 typedef struct {
 	unsigned long fds_bits[FD_SETSIZE / 8 / sizeof(long)];
 } fd_set;
@@ -27,12 +30,22 @@ typedef struct {
 #define FD_SET(d, s)   ((s)->fds_bits[(d)/(8*sizeof(long))] |= (1UL<<((d)%(8*sizeof(long)))))
 #define FD_CLR(d, s)   ((s)->fds_bits[(d)/(8*sizeof(long))] &= ~(1UL<<((d)%(8*sizeof(long)))))
 #define FD_ISSET(d, s) !!((s)->fds_bits[(d)/(8*sizeof(long))] & (1UL<<((d)%(8*sizeof(long)))))
+#else
+#include <__fd_set.h>
+#endif
 
 int select (int, fd_set *__restrict, fd_set *__restrict, fd_set *__restrict, struct timeval *__restrict);
+#ifdef __wasm_musl_unmodified_upstream__
 int pselect (int, fd_set *__restrict, fd_set *__restrict, fd_set *__restrict, const struct timespec *__restrict, const sigset_t *__restrict);
+#else
+// TODO: This is what cows-libc currently uses, but we should look at changing it.
+int pselect(int, fd_set *, fd_set *, fd_set *, const struct timespec *, ...);
+#endif
 
+#ifdef __wasm_musl_unmodified_upstream__
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 #define NFDBITS (8*(int)sizeof(long))
+#endif
 #endif
 
 #ifdef __cplusplus

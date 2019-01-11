@@ -195,12 +195,17 @@ long sysconf(int name)
 		return DELAYTIMER_MAX;
 	case JT_NPROCESSORS_CONF & 255:
 	case JT_NPROCESSORS_ONLN & 255: ;
+#if defined(__wasm_musl_unmodified_upstream__) || !defined(__WASM_THREAD_MODEL_SINGLE)
 		unsigned char set[128] = {1};
 		int i, cnt;
 		__syscall(SYS_sched_getaffinity, 0, sizeof set, set);
 		for (i=cnt=0; i<sizeof set; i++)
 			for (; set[i]; set[i]&=set[i]-1, cnt++);
 		return cnt;
+#else
+                // With no thread support, just say there's 1 processor.
+		return 1;
+#endif
 	case JT_PHYS_PAGES & 255:
 	case JT_AVPHYS_PAGES & 255: ;
 		unsigned long long mem;

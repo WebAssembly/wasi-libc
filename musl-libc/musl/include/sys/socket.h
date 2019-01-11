@@ -310,16 +310,24 @@ struct linger {
 #define SCM_RIGHTS      0x01
 #define SCM_CREDENTIALS 0x02
 
+#ifdef __wasm_musl_unmodified_upstream__
 struct sockaddr {
 	sa_family_t sa_family;
 	char sa_data[14];
 };
+#else
+#include <__struct_sockaddr.h>
+#endif
 
+#ifdef __wasm_musl_unmodified_upstream__
 struct sockaddr_storage {
 	sa_family_t ss_family;
 	char __ss_padding[128-sizeof(long)-sizeof(sa_family_t)];
 	unsigned long __ss_align;
 };
+#else
+#include <__struct_sockaddr_storage.h>
+#endif
 
 int socket (int, int, int);
 int socketpair (int, int, int, int [2]);

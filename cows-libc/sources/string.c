@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-size_t strlen(const char *str) {
+__attribute__((__weak__)) size_t strlen(const char *str) {
     const char *s = str;
     while (*s) {
         ++s;
@@ -10,7 +10,7 @@ size_t strlen(const char *str) {
     return s - str;
 }
 
-char *strdup(const char *str) {
+__attribute__((__weak__)) char *strdup(const char *str) {
     size_t buf_len = strlen(str) + 1;
     void *ptr = malloc(buf_len);
     if (ptr == NULL) {
@@ -19,7 +19,7 @@ char *strdup(const char *str) {
     return memcpy(ptr, str, buf_len);
 }
 
-int strcmp(const char *a, const char *b) {
+__attribute__((__weak__)) int strcmp(const char *a, const char *b) {
     while (*a != '\0' && (*a == *b)) {
         ++a;
         ++b;
@@ -27,7 +27,7 @@ int strcmp(const char *a, const char *b) {
     return *(const unsigned char*)a - *(const unsigned char*)b;
 }
 
-void *memchr(const void *ptr, int c, size_t len) {
+__attribute__((__weak__)) void *memchr(const void *ptr, int c, size_t len) {
 	const unsigned char *p = ptr;
 	while (len != 0 && *p != (unsigned char)c) {
             ++p;

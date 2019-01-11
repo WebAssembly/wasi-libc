@@ -57,10 +57,10 @@ FILE *__fdopen(int fd, const char *mode)
 	f->lbf = EOF;
 #ifdef __wasm_musl_unmodified_upstream__
 	if (!(f->flags & F_NOWR) && !__syscall(SYS_ioctl, fd, TIOCGWINSZ, &wsz))
-#else
-	if (!(f->flags & F_NOWR) && !ioctl(fd, TIOCGWINSZ, &wsz))
-#endif
 		f->lbf = '\n';
+#else
+	// Avoid __syscall, but also, TIOCGWINSZ is not supported in COWS.
+#endif
 
 	/* Initialize op ptrs. No problem if some are unneeded. */
 	f->read = __stdio_read;

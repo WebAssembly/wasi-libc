@@ -176,43 +176,33 @@ $(SYSROOT):
 	mkdir -p "$(SYSROOT)"
 
 	#
-	# Install the include files.
+	# Install the basics include files.
 	#
 	cp -r --backup=numbered "$(BASICS_INC)" "$(SYSROOT)"
 
 	#
 	# Build the C startup files.
 	#
-	$(RM) *.o
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" \
 	    -c $(BASICS_LIBC_DIR)/crt*.S
 	mkdir -p "$(SYSROOT_LIB)"
 	mv *.o "$(SYSROOT_LIB)"
 
 	#
-	# Compile and install the basics libc subset source files.
+	# Compile the basics libc subset source files.
 	#
-	$(RM) *.o
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" \
 	    -c $(BASICS_LIBC_SOURCES)
-	mkdir -p "$(SYSROOT_LIB)"
-	$(WASM_AR) crs "$(SYSROOT_LIB)/libc-basics.a" *.o
-	$(RM) *.o
 
 	#
-	# Compile and install the dlmalloc source files.
+	# Compile the dlmalloc source files.
 	#
-	$(RM) *.o
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" \
 	    -c $(DLMALLOC_SOURCES) -I$(DLMALLOC_INC)
-	mkdir -p "$(SYSROOT_LIB)"
-	$(WASM_AR) crs "$(SYSROOT_LIB)/libc-dlmalloc.a" *.o
-	$(RM) *.o
 
 	#
-	# Compile and install the COWS libc source files.
+	# Compile the COWS libc source files.
 	#
-	$(RM) *.o
 	cp -r --backup=numbered "$(COWS_LIBC_CLOUDABI_HEADERS)"/* "$(SYSROOT_INC)"
 	cp -r --backup=numbered "$(COWS_LIBC_HEADERS_PUBLIC)"/* "$(SYSROOT_INC)"
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" -c \
@@ -220,12 +210,9 @@ $(SYSROOT):
 	    -I$(COWS_LIBC_HEADERS_PRIVATE) \
 	    -I$(COWS_LIBC_CLOUDLIBC_SRC_INC) -I$(COWS_LIBC_CLOUDLIBC_SRC) \
 	    -I$(COWS_LIBC_LIBPREOPEN_LIB) -I$(COWS_LIBC_LIBPREOPEN_INC)
-	mkdir -p "$(SYSROOT_LIB)"
-	$(WASM_AR) crs "$(SYSROOT_LIB)/libc-cows.a" *.o
-	$(RM) *.o
 
 	#
-	# Compile and install musl source files.
+	# Compile the musl libc source files.
 	#
 	mkdir -p "$(SYSROOT_INC)/bits"
 	# Generate musl's bits/alltypes.h header.
@@ -263,7 +250,7 @@ $(SYSROOT):
 	      "$(SYSROOT_INC)/link.h" \
 	      "$(SYSROOT_INC)/elf.h" \
 	      "$(SYSROOT_INC)/sys/auxv.h"
-	# Compile the musl sources.
+	# Compile the musl libc sources.
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" -c \
 	    $(MUSL_LIBC_SOURCES) \
 	    -I $(MUSL_LIBC_SRC_DIR)/include \
@@ -272,12 +259,20 @@ $(SYSROOT):
 	    -I $(MUSL_LIBC_DIR)/arch/generic \
 	    -Wno-shift-op-parentheses \
 	    -Wno-string-plus-int \
-	    -Wno-unknown-pragmas \
-	    -Wno-dangling-else
-	# Create the library.
+	    -Wno-dangling-else \
+	    -Wno-unknown-pragmas
+
+	# Create the musl libc library.
 	mkdir -p "$(SYSROOT_LIB)"
-	$(WASM_AR) crs "$(SYSROOT_LIB)/libc-musl.a" *.o
+	$(WASM_AR) crs "$(SYSROOT_LIB)/libc.a" *.o
 	$(RM) *.o
+
+	#
+	# Create empty placeholder libraries.
+	#
+	for name in m rt pthread crypt util xnet resolv dl; do \
+	    $(WASM_AR) crs "$(SYSROOT_LIB)/lib$${name}.a"; \
+	done
 
 	#
 	# Collect metadata on the sysroot and perform sanity checks.

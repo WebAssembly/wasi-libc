@@ -153,7 +153,8 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/errno/strerror.c \
     $(MUSL_LIBC_SRC_DIR)/fenv/fenv.c \
     $(MUSL_LIBC_SRC_DIR)/misc/syslog.c \
-    $(MUSL_LIBC_SRC_DIR)/exit/exit.c
+    $(MUSL_LIBC_SRC_DIR)/exit/exit.c \
+    $(MUSL_LIBC_SRC_DIR)/exit/atexit.c
 
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.

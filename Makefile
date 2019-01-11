@@ -309,4 +309,6 @@ $(SYSROOT):
 	# Check that the computed metadata matches the expected metadata.
 	diff -ur expected "$(SYSROOT_SHARE)"
 
-	# The build succeeded!
+	#
+	# The build succeeded! The generated sysroot is in $(SYSROOT).
+	#

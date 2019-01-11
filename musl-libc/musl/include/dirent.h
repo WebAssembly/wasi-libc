@@ -15,12 +15,17 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
+#ifdef __wasm_musl_unmodified_upstream__
 typedef struct __dirstream DIR;
+#else
+#include <__typedef_DIR.h>
+#endif
 
 #define _DIRENT_HAVE_D_RECLEN
 #define _DIRENT_HAVE_D_OFF
 #define _DIRENT_HAVE_D_TYPE
 
+#ifdef __wasm_musl_unmodified_upstream__
 struct dirent {
 	ino_t d_ino;
 	off_t d_off;
@@ -28,6 +33,9 @@ struct dirent {
 	unsigned char d_type;
 	char d_name[256];
 };
+#else
+#include <__struct_dirent.h>
+#endif
 
 #define d_fileno d_ino
 

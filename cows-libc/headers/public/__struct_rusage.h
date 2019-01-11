@@ -3,6 +3,7 @@
 
 #include "__struct_timeval.h"
 
+/* TODO: Add more features here. */
 struct rusage {
     struct timeval ru_utime;
     struct timeval ru_stime;

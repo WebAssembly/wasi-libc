@@ -9,7 +9,12 @@ char *__randname(char *template)
 	struct timespec ts;
 	unsigned long r;
 
+#ifdef __wasm_musl_unmodified_upstream__
 	__clock_gettime(CLOCK_REALTIME, &ts);
+#else
+        // Use the COWS libc version.
+	clock_gettime(CLOCK_REALTIME, &ts);
+#endif
 	r = ts.tv_nsec*65537 ^ (uintptr_t)&ts / 16 + (uintptr_t)template;
 	for (i=0; i<6; i++, r>>=5)
 		template[i] = 'A'+(r&15)+(r&16)*2;

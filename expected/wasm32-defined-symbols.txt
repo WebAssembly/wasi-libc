@@ -26,6 +26,7 @@ atanh
 atanhf
 atanhl
 atanl
+atexit
 atof
 atoi
 atol
@@ -156,6 +157,8 @@ ctanl
 __ctype_b_loc
 __ctype_tolower_loc
 __ctype_toupper_loc
+__cxa_atexit
+__cxa_finalize
 __des_setkey
 dirname
 div
@@ -269,6 +272,7 @@ fstat
 fstatat
 fsync
 ftruncate
+__funcs_on_exit
 __funcs_on_exit
 futimens
 fwrite

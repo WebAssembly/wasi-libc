@@ -285,6 +285,7 @@ get_avphys_pages
 getc
 get_current_dir_name
 getdomainname
+getentropy
 gethostid
 get_nprocs
 get_nprocs_conf

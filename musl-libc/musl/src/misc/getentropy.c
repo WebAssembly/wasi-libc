@@ -1,3 +1,7 @@
+#ifdef __wasm_musl_unmodified_upstream__
+#else
+#include <cloudabi_syscalls.h>
+#endif
 #define _BSD_SOURCE
 #include <unistd.h>
 #include <sys/random.h>
@@ -21,7 +25,15 @@ int getentropy(void *buffer, size_t len)
 #endif
 
 	while (len) {
+#ifdef __wasm_musl_unmodified_upstream__
 		ret = getrandom(pos, len, 0);
+#else
+		errno = cloudabi_sys_random_get(pos, len);
+		if (errno == 0)
+                    ret = len;
+                else
+                    ret = -1;
+#endif
 		if (ret < 0) {
 			if (errno == EINTR) continue;
 			else break;

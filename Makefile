@@ -280,29 +280,29 @@ $(SYSROOT):
 	# Collect symbol information.
 	# FIXME: --extern-only doesn't seem to report all the defined symbols.
 	$(WASM_NM) --defined-only "$(SYSROOT_LIB)"/*.a "$(SYSROOT_LIB)"/*.o \
-	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |sort > "$(SYSROOT_SHARE)/defined-symbols.txt"
+	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |sort > "$(SYSROOT_SHARE)/wasm32-defined-symbols.txt"
 	for undef_sym in $$($(WASM_NM) --undefined-only "$(SYSROOT_LIB)"/*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' U ' |sed 's/.* U //' |sort |uniq); do \
-	    grep -q $$undef_sym "$(SYSROOT_SHARE)/defined-symbols.txt" || echo $$undef_sym; \
-	done > "$(SYSROOT_SHARE)/undefined-symbols.txt"
+	    grep -q $$undef_sym "$(SYSROOT_SHARE)/wasm32-defined-symbols.txt" || echo $$undef_sym; \
+	done > "$(SYSROOT_SHARE)/wasm32-undefined-symbols.txt"
 
 	# Generate a test file that includes all public header files.
 	cd "$(SYSROOT)" && \
 	for header in $$(find include -type f |grep -v /bits/); do \
-	    echo '#include <'$$header'>' | sed 's/include\///' >> share/include_all.c; \
+	    echo '#include <'$$header'>' | sed 's/include\///' >> share/wasm32-include-all.c; \
 	done; \
 	cd - >/dev/null
 
 	# Test that it compiles.
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" \
-	    -fsyntax-only "$(SYSROOT_SHARE)/include_all.c" -Weverything -Wno-\#warnings
+	    -fsyntax-only "$(SYSROOT_SHARE)/wasm32-include-all.c" -Weverything -Wno-\#warnings
 
 	# Collect all the predefined macros.
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" \
-	    -E -dM "$(SYSROOT_SHARE)/include_all.c" -Wno-\#warnings > "$(SYSROOT_SHARE)/predefined-macros.txt"
+	    -E -dM "$(SYSROOT_SHARE)/wasm32-include-all.c" -Wno-\#warnings > "$(SYSROOT_SHARE)/wasm32-predefined-macros.txt"
 
 	# Remove this once https://reviews.llvm.org/D56553 is resolved.
-	ln -s $(SYSROOT_LIB) $(SYSROOT)/lib
+	ln -s lib32 $(SYSROOT)/lib
 
 	# Check that the computed metadata matches the expected metadata.
 	diff -ur expected "$(SYSROOT_SHARE)"

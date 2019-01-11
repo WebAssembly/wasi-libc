@@ -11,6 +11,7 @@
 #include <__macro_FD_SETSIZE.h>
 #include <pthread.h>
 #include <elf.h>
+#include <__errno_values.h>
 #include <memory.h>
 #include <signal.h>
 #include <__typedef_uid_t.h>

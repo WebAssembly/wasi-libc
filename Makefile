@@ -256,7 +256,8 @@ $(SYSROOT):
 	      "$(SYSROOT_INC)/sys/shm.h" \
 	      "$(SYSROOT_INC)/bits/shm.h" \
 	      "$(SYSROOT_INC)/sys/msg.h" \
-	      "$(SYSROOT_INC)/bits/msg.h"
+	      "$(SYSROOT_INC)/bits/msg.h" \
+	      "$(SYSROOT_INC)/bits/errno.h"
 	# Compile the musl sources.
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" -c \
 	    $(MUSL_LIBC_SOURCES) \

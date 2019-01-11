@@ -31,14 +31,18 @@ E(ENOTEMPTY,    "Directory not empty")
 E(ECONNRESET,   "Connection reset by peer")
 E(ETIMEDOUT,    "Operation timed out")
 E(ECONNREFUSED, "Connection refused")
+#ifdef __wasm_musl_unmodified_upstream__ // errno value not in COWS
 E(EHOSTDOWN,    "Host is down")
+#endif
 E(EHOSTUNREACH, "Host is unreachable")
 E(EADDRINUSE,   "Address in use")
 
 E(EPIPE,        "Broken pipe")
 E(EIO,          "I/O error")
 E(ENXIO,        "No such device or address")
+#ifdef __wasm_musl_unmodified_upstream__ // errno value not in COWS
 E(ENOTBLK,      "Block device required")
+#endif
 E(ENODEV,       "No such device")
 E(ENOTDIR,      "Not a directory")
 E(EISDIR,       "Is a directory")
@@ -66,23 +70,31 @@ E(ECANCELED,    "Operation canceled")
 E(ENOSYS,       "Function not implemented")
 E(ENOMSG,       "No message of desired type")
 E(EIDRM,        "Identifier removed")
+#ifdef __wasm_musl_unmodified_upstream__ // errno value not in COWS
 E(ENOSTR,       "Device not a stream")
 E(ENODATA,      "No data available")
 E(ETIME,        "Device timeout")
 E(ENOSR,        "Out of streams resources")
+#endif
 E(ENOLINK,      "Link has been severed")
 E(EPROTO,       "Protocol error")
 E(EBADMSG,      "Bad message")
+#ifdef __wasm_musl_unmodified_upstream__ // errno value not in COWS
 E(EBADFD,       "File descriptor in bad state")
+#endif
 E(ENOTSOCK,     "Not a socket")
 E(EDESTADDRREQ, "Destination address required")
 E(EMSGSIZE,     "Message too large")
 E(EPROTOTYPE,   "Protocol wrong type for socket")
 E(ENOPROTOOPT,  "Protocol not available")
 E(EPROTONOSUPPORT,"Protocol not supported")
+#ifdef __wasm_musl_unmodified_upstream__ // errno value not in COWS
 E(ESOCKTNOSUPPORT,"Socket type not supported")
+#endif
 E(ENOTSUP,      "Not supported")
+#ifdef __wasm_musl_unmodified_upstream__ // errno value not in COWS
 E(EPFNOSUPPORT, "Protocol family not supported")
+#endif
 E(EAFNOSUPPORT, "Address family not supported by protocol")
 E(EADDRNOTAVAIL,"Address not available")
 E(ENETDOWN,     "Network is down")
@@ -92,14 +104,26 @@ E(ECONNABORTED, "Connection aborted")
 E(ENOBUFS,      "No buffer space available")
 E(EISCONN,      "Socket is connected")
 E(ENOTCONN,     "Socket not connected")
+#ifdef __wasm_musl_unmodified_upstream__ // errno value not in COWS
 E(ESHUTDOWN,    "Cannot send after socket shutdown")
+#endif
 E(EALREADY,     "Operation already in progress")
 E(EINPROGRESS,  "Operation in progress")
 E(ESTALE,       "Stale file handle")
+#ifdef __wasm_musl_unmodified_upstream__ // errno value not in COWS
 E(EREMOTEIO,    "Remote I/O error")
+#endif
 E(EDQUOT,       "Quota exceeded")
+#ifdef __wasm_musl_unmodified_upstream__ // errno value not in COWS
 E(ENOMEDIUM,    "No medium found")
 E(EMEDIUMTYPE,  "Wrong medium type")
+#endif
 E(EMULTIHOP,    "Multihop attempted")
+
+#ifdef __wasm_musl_unmodified_upstream__ // errno value in COWS and not musl
+#else
+// COWS adds this errno code.
+E(ENOTCAPABLE,  "Capabilities insufficient")
+#endif
 
 E(0,            "No error information")

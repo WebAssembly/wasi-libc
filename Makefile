@@ -137,7 +137,6 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/misc/ffsl.c \
     $(MUSL_LIBC_SRC_DIR)/misc/ffsll.c \
     $(MUSL_LIBC_SRC_DIR)/misc/fmtmsg.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/getauxval.c \
     $(MUSL_LIBC_SRC_DIR)/misc/get_current_dir_name.c \
     $(MUSL_LIBC_SRC_DIR)/misc/getdomainname.c \
     $(MUSL_LIBC_SRC_DIR)/misc/gethostid.c \
@@ -239,7 +238,7 @@ $(SYSROOT):
 	# Copy in the musl's "bits" header files.
 	cp -r --backup=numbered "$(MUSL_LIBC_DIR)"/arch/generic/bits/* "$(SYSROOT_INC)/bits"
 	cp -r "$(MUSL_LIBC_DIR)"/arch/wasm32/bits/* "$(SYSROOT_INC)/bits"
-	# Remove files that aren't headers or that aren't supported or relevant for wasm.
+	# Remove files that aren't headers or that aren't supported yet or that aren't relevant for wasm.
 	$(RM) "$(SYSROOT_INC)/bits/syscall.h.in" \
 	      "$(SYSROOT_INC)/bits/alltypes.h.in" \
 	      "$(SYSROOT_INC)/alltypes.h.in" \
@@ -257,7 +256,13 @@ $(SYSROOT):
 	      "$(SYSROOT_INC)/bits/shm.h" \
 	      "$(SYSROOT_INC)/sys/msg.h" \
 	      "$(SYSROOT_INC)/bits/msg.h" \
-	      "$(SYSROOT_INC)/bits/errno.h"
+	      "$(SYSROOT_INC)/sys/ipc.h" \
+	      "$(SYSROOT_INC)/bits/ipc.h" \
+	      "$(SYSROOT_INC)/bits/errno.h" \
+	      "$(SYSROOT_INC)/bits/link.h" \
+	      "$(SYSROOT_INC)/link.h" \
+	      "$(SYSROOT_INC)/elf.h" \
+	      "$(SYSROOT_INC)/sys/auxv.h"
 	# Compile the musl sources.
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" -c \
 	    $(MUSL_LIBC_SOURCES) \

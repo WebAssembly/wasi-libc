@@ -13,3 +13,5 @@ Some major known missing areas include:
  - ipc
  - getenv
  - regex (because locales)
+ - TIOCGWINSZ (because cloudabi lacks it; affects isatty, line buffering for stdout)
+ - O\_CLOEXEC, O\_NOCTTY (because cloudabi lacks them)

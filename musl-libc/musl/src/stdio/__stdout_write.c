@@ -7,9 +7,9 @@ size_t __stdout_write(FILE *f, const unsigned char *buf, size_t len)
 	f->write = __stdio_write;
 #ifdef __wasm_musl_unmodified_upstream__
 	if (!(f->flags & F_SVB) && __syscall(SYS_ioctl, f->fd, TIOCGWINSZ, &wsz))
-#else
-	if (!(f->flags & F_SVB) && ioctl(f->fd, TIOCGWINSZ, &wsz))
-#endif
 		f->lbf = -1;
+#else
+	// Avoid __syscall, but also, TIOCGWINSZ is not supported in COWS.
+#endif
 	return __stdio_write(f, buf, len);
 }

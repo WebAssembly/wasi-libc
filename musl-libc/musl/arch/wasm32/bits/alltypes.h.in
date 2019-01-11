@@ -20,6 +20,11 @@ TYPEDEF long long suseconds_t;
 
 TYPEDEF const struct __clockid * clockid_t;
 
+// TODO: This is just a placeholder for now. Keep this in sync with cowslibc.
+TYPEDEF unsigned char sigset_t;
+
+TYPEDEF long long clock_t;
+
 #ifndef __WASM_THREAD_MODEL_SINGLE
 #error "multiple threads not supported in musl yet"
 #endif

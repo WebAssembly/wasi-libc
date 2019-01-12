@@ -325,18 +325,10 @@
 #define CLNEXT CTRL('v')
 #define CLOCAL 0004000
 #define CLOCKS_PER_SEC 1000000000
-#define CLOCK_BOOTTIME 7
-#define CLOCK_BOOTTIME_ALARM 9
-#define CLOCK_MONOTONIC 1
-#define CLOCK_MONOTONIC_COARSE 6
-#define CLOCK_MONOTONIC_RAW 4
-#define CLOCK_PROCESS_CPUTIME_ID 2
-#define CLOCK_REALTIME 0
-#define CLOCK_REALTIME_ALARM 8
-#define CLOCK_REALTIME_COARSE 5
-#define CLOCK_SGI_CYCLE 10
-#define CLOCK_TAI 11
-#define CLOCK_THREAD_CPUTIME_ID 3
+#define CLOCK_MONOTONIC (&_CLOCK_MONOTONIC)
+#define CLOCK_PROCESS_CPUTIME_ID (&_CLOCK_PROCESS_CPUTIME_ID)
+#define CLOCK_REALTIME (&_CLOCK_REALTIME)
+#define CLOCK_THREAD_CPUTIME_ID (&_CLOCK_THREAD_CPUTIME_ID)
 #define CLOUDABI_ADVICE_DONTNEED 1
 #define CLOUDABI_ADVICE_NOREUSE 2
 #define CLOUDABI_ADVICE_NORMAL 3
@@ -4067,7 +4059,7 @@
 #define TIME_INS 1
 #define TIME_OK 0
 #define TIME_OOP 3
-#define TIME_UTC 1
+#define TIME_UTC CLOUDABI_CLOCK_REALTIME
 #define TIME_WAIT 4
 #define TIOCCBRK 0x5428
 #define TIOCCONS 0x541D
@@ -5393,6 +5385,7 @@
 #define __cowslibc___struct_timeval_h 
 #define __cowslibc___struct_tm_h 
 #define __cowslibc___struct_tms_h 
+#define __cowslibc___time_h 
 #define __cowslibc___typedef_DIR_h 
 #define __cowslibc___typedef_clockid_t_h 
 #define __cowslibc___typedef_fd_set_h 

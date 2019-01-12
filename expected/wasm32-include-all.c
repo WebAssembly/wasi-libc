@@ -89,6 +89,7 @@
 #include <iconv.h>
 #include <paths.h>
 #include <iso646.h>
+#include <__time.h>
 #include <fnmatch.h>
 #include <__typedef_time_t.h>
 #include <ulimit.h>

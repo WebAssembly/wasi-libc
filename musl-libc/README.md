@@ -5,7 +5,6 @@ Whole files which are unused are omitted. Changes to upstream code are wrapped
 in preprocessor directives controlled by the macro `__wasm_musl_unmodified_upstream__`.
 
 Some major known missing areas include:
- - random
  - locales
  - threads
  - setjmp

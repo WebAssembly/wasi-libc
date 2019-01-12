@@ -1,4 +1,4 @@
-#ifndef __WASM_THREAD_MODEL_SINGLE
+#ifdef _REENTRANT
 #error "multiple threads not supported in musl yet"
 #endif
 

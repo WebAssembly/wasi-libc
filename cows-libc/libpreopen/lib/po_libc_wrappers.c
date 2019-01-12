@@ -405,7 +405,7 @@ __cowslibc_register_preopened_fd(int fd, const char *path)
                 return -1;
         }
 
-#ifndef __WASM_THREAD_MODEL_SINGLE
+#ifdef _REENTRANT
 #error "__cowslibc_register_preopened_fd doesn't yet support multiple threads"
 #endif
 

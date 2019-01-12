@@ -195,7 +195,7 @@ long sysconf(int name)
 		return DELAYTIMER_MAX;
 	case JT_NPROCESSORS_CONF & 255:
 	case JT_NPROCESSORS_ONLN & 255: ;
-#if defined(__wasm_musl_unmodified_upstream__) || !defined(__WASM_THREAD_MODEL_SINGLE)
+#if defined(__wasm_musl_unmodified_upstream__) || defined(_REENTRANT)
 		unsigned char set[128] = {1};
 		int i, cnt;
 		__syscall(SYS_sched_getaffinity, 0, sizeof set, set);

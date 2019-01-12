@@ -4,7 +4,6 @@ WASM_CC = clang
 WASM_NM = $(subst clang,llvm-nm,$(WASM_CC))
 WASM_AR = $(subst clang,llvm-ar,$(WASM_CC))
 WASM_CFLAGS = -O2
-WASM_TARGET_FLAGS = --target=wasm32
 SYSROOT = sysroot
 # single or posix
 THREAD_MODEL = single
@@ -36,7 +35,6 @@ COWS_LIBC_ALL_SOURCES = \
 MUSL_LIBC_DIR = musl-libc/musl
 MUSL_LIBC_SRC_DIR = $(MUSL_LIBC_DIR)/src
 MUSL_LIBC_INC = $(MUSL_LIBC_DIR)/include
-# TODO: Add more sources.
 MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/stdio/asprintf.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/dprintf.c \
@@ -162,13 +160,25 @@ SYSROOT_LIB = $(SYSROOT)/lib32
 SYSROOT_INC = $(SYSROOT)/include
 SYSROOT_SHARE = $(SYSROOT)/share
 
+# Set the target.
+# TODO: Add -unknown-cows-musl when the compiler supports it.
+override WASM_CFLAGS += --target=wasm32
+# We're compiling libc.
+override WASM_CFLAGS += -fno-builtin
+# WebAssembly floating-point match doesn't trap.
+# TODO: Add -fno-signaling-nans when the compiler supports it.
+override WASM_CFLAGS += -fno-trapping-math
+
 # Configure support for threads.
 ifeq ($(THREAD_MODEL), single)
-WASM_CFLAGS += -mthread-model single -D__WASM_THREAD_MODEL_SINGLE
+override WASM_CFLAGS += -mthread-model single -D__WASM_THREAD_MODEL_SINGLE
 endif
 ifeq ($(THREAD_MODEL), posix)
-WASM_CFLAGS += -mthread-model posix -pthread -D__WASM_THREAD_MODEL_POSIX
+override WASM_CFLAGS += -mthread-model posix -pthread -D__WASM_THREAD_MODEL_POSIX
 endif
+
+# Set the sysroot.
+override WASM_CFLAGS += --sysroot="$(SYSROOT)"
 
 .PHONY: $(SYSROOT)
 $(SYSROOT):
@@ -183,30 +193,26 @@ $(SYSROOT):
 	#
 	# Build the C startup files.
 	#
-	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" \
-	    -c $(BASICS_LIBC_DIR)/crt*.S
+	"$(WASM_CC)" $(WASM_CFLAGS) -c $(BASICS_LIBC_DIR)/crt*.S
 	mkdir -p "$(SYSROOT_LIB)"
 	mv *.o "$(SYSROOT_LIB)"
 
 	#
 	# Compile the basics libc subset source files.
 	#
-	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" \
-	    -c $(BASICS_LIBC_SOURCES)
+	"$(WASM_CC)" $(WASM_CFLAGS) -c $(BASICS_LIBC_SOURCES)
 
 	#
 	# Compile the dlmalloc source files.
 	#
-	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" \
-	    -c $(DLMALLOC_SOURCES) -I$(DLMALLOC_INC)
+	"$(WASM_CC)" $(WASM_CFLAGS) -c $(DLMALLOC_SOURCES) -I$(DLMALLOC_INC)
 
 	#
 	# Compile the COWS libc source files.
 	#
 	cp -r --backup=numbered "$(COWS_LIBC_CLOUDABI_HEADERS)"/* "$(SYSROOT_INC)"
 	cp -r --backup=numbered "$(COWS_LIBC_HEADERS_PUBLIC)"/* "$(SYSROOT_INC)"
-	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" -c \
-	    $(COWS_LIBC_ALL_SOURCES) \
+	"$(WASM_CC)" $(WASM_CFLAGS) -c $(COWS_LIBC_ALL_SOURCES) \
 	    -I$(COWS_LIBC_HEADERS_PRIVATE) \
 	    -I$(COWS_LIBC_CLOUDLIBC_SRC_INC) -I$(COWS_LIBC_CLOUDLIBC_SRC) \
 	    -I$(COWS_LIBC_LIBPREOPEN_LIB) -I$(COWS_LIBC_LIBPREOPEN_INC)
@@ -251,8 +257,7 @@ $(SYSROOT):
 	      "$(SYSROOT_INC)/elf.h" \
 	      "$(SYSROOT_INC)/sys/auxv.h"
 	# Compile the musl libc sources.
-	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" -c \
-	    $(MUSL_LIBC_SOURCES) \
+	"$(WASM_CC)" $(WASM_CFLAGS) -c $(MUSL_LIBC_SOURCES) \
 	    -I $(MUSL_LIBC_SRC_DIR)/include \
 	    -I $(MUSL_LIBC_SRC_DIR)/internal \
 	    -I $(MUSL_LIBC_DIR)/arch/wasm32 \
@@ -296,15 +301,16 @@ $(SYSROOT):
 	cd - >/dev/null
 
 	# Test that it compiles.
-	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" \
-	    -fsyntax-only "$(SYSROOT_SHARE)/wasm32-include-all.c" -Weverything -Wno-\#warnings
+	"$(WASM_CC)" $(WASM_CFLAGS) -fsyntax-only "$(SYSROOT_SHARE)/wasm32-include-all.c" \
+	    -Weverything \
+	    -Wno-\#warnings
 
 	# Collect all the predefined macros, except for compiler version macros
 	# which we don't need to track here. For the __*_ATOMIC_*_LOCK_FREE
 	# macros, squash individual compiler names to attempt, toward keeping
 	# these files compiler-independent.
-	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" \
-	    -E -dM "$(SYSROOT_SHARE)/wasm32-include-all.c" -Wno-\#warnings \
+	"$(WASM_CC)" $(WASM_CFLAGS) "$(SYSROOT_SHARE)/wasm32-include-all.c"
+	    -E -dM -Wno-\#warnings \
 	    -U__llvm__ \
 	    -U__clang__ \
 	    -U__clang_major__ \

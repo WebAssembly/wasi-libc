@@ -10,7 +10,6 @@
 #include <utmpx.h>
 #include <__macro_FD_SETSIZE.h>
 #include <pthread.h>
-#include <elf.h>
 #include <__errno_values.h>
 #include <memory.h>
 #include <signal.h>
@@ -174,7 +173,6 @@
 #include <sys/select.h>
 #include <sys/quota.h>
 #include <sys/dir.h>
-#include <sys/auxv.h>
 #include <sys/statvfs.h>
 #include <sys/fanotify.h>
 #include <sys/ttydefaults.h>
@@ -202,7 +200,6 @@
 #include <sys/socket.h>
 #include <sys/un.h.~1~>
 #include <sys/xattr.h>
-#include <sys/ipc.h>
 #include <sys/reg.h>
 #include <sys/klog.h>
 #include <sys/utsname.h>
@@ -237,7 +234,6 @@
 #include <inttypes.h>
 #include <ftw.h>
 #include <__typedef_dev_t.h>
-#include <link.h>
 #include <__struct_in_addr.h>
 #include <__struct_iovec.h>
 #include <search.h>

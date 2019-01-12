@@ -1,7 +1,7 @@
 #ifndef LOCK_H
 #define LOCK_H
 
-#if defined(__wasm_musl_unmodified_upstream__) || !defined(__WASM_THREAD_MODEL_SINGLE)
+#if defined(__wasm_musl_unmodified_upstream__) || defined(_REENTRANT)
 hidden void __lock(volatile int *);
 hidden void __unlock(volatile int *);
 #define LOCK(x) __lock(x)

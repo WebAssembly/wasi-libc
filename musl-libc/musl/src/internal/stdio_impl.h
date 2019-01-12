@@ -6,7 +6,7 @@
 
 #define UNGET 8
 
-#if defined(__wasm_musl_unmodified_upstream__) || !defined(__WASM_THREAD_MODEL_SINGLE)
+#if defined(__wasm_musl_unmodified_upstream__) || defined(_REENTRANT)
 #define FFINALLOCK(f) ((f)->lock>=0 ? __lockfile((f)) : 0)
 #define FLOCK(f) int __need_unlock = ((f)->lock>=0 ? __lockfile((f)) : 0)
 #define FUNLOCK(f) do { if (__need_unlock) __unlockfile((f)); } while (0)
@@ -58,7 +58,7 @@ extern hidden FILE *volatile __stdin_used;
 extern hidden FILE *volatile __stdout_used;
 extern hidden FILE *volatile __stderr_used;
 
-#if defined(__wasm_musl_unmodified_upstream__) || !defined(__WASM_THREAD_MODEL_SINGLE)
+#if defined(__wasm_musl_unmodified_upstream__) || defined(_REENTRANT)
 hidden int __lockfile(FILE *);
 hidden void __unlockfile(FILE *);
 #endif

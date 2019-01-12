@@ -5360,7 +5360,6 @@
 #define __USER_LABEL_PREFIX__ 
 #define __USE_GNU_GETTEXT 1
 #define __WALL 0x40000000
-#define __WASM_THREAD_MODEL_SINGLE 1
 #define __WCHAR_MAX__ 2147483647
 #define __WCHAR_TYPE__ int
 #define __WCHAR_WIDTH__ 32

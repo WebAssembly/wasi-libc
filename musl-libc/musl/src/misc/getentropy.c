@@ -5,7 +5,7 @@
 #define _BSD_SOURCE
 #include <unistd.h>
 #include <sys/random.h>
-#if defined(__wasm_musl_unmodified_upstream__) || !defined(__WASM_THREAD_MODEL_SINGLE)
+#if defined(__wasm_musl_unmodified_upstream__) || defined(_REENTRANT)
 #include <pthread.h>
 #endif
 #include <errno.h>
@@ -20,7 +20,7 @@ int getentropy(void *buffer, size_t len)
 		return -1;
 	}
 
-#if defined(__wasm_musl_unmodified_upstream__) || !defined(__WASM_THREAD_MODEL_SINGLE)
+#if defined(__wasm_musl_unmodified_upstream__) || defined(_REENTRANT)
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
 #endif
 
@@ -43,7 +43,7 @@ int getentropy(void *buffer, size_t len)
 		ret = 0;
 	}
 
-#if defined(__wasm_musl_unmodified_upstream__) || !defined(__WASM_THREAD_MODEL_SINGLE)
+#if defined(__wasm_musl_unmodified_upstream__) || defined(_REENTRANT)
 	pthread_setcancelstate(cs, 0);
 #endif
 

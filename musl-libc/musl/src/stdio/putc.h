@@ -1,5 +1,5 @@
 #include "stdio_impl.h"
-#if defined(__wasm_musl_unmodified_upstream__) || !defined(__WASM_THREAD_MODEL_SINGLE)
+#if defined(__wasm_musl_unmodified_upstream__) || defined(_REENTRANT)
 #include "pthread_impl.h"
 
 #ifdef __GNUC__
@@ -18,7 +18,7 @@ static int locking_putc(int c, FILE *f)
 static inline int do_putc(int c, FILE *f)
 {
 	int l = f->lock;
-#if defined(__wasm_musl_unmodified_upstream__) || !defined(__WASM_THREAD_MODEL_SINGLE)
+#if defined(__wasm_musl_unmodified_upstream__) || defined(_REENTRANT)
 	if (l < 0 || l && (l & ~MAYBE_WAITERS) == __pthread_self()->tid)
 		return putc_unlocked(c, f);
 	return locking_putc(c, f);

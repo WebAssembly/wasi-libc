@@ -171,10 +171,10 @@ override WASM_CFLAGS += -fno-trapping-math
 
 # Configure support for threads.
 ifeq ($(THREAD_MODEL), single)
-override WASM_CFLAGS += -mthread-model single -D__WASM_THREAD_MODEL_SINGLE
+override WASM_CFLAGS += -mthread-model single
 endif
 ifeq ($(THREAD_MODEL), posix)
-override WASM_CFLAGS += -mthread-model posix -pthread -D__WASM_THREAD_MODEL_POSIX
+override WASM_CFLAGS += -mthread-model posix -pthread
 endif
 
 # Set the sysroot.
@@ -309,7 +309,7 @@ $(SYSROOT):
 	# which we don't need to track here. For the __*_ATOMIC_*_LOCK_FREE
 	# macros, squash individual compiler names to attempt, toward keeping
 	# these files compiler-independent.
-	"$(WASM_CC)" $(WASM_CFLAGS) "$(SYSROOT_SHARE)/wasm32-include-all.c"
+	"$(WASM_CC)" $(WASM_CFLAGS) "$(SYSROOT_SHARE)/wasm32-include-all.c" \
 	    -E -dM -Wno-\#warnings \
 	    -U__llvm__ \
 	    -U__clang__ \

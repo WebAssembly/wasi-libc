@@ -299,9 +299,24 @@ $(SYSROOT):
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" \
 	    -fsyntax-only "$(SYSROOT_SHARE)/wasm32-include-all.c" -Weverything -Wno-\#warnings
 
-	# Collect all the predefined macros.
+	# Collect all the predefined macros, except for compiler version macros
+	# which we don't need to track here. For the __*_ATOMIC_*_LOCK_FREE
+	# macros, squash individual compiler names to attempt, toward keeping
+	# these files compiler-independent.
 	"$(WASM_CC)" $(WASM_CFLAGS) $(WASM_TARGET_FLAGS) --sysroot="$(SYSROOT)" \
-	    -E -dM "$(SYSROOT_SHARE)/wasm32-include-all.c" -Wno-\#warnings > "$(SYSROOT_SHARE)/wasm32-predefined-macros.txt"
+	    -E -dM "$(SYSROOT_SHARE)/wasm32-include-all.c" -Wno-\#warnings \
+	    -U__llvm__ \
+	    -U__clang__ \
+	    -U__clang_major__ \
+	    -U__clang_minor__ \
+	    -U__clang_patchlevel__ \
+	    -U__clang_version__ \
+	    -U__GNUC__ \
+	    -U__GNUC_MINOR__ \
+	    -U__GNUC_PATCHLEVEL__ \
+	    -U__VERSION__ \
+	    | sed -e 's/__[[:upper:][:digit:]]*_ATOMIC_\([[:upper:][:digit:]_]*\)_LOCK_FREE/__compiler_ATOMIC_\1_LOCK_FREE/' \
+	    > "$(SYSROOT_SHARE)/wasm32-predefined-macros.txt"
 
 	# Remove this once https://reviews.llvm.org/D56553 is resolved.
 	ln -s lib32 $(SYSROOT)/lib

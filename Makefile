@@ -293,6 +293,8 @@ $(SYSROOT):
 	    |grep ' U ' |sed 's/.* U //' |sort |uniq); do \
 	    grep -q $$undef_sym "$(SYSROOT_SHARE)/wasm32-defined-symbols.txt" || echo $$undef_sym; \
 	done > "$(SYSROOT_SHARE)/wasm32-undefined-symbols.txt"
+	grep ^cloudabi_sys_ "$(SYSROOT_SHARE)/wasm32-undefined-symbols.txt" \
+	    > "$(SYSROOT_LIB)/libc.imports"
 
 	# Generate a test file that includes all public header files.
 	cd "$(SYSROOT)" && \

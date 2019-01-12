@@ -70,6 +70,10 @@ static long double T_odd(long double x)
 #elif LDBL_MANT_DIG == 113
 #define EXPMAN(u) ((u.i.se & 0x7fff)<<8 | u.i.top>>8)
 
+#ifdef __wasm_musl_unmodified_upstream__ // bug fix
+#else
+static
+#endif
 const long double atanhi[] = {
 	 4.63647609000806116214256231461214397e-01L,
 	 7.85398163397448309615660845819875699e-01L,
@@ -77,6 +81,10 @@ const long double atanhi[] = {
 	 1.57079632679489661923132169163975140e+00L,
 };
 
+#ifdef __wasm_musl_unmodified_upstream__ // bug fix
+#else
+static
+#endif
 const long double atanlo[] = {
 	 4.89509642257333492668618435220297706e-36L,
 	 2.16795253253094525619926100651083806e-35L,
@@ -84,6 +92,10 @@ const long double atanlo[] = {
 	 4.33590506506189051239852201302167613e-35L,
 };
 
+#ifdef __wasm_musl_unmodified_upstream__ // bug fix
+#else
+static
+#endif
 const long double aT[] = {
 	 3.33333333333333333333333333333333125e-01L,
 	-1.99999999999999999999999999999180430e-01L,

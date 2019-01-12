@@ -249,6 +249,7 @@ fmin
 fminf
 fminl
 fmod
+__fmodeflags
 fmodf
 fmodl
 fmtmsg

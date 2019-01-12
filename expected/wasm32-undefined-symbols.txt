@@ -51,7 +51,6 @@ __fixunstfsi
 __floatscan
 __floatsitf
 __floatunsitf
-__fmodeflags
 getcwd
 __getf2
 getpid

@@ -320,7 +320,7 @@ $(SYSROOT):
 	    | sed -e 's/__[[:upper:][:digit:]]*_ATOMIC_\([[:upper:][:digit:]_]*\)_LOCK_FREE/__compiler_ATOMIC_\1_LOCK_FREE/' \
 	    > "$(SYSROOT_SHARE)/wasm32-predefined-macros.txt"
 
-	# Remove this once https://reviews.llvm.org/D56553 is resolved.
+	# FIXME: Remove this once https://reviews.llvm.org/D56553 is resolved.
 	ln -s lib32 $(SYSROOT)/lib
 
 	# Check that the computed metadata matches the expected metadata.

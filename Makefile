@@ -192,13 +192,6 @@ $(SYSROOT):
 	cp -r --backup=numbered "$(BASICS_INC)" "$(SYSROOT)"
 
 	#
-	# Build the C startup files.
-	#
-	"$(WASM_CC)" $(WASM_CFLAGS) -c $(BASICS_LIBC_DIR)/crt*.S
-	mkdir -p "$(SYSROOT_LIB)"
-	mv *.o "$(SYSROOT_LIB)"
-
-	#
 	# Compile the basics libc subset source files.
 	#
 	"$(WASM_CC)" $(WASM_CFLAGS) -c $(BASICS_LIBC_SOURCES)

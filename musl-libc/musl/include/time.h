@@ -50,7 +50,7 @@ struct tm {
 	const char *__tm_zone;
 };
 #else
-#include <__struct_tm.h>
+#include <__time.h>
 #endif
 
 clock_t clock (void);
@@ -64,9 +64,11 @@ char *asctime (const struct tm *);
 char *ctime (const time_t *);
 int timespec_get(struct timespec *, int);
 
+#ifdef __wasm_musl_unmodified_upstream__
 #define CLOCKS_PER_SEC 1000000L
 
 #define TIME_UTC 1
+#endif
 
 #if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) \
  || defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) \
@@ -86,6 +88,7 @@ struct itimerspec {
 	struct timespec it_value;
 };
 
+#ifdef __wasm_musl_unmodified_upstream__
 #define CLOCK_REALTIME           0
 #define CLOCK_MONOTONIC          1
 #define CLOCK_PROCESS_CPUTIME_ID 2
@@ -100,6 +103,7 @@ struct itimerspec {
 #define CLOCK_TAI               11
 
 #define TIMER_ABSTIME 1
+#endif
 
 int nanosleep (const struct timespec *, struct timespec *);
 int clock_getres (clockid_t, struct timespec *);

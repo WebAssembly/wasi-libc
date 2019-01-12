@@ -78,6 +78,7 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/stdio/__stdio_write.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__stdio_seek.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__stdout_write.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/__fmodeflags.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/ofl.c \
     $(MUSL_LIBC_SRC_DIR)/string/bcmp.c \
     $(MUSL_LIBC_SRC_DIR)/string/bcopy.c \

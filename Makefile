@@ -192,6 +192,13 @@ $(SYSROOT):
 	cp -r --backup=numbered "$(BASICS_INC)" "$(SYSROOT)"
 
 	#
+	# Build the C startup files.
+	#
+	"$(WASM_CC)" $(WASM_CFLAGS) -c $(BASICS_LIBC_DIR)/crt*.c
+	mkdir -p "$(SYSROOT_LIB)"
+	mv *.o "$(SYSROOT_LIB)"
+
+	#
 	# Compile the basics libc subset source files.
 	#
 	"$(WASM_CC)" $(WASM_CFLAGS) -c $(BASICS_LIBC_SOURCES)
@@ -269,7 +276,7 @@ $(SYSROOT):
 	#
 	# Create empty placeholder libraries.
 	#
-	for name in m rt pthread crypt util xnet resolv dl; do \
+	for name in m rt pthread crypt util xnet resolv dl c++ c++abi; do \
 	    $(WASM_AR) crs "$(SYSROOT_LIB)/lib$${name}.a"; \
 	done
 

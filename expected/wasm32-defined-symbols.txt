@@ -634,6 +634,7 @@ srand
 srand48
 srandom
 sscanf
+_start
 stat
 stderr
 __stderr_FILE

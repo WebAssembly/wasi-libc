@@ -279,8 +279,6 @@ fwrite
 fwrite_unlocked
 __fwritex
 gcvt
-getauxval
-__getauxval
 get_avphys_pages
 getc
 get_current_dir_name
@@ -471,14 +469,11 @@ memchr
 memchr
 memcmp
 memcpy
-memcpy
 memmem
-memmove
 memmove
 mempcpy
 memrchr
 __memrchr
-memset
 memset
 mkdirat
 mkdtemp
@@ -553,7 +548,6 @@ putc
 puts
 pwrite
 pwritev
-qsort
 qsort
 rand
 __rand48_step

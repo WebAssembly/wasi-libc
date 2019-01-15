@@ -292,7 +292,7 @@ $(SYSROOT):
 	for undef_sym in $$($(WASM_NM) --undefined-only "$(SYSROOT_LIB)"/*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' U ' |sed 's/.* U //' |sort |uniq); do \
 	    grep -q $$undef_sym "$(SYSROOT_SHARE)/wasm32-defined-symbols.txt" || echo $$undef_sym; \
-	done > "$(SYSROOT_SHARE)/wasm32-undefined-symbols.txt"
+	done   > "$(SYSROOT_SHARE)/wasm32-undefined-symbols.txt"
 	grep ^cloudabi_sys_ "$(SYSROOT_SHARE)/wasm32-undefined-symbols.txt" \
 	    > "$(SYSROOT_LIB)/libc.imports"
 

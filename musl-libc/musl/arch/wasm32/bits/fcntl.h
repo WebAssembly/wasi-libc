@@ -1,1 +1,1 @@
-// Use the COWS libc fcntl implementation bits.
+// Use the WASI libc fcntl implementation bits.

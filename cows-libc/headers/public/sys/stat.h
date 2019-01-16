@@ -1,5 +1,5 @@
-#ifndef __cowslibc_sys_stat_h
-#define __cowslibc_sys_stat_h
+#ifndef __wasilibc_sys_stat_h
+#define __wasilibc_sys_stat_h
 
 #include <__struct_stat.h>
 

@@ -1,5 +1,5 @@
-#ifndef __cowslibc_sys_resource_h
-#define __cowslibc_sys_resource_h
+#ifndef __wasilibc_sys_resource_h
+#define __wasilibc_sys_resource_h
 
 #include <__struct_rusage.h>
 

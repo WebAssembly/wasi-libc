@@ -59,7 +59,7 @@ FILE *__fdopen(int fd, const char *mode)
 	if (!(f->flags & F_NOWR) && !__syscall(SYS_ioctl, fd, TIOCGWINSZ, &wsz))
 		f->lbf = '\n';
 #else
-	// Avoid __syscall, but also, TIOCGWINSZ is not supported in COWS.
+	// Avoid __syscall, but also, TIOCGWINSZ is not supported in WASI.
 #endif
 
 	/* Initialize op ptrs. No problem if some are unneeded. */

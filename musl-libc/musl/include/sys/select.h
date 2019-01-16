@@ -38,7 +38,7 @@ int select (int, fd_set *__restrict, fd_set *__restrict, fd_set *__restrict, str
 #ifdef __wasm_musl_unmodified_upstream__
 int pselect (int, fd_set *__restrict, fd_set *__restrict, fd_set *__restrict, const struct timespec *__restrict, const sigset_t *__restrict);
 #else
-// TODO: This is what cows-libc currently uses, but we should look at changing it.
+// TODO: This is what wasi-libc currently uses, but we should look at changing it.
 int pselect(int, fd_set *, fd_set *, fd_set *, const struct timespec *, ...);
 #endif
 

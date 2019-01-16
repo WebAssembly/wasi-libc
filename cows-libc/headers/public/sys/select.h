@@ -1,5 +1,5 @@
-#ifndef __cowslibc_sys_select_h
-#define __cowslibc_sys_select_h
+#ifndef __wasilibc_sys_select_h
+#define __wasilibc_sys_select_h
 
 #include <__fd_set.h>
 #include <__struct_timespec.h>

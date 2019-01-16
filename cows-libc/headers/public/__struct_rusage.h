@@ -1,5 +1,5 @@
-#ifndef __cowslibc___struct_rusage_h
-#define __cowslibc___struct_rusage_h
+#ifndef __wasilibc___struct_rusage_h
+#define __wasilibc___struct_rusage_h
 
 #include "__struct_timeval.h"
 

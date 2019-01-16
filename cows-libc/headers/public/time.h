@@ -1,5 +1,5 @@
-#ifndef __cowslibc_time_h
-#define __cowslibc_time_h
+#ifndef __wasilibc_time_h
+#define __wasilibc_time_h
 
 #include <__time.h>
 

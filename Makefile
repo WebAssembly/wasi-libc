@@ -18,20 +18,20 @@ DLMALLOC_DIR = dlmalloc
 DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
 DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/wrapper.c
 DLMALLOC_INC = $(DLMALLOC_DIR)/include
-COWS_LIBC_DIR = cows-libc
-COWS_LIBC_CLOUDLIBC_SRC = $(COWS_LIBC_DIR)/cloudlibc/src
-COWS_LIBC_CLOUDLIBC_SRC_INC = $(COWS_LIBC_CLOUDLIBC_SRC)/include
-COWS_LIBC_HEADERS_PUBLIC = $(COWS_LIBC_DIR)/headers/public
-COWS_LIBC_HEADERS_PRIVATE = $(COWS_LIBC_DIR)/headers/private
-COWS_LIBC_CLOUDABI_HEADERS = $(COWS_LIBC_DIR)/cloudabi/headers
-COWS_LIBC_LIBPREOPEN_DIR = $(COWS_LIBC_DIR)/libpreopen
-COWS_LIBC_LIBPREOPEN_LIB = $(COWS_LIBC_LIBPREOPEN_DIR)/lib
-COWS_LIBC_LIBPREOPEN_INC = $(COWS_LIBC_LIBPREOPEN_DIR)/include
-COWS_LIBC_SOURCES = $(COWS_LIBC_DIR)/sources
-COWS_LIBC_ALL_SOURCES = \
-    $(shell find $(COWS_LIBC_CLOUDLIBC_SRC) -name \*.c) \
-    $(COWS_LIBC_LIBPREOPEN_LIB)/po_libc_wrappers.c \
-    $(shell find $(COWS_LIBC_SOURCES) -name \*.c)
+WASI_LIBC_DIR = wasi-libc
+WASI_LIBC_CLOUDLIBC_SRC = $(WASI_LIBC_DIR)/cloudlibc/src
+WASI_LIBC_CLOUDLIBC_SRC_INC = $(WASI_LIBC_CLOUDLIBC_SRC)/include
+WASI_LIBC_HEADERS_PUBLIC = $(WASI_LIBC_DIR)/headers/public
+WASI_LIBC_HEADERS_PRIVATE = $(WASI_LIBC_DIR)/headers/private
+WASI_LIBC_CLOUDABI_HEADERS = $(WASI_LIBC_DIR)/cloudabi/headers
+WASI_LIBC_LIBPREOPEN_DIR = $(WASI_LIBC_DIR)/libpreopen
+WASI_LIBC_LIBPREOPEN_LIB = $(WASI_LIBC_LIBPREOPEN_DIR)/lib
+WASI_LIBC_LIBPREOPEN_INC = $(WASI_LIBC_LIBPREOPEN_DIR)/include
+WASI_LIBC_SOURCES = $(WASI_LIBC_DIR)/sources
+WASI_LIBC_ALL_SOURCES = \
+    $(shell find $(WASI_LIBC_CLOUDLIBC_SRC) -name \*.c) \
+    $(WASI_LIBC_LIBPREOPEN_LIB)/po_libc_wrappers.c \
+    $(shell find $(WASI_LIBC_SOURCES) -name \*.c)
 MUSL_LIBC_DIR = musl-libc/musl
 MUSL_LIBC_SRC_DIR = $(MUSL_LIBC_DIR)/src
 MUSL_LIBC_INC = $(MUSL_LIBC_DIR)/include
@@ -162,7 +162,7 @@ SYSROOT_INC = $(SYSROOT)/include
 SYSROOT_SHARE = $(SYSROOT)/share
 
 # Set the target.
-# TODO: Add -unknown-cows-musl when the compiler supports it.
+# TODO: Add -unknown-wasi-musl when the compiler supports it.
 override WASM_CFLAGS += --target=wasm32-unknown-wasi-musl
 # We're compiling libc.
 override WASM_CFLAGS += -fno-builtin
@@ -209,14 +209,14 @@ $(SYSROOT):
 	"$(WASM_CC)" $(WASM_CFLAGS) -c $(DLMALLOC_SOURCES) -I$(DLMALLOC_INC)
 
 	#
-	# Compile the COWS libc source files.
+	# Compile the WASI libc source files.
 	#
-	cp -r --backup=numbered "$(COWS_LIBC_CLOUDABI_HEADERS)"/* "$(SYSROOT_INC)"
-	cp -r --backup=numbered "$(COWS_LIBC_HEADERS_PUBLIC)"/* "$(SYSROOT_INC)"
-	"$(WASM_CC)" $(WASM_CFLAGS) -c $(COWS_LIBC_ALL_SOURCES) \
-	    -I$(COWS_LIBC_HEADERS_PRIVATE) \
-	    -I$(COWS_LIBC_CLOUDLIBC_SRC_INC) -I$(COWS_LIBC_CLOUDLIBC_SRC) \
-	    -I$(COWS_LIBC_LIBPREOPEN_LIB) -I$(COWS_LIBC_LIBPREOPEN_INC)
+	cp -r --backup=numbered "$(WASI_LIBC_CLOUDABI_HEADERS)"/* "$(SYSROOT_INC)"
+	cp -r --backup=numbered "$(WASI_LIBC_HEADERS_PUBLIC)"/* "$(SYSROOT_INC)"
+	"$(WASM_CC)" $(WASM_CFLAGS) -c $(WASI_LIBC_ALL_SOURCES) \
+	    -I$(WASI_LIBC_HEADERS_PRIVATE) \
+	    -I$(WASI_LIBC_CLOUDLIBC_SRC_INC) -I$(WASI_LIBC_CLOUDLIBC_SRC) \
+	    -I$(WASI_LIBC_LIBPREOPEN_LIB) -I$(WASI_LIBC_LIBPREOPEN_INC)
 
 	#
 	# Compile the musl libc source files.

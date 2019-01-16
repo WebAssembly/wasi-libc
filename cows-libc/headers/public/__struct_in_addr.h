@@ -1,5 +1,5 @@
-#ifndef __cowslibc___struct_in_addr_h
-#define __cowslibc___struct_in_addr_h
+#ifndef __wasilibc___struct_in_addr_h
+#define __wasilibc___struct_in_addr_h
 
 #include <__typedef_in_addr_t.h>
 

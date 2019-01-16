@@ -1,5 +1,5 @@
-#ifndef __cowslibc_stdlib_h
-#define __cowslibc_stdlib_h
+#ifndef __wasilibc_stdlib_h
+#define __wasilibc_stdlib_h
 
 #define __need_size_t
 #include <stddef.h>

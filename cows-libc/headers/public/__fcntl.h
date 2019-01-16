@@ -1,5 +1,5 @@
-#ifndef __cowslibc___fcntl_h
-#define __cowslibc___fcntl_h
+#ifndef __wasilibc___fcntl_h
+#define __wasilibc___fcntl_h
 
 #include <cloudabi_types_common.h>
 

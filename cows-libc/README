@@ -1,7 +1,7 @@
-"COWS" is the Capability-Oriented WebAssembly Syscalls.
+"WASI" the WebAssembly System Interface.
 
-COWS libc is conceptually the lower half of a traditional libc implementation.
-It provides C interfaces to the low-level COWS syscalls.
+WASI libc is conceptually the lower half of a traditional libc implementation.
+It provides C interfaces to the low-level WASI syscalls.
 
 This is largely based on [CloudABI], [cloudlibc], and [libpreopen], however we
 use just the low-level syscall wrappers rather than all of cloudlibc and
@@ -18,6 +18,6 @@ cloudlibc - https://github.com/NuxiNL/cloudlibc 742ea0899ab9ecc9746692d903593603
 libpreopen - https://github.com/musec/libpreopen 8265fc50b9db3730c250597bdd084f1e728f3e48
 
 Whole files which are unused are omitted. Changes to upstream code are wrapped
-in preprocessor directives controlled by the macro `__cowslibc_unmodified_upstream__`.
+in preprocessor directives controlled by the macro `__wasilibc_unmodified_upstream__`.
 
-COWS libc currently depends on the basics and dlmalloc components of reference-sysroot.
+WASI libc currently depends on the basics and dlmalloc components of reference-sysroot.

@@ -1,5 +1,5 @@
-#ifndef __cowslibc___struct_tms_h
-#define __cowslibc___struct_tms_h
+#ifndef __wasilibc___struct_tms_h
+#define __wasilibc___struct_tms_h
 
 #include <__typedef_clock_t.h>
 

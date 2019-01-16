@@ -1,5 +1,5 @@
-#ifndef __cowslibc___struct_tm_h
-#define __cowslibc___struct_tm_h
+#ifndef __wasilibc___struct_tm_h
+#define __wasilibc___struct_tm_h
 
 struct tm {
     int tm_sec;

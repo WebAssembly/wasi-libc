@@ -1,5 +1,5 @@
-#ifndef __cowslibc_unistd_h
-#define __cowslibc_unistd_h
+#ifndef __wasilibc_unistd_h
+#define __wasilibc_unistd_h
 
 struct stat;
 

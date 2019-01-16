@@ -1,5 +1,5 @@
-#ifndef __cowslibc___typedef_fd_set_h
-#define __cowslibc___typedef_fd_set_h
+#ifndef __wasilibc___typedef_fd_set_h
+#define __wasilibc___typedef_fd_set_h
 
 #define __need_size_t
 #include <stddef.h>

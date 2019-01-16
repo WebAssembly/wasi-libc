@@ -1,5 +1,5 @@
-#ifndef __cowslibc_netinet_in_h
-#define __cowslibc_netinet_in_h
+#ifndef __wasilibc_netinet_in_h
+#define __wasilibc_netinet_in_h
 
 #include <__struct_sockaddr_in.h>
 #include <__struct_sockaddr_in6.h>

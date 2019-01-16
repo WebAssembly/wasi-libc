@@ -1,5 +1,5 @@
-#ifndef __cowslibc_string_h
-#define __cowslibc_string_h
+#ifndef __wasilibc_string_h
+#define __wasilibc_string_h
 
 #define __need_size_t
 #define __need_NULL

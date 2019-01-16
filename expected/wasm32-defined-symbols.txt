@@ -121,7 +121,7 @@ coshf
 coshl
 cosl
 __cosl
-__cowslibc_register_preopened_fd
+__wasilibc_register_preopened_fd
 cpow
 cpowf
 cpowl

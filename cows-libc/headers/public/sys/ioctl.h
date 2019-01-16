@@ -1,5 +1,5 @@
-#ifndef __cowslibc_sys_ioctl_h
-#define __cowslibc_sys_ioctl_h
+#ifndef __wasilibc_sys_ioctl_h
+#define __wasilibc_sys_ioctl_h
 
 #define FIONREAD 1
 #define FIONBIO 2

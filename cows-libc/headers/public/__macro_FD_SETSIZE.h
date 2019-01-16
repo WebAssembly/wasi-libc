@@ -1,5 +1,5 @@
-#ifndef __cowslibc___macro_FD_SETSIZE_h
-#define __cowslibc___macro_FD_SETSIZE_h
+#ifndef __wasilibc___macro_FD_SETSIZE_h
+#define __wasilibc___macro_FD_SETSIZE_h
 
 #define FD_SETSIZE 1024
 

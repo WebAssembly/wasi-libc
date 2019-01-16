@@ -1,5 +1,5 @@
-#ifndef __cowslibc_dirent_h
-#define __cowslibc_dirent_h
+#ifndef __wasilibc_dirent_h
+#define __wasilibc_dirent_h
 
 #include <cloudabi_types_common.h>
 

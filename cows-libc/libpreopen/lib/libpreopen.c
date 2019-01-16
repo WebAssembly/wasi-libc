@@ -42,7 +42,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 #else
 #include <fcntl.h>
 #endif
@@ -50,7 +50,7 @@
 #include "internal.h"
 
 
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 #else
 static
 #endif
@@ -89,7 +89,7 @@ po_add(struct po_map *map, const char *path, int fd)
 	return (map);
 }
 
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 #else
 static
 #endif
@@ -110,7 +110,7 @@ po_find(struct po_map* map, const char *path, cap_rights_t *rights)
 	for(size_t i = 0; i < map->length; i++) {
 		const struct po_map_entry *entry = map->entries + i;
 		const char *name = entry->name;
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 		size_t len = strnlen(name, MAXPATHLEN);
 #else
 		size_t len = strlen(name);
@@ -146,7 +146,7 @@ po_find(struct po_map* map, const char *path, cap_rights_t *rights)
 	return match;
 }
 
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 #else
 static
 #endif
@@ -164,7 +164,7 @@ po_isprefix(const char *dir, size_t dirlen, const char *path)
 	return path[i] == '/' || path[i] == '\0';
 }
 
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 int
 po_preopen(struct po_map *map, const char *path, int flags, ...)
 {
@@ -195,7 +195,7 @@ po_preopen(struct po_map *map, const char *path, int flags, ...)
 }
 #endif
 
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 bool
 po_print_entry(const char *name, int fd, cap_rights_t rights)
 {

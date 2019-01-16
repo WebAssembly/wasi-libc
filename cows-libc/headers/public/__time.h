@@ -1,5 +1,5 @@
-#ifndef __cowslibc___time_h
-#define __cowslibc___time_h
+#ifndef __wasilibc___time_h
+#define __wasilibc___time_h
 
 #define __need_size_t
 #define __need_NULL

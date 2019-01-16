@@ -1,5 +1,5 @@
-#ifndef __cowslibc___struct_iovec_h
-#define __cowslibc___struct_iovec_h
+#ifndef __wasilibc___struct_iovec_h
+#define __wasilibc___struct_iovec_h
 
 #define __need_size_t
 #include <stddef.h>

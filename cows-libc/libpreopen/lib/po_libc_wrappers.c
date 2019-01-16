@@ -40,7 +40,7 @@
 #include <sys/un.h>
 
 #include <fcntl.h>
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 #include <dlfcn.h>
 #endif
 #include <stdarg.h>
@@ -48,13 +48,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 #else
 #include <errno.h>
 #endif
 
 #include "internal.h"
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 #else
 // Make all of the po_* implementation details private.
 #include "libpreopen.c"
@@ -101,7 +101,7 @@ static struct po_map*	get_shared_map(void);
  * the same as the unwrapped `open(2)` call (i.e., will fail with `ECAPMODE`).
  */
 int
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 _open(const char *path, int flags, ...)
 #else
 /* We just need a plain open definition. */
@@ -112,7 +112,7 @@ open(const char *path, int flags, ...)
 	va_list args;
 	int mode;
 
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 	va_start(args, flags);
 	mode = va_arg(args, int);
 #else
@@ -152,7 +152,7 @@ access(const char *path, int mode)
 	return faccessat(rel.dirfd, rel.relative_path, mode,0);
 }
 
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 /**
  * Capability-safe wrapper around the `connect(2)` system call.
  *
@@ -172,7 +172,7 @@ connect(int s, const struct sockaddr *name, socklen_t namelen)
 	if (name->sa_family == AF_UNIX) {
 	    struct sockaddr_un *usock = (struct sockaddr_un *)name;
 	    rel = find_relative(usock->sun_path, NULL);
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 	    strlcpy(usock->sun_path, rel.relative_path, sizeof(usock->sun_path));
 #else
 	    if (strlen(rel.relative_path) + 1 > sizeof(usock->sun_path)) {
@@ -226,7 +226,7 @@ lstat(const char *path, struct stat *st)
 	return fstatat(rel.dirfd, rel.relative_path,st,AT_SYMLINK_NOFOLLOW);
 }
 
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 /**
  * Capability-safe wrapper around the `open(2)` system call.
  *
@@ -289,7 +289,7 @@ stat(const char *path, struct stat *st)
  * Wrappers around other libc calls:
  */
 
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 /**
  * Capability-safe wrapper around the `dlopen(3)` libc function.
  *
@@ -310,7 +310,7 @@ dlopen(const char *path, int mode)
 }
 #endif
 
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 #else
 static
 #endif
@@ -336,7 +336,7 @@ find_relative(const char *path, cap_rights_t *rights)
 	struct po_map *map;
 
 	map = get_shared_map();
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 	if (map == NULL) {
 		rel.dirfd = AT_FDCWD;
 		rel.relative_path = path;
@@ -353,7 +353,7 @@ find_relative(const char *path, cap_rights_t *rights)
 static struct po_map*
 get_shared_map()
 {
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 	struct po_map *map;
 	char *end, *env;
 	long fd;
@@ -391,13 +391,13 @@ get_shared_map()
 	return global_map;
 #endif
 }
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 #else
 /*
  * Register the given pre-opened file descriptor under the given path.
  */
 int
-__cowslibc_register_preopened_fd(int fd, const char *path)
+__wasilibc_register_preopened_fd(int fd, const char *path)
 {
         po_map_assertvalid(global_map);
 
@@ -406,7 +406,7 @@ __cowslibc_register_preopened_fd(int fd, const char *path)
         }
 
 #ifdef _REENTRANT
-#error "__cowslibc_register_preopened_fd doesn't yet support multiple threads"
+#error "__wasilibc_register_preopened_fd doesn't yet support multiple threads"
 #endif
 
 	struct po_map *map = po_add(global_map, path, fd);

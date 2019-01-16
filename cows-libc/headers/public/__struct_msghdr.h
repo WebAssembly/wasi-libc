@@ -1,5 +1,5 @@
-#ifndef __cowslibc___struct_msghdr_h
-#define __cowslibc___struct_msghdr_h
+#ifndef __wasilibc___struct_msghdr_h
+#define __wasilibc___struct_msghdr_h
 
 #include <__typedef_socklen_t.h>
 

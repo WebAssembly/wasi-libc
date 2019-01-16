@@ -1,5 +1,5 @@
-#ifndef __cowslibc___struct_dirent_h
-#define __cowslibc___struct_dirent_h
+#ifndef __wasilibc___struct_dirent_h
+#define __wasilibc___struct_dirent_h
 
 #include <__typedef_ino_t.h>
 

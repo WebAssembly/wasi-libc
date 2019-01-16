@@ -1,5 +1,5 @@
-#ifndef __cowslibc_sys_mman_h
-#define __cowslibc_sys_mman_h
+#ifndef __wasilibc_sys_mman_h
+#define __wasilibc_sys_mman_h
 
 #include <cloudabi_types_common.h>
 

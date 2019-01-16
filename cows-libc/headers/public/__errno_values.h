@@ -1,5 +1,5 @@
-#ifndef __cowslibc___errno_values_h
-#define __cowslibc___errno_values_h
+#ifndef __wasilibc___errno_values_h
+#define __wasilibc___errno_values_h
 
 #include <cloudabi_types_common.h>
 

@@ -34,7 +34,7 @@
 #ifndef LIBPO_H
 #define LIBPO_H
 
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 #include <sys/cdefs.h>
 #endif
 #include <sys/capsicum.h>
@@ -54,7 +54,7 @@ __BEGIN_DECLS
  */
 struct po_map;
 
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 /**
  * A callback that can be used to inpect the contents of a @ref po_map.
  *
@@ -88,7 +88,7 @@ struct po_relpath {
  *
  * The returned @ref po_map will have a reference count of 1.
  */
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 #else
 static
 #endif
@@ -99,13 +99,13 @@ struct po_map* po_map_create(int capacity);
  *
  * This may cause memory to be freed.
  */
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 #else
 static
 #endif
 void po_map_release(struct po_map *);
 
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 /**
  * Iterate over a @ref po_map, invoking a callback for each element in the map.
  *
@@ -126,13 +126,13 @@ size_t po_map_foreach(const struct po_map*, po_map_iter_cb);
  *                  (which may or may not be the path used to open it)
  * @param   fd      the directory descriptor (must be a directory!)
  */
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 #else
 static
 #endif
 struct po_map* po_add(struct po_map *map, const char *path, int fd);
 
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 /**
  * Pre-open a path and store it in a @ref po_map for later use.
  *
@@ -162,14 +162,14 @@ int po_preopen(struct po_map *map, const char *path, int flags, ...);
  *          directory in the map (or -1 if none was found) and the remaining
  *          path, relative to the file (or undefined if no match found)
  */
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 #else
 static
 #endif
 struct po_relpath po_find(struct po_map *map, const char *path,
 	cap_rights_t *rights);
 
-#ifdef __cowslibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__
 /**
  * Retrieve a message from with the last libpreopen error.
  *

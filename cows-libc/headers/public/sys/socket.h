@@ -1,5 +1,5 @@
-#ifndef __cowslibc_sys_socket_h
-#define __cowslibc_sys_socket_h
+#ifndef __wasilibc_sys_socket_h
+#define __wasilibc_sys_socket_h
 
 #include <__struct_msghdr.h>
 #include <__struct_cmsghdr.h>

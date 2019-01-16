@@ -9,7 +9,7 @@ hidden int *___errno_location(void);
 #undef errno
 #define errno (*___errno_location())
 #else
-// Use the COWS libc errno.
+// Use the WASI libc errno.
 #endif
 
 #endif

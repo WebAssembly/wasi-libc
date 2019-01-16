@@ -1,5 +1,5 @@
-#ifndef __cowslibc_poll_h
-#define __cowslibc_poll_h
+#ifndef __wasilibc_poll_h
+#define __wasilibc_poll_h
 
 #include <__struct_pollfd.h>
 #include <__typedef_nfds_t.h>

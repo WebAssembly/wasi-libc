@@ -1,5 +1,5 @@
-#ifndef __cowslibc_fcntl_h
-#define __cowslibc_fcntl_h
+#ifndef __wasilibc_fcntl_h
+#define __wasilibc_fcntl_h
 
 /*
  * Include the real implementation, which is factored into a separate file so

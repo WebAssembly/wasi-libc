@@ -1,5 +1,5 @@
-#ifndef __cowslibc___fd_set_h
-#define __cowslibc___fd_set_h
+#ifndef __wasilibc___fd_set_h
+#define __wasilibc___fd_set_h
 
 #include <__typedef_fd_set.h>
 

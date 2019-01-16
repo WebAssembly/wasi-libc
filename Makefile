@@ -163,7 +163,7 @@ SYSROOT_SHARE = $(SYSROOT)/share
 
 # Set the target.
 # TODO: Add -unknown-cows-musl when the compiler supports it.
-override WASM_CFLAGS += --target=wasm32
+override WASM_CFLAGS += --target=wasm32-unknown-wasi-musl
 # We're compiling libc.
 override WASM_CFLAGS += -fno-builtin
 # WebAssembly floating-point match doesn't trap.
@@ -327,8 +327,9 @@ $(SYSROOT):
 	    | sed -e 's/__[[:upper:][:digit:]]*_ATOMIC_\([[:upper:][:digit:]_]*\)_LOCK_FREE/__compiler_ATOMIC_\1_LOCK_FREE/' \
 	    > "$(SYSROOT_SHARE)/wasm32-predefined-macros.txt"
 
-	# FIXME: Remove this once https://reviews.llvm.org/D56553 is resolved.
+	# FIXME: Switch to the multiarch path once everything supports it.
 	ln -s lib32 $(SYSROOT)/lib
+	ln -s lib32 $(SYSROOT)/lib/wasm32-unknown-wasi-musl
 
 	# Check that the computed metadata matches the expected metadata.
 	diff -ur expected "$(SYSROOT_SHARE)"

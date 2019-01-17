@@ -165,9 +165,10 @@ LIBC_TOP_HALF_HEADERS_PRIVATE = $(LIBC_TOP_HALF_DIR)/headers/private
 
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
-SYSROOT_LIB = $(SYSROOT)/lib32
+MULTIARCH_TRIPLE = wasm32-wasi-musl
+SYSROOT_LIB = $(SYSROOT)/lib/$(MULTIARCH_TRIPLE)
 SYSROOT_INC = $(SYSROOT)/include
-SYSROOT_SHARE = $(SYSROOT)/share/wasm32-wasi-musl
+SYSROOT_SHARE = $(SYSROOT)/share/$(MULTIARCH_TRIPLE)
 
 # Set the target.
 # TODO: Add -unknown-wasi-musl when the compiler supports it.
@@ -367,7 +368,7 @@ $(SYSROOT):
 	# Generate a test file that includes all public header files.
 	cd "$(SYSROOT)" && \
 	for header in $$(find include -type f |grep -v /bits/); do \
-	    echo '#include <'$$header'>' | sed 's/include\///' >> share/wasm32-include-all.c; \
+	    echo '#include <'$$header'>' | sed 's/include\///' >> share/$(MULTIARCH_TRIPLE)/include-all.c; \
 	done; \
 	cd - >/dev/null
 
@@ -394,10 +395,6 @@ $(SYSROOT):
 	    -U__VERSION__ \
 	    | sed -e 's/__[[:upper:][:digit:]]*_ATOMIC_\([[:upper:][:digit:]_]*\)_LOCK_FREE/__compiler_ATOMIC_\1_LOCK_FREE/' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
-
-	# FIXME: Switch to the multiarch path once everything supports it.
-	ln -s lib32 $(SYSROOT)/lib
-	ln -s ../lib32 $(SYSROOT)/lib/wasm32-wasi-musl
 
 	# Check that the computed metadata matches the expected metadata.
 	diff -ur expected "$(SYSROOT_SHARE)"

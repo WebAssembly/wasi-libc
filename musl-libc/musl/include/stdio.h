@@ -35,12 +35,16 @@ extern "C" {
 #undef EOF
 #define EOF (-1)
 
+#ifdef __wasm_musl_unmodified_upstream__
 #undef SEEK_SET
 #undef SEEK_CUR
 #undef SEEK_END
 #define SEEK_SET 0
 #define SEEK_CUR 1
 #define SEEK_END 2
+#else
+#include <__wasilibc_unistd.h>
+#endif
 
 #define _IOFBF 0
 #define _IOLBF 1

@@ -19,6 +19,7 @@
 #include <features.h>
 #include <time.h.~2~>
 #include <__struct_pollfd.h>
+#include <__wasilibc_time.h>
 #include <stdio.h>
 #include <poll.h>
 #include <string.h.~1~>
@@ -89,7 +90,6 @@
 #include <iconv.h>
 #include <paths.h>
 #include <iso646.h>
-#include <__time.h>
 #include <fnmatch.h>
 #include <__typedef_time_t.h>
 #include <ulimit.h>
@@ -98,11 +98,13 @@
 #include <__typedef_suseconds_t.h>
 #include <regex.h>
 #include <complex.h>
+#include <__wasilibc_fcntl.h>
 #include <__struct_dirent.h>
 #include <__typedef_DIR.h>
 #include <libintl.h>
 #include <malloc.h>
 #include <sysexits.h>
+#include <__wasilibc_mman.h>
 #include <wchar.h>
 #include <float.h>
 #include <byteswap.h>
@@ -112,7 +114,6 @@
 #include <string.h.~2~>
 #include <libgen.h>
 #include <__struct_sockaddr_storage.h>
-#include <__fcntl.h>
 #include <crypt.h>
 #include <stdbool.h>
 #include <locale.h>
@@ -221,6 +222,7 @@
 #include <setjmp.h>
 #include <__typedef_mode_t.h>
 #include <shadow.h>
+#include <__wasilibc_unistd.h>
 #include <__typedef_ino_t.h>
 #include <getopt.h>
 #include <grp.h>

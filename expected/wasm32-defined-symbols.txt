@@ -121,7 +121,6 @@ coshf
 coshl
 cosl
 __cosl
-__wasilibc_register_preopened_fd
 cpow
 cpowf
 cpowl
@@ -236,6 +235,7 @@ fgets_unlocked
 _fini
 finite
 finitef
+__floatscan
 floor
 floorf
 floorl
@@ -784,6 +784,7 @@ vsnprintf
 vsprintf
 vsscanf
 vsyslog
+__wasilibc_register_preopened_fd
 wcstod
 wcstof
 wcstoimax

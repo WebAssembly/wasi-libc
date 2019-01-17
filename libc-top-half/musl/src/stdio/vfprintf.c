@@ -137,7 +137,8 @@ static void pop_arg(union arg *arg, int type, va_list *ap)
 	break; case UIPTR:	arg->i = (uintptr_t)va_arg(*ap, void *);
 #if defined(__wasilibc_printscan_no_floating_point)
 	break; case DBL:
-	break; case LDBL:	floating_point_not_supported();
+	       case LDBL:
+        floating_point_not_supported();
 #else
 	break; case DBL:	arg->f = va_arg(*ap, double);
 #if defined(__wasilibc_printscan_no_long_double)

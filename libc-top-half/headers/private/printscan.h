@@ -1,22 +1,18 @@
 #if defined(__wasilibc_printscan_no_floating_point)
 
-#define __NEED_FILE
-#include <bits/alltypes.h>
+#include <stdio.h>
 
 __attribute__((__cold__, __noreturn__))
 static void floating_point_not_supported(void) {
-    extern FILE __stderr_FILE;
-    int fputs(const char *, FILE *);
     void abort(void) __attribute__((__noreturn__));
     fputs("Support for floating-point formatting is currently disabled.\n"
-          "To enable it, " __wasilibc_printscan_floating_point_support_option ".\n", &__stderr_FILE);
+          "To enable it, " __wasilibc_printscan_floating_point_support_option ".\n", stderr);
     abort();
 }
 
 #elif defined(__wasilibc_printscan_no_long_double)
 
-#define __NEED_FILE
-#include <bits/alltypes.h>
+#include <stdio.h>
 
 typedef double long_double;
 #undef LDBL_TRUE_MIN
@@ -43,8 +39,6 @@ typedef double long_double;
 #define frexpl(x, exp) frexp(x, exp)
 __attribute__((__cold__, __noreturn__))
 static void long_double_not_supported(void) {
-    extern FILE __stderr_FILE;
-    int fputs(const char *, FILE *);
     void abort(void) __attribute__((__noreturn__));
     fputs("Support for formatting long double values is currently disabled.\n"
           "To enable it, " __wasilibc_printscan_full_support_option ".\n", &__stderr_FILE);

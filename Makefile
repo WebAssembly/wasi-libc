@@ -18,21 +18,22 @@ DLMALLOC_DIR = dlmalloc
 DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
 DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/wrapper.c
 DLMALLOC_INC = $(DLMALLOC_DIR)/include
-WASI_LIBC_DIR = wasi-libc
-WASI_LIBC_CLOUDLIBC_SRC = $(WASI_LIBC_DIR)/cloudlibc/src
-WASI_LIBC_CLOUDLIBC_SRC_INC = $(WASI_LIBC_CLOUDLIBC_SRC)/include
-WASI_LIBC_HEADERS_PUBLIC = $(WASI_LIBC_DIR)/headers/public
-WASI_LIBC_HEADERS_PRIVATE = $(WASI_LIBC_DIR)/headers/private
-WASI_LIBC_CLOUDABI_HEADERS = $(WASI_LIBC_DIR)/cloudabi/headers
-WASI_LIBC_LIBPREOPEN_DIR = $(WASI_LIBC_DIR)/libpreopen
-WASI_LIBC_LIBPREOPEN_LIB = $(WASI_LIBC_LIBPREOPEN_DIR)/lib
-WASI_LIBC_LIBPREOPEN_INC = $(WASI_LIBC_LIBPREOPEN_DIR)/include
-WASI_LIBC_SOURCES = $(WASI_LIBC_DIR)/sources
-WASI_LIBC_ALL_SOURCES = \
-    $(shell find $(WASI_LIBC_CLOUDLIBC_SRC) -name \*.c) \
-    $(WASI_LIBC_LIBPREOPEN_LIB)/po_libc_wrappers.c \
-    $(shell find $(WASI_LIBC_SOURCES) -name \*.c)
-MUSL_LIBC_DIR = musl-libc/musl
+LIBC_BOTTOM_HALF_DIR = libc-bottom-half
+LIBC_BOTTOM_HALF_CLOUDLIBC_SRC = $(LIBC_BOTTOM_HALF_DIR)/cloudlibc/src
+LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC = $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/include
+LIBC_BOTTOM_HALF_HEADERS_PUBLIC = $(LIBC_BOTTOM_HALF_DIR)/headers/public
+LIBC_BOTTOM_HALF_HEADERS_PRIVATE = $(LIBC_BOTTOM_HALF_DIR)/headers/private
+LIBC_BOTTOM_HALF_CLOUDABI_HEADERS = $(LIBC_BOTTOM_HALF_DIR)/cloudabi/headers
+LIBC_BOTTOM_HALF_LIBPREOPEN_DIR = $(LIBC_BOTTOM_HALF_DIR)/libpreopen
+LIBC_BOTTOM_HALF_LIBPREOPEN_LIB = $(LIBC_BOTTOM_HALF_LIBPREOPEN_DIR)/lib
+LIBC_BOTTOM_HALF_LIBPREOPEN_INC = $(LIBC_BOTTOM_HALF_LIBPREOPEN_DIR)/include
+LIBC_BOTTOM_HALF_SOURCES = $(LIBC_BOTTOM_HALF_DIR)/sources
+LIBC_BOTTOM_HALF_ALL_SOURCES = \
+    $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
+    $(LIBC_BOTTOM_HALF_LIBPREOPEN_LIB)/po_libc_wrappers.c \
+    $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c)
+LIBC_TOP_HALF_DIR = libc-top-half
+MUSL_LIBC_DIR = $(LIBC_TOP_HALF_DIR)/musl
 MUSL_LIBC_SRC_DIR = $(MUSL_LIBC_DIR)/src
 MUSL_LIBC_INC = $(MUSL_LIBC_DIR)/include
 MUSL_LIBC_SOURCES = \
@@ -80,6 +81,7 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/stdio/__stdout_write.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__fmodeflags.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/ofl.c \
+    $(MUSL_LIBC_SRC_DIR)/internal/floatscan.c \
     $(MUSL_LIBC_SRC_DIR)/string/bcmp.c \
     $(MUSL_LIBC_SRC_DIR)/string/bcopy.c \
     $(MUSL_LIBC_SRC_DIR)/string/bzero.c \
@@ -154,12 +156,18 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/fenv/fenv.c \
     $(MUSL_LIBC_SRC_DIR)/exit/exit.c \
     $(MUSL_LIBC_SRC_DIR)/exit/atexit.c
+MUSL_PRINTSCAN_SOURCES = \
+    $(MUSL_LIBC_SRC_DIR)/internal/floatscan.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/vfprintf.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/vfscanf.c \
+    $(MUSL_LIBC_SRC_DIR)/stdlib/strtod.c
+LIBC_TOP_HALF_HEADERS_PRIVATE = $(LIBC_TOP_HALF_DIR)/headers/private
 
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
 SYSROOT_LIB = $(SYSROOT)/lib32
 SYSROOT_INC = $(SYSROOT)/include
-SYSROOT_SHARE = $(SYSROOT)/share
+SYSROOT_SHARE = $(SYSROOT)/share/wasm32-wasi-musl
 
 # Set the target.
 # TODO: Add -unknown-wasi-musl when the compiler supports it.
@@ -211,12 +219,12 @@ $(SYSROOT):
 	#
 	# Compile the WASI libc source files.
 	#
-	cp -r --backup=numbered "$(WASI_LIBC_CLOUDABI_HEADERS)"/* "$(SYSROOT_INC)"
-	cp -r --backup=numbered "$(WASI_LIBC_HEADERS_PUBLIC)"/* "$(SYSROOT_INC)"
-	"$(WASM_CC)" $(WASM_CFLAGS) -c $(WASI_LIBC_ALL_SOURCES) \
-	    -I$(WASI_LIBC_HEADERS_PRIVATE) \
-	    -I$(WASI_LIBC_CLOUDLIBC_SRC_INC) -I$(WASI_LIBC_CLOUDLIBC_SRC) \
-	    -I$(WASI_LIBC_LIBPREOPEN_LIB) -I$(WASI_LIBC_LIBPREOPEN_INC)
+	cp -r --backup=numbered "$(LIBC_BOTTOM_HALF_CLOUDABI_HEADERS)"/* "$(SYSROOT_INC)"
+	cp -r --backup=numbered "$(LIBC_BOTTOM_HALF_HEADERS_PUBLIC)"/* "$(SYSROOT_INC)"
+	"$(WASM_CC)" $(WASM_CFLAGS) -c $(LIBC_BOTTOM_HALF_ALL_SOURCES) \
+	    -I$(LIBC_BOTTOM_HALF_HEADERS_PRIVATE) \
+	    -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC) -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) \
+	    -I$(LIBC_BOTTOM_HALF_LIBPREOPEN_LIB) -I$(LIBC_BOTTOM_HALF_LIBPREOPEN_INC)
 
 	#
 	# Compile the musl libc source files.
@@ -257,12 +265,15 @@ $(SYSROOT):
 	      "$(SYSROOT_INC)/link.h" \
 	      "$(SYSROOT_INC)/elf.h" \
 	      "$(SYSROOT_INC)/sys/auxv.h"
-	# Compile the musl libc sources.
+	# Compile the musl libc sources (long double print/scan disabled).
 	"$(WASM_CC)" $(WASM_CFLAGS) -c $(MUSL_LIBC_SOURCES) \
 	    -I $(MUSL_LIBC_SRC_DIR)/include \
 	    -I $(MUSL_LIBC_SRC_DIR)/internal \
 	    -I $(MUSL_LIBC_DIR)/arch/wasm32 \
 	    -I $(MUSL_LIBC_DIR)/arch/generic \
+	    -I $(LIBC_TOP_HALF_HEADERS_PRIVATE) \
+	    -D__wasilibc_printscan_no_long_double \
+	    -D__wasilibc_printscan_full_support_option="\"add -lc-printscan-long-double to the link command\"" \
 	    -Wno-shift-op-parentheses \
 	    -Wno-string-plus-int \
 	    -Wno-dangling-else \
@@ -271,6 +282,63 @@ $(SYSROOT):
 	# Create the musl libc library.
 	mkdir -p "$(SYSROOT_LIB)"
 	$(WASM_AR) crs "$(SYSROOT_LIB)/libc.a" *.o
+	$(RM) *.o
+
+        #fixme
+	# Compile the musl libc sources (long double print/scan disabled).
+	"$(WASM_CC)" $(WASM_CFLAGS) -c $(MUSL_PRINTSCAN_SOURCES) \
+	    -I $(MUSL_LIBC_SRC_DIR)/include \
+	    -I $(MUSL_LIBC_SRC_DIR)/internal \
+	    -I $(MUSL_LIBC_DIR)/arch/wasm32 \
+	    -I $(MUSL_LIBC_DIR)/arch/generic \
+	    -I $(LIBC_TOP_HALF_HEADERS_PRIVATE) \
+	    -D__wasilibc_printscan_no_long_double \
+	    -D__wasilibc_printscan_full_support_option="\"add -lc-printscan-long-fixmes to the link command\"" \
+	    -Wno-shift-op-parentheses \
+	    -Wno-string-plus-int \
+	    -Wno-dangling-else \
+	    -Wno-unknown-pragmas
+
+	# Create the musl libc library.
+	mkdir -p "$(SYSROOT_LIB)"
+	$(WASM_AR) crs "$(SYSROOT_LIB)/libc-nold-fixme.a" *.o
+	$(RM) *.o
+        #fixme
+
+	# Compile the musl print/scan libc sources with long double support.
+	"$(WASM_CC)" $(WASM_CFLAGS) -c $(MUSL_PRINTSCAN_SOURCES) \
+	    -I $(MUSL_LIBC_SRC_DIR)/include \
+	    -I $(MUSL_LIBC_SRC_DIR)/internal \
+	    -I $(MUSL_LIBC_DIR)/arch/wasm32 \
+	    -I $(MUSL_LIBC_DIR)/arch/generic \
+	    -I $(LIBC_TOP_HALF_HEADERS_PRIVATE) \
+	    -Wno-shift-op-parentheses \
+	    -Wno-string-plus-int \
+	    -Wno-dangling-else \
+	    -Wno-unknown-pragmas
+
+	# Create the musl libc-printscan-long-double library.
+	mkdir -p "$(SYSROOT_LIB)"
+	$(WASM_AR) crs "$(SYSROOT_LIB)/libc-printscan-long-double.a" *.o
+	$(RM) *.o
+
+	# Compile the musl libc sources with floating-point print/scan disabled.
+	"$(WASM_CC)" $(WASM_CFLAGS) -c $(MUSL_PRINTSCAN_SOURCES) \
+	    -I $(MUSL_LIBC_SRC_DIR)/include \
+	    -I $(MUSL_LIBC_SRC_DIR)/internal \
+	    -I $(MUSL_LIBC_DIR)/arch/wasm32 \
+	    -I $(MUSL_LIBC_DIR)/arch/generic \
+	    -I $(LIBC_TOP_HALF_HEADERS_PRIVATE) \
+	    -D__wasilibc_printscan_no_floating_point \
+	    -D__wasilibc_printscan_floating_point_support_option="\"remove -lc-printscan-no-floating-point from the link command\"" \
+	    -Wno-shift-op-parentheses \
+	    -Wno-string-plus-int \
+	    -Wno-dangling-else \
+	    -Wno-unknown-pragmas
+
+	# Create the musl libc-printscan-no-floating-point library.
+	mkdir -p "$(SYSROOT_LIB)"
+	$(WASM_AR) crs "$(SYSROOT_LIB)/libc-printscan-no-floating-point.a" *.o
 	$(RM) *.o
 
 	#
@@ -287,13 +355,13 @@ $(SYSROOT):
 
 	# Collect symbol information.
 	# FIXME: --extern-only doesn't seem to report all the defined symbols.
-	$(WASM_NM) --defined-only "$(SYSROOT_LIB)"/*.a "$(SYSROOT_LIB)"/*.o \
-	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |sort > "$(SYSROOT_SHARE)/wasm32-defined-symbols.txt"
+	$(WASM_NM) --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/*.o \
+	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |sort > "$(SYSROOT_SHARE)/defined-symbols.txt"
 	for undef_sym in $$($(WASM_NM) --undefined-only "$(SYSROOT_LIB)"/*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' U ' |sed 's/.* U //' |sort |uniq); do \
-	    grep -q $$undef_sym "$(SYSROOT_SHARE)/wasm32-defined-symbols.txt" || echo $$undef_sym; \
-	done   > "$(SYSROOT_SHARE)/wasm32-undefined-symbols.txt"
-	grep ^cloudabi_sys_ "$(SYSROOT_SHARE)/wasm32-undefined-symbols.txt" \
+	    grep -q $$undef_sym "$(SYSROOT_SHARE)/defined-symbols.txt" || echo $$undef_sym; \
+	done   > "$(SYSROOT_SHARE)/undefined-symbols.txt"
+	grep ^cloudabi_sys_ "$(SYSROOT_SHARE)/undefined-symbols.txt" \
 	    > "$(SYSROOT_LIB)/libc.imports"
 
 	# Generate a test file that includes all public header files.
@@ -304,7 +372,7 @@ $(SYSROOT):
 	cd - >/dev/null
 
 	# Test that it compiles.
-	"$(WASM_CC)" $(WASM_CFLAGS) -fsyntax-only "$(SYSROOT_SHARE)/wasm32-include-all.c" \
+	"$(WASM_CC)" $(WASM_CFLAGS) -fsyntax-only "$(SYSROOT_SHARE)/include-all.c" \
 	    -Weverything \
 	    -Wno-\#warnings
 
@@ -312,7 +380,7 @@ $(SYSROOT):
 	# which we don't need to track here. For the __*_ATOMIC_*_LOCK_FREE
 	# macros, squash individual compiler names to attempt, toward keeping
 	# these files compiler-independent.
-	"$(WASM_CC)" $(WASM_CFLAGS) "$(SYSROOT_SHARE)/wasm32-include-all.c" \
+	"$(WASM_CC)" $(WASM_CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -E -dM -Wno-\#warnings \
 	    -U__llvm__ \
 	    -U__clang__ \
@@ -325,11 +393,11 @@ $(SYSROOT):
 	    -U__GNUC_PATCHLEVEL__ \
 	    -U__VERSION__ \
 	    | sed -e 's/__[[:upper:][:digit:]]*_ATOMIC_\([[:upper:][:digit:]_]*\)_LOCK_FREE/__compiler_ATOMIC_\1_LOCK_FREE/' \
-	    > "$(SYSROOT_SHARE)/wasm32-predefined-macros.txt"
+	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
 
 	# FIXME: Switch to the multiarch path once everything supports it.
 	ln -s lib32 $(SYSROOT)/lib
-	ln -s lib32 $(SYSROOT)/lib/wasm32-unknown-wasi-musl
+	ln -s ../lib32 $(SYSROOT)/lib/wasm32-wasi-musl
 
 	# Check that the computed metadata matches the expected metadata.
 	diff -ur expected "$(SYSROOT_SHARE)"

@@ -2104,58 +2104,12 @@
 #define L_ctermid 20
 #define L_cuserid 20
 #define L_tmpnam 20
-#define MADV_DODUMP 17
-#define MADV_DOFORK 11
-#define MADV_DONTDUMP 16
-#define MADV_DONTFORK 10
-#define MADV_DONTNEED 4
-#define MADV_FREE 8
-#define MADV_HUGEPAGE 14
-#define MADV_HWPOISON 100
-#define MADV_KEEPONFORK 19
-#define MADV_MERGEABLE 12
-#define MADV_NOHUGEPAGE 15
-#define MADV_NORMAL 0
-#define MADV_RANDOM 1
-#define MADV_REMOVE 9
-#define MADV_SEQUENTIAL 2
-#define MADV_SOFT_OFFLINE 101
-#define MADV_UNMERGEABLE 13
-#define MADV_WILLNEED 3
-#define MADV_WIPEONFORK 18
 #define MAGIC "070707"
-#define MAP_ANON 0x20
-#define MAP_ANONYMOUS MAP_ANON
-#define MAP_DENYWRITE 0x0800
-#define MAP_EXECUTABLE 0x1000
-#define MAP_FAILED ((void *) -1)
-#define MAP_FILE 0
-#define MAP_FIXED 0x10
-#define MAP_FIXED_NOREPLACE 0x100000
-#define MAP_GROWSDOWN 0x0100
-#define MAP_HUGETLB 0x40000
-#define MAP_HUGE_16GB (34U << 26)
-#define MAP_HUGE_16MB (24 << 26)
-#define MAP_HUGE_1GB (30 << 26)
-#define MAP_HUGE_1MB (20 << 26)
-#define MAP_HUGE_256MB (28 << 26)
-#define MAP_HUGE_2GB (31 << 26)
-#define MAP_HUGE_2MB (21 << 26)
-#define MAP_HUGE_512KB (19 << 26)
-#define MAP_HUGE_64KB (16 << 26)
-#define MAP_HUGE_8MB (23 << 26)
-#define MAP_HUGE_MASK 0x3f
-#define MAP_HUGE_SHIFT 26
-#define MAP_LOCKED 0x2000
-#define MAP_NONBLOCK 0x10000
-#define MAP_NORESERVE 0x4000
-#define MAP_POPULATE 0x8000
-#define MAP_PRIVATE 0x02
-#define MAP_SHARED 0x01
-#define MAP_SHARED_VALIDATE 0x03
-#define MAP_STACK 0x20000
-#define MAP_SYNC 0x80000
-#define MAP_TYPE 0x0f
+#define MAP_ANON CLOUDABI_MAP_ANON
+#define MAP_FAILED ((void *)-1)
+#define MAP_FIXED CLOUDABI_MAP_FIXED
+#define MAP_PRIVATE CLOUDABI_MAP_PRIVATE
+#define MAP_SHARED CLOUDABI_MAP_SHARED
 #define MATH_ERREXCEPT 2
 #define MATH_ERRNO 1
 #define MAX(a,b) (((a)>(b))?(a):(b))
@@ -2193,9 +2147,6 @@
 #define MCAST_LEAVE_SOURCE_GROUP 47
 #define MCAST_MSFILTER 48
 #define MCAST_UNBLOCK_SOURCE 44
-#define MCL_CURRENT 1
-#define MCL_FUTURE 2
-#define MCL_ONFAULT 4
 #define MEDIUM_ERROR 0x03
 #define MEDIUM_SCAN 0x38
 #define MESSAGE_REJECT 0x07
@@ -2319,11 +2270,11 @@
 #define MSG_WAITFORONE 0x10000
 #define MSG_ZEROCOPY 0x4000000
 #define MS_ACTIVE (1<<30)
-#define MS_ASYNC 1
+#define MS_ASYNC CLOUDABI_MS_ASYNC
 #define MS_BIND 4096
 #define MS_BORN (1<<29)
 #define MS_DIRSYNC 128
-#define MS_INVALIDATE 2
+#define MS_INVALIDATE CLOUDABI_MS_INVALIDATE
 #define MS_I_VERSION (1<<23)
 #define MS_KERNMOUNT (1<<22)
 #define MS_LAZYTIME (1<<25)
@@ -2350,7 +2301,7 @@
 #define MS_SILENT 32768
 #define MS_SLAVE (1<<19)
 #define MS_STRICTATIME (1<<24)
-#define MS_SYNC 4
+#define MS_SYNC CLOUDABI_MS_SYNC
 #define MS_SYNCHRONOUS 16
 #define MS_UNBINDABLE (1<<17)
 #define MTBSF 2
@@ -2806,11 +2757,11 @@
 #define POSIX_FADV_RANDOM CLOUDABI_ADVICE_RANDOM
 #define POSIX_FADV_SEQUENTIAL CLOUDABI_ADVICE_SEQUENTIAL
 #define POSIX_FADV_WILLNEED CLOUDABI_ADVICE_WILLNEED
-#define POSIX_MADV_DONTNEED 4
-#define POSIX_MADV_NORMAL 0
-#define POSIX_MADV_RANDOM 1
-#define POSIX_MADV_SEQUENTIAL 2
-#define POSIX_MADV_WILLNEED 3
+#define POSIX_MADV_DONTNEED CLOUDABI_ADVICE_DONTNEED
+#define POSIX_MADV_NORMAL CLOUDABI_ADVICE_NORMAL
+#define POSIX_MADV_RANDOM CLOUDABI_ADVICE_RANDOM
+#define POSIX_MADV_SEQUENTIAL CLOUDABI_ADVICE_SEQUENTIAL
+#define POSIX_MADV_WILLNEED CLOUDABI_ADVICE_WILLNEED
 #define POSIX_SPAWN_RESETIDS 1
 #define POSIX_SPAWN_SETPGROUP 2
 #define POSIX_SPAWN_SETSCHEDPARAM 16
@@ -2910,12 +2861,9 @@
 #define PRIxLEAST8 "x"
 #define PRIxMAX __PRI64 "x"
 #define PRIxPTR __PRIPTR "x"
-#define PROT_EXEC 4
-#define PROT_GROWSDOWN 0x01000000
-#define PROT_GROWSUP 0x02000000
-#define PROT_NONE 0
-#define PROT_READ 1
-#define PROT_WRITE 2
+#define PROT_EXEC CLOUDABI_PROT_EXEC
+#define PROT_READ CLOUDABI_PROT_READ
+#define PROT_WRITE CLOUDABI_PROT_WRITE
 #define PR_CAPBSET_DROP 24
 #define PR_CAPBSET_READ 23
 #define PR_CAP_AMBIENT 47
@@ -4620,6 +4568,7 @@
 #define _POSIX_VDISABLE 0
 #define _POSIX_VERSION 200809L
 #define _PTHREAD_H 
+#define _PTRDIFF_T 
 #define _PTY_H 
 #define _PWD_H 
 #define _REGEX_H 
@@ -4774,6 +4723,7 @@
 #define _SETJMP_H 
 #define _SHADOW_H 
 #define _SIGNAL_H 
+#define _SIZE_T 
 #define _SPAWN_H 
 #define _STDALIGN_H 
 #define _STDARG_H 
@@ -4847,8 +4797,11 @@
 #define _UTMPX_H 
 #define _UTMP_H 
 #define _VALUES_H 
+#define _VA_LIST 
 #define _WCHAR_H 
+#define _WCHAR_T 
 #define _WCTYPE_H 
+#define _WINT_T 
 #define _WORDEXP_H 
 #define _XOPEN_ENH_I18N 1
 #define _XOPEN_IOV_MAX 16
@@ -4883,6 +4836,7 @@
 #define __compiler_ATOMIC_POINTER_LOCK_FREE 2
 #define __compiler_ATOMIC_SHORT_LOCK_FREE 2
 #define __compiler_ATOMIC_WCHAR_T_LOCK_FREE 2
+#define __CLANG_MAX_ALIGN_T_DEFINED 
 #define __CMPLX(x,y,t) (__builtin_complex((t)(x), (t)(y)))
 #define __CMSG_LEN(cmsg) (((cmsg)->cmsg_len + sizeof(long) - 1) & ~(long)(sizeof(long) - 1))
 #define __CMSG_NEXT(cmsg) ((unsigned char *)(cmsg) + __CMSG_LEN(cmsg))
@@ -4926,7 +4880,6 @@
 #define __DEFINED_intptr_t 
 #define __DEFINED_key_t 
 #define __DEFINED_locale_t 
-#define __DEFINED_max_align_t 
 #define __DEFINED_mbstate_t 
 #define __DEFINED_mode_t 
 #define __DEFINED_mtx_t 
@@ -4946,7 +4899,6 @@
 #define __DEFINED_pthread_rwlockattr_t 
 #define __DEFINED_pthread_spinlock_t 
 #define __DEFINED_pthread_t 
-#define __DEFINED_ptrdiff_t 
 #define __DEFINED_register_t 
 #define __DEFINED_regoff_t 
 #define __DEFINED_sa_family_t 
@@ -5015,6 +4967,7 @@
 #define __GCC_ATOMIC_TEST_AND_SET_TRUEVAL 1
 #define __compiler_ATOMIC_WCHAR_T_LOCK_FREE 2
 #define __GNUC_STDC_INLINE__ 1
+#define __GNUC_VA_LIST 1
 #define __GNU_GETTEXT_SUPPORTED_REVISION(major) ((major) == 0 ? 1 : -1)
 #define __GXX_ABI_VERSION 1002
 #define __ILP32__ 1
@@ -5131,7 +5084,6 @@
 #define __NEED_intptr_t 
 #define __NEED_key_t 
 #define __NEED_locale_t 
-#define __NEED_max_align_t 
 #define __NEED_mbstate_t 
 #define __NEED_mode_t 
 #define __NEED_mtx_t 
@@ -5151,7 +5103,6 @@
 #define __NEED_pthread_rwlockattr_t 
 #define __NEED_pthread_spinlock_t 
 #define __NEED_pthread_t 
-#define __NEED_ptrdiff_t 
 #define __NEED_register_t 
 #define __NEED_regoff_t 
 #define __NEED_sa_family_t 
@@ -5229,6 +5180,7 @@
 #define __SIZE_MAX__ 4294967295UL
 #define __SIZE_TYPE__ long unsigned int
 #define __SIZE_WIDTH__ 32
+#define __STDARG_H 
 #define __STDC_HOSTED__ 1
 #define __STDC_IEC_559__ 1
 #define __STDC_ISO_10646__ 201206L
@@ -5236,6 +5188,7 @@
 #define __STDC_UTF_32__ 1
 #define __STDC_VERSION__ 201112L
 #define __STDC__ 1
+#define __STDDEF_H 
 #define __UAPI_DEF_ETHHDR 0
 #define __UAPI_DEF_IF_IFCONF 0
 #define __UAPI_DEF_IF_IFMAP 0
@@ -5365,8 +5318,24 @@
 #define __alignof_is_defined 1
 #define __bitop(x,i,o) ((x)[(i)/8] o (1<<(i)%8))
 #define __bool_true_false_are_defined 1
+#define __inline inline
+#define __restrict restrict
+#define __tg_complex(fun,x) (__RETCAST_CX(x)( __FLTCX((x)+I) && __IS_FP(x) ? fun ## f (x) : __LDBLCX((x)+I) ? fun ## l (x) : fun(x) ))
+#define __tg_complex_retreal(fun,x) (__RETCAST_REAL(x)( __FLTCX((x)+I) && __IS_FP(x) ? fun ## f (x) : __LDBLCX((x)+I) ? fun ## l (x) : fun(x) ))
+#define __tg_pred_2(x,y,p) ( sizeof((x)+(y)) == sizeof(float) ? p##f(x, y) : sizeof((x)+(y)) == sizeof(double) ? p(x, y) : p##l(x, y) )
+#define __tg_real(fun,x) (__RETCAST(x)__tg_real_nocast(fun, x))
+#define __tg_real_2(fun,x,y) (__RETCAST_2(x, y)( __FLT(x) && __FLT(y) ? fun ## f (x, y) : __LDBL((x)+(y)) ? fun ## l (x, y) : fun(x, y) ))
+#define __tg_real_2_1(fun,x,y) (__RETCAST(x)( __FLT(x) ? fun ## f (x, y) : __LDBL(x) ? fun ## l (x, y) : fun(x, y) ))
+#define __tg_real_complex(fun,x) (__RETCAST(x)( __FLTCX(x) ? c ## fun ## f (x) : __DBLCX(x) ? c ## fun (x) : __LDBLCX(x) ? c ## fun ## l (x) : __FLT(x) ? fun ## f (x) : __LDBL(x) ? fun ## l (x) : fun(x) ))
+#define __tg_real_complex_fabs(x) (__RETCAST_REAL(x)( __FLTCX(x) ? cabsf(x) : __DBLCX(x) ? cabs(x) : __LDBLCX(x) ? cabsl(x) : __FLT(x) ? fabsf(x) : __LDBL(x) ? fabsl(x) : fabs(x) ))
+#define __tg_real_complex_pow(x,y) (__RETCAST_2(x, y)( __FLTCX((x)+(y)) && __IS_FP(x) && __IS_FP(y) ? cpowf(x, y) : __FLTCX((x)+(y)) ? cpow(x, y) : __DBLCX((x)+(y)) ? cpow(x, y) : __LDBLCX((x)+(y)) ? cpowl(x, y) : __FLT(x) && __FLT(y) ? powf(x, y) : __LDBL((x)+(y)) ? powl(x, y) : pow(x, y) ))
+#define __tg_real_fma(x,y,z) (__RETCAST_3(x, y, z)( __FLT(x) && __FLT(y) && __FLT(z) ? fmaf(x, y, z) : __LDBL((x)+(y)+(z)) ? fmal(x, y, z) : fma(x, y, z) ))
+#define __tg_real_nocast(fun,x) ( __FLT(x) ? fun ## f (x) : __LDBL(x) ? fun ## l (x) : fun(x) )
+#define __tg_real_remquo(x,y,z) (__RETCAST_2(x, y)( __FLT(x) && __FLT(y) ? remquof(x, y, z) : __LDBL((x)+(y)) ? remquol(x, y, z) : remquo(x, y, z) ))
+#define __tm_gmtoff tm_gmtoff
+#define __tm_zone tm_zone
+#define __va_copy(d,s) __builtin_va_copy(d,s)
 #define __wasilibc___errno_values_h 
-#define __wasilibc___fcntl_h 
 #define __wasilibc___fd_set_h 
 #define __wasilibc___macro_FD_SETSIZE_h 
 #define __wasilibc___struct_cmsghdr_h 
@@ -5385,7 +5354,6 @@
 #define __wasilibc___struct_timeval_h 
 #define __wasilibc___struct_tm_h 
 #define __wasilibc___struct_tms_h 
-#define __wasilibc___time_h 
 #define __wasilibc___typedef_DIR_h 
 #define __wasilibc___typedef_clockid_t_h 
 #define __wasilibc___typedef_fd_set_h 
@@ -5395,6 +5363,10 @@
 #define __wasilibc___typedef_sa_family_t_h 
 #define __wasilibc___typedef_sigset_t_h 
 #define __wasilibc___typedef_socklen_t_h 
+#define __wasilibc___wasilibc_fcntl_h 
+#define __wasilibc___wasilibc_mman_h 
+#define __wasilibc___wasilibc_time_h 
+#define __wasilibc___wasilibc_unistd_h 
 #define __wasilibc_dirent_h 
 #define __wasilibc_errno_h 
 #define __wasilibc_fcntl_h 
@@ -5415,26 +5387,6 @@
 #define __wasilibc_sys_un_h 
 #define __wasilibc_time_h 
 #define __wasilibc_unistd_h 
-#define __inline inline
-#define __need_NULL 
-#define __need_STDDEF_H_misc 
-#define __need_size_t 
-#define __need_wchar_t 
-#define __restrict restrict
-#define __tg_complex(fun,x) (__RETCAST_CX(x)( __FLTCX((x)+I) && __IS_FP(x) ? fun ## f (x) : __LDBLCX((x)+I) ? fun ## l (x) : fun(x) ))
-#define __tg_complex_retreal(fun,x) (__RETCAST_REAL(x)( __FLTCX((x)+I) && __IS_FP(x) ? fun ## f (x) : __LDBLCX((x)+I) ? fun ## l (x) : fun(x) ))
-#define __tg_pred_2(x,y,p) ( sizeof((x)+(y)) == sizeof(float) ? p##f(x, y) : sizeof((x)+(y)) == sizeof(double) ? p(x, y) : p##l(x, y) )
-#define __tg_real(fun,x) (__RETCAST(x)__tg_real_nocast(fun, x))
-#define __tg_real_2(fun,x,y) (__RETCAST_2(x, y)( __FLT(x) && __FLT(y) ? fun ## f (x, y) : __LDBL((x)+(y)) ? fun ## l (x, y) : fun(x, y) ))
-#define __tg_real_2_1(fun,x,y) (__RETCAST(x)( __FLT(x) ? fun ## f (x, y) : __LDBL(x) ? fun ## l (x, y) : fun(x, y) ))
-#define __tg_real_complex(fun,x) (__RETCAST(x)( __FLTCX(x) ? c ## fun ## f (x) : __DBLCX(x) ? c ## fun (x) : __LDBLCX(x) ? c ## fun ## l (x) : __FLT(x) ? fun ## f (x) : __LDBL(x) ? fun ## l (x) : fun(x) ))
-#define __tg_real_complex_fabs(x) (__RETCAST_REAL(x)( __FLTCX(x) ? cabsf(x) : __DBLCX(x) ? cabs(x) : __LDBLCX(x) ? cabsl(x) : __FLT(x) ? fabsf(x) : __LDBL(x) ? fabsl(x) : fabs(x) ))
-#define __tg_real_complex_pow(x,y) (__RETCAST_2(x, y)( __FLTCX((x)+(y)) && __IS_FP(x) && __IS_FP(y) ? cpowf(x, y) : __FLTCX((x)+(y)) ? cpow(x, y) : __DBLCX((x)+(y)) ? cpow(x, y) : __LDBLCX((x)+(y)) ? cpowl(x, y) : __FLT(x) && __FLT(y) ? powf(x, y) : __LDBL((x)+(y)) ? powl(x, y) : pow(x, y) ))
-#define __tg_real_fma(x,y,z) (__RETCAST_3(x, y, z)( __FLT(x) && __FLT(y) && __FLT(z) ? fmaf(x, y, z) : __LDBL((x)+(y)+(z)) ? fmal(x, y, z) : fma(x, y, z) ))
-#define __tg_real_nocast(fun,x) ( __FLT(x) ? fun ## f (x) : __LDBL(x) ? fun ## l (x) : fun(x) )
-#define __tg_real_remquo(x,y,z) (__RETCAST_2(x, y)( __FLT(x) && __FLT(y) ? remquof(x, y, z) : __LDBL((x)+(y)) ? remquol(x, y, z) : remquo(x, y, z) ))
-#define __tm_gmtoff tm_gmtoff
-#define __tm_zone tm_zone
 #define __wasm 1
 #define __wasm32 1
 #define __wasm32__ 1
@@ -5701,7 +5653,7 @@
 #define ns_t_udp_p(t) ((t) != ns_t_axfr && (t) != ns_t_zxfr)
 #define ns_t_xfr_p(t) ((t) == ns_t_axfr || (t) == ns_t_ixfr || (t) == ns_t_zxfr)
 #define nsaddr nsaddr_list[0]
-#define offsetof(type,member) ((size_t)( (char *)&(((type *)0)->member) - (char *)0 ))
+#define offsetof(t,d) __builtin_offsetof(t, d)
 #define optional_argument 2
 #define or ||
 #define or_eq |=
@@ -5778,10 +5730,10 @@
 #define ut_name ut_user
 #define ut_time ut_tv.tv_sec
 #define utmp utmpx
-#define va_arg(v,l) __builtin_va_arg(v,l)
-#define va_copy(d,s) __builtin_va_copy(d,s)
-#define va_end(v) __builtin_va_end(v)
-#define va_start(v,l) __builtin_va_start(v,l)
+#define va_arg(ap,type) __builtin_va_arg(ap, type)
+#define va_copy(dest,src) __builtin_va_copy(dest, src)
+#define va_end(ap) __builtin_va_end(ap)
+#define va_start(ap,param) __builtin_va_start(ap, param)
 #define xEOF 236
 #define xor ^
 #define xor_eq ^=

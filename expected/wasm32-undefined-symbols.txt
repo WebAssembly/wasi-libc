@@ -48,7 +48,6 @@ __extendsftf2
 __fixtfdi
 __fixtfsi
 __fixunstfsi
-__floatscan
 __floatsitf
 __floatunsitf
 getcwd

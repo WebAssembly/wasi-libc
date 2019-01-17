@@ -4,16 +4,26 @@ Caution: This is currently quite experimental and not generally usable yet!
 
 ## What is this?
 
-This is a "reference sysroot", which is meant to be part of a common C ABI
-that can be shared across C libraries and compilers. While it's intended to
-(eventually) be usable in its own right, we fully expect other
-implementations to be used in practice by many different systems, though
-we do hope that in those cases, this library defines a useful ABI that can
-be followed.
+It's several things.
+
+First, it's a usable libc. It builds a "sysroot" which can be pointed to by
+compilers, such as Clang 8.0, using the wasm32-unknown-wasi-musl target triple.
+It's experimental, but it is already sufficient to run basic programs.
+
+Second, it's a "reference" implementation, which means the interfaces defined
+here can be used by other tools and libraries, even if they don't use the
+actual implementations here. For example, we don't expect everyone will want
+to use the exact `malloc` implementation provided here, but tools and
+libraries using an ABI-compatible `malloc` interface will be able to
+interoperate regardless of which actual implementation is used.
+
+Third, it's an example showing the use of the WASI API. The libc functionality
+is implemented using calls to WASI functions.
 
 ## Usage
 
-Obtain a WebAssembly-supporting C compiler, and then run:
+Obtain a WebAssembly-supporting C compiler (currently this is only clang,
+though we'd like to support other compilers as well), and then run:
 
 ```
 make WASM_CC=/path/to/wasm/supporting/c/compiler
@@ -29,8 +39,3 @@ To use the sysroot, use the `--sysroot=` option:
 ```
 
 to run the compiler using the newly built sysroot.
-
-## What is the status of the full libc implementation?
-
-There is a libc implmentation based on musl included in this repository;
-it is currently experimental.

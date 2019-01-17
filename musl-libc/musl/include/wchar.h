@@ -34,10 +34,15 @@ extern "C" {
 #define WCHAR_MIN (-1-0x7fffffff+L'\0')
 #endif
 
+#ifdef __wasm_musl_unmodified_upstream__
 #ifdef __cplusplus
 #define NULL 0L
 #else
 #define NULL ((void*)0)
+#endif
+#else
+#define __need_NULL
+#include <stddef.h>
 #endif
 
 #undef WEOF

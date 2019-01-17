@@ -7,10 +7,15 @@ extern "C" {
 
 #include <features.h>
 
+#ifdef __wasm_musl_unmodified_upstream__
 #ifdef __cplusplus
 #define NULL 0L
 #else
 #define NULL ((void*)0)
+#endif
+#else
+#define __need_NULL
+#include <stddef.h>
 #endif
 
 #define LC_CTYPE    0

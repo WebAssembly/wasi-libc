@@ -1,6 +1,7 @@
 #ifndef _STDARG_H
 #define _STDARG_H
 
+#ifdef __wasm_musl_unmodified_upstream__
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -16,6 +17,10 @@ extern "C" {
 
 #ifdef __cplusplus
 }
+#endif
+#else
+// Just use the compiler's stdarg.h.
+#include_next <stdarg.h>
 #endif
 
 #endif

@@ -1,3 +1,4 @@
+#ifdef __wasm_musl_unmodified_upstream__
 #ifndef _STDDEF_H
 #define _STDDEF_H
 
@@ -20,6 +21,17 @@
 #define offsetof(type, member) __builtin_offsetof(type, member)
 #else
 #define offsetof(type, member) ((size_t)( (char *)&(((type *)0)->member) - (char *)0 ))
+#endif
+
+#endif
+#else
+
+// Just use the compiler's stddef.h.
+#include_next <stddef.h>
+
+// Define musl's include guard, in case any code depends on that.
+#if defined(__STDDEF_H) && !defined(_STDDEF_H)
+#define _STDDEF_H
 #endif
 
 #endif

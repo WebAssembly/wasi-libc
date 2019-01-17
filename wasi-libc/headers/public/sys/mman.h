@@ -1,27 +1,10 @@
 #ifndef __wasilibc_sys_mman_h
 #define __wasilibc_sys_mman_h
 
-#include <cloudabi_types_common.h>
-
-#define MAP_FAILED ((void *)-1)
-
-#define MAP_ANON CLOUDABI_MAP_ANON
-#define MAP_FIXED CLOUDABI_MAP_FIXED
-#define MAP_PRIVATE CLOUDABI_MAP_PRIVATE
-#define MAP_SHARED CLOUDABI_MAP_SHARED
-
-#define PROT_EXEC CLOUDABI_PROT_EXEC
-#define PROT_WRITE CLOUDABI_PROT_WRITE
-#define PROT_READ CLOUDABI_PROT_READ
-
-#define POSIX_MADV_DONTNEED CLOUDABI_ADVICE_DONTNEED
-#define POSIX_MADV_NORMAL CLOUDABI_ADVICE_NORMAL
-#define POSIX_MADV_RANDOM CLOUDABI_ADVICE_RANDOM
-#define POSIX_MADV_SEQUENTIAL CLOUDABI_ADVICE_SEQUENTIAL
-#define POSIX_MADV_WILLNEED CLOUDABI_ADVICE_WILLNEED
-
-#define MS_ASYNC CLOUDABI_MS_ASYNC
-#define MS_INVALIDATE CLOUDABI_MS_INVALIDATE
-#define MS_SYNC CLOUDABI_MS_SYNC
+/*
+ * Include the real implementation, which is factored into a separate file so
+ * that it can be reused by other libc mman implementations.
+ */
+#include <__mman.h>
 
 #endif

@@ -16,6 +16,7 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
+#ifdef __wasm_musl_unmodified_upstream__
 #define MAP_FAILED ((void *) -1)
 
 #define MAP_SHARED     0x01
@@ -106,6 +107,9 @@ extern "C" {
 #endif
 
 #include <bits/mman.h>
+#else
+#include <__mman.h>
+#endif
 
 void *mmap (void *, size_t, int, int, int, off_t);
 int munmap (void *, size_t);

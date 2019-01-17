@@ -11,9 +11,13 @@ extern "C" {
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
+#ifdef __wasm_musl_unmodified_upstream__
 #define SEEK_SET 0
 #define SEEK_CUR 1
 #define SEEK_END 2
+#else
+#include <__wasilibc_unistd.h>
+#endif
 
 #ifdef __wasm_musl_unmodified_upstream__
 #ifdef __cplusplus

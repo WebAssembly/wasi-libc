@@ -8,3 +8,6 @@ void _start(void) {
         exit(r);
     }
 }
+
+// ABI version tag.
+void __wasi_experiment_a(void) {}

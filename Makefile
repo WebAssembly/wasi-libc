@@ -101,6 +101,7 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/string/stpncpy.c \
     $(MUSL_LIBC_SRC_DIR)/string/strcasecmp.c \
     $(MUSL_LIBC_SRC_DIR)/string/strcasestr.c \
+    $(MUSL_LIBC_SRC_DIR)/string/strcat.c \
     $(MUSL_LIBC_SRC_DIR)/string/strchr.c \
     $(MUSL_LIBC_SRC_DIR)/string/strchrnul.c \
     $(MUSL_LIBC_SRC_DIR)/string/strcmp.c \
@@ -126,6 +127,7 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/string/strtok_r.c \
     $(MUSL_LIBC_SRC_DIR)/string/strverscmp.c \
     $(MUSL_LIBC_SRC_DIR)/string/swab.c \
+    $(MUSL_LIBC_SRC_DIR)/string/w*.c \
     $(MUSL_LIBC_SRC_DIR)/stdlib/*.c \
     $(MUSL_LIBC_SRC_DIR)/search/*.c \
     $(MUSL_LIBC_SRC_DIR)/termios/*.c \

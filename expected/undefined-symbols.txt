@@ -79,6 +79,4 @@ __toread
 __trunctfdf2
 __trunctfsf2
 __uflow
-uname
 __unordtf2
-wcschr

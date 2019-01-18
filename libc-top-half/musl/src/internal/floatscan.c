@@ -5,7 +5,7 @@
 #include <limits.h>
 #include <errno.h>
 #include <ctype.h>
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream__
 #else
 #include "printscan.h"
 #endif

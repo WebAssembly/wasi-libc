@@ -9,6 +9,7 @@ extern "C" {
 
 #include <bits/poll.h>
 
+#ifdef __wasilibc_unmodified_upstream__
 #define POLLIN     0x001
 #define POLLPRI    0x002
 #define POLLOUT    0x004
@@ -25,8 +26,15 @@ extern "C" {
 #define POLLMSG    0x400
 #define POLLRDHUP  0x2000
 #endif
+#else
+#include <__wasilibc_poll.h>
+#endif
 
+#ifdef __wasilibc_unmodified_upstream__
 typedef unsigned long nfds_t;
+#else
+#include <__typedef_nfds_t.h>
+#endif
 
 #ifdef __wasilibc_unmodified_upstream__
 struct pollfd {

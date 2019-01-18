@@ -43,55 +43,10 @@
 #define ADJ_TICK 0x4000
 #define ADJ_TIMECONST 0x0020
 #define AFORK 1
-#define AF_ALG PF_ALG
-#define AF_APPLETALK PF_APPLETALK
-#define AF_ASH PF_ASH
-#define AF_ATMPVC PF_ATMPVC
-#define AF_ATMSVC PF_ATMSVC
-#define AF_AX25 PF_AX25
-#define AF_BLUETOOTH PF_BLUETOOTH
-#define AF_BRIDGE PF_BRIDGE
-#define AF_CAIF PF_CAIF
-#define AF_CAN PF_CAN
-#define AF_DECnet PF_DECnet
-#define AF_ECONET PF_ECONET
-#define AF_FILE AF_LOCAL
-#define AF_IB PF_IB
-#define AF_IEEE802154 PF_IEEE802154
 #define AF_INET 1
 #define AF_INET6 2
-#define AF_IPX PF_IPX
-#define AF_IRDA PF_IRDA
-#define AF_ISDN PF_ISDN
-#define AF_IUCV PF_IUCV
-#define AF_KCM PF_KCM
-#define AF_KEY PF_KEY
-#define AF_LLC PF_LLC
-#define AF_LOCAL PF_LOCAL
-#define AF_MAX PF_MAX
-#define AF_MPLS PF_MPLS
-#define AF_NETBEUI PF_NETBEUI
-#define AF_NETLINK PF_NETLINK
-#define AF_NETROM PF_NETROM
-#define AF_NFC PF_NFC
-#define AF_PACKET PF_PACKET
-#define AF_PHONET PF_PHONET
-#define AF_PPPOX PF_PPPOX
-#define AF_QIPCRTR PF_QIPCRTR
-#define AF_RDS PF_RDS
-#define AF_ROSE PF_ROSE
-#define AF_ROUTE PF_ROUTE
-#define AF_RXRPC PF_RXRPC
-#define AF_SECURITY PF_SECURITY
-#define AF_SMC PF_SMC
-#define AF_SNA PF_SNA
-#define AF_TIPC PF_TIPC
 #define AF_UNIX 3
 #define AF_UNSPEC 0
-#define AF_VSOCK PF_VSOCK
-#define AF_WANPIPE PF_WANPIPE
-#define AF_X25 PF_X25
-#define AF_XDP PF_XDP
 #define AHZ 100
 #define AIO_ALLDONE 2
 #define AIO_CANCELED 0
@@ -560,7 +515,6 @@
 #define CMPLX(x,y) __CMPLX(x, y, double)
 #define CMPLXF(x,y) __CMPLX(x, y, float)
 #define CMPLXL(x,y) __CMPLX(x, y, long double)
-#define CMSG_ALIGN(len) (((len) + sizeof (size_t) - 1) & (size_t) ~(sizeof (size_t) - 1))
 #define CMSG_DATA(cmsg) ((cmsg)->__cmsg_data)
 #define CMSG_FIRSTHDR CMSG_FIRSTHDR
 #define CMSG_LEN(len) (__builtin_offsetof(struct cmsghdr, __cmsg_data[(len)]))
@@ -664,16 +618,13 @@
 #define DO 253
 #define DONT 254
 #define DOUBLEBITS (sizeof(double) * 8)
-#define DTTOIF(x) ((x)<<12)
-#define DT_BLK 6
-#define DT_CHR 2
-#define DT_DIR 4
-#define DT_FIFO 1
-#define DT_LNK 10
-#define DT_REG 8
-#define DT_SOCK 12
-#define DT_UNKNOWN 0
-#define DT_WHT 14
+#define DT_BLK CLOUDABI_FILETYPE_BLOCK_DEVICE
+#define DT_CHR CLOUDABI_FILETYPE_CHARACTER_DEVICE
+#define DT_DIR CLOUDABI_FILETYPE_DIRECTORY
+#define DT_FIFO CLOUDABI_FILETYPE_SOCKET_STREAM
+#define DT_LNK CLOUDABI_FILETYPE_SYMBOLIC_LINK
+#define DT_REG CLOUDABI_FILETYPE_REGULAR_FILE
+#define DT_UNKNOWN CLOUDABI_FILETYPE_UNKNOWN
 #define D_FMT 0x20029
 #define D_T_FMT 0x20028
 #define E2BIG CLOUDABI_E2BIG
@@ -1319,7 +1270,6 @@
 #define IFF_VOLATILE (IFF_LOOPBACK|IFF_POINTOPOINT|IFF_BROADCAST| IFF_ECHO|IFF_MASTER|IFF_SLAVE|IFF_RUNNING|IFF_LOWER_UP|IFF_DORMANT)
 #define IFHWADDRLEN 6
 #define IFNAMSIZ IF_NAMESIZE
-#define IFTODT(x) ((x)>>12 & 017)
 #define IF_NAMESIZE 16
 #define IGMP_AWAKENING_MEMBER 5
 #define IGMP_DELAYING_MEMBER 1
@@ -2048,29 +1998,12 @@
 #define MQ_PRIO_MAX 32768
 #define MSG_ANY 0x02
 #define MSG_BAND 0x04
-#define MSG_BATCH 0x40000
-#define MSG_CMSG_CLOEXEC 0x40000000
-#define MSG_CONFIRM 0x0800
 #define MSG_CTRUNC CLOUDABI_SOCK_RECV_FDS_TRUNCATED
-#define MSG_DONTROUTE 0x0004
-#define MSG_DONTWAIT 0x0040
-#define MSG_EOR 0x0080
-#define MSG_ERRQUEUE 0x2000
-#define MSG_FASTOPEN 0x20000000
-#define MSG_FIN 0x0200
 #define MSG_HIPRI 0x01
-#define MSG_MORE 0x8000
-#define MSG_NOSIGNAL 0x4000
-#define MSG_OOB 0x0001
 #define MSG_PARITY_ERROR 0x09
 #define MSG_PEEK CLOUDABI_SOCK_RECV_PEEK
-#define MSG_PROXY 0x0010
-#define MSG_RST 0x1000
-#define MSG_SYN 0x0400
 #define MSG_TRUNC CLOUDABI_SOCK_RECV_DATA_TRUNCATED
 #define MSG_WAITALL CLOUDABI_SOCK_RECV_WAITALL
-#define MSG_WAITFORONE 0x10000
-#define MSG_ZEROCOPY 0x4000000
 #define MS_ACTIVE (1<<30)
 #define MS_ASYNC CLOUDABI_MS_ASYNC
 #define MS_BIND 4096
@@ -2483,68 +2416,14 @@
 #define PER_UW7 (0xe | STICKY_TIMEOUTS | MMAP_PAGE_ZERO)
 #define PER_WYSEV386 (4 | STICKY_TIMEOUTS | SHORT_INODE)
 #define PER_XENIX (7 | STICKY_TIMEOUTS | SHORT_INODE)
-#define PF_ALG 38
-#define PF_APPLETALK 5
-#define PF_ASH 18
-#define PF_ATMPVC 8
-#define PF_ATMSVC 20
-#define PF_AX25 3
-#define PF_BLUETOOTH 31
-#define PF_BRIDGE 7
-#define PF_CAIF 37
-#define PF_CAN 29
-#define PF_DECnet 12
-#define PF_ECONET 19
-#define PF_FILE PF_LOCAL
-#define PF_IB 27
-#define PF_IEEE802154 36
-#define PF_INET 2
-#define PF_INET6 10
-#define PF_IPX 4
-#define PF_IRDA 23
-#define PF_ISDN 34
-#define PF_IUCV 32
-#define PF_KCM 41
-#define PF_KEY 15
-#define PF_LLC 26
-#define PF_LOCAL 1
-#define PF_MAX 45
-#define PF_MPLS 28
-#define PF_NETBEUI 13
-#define PF_NETLINK 16
-#define PF_NETROM 6
-#define PF_NFC 39
-#define PF_PACKET 17
-#define PF_PHONET 35
-#define PF_PPPOX 24
-#define PF_QIPCRTR 42
-#define PF_RDS 21
-#define PF_ROSE 11
-#define PF_ROUTE PF_NETLINK
-#define PF_RXRPC 33
-#define PF_SECURITY 14
-#define PF_SMC 43
-#define PF_SNA 22
-#define PF_TIPC 30
-#define PF_UNIX PF_LOCAL
-#define PF_UNSPEC 0
-#define PF_VSOCK 40
-#define PF_WANPIPE 25
-#define PF_X25 9
-#define PF_XDP 44
 #define PIPE_BUF 4096
 #define PM_STR 0x20027
 #define POLLERR 0x1000
 #define POLLHUP 0x2000
 #define POLLIN POLLRDNORM
-#define POLLMSG 0x400
 #define POLLNVAL 0x4000
 #define POLLOUT POLLWRNORM
-#define POLLPRI 0x002
-#define POLLRDBAND 0x080
-#define POLLRDHUP 0x2000
 #define POLLRDNORM 0x1
-#define POLLWRBAND 0x200
 #define POLLWRNORM 0x2
 #define POLL_ERR 4
 #define POLL_HUP 6
@@ -3139,14 +3018,7 @@
 #define SCHED_OTHER 0
 #define SCHED_RESET_ON_FORK 0x40000000
 #define SCHED_RR 2
-#define SCM_CREDENTIALS 0x02
 #define SCM_RIGHTS 1
-#define SCM_TIMESTAMP SO_TIMESTAMP
-#define SCM_TIMESTAMPING SO_TIMESTAMPING
-#define SCM_TIMESTAMPING_OPT_STATS 54
-#define SCM_TIMESTAMPING_PKTINFO 58
-#define SCM_TIMESTAMPNS SO_TIMESTAMPNS
-#define SCM_WIFI_STATUS SO_WIFI_STATUS
 #define SCNd16 "hd"
 #define SCNd32 "d"
 #define SCNd64 __PRI64 "d"
@@ -3439,106 +3311,14 @@
 #define SLC_XON 15
 #define SNDPIPE 0x002
 #define SNDZERO 0x001
-#define SOCK_CLOEXEC 02000000
-#define SOCK_DCCP 6
+#define SOCK_CLOEXEC (0x00002000)
 #define SOCK_DGRAM CLOUDABI_FILETYPE_SOCKET_DGRAM
-#define SOCK_NONBLOCK 04000
-#define SOCK_PACKET 10
-#define SOCK_RAW 3
-#define SOCK_RDM 4
-#define SOCK_SEQPACKET 5
+#define SOCK_NONBLOCK (0x00004000)
 #define SOCK_STREAM CLOUDABI_FILETYPE_SOCKET_STREAM
-#define SOL_AAL 265
-#define SOL_ALG 279
-#define SOL_ATM 264
-#define SOL_BLUETOOTH 274
-#define SOL_CAIF 278
-#define SOL_DCCP 269
-#define SOL_DECNET 261
-#define SOL_ICMPV6 58
-#define SOL_IP 0
-#define SOL_IPV6 41
-#define SOL_IRDA 266
-#define SOL_IUCV 277
-#define SOL_KCM 281
-#define SOL_LLC 268
-#define SOL_NETBEUI 267
-#define SOL_NETLINK 270
-#define SOL_NFC 280
-#define SOL_PACKET 263
-#define SOL_PNPIPE 275
-#define SOL_PPPOL2TP 273
-#define SOL_RAW 255
-#define SOL_RDS 276
-#define SOL_RXRPC 272
 #define SOL_SOCKET 0x7fffffff
 #define SOL_TCP 6
-#define SOL_TIPC 271
-#define SOL_TLS 282
 #define SOL_UDP 17
-#define SOL_X25 262
-#define SOL_XDP 283
-#define SOMAXCONN 128
-#define SO_ACCEPTCONN 30
-#define SO_ATTACH_BPF 50
-#define SO_ATTACH_FILTER 26
-#define SO_ATTACH_REUSEPORT_CBPF 51
-#define SO_ATTACH_REUSEPORT_EBPF 52
-#define SO_BINDTODEVICE 25
-#define SO_BPF_EXTENSIONS 48
-#define SO_BROADCAST 6
-#define SO_BSDCOMPAT 14
-#define SO_BUSY_POLL 46
-#define SO_CNX_ADVICE 53
-#define SO_COOKIE 57
-#define SO_DEBUG 1
-#define SO_DETACH_BPF SO_DETACH_FILTER
-#define SO_DETACH_FILTER 27
-#define SO_DOMAIN 39
-#define SO_DONTROUTE 5
-#define SO_ERROR 4
-#define SO_GET_FILTER SO_ATTACH_FILTER
-#define SO_INCOMING_CPU 49
-#define SO_INCOMING_NAPI_ID 56
-#define SO_KEEPALIVE 9
-#define SO_LINGER 13
-#define SO_LOCK_FILTER 44
-#define SO_MARK 36
-#define SO_MAX_PACING_RATE 47
-#define SO_MEMINFO 55
-#define SO_NOFCS 43
-#define SO_NO_CHECK 11
-#define SO_OOBINLINE 10
-#define SO_PASSCRED 16
-#define SO_PASSSEC 34
-#define SO_PEEK_OFF 42
-#define SO_PEERCRED 17
-#define SO_PEERGROUPS 59
-#define SO_PEERNAME 28
-#define SO_PEERSEC 31
-#define SO_PRIORITY 12
-#define SO_PROTOCOL 38
-#define SO_RCVBUF 8
-#define SO_RCVBUFFORCE 33
-#define SO_RCVLOWAT 18
-#define SO_RCVTIMEO 20
-#define SO_REUSEADDR 2
-#define SO_REUSEPORT 15
-#define SO_RXQ_OVFL 40
-#define SO_SECURITY_AUTHENTICATION 22
-#define SO_SECURITY_ENCRYPTION_NETWORK 24
-#define SO_SECURITY_ENCRYPTION_TRANSPORT 23
-#define SO_SELECT_ERR_QUEUE 45
-#define SO_SNDBUF 7
-#define SO_SNDBUFFORCE 32
-#define SO_SNDLOWAT 19
-#define SO_SNDTIMEO 21
-#define SO_TIMESTAMP 29
-#define SO_TIMESTAMPING 37
-#define SO_TIMESTAMPNS 35
 #define SO_TYPE 3
-#define SO_WIFI_STATUS 41
-#define SO_ZEROCOPY 60
 #define SPACE 0x11
 #define SSIZE_MAX LONG_MAX
 #define SS_AUTODISARM (1U << 31)
@@ -4640,8 +4420,6 @@
 #define __compiler_ATOMIC_WCHAR_T_LOCK_FREE 2
 #define __CLANG_MAX_ALIGN_T_DEFINED 
 #define __CMPLX(x,y,t) (__builtin_complex((t)(x), (t)(y)))
-#define __CMSG_LEN(cmsg) (((cmsg)->cmsg_len + sizeof(long) - 1) & ~(long)(sizeof(long) - 1))
-#define __CMSG_NEXT(cmsg) ((unsigned char *)(cmsg) + __CMSG_LEN(cmsg))
 #define __CONSTANT_CFSTRINGS__ 1
 #define __DBLCX(x) (__IS_CX(x) && sizeof(x) == sizeof(double complex))
 #define __DBL_DECIMAL_DIG__ 17
@@ -4861,7 +4639,6 @@
 #define __LITTLE_ENDIAN__ 1
 #define __LONG_LONG_MAX__ 9223372036854775807LL
 #define __LONG_MAX__ 2147483647L
-#define __MHDR_END(mhdr) ((unsigned char *)(mhdr)->msg_control + (mhdr)->msg_controllen)
 #define __NAMESER 19991006
 #define __NEED_FILE 
 #define __NEED___isoc_va_list 
@@ -5165,8 +4942,11 @@
 #define __wasilibc___typedef_sa_family_t_h 
 #define __wasilibc___typedef_sigset_t_h 
 #define __wasilibc___typedef_socklen_t_h 
+#define __wasilibc___wasilibc_dirent_h 
 #define __wasilibc___wasilibc_fcntl_h 
-#define __wasilibc___wasilibc_mman_h 
+#define __wasilibc___wasilibc_poll_h 
+#define __wasilibc___wasilibc_sys_mman_h 
+#define __wasilibc___wasilibc_sys_socket_h 
 #define __wasilibc___wasilibc_time_h 
 #define __wasilibc___wasilibc_unistd_h 
 #define __wasilibc_dirent_h 

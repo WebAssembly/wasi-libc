@@ -35,7 +35,6 @@
 #include <__typedef_ssize_t.h>
 #include <__struct_timeval.h>
 #include <fcntl.h>
-#include <cloudabi_syscalls_info.h>
 #include <fenv.h>
 #include <net/if_arp.h>
 #include <net/if.h>

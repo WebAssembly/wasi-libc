@@ -1,6 +1,11 @@
 #ifndef	_DIRENT_H
 #define	_DIRENT_H
 
+#ifdef __wasilibc_unmodified_upstream__
+#else
+#include <__wasilibc_dirent.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -56,6 +61,7 @@ long           telldir(DIR *);
 #endif
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
+#ifdef __wasilibc_unmodified_upstream__
 #define DT_UNKNOWN 0
 #define DT_FIFO 1
 #define DT_CHR 2
@@ -67,6 +73,7 @@ long           telldir(DIR *);
 #define DT_WHT 14
 #define IFTODT(x) ((x)>>12 & 017)
 #define DTTOIF(x) ((x)<<12)
+#endif
 int getdents(int, struct dirent *, size_t);
 #endif
 

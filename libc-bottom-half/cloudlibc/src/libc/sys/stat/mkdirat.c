@@ -10,7 +10,11 @@
 #include <errno.h>
 #include <string.h>
 
+#ifdef __wasilibc_unmodified_upstream__
 int mkdirat(int fd, const char *path, ...) {
+#else
+int mkdirat(int fd, const char *path, mode_t mode) {
+#endif
   cloudabi_errno_t error = cloudabi_sys_file_create(
       fd, path, strlen(path), CLOUDABI_FILETYPE_DIRECTORY);
   if (error != 0) {

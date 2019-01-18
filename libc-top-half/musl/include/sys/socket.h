@@ -1,5 +1,9 @@
 #ifndef	_SYS_SOCKET_H
 #define	_SYS_SOCKET_H
+#ifdef __wasilibc_unmodified_upstream__
+#else
+#include <__wasilibc_sys_socket.h>
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -42,6 +46,7 @@ struct linger {
 	int l_linger;
 };
 
+#ifdef __wasilibc_unmodified_upstream__
 #define SHUT_RD 0
 #define SHUT_WR 1
 #define SHUT_RDWR 2
@@ -309,6 +314,7 @@ struct linger {
 
 #define SCM_RIGHTS      0x01
 #define SCM_CREDENTIALS 0x02
+#endif
 
 #ifdef __wasilibc_unmodified_upstream__
 struct sockaddr {

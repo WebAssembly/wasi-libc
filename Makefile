@@ -1,27 +1,46 @@
 # These variables are specifically meant to be overridable via
 # the make command-line.
-WASM_CC = @WASM_CC@
+WASM_CC = clang
 WASM_NM = $(subst clang,llvm-nm,$(WASM_CC))
 WASM_AR = $(subst clang,llvm-ar,$(WASM_CC))
 WASM_CFLAGS = -O2
-SYSROOT = sysroot
-HOST_TRIPLE = @HOST_TRIPLE@
+# The directory where we build the sysroot.
+SYSROOT = $(CURDIR)/sysroot
+# A directory to install to for "make install".
+INSTALL_DIR = /usr/local
 # single or posix
 THREAD_MODEL = single
+# yes or no
+BUILD_DLMALLOC = yes
+BUILD_LIBC_BOTTOM_HALF = yes
+BUILD_LIBC_TOP_HALF = yes
+# The directory where we're store intermediate artifacts.
+OBJDIR = $(SYSROOT)/tmp
 
-srcdir = @srcdir@
+# Check dependencies.
+ifeq ($(BUILD_LIBC_TOP_HALF),yes)
+ifneq ($(BUILD_LIBC_BOTTOM_HALF),yes)
+$(error BUILD_LIBC_TOP_HALF=yes depends on BUILD_LIBC_BOTTOM_HALF=yes)
+endif
+endif
+ifeq ($(BUILD_LIBC_BOTTOM_HALF),yes)
+ifneq ($(BUILD_DLMALLOC),yes)
+$(error BUILD_LIBC_BOTTOM_HALF=yes depends on BUILD_DLMALLOC=yes)
+endif
+endif
 
 # These variables describe the locations of various files and
 # directories in the source tree.
-BASICS_DIR = $(srcdir)/basics
+BASICS_DIR = $(CURDIR)/basics
 BASICS_INC = $(BASICS_DIR)/include
 BASICS_LIBC_DIR = $(BASICS_DIR)/libc
+BASICS_CRT_SOURCES = $(wildcard $(BASICS_LIBC_DIR)/crt*.c)
 BASICS_LIBC_SOURCES = $(BASICS_LIBC_DIR)/string.c
-DLMALLOC_DIR = $(srcdir)/dlmalloc
+DLMALLOC_DIR = $(CURDIR)/dlmalloc
 DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
 DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/wrapper.c
 DLMALLOC_INC = $(DLMALLOC_DIR)/include
-LIBC_BOTTOM_HALF_DIR = $(srcdir)/libc-bottom-half
+LIBC_BOTTOM_HALF_DIR = $(CURDIR)/libc-bottom-half
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC = $(LIBC_BOTTOM_HALF_DIR)/cloudlibc/src
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC = $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/include
 LIBC_BOTTOM_HALF_HEADERS_PUBLIC = $(LIBC_BOTTOM_HALF_DIR)/headers/public
@@ -35,7 +54,7 @@ LIBC_BOTTOM_HALF_ALL_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
     $(LIBC_BOTTOM_HALF_LIBPREOPEN_LIB)/po_libc_wrappers.c \
     $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c)
-LIBC_TOP_HALF_DIR = $(srcdir)/libc-top-half
+LIBC_TOP_HALF_DIR = $(CURDIR)/libc-top-half
 MUSL_LIBC_DIR = $(LIBC_TOP_HALF_DIR)/musl
 MUSL_LIBC_SRC_DIR = $(MUSL_LIBC_DIR)/src
 MUSL_LIBC_INC = $(MUSL_LIBC_DIR)/include
@@ -130,12 +149,6 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/string/strtok_r.c \
     $(MUSL_LIBC_SRC_DIR)/string/strverscmp.c \
     $(MUSL_LIBC_SRC_DIR)/string/swab.c \
-    $(MUSL_LIBC_SRC_DIR)/string/w*.c \
-    $(MUSL_LIBC_SRC_DIR)/stdlib/*.c \
-    $(MUSL_LIBC_SRC_DIR)/search/*.c \
-    $(MUSL_LIBC_SRC_DIR)/termios/*.c \
-    $(MUSL_LIBC_SRC_DIR)/temp/*.c \
-    $(MUSL_LIBC_SRC_DIR)/prng/*.c \
     $(MUSL_LIBC_SRC_DIR)/misc/a64l.c \
     $(MUSL_LIBC_SRC_DIR)/misc/basename.c \
     $(MUSL_LIBC_SRC_DIR)/misc/dirname.c \
@@ -153,15 +166,21 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/misc/syslog.c \
     $(MUSL_LIBC_SRC_DIR)/misc/getentropy.c \
     $(MUSL_LIBC_SRC_DIR)/misc/uname.c \
-    $(MUSL_LIBC_SRC_DIR)/conf/*.c \
-    $(MUSL_LIBC_SRC_DIR)/ctype/*.c \
-    $(MUSL_LIBC_SRC_DIR)/math/*.c \
-    $(MUSL_LIBC_SRC_DIR)/complex/*.c \
-    $(MUSL_LIBC_SRC_DIR)/crypt/*.c \
     $(MUSL_LIBC_SRC_DIR)/errno/strerror.c \
     $(MUSL_LIBC_SRC_DIR)/fenv/fenv.c \
     $(MUSL_LIBC_SRC_DIR)/exit/exit.c \
-    $(MUSL_LIBC_SRC_DIR)/exit/atexit.c
+    $(MUSL_LIBC_SRC_DIR)/exit/atexit.c \
+    $(wildcard $(MUSL_LIBC_SRC_DIR)/string/w*.c) \
+    $(wildcard $(MUSL_LIBC_SRC_DIR)/stdlib/*.c) \
+    $(wildcard $(MUSL_LIBC_SRC_DIR)/search/*.c) \
+    $(wildcard $(MUSL_LIBC_SRC_DIR)/termios/*.c) \
+    $(wildcard $(MUSL_LIBC_SRC_DIR)/temp/*.c) \
+    $(wildcard $(MUSL_LIBC_SRC_DIR)/prng/*.c) \
+    $(wildcard $(MUSL_LIBC_SRC_DIR)/conf/*.c) \
+    $(wildcard $(MUSL_LIBC_SRC_DIR)/ctype/*.c) \
+    $(wildcard $(MUSL_LIBC_SRC_DIR)/math/*.c) \
+    $(wildcard $(MUSL_LIBC_SRC_DIR)/complex/*.c) \
+    $(wildcard $(MUSL_LIBC_SRC_DIR)/crypt/*.c)
 MUSL_PRINTSCAN_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/internal/floatscan.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/vfprintf.c \
@@ -169,16 +188,19 @@ MUSL_PRINTSCAN_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/stdlib/strtod.c
 LIBC_TOP_HALF_HEADERS_PRIVATE = $(LIBC_TOP_HALF_DIR)/headers/private
 
+# Set the target variables. The multiarch triple is the same as the
+# regular triple for wasm, except that it excludes the vendor field.
+TARGET_TRIPLE = wasm32-unknown-musl-wasi
+MULTIARCH_TRIPLE = wasm32-wasi-musl
+
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
-MULTIARCH_TRIPLE = wasm32-wasi-musl
 SYSROOT_LIB = $(SYSROOT)/lib/$(MULTIARCH_TRIPLE)
 SYSROOT_INC = $(SYSROOT)/include
 SYSROOT_SHARE = $(SYSROOT)/share/$(MULTIARCH_TRIPLE)
 
 # Set the target.
-# TODO: Add -unknown-wasi-musl when the compiler supports it.
-override WASM_CFLAGS += --target=$(HOST_TRIPLE)
+override WASM_CFLAGS += --target=$(TARGET_TRIPLE)
 # We're compiling libc.
 override WASM_CFLAGS += -fno-builtin
 # WebAssembly floating-point match doesn't trap.
@@ -196,58 +218,114 @@ endif
 # Set the sysroot.
 override WASM_CFLAGS += --sysroot="$(SYSROOT)"
 
+objs = $(patsubst $(CURDIR)/%.c,$(OBJDIR)/%.o,$(1))
+override BASICS_LIBC_OBJS = $(call objs,$(BASICS_LIBC_SOURCES))
+override DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
+override LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
+override MUSL_LIBC_OBJS = $(call objs,$(MUSL_LIBC_SOURCES))
+override LIBC_OBJS := $(BASICS_LIBC_OBJS)
+ifeq ($(BUILD_DLMALLOC),yes)
+override LIBC_OBJS += $(DLMALLOC_OBJS)
+endif
+ifeq ($(BUILD_LIBC_BOTTOM_HALF),yes)
+# Override basics' string.o with libc-bottom-half's.
+override LIBC_OBJS := $(filter-out %/string.o,$(LIBC_OBJS))
+# Add libc-bottom-half's objects.
+override LIBC_OBJS += $(LIBC_BOTTOM_HALF_ALL_OBJS)
+endif
+ifeq ($(BUILD_LIBC_TOP_HALF),yes)
+# Override libc-bottom-half's string.o with libc-top-half's.
+override LIBC_OBJS := $(filter-out %/string.o,$(LIBC_OBJS))
+# Override libc-bottom-half's qsort.o with libc-top-half's.
+override LIBC_OBJS := $(filter-out %/qsort.o,$(LIBC_OBJS))
+# libc-top-half is musl.
+override LIBC_OBJS += $(MUSL_LIBC_OBJS)
+endif
+override MUSL_PRINTSCAN_OBJS = $(call objs,$(MUSL_PRINTSCAN_SOURCES))
+override MUSL_PRINTSCAN_LONG_DOUBLE_OBJS = $(patsubst %.o,%.long-double.o,$(MUSL_PRINTSCAN_OBJS))
+override MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS = $(patsubst %.o,%.no-floating-point.o,$(MUSL_PRINTSCAN_OBJS))
+
 default: check
 
-$(SYSROOT):
+$(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
+
+$(SYSROOT_LIB)/libc-printscan-long-double.a: $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS)
+
+$(SYSROOT_LIB)/libc-printscan-no-floating-point.a: $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS)
+
+%.a:
+	@mkdir -p "$(@D)"
+	$(WASM_AR) crs $@ $^
+
+$(MUSL_PRINTSCAN_OBJS): override WASM_CFLAGS += \
+	    -D__wasilibc_printscan_no_long_double \
+	    -D__wasilibc_printscan_full_support_option="\"add -lc-printscan-long-double to the link command\""
+
+$(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): override WASM_CFLAGS += \
+	    -D__wasilibc_printscan_no_floating_point \
+	    -D__wasilibc_printscan_floating_point_support_option="\"remove -lc-printscan-no-floating-point from the link command\""
+
+$(OBJDIR)/%.long-double.o: $(CURDIR)/%.c $(SYSROOT_INC)
+	@mkdir -p "$(@D)"
+	"$(WASM_CC)" $(WASM_CFLAGS) -MD -MP -o $@ -c $<
+
+$(OBJDIR)/%.no-floating-point.o: $(CURDIR)/%.c $(SYSROOT_INC)
+	@mkdir -p "$(@D)"
+	"$(WASM_CC)" $(WASM_CFLAGS) -MD -MP -o $@ -c $<
+
+$(OBJDIR)/%.o: $(CURDIR)/%.c $(SYSROOT_INC)
+	@mkdir -p "$(@D)"
+	"$(WASM_CC)" $(WASM_CFLAGS) -MD -MP -o $@ -c $<
+
+include $(shell find $(OBJDIR) -name \*.d) /dev/null
+
+$(DLMALLOC_OBJS): override WASM_CFLAGS += \
+    -I$(DLMALLOC_INC)
+
+$(LIBC_BOTTOM_HALF_ALL_OBJS): override WASM_CFLAGS += \
+    -I$(LIBC_BOTTOM_HALF_HEADERS_PRIVATE) \
+    -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC) \
+    -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) \
+    -I$(LIBC_BOTTOM_HALF_LIBPREOPEN_LIB) \
+    -I$(LIBC_BOTTOM_HALF_LIBPREOPEN_INC)
+
+$(MUSL_LIBC_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): override WASM_CFLAGS += \
+    -I $(MUSL_LIBC_SRC_DIR)/include \
+    -I $(MUSL_LIBC_SRC_DIR)/internal \
+    -I $(MUSL_LIBC_DIR)/arch/wasm32 \
+    -I $(MUSL_LIBC_DIR)/arch/generic \
+    -I $(LIBC_TOP_HALF_HEADERS_PRIVATE) \
+    -Wno-shift-op-parentheses \
+    -Wno-string-plus-int \
+    -Wno-dangling-else \
+    -Wno-unknown-pragmas
+
+$(SYSROOT): | startup_files libc finish check
+
+$(SYSROOT_INC):
 	$(RM) -r "$(SYSROOT)"
-	mkdir -p "$(SYSROOT)"
 
 	#
-	# Install the basics include files.
+	# Install the include files.
 	#
+	mkdir -p "$(SYSROOT_INC)"
 	cp -r --backup=numbered "$(BASICS_INC)" "$(SYSROOT)"
-
-	#
-	# Build the C startup files.
-	#
-	"$(WASM_CC)" $(WASM_CFLAGS) -c $(BASICS_LIBC_DIR)/crt*.c
-	mkdir -p "$(SYSROOT_LIB)"
-	mv *.o "$(SYSROOT_LIB)"
-
-	#
-	# Compile the basics libc subset source files.
-	#
-	"$(WASM_CC)" $(WASM_CFLAGS) -c $(BASICS_LIBC_SOURCES)
-
-	#
-	# Compile the dlmalloc source files.
-	#
-	"$(WASM_CC)" $(WASM_CFLAGS) -c $(DLMALLOC_SOURCES) -I$(DLMALLOC_INC)
-
-	#
-	# Compile the WASI libc source files.
-	#
 	cp -r --backup=numbered "$(LIBC_BOTTOM_HALF_CLOUDABI_HEADERS)"/* "$(SYSROOT_INC)"
 	cp -r --backup=numbered "$(LIBC_BOTTOM_HALF_HEADERS_PUBLIC)"/* "$(SYSROOT_INC)"
-	"$(WASM_CC)" $(WASM_CFLAGS) -c $(LIBC_BOTTOM_HALF_ALL_SOURCES) \
-	    -I$(LIBC_BOTTOM_HALF_HEADERS_PRIVATE) \
-	    -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC) -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) \
-	    -I$(LIBC_BOTTOM_HALF_LIBPREOPEN_LIB) -I$(LIBC_BOTTOM_HALF_LIBPREOPEN_INC)
 
-	#
-	# Compile the musl libc source files.
-	#
-	mkdir -p "$(SYSROOT_INC)/bits"
 	# Generate musl's bits/alltypes.h header.
+	mkdir -p "$(SYSROOT_INC)/bits"
 	sed -f $(MUSL_LIBC_DIR)/tools/mkalltypes.sed \
 	    $(MUSL_LIBC_DIR)/arch/wasm32/bits/alltypes.h.in \
 	    $(MUSL_LIBC_DIR)/include/alltypes.h.in \
 	    > "$(SYSROOT_INC)/bits/alltypes.h"
+
 	# Copy in the bulk of musl's public header files.
 	cp -r --backup=numbered "$(MUSL_LIBC_INC)"/* "$(SYSROOT_INC)"
 	# Copy in the musl's "bits" header files.
 	cp -r --backup=numbered "$(MUSL_LIBC_DIR)"/arch/generic/bits/* "$(SYSROOT_INC)/bits"
 	cp -r "$(MUSL_LIBC_DIR)"/arch/wasm32/bits/* "$(SYSROOT_INC)/bits"
+
 	# Remove files that aren't headers or that aren't supported yet or that aren't relevant for wasm.
 	$(RM) "$(SYSROOT_INC)/bits/syscall.h.in" \
 	      "$(SYSROOT_INC)/bits/alltypes.h.in" \
@@ -273,61 +351,23 @@ $(SYSROOT):
 	      "$(SYSROOT_INC)/link.h" \
 	      "$(SYSROOT_INC)/elf.h" \
 	      "$(SYSROOT_INC)/sys/auxv.h"
-	# Compile the musl libc sources (long double print/scan disabled).
-	"$(WASM_CC)" $(WASM_CFLAGS) -c $(MUSL_LIBC_SOURCES) \
-	    -I $(MUSL_LIBC_SRC_DIR)/include \
-	    -I $(MUSL_LIBC_SRC_DIR)/internal \
-	    -I $(MUSL_LIBC_DIR)/arch/wasm32 \
-	    -I $(MUSL_LIBC_DIR)/arch/generic \
-	    -I $(LIBC_TOP_HALF_HEADERS_PRIVATE) \
-	    -D__wasilibc_printscan_no_long_double \
-	    -D__wasilibc_printscan_full_support_option="\"add -lc-printscan-long-double to the link command\"" \
-	    -Wno-shift-op-parentheses \
-	    -Wno-string-plus-int \
-	    -Wno-dangling-else \
-	    -Wno-unknown-pragmas
 
-	# Create the musl libc library.
-	mkdir -p "$(SYSROOT_LIB)"
-	$(WASM_AR) crs "$(SYSROOT_LIB)/libc.a" *.o
-	$(RM) *.o
+startup_files: $(SYSROOT_INC)
+	#
+	# Build the startup files.
+	#
+	@mkdir -p "$(OBJDIR)"
+	cd "$(OBJDIR)" && \
+	"$(WASM_CC)" $(WASM_CFLAGS) -c $(BASICS_CRT_SOURCES) -MD -MP && \
+	mkdir -p "$(SYSROOT_LIB)" && \
+	mv *.o "$(SYSROOT_LIB)"
 
-	# Compile the musl print/scan libc sources with long double support.
-	"$(WASM_CC)" $(WASM_CFLAGS) -c $(MUSL_PRINTSCAN_SOURCES) \
-	    -I $(MUSL_LIBC_SRC_DIR)/include \
-	    -I $(MUSL_LIBC_SRC_DIR)/internal \
-	    -I $(MUSL_LIBC_DIR)/arch/wasm32 \
-	    -I $(MUSL_LIBC_DIR)/arch/generic \
-	    -I $(LIBC_TOP_HALF_HEADERS_PRIVATE) \
-	    -Wno-shift-op-parentheses \
-	    -Wno-string-plus-int \
-	    -Wno-dangling-else \
-	    -Wno-unknown-pragmas
+libc: $(SYSROOT_INC) \
+    $(SYSROOT_LIB)/libc.a \
+    $(SYSROOT_LIB)/libc-printscan-long-double.a \
+    $(SYSROOT_LIB)/libc-printscan-no-floating-point.a
 
-	# Create the musl libc-printscan-long-double library.
-	mkdir -p "$(SYSROOT_LIB)"
-	$(WASM_AR) crs "$(SYSROOT_LIB)/libc-printscan-long-double.a" *.o
-	$(RM) *.o
-
-	# Compile the musl libc sources with floating-point print/scan disabled.
-	"$(WASM_CC)" $(WASM_CFLAGS) -c $(MUSL_PRINTSCAN_SOURCES) \
-	    -I $(MUSL_LIBC_SRC_DIR)/include \
-	    -I $(MUSL_LIBC_SRC_DIR)/internal \
-	    -I $(MUSL_LIBC_DIR)/arch/wasm32 \
-	    -I $(MUSL_LIBC_DIR)/arch/generic \
-	    -I $(LIBC_TOP_HALF_HEADERS_PRIVATE) \
-	    -D__wasilibc_printscan_no_floating_point \
-	    -D__wasilibc_printscan_floating_point_support_option="\"remove -lc-printscan-no-floating-point from the link command\"" \
-	    -Wno-shift-op-parentheses \
-	    -Wno-string-plus-int \
-	    -Wno-dangling-else \
-	    -Wno-unknown-pragmas
-
-	# Create the musl libc-printscan-no-floating-point library.
-	mkdir -p "$(SYSROOT_LIB)"
-	$(WASM_AR) crs "$(SYSROOT_LIB)/libc-printscan-no-floating-point.a" *.o
-	$(RM) *.o
-
+finish: $(SYSROOT_INC) libc
 	#
 	# Create empty placeholder libraries.
 	#
@@ -343,9 +383,9 @@ $(SYSROOT):
 	# Collect symbol information.
 	# FIXME: --extern-only doesn't seem to report all the defined symbols.
 	$(WASM_NM) --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/*.o \
-	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |sort > "$(SYSROOT_SHARE)/defined-symbols.txt"
+	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_COLLATE=C sort > "$(SYSROOT_SHARE)/defined-symbols.txt"
 	for undef_sym in $$($(WASM_NM) --undefined-only "$(SYSROOT_LIB)"/*.a "$(SYSROOT_LIB)"/*.o \
-	    |grep ' U ' |sed 's/.* U //' |sort |uniq); do \
+	    |grep ' U ' |sed 's/.* U //' |LC_COLLATE=C sort |uniq); do \
 	    grep -q $$undef_sym "$(SYSROOT_SHARE)/defined-symbols.txt" || echo $$undef_sym; \
 	done   > "$(SYSROOT_SHARE)/undefined-symbols.txt"
 	grep ^cloudabi_sys_ "$(SYSROOT_SHARE)/undefined-symbols.txt" \
@@ -354,8 +394,8 @@ $(SYSROOT):
 	# Generate a test file that includes all public header files.
 	cd "$(SYSROOT)" && \
 	for header in $$(find include -type f |grep -v /bits/); do \
-	    echo '#include <'$$header'>' | sed 's/include\///' >> share/$(MULTIARCH_TRIPLE)/include-all.c; \
-	done; \
+	    echo '#include <'$$header'>' | sed 's/include\///' ; \
+	done |LC_COLLATE=C sort >share/$(MULTIARCH_TRIPLE)/include-all.c ; \
 	cd - >/dev/null
 
 	# Test that it compiles.
@@ -386,8 +426,11 @@ $(SYSROOT):
 	# The build succeeded! The generated sysroot is in $(SYSROOT).
 	#
 
-check: $(SYSROOT)
+check: $(SYSROOT) finish
 	# Check that the computed metadata matches the expected metadata.
-	diff -ur $(srcdir)/expected "$(SYSROOT_SHARE)"
+	diff -ur $(CURDIR)/expected "$(SYSROOT_SHARE)"
 
-.PHONY: $(SYSROOT) check default
+install: $(SYSROOT)
+	cp -r $(SYSROOT) $(INSTALL_DIR)
+
+.PHONY: $(SYSROOT) default startup_files libc finish check install $(SYSROOT_INC)

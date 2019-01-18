@@ -1,5 +1,5 @@
-#ifndef __wasilibc___wasilibc_mman_h
-#define __wasilibc___wasilibc_mman_h
+#ifndef __wasilibc___wasilibc_sys_mman_h
+#define __wasilibc___wasilibc_sys_mman_h
 
 #include <cloudabi_types_common.h>
 

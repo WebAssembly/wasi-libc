@@ -13,8 +13,13 @@
 static_assert(TIMER_ABSTIME == CLOUDABI_SUBSCRIPTION_CLOCK_ABSTIME,
               "Value mismatch");
 
+#ifdef __wasilibc_unmodified_upstream__
 int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
                     ...) {
+#else
+int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
+                    struct timespec *rmtp) {
+#endif
   if ((flags & ~TIMER_ABSTIME) != 0)
     return EINVAL;
 

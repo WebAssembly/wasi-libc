@@ -149,6 +149,7 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/misc/login_tty.c \
     $(MUSL_LIBC_SRC_DIR)/misc/syslog.c \
     $(MUSL_LIBC_SRC_DIR)/misc/getentropy.c \
+    $(MUSL_LIBC_SRC_DIR)/misc/uname.c \
     $(MUSL_LIBC_SRC_DIR)/conf/*.c \
     $(MUSL_LIBC_SRC_DIR)/ctype/*.c \
     $(MUSL_LIBC_SRC_DIR)/math/*.c \

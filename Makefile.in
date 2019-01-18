@@ -1,15 +1,15 @@
 # These variables are specifically meant to be overridable via
 # the make command-line.
-WASM_CC = clang
+WASM_CC = @WASM_CC@
 WASM_NM = $(subst clang,llvm-nm,$(WASM_CC))
 WASM_AR = $(subst clang,llvm-ar,$(WASM_CC))
 WASM_CFLAGS = -O2
 SYSROOT = sysroot
-HOST_TRIPLE = wasm32-unknown-wasi-musl
+HOST_TRIPLE = @HOST_TRIPLE@
 # single or posix
 THREAD_MODEL = single
 
-srcdir = .
+srcdir = @srcdir@
 
 # These variables describe the locations of various files and
 # directories in the source tree.

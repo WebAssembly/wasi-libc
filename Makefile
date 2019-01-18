@@ -300,7 +300,7 @@ $(MUSL_LIBC_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO_FLOATIN
     -Wno-dangling-else \
     -Wno-unknown-pragmas
 
-$(SYSROOT): | startup_files libc finish check
+$(SYSROOT): startup_files libc finish check
 
 $(SYSROOT_INC):
 	$(RM) -r "$(SYSROOT)"
@@ -428,9 +428,10 @@ finish: $(SYSROOT_INC) libc
 
 check: $(SYSROOT) finish
 	# Check that the computed metadata matches the expected metadata.
-	diff -ur $(CURDIR)/expected "$(SYSROOT_SHARE)"
+	diff -ur "$(CURDIR)/expected/$(MULTIARCH_TRIPLE)" "$(SYSROOT_SHARE)"
 
 install: $(SYSROOT)
-	cp -r $(SYSROOT) $(INSTALL_DIR)
+	mkdir -p "$(INSTALL_DIR)"
+	cp -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"
 
 .PHONY: $(SYSROOT) default startup_files libc finish check install $(SYSROOT_INC)

@@ -5,20 +5,23 @@ WASM_NM = $(subst clang,llvm-nm,$(WASM_CC))
 WASM_AR = $(subst clang,llvm-ar,$(WASM_CC))
 WASM_CFLAGS = -O2
 SYSROOT = sysroot
+HOST_TRIPLE = wasm32-unknown-wasi-musl
 # single or posix
 THREAD_MODEL = single
 
+srcdir = .
+
 # These variables describe the locations of various files and
 # directories in the source tree.
-BASICS_DIR = basics
+BASICS_DIR = $(srcdir)/basics
 BASICS_INC = $(BASICS_DIR)/include
 BASICS_LIBC_DIR = $(BASICS_DIR)/libc
 BASICS_LIBC_SOURCES = $(BASICS_LIBC_DIR)/string.c
-DLMALLOC_DIR = dlmalloc
+DLMALLOC_DIR = $(srcdir)/dlmalloc
 DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
 DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/wrapper.c
 DLMALLOC_INC = $(DLMALLOC_DIR)/include
-LIBC_BOTTOM_HALF_DIR = libc-bottom-half
+LIBC_BOTTOM_HALF_DIR = $(srcdir)/libc-bottom-half
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC = $(LIBC_BOTTOM_HALF_DIR)/cloudlibc/src
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC = $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/include
 LIBC_BOTTOM_HALF_HEADERS_PUBLIC = $(LIBC_BOTTOM_HALF_DIR)/headers/public
@@ -32,7 +35,7 @@ LIBC_BOTTOM_HALF_ALL_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
     $(LIBC_BOTTOM_HALF_LIBPREOPEN_LIB)/po_libc_wrappers.c \
     $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c)
-LIBC_TOP_HALF_DIR = libc-top-half
+LIBC_TOP_HALF_DIR = $(srcdir)/libc-top-half
 MUSL_LIBC_DIR = $(LIBC_TOP_HALF_DIR)/musl
 MUSL_LIBC_SRC_DIR = $(MUSL_LIBC_DIR)/src
 MUSL_LIBC_INC = $(MUSL_LIBC_DIR)/include
@@ -175,7 +178,7 @@ SYSROOT_SHARE = $(SYSROOT)/share/$(MULTIARCH_TRIPLE)
 
 # Set the target.
 # TODO: Add -unknown-wasi-musl when the compiler supports it.
-override WASM_CFLAGS += --target=wasm32-unknown-wasi-musl
+override WASM_CFLAGS += --target=$(HOST_TRIPLE)
 # We're compiling libc.
 override WASM_CFLAGS += -fno-builtin
 # WebAssembly floating-point match doesn't trap.
@@ -193,7 +196,8 @@ endif
 # Set the sysroot.
 override WASM_CFLAGS += --sysroot="$(SYSROOT)"
 
-.PHONY: $(SYSROOT)
+default: check
+
 $(SYSROOT):
 	$(RM) -r "$(SYSROOT)"
 	mkdir -p "$(SYSROOT)"
@@ -378,9 +382,12 @@ $(SYSROOT):
 	    | sed -e 's/__[[:upper:][:digit:]]*_ATOMIC_\([[:upper:][:digit:]_]*\)_LOCK_FREE/__compiler_ATOMIC_\1_LOCK_FREE/' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
 
-	# Check that the computed metadata matches the expected metadata.
-	diff -ur expected "$(SYSROOT_SHARE)"
-
 	#
 	# The build succeeded! The generated sysroot is in $(SYSROOT).
 	#
+
+check: $(SYSROOT)
+	# Check that the computed metadata matches the expected metadata.
+	diff -ur $(srcdir)/expected "$(SYSROOT_SHARE)"
+
+.PHONY: $(SYSROOT) check default

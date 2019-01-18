@@ -285,27 +285,6 @@ $(SYSROOT):
 	$(WASM_AR) crs "$(SYSROOT_LIB)/libc.a" *.o
 	$(RM) *.o
 
-        #fixme
-	# Compile the musl libc sources (long double print/scan disabled).
-	"$(WASM_CC)" $(WASM_CFLAGS) -c $(MUSL_PRINTSCAN_SOURCES) \
-	    -I $(MUSL_LIBC_SRC_DIR)/include \
-	    -I $(MUSL_LIBC_SRC_DIR)/internal \
-	    -I $(MUSL_LIBC_DIR)/arch/wasm32 \
-	    -I $(MUSL_LIBC_DIR)/arch/generic \
-	    -I $(LIBC_TOP_HALF_HEADERS_PRIVATE) \
-	    -D__wasilibc_printscan_no_long_double \
-	    -D__wasilibc_printscan_full_support_option="\"add -lc-printscan-long-fixmes to the link command\"" \
-	    -Wno-shift-op-parentheses \
-	    -Wno-string-plus-int \
-	    -Wno-dangling-else \
-	    -Wno-unknown-pragmas
-
-	# Create the musl libc library.
-	mkdir -p "$(SYSROOT_LIB)"
-	$(WASM_AR) crs "$(SYSROOT_LIB)/libc-nold-fixme.a" *.o
-	$(RM) *.o
-        #fixme
-
 	# Compile the musl print/scan libc sources with long double support.
 	"$(WASM_CC)" $(WASM_CFLAGS) -c $(MUSL_PRINTSCAN_SOURCES) \
 	    -I $(MUSL_LIBC_SRC_DIR)/include \

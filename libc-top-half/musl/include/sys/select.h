@@ -35,12 +35,7 @@ typedef struct {
 #endif
 
 int select (int, fd_set *__restrict, fd_set *__restrict, fd_set *__restrict, struct timeval *__restrict);
-#ifdef __wasilibc_unmodified_upstream__
 int pselect (int, fd_set *__restrict, fd_set *__restrict, fd_set *__restrict, const struct timespec *__restrict, const sigset_t *__restrict);
-#else
-// TODO: This is what wasi-libc currently uses, but we should look at changing it.
-int pselect(int, fd_set *, fd_set *, fd_set *, const struct timespec *, ...);
-#endif
 
 #ifdef __wasilibc_unmodified_upstream__
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)

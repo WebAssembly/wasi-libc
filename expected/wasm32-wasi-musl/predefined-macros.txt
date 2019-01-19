@@ -2431,11 +2431,6 @@
 #define POSIX_SPAWN_USEVFORK 64
 #define PRELIM 1
 #define PRE_FETCH 0x34
-#define PRIO_MAX 20
-#define PRIO_MIN (-20)
-#define PRIO_PGRP 1
-#define PRIO_PROCESS 0
-#define PRIO_USER 2
 #define PRIX16 "X"
 #define PRIX32 "X"
 #define PRIX64 __PRI64 "X"
@@ -2883,26 +2878,6 @@
 #define RES_USE_INET6 0x00002000
 #define REZERO_UNIT 0x01
 #define RE_DUP_MAX 255
-#define RLIMIT_AS 9
-#define RLIMIT_CORE 4
-#define RLIMIT_CPU 0
-#define RLIMIT_DATA 2
-#define RLIMIT_FSIZE 1
-#define RLIMIT_LOCKS 10
-#define RLIMIT_MEMLOCK 8
-#define RLIMIT_MSGQUEUE 12
-#define RLIMIT_NICE 13
-#define RLIMIT_NLIMITS 15
-#define RLIMIT_NOFILE 7
-#define RLIMIT_NPROC 6
-#define RLIMIT_RSS 5
-#define RLIMIT_RTPRIO 14
-#define RLIMIT_SIGPENDING 11
-#define RLIMIT_STACK 3
-#define RLIM_INFINITY (~0ULL)
-#define RLIM_NLIMITS RLIMIT_NLIMITS
-#define RLIM_SAVED_CUR RLIM_INFINITY
-#define RLIM_SAVED_MAX RLIM_INFINITY
 #define RMSGD 0x0001
 #define RMSGN 0x0002
 #define RNORM 0x0000
@@ -2982,7 +2957,6 @@
 #define RUN_LVL 1
 #define RUSAGE_CHILDREN 2
 #define RUSAGE_SELF 1
-#define RUSAGE_THREAD 1
 #define R_OK 1
 #define SARMAG 8
 #define SAVE_POINTERS 0x02
@@ -3301,48 +3275,44 @@
 #define S_HANGUP 0x0020
 #define S_HIPRI 0x0002
 #define S_IEXEC S_IXUSR
-#define S_IFBLK 0x6000
-#define S_IFCHR 0x2000
-#define S_IFDIR 0x4000
-#define S_IFIFO 0xc000
-#define S_IFLNK 0xa000
+#define S_IFBLK (0x6000)
+#define S_IFCHR (0x2000)
+#define S_IFDIR (0x4000)
+#define S_IFIFO (0xc000)
+#define S_IFLNK (0xa000)
 #define S_IFMT (S_IFBLK | S_IFCHR | S_IFDIR | S_IFIFO | S_IFLNK | S_IFREG | S_IFSOCK)
-#define S_IFREG 0x8000
-#define S_IFSOCK 0xc000
+#define S_IFREG (0x8000)
+#define S_IFSOCK (0xc000)
 #define S_INPUT 0x0001
 #define S_IREAD S_IRUSR
-#define S_IRGRP 0040
-#define S_IROTH 0004
-#define S_IRUSR 0400
-#define S_IRWXG 0070
-#define S_IRWXO 0007
-#define S_IRWXU 0700
+#define S_IRGRP (0x20)
+#define S_IROTH (0x4)
+#define S_IRUSR (0x100)
+#define S_IRWXG (S_IXGRP | S_IWGRP | S_IRGRP)
+#define S_IRWXO (S_IXOTH | S_IWOTH | S_IROTH)
+#define S_IRWXU (S_IXUSR | S_IWUSR | S_IRUSR)
 #define S_ISBLK(m) (((m)&S_IFMT) == S_IFBLK)
 #define S_ISCHR(m) (((m)&S_IFMT) == S_IFCHR)
 #define S_ISDIR(m) (((m)&S_IFMT) == S_IFDIR)
 #define S_ISFIFO(m) (((m)&S_IFMT) == S_IFIFO)
-#define S_ISGID 02000
+#define S_ISGID (0x400)
 #define S_ISLNK(m) (((m)&S_IFMT) == S_IFLNK)
 #define S_ISREG(m) (((m)&S_IFMT) == S_IFREG)
 #define S_ISSOCK(m) (((m)&S_IFMT) == S_IFSOCK)
-#define S_ISUID 04000
-#define S_ISVTX 01000
-#define S_IWGRP 0020
-#define S_IWOTH 0002
+#define S_ISUID (0x800)
+#define S_ISVTX (0x200)
+#define S_IWGRP (0x10)
+#define S_IWOTH (0x2)
 #define S_IWRITE S_IWUSR
-#define S_IWUSR 0200
-#define S_IXGRP 0010
-#define S_IXOTH 0001
-#define S_IXUSR 0100
+#define S_IWUSR (0x80)
+#define S_IXGRP (0x8)
+#define S_IXOTH (0x1)
+#define S_IXUSR (0x40)
 #define S_MSG 0x0008
 #define S_OUTPUT 0x0004
 #define S_PREREQ ns_s_pr
 #define S_RDBAND 0x0080
 #define S_RDNORM 0x0040
-#define S_TYPEISMQ(buf) 0
-#define S_TYPEISSEM(buf) 0
-#define S_TYPEISSHM(buf) 0
-#define S_TYPEISTMO(buf) 0
 #define S_UPDATE ns_s_ud
 #define S_WRBAND 0x0100
 #define S_WRNORM S_OUTPUT
@@ -4770,7 +4740,9 @@
 #define __wasilibc___wasilibc_poll_h 
 #define __wasilibc___wasilibc_sys_ioctl_h 
 #define __wasilibc___wasilibc_sys_mman_h 
+#define __wasilibc___wasilibc_sys_resource_h 
 #define __wasilibc___wasilibc_sys_socket_h 
+#define __wasilibc___wasilibc_sys_stat_h 
 #define __wasilibc___wasilibc_time_h 
 #define __wasilibc___wasilibc_unistd_h 
 #define __wasilibc_dirent_h 

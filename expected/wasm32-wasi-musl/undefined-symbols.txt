@@ -10,9 +10,7 @@ __floatsitf
 __floatunsitf
 __getf2
 __gttf2
-__intscan
 __letf2
-__lsysinfo
 __lttf2
 __muldc3
 __muloti4
@@ -20,15 +18,10 @@ __mulsc3
 __multc3
 __multf3
 __netf2
-__shgetc
-__shlim
 __stack_pointer
-__string_read
 __subtf3
-__toread
 __trunctfdf2
 __trunctfsf2
-__uflow
 __unordtf2
 cloudabi_sys_clock_res_get
 cloudabi_sys_clock_time_get
@@ -78,5 +71,4 @@ getrlimit
 gmtime_r
 mblen
 mbtowc
-setsid
 strftime

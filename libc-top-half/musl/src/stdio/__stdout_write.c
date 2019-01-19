@@ -3,7 +3,9 @@
 
 size_t __stdout_write(FILE *f, const unsigned char *buf, size_t len)
 {
+#ifdef __wasilibc_unmodified_upstream__
 	struct winsize wsz;
+#endif
 	f->write = __stdio_write;
 #ifdef __wasilibc_unmodified_upstream__
 	if (!(f->flags & F_SVB) && __syscall(SYS_ioctl, f->fd, TIOCGWINSZ, &wsz))

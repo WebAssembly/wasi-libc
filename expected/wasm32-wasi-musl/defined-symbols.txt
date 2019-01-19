@@ -41,6 +41,7 @@ __funcs_on_exit
 __funcs_on_exit
 __fwritex
 __getopt_msg
+__intscan
 __invtrigl_R
 __isalnum_l
 __isalpha_l
@@ -98,6 +99,8 @@ __rem_pio2_large
 __rem_pio2f
 __rem_pio2l
 __seed48
+__shgetc
+__shlim
 __signbit
 __signbitf
 __signbitl
@@ -128,6 +131,7 @@ __stpcpy
 __stpncpy
 __strcasecmp_l
 __strchrnul
+__string_read
 __strncasecmp_l
 __strtod_l
 __strtof_l
@@ -142,6 +146,8 @@ __tan
 __tandf
 __tanl
 __tolower_l
+__toread
+__toread_needs_stdio_exit
 __toupper_l
 __towctrans_l
 __towlower_l
@@ -149,6 +155,7 @@ __towrite
 __towrite_needs_stdio_exit
 __towupper_l
 __tsearch_balance
+__uflow
 __unlist_locked_file
 __wasilibc_register_preopened_fd
 __wctrans_l
@@ -237,12 +244,6 @@ ceill
 cexp
 cexpf
 cexpl
-cfgetispeed
-cfgetospeed
-cfmakeraw
-cfsetispeed
-cfsetospeed
-cfsetspeed
 cimag
 cimagf
 cimagl
@@ -529,7 +530,6 @@ logb
 logbf
 logbl
 logf
-login_tty
 logl
 lrand48
 lrint
@@ -743,13 +743,6 @@ tanh
 tanhf
 tanhl
 tanl
-tcdrain
-tcflow
-tcflush
-tcgetattr
-tcgetsid
-tcsendbreak
-tcsetattr
 tdelete
 tdestroy
 telldir

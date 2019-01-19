@@ -67,7 +67,6 @@ cloudabi_sys_thread_yield
 connect
 getcwd
 getpid
-getrlimit
 gmtime_r
 mblen
 mbtowc

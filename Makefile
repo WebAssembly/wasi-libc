@@ -403,9 +403,7 @@ finish: $(SYSROOT_INC) libc
 	cd - >/dev/null
 
 	# Test that it compiles.
-	"$(WASM_CC)" $(WASM_CFLAGS) -fsyntax-only "$(SYSROOT_SHARE)/include-all.c" \
-	    -Weverything \
-	    -Wno-\#warnings
+	"$(WASM_CC)" $(WASM_CFLAGS) -fsyntax-only "$(SYSROOT_SHARE)/include-all.c"
 
 	# Collect all the predefined macros, except for compiler version macros
 	# which we don't need to track here. For the __*_ATOMIC_*_LOCK_FREE

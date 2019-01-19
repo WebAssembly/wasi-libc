@@ -19,7 +19,7 @@ extern "C" {
 }
 #endif
 #else
-// Just use the compiler's stdarg.h.
+/* Just use the compiler's stdarg.h. */
 #include_next <stdarg.h>
 #endif
 

@@ -2,8 +2,10 @@
 #define _Int64 long long
 #define _Reg long long
 
-// Rather than define everything ourselves here in the musl layer, for
-// WASI, reference the definitions in the lower layers.
+/*
+ * Rather than define everything ourselves here in the musl layer, for
+ * WASI, reference the definitions in the lower layers.
+ */
 
 #if defined(__NEED_va_list) && !defined(__DEFINED_va_list)
 #include <stdarg.h>
@@ -58,7 +60,7 @@ TYPEDEF double double_t;
 #define __DEFINED_clock_t
 #endif
 
-// TODO: Threads support.
+/* TODO: Threads support. */
 TYPEDEF unsigned char pthread_attr_t;
 TYPEDEF unsigned char pthread_mutex_t;
 TYPEDEF unsigned char mtx_t;

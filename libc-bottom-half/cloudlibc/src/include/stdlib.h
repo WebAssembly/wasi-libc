@@ -101,8 +101,10 @@ typedef __wchar_t wchar_t;
 #define _WCHAR_T_DECLARED
 #endif
 
+#ifdef __wasilibc_unmodified_upstream__
 // Process wide locale always uses ASCII.
 #define MB_CUR_MAX ((size_t)1)
+#endif
 
 // Keep existing code happy that assumes that MB_CUR_MAX_L is a macro.
 #define MB_CUR_MAX_L MB_CUR_MAX_L

@@ -94,16 +94,21 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/stdio/ferror.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/clearerr.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__overflow.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/__toread.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__towrite.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/__uflow.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__stdio_exit.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__stdio_close.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__stdio_read.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__stdio_write.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__stdio_seek.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__stdout_write.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/__string_read.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__fmodeflags.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/ofl.c \
+    $(MUSL_LIBC_SRC_DIR)/internal/intscan.c \
     $(MUSL_LIBC_SRC_DIR)/internal/floatscan.c \
+    $(MUSL_LIBC_SRC_DIR)/internal/shgetc.c \
     $(MUSL_LIBC_SRC_DIR)/string/bcmp.c \
     $(MUSL_LIBC_SRC_DIR)/string/bcopy.c \
     $(MUSL_LIBC_SRC_DIR)/string/bzero.c \
@@ -162,7 +167,6 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/misc/getopt.c \
     $(MUSL_LIBC_SRC_DIR)/misc/getopt_long.c \
     $(MUSL_LIBC_SRC_DIR)/misc/getsubopt.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/login_tty.c \
     $(MUSL_LIBC_SRC_DIR)/misc/syslog.c \
     $(MUSL_LIBC_SRC_DIR)/misc/getentropy.c \
     $(MUSL_LIBC_SRC_DIR)/misc/uname.c \
@@ -173,7 +177,6 @@ MUSL_LIBC_SOURCES = \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/string/w*.c) \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/stdlib/*.c) \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/search/*.c) \
-    $(wildcard $(MUSL_LIBC_SRC_DIR)/termios/*.c) \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/temp/*.c) \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/prng/*.c) \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/conf/*.c) \
@@ -298,7 +301,8 @@ $(MUSL_LIBC_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO_FLOATIN
     -Wno-shift-op-parentheses \
     -Wno-string-plus-int \
     -Wno-dangling-else \
-    -Wno-unknown-pragmas
+    -Wno-unknown-pragmas \
+    -Wno-logical-op-parentheses
 
 $(SYSROOT): startup_files libc finish check
 

@@ -1,17 +1,10 @@
 #ifndef __wasilibc_sys_ioctl_h
 #define __wasilibc_sys_ioctl_h
 
-#define FIONREAD 1
-#define FIONBIO 2
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int ioctl(int, int, ...);
-
-#ifdef __cplusplus
-}
-#endif
+/*
+ * Include the real implementation, which is factored into a separate file so
+ * that it can be reused by other libc ioctl implementations.
+ */
+#include <__wasilibc_sys_ioctl.h>
 
 #endif

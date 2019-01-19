@@ -46,6 +46,7 @@
 #include <__wasilibc_dirent.h>
 #include <__wasilibc_fcntl.h>
 #include <__wasilibc_poll.h>
+#include <__wasilibc_sys_ioctl.h>
 #include <__wasilibc_sys_mman.h>
 #include <__wasilibc_sys_socket.h>
 #include <__wasilibc_time.h>

@@ -11,7 +11,11 @@
 
 int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
             fd_set *restrict errorfds, const struct timespec *restrict timeout,
+#ifdef __wasilibc_unmodified_upstream__
             ...) {
+#else
+            const sigset_t *sigmask) {
+#endif
   // Negative file descriptor upperbound.
   if (nfds < 0) {
     errno = EINVAL;

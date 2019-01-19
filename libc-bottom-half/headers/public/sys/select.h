@@ -9,11 +9,7 @@
 extern "C" {
 #endif
 
-/*
- * TODO: POSIX/musl/glibc have the last argument as
- * `const sigset_t *sigmask` rather than `...`.
- */
-int pselect(int, fd_set *, fd_set *, fd_set *, const struct timespec *, ...);
+int pselect(int, fd_set *, fd_set *, fd_set *, const struct timespec *, const sigset_t *);
 
 #ifdef __cplusplus
 }

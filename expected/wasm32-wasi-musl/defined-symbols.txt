@@ -13,6 +13,7 @@ _IO_putc
 __EINVAL
 __ENOMEM
 __aio_close
+__assert_fail
 __cos
 __cosdf
 __cosl
@@ -37,6 +38,10 @@ __fmodeflags
 __fpclassify
 __fpclassifyf
 __fpclassifyl
+__fseeko
+__fseeko_unlocked
+__ftello
+__ftello_unlocked
 __funcs_on_exit
 __funcs_on_exit
 __fwritex
@@ -384,6 +389,7 @@ fopen
 fopen64
 fpathconf
 fprintf
+fputc
 fputs
 fputs_unlocked
 fread
@@ -393,9 +399,15 @@ frexp
 frexpf
 frexpl
 fscanf
+fseek
+fseeko
+fseeko64
 fstat
 fstatat
 fsync
+ftell
+ftello
+ftello64
 ftruncate
 futimens
 fwrite
@@ -593,6 +605,7 @@ optind
 optopt
 optreset
 pathconf
+perror
 pipe
 poll
 posix_fadvise

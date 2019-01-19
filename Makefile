@@ -80,6 +80,7 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/stdio/fwrite.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/fread.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/fputs.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/fputc.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/puts.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/putc.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/fgets.c \
@@ -93,6 +94,8 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/stdio/feof.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/ferror.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/clearerr.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/fseek.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/ftell.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__overflow.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__toread.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__towrite.c \
@@ -106,6 +109,7 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/stdio/__string_read.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/__fmodeflags.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/ofl.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/perror.c \
     $(MUSL_LIBC_SRC_DIR)/internal/intscan.c \
     $(MUSL_LIBC_SRC_DIR)/internal/floatscan.c \
     $(MUSL_LIBC_SRC_DIR)/internal/shgetc.c \
@@ -174,6 +178,7 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/fenv/fenv.c \
     $(MUSL_LIBC_SRC_DIR)/exit/exit.c \
     $(MUSL_LIBC_SRC_DIR)/exit/atexit.c \
+    $(MUSL_LIBC_SRC_DIR)/exit/assert.c \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/string/w*.c) \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/stdlib/*.c) \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/search/*.c) \

@@ -59,135 +59,6 @@ MUSL_LIBC_DIR = $(LIBC_TOP_HALF_DIR)/musl
 MUSL_LIBC_SRC_DIR = $(MUSL_LIBC_DIR)/src
 MUSL_LIBC_INC = $(MUSL_LIBC_DIR)/include
 MUSL_LIBC_SOURCES = \
-    $(MUSL_LIBC_SRC_DIR)/stdio/asprintf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/dprintf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fprintf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/printf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/snprintf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/sprintf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/vasprintf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/vdprintf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/vfprintf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/vprintf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/vsnprintf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/vsprintf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fscanf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/scanf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/sscanf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/vfscanf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/vscanf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/vsscanf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fwrite.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fread.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fputs.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fputc.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/puts.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/putc.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fgets.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/getc.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fopen.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fclose.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/stdin.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/stdout.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/stderr.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fflush.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/feof.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/ferror.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/clearerr.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fseek.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/ftell.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/__overflow.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/__toread.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/__towrite.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/__uflow.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/__stdio_exit.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/__stdio_close.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/__stdio_read.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/__stdio_write.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/__stdio_seek.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/__stdout_write.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/__string_read.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/__fmodeflags.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/ofl.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/perror.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/ext2.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/ext.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/__fclose_ca.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/__fdopen.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fgetc.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fgetln.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fgetpos.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fileno.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fmemopen.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fopencookie.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/__fopen_rb_ca.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/freopen.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/fsetpos.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/getchar.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/getchar_unlocked.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/getc_unlocked.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/getdelim.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/getline.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/gets.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/ofl_add.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/open_memstream.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/putchar.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/putchar_unlocked.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/putc_unlocked.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/rewind.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/setbuf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/setbuffer.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/setlinebuf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/setvbuf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/ungetc.c \
-    $(MUSL_LIBC_SRC_DIR)/internal/intscan.c \
-    $(MUSL_LIBC_SRC_DIR)/internal/floatscan.c \
-    $(MUSL_LIBC_SRC_DIR)/internal/shgetc.c \
-    $(MUSL_LIBC_SRC_DIR)/string/bcmp.c \
-    $(MUSL_LIBC_SRC_DIR)/string/bcopy.c \
-    $(MUSL_LIBC_SRC_DIR)/string/bzero.c \
-    $(MUSL_LIBC_SRC_DIR)/string/explicit_bzero.c \
-    $(MUSL_LIBC_SRC_DIR)/string/index.c \
-    $(MUSL_LIBC_SRC_DIR)/string/memccpy.c \
-    $(MUSL_LIBC_SRC_DIR)/string/memchr.c \
-    $(MUSL_LIBC_SRC_DIR)/string/memcmp.c \
-    $(MUSL_LIBC_SRC_DIR)/string/memcpy.c \
-    $(MUSL_LIBC_SRC_DIR)/string/memmem.c \
-    $(MUSL_LIBC_SRC_DIR)/string/memmove.c \
-    $(MUSL_LIBC_SRC_DIR)/string/mempcpy.c \
-    $(MUSL_LIBC_SRC_DIR)/string/memrchr.c \
-    $(MUSL_LIBC_SRC_DIR)/string/memset.c \
-    $(MUSL_LIBC_SRC_DIR)/string/rindex.c \
-    $(MUSL_LIBC_SRC_DIR)/string/stpcpy.c \
-    $(MUSL_LIBC_SRC_DIR)/string/stpncpy.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strcasecmp.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strcasestr.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strcat.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strchr.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strchrnul.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strcmp.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strcpy.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strcspn.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strdup.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strerror_r.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strlcat.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strlcpy.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strlen.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strncasecmp.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strncat.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strncmp.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strncpy.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strndup.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strnlen.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strpbrk.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strrchr.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strsep.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strspn.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strstr.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strtok.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strtok_r.c \
-    $(MUSL_LIBC_SRC_DIR)/string/strverscmp.c \
-    $(MUSL_LIBC_SRC_DIR)/string/swab.c \
     $(MUSL_LIBC_SRC_DIR)/misc/a64l.c \
     $(MUSL_LIBC_SRC_DIR)/misc/basename.c \
     $(MUSL_LIBC_SRC_DIR)/misc/dirname.c \
@@ -195,13 +66,11 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/misc/ffsl.c \
     $(MUSL_LIBC_SRC_DIR)/misc/ffsll.c \
     $(MUSL_LIBC_SRC_DIR)/misc/fmtmsg.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/get_current_dir_name.c \
     $(MUSL_LIBC_SRC_DIR)/misc/getdomainname.c \
     $(MUSL_LIBC_SRC_DIR)/misc/gethostid.c \
     $(MUSL_LIBC_SRC_DIR)/misc/getopt.c \
     $(MUSL_LIBC_SRC_DIR)/misc/getopt_long.c \
     $(MUSL_LIBC_SRC_DIR)/misc/getsubopt.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/syslog.c \
     $(MUSL_LIBC_SRC_DIR)/misc/getentropy.c \
     $(MUSL_LIBC_SRC_DIR)/misc/uname.c \
     $(MUSL_LIBC_SRC_DIR)/errno/strerror.c \
@@ -209,9 +78,36 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/exit/exit.c \
     $(MUSL_LIBC_SRC_DIR)/exit/atexit.c \
     $(MUSL_LIBC_SRC_DIR)/exit/assert.c \
-    $(wildcard $(MUSL_LIBC_SRC_DIR)/string/w*.c) \
+    $(MUSL_LIBC_SRC_DIR)/time/strftime.c \
+    $(MUSL_LIBC_SRC_DIR)/time/asctime_r.c \
+    $(MUSL_LIBC_SRC_DIR)/time/wcsftime.c \
+    $(MUSL_LIBC_SRC_DIR)/time/strptime.c \
+    $(MUSL_LIBC_SRC_DIR)/time/difftime.c \
+    $(MUSL_LIBC_SRC_DIR)/time/timegm.c \
+    $(MUSL_LIBC_SRC_DIR)/time/ftime.c \
+    $(MUSL_LIBC_SRC_DIR)/time/gmtime.c \
+    $(MUSL_LIBC_SRC_DIR)/time/gmtime_r.c \
+    $(MUSL_LIBC_SRC_DIR)/time/__tm_to_secs.c \
+    $(MUSL_LIBC_SRC_DIR)/time/__month_to_secs.c \
+    $(MUSL_LIBC_SRC_DIR)/time/__secs_to_tm.c \
+    $(MUSL_LIBC_SRC_DIR)/time/__year_to_secs.c \
+    $(MUSL_LIBC_SRC_DIR)/time/__tz.c \
+    $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \
+                 $(wildcard $(MUSL_LIBC_SRC_DIR)/internal/*.c)) \
+    $(filter-out %/flockfile.c %/funlockfile.c %/__lockfile.c %/ftrylockfile.c \
+                 %/rename.c %/remove.c \
+                 %/tmpnam.c %/tmpfile.c %/tempnam.c \
+                 %/popen.c %/pclose.c,\
+                 $(wildcard $(MUSL_LIBC_SRC_DIR)/stdio/*.c)) \
+    $(filter-out %/strsignal.c, \
+                 $(wildcard $(MUSL_LIBC_SRC_DIR)/string/*.c)) \
+    $(filter-out %/uselocale.c %/newlocale.c %/freelocale.c \
+                 %/dcngettext.c %/textdomain.c, \
+                 $(wildcard $(MUSL_LIBC_SRC_DIR)/locale/*.c)) \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/stdlib/*.c) \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/search/*.c) \
+    $(wildcard $(MUSL_LIBC_SRC_DIR)/multibyte/*.c) \
+    $(wildcard $(MUSL_LIBC_SRC_DIR)/regex/*.c) \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/temp/*.c) \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/prng/*.c) \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/conf/*.c) \
@@ -328,16 +224,18 @@ $(LIBC_BOTTOM_HALF_ALL_OBJS): override WASM_CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_LIBPREOPEN_INC)
 
 $(MUSL_LIBC_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): override WASM_CFLAGS += \
-    -I $(MUSL_LIBC_SRC_DIR)/include \
-    -I $(MUSL_LIBC_SRC_DIR)/internal \
-    -I $(MUSL_LIBC_DIR)/arch/wasm32 \
-    -I $(MUSL_LIBC_DIR)/arch/generic \
-    -I $(LIBC_TOP_HALF_HEADERS_PRIVATE) \
+    -I$(MUSL_LIBC_SRC_DIR)/include \
+    -I$(MUSL_LIBC_SRC_DIR)/internal \
+    -I$(MUSL_LIBC_DIR)/arch/wasm32 \
+    -I$(MUSL_LIBC_DIR)/arch/generic \
+    -I$(LIBC_TOP_HALF_HEADERS_PRIVATE) \
+    -Wno-parentheses \
     -Wno-shift-op-parentheses \
+    -Wno-bitwise-op-parentheses \
+    -Wno-logical-op-parentheses \
     -Wno-string-plus-int \
     -Wno-dangling-else \
-    -Wno-unknown-pragmas \
-    -Wno-logical-op-parentheses
+    -Wno-unknown-pragmas
 
 $(SYSROOT): startup_files libc finish check
 
@@ -385,11 +283,46 @@ $(SYSROOT_INC):
 	      "$(SYSROOT_INC)/bits/msg.h" \
 	      "$(SYSROOT_INC)/sys/ipc.h" \
 	      "$(SYSROOT_INC)/bits/ipc.h" \
+	      "$(SYSROOT_INC)/syslog.h" \
+	      "$(SYSROOT_INC)/sys/syslog.h" \
+	      "$(SYSROOT_INC)/paths.h" \
+	      "$(SYSROOT_INC)/utmp.h" \
+	      "$(SYSROOT_INC)/utmpx.h" \
+	      "$(SYSROOT_INC)/lastlog.h" \
+	      "$(SYSROOT_INC)/sys/acct.h" \
+	      "$(SYSROOT_INC)/sys/cachectl.h" \
+	      "$(SYSROOT_INC)/sys/epoll.h" \
+	      "$(SYSROOT_INC)/sys/ptrace.h" \
+	      "$(SYSROOT_INC)/sys/reboot.h" \
+	      "$(SYSROOT_INC)/sys/swap.h" \
+	      "$(SYSROOT_INC)/sys/sendfile.h" \
+	      "$(SYSROOT_INC)/sys/quota.h" \
+	      "$(SYSROOT_INC)/sys/inotify.h" \
+	      "$(SYSROOT_INC)/sys/klog.h" \
+	      "$(SYSROOT_INC)/sys/fsuid.h" \
+	      "$(SYSROOT_INC)/sys/io.h" \
+	      "$(SYSROOT_INC)/sys/prctl.h" \
+	      "$(SYSROOT_INC)/sys/mtio.h" \
+	      "$(SYSROOT_INC)/sys/mount.h" \
+	      "$(SYSROOT_INC)/sys/fanotify.h" \
+	      "$(SYSROOT_INC)/sys/personality.h" \
+	      "$(SYSROOT_INC)/sys/wait.h" \
+	      "$(SYSROOT_INC)/wait.h" \
 	      "$(SYSROOT_INC)/bits/errno.h" \
 	      "$(SYSROOT_INC)/bits/link.h" \
 	      "$(SYSROOT_INC)/link.h" \
 	      "$(SYSROOT_INC)/elf.h" \
-	      "$(SYSROOT_INC)/sys/auxv.h"
+	      "$(SYSROOT_INC)/scsi/scsi.h" \
+	      "$(SYSROOT_INC)/scsi/scsi_ioctl.h" \
+	      "$(SYSROOT_INC)/scsi/sg.h" \
+	      "$(SYSROOT_INC)/sys/auxv.h" \
+	      "$(SYSROOT_INC)/pwd.h" \
+	      "$(SYSROOT_INC)/shadow.h" \
+	      "$(SYSROOT_INC)/grp.h" \
+	      "$(SYSROOT_INC)/mntent.h" \
+	      "$(SYSROOT_INC)/netdb.h" \
+	      "$(SYSROOT_INC)/resolv.h" \
+	      "$(SYSROOT_INC)/pty.h"
 
 startup_files: $(SYSROOT_INC)
 	#

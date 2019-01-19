@@ -62,6 +62,7 @@ const struct __locale_map *__get_locale(int cat, const char *val)
 			return p;
 		}
 
+#ifdef __wasilibc_unmodified_upstream__ // locales
 	if (!libc.secure) path = getenv("MUSL_LOCPATH");
 	/* FIXME: add a default path? */
 
@@ -90,6 +91,7 @@ const struct __locale_map *__get_locale(int cat, const char *val)
 			break;
 		}
 	}
+#endif
 
 	/* If no locale definition was found, make a locale map
 	 * object anyway to store the name, which is kept for the

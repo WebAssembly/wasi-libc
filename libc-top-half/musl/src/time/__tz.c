@@ -7,6 +7,7 @@
 #include "libc.h"
 #include "lock.h"
 
+#ifdef __wasilibc_unmodified_upstream__ // timezone data
 long  __timezone = 0;
 int   __daylight = 0;
 char *__tzname[2] = { 0, 0 };
@@ -17,8 +18,10 @@ weak_alias(__tzname, tzname);
 
 static char std_name[TZNAME_MAX+1];
 static char dst_name[TZNAME_MAX+1];
+#endif
 const char __utc[] = "UTC";
 
+#ifdef __wasilibc_unmodified_upstream__ // timezone data
 static int dst_off;
 static int r0[5], r1[5];
 
@@ -408,15 +411,18 @@ static void __tzset()
 }
 
 weak_alias(__tzset, tzset);
+#endif
 
 const char *__tm_to_tzname(const struct tm *tm)
 {
 	const void *p = tm->__tm_zone;
+#ifdef __wasilibc_unmodified_upstream__ // timezone data
 	LOCK(lock);
 	do_tzset();
 	if (p != __utc && p != __tzname[0] && p != __tzname[1] &&
 	    (!zi || (uintptr_t)p-(uintptr_t)abbrevs >= abbrevs_end - abbrevs))
 		p = "";
 	UNLOCK(lock);
+#endif
 	return p;
 }

@@ -27,6 +27,10 @@ struct __libc {
 	size_t tls_size, tls_align, tls_cnt;
 	size_t page_size;
 	struct __locale_struct global_locale;
+#if defined(__wasilibc_unmodified_upstream__) || defined(_REENTRANT)
+#else
+	struct __locale_struct *current_locale;
+#endif
 };
 
 #ifndef PAGE_SIZE

@@ -53,8 +53,10 @@ extern "C" {
 #define BUFSIZ 1024
 #define FILENAME_MAX 4096
 #define FOPEN_MAX 1000
+#ifdef __wasilibc_unmodified_upstream__
 #define TMP_MAX 10000
 #define L_tmpnam 20
+#endif
 
 typedef union _G_fpos64_t {
 	char __opaque[16];
@@ -131,8 +133,10 @@ void perror(const char *);
 int setvbuf(FILE *__restrict, char *__restrict, int, size_t);
 void setbuf(FILE *__restrict, char *__restrict);
 
+#ifdef __wasilibc_unmodified_upstream__
 char *tmpnam(char *);
 FILE *tmpfile(void);
+#endif
 
 #if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) \
  || defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) \
@@ -162,10 +166,12 @@ char *ctermid(char *);
 #endif
 
 
+#ifdef __wasilibc_unmodified_upstream__
 #if defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) \
  || defined(_BSD_SOURCE)
 #define P_tmpdir "/tmp"
 char *tempnam(const char *, const char *);
+#endif
 #endif
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)

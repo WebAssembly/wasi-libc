@@ -9,7 +9,9 @@
 FILE *__fdopen(int fd, const char *mode)
 {
 	FILE *f;
+#ifdef __wasilibc_unmodified_upstream__
 	struct winsize wsz;
+#endif
 
 	/* Check for valid initial mode character */
 	if (!strchr("rwa", *mode)) {

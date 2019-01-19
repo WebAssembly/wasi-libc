@@ -64,10 +64,3 @@ cloudabi_sys_sock_recv
 cloudabi_sys_sock_send
 cloudabi_sys_sock_shutdown
 cloudabi_sys_thread_yield
-connect
-getcwd
-getpid
-gmtime_r
-mblen
-mbtowc
-strftime

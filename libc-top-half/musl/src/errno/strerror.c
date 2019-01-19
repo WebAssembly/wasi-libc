@@ -1,8 +1,6 @@
 #include <errno.h>
 #include <string.h>
-#ifdef __wasilibc_unmodified_upstream__ // locales
 #include "locale_impl.h"
-#endif
 
 #define E(a,b) ((unsigned char)a),
 static const unsigned char errid[] = {
@@ -15,11 +13,7 @@ static const char errmsg[] =
 #include "__strerror.h"
 ;
 
-#ifdef __wasilibc_unmodified_upstream__ // locales
 char *__strerror_l(int e, locale_t loc)
-#else
-static char *__strerror(int e)
-#endif
 {
 	const char *s;
 	int i;
@@ -31,22 +25,12 @@ static char *__strerror(int e)
 	}
 	for (i=0; errid[i] && errid[i] != e; i++);
 	for (s=errmsg; i; s++, i--) for (; *s; s++);
-#ifdef __wasilibc_unmodified_upstream__ // locales
 	return (char *)LCTRANS(s, LC_MESSAGES, loc);
-#else
-	return (char *)s;
-#endif
 }
 
 char *strerror(int e)
 {
-#ifdef __wasilibc_unmodified_upstream__ // locales
 	return __strerror_l(e, CURRENT_LOCALE);
-#else
-	return __strerror(e);
-#endif
 }
 
-#ifdef __wasilibc_unmodified_upstream__ // locales
 weak_alias(__strerror_l, strerror_l);
-#endif

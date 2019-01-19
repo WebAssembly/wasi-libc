@@ -4,7 +4,9 @@
 #include <locale.h>
 #include <stdlib.h>
 #include "libc.h"
+#if defined(__wasilibc_unmodified_upstream__) || defined(_REENTRANT)
 #include "pthread_impl.h"
+#endif
 
 #define LOCALE_NAME_MAX 23
 
@@ -35,9 +37,15 @@ hidden char *__gettextdomain(void);
 #define C_LOCALE ((locale_t)&__c_locale)
 #define UTF8_LOCALE ((locale_t)&__c_dot_utf8_locale)
 
+#if defined(__wasilibc_unmodified_upstream__) || defined(_REENTRANT)
 #define CURRENT_LOCALE (__pthread_self()->locale)
 
 #define CURRENT_UTF8 (!!__pthread_self()->locale->cat[LC_CTYPE])
+#else
+#define CURRENT_LOCALE (*(libc.current_locale = &libc.global_locale, &libc.current_locale))
+
+#define CURRENT_UTF8 (!!libc.global_locale.cat[LC_CTYPE])
+#endif
 
 #undef MB_CUR_MAX
 #define MB_CUR_MAX (CURRENT_UTF8 ? 4 : 1)

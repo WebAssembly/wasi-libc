@@ -11,6 +11,9 @@ struct tm {
     int tm_wday;
     int tm_yday;
     int tm_isdst;
+    int __tm_gmtoff;
+    const char *__tm_zone;
+    int __tm_nsec;
 };
 
 #endif

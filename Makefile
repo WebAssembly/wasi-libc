@@ -193,7 +193,7 @@ LIBC_TOP_HALF_HEADERS_PRIVATE = $(LIBC_TOP_HALF_DIR)/headers/private
 
 # Set the target variables. The multiarch triple is the same as the
 # regular triple for wasm, except that it excludes the vendor field.
-TARGET_TRIPLE = wasm32-unknown-musl-wasi
+TARGET_TRIPLE = wasm32-unknown-wasi-musl
 MULTIARCH_TRIPLE = wasm32-wasi-musl
 
 # These variables describe the locations of various files and

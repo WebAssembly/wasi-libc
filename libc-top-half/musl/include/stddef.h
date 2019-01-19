@@ -26,10 +26,10 @@
 #endif
 #else
 
-// Just use the compiler's stddef.h.
+/* Just use the compiler's stddef.h. */
 #include_next <stddef.h>
 
-// Define musl's include guard, in case any code depends on that.
+/* Define musl's include guard, in case any code depends on that. */
 #if defined(__STDDEF_H) && !defined(_STDDEF_H)
 #define _STDDEF_H
 #endif

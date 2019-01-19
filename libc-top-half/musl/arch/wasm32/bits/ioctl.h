@@ -1,1 +1,1 @@
-// Use the WASI libc ioctl implementation bits.
+/* Use the WASI libc ioctl implementation bits. */

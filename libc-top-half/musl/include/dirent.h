@@ -5,7 +5,6 @@
 #else
 #include <__wasilibc_dirent.h>
 #endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

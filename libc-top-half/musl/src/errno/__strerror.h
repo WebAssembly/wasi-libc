@@ -119,7 +119,6 @@ E(ENOMEDIUM,    "No medium found")
 E(EMEDIUMTYPE,  "Wrong medium type")
 #endif
 E(EMULTIHOP,    "Multihop attempted")
-
 #ifdef __wasilibc_unmodified_upstream__ // errno value in WASI and not musl
 #else
 // WASI adds this errno code.

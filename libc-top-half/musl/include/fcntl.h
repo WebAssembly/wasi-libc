@@ -5,7 +5,6 @@
 #else
 #include <__wasilibc_fcntl.h>
 #endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -22,6 +22,7 @@ extern "C" {
 
 #include <bits/stat.h>
 
+#ifdef __wasilibc_unmodified_upstream__
 #define st_atime st_atim.tv_sec
 #define st_mtime st_mtim.tv_sec
 #define st_ctime st_ctim.tv_sec
@@ -69,6 +70,9 @@ extern "C" {
 
 #define UTIME_NOW  0x3fffffff
 #define UTIME_OMIT 0x3ffffffe
+#else
+#include <__wasilibc_sys_stat.h>
+#endif
 
 int stat(const char *__restrict, struct stat *__restrict);
 int fstat(int, struct stat *);

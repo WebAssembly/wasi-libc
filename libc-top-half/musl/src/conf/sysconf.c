@@ -26,10 +26,20 @@ long sysconf(int name)
 {
 	static const short values[] = {
 		[_SC_ARG_MAX] = JT_ARG_MAX,
+#ifdef __wasilibc_unmodified_upstream__
 		[_SC_CHILD_MAX] = RLIM(NPROC),
+#else
+                // Not supported on wasi.
+		[_SC_CHILD_MAX] = -1,
+#endif
 		[_SC_CLK_TCK] = 100,
 		[_SC_NGROUPS_MAX] = 32,
+#ifdef __wasilibc_unmodified_upstream__
 		[_SC_OPEN_MAX] = RLIM(NOFILE),
+#else
+                // Not supported on wasi.
+		[_SC_OPEN_MAX] = -1,
+#endif
 		[_SC_STREAM_MAX] = -1,
 		[_SC_TZNAME_MAX] = TZNAME_MAX,
 		[_SC_JOB_CONTROL] = 1,
@@ -173,11 +183,17 @@ long sysconf(int name)
 	} else if (values[name] >= -1) {
 		return values[name];
 	} else if (values[name] < -256) {
+#ifdef __wasilibc_unmodified_upstream__
 		struct rlimit lim;
 		getrlimit(values[name]&16383, &lim);
 		if (lim.rlim_cur == RLIM_INFINITY)
 			return -1;
 		return lim.rlim_cur > LONG_MAX ? LONG_MAX : lim.rlim_cur;
+#else
+                // Not supported on wasi.
+		errno = EINVAL;
+		return -1;
+#endif
 	}
 
 	switch ((unsigned char)values[name]) {

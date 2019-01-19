@@ -1,9 +1,10 @@
 #ifndef __wasilibc_sys_resource_h
 #define __wasilibc_sys_resource_h
 
-#include <__struct_rusage.h>
-
-#define RUSAGE_SELF 1
-#define RUSAGE_CHILDREN 2
+/*
+ * Include the real implementation, which is factored into a separate file so
+ * that it can be reused by other libc resource implementations.
+ */
+#include <__wasilibc_sys_resource.h>
 
 #endif

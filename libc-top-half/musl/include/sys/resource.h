@@ -17,6 +17,7 @@ extern "C" {
 #include <bits/alltypes.h>
 #include <bits/resource.h>
 
+#ifdef __wasilibc_unmodified_upstream__
 typedef unsigned long long rlim_t;
 
 struct rlimit {
@@ -24,7 +25,6 @@ struct rlimit {
 	rlim_t rlim_max;
 };
 
-#ifdef __wasilibc_unmodified_upstream__
 struct rusage {
 	struct timeval ru_utime;
 	struct timeval ru_stime;
@@ -47,7 +47,7 @@ struct rusage {
 	long    __reserved[16];
 };
 #else
-#include <__struct_rusage.h>
+#include <__wasilibc_sys_resource.h>
 #endif
 
 int getrlimit (int, struct rlimit *);
@@ -62,6 +62,7 @@ int prlimit(pid_t, int, const struct rlimit *, struct rlimit *);
 #define prlimit64 prlimit
 #endif
 
+#ifdef __wasilibc_unmodified_upstream__
 #define PRIO_MIN (-20)
 #define PRIO_MAX 20
 
@@ -97,6 +98,7 @@ int prlimit(pid_t, int, const struct rlimit *, struct rlimit *);
 #define RLIMIT_NLIMITS 15
 
 #define RLIM_NLIMITS RLIMIT_NLIMITS
+#endif
 
 #if defined(_LARGEFILE64_SOURCE) || defined(_GNU_SOURCE)
 #define RLIM64_INFINITY RLIM_INFINITY

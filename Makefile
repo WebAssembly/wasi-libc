@@ -110,6 +110,36 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/stdio/__fmodeflags.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/ofl.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/perror.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/ext2.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/ext.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/__fclose_ca.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/__fdopen.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/fgetc.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/fgetln.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/fgetpos.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/fileno.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/fmemopen.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/fopencookie.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/__fopen_rb_ca.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/freopen.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/fsetpos.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/getchar.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/getchar_unlocked.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/getc_unlocked.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/getdelim.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/getline.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/gets.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/ofl_add.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/open_memstream.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/putchar.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/putchar_unlocked.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/putc_unlocked.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/rewind.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/setbuf.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/setbuffer.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/setlinebuf.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/setvbuf.c \
+    $(MUSL_LIBC_SRC_DIR)/stdio/ungetc.c \
     $(MUSL_LIBC_SRC_DIR)/internal/intscan.c \
     $(MUSL_LIBC_SRC_DIR)/internal/floatscan.c \
     $(MUSL_LIBC_SRC_DIR)/internal/shgetc.c \

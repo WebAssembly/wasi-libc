@@ -10,7 +10,11 @@ struct tm *getdate(const char *s)
 {
 	static struct tm tmbuf;
 	struct tm *ret = 0;
+#ifdef __wasilibc_unmodified_upstream__ // getenv
 	char *datemsk = getenv("DATEMSK");
+#else
+	char *datemsk = NULL;
+#endif
 	FILE *f = 0;
 	char fmt[100], *p;
 	int cs;

@@ -73,7 +73,6 @@
 #include <ctype.h>
 #include <dirent.h.~1~>
 #include <dirent.h>
-#include <dlfcn.h>
 #include <endian.h>
 #include <err.h>
 #include <errno.h.~1~>
@@ -124,12 +123,10 @@
 #include <poll.h.~1~>
 #include <poll.h>
 #include <pthread.h>
-#include <pty.h>
 #include <regex.h>
 #include <sched.h>
 #include <search.h>
 #include <semaphore.h>
-#include <setjmp.h>
 #include <signal.h>
 #include <spawn.h>
 #include <stdalign.h>
@@ -173,8 +170,6 @@
 #include <sys/stat.h.~1~>
 #include <sys/stat.h.~2~>
 #include <sys/stat.h>
-#include <sys/statfs.h>
-#include <sys/statvfs.h>
 #include <sys/stropts.h>
 #include <sys/syscall.h>
 #include <sys/sysinfo.h>
@@ -197,7 +192,6 @@
 #include <sys/un.h.~1~>
 #include <sys/un.h>
 #include <sys/utsname.h>
-#include <sys/vfs.h>
 #include <sys/xattr.h>
 #include <syscall.h>
 #include <sysexits.h>

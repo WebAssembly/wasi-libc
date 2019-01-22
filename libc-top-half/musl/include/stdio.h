@@ -104,8 +104,10 @@ int putc(int, FILE *);
 int putchar(int);
 
 char *fgets(char *__restrict, int, FILE *__restrict);
+#ifdef __wasilibc_unmodified_upstream__
 #if __STDC_VERSION__ < 201112L
 char *gets(char *);
+#endif
 #endif
 
 int fputs(const char *__restrict, FILE *__restrict);

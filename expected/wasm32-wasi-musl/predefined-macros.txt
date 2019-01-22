@@ -2193,15 +2193,6 @@
 #define RTF_UP 0x0001
 #define RTF_WINDOW 0x0080
 #define RTF_XRESOLVE 0x0800
-#define RTLD_DEFAULT ((void *)0)
-#define RTLD_DI_LINKMAP 2
-#define RTLD_GLOBAL 256
-#define RTLD_LAZY 1
-#define RTLD_LOCAL 0
-#define RTLD_NEXT ((void *)-1)
-#define RTLD_NODELETE 4096
-#define RTLD_NOLOAD 4
-#define RTLD_NOW 2
 #define RTMSG_ACK NLMSG_ACK
 #define RTMSG_AR_FAILED 0x51
 #define RTMSG_CONTROL 0x40
@@ -2423,18 +2414,6 @@
 #define STRU_F 1
 #define STRU_P 3
 #define STRU_R 2
-#define ST_APPEND 256
-#define ST_IMMUTABLE 512
-#define ST_MANDLOCK 64
-#define ST_NOATIME 1024
-#define ST_NODEV 4
-#define ST_NODIRATIME 2048
-#define ST_NOEXEC 8
-#define ST_NOSUID 2
-#define ST_RDONLY 1
-#define ST_RELATIME 4096
-#define ST_SYNCHRONOUS 16
-#define ST_WRITE 128
 #define SUN_LEN(s) (2+strlen((s)->sun_path))
 #define SUSP 237
 #define SYMLOOP_MAX 40
@@ -2870,7 +2849,6 @@
 #define _DIRENT_HAVE_D_OFF 
 #define _DIRENT_HAVE_D_RECLEN 
 #define _DIRENT_HAVE_D_TYPE 
-#define _DLFCN_H 
 #define _ENDIAN_H 
 #define _ERRNO_H 
 #define _ERR_H 
@@ -3035,7 +3013,6 @@
 #define _POSIX_VERSION 200809L
 #define _PTHREAD_H 
 #define _PTRDIFF_T 
-#define _PTY_H 
 #define _REGEX_H 
 #define _SCHED_H 
 #define _SC_2_CHAR_TERM 95
@@ -3181,7 +3158,6 @@
 #define _SC_XOPEN_XPG4 100
 #define _SEARCH_H 
 #define _SEMAPHORE_H 
-#define _SETJMP_H 
 #define _SIGNAL_H 
 #define _SIZE_T 
 #define _SPAWN_H 
@@ -3210,8 +3186,6 @@
 #define _SYS_SELECT_H 
 #define _SYS_SIGNALFD_H 
 #define _SYS_SOCKET_H 
-#define _SYS_STATFS_H 
-#define _SYS_STATVFS_H 
 #define _SYS_STAT_H 
 #define _SYS_SYSCALL_H 
 #define _SYS_SYSINFO_H 

@@ -73,11 +73,16 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/misc/getsubopt.c \
     $(MUSL_LIBC_SRC_DIR)/misc/getentropy.c \
     $(MUSL_LIBC_SRC_DIR)/misc/uname.c \
+    $(MUSL_LIBC_SRC_DIR)/misc/nftw.c \
     $(MUSL_LIBC_SRC_DIR)/errno/strerror.c \
+    $(MUSL_LIBC_SRC_DIR)/network/htonl.c \
+    $(MUSL_LIBC_SRC_DIR)/network/htons.c \
     $(MUSL_LIBC_SRC_DIR)/fenv/fenv.c \
     $(MUSL_LIBC_SRC_DIR)/exit/exit.c \
     $(MUSL_LIBC_SRC_DIR)/exit/atexit.c \
     $(MUSL_LIBC_SRC_DIR)/exit/assert.c \
+    $(MUSL_LIBC_SRC_DIR)/exit/quick_exit.c \
+    $(MUSL_LIBC_SRC_DIR)/exit/at_quick_exit.c \
     $(MUSL_LIBC_SRC_DIR)/time/strftime.c \
     $(MUSL_LIBC_SRC_DIR)/time/asctime_r.c \
     $(MUSL_LIBC_SRC_DIR)/time/wcsftime.c \
@@ -92,12 +97,14 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/time/__secs_to_tm.c \
     $(MUSL_LIBC_SRC_DIR)/time/__year_to_secs.c \
     $(MUSL_LIBC_SRC_DIR)/time/__tz.c \
+    $(MUSL_LIBC_SRC_DIR)/fcntl/creat.c \
     $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \
                  $(wildcard $(MUSL_LIBC_SRC_DIR)/internal/*.c)) \
     $(filter-out %/flockfile.c %/funlockfile.c %/__lockfile.c %/ftrylockfile.c \
                  %/rename.c %/remove.c \
                  %/tmpnam.c %/tmpfile.c %/tempnam.c \
-                 %/popen.c %/pclose.c,\
+                 %/popen.c %/pclose.c \
+                 %/gets.c, \
                  $(wildcard $(MUSL_LIBC_SRC_DIR)/stdio/*.c)) \
     $(filter-out %/strsignal.c, \
                  $(wildcard $(MUSL_LIBC_SRC_DIR)/string/*.c)) \
@@ -277,6 +284,10 @@ $(SYSROOT_INC):
 	      "$(SYSROOT_INC)/bits/soundcard.h" \
 	      "$(SYSROOT_INC)/sys/sem.h" \
 	      "$(SYSROOT_INC)/bits/sem.h" \
+	      "$(SYSROOT_INC)/sys/statfs.h" \
+	      "$(SYSROOT_INC)/sys/vfs.h" \
+	      "$(SYSROOT_INC)/bits/statfs.h" \
+	      "$(SYSROOT_INC)/sys/statvfs.h" \
 	      "$(SYSROOT_INC)/sys/shm.h" \
 	      "$(SYSROOT_INC)/bits/shm.h" \
 	      "$(SYSROOT_INC)/sys/msg.h" \
@@ -293,6 +304,7 @@ $(SYSROOT_INC):
 	      "$(SYSROOT_INC)/sys/cachectl.h" \
 	      "$(SYSROOT_INC)/sys/epoll.h" \
 	      "$(SYSROOT_INC)/sys/ptrace.h" \
+	      "$(SYSROOT_INC)/bits/ptrace.h" \
 	      "$(SYSROOT_INC)/sys/reboot.h" \
 	      "$(SYSROOT_INC)/sys/swap.h" \
 	      "$(SYSROOT_INC)/sys/sendfile.h" \
@@ -316,13 +328,15 @@ $(SYSROOT_INC):
 	      "$(SYSROOT_INC)/scsi/scsi_ioctl.h" \
 	      "$(SYSROOT_INC)/scsi/sg.h" \
 	      "$(SYSROOT_INC)/sys/auxv.h" \
+	      "$(SYSROOT_INC)/setjmp.h" \
 	      "$(SYSROOT_INC)/pwd.h" \
 	      "$(SYSROOT_INC)/shadow.h" \
 	      "$(SYSROOT_INC)/grp.h" \
 	      "$(SYSROOT_INC)/mntent.h" \
 	      "$(SYSROOT_INC)/netdb.h" \
 	      "$(SYSROOT_INC)/resolv.h" \
-	      "$(SYSROOT_INC)/pty.h"
+	      "$(SYSROOT_INC)/pty.h" \
+	      "$(SYSROOT_INC)/dlfcn.h"
 
 startup_files: $(SYSROOT_INC)
 	#

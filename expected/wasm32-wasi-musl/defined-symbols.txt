@@ -533,6 +533,8 @@ getc
 getc_unlocked
 getchar
 getchar_unlocked
+getdate
+getdate_err
 getdelim
 getdomainname
 getentropy

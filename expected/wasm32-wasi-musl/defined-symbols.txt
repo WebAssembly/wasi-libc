@@ -65,6 +65,7 @@ __freadahead
 __freading
 __freadptr
 __freadptrinc
+__freelocale
 __fseeko
 __fseeko_unlocked
 __fseterr
@@ -134,10 +135,12 @@ __lgammaf_r
 __lgammal_r
 __libc
 __libc_exit_fini
+__loc_is_allocated
 __memrchr
 __mkostemps
 __mo_lookup
 __month_to_secs
+__newlocale
 __nl_langinfo
 __nl_langinfo_l
 __ofl_add
@@ -228,6 +231,7 @@ __tre_mem_new_impl
 __tsearch_balance
 __uflow
 __unlist_locked_file
+__uselocale
 __utc
 __wasilibc_register_preopened_fd
 __wcscoll_l
@@ -444,6 +448,7 @@ feraiseexcept
 ferror
 ferror_unlocked
 fesetenv
+fesetround
 fetestexcept
 fflush
 fflush_unlocked
@@ -500,6 +505,7 @@ fputws_unlocked
 fread
 fread_unlocked
 free
+freelocale
 freopen
 freopen64
 frexp
@@ -738,6 +744,7 @@ nanosleep
 nearbyint
 nearbyintf
 nearbyintl
+newlocale
 nextafter
 nextafterf
 nextafterl
@@ -983,6 +990,7 @@ ungetc
 ungetwc
 unlink
 unlinkat
+uselocale
 usleep
 utimensat
 vasprintf

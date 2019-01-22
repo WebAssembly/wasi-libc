@@ -320,11 +320,12 @@ mips64*|mipsisa64*) ARCH=mips64 ;;
 mips*) ARCH=mips ;;
 microblaze*) ARCH=microblaze ;;
 or1k*) ARCH=or1k ;;
-powerpc64*) ARCH=powerpc64 ;;
-powerpc*) ARCH=powerpc ;;
-wasm*) ARCH=wasm32 ;;
+powerpc64*|ppc64*) ARCH=powerpc64 ;;
+powerpc*|ppc*) ARCH=powerpc ;;
 sh[1-9bel-]*|sh|superh*) ARCH=sh ;;
 s390x*) ARCH=s390x ;;
+wasm32) ARCH=wasm32 ;;
+wasm64) ARCH=wasm64 ;;
 unknown) fail "$0: unable to detect target arch; try $0 --target=..." ;;
 *) fail "$0: unknown or unsupported target \"$target\"" ;;
 esac

@@ -35,6 +35,12 @@ static void clean_dirty_tsd_callback(void *p)
 	if (args->caller == self) args->ret = 0;
 }
 
+static void dummy2(void (*f)(void *), void *p)
+{
+}
+
+weak_alias(dummy2, __pthread_key_delete_synccall);
+
 static int clean_dirty_tsd(void)
 {
 	struct cleanup_args args = {

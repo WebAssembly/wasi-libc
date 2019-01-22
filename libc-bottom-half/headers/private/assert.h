@@ -4,4 +4,4 @@
 #define static_assert _Static_assert
 #endif
 
-#define assert(x) ((void)((x) || (abort(),0)))
+#define assert(x) ((void)((x) || (abort(), 0)))

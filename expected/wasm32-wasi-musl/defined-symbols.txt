@@ -255,6 +255,7 @@ acosh
 acoshf
 acoshl
 acosl
+aligned_alloc
 alphasort
 alphasort64
 asctime_r
@@ -390,7 +391,6 @@ ctanl
 difftime
 dirname
 div
-dlmalloc_usable_size
 dprintf
 drand48
 drem
@@ -693,6 +693,7 @@ lsearch
 lseek
 lstat
 malloc
+malloc_usable_size
 mblen
 mbrlen
 mbrtoc16

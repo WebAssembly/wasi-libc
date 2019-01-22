@@ -1,3 +1,10 @@
+/*
+ * This file is a wrapper around malloc.c, which is the upstream source file.
+ * It sets configuration flags and controls which symbols are exported.
+ */
+
+#include <stddef.h>
+
 /* Define configuration macros for dlmalloc. */
 
 /* WebAssembly doesn't have mmap-style memory allocation. */
@@ -37,6 +44,9 @@ extern const int __EINVAL;
 #define USE_DL_PREFIX 1
 #define DLMALLOC_EXPORT static inline
 
+/* This isn't declared with DLMALLOC_EXPORT so make it static explicitly. */
+static size_t dlmalloc_usable_size(void*);
+
 /* Include the upstream dlmalloc's malloc.c. */
 #include "malloc.c"
 
@@ -60,4 +70,12 @@ void *realloc(void *ptr, size_t size) {
 
 int posix_memalign(void **memptr, size_t alignment, size_t size) {
     return dlposix_memalign(memptr, alignment, size);
+}
+
+void* aligned_alloc(size_t alignment, size_t bytes) {
+    return dlmemalign(alignment, bytes);
+}
+
+size_t malloc_usable_size(void *ptr) {
+    return dlmalloc_usable_size(ptr);
 }

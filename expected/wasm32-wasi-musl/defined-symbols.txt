@@ -69,6 +69,8 @@ __ftello
 __ftello_unlocked
 __funcs_on_exit
 __funcs_on_exit
+__funcs_on_quick_exit
+__funcs_on_quick_exit
 __fwritable
 __fwritex
 __fwriting
@@ -257,6 +259,7 @@ asinhf
 asinhl
 asinl
 asprintf
+at_quick_exit
 atan
 atan2
 atan2f
@@ -361,6 +364,8 @@ cprojl
 creal
 crealf
 creall
+creat
+creat64
 crypt
 crypt_r
 csin
@@ -536,7 +541,6 @@ getopt
 getopt_long
 getopt_long_only
 getrusage
-gets
 getsockopt
 getsubopt
 gettimeofday
@@ -557,6 +561,8 @@ hdestroy
 hdestroy_r
 hsearch
 hsearch_r
+htonl
+htons
 hypot
 hypotf
 hypotl
@@ -721,6 +727,7 @@ munmap
 nan
 nanf
 nanl
+nanosleep
 nearbyint
 nearbyintf
 nearbyintl
@@ -730,6 +737,8 @@ nextafterl
 nexttoward
 nexttowardf
 nexttowardl
+nftw
+nftw64
 nl_langinfo
 nl_langinfo_l
 nrand48
@@ -776,6 +785,7 @@ putwchar_unlocked
 pwrite
 pwritev
 qsort
+quick_exit
 rand
 rand_r
 random
@@ -845,6 +855,7 @@ sinh
 sinhf
 sinhl
 sinl
+sleep
 snprintf
 socket
 socketpair

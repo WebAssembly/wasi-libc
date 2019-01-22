@@ -77,6 +77,8 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/errno/strerror.c \
     $(MUSL_LIBC_SRC_DIR)/network/htonl.c \
     $(MUSL_LIBC_SRC_DIR)/network/htons.c \
+    $(MUSL_LIBC_SRC_DIR)/network/ntohl.c \
+    $(MUSL_LIBC_SRC_DIR)/network/ntohs.c \
     $(MUSL_LIBC_SRC_DIR)/fenv/fenv.c \
     $(MUSL_LIBC_SRC_DIR)/exit/exit.c \
     $(MUSL_LIBC_SRC_DIR)/exit/atexit.c \
@@ -100,6 +102,8 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/time/__year_to_secs.c \
     $(MUSL_LIBC_SRC_DIR)/time/__tz.c \
     $(MUSL_LIBC_SRC_DIR)/fcntl/creat.c \
+    $(MUSL_LIBC_SRC_DIR)/dirent/alphasort.c \
+    $(MUSL_LIBC_SRC_DIR)/dirent/versionsort.c \
     $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \
                  $(wildcard $(MUSL_LIBC_SRC_DIR)/internal/*.c)) \
     $(filter-out %/flockfile.c %/funlockfile.c %/__lockfile.c %/ftrylockfile.c \

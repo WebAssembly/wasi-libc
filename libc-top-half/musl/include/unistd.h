@@ -166,13 +166,17 @@ unsigned ualarm(unsigned, unsigned);
 #define L_SET 0
 #define L_INCR 1
 #define L_XTND 2
+#ifdef __wasilibc_unmodified_upstream__
 int brk(void *);
+#endif
 void *sbrk(intptr_t);
 pid_t vfork(void);
 int vhangup(void);
 int chroot(const char *);
+#ifdef __wasilibc_unmodified_upstream__
 int getpagesize(void);
 int getdtablesize(void);
+#endif
 int sethostname(const char *, size_t);
 int getdomainname(char *, size_t);
 int setdomainname(const char *, size_t);

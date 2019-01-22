@@ -257,7 +257,6 @@ acoshl
 acosl
 alphasort
 alphasort64
-arc4random_buf
 asctime_r
 asin
 asinf

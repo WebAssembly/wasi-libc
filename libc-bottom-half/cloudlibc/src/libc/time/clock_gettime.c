@@ -9,7 +9,11 @@
 #include <errno.h>
 #include <time.h>
 
+#ifdef __wasilibc_unmodified_upstream__
 int clock_gettime(clockid_t clock_id, struct timespec *tp) {
+#else
+int __clock_gettime(clockid_t clock_id, struct timespec *tp) {
+#endif
   cloudabi_timestamp_t ts;
   cloudabi_errno_t error = cloudabi_sys_clock_time_get(clock_id->id, 1, &ts);
   if (error != 0) {
@@ -19,3 +23,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp) {
   *tp = timestamp_to_timespec(ts);
   return 0;
 }
+#ifdef __wasilibc_unmodified_upstream__
+#else
+extern __typeof(__clock_gettime) clock_gettime __attribute__((weak, alias("__clock_gettime")));
+#endif

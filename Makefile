@@ -93,6 +93,7 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/time/gmtime.c \
     $(MUSL_LIBC_SRC_DIR)/time/gmtime_r.c \
     $(MUSL_LIBC_SRC_DIR)/time/timespec_get.c \
+    $(MUSL_LIBC_SRC_DIR)/time/getdate.c \
     $(MUSL_LIBC_SRC_DIR)/time/__tm_to_secs.c \
     $(MUSL_LIBC_SRC_DIR)/time/__month_to_secs.c \
     $(MUSL_LIBC_SRC_DIR)/time/__secs_to_tm.c \

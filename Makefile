@@ -80,6 +80,7 @@ MUSL_LIBC_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/network/ntohl.c \
     $(MUSL_LIBC_SRC_DIR)/network/ntohs.c \
     $(MUSL_LIBC_SRC_DIR)/fenv/fenv.c \
+    $(MUSL_LIBC_SRC_DIR)/fenv/fesetround.c \
     $(MUSL_LIBC_SRC_DIR)/exit/exit.c \
     $(MUSL_LIBC_SRC_DIR)/exit/atexit.c \
     $(MUSL_LIBC_SRC_DIR)/exit/assert.c \
@@ -114,8 +115,7 @@ MUSL_LIBC_SOURCES = \
                  $(wildcard $(MUSL_LIBC_SRC_DIR)/stdio/*.c)) \
     $(filter-out %/strsignal.c, \
                  $(wildcard $(MUSL_LIBC_SRC_DIR)/string/*.c)) \
-    $(filter-out %/uselocale.c %/newlocale.c %/freelocale.c \
-                 %/dcngettext.c %/textdomain.c, \
+    $(filter-out %/dcngettext.c %/textdomain.c, \
                  $(wildcard $(MUSL_LIBC_SRC_DIR)/locale/*.c)) \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/stdlib/*.c) \
     $(wildcard $(MUSL_LIBC_SRC_DIR)/search/*.c) \
@@ -379,7 +379,7 @@ finish: $(SYSROOT_INC) libc
 	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_COLLATE=C sort > "$(SYSROOT_SHARE)/defined-symbols.txt"
 	for undef_sym in $$($(WASM_NM) --undefined-only "$(SYSROOT_LIB)"/*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' U ' |sed 's/.* U //' |LC_COLLATE=C sort |uniq); do \
-	    grep -q $$undef_sym "$(SYSROOT_SHARE)/defined-symbols.txt" || echo $$undef_sym; \
+	    grep -q '\<'$$undef_sym'\>' "$(SYSROOT_SHARE)/defined-symbols.txt" || echo $$undef_sym; \
 	done   > "$(SYSROOT_SHARE)/undefined-symbols.txt"
 	grep ^cloudabi_sys_ "$(SYSROOT_SHARE)/undefined-symbols.txt" \
 	    > "$(SYSROOT_LIB)/libc.imports"

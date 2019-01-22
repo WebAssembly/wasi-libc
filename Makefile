@@ -132,7 +132,8 @@ MUSL_PRINTSCAN_SOURCES = \
     $(MUSL_LIBC_SRC_DIR)/internal/floatscan.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/vfprintf.c \
     $(MUSL_LIBC_SRC_DIR)/stdio/vfscanf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdlib/strtod.c
+    $(MUSL_LIBC_SRC_DIR)/stdlib/strtod.c \
+    $(MUSL_LIBC_SRC_DIR)/stdlib/wcstod.c
 LIBC_TOP_HALF_HEADERS_PRIVATE = $(LIBC_TOP_HALF_DIR)/headers/private
 
 # Set the target variables. The multiarch triple is the same as the

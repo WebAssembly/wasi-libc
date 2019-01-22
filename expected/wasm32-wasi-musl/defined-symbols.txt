@@ -1,5 +1,9 @@
 CMSG_FIRSTHDR
 CMSG_NXTHDR
+FD_CLR
+FD_COPY
+FD_ISSET
+FD_SET
 FD_ZERO
 _CLOCK_MONOTONIC
 _CLOCK_PROCESS_CPUTIME_ID
@@ -251,6 +255,8 @@ acosh
 acoshf
 acoshl
 acosl
+alphasort
+alphasort64
 arc4random_buf
 asctime_r
 asin
@@ -294,8 +300,6 @@ cacoshf
 cacoshl
 cacosl
 calloc
-cap_rights_get_explicit
-cap_rights_limit_explicit
 carg
 cargf
 cargl
@@ -745,6 +749,8 @@ nftw64
 nl_langinfo
 nl_langinfo_l
 nrand48
+ntohl
+ntohs
 open
 open_memstream
 open_wmemstream
@@ -970,9 +976,12 @@ uname
 ungetc
 ungetwc
 unlinkat
+usleep
 utimensat
 vasprintf
 vdprintf
+versionsort
+versionsort64
 vfprintf
 vfscanf
 vfwprintf

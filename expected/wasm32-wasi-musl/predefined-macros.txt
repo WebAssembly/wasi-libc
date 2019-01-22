@@ -844,6 +844,7 @@
 #define EX__MAX 78
 #define FD_CLOEXEC 1
 #define FD_CLR(fd,set) FD_CLR((fd), (set))
+#define FD_COPY(from,to) FD_COPY(from, to)
 #define FD_ISSET(fd,set) FD_ISSET((fd), (set))
 #define FD_SET(fd,set) FD_SET((fd), (set))
 #define FD_SETSIZE 1024

@@ -309,6 +309,81 @@ dlopen(const char *path, int mode)
 	return fdlopen(openat(rel.dirfd, rel.relative_path, 0, mode), mode);
 }
 #endif
+#ifdef __wasilibc_unmodified_upstream__
+#else
+#include <dirent.h>
+
+int
+unlink(const char *pathname)
+{
+	struct po_relpath rel_pathname = find_relative(pathname, NULL);
+
+	return unlinkat(rel_pathname.dirfd, rel_pathname.relative_path, 0);
+}
+
+int
+rmdir(const char *pathname)
+{
+	struct po_relpath rel_pathname = find_relative(pathname, NULL);
+
+	return unlinkat(rel_pathname.dirfd, rel_pathname.relative_path, AT_REMOVEDIR);
+}
+
+int
+link(const char *oldpath, const char *newpath)
+{
+	struct po_relpath rel_oldpath = find_relative(oldpath, NULL);
+	struct po_relpath rel_newpath = find_relative(newpath, NULL);
+
+	return linkat(rel_oldpath.dirfd, rel_oldpath.relative_path,
+                      rel_newpath.dirfd, rel_newpath.relative_path,
+                      0);
+}
+
+int
+mkdir(const char *pathname, mode_t mode)
+{
+	struct po_relpath rel_pathname = find_relative(pathname, NULL);
+
+        return mkdirat(rel_pathname.dirfd, rel_pathname.relative_path, mode);
+}
+
+DIR *
+opendir(const char *name)
+{
+	struct po_relpath rel_name = find_relative(name, NULL);
+
+        return opendirat(rel_name.dirfd, rel_name.relative_path);
+}
+
+ssize_t
+readlink(const char *pathname, char *buf, size_t bufsiz)
+{
+	struct po_relpath rel_pathname = find_relative(pathname, NULL);
+
+        return readlinkat(rel_pathname.dirfd, rel_pathname.relative_path,
+                          buf, bufsiz);
+}
+
+int
+scandir(const char *dirp, struct dirent ***namelist,
+        int (*filter)(const struct dirent *),
+        int (*compar)(const struct dirent **, const struct dirent **))
+{
+	struct po_relpath rel_dirp = find_relative(dirp, NULL);
+
+        return scandirat(rel_dirp.dirfd, rel_dirp.relative_path,
+                         namelist, filter, compar);
+}
+
+int
+symlink(const char *target, const char *linkpath)
+{
+	struct po_relpath rel_target = find_relative(target, NULL);
+
+        return symlinkat(rel_target.dirfd, rel_target.relative_path, linkpath);
+}
+#endif
 
 #ifdef __wasilibc_unmodified_upstream__
 #else

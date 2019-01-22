@@ -656,6 +656,7 @@ lgammaf
 lgammaf_r
 lgammal
 lgammal_r
+link
 linkat
 llabs
 lldiv
@@ -711,6 +712,7 @@ memmove
 mempcpy
 memrchr
 memset
+mkdir
 mkdirat
 mkdtemp
 mkostemp
@@ -754,6 +756,7 @@ open
 open_memstream
 open_wmemstream
 openat
+opendir
 opendirat
 optarg
 opterr
@@ -799,6 +802,7 @@ rand_r
 random
 read
 readdir
+readlink
 readlinkat
 readv
 realloc
@@ -811,6 +815,7 @@ regfree
 remainder
 remainderf
 remainderl
+remove
 remque
 remquo
 remquof
@@ -823,6 +828,7 @@ rindex
 rint
 rintf
 rintl
+rmdir
 round
 roundf
 roundl
@@ -835,6 +841,7 @@ scalblnl
 scalbn
 scalbnf
 scalbnl
+scandir
 scandirat
 scanf
 sched_yield
@@ -936,6 +943,7 @@ strxfrm_l
 swab
 swprintf
 swscanf
+symlink
 symlinkat
 sysconf
 tan
@@ -974,6 +982,7 @@ twalk
 uname
 ungetc
 ungetwc
+unlink
 unlinkat
 usleep
 utimensat

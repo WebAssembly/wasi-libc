@@ -107,7 +107,7 @@ MUSL_LIBC_SOURCES = \
     $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \
                  $(wildcard $(MUSL_LIBC_SRC_DIR)/internal/*.c)) \
     $(filter-out %/flockfile.c %/funlockfile.c %/__lockfile.c %/ftrylockfile.c \
-                 %/rename.c %/remove.c \
+                 %/rename.c \
                  %/tmpnam.c %/tmpfile.c %/tempnam.c \
                  %/popen.c %/pclose.c \
                  %/gets.c, \

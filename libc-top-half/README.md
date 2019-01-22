@@ -6,9 +6,12 @@ in preprocessor directives controlled by the macro `__wasilibc_unmodified_upstre
 
 Some major known missing areas include:
  - threads
+ - aio
  - setjmp
  - signals
  - ipc
- - getenv
+ - environment variables
+ - timezones
+ - non-builtin locales
  - TIOCGWINSZ (because cloudabi lacks it; affects isatty, line buffering for stdout)
  - O\_CLOEXEC, O\_NOCTTY (because cloudabi lacks them)

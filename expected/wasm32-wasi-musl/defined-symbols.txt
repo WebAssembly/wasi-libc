@@ -389,6 +389,7 @@ ctanhf
 ctanhl
 ctanl
 difftime
+dirfd
 dirname
 div
 dprintf

@@ -10,6 +10,8 @@ Some major known missing areas include:
  - setjmp
  - signals
  - ipc
+ - termios
+ - nss
  - environment variables
  - timezones
  - non-builtin locales

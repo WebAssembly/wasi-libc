@@ -7,7 +7,7 @@ Caution: This is currently quite experimental and not generally usable yet!
 It's several things.
 
 First, it's a usable libc. It builds a "sysroot" which can be pointed to by
-compilers, such as Clang 8.0, using the wasm32-unknown-wasi-musl target triple.
+compilers, such as Clang 8.0, using the wasm32-unknown-wasi target triple.
 It's experimental, but it is already sufficient to run basic programs.
 
 Second, it's a "reference" implementation, which means the interfaces defined

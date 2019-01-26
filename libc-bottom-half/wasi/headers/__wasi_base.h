@@ -34,8 +34,10 @@
 #ifndef __wasi_h
 #define __wasi_h
 
+#if 0 /* FIXME: Enable this once clang 8.0 has this define in it. */
 #ifndef __wasi__
 #error __wasi__ is not defined!
+#endif
 #endif
 
 #include <stddef.h>

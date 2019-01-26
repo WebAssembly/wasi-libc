@@ -7,19 +7,19 @@
 #include <sys/times.h>
 
 #include <assert.h>
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 
 static_assert(CLOCKS_PER_SEC == NSEC_PER_SEC,
               "Timestamp should need no conversion");
 
 clock_t times(struct tms *buffer) {
   // Obtain user time.
-  cloudabi_timestamp_t usertime = 0;
-  cloudabi_sys_clock_time_get(CLOUDABI_CLOCK_PROCESS_CPUTIME_ID, 0, &usertime);
+  wasi_timestamp_t usertime = 0;
+  wasi_clock_time_get(WASI_CLOCK_PROCESS_CPUTIME_ID, 0, &usertime);
   *buffer = (struct tms){.tms_utime = usertime};
 
   // Obtain real time.
-  cloudabi_timestamp_t realtime = 0;
-  cloudabi_sys_clock_time_get(CLOUDABI_CLOCK_MONOTONIC, 0, &realtime);
+  wasi_timestamp_t realtime = 0;
+  wasi_clock_time_get(WASI_CLOCK_MONOTONIC, 0, &realtime);
   return realtime;
 }

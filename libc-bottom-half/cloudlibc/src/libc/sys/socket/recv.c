@@ -7,12 +7,12 @@
 #include <sys/socket.h>
 
 #include <assert.h>
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 #include <stdint.h>
 
-static_assert(MSG_PEEK == CLOUDABI_SOCK_RECV_PEEK, "Value mismatch");
-static_assert(MSG_WAITALL == CLOUDABI_SOCK_RECV_WAITALL, "Value mismatch");
+static_assert(MSG_PEEK == WASI_SOCK_RECV_PEEK, "Value mismatch");
+static_assert(MSG_WAITALL == WASI_SOCK_RECV_WAITALL, "Value mismatch");
 
 ssize_t recv(int socket, void *restrict buffer, size_t length, int flags) {
   // Validate flags.
@@ -22,16 +22,16 @@ ssize_t recv(int socket, void *restrict buffer, size_t length, int flags) {
   }
 
   // Prepare input parameters.
-  cloudabi_iovec_t iov = {.buf = buffer, .buf_len = length};
-  cloudabi_recv_in_t ri = {
+  wasi_iovec_t iov = {.buf = buffer, .buf_len = length};
+  wasi_recv_in_t ri = {
       .ri_data = &iov,
       .ri_data_len = 1,
       .ri_flags = flags,
   };
 
   // Perform system call.
-  cloudabi_recv_out_t ro;
-  cloudabi_errno_t error = cloudabi_sys_sock_recv(socket, &ri, &ro);
+  wasi_recv_out_t ro;
+  wasi_errno_t error = wasi_sock_recv(socket, &ri, &ro);
   if (error != 0) {
     errno = errno_fixup_socket(socket, error);
     return -1;

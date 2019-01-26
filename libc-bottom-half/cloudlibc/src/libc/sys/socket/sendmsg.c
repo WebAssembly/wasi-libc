@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 
 #include <assert.h>
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 
 ssize_t sendmsg(int socket, const struct msghdr *message, int flags) {
@@ -24,8 +24,8 @@ ssize_t sendmsg(int socket, const struct msghdr *message, int flags) {
   }
 
   // Prepare input parameters.
-  cloudabi_send_in_t si = {
-      .si_data = (const cloudabi_ciovec_t *)message->msg_iov,
+  wasi_send_in_t si = {
+      .si_data = (const wasi_ciovec_t *)message->msg_iov,
       .si_data_len = message->msg_iovlen,
   };
 
@@ -39,8 +39,8 @@ ssize_t sendmsg(int socket, const struct msghdr *message, int flags) {
         return -1;
       }
       // Extract file descriptor list.
-      si.si_fds = (const cloudabi_fd_t *)CMSG_DATA(cmsg);
-      si.si_fds_len = (cmsg->cmsg_len - CMSG_LEN(0)) / sizeof(cloudabi_fd_t);
+      si.si_fds = (const wasi_fd_t *)CMSG_DATA(cmsg);
+      si.si_fds_len = (cmsg->cmsg_len - CMSG_LEN(0)) / sizeof(wasi_fd_t);
     } else {
       // Invalid control message type.
       errno = EINVAL;
@@ -49,8 +49,8 @@ ssize_t sendmsg(int socket, const struct msghdr *message, int flags) {
   }
 
   // Perform system call.
-  cloudabi_send_out_t so;
-  cloudabi_errno_t error = cloudabi_sys_sock_send(socket, &si, &so);
+  wasi_send_out_t so;
+  wasi_errno_t error = wasi_sock_send(socket, &si, &so);
   if (error != 0) {
     errno = errno_fixup_socket(socket, error);
     return -1;

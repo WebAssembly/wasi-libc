@@ -4,7 +4,7 @@
 
 #include <common/errno.h>
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -19,13 +19,13 @@ int faccessat(int fd, const char *path, int amode, int flag) {
   }
 
   // Check for target file existence and obtain the file type.
-  cloudabi_lookup_t lookup = {
+  wasi_lookup_t lookup = {
       .fd = fd,
-      .flags = CLOUDABI_LOOKUP_SYMLINK_FOLLOW,
+      .flags = WASI_LOOKUP_SYMLINK_FOLLOW,
   };
-  cloudabi_filestat_t file;
-  cloudabi_errno_t error =
-      cloudabi_sys_file_stat_get(lookup, path, strlen(path), &file);
+  wasi_filestat_t file;
+  wasi_errno_t error =
+      wasi_file_stat_get(lookup, path, strlen(path), &file);
   if (error != 0) {
     errno = errno_fixup_directory(fd, error);
     return -1;
@@ -34,22 +34,22 @@ int faccessat(int fd, const char *path, int amode, int flag) {
   // Test whether the requested access rights are present on the
   // directory file descriptor.
   if (amode != 0) {
-    cloudabi_fdstat_t directory;
-    error = cloudabi_sys_fd_stat_get(fd, &directory);
+    wasi_fdstat_t directory;
+    error = wasi_fd_stat_get(fd, &directory);
     if (error != 0) {
       errno = error;
       return -1;
     }
 
-    cloudabi_rights_t min = 0;
+    wasi_rights_t min = 0;
     if ((amode & R_OK) != 0)
-      min |= file.st_filetype == CLOUDABI_FILETYPE_DIRECTORY
-                 ? CLOUDABI_RIGHT_FILE_READDIR
-                 : CLOUDABI_RIGHT_FD_READ;
+      min |= file.st_filetype == WASI_FILETYPE_DIRECTORY
+                 ? WASI_RIGHT_FILE_READDIR
+                 : WASI_RIGHT_FD_READ;
     if ((amode & W_OK) != 0)
-      min |= CLOUDABI_RIGHT_FD_WRITE;
-    if ((amode & X_OK) != 0 && file.st_filetype != CLOUDABI_FILETYPE_DIRECTORY)
-      min |= CLOUDABI_RIGHT_PROC_EXEC;
+      min |= WASI_RIGHT_FD_WRITE;
+    if ((amode & X_OK) != 0 && file.st_filetype != WASI_FILETYPE_DIRECTORY)
+      min |= WASI_RIGHT_PROC_EXEC;
 
     if ((min & directory.fs_rights_inheriting) != min) {
       errno = EACCES;

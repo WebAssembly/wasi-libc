@@ -5,13 +5,13 @@
 #include <common/clock.h>
 #include <common/time.h>
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 #include <time.h>
 
 int clock_getres(clockid_t clock_id, struct timespec *res) {
-  cloudabi_timestamp_t ts;
-  cloudabi_errno_t error = cloudabi_sys_clock_res_get(clock_id->id, &ts);
+  wasi_timestamp_t ts;
+  wasi_errno_t error = wasi_clock_res_get(clock_id->id, &ts);
   if (error != 0) {
     errno = error;
     return -1;

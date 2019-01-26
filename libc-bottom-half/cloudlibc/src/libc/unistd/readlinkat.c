@@ -4,7 +4,7 @@
 
 #include <common/errno.h>
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
@@ -12,7 +12,7 @@
 ssize_t readlinkat(int fd, const char *restrict path, char *restrict buf,
                    size_t bufsize) {
   size_t bufused;
-  cloudabi_errno_t error = cloudabi_sys_file_readlink(fd, path, strlen(path),
+  wasi_errno_t error = wasi_file_readlink(fd, path, strlen(path),
                                                       buf, bufsize, &bufused);
   if (error != 0) {
     errno = errno_fixup_directory(fd, error);

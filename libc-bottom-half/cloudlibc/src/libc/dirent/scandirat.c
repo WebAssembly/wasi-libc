@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -43,20 +43,20 @@ int scandirat(int dirfd, const char *dir, struct dirent ***namelist,
   size_t dirents_size = 0;
   size_t dirents_used = 0;
 
-  cloudabi_dircookie_t cookie = CLOUDABI_DIRCOOKIE_START;
+  wasi_dircookie_t cookie = WASI_DIRCOOKIE_START;
   for (;;) {
     // Extract the next dirent header.
     size_t buffer_left = buffer_used - buffer_processed;
-    if (buffer_left < sizeof(cloudabi_dirent_t)) {
+    if (buffer_left < sizeof(wasi_dirent_t)) {
       // End-of-file.
       if (buffer_used < buffer_size)
         break;
       goto read_entries;
     }
-    cloudabi_dirent_t entry;
+    wasi_dirent_t entry;
     memcpy(&entry, buffer + buffer_processed, sizeof(entry));
 
-    size_t entry_size = sizeof(cloudabi_dirent_t) + entry.d_namlen;
+    size_t entry_size = sizeof(wasi_dirent_t) + entry.d_namlen;
     if (entry.d_namlen == 0) {
       // Invalid pathname length. Skip the entry.
       buffer_processed += entry_size;
@@ -114,7 +114,7 @@ int scandirat(int dirfd, const char *dir, struct dirent ***namelist,
 
   read_entries:;
     // Load more directory entries and continue.
-    cloudabi_errno_t error = cloudabi_sys_file_readdir(fd, buffer, buffer_size,
+    wasi_errno_t error = wasi_file_readdir(fd, buffer, buffer_size,
                                                        cookie, &buffer_used);
     if (error != 0) {
       errno = error;

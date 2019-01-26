@@ -379,9 +379,9 @@ scandir(const char *dirp, struct dirent ***namelist,
 int
 symlink(const char *target, const char *linkpath)
 {
-	struct po_relpath rel_target = find_relative(target, NULL);
+	struct po_relpath rel_linkpath = find_relative(linkpath, NULL);
 
-        return symlinkat(rel_target.dirfd, rel_target.relative_path, linkpath);
+        return symlinkat(target, rel_linkpath.dirfd, rel_linkpath.relative_path);
 }
 #endif
 

@@ -2,12 +2,12 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 #include <sched.h>
 
 int sched_yield(void) {
-  cloudabi_errno_t error = cloudabi_sys_thread_yield();
+  wasi_errno_t error = wasi_thread_yield();
   if (error != 0) {
     errno = error;
     return -1;

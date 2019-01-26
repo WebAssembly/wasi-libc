@@ -5,7 +5,7 @@
 #ifndef COMMON_CLOCK_H
 #define COMMON_CLOCK_H
 
-#include <cloudabi_types.h>
+#include <wasi.h>
 
 // In this implementation we define clockid_t as a pointer type, so that
 // we can implement them as full objects. Right now we only use those
@@ -13,7 +13,7 @@
 // future we can use this to provide support for pthread_getcpuclockid()
 // and clock file descriptors.
 struct __clockid {
-  cloudabi_clockid_t id;
+  wasi_clockid_t id;
 };
 
 #endif

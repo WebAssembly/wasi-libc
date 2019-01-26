@@ -4,7 +4,7 @@
 
 #include <sys/ioctl.h>
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 #include <stdarg.h>
 
@@ -12,20 +12,20 @@ int ioctl(int fildes, int request, ...) {
   switch (request) {
     case FIONREAD: {
       // Poll the file descriptor to determine how many bytes can be read.
-      cloudabi_subscription_t subscriptions[2] = {
+      wasi_subscription_t subscriptions[2] = {
           {
-              .type = CLOUDABI_EVENTTYPE_FD_READ,
+              .type = WASI_EVENTTYPE_FD_READ,
               .fd_readwrite.fd = fildes,
-              .fd_readwrite.flags = CLOUDABI_SUBSCRIPTION_FD_READWRITE_POLL,
+              .fd_readwrite.flags = WASI_SUBSCRIPTION_FD_READWRITE_POLL,
           },
           {
-              .type = CLOUDABI_EVENTTYPE_CLOCK,
-              .clock.clock_id = CLOUDABI_CLOCK_MONOTONIC,
+              .type = WASI_EVENTTYPE_CLOCK,
+              .clock.clock_id = WASI_CLOCK_MONOTONIC,
           },
       };
-      cloudabi_event_t events[__arraycount(subscriptions)];
+      wasi_event_t events[__arraycount(subscriptions)];
       size_t nevents;
-      cloudabi_errno_t error = cloudabi_sys_poll(
+      wasi_errno_t error = wasi_poll(
           subscriptions, events, __arraycount(subscriptions), &nevents);
       if (error != 0) {
         errno = error;
@@ -40,12 +40,12 @@ int ioctl(int fildes, int request, ...) {
 
       // Extract number of bytes for reading from poll results.
       for (size_t i = 0; i < nevents; ++i) {
-        cloudabi_event_t *event = &events[i];
+        wasi_event_t *event = &events[i];
         if (event->error != 0) {
           errno = event->error;
           return -1;
         }
-        if (event->type == CLOUDABI_EVENTTYPE_FD_READ) {
+        if (event->type == WASI_EVENTTYPE_FD_READ) {
           *result = event->fd_readwrite.nbytes;
           return 0;
         }
@@ -57,8 +57,8 @@ int ioctl(int fildes, int request, ...) {
     }
     case FIONBIO: {
       // Obtain the current file descriptor flags.
-      cloudabi_fdstat_t fds;
-      cloudabi_errno_t error = cloudabi_sys_fd_stat_get(fildes, &fds);
+      wasi_fdstat_t fds;
+      wasi_errno_t error = wasi_fd_stat_get(fildes, &fds);
       if (error != 0) {
         errno = error;
         return -1;
@@ -68,13 +68,13 @@ int ioctl(int fildes, int request, ...) {
       va_list ap;
       va_start(ap, request);
       if (*va_arg(ap, const int *) != 0)
-        fds.fs_flags |= CLOUDABI_FDFLAG_NONBLOCK;
+        fds.fs_flags |= WASI_FDFLAG_NONBLOCK;
       else
-        fds.fs_flags &= ~CLOUDABI_FDFLAG_NONBLOCK;
+        fds.fs_flags &= ~WASI_FDFLAG_NONBLOCK;
       va_end(ap);
 
       // Update the file descriptor flags.
-      error = cloudabi_sys_fd_stat_put(fildes, &fds, CLOUDABI_FDSTAT_FLAGS);
+      error = wasi_fd_stat_put(fildes, &fds, WASI_FDSTAT_FLAGS);
       if (error != 0) {
         errno = error;
         return -1;

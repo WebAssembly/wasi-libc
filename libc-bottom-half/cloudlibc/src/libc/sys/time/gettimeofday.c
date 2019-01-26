@@ -6,15 +6,15 @@
 
 #include <sys/time.h>
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 
 #ifdef __wasilibc_unmodified_upstream__
 int gettimeofday(struct timeval *restrict tp, ...) {
 #else
 int gettimeofday(struct timeval *restrict tp, void *tz) {
 #endif
-  cloudabi_timestamp_t ts = 0;
-  cloudabi_sys_clock_time_get(CLOUDABI_CLOCK_REALTIME, 1000, &ts);
+  wasi_timestamp_t ts = 0;
+  wasi_clock_time_get(WASI_CLOCK_REALTIME, 1000, &ts);
   *tp = timestamp_to_timeval(ts);
   return 0;
 }

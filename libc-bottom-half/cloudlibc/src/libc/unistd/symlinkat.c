@@ -4,14 +4,14 @@
 
 #include <common/errno.h>
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
 
 int symlinkat(const char *path1, int fd, const char *path2) {
-  cloudabi_errno_t error =
-      cloudabi_sys_file_symlink(path1, strlen(path1), fd, path2, strlen(path2));
+  wasi_errno_t error =
+      wasi_file_symlink(path1, strlen(path1), fd, path2, strlen(path2));
   if (error != 0) {
     errno = errno_fixup_directory(fd, error);
     return -1;

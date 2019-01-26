@@ -5,7 +5,7 @@
 #ifndef DIRENT_DIRENT_IMPL_H
 #define DIRENT_DIRENT_IMPL_H
 
-#include <cloudabi_types.h>
+#include <wasi.h>
 #include <stddef.h>
 
 struct dirent;
@@ -15,7 +15,7 @@ struct dirent;
 struct _DIR {
   // Directory file descriptor and cookie.
   int fd;
-  cloudabi_dircookie_t cookie;
+  wasi_dircookie_t cookie;
 
   // Read buffer.
   char *buffer;

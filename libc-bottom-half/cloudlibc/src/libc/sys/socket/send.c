@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 
 #include <assert.h>
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 
 ssize_t send(int socket, const void *buffer, size_t length, int flags) {
@@ -18,15 +18,15 @@ ssize_t send(int socket, const void *buffer, size_t length, int flags) {
   }
 
   // Prepare input parameters.
-  cloudabi_ciovec_t iov = {.buf = buffer, .buf_len = length};
-  cloudabi_send_in_t si = {
+  wasi_ciovec_t iov = {.buf = buffer, .buf_len = length};
+  wasi_send_in_t si = {
       .si_data = &iov,
       .si_data_len = 1,
   };
 
   // Perform system call.
-  cloudabi_send_out_t so;
-  cloudabi_errno_t error = cloudabi_sys_sock_send(socket, &si, &so);
+  wasi_send_out_t so;
+  wasi_errno_t error = wasi_sock_send(socket, &si, &so);
   if (error != 0) {
     errno = errno_fixup_socket(socket, error);
     return -1;

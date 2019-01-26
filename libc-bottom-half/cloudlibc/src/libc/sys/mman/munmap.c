@@ -4,11 +4,11 @@
 
 #include <sys/mman.h>
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 
 int munmap(void *addr, size_t len) {
-  cloudabi_errno_t error = cloudabi_sys_mem_unmap(addr, len);
+  wasi_errno_t error = wasi_mem_unmap(addr, len);
   if (error != 0) {
     errno = error;
     return -1;

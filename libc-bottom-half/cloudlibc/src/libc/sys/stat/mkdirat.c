@@ -6,7 +6,7 @@
 
 #include <sys/stat.h>
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 #include <string.h>
 
@@ -15,8 +15,8 @@ int mkdirat(int fd, const char *path, ...) {
 #else
 int mkdirat(int fd, const char *path, mode_t mode) {
 #endif
-  cloudabi_errno_t error = cloudabi_sys_file_create(
-      fd, path, strlen(path), CLOUDABI_FILETYPE_DIRECTORY);
+  wasi_errno_t error = wasi_file_create(
+      fd, path, strlen(path), WASI_FILETYPE_DIRECTORY);
   if (error != 0) {
     errno = errno_fixup_directory(fd, error);
     return -1;

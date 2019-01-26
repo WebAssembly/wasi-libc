@@ -6,14 +6,14 @@
 
 #include <sys/resource.h>
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 
 int getrusage(int who, struct rusage *r_usage) {
   switch (who) {
     case RUSAGE_SELF: {
-      cloudabi_timestamp_t usertime = 0;
-      cloudabi_sys_clock_time_get(CLOUDABI_CLOCK_PROCESS_CPUTIME_ID, 1000,
+      wasi_timestamp_t usertime = 0;
+      wasi_clock_time_get(WASI_CLOCK_PROCESS_CPUTIME_ID, 1000,
                                   &usertime);
       *r_usage = (struct rusage){
           .ru_utime = timestamp_to_timeval(usertime),

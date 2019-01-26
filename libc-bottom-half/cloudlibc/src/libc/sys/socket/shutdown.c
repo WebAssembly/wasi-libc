@@ -7,11 +7,11 @@
 #include <sys/socket.h>
 
 #include <assert.h>
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 
-static_assert(SHUT_RD == CLOUDABI_SHUT_RD, "Value mismatch");
-static_assert(SHUT_WR == CLOUDABI_SHUT_WR, "Value mismatch");
+static_assert(SHUT_RD == WASI_SHUT_RD, "Value mismatch");
+static_assert(SHUT_WR == WASI_SHUT_WR, "Value mismatch");
 
 int shutdown(int socket, int how) {
   // Validate shutdown flags.
@@ -20,7 +20,7 @@ int shutdown(int socket, int how) {
     return -1;
   }
 
-  cloudabi_errno_t error = cloudabi_sys_sock_shutdown(socket, how);
+  wasi_errno_t error = wasi_sock_shutdown(socket, how);
   if (error != 0) {
     errno = errno_fixup_socket(socket, error);
     return -1;

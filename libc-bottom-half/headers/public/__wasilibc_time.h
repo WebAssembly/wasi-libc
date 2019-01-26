@@ -10,9 +10,9 @@
 #include <__struct_tm.h>
 #include <__typedef_clockid_t.h>
 
-#include <cloudabi_types_common.h>
+#include <wasi.h>
 
-#define TIMER_ABSTIME CLOUDABI_SUBSCRIPTION_CLOCK_ABSTIME
+#define TIMER_ABSTIME WASI_SUBSCRIPTION_CLOCK_ABSTIME
 
 extern const struct __clockid _CLOCK_MONOTONIC;
 #define CLOCK_MONOTONIC (&_CLOCK_MONOTONIC)
@@ -23,9 +23,9 @@ extern const struct __clockid _CLOCK_REALTIME;
 extern const struct __clockid _CLOCK_THREAD_CPUTIME_ID;
 #define CLOCK_THREAD_CPUTIME_ID (&_CLOCK_THREAD_CPUTIME_ID)
 
-#define TIME_UTC CLOUDABI_CLOCK_REALTIME
+#define TIME_UTC WASI_CLOCK_REALTIME
 
 /* FIXME: POSIX requires this to be 1000000, and that's what glibc and musl use. */
-#define CLOCKS_PER_SEC 1000000000
+#define CLOCKS_PER_SEC (1000000000)
 
 #endif

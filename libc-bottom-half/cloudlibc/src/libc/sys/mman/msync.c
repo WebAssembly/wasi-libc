@@ -5,15 +5,15 @@
 #include <sys/mman.h>
 
 #include <assert.h>
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 
-static_assert(MS_ASYNC == CLOUDABI_MS_ASYNC, "Value mismatch");
-static_assert(MS_INVALIDATE == CLOUDABI_MS_INVALIDATE, "Value mismatch");
-static_assert(MS_SYNC == CLOUDABI_MS_SYNC, "Value mismatch");
+static_assert(MS_ASYNC == WASI_MS_ASYNC, "Value mismatch");
+static_assert(MS_INVALIDATE == WASI_MS_INVALIDATE, "Value mismatch");
+static_assert(MS_SYNC == WASI_MS_SYNC, "Value mismatch");
 
 int msync(void *addr, size_t len, int flags) {
-  cloudabi_errno_t error = cloudabi_sys_mem_sync(addr, len, flags);
+  wasi_errno_t error = wasi_mem_sync(addr, len, flags);
   if (error != 0) {
     errno = error;
     return -1;

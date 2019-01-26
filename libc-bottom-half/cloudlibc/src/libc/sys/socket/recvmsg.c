@@ -7,15 +7,15 @@
 #include <sys/socket.h>
 
 #include <assert.h>
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 #include <stdint.h>
 
-static_assert(MSG_PEEK == CLOUDABI_SOCK_RECV_PEEK, "Value mismatch");
-static_assert(MSG_WAITALL == CLOUDABI_SOCK_RECV_WAITALL, "Value mismatch");
+static_assert(MSG_PEEK == WASI_SOCK_RECV_PEEK, "Value mismatch");
+static_assert(MSG_WAITALL == WASI_SOCK_RECV_WAITALL, "Value mismatch");
 
-static_assert(MSG_CTRUNC == CLOUDABI_SOCK_RECV_FDS_TRUNCATED, "Value mismatch");
-static_assert(MSG_TRUNC == CLOUDABI_SOCK_RECV_DATA_TRUNCATED, "Value mismatch");
+static_assert(MSG_CTRUNC == WASI_SOCK_RECV_FDS_TRUNCATED, "Value mismatch");
+static_assert(MSG_TRUNC == WASI_SOCK_RECV_DATA_TRUNCATED, "Value mismatch");
 
 ssize_t recvmsg(int socket, struct msghdr *message, int flags) {
   // Validate flags.
@@ -32,10 +32,10 @@ ssize_t recvmsg(int socket, struct msghdr *message, int flags) {
 
   // Prepare input parameters.
   struct cmsghdr *fds_cmsg = message->msg_control;
-  cloudabi_recv_in_t ri = {
-      .ri_data = (const cloudabi_iovec_t *)message->msg_iov,
+  wasi_recv_in_t ri = {
+      .ri_data = (const wasi_iovec_t *)message->msg_iov,
       .ri_data_len = message->msg_iovlen,
-      .ri_fds = (cloudabi_fd_t *)CMSG_DATA(fds_cmsg),
+      .ri_fds = (wasi_fd_t *)CMSG_DATA(fds_cmsg),
       .ri_fds_len =
           message->msg_controllen > CMSG_SPACE(0)
               ? (message->msg_controllen - CMSG_SPACE(0)) / sizeof(int)
@@ -44,8 +44,8 @@ ssize_t recvmsg(int socket, struct msghdr *message, int flags) {
   };
 
   // Perform system call.
-  cloudabi_recv_out_t ro;
-  cloudabi_errno_t error = cloudabi_sys_sock_recv(socket, &ri, &ro);
+  wasi_recv_out_t ro;
+  wasi_errno_t error = wasi_sock_recv(socket, &ri, &ro);
   if (error != 0) {
     errno = errno_fixup_socket(socket, error);
     return -1;

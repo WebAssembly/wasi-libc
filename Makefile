@@ -45,7 +45,7 @@ LIBC_BOTTOM_HALF_CLOUDLIBC_SRC = $(LIBC_BOTTOM_HALF_DIR)/cloudlibc/src
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC = $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/include
 LIBC_BOTTOM_HALF_HEADERS_PUBLIC = $(LIBC_BOTTOM_HALF_DIR)/headers/public
 LIBC_BOTTOM_HALF_HEADERS_PRIVATE = $(LIBC_BOTTOM_HALF_DIR)/headers/private
-LIBC_BOTTOM_HALF_CLOUDABI_HEADERS = $(LIBC_BOTTOM_HALF_DIR)/cloudabi/headers
+LIBC_BOTTOM_HALF_WASI_HEADERS = $(LIBC_BOTTOM_HALF_DIR)/wasi/headers
 LIBC_BOTTOM_HALF_LIBPREOPEN_DIR = $(LIBC_BOTTOM_HALF_DIR)/libpreopen
 LIBC_BOTTOM_HALF_LIBPREOPEN_LIB = $(LIBC_BOTTOM_HALF_LIBPREOPEN_DIR)/lib
 LIBC_BOTTOM_HALF_LIBPREOPEN_INC = $(LIBC_BOTTOM_HALF_LIBPREOPEN_DIR)/include
@@ -261,7 +261,7 @@ $(SYSROOT_INC):
 	#
 	mkdir -p "$(SYSROOT_INC)"
 	cp -r --backup=numbered "$(BASICS_INC)" "$(SYSROOT)"
-	cp -r --backup=numbered "$(LIBC_BOTTOM_HALF_CLOUDABI_HEADERS)"/* "$(SYSROOT_INC)"
+	cp -r --backup=numbered "$(LIBC_BOTTOM_HALF_WASI_HEADERS)"/* "$(SYSROOT_INC)"
 	cp -r --backup=numbered "$(LIBC_BOTTOM_HALF_HEADERS_PUBLIC)"/* "$(SYSROOT_INC)"
 
 	# Generate musl's bits/alltypes.h header.
@@ -381,7 +381,7 @@ finish: $(SYSROOT_INC) libc
 	    |grep ' U ' |sed 's/.* U //' |LC_COLLATE=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$(SYSROOT_SHARE)/defined-symbols.txt" || echo $$undef_sym; \
 	done   > "$(SYSROOT_SHARE)/undefined-symbols.txt"
-	grep ^cloudabi_sys_ "$(SYSROOT_SHARE)/undefined-symbols.txt" \
+	grep ^wasi_ "$(SYSROOT_SHARE)/undefined-symbols.txt" \
 	    > "$(SYSROOT_LIB)/libc.imports"
 
 	# Generate a test file that includes all public header files.

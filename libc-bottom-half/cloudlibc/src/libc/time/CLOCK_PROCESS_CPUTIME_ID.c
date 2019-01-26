@@ -4,9 +4,9 @@
 
 #include <common/clock.h>
 
-#include <cloudabi_types.h>
+#include <wasi.h>
 #include <time.h>
 
 const struct __clockid _CLOCK_PROCESS_CPUTIME_ID = {
-    .id = CLOUDABI_CLOCK_PROCESS_CPUTIME_ID,
+    .id = WASI_CLOCK_PROCESS_CPUTIME_ID,
 };

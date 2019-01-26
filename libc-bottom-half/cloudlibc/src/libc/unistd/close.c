@@ -2,12 +2,12 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 #include <unistd.h>
 
 int close(int fildes) {
-  cloudabi_errno_t error = cloudabi_sys_fd_close(fildes);
+  wasi_errno_t error = wasi_fd_close(fildes);
   if (error != 0) {
     errno = error;
     return -1;

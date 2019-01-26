@@ -3,11 +3,11 @@
 
 struct stat;
 
-#include <cloudabi_types_common.h>
+#include <wasi.h>
 
-#define SEEK_CUR CLOUDABI_WHENCE_CUR
-#define SEEK_END CLOUDABI_WHENCE_END
-#define SEEK_SET CLOUDABI_WHENCE_SET
+#define SEEK_CUR WASI_WHENCE_CUR
+#define SEEK_END WASI_WHENCE_END
+#define SEEK_SET WASI_WHENCE_SET
 
 #define F_OK 0
 #define R_OK 1

@@ -4,14 +4,14 @@
 
 #include <sys/stat.h>
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 
 #include "stat_impl.h"
 
 int fstat(int fildes, struct stat *buf) {
-  cloudabi_filestat_t internal_stat;
-  cloudabi_errno_t error = cloudabi_sys_file_stat_fget(fildes, &internal_stat);
+  wasi_filestat_t internal_stat;
+  wasi_errno_t error = wasi_file_stat_fget(fildes, &internal_stat);
   if (error != 0) {
     errno = error;
     return -1;

@@ -4,7 +4,7 @@
 
 #include <common/errno.h>
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -12,12 +12,12 @@
 
 int linkat(int fd1, const char *path1, int fd2, const char *path2, int flag) {
   // Create lookup properties.
-  cloudabi_lookup_t lookup1 = {.fd = fd1, .flags = 0};
+  wasi_lookup_t lookup1 = {.fd = fd1, .flags = 0};
   if ((flag & AT_SYMLINK_FOLLOW) != 0)
-    lookup1.flags |= CLOUDABI_LOOKUP_SYMLINK_FOLLOW;
+    lookup1.flags |= WASI_LOOKUP_SYMLINK_FOLLOW;
 
   // Perform system call.
-  cloudabi_errno_t error = cloudabi_sys_file_link(lookup1, path1, strlen(path1),
+  wasi_errno_t error = wasi_file_link(lookup1, path1, strlen(path1),
                                                   fd2, path2, strlen(path2));
   if (error != 0) {
     errno = errno_fixup_directory(fd1, errno_fixup_directory(fd2, error));

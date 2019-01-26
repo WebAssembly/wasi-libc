@@ -6,7 +6,7 @@
 
 #include <sys/select.h>
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 
 int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
@@ -39,19 +39,19 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
 
   // Determine the maximum number of events.
   size_t maxevents = readfds->__nfds + writefds->__nfds + 1;
-  cloudabi_subscription_t subscriptions[maxevents];
+  wasi_subscription_t subscriptions[maxevents];
   size_t nevents = 0;
 
   // Convert the readfds set.
   for (size_t i = 0; i < readfds->__nfds; ++i) {
     int fd = readfds->__fds[i];
     if (fd < nfds) {
-      cloudabi_subscription_t *subscription = &subscriptions[nevents++];
-      *subscription = (cloudabi_subscription_t){
+      wasi_subscription_t *subscription = &subscriptions[nevents++];
+      *subscription = (wasi_subscription_t){
           .userdata = fd,
-          .type = CLOUDABI_EVENTTYPE_FD_READ,
+          .type = WASI_EVENTTYPE_FD_READ,
           .fd_readwrite.fd = fd,
-          .fd_readwrite.flags = CLOUDABI_SUBSCRIPTION_FD_READWRITE_POLL,
+          .fd_readwrite.flags = WASI_SUBSCRIPTION_FD_READWRITE_POLL,
       };
     }
   }
@@ -60,22 +60,22 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
   for (size_t i = 0; i < writefds->__nfds; ++i) {
     int fd = writefds->__fds[i];
     if (fd < nfds) {
-      cloudabi_subscription_t *subscription = &subscriptions[nevents++];
-      *subscription = (cloudabi_subscription_t){
+      wasi_subscription_t *subscription = &subscriptions[nevents++];
+      *subscription = (wasi_subscription_t){
           .userdata = fd,
-          .type = CLOUDABI_EVENTTYPE_FD_WRITE,
+          .type = WASI_EVENTTYPE_FD_WRITE,
           .fd_readwrite.fd = fd,
-          .fd_readwrite.flags = CLOUDABI_SUBSCRIPTION_FD_READWRITE_POLL,
+          .fd_readwrite.flags = WASI_SUBSCRIPTION_FD_READWRITE_POLL,
       };
     }
   }
 
   // Create extra event for the timeout.
   if (timeout != NULL) {
-    cloudabi_subscription_t *subscription = &subscriptions[nevents++];
-    *subscription = (cloudabi_subscription_t){
-        .type = CLOUDABI_EVENTTYPE_CLOCK,
-        .clock.clock_id = CLOUDABI_CLOCK_REALTIME,
+    wasi_subscription_t *subscription = &subscriptions[nevents++];
+    *subscription = (wasi_subscription_t){
+        .type = WASI_EVENTTYPE_CLOCK,
+        .clock.clock_id = WASI_CLOCK_REALTIME,
     };
     if (!timespec_to_timestamp_clamp(timeout, &subscription->clock.timeout)) {
       errno = EINVAL;
@@ -84,9 +84,9 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
   }
 
   // Execute poll().
-  cloudabi_event_t events[nevents];
-  cloudabi_errno_t error =
-      cloudabi_sys_poll(subscriptions, events, nevents, &nevents);
+  wasi_event_t events[nevents];
+  wasi_errno_t error =
+      wasi_poll(subscriptions, events, nevents, &nevents);
   if (error != 0) {
     errno = error;
     return -1;
@@ -94,10 +94,10 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
 
   // Test for EBADF.
   for (size_t i = 0; i < nevents; ++i) {
-    const cloudabi_event_t *event = &events[i];
-    if ((event->type == CLOUDABI_EVENTTYPE_FD_READ ||
-         event->type == CLOUDABI_EVENTTYPE_FD_WRITE) &&
-        event->error == CLOUDABI_EBADF) {
+    const wasi_event_t *event = &events[i];
+    if ((event->type == WASI_EVENTTYPE_FD_READ ||
+         event->type == WASI_EVENTTYPE_FD_WRITE) &&
+        event->error == WASI_EBADF) {
       errno = EBADF;
       return -1;
     }
@@ -107,10 +107,10 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
   FD_ZERO(readfds);
   FD_ZERO(writefds);
   for (size_t i = 0; i < nevents; ++i) {
-    const cloudabi_event_t *event = &events[i];
-    if (event->type == CLOUDABI_EVENTTYPE_FD_READ) {
+    const wasi_event_t *event = &events[i];
+    if (event->type == WASI_EVENTTYPE_FD_READ) {
       readfds->__fds[readfds->__nfds++] = event->userdata;
-    } else if (event->type == CLOUDABI_EVENTTYPE_FD_WRITE) {
+    } else if (event->type == WASI_EVENTTYPE_FD_WRITE) {
       writefds->__fds[writefds->__nfds++] = event->userdata;
     }
   }

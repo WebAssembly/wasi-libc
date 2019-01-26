@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -17,8 +17,8 @@ int fcntl(int fildes, int cmd, ...) {
       return 0;
     case F_GETFL: {
       // Obtain the flags and the rights of the descriptor.
-      cloudabi_fdstat_t fds;
-      cloudabi_errno_t error = cloudabi_sys_fd_stat_get(fildes, &fds);
+      wasi_fdstat_t fds;
+      wasi_errno_t error = wasi_fd_stat_get(fildes, &fds);
       if (error != 0) {
         errno = error;
         return -1;
@@ -27,14 +27,14 @@ int fcntl(int fildes, int cmd, ...) {
       // Roughly approximate the access mode by converting the rights.
       int oflags = fds.fs_flags;
       if ((fds.fs_rights_base &
-           (CLOUDABI_RIGHT_FD_READ | CLOUDABI_RIGHT_FILE_READDIR)) != 0) {
-        if ((fds.fs_rights_base & CLOUDABI_RIGHT_FD_WRITE) != 0)
+           (WASI_RIGHT_FD_READ | WASI_RIGHT_FILE_READDIR)) != 0) {
+        if ((fds.fs_rights_base & WASI_RIGHT_FD_WRITE) != 0)
           oflags |= O_RDWR;
         else
           oflags |= O_RDONLY;
-      } else if ((fds.fs_rights_base & CLOUDABI_RIGHT_FD_WRITE) != 0) {
+      } else if ((fds.fs_rights_base & WASI_RIGHT_FD_WRITE) != 0) {
         oflags |= O_WRONLY;
-      } else if ((fds.fs_rights_base & CLOUDABI_RIGHT_PROC_EXEC) != 0) {
+      } else if ((fds.fs_rights_base & WASI_RIGHT_PROC_EXEC) != 0) {
         oflags |= O_EXEC;
       } else {
         oflags |= O_SEARCH;
@@ -48,9 +48,9 @@ int fcntl(int fildes, int cmd, ...) {
       int flags = va_arg(ap, int);
       va_end(ap);
 
-      cloudabi_fdstat_t fds = {.fs_flags = flags & 0xfff};
-      cloudabi_errno_t error =
-          cloudabi_sys_fd_stat_put(fildes, &fds, CLOUDABI_FDSTAT_FLAGS);
+      wasi_fdstat_t fds = {.fs_flags = flags & 0xfff};
+      wasi_errno_t error =
+          wasi_fd_stat_put(fildes, &fds, WASI_FDSTAT_FLAGS);
       if (error != 0) {
         errno = error;
         return -1;

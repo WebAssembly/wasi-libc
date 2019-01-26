@@ -5,23 +5,23 @@
 #include <sys/uio.h>
 
 #include <assert.h>
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 #include <stddef.h>
 
 static_assert(offsetof(struct iovec, iov_base) ==
-                  offsetof(cloudabi_iovec_t, buf),
+                  offsetof(wasi_iovec_t, buf),
               "Offset mismatch");
 static_assert(sizeof(((struct iovec *)0)->iov_base) ==
-                  sizeof(((cloudabi_iovec_t *)0)->buf),
+                  sizeof(((wasi_iovec_t *)0)->buf),
               "Size mismatch");
 static_assert(offsetof(struct iovec, iov_len) ==
-                  offsetof(cloudabi_iovec_t, buf_len),
+                  offsetof(wasi_iovec_t, buf_len),
               "Offset mismatch");
 static_assert(sizeof(((struct iovec *)0)->iov_len) ==
-                  sizeof(((cloudabi_iovec_t *)0)->buf_len),
+                  sizeof(((wasi_iovec_t *)0)->buf_len),
               "Size mismatch");
-static_assert(sizeof(struct iovec) == sizeof(cloudabi_iovec_t),
+static_assert(sizeof(struct iovec) == sizeof(wasi_iovec_t),
               "Size mismatch");
 
 ssize_t readv(int fildes, const struct iovec *iov, int iovcnt) {
@@ -30,8 +30,8 @@ ssize_t readv(int fildes, const struct iovec *iov, int iovcnt) {
     return -1;
   }
   size_t bytes_read;
-  cloudabi_errno_t error = cloudabi_sys_fd_read(
-      fildes, (const cloudabi_iovec_t *)iov, iovcnt, &bytes_read);
+  wasi_errno_t error = wasi_fd_read(
+      fildes, (const wasi_iovec_t *)iov, iovcnt, &bytes_read);
   if (error != 0) {
     errno = error;
     return -1;

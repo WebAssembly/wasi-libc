@@ -43,6 +43,7 @@
 #include <__typedef_suseconds_t.h>
 #include <__typedef_time_t.h>
 #include <__typedef_uid_t.h>
+#include <__wasi_base.h>
 #include <__wasilibc_dirent.h>
 #include <__wasilibc_fcntl.h>
 #include <__wasilibc_poll.h>
@@ -64,9 +65,6 @@
 #include <arpa/tftp.h>
 #include <assert.h>
 #include <byteswap.h>
-#include <cloudabi_syscalls.h>
-#include <cloudabi_types.h>
-#include <cloudabi_types_common.h>
 #include <complex.h>
 #include <cpio.h>
 #include <crypt.h>
@@ -209,6 +207,7 @@
 #include <unistd.h>
 #include <utime.h>
 #include <values.h>
+#include <wasi.h>
 #include <wchar.h.~1~>
 #include <wchar.h>
 #include <wctype.h>

@@ -1,6 +1,6 @@
 #ifdef __wasilibc_unmodified_upstream__
 #else
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #endif
 #define _BSD_SOURCE
 #include <unistd.h>
@@ -28,7 +28,7 @@ int getentropy(void *buffer, size_t len)
 #ifdef __wasilibc_unmodified_upstream__
 		ret = getrandom(pos, len, 0);
 #else
-		errno = cloudabi_sys_random_get(pos, len);
+		errno = wasi_random_get(pos, len);
 		if (errno == 0)
                     ret = len;
                 else

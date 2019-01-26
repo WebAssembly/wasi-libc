@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 
-#include <cloudabi_syscalls.h>
+#include <wasi.h>
 #include <errno.h>
 
 ssize_t preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
@@ -14,8 +14,8 @@ ssize_t preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
     return -1;
   }
   size_t bytes_read;
-  cloudabi_errno_t error = cloudabi_sys_fd_pread(
-      fildes, (const cloudabi_iovec_t *)iov, iovcnt, offset, &bytes_read);
+  wasi_errno_t error = wasi_fd_pread(
+      fildes, (const wasi_iovec_t *)iov, iovcnt, offset, &bytes_read);
   if (error != 0) {
     errno = error;
     return -1;

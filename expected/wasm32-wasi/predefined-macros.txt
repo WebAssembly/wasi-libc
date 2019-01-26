@@ -3322,7 +3322,6 @@
 #define __DEFINED_wctype_t 
 #define __DEFINED_wint_t 
 #define __FINITE_MATH_ONLY__ 0
-#define __FLOAT128__ 1
 #define __FLT(x) (__IS_REAL(x) && sizeof(x) == sizeof(float))
 #define __FLT16_DECIMAL_DIG__ 5
 #define __FLT16_DENORM_MIN__ 5.9604644775390625e-8F16

@@ -1,3 +1,7 @@
+#ifdef __wasilibc_unmodified_upstream__
+#else
+#include <unistd.h>
+#endif
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>

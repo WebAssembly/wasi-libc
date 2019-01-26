@@ -398,6 +398,7 @@ finish: $(SYSROOT_INC) libc
 	# which we don't need to track here. For the __*_ATOMIC_*_LOCK_FREE
 	# macros, squash individual compiler names to attempt, toward keeping
 	# these files compiler-independent.
+	# FIXME: Undefine __FLOAT128__ for now since it's not in clang 8.0.
 	"$(WASM_CC)" $(WASM_CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -E -dM -Wno-\#warnings \
 	    -U__llvm__ \
@@ -410,6 +411,7 @@ finish: $(SYSROOT_INC) libc
 	    -U__GNUC_MINOR__ \
 	    -U__GNUC_PATCHLEVEL__ \
 	    -U__VERSION__ \
+	    -U__FLOAT128__ \
 	    | sed -e 's/__[[:upper:][:digit:]]*_ATOMIC_\([[:upper:][:digit:]_]*\)_LOCK_FREE/__compiler_ATOMIC_\1_LOCK_FREE/' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
 

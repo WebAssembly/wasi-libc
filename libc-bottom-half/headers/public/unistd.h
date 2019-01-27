@@ -5,6 +5,6 @@
  * Include the real implementation, which is factored into a separate file so
  * that it can be reused by other libc unistd implementations.
  */
-#include <__wasilibc_unistd.h>
+#include <__header_unistd.h>
 
 #endif

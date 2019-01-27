@@ -2,7 +2,7 @@
 #define	_SYS_SOCKET_H
 #ifdef __wasilibc_unmodified_upstream__
 #else
-#include <__wasilibc_sys_socket.h>
+#include <__header_sys_socket.h>
 #endif
 #ifdef __cplusplus
 extern "C" {

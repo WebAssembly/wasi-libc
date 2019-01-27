@@ -13,6 +13,6 @@ int ioctl (int, int, ...);
 }
 #endif
 #else
-#include <__wasilibc_sys_ioctl.h>
+#include <__header_sys_ioctl.h>
 #endif
 #endif

@@ -1,5 +1,5 @@
-#ifndef __wasilibc___wasilibc_sys_socket_h
-#define __wasilibc___wasilibc_sys_socket_h
+#ifndef __wasilibc___header_sys_socket_h
+#define __wasilibc___header_sys_socket_h
 
 #include <__struct_msghdr.h>
 #include <__struct_cmsghdr.h>

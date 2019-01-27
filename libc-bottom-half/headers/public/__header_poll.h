@@ -1,5 +1,5 @@
-#ifndef __wasilibc___wasilibc_poll_h
-#define __wasilibc___wasilibc_poll_h
+#ifndef __wasilibc___header_poll_h
+#define __wasilibc___header_poll_h
 
 #include <__struct_pollfd.h>
 #include <__typedef_nfds_t.h>

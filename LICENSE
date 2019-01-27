@@ -2,10 +2,13 @@ Please see the LICENSE file in each top-level directory for the terms applicable
 
 The relevant directories and licenses are:
 
-basics/               - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
-dlmalloc/             - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
-wasi-libc/cloudabi/   - BSD-2-Clause; see wasi-libc/cloudabi/LICENSE for details
-wasi-libc/cloudlibc/  - BSD-2-Clause; see wasi-libc/cloudlibc/LICENSE for details
-wasi-libc/libpreopen/ - BSD-2-Clause; see the individual files for details
-wasi-libc/headers/    - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
-musl-libc/            - MIT; see musl-libc/musl/COPYRIGHT for details
+basics/                       - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+dlmalloc/                     - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+libc-bottom-half/wasi/        - BSD-2-Clause; see wasi-libc/cloudabi/LICENSE for details
+libc-bottom-half/cloudlibc/   - BSD-2-Clause; see wasi-libc/cloudlibc/LICENSE for details
+libc-bottom-half/libpreopen/  - BSD-2-Clause; see the individual files for details
+libc-bottom-half/headers/     - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+libc-bottom-half/sources/     - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+libc-top-half/musl            - MIT; see musl-libc/musl/COPYRIGHT for details
+libc-top-half/headers         - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+libc-top-half/sources         - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication

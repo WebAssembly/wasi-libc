@@ -47,7 +47,7 @@ struct rusage {
 	long    __reserved[16];
 };
 #else
-#include <__wasilibc_sys_resource.h>
+#include <__header_sys_resource.h>
 #endif
 
 int getrlimit (int, struct rlimit *);

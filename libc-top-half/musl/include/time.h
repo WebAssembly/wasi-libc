@@ -55,7 +55,7 @@ struct tm {
 	const char *__tm_zone;
 };
 #else
-#include <__wasilibc_time.h>
+#include <__header_time.h>
 #endif
 
 clock_t clock (void);

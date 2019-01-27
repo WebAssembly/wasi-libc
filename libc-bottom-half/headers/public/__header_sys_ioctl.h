@@ -1,5 +1,5 @@
-#ifndef __wasilibc___wasilibc_sys_ioctl_h
-#define __wasilibc___wasilibc_sys_ioctl_h
+#ifndef __wasilibc___header_sys_ioctl_h
+#define __wasilibc___header_sys_ioctl_h
 
 #define FIONREAD 1
 #define FIONBIO 2

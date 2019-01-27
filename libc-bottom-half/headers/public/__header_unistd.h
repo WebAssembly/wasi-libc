@@ -1,5 +1,5 @@
-#ifndef __wasilibc___wasilibc_unistd_h
-#define __wasilibc___wasilibc_unistd_h
+#ifndef __wasilibc___header_unistd_h
+#define __wasilibc___header_unistd_h
 
 struct stat;
 

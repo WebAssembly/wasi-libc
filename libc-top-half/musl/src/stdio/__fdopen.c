@@ -5,6 +5,10 @@
 #include <errno.h>
 #include <string.h>
 #include "libc.h"
+#ifdef __wasilibc_unmodified_upstream__
+#else
+#include <__function___isatty.h>
+#endif
 
 FILE *__fdopen(int fd, const char *mode)
 {
@@ -59,10 +63,10 @@ FILE *__fdopen(int fd, const char *mode)
 	f->lbf = EOF;
 #ifdef __wasilibc_unmodified_upstream__
 	if (!(f->flags & F_NOWR) && !__syscall(SYS_ioctl, fd, TIOCGWINSZ, &wsz))
-		f->lbf = '\n';
 #else
-	// Avoid __syscall, but also, TIOCGWINSZ is not supported in WASI.
+	if (!(f->flags & F_NOWR) && __isatty(fd))
 #endif
+		f->lbf = '\n';
 
 	/* Initialize op ptrs. No problem if some are unneeded. */
 	f->read = __stdio_read;

@@ -55,86 +55,90 @@ LIBC_BOTTOM_HALF_ALL_SOURCES = \
     $(LIBC_BOTTOM_HALF_LIBPREOPEN_LIB)/po_libc_wrappers.c \
     $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c)
 LIBC_TOP_HALF_DIR = $(CURDIR)/libc-top-half
-MUSL_LIBC_DIR = $(LIBC_TOP_HALF_DIR)/musl
-MUSL_LIBC_SRC_DIR = $(MUSL_LIBC_DIR)/src
-MUSL_LIBC_INC = $(MUSL_LIBC_DIR)/include
-MUSL_LIBC_SOURCES = \
-    $(MUSL_LIBC_SRC_DIR)/misc/a64l.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/basename.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/dirname.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/ffs.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/ffsl.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/ffsll.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/fmtmsg.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/getdomainname.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/gethostid.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/getopt.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/getopt_long.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/getsubopt.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/getentropy.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/uname.c \
-    $(MUSL_LIBC_SRC_DIR)/misc/nftw.c \
-    $(MUSL_LIBC_SRC_DIR)/errno/strerror.c \
-    $(MUSL_LIBC_SRC_DIR)/network/htonl.c \
-    $(MUSL_LIBC_SRC_DIR)/network/htons.c \
-    $(MUSL_LIBC_SRC_DIR)/network/ntohl.c \
-    $(MUSL_LIBC_SRC_DIR)/network/ntohs.c \
-    $(MUSL_LIBC_SRC_DIR)/fenv/fenv.c \
-    $(MUSL_LIBC_SRC_DIR)/fenv/fesetround.c \
-    $(MUSL_LIBC_SRC_DIR)/exit/exit.c \
-    $(MUSL_LIBC_SRC_DIR)/exit/atexit.c \
-    $(MUSL_LIBC_SRC_DIR)/exit/assert.c \
-    $(MUSL_LIBC_SRC_DIR)/exit/quick_exit.c \
-    $(MUSL_LIBC_SRC_DIR)/exit/at_quick_exit.c \
-    $(MUSL_LIBC_SRC_DIR)/time/strftime.c \
-    $(MUSL_LIBC_SRC_DIR)/time/asctime_r.c \
-    $(MUSL_LIBC_SRC_DIR)/time/wcsftime.c \
-    $(MUSL_LIBC_SRC_DIR)/time/strptime.c \
-    $(MUSL_LIBC_SRC_DIR)/time/difftime.c \
-    $(MUSL_LIBC_SRC_DIR)/time/timegm.c \
-    $(MUSL_LIBC_SRC_DIR)/time/ftime.c \
-    $(MUSL_LIBC_SRC_DIR)/time/gmtime.c \
-    $(MUSL_LIBC_SRC_DIR)/time/gmtime_r.c \
-    $(MUSL_LIBC_SRC_DIR)/time/timespec_get.c \
-    $(MUSL_LIBC_SRC_DIR)/time/getdate.c \
-    $(MUSL_LIBC_SRC_DIR)/time/__tm_to_secs.c \
-    $(MUSL_LIBC_SRC_DIR)/time/__month_to_secs.c \
-    $(MUSL_LIBC_SRC_DIR)/time/__secs_to_tm.c \
-    $(MUSL_LIBC_SRC_DIR)/time/__year_to_secs.c \
-    $(MUSL_LIBC_SRC_DIR)/time/__tz.c \
-    $(MUSL_LIBC_SRC_DIR)/fcntl/creat.c \
-    $(MUSL_LIBC_SRC_DIR)/dirent/alphasort.c \
-    $(MUSL_LIBC_SRC_DIR)/dirent/versionsort.c \
+LIBC_TOP_HALF_MUSL_DIR = $(LIBC_TOP_HALF_DIR)/musl
+LIBC_TOP_HALF_MUSL_SRC_DIR = $(LIBC_TOP_HALF_MUSL_DIR)/src
+LIBC_TOP_HALF_MUSL_INC = $(LIBC_TOP_HALF_MUSL_DIR)/include
+LIBC_TOP_HALF_MUSL_SOURCES = \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/a64l.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/basename.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/dirname.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/ffs.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/ffsl.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/ffsll.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/fmtmsg.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/getdomainname.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/gethostid.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/getopt.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/getopt_long.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/getsubopt.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/getentropy.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/uname.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/nftw.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/errno/strerror.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/htonl.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/htons.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/ntohl.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/ntohs.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/fenv.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/fesetround.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/exit.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/atexit.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/assert.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/quick_exit.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/at_quick_exit.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/strftime.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/asctime_r.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/wcsftime.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/strptime.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/difftime.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/timegm.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/ftime.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/gmtime.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/gmtime_r.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/timespec_get.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/getdate.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/__tm_to_secs.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/__month_to_secs.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/__secs_to_tm.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/__year_to_secs.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/__tz.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fcntl/creat.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/dirent/alphasort.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/dirent/versionsort.c \
     $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \
-                 $(wildcard $(MUSL_LIBC_SRC_DIR)/internal/*.c)) \
+                 $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/*.c)) \
     $(filter-out %/flockfile.c %/funlockfile.c %/__lockfile.c %/ftrylockfile.c \
                  %/rename.c \
                  %/tmpnam.c %/tmpfile.c %/tempnam.c \
                  %/popen.c %/pclose.c \
                  %/gets.c, \
-                 $(wildcard $(MUSL_LIBC_SRC_DIR)/stdio/*.c)) \
+                 $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/*.c)) \
     $(filter-out %/strsignal.c, \
-                 $(wildcard $(MUSL_LIBC_SRC_DIR)/string/*.c)) \
+                 $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/string/*.c)) \
     $(filter-out %/dcngettext.c %/textdomain.c, \
-                 $(wildcard $(MUSL_LIBC_SRC_DIR)/locale/*.c)) \
-    $(wildcard $(MUSL_LIBC_SRC_DIR)/stdlib/*.c) \
-    $(wildcard $(MUSL_LIBC_SRC_DIR)/search/*.c) \
-    $(wildcard $(MUSL_LIBC_SRC_DIR)/multibyte/*.c) \
-    $(wildcard $(MUSL_LIBC_SRC_DIR)/regex/*.c) \
-    $(wildcard $(MUSL_LIBC_SRC_DIR)/temp/*.c) \
-    $(wildcard $(MUSL_LIBC_SRC_DIR)/prng/*.c) \
-    $(wildcard $(MUSL_LIBC_SRC_DIR)/conf/*.c) \
-    $(wildcard $(MUSL_LIBC_SRC_DIR)/ctype/*.c) \
-    $(wildcard $(MUSL_LIBC_SRC_DIR)/math/*.c) \
-    $(wildcard $(MUSL_LIBC_SRC_DIR)/complex/*.c) \
-    $(wildcard $(MUSL_LIBC_SRC_DIR)/crypt/*.c)
+                 $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/locale/*.c)) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/search/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/multibyte/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/regex/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/temp/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/prng/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/conf/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/ctype/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/math/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
 MUSL_PRINTSCAN_SOURCES = \
-    $(MUSL_LIBC_SRC_DIR)/internal/floatscan.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/vfprintf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdio/vfscanf.c \
-    $(MUSL_LIBC_SRC_DIR)/stdlib/strtod.c \
-    $(MUSL_LIBC_SRC_DIR)/stdlib/wcstod.c
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/floatscan.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfprintf.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfscanf.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/strtod.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/wcstod.c
 LIBC_TOP_HALF_HEADERS_PRIVATE = $(LIBC_TOP_HALF_DIR)/headers/private
+LIBC_TOP_HALF_SOURCES = $(LIBC_TOP_HALF_DIR)/sources
+LIBC_TOP_HALF_ALL_SOURCES = \
+    $(LIBC_TOP_HALF_MUSL_SOURCES) \
+    $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.c)
 
 # Set the target variables. The multiarch triple is the same as the
 # regular triple for wasm, except that it excludes the vendor field.
@@ -170,7 +174,7 @@ objs = $(patsubst $(CURDIR)/%.c,$(OBJDIR)/%.o,$(1))
 override BASICS_LIBC_OBJS = $(call objs,$(BASICS_LIBC_SOURCES))
 override DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 override LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
-override MUSL_LIBC_OBJS = $(call objs,$(MUSL_LIBC_SOURCES))
+override LIBC_TOP_HALF_ALL_OBJS = $(call objs,$(LIBC_TOP_HALF_ALL_SOURCES))
 override LIBC_OBJS := $(BASICS_LIBC_OBJS)
 ifeq ($(BUILD_DLMALLOC),yes)
 override LIBC_OBJS += $(DLMALLOC_OBJS)
@@ -187,7 +191,7 @@ override LIBC_OBJS := $(filter-out %/string.o,$(LIBC_OBJS))
 # Override libc-bottom-half's qsort.o with libc-top-half's.
 override LIBC_OBJS := $(filter-out %/qsort.o,$(LIBC_OBJS))
 # libc-top-half is musl.
-override LIBC_OBJS += $(MUSL_LIBC_OBJS)
+override LIBC_OBJS += $(LIBC_TOP_HALF_ALL_OBJS)
 endif
 override MUSL_PRINTSCAN_OBJS = $(call objs,$(MUSL_PRINTSCAN_SOURCES))
 override MUSL_PRINTSCAN_LONG_DOUBLE_OBJS = $(patsubst %.o,%.long-double.o,$(MUSL_PRINTSCAN_OBJS))
@@ -237,11 +241,11 @@ $(LIBC_BOTTOM_HALF_ALL_OBJS): override WASM_CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_LIBPREOPEN_LIB) \
     -I$(LIBC_BOTTOM_HALF_LIBPREOPEN_INC)
 
-$(MUSL_LIBC_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): override WASM_CFLAGS += \
-    -I$(MUSL_LIBC_SRC_DIR)/include \
-    -I$(MUSL_LIBC_SRC_DIR)/internal \
-    -I$(MUSL_LIBC_DIR)/arch/wasm32 \
-    -I$(MUSL_LIBC_DIR)/arch/generic \
+$(LIBC_TOP_HALF_ALL_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): override WASM_CFLAGS += \
+    -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/include \
+    -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal \
+    -I$(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm32 \
+    -I$(LIBC_TOP_HALF_MUSL_DIR)/arch/generic \
     -I$(LIBC_TOP_HALF_HEADERS_PRIVATE) \
     -Wno-parentheses \
     -Wno-shift-op-parentheses \
@@ -266,16 +270,16 @@ $(SYSROOT_INC):
 
 	# Generate musl's bits/alltypes.h header.
 	mkdir -p "$(SYSROOT_INC)/bits"
-	sed -f $(MUSL_LIBC_DIR)/tools/mkalltypes.sed \
-	    $(MUSL_LIBC_DIR)/arch/wasm32/bits/alltypes.h.in \
-	    $(MUSL_LIBC_DIR)/include/alltypes.h.in \
+	sed -f $(LIBC_TOP_HALF_MUSL_DIR)/tools/mkalltypes.sed \
+	    $(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm32/bits/alltypes.h.in \
+	    $(LIBC_TOP_HALF_MUSL_DIR)/include/alltypes.h.in \
 	    > "$(SYSROOT_INC)/bits/alltypes.h"
 
 	# Copy in the bulk of musl's public header files.
-	cp -r --backup=numbered "$(MUSL_LIBC_INC)"/* "$(SYSROOT_INC)"
+	cp -r --backup=numbered "$(LIBC_TOP_HALF_MUSL_INC)"/* "$(SYSROOT_INC)"
 	# Copy in the musl's "bits" header files.
-	cp -r --backup=numbered "$(MUSL_LIBC_DIR)"/arch/generic/bits/* "$(SYSROOT_INC)/bits"
-	cp -r "$(MUSL_LIBC_DIR)"/arch/wasm32/bits/* "$(SYSROOT_INC)/bits"
+	cp -r --backup=numbered "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/generic/bits/* "$(SYSROOT_INC)/bits"
+	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/wasm32/bits/* "$(SYSROOT_INC)/bits"
 
 	# Remove files that aren't headers or that aren't supported yet or that aren't relevant for wasm.
 	$(RM) "$(SYSROOT_INC)/bits/syscall.h.in" \

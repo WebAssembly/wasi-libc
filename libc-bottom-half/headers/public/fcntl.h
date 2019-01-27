@@ -5,6 +5,6 @@
  * Include the real implementation, which is factored into a separate file so
  * that it can be reused by other libc fcntl implementations.
  */
-#include <__wasilibc_fcntl.h>
+#include <__header_fcntl.h>
 
 #endif

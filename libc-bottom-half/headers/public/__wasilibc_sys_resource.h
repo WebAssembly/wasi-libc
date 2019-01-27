@@ -1,9 +1,0 @@
-#ifndef __wasilibc___wasilibc_sys_resource_h
-#define __wasilibc___wasilibc_sys_resource_h
-
-#include <__struct_rusage.h>
-
-#define RUSAGE_SELF 1
-#define RUSAGE_CHILDREN 2
-
-#endif

@@ -1,5 +1,5 @@
-#ifndef __wasilibc___wasilibc_sys_stat_h
-#define __wasilibc___wasilibc_sys_stat_h
+#ifndef __wasilibc___header_sys_stat_h
+#define __wasilibc___header_sys_stat_h
 
 #include <__struct_stat.h>
 

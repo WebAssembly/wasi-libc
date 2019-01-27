@@ -108,7 +108,7 @@ extern "C" {
 
 #include <bits/mman.h>
 #else
-#include <__wasilibc_sys_mman.h>
+#include <__header_sys_mman.h>
 #endif
 
 void *mmap (void *, size_t, int, int, int, off_t);

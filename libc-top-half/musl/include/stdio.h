@@ -43,7 +43,7 @@ extern "C" {
 #define SEEK_CUR 1
 #define SEEK_END 2
 #else
-#include <__wasilibc_unistd.h>
+#include <__header_unistd.h>
 #endif
 
 #define _IOFBF 0

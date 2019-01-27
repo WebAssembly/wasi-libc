@@ -71,7 +71,7 @@ extern "C" {
 #define UTIME_NOW  0x3fffffff
 #define UTIME_OMIT 0x3ffffffe
 #else
-#include <__wasilibc_sys_stat.h>
+#include <__header_sys_stat.h>
 #endif
 
 int stat(const char *__restrict, struct stat *__restrict);

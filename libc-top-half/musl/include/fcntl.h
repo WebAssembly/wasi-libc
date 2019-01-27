@@ -3,7 +3,7 @@
 
 #ifdef __wasilibc_unmodified_upstream__
 #else
-#include <__wasilibc_fcntl.h>
+#include <__header_fcntl.h>
 #endif
 #ifdef __cplusplus
 extern "C" {

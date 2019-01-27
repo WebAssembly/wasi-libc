@@ -1,5 +1,5 @@
-#ifndef __wasilibc___wasilibc_fcntl_h
-#define __wasilibc___wasilibc_fcntl_h
+#ifndef __wasilibc___header_fcntl_h
+#define __wasilibc___header_fcntl_h
 
 #include <wasi.h>
 

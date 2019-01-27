@@ -3732,6 +3732,7 @@
 #define __wasi_h 
 #define __wasilibc___errno_values_h 
 #define __wasilibc___fd_set_h 
+#define __wasilibc___function___isatty_h 
 #define __wasilibc___header_dirent_h 
 #define __wasilibc___header_fcntl_h 
 #define __wasilibc___header_poll_h 

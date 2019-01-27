@@ -27,7 +27,7 @@ extern "C" {
 #define POLLRDHUP  0x2000
 #endif
 #else
-#include <__wasilibc_poll.h>
+#include <__header_poll.h>
 #endif
 
 #ifdef __wasilibc_unmodified_upstream__

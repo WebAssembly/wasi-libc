@@ -1,5 +1,5 @@
-#ifndef __wasilibc___wasilibc_time_h
-#define __wasilibc___wasilibc_time_h
+#ifndef __wasilibc___header_time_h
+#define __wasilibc___header_time_h
 
 #define __need_size_t
 #define __need_NULL

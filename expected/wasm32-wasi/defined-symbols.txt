@@ -89,6 +89,7 @@ __intscan
 __invtrigl_R
 __isalnum_l
 __isalpha_l
+__isatty
 __isblank_l
 __iscntrl_l
 __isdigit_l
@@ -593,6 +594,7 @@ isalnum_l
 isalpha
 isalpha_l
 isascii
+isatty
 isblank
 isblank_l
 iscntrl

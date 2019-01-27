@@ -5,6 +5,6 @@
  * Include the real implementation, which is factored into a separate file so
  * that it can be reused by other libc ioctl implementations.
  */
-#include <__wasilibc_sys_ioctl.h>
+#include <__header_sys_ioctl.h>
 
 #endif

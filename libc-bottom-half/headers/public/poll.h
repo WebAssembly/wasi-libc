@@ -5,6 +5,6 @@
  * Include the real implementation, which is factored into a separate file so
  * that it can be reused by other libc poll implementations.
  */
-#include <__wasilibc_poll.h>
+#include <__header_poll.h>
 
 #endif

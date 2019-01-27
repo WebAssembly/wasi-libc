@@ -92,6 +92,7 @@ unsigned alarm(unsigned);
 unsigned sleep(unsigned);
 int pause(void);
 
+#ifdef __wasilibc_unmodified_upstream__
 pid_t fork(void);
 int execve(const char *, char *const [], char *const []);
 int execv(const char *, char *const []);
@@ -100,6 +101,7 @@ int execl(const char *, const char *, ...);
 int execvp(const char *, char *const []);
 int execlp(const char *, const char *, ...);
 int fexecve(int, char *const [], char *const []);
+#endif
 _Noreturn void _exit(int);
 
 pid_t getpid(void);
@@ -170,10 +172,12 @@ unsigned ualarm(unsigned, unsigned);
 int brk(void *);
 #endif
 void *sbrk(intptr_t);
-pid_t vfork(void);
-int vhangup(void);
-int chroot(const char *);
 #ifdef __wasilibc_unmodified_upstream__
+pid_t vfork(void);
+#endif
+int vhangup(void);
+#ifdef __wasilibc_unmodified_upstream__
+int chroot(const char *);
 int getpagesize(void);
 int getdtablesize(void);
 #endif
@@ -188,7 +192,9 @@ void endusershell(void);
 char *getusershell(void);
 int acct(const char *);
 long syscall(long, ...);
+#ifdef __wasilibc_unmodified_upstream__
 int execvpe(const char *, char *const [], char *const []);
+#endif
 int issetugid(void);
 int getentropy(void *, size_t);
 #endif

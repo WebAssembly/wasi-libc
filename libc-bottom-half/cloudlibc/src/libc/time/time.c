@@ -9,6 +9,10 @@
 
 time_t time(time_t *tloc) {
   wasi_timestamp_t ts = 0;
+#ifdef __wasilibc_unmodified_upstream__ // bug fix
+#else
+  (void)
+#endif
   wasi_clock_time_get(WASI_CLOCK_REALTIME, NSEC_PER_SEC, &ts);
   if (tloc != NULL)
     *tloc = ts / NSEC_PER_SEC;

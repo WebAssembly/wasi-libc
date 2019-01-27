@@ -71,7 +71,6 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/getopt.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/getopt_long.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/getsubopt.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/getentropy.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/uname.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/nftw.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/errno/strerror.c \

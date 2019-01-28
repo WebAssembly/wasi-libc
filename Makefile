@@ -377,7 +377,8 @@ finish: $(SYSROOT_INC) libc
 	mkdir -p "$(SYSROOT_SHARE)"
 
 	# Collect symbol information.
-	# FIXME: --extern-only doesn't seem to report all the defined symbols.
+	# TODO: Use llvm-nm --extern-only instead of grep once
+	# https://bugs.llvm.org/show_bug.cgi?id=40497 is fixed.
 	$(WASM_NM) --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_COLLATE=C sort > "$(SYSROOT_SHARE)/defined-symbols.txt"
 	for undef_sym in $$($(WASM_NM) --undefined-only "$(SYSROOT_LIB)"/*.a "$(SYSROOT_LIB)"/*.o \
@@ -401,7 +402,7 @@ finish: $(SYSROOT_INC) libc
 	# which we don't need to track here. For the __*_ATOMIC_*_LOCK_FREE
 	# macros, squash individual compiler names to attempt, toward keeping
 	# these files compiler-independent.
-	# FIXME: Undefine __FLOAT128__ for now since it's not in clang 8.0.
+	# TODO: Undefine __FLOAT128__ for now since it's not in clang 8.0.
 	"$(WASM_CC)" $(WASM_CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -E -dM -Wno-\#warnings \
 	    -U__llvm__ \

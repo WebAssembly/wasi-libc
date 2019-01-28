@@ -23,6 +23,7 @@ __subtf3
 __trunctfdf2
 __trunctfsf2
 __unordtf2
+__wasm_call_ctors
 main
 wasi_clock_res_get
 wasi_clock_time_get

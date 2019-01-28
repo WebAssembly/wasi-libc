@@ -40,7 +40,7 @@
 #include <sys/un.h>
 
 #include <fcntl.h>
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream__ // dlfcn
 #include <dlfcn.h>
 #endif
 #include <stdarg.h>

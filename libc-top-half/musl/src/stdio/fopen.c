@@ -32,7 +32,7 @@ FILE *fopen(const char *restrict filename, const char *restrict mode)
 #ifdef __wasilibc_unmodified_upstream__
 		__syscall(SYS_fcntl, fd, F_SETFD, FD_CLOEXEC);
 #else
-		// Avoid __syscall, but also, FD_CLOEXEC is not supported in WASI.
+		/* Avoid __syscall, but also, FD_CLOEXEC is not supported in WASI. */
 #endif
 
 	f = __fdopen(fd, mode);

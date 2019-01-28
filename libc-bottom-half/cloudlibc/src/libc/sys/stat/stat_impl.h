@@ -31,7 +31,7 @@ static inline void to_public_stat(const wasi_filestat_t *in,
                 "Size mismatch");
 #else
   /*
-   * The -standard __st_filetype field appears to only be used for shared
+   * The non-standard __st_filetype field appears to only be used for shared
    * memory, which we don't currently support.
    */
 #endif

@@ -12,6 +12,7 @@ weak_alias(dummy, __funcs_on_exit);
 weak_alias(dummy, __stdio_exit);
 weak_alias(dummy, _fini);
 
+#ifdef __wasilibc_unmodified_upstream__ // fini
 extern weak hidden void (*const __fini_array_start)(void), (*const __fini_array_end)(void);
 
 static void libc_exit_fini(void)
@@ -23,7 +24,9 @@ static void libc_exit_fini(void)
 }
 
 weak_alias(libc_exit_fini, __libc_exit_fini);
+#endif
 
+#ifdef __wasilibc_unmodified_upstream__
 _Noreturn void exit(int code)
 {
 	__funcs_on_exit();
@@ -31,3 +34,19 @@ _Noreturn void exit(int code)
 	__stdio_exit();
 	_Exit(code);
 }
+#else
+// Split out the cleanup functions so that we can call them without calling
+// _Exit if we don't need to. This allows _start to just return if main
+// returns 0.
+void __prepare_for_exit(void)
+{
+	__funcs_on_exit();
+	__stdio_exit();
+}
+
+_Noreturn void exit(int code)
+{
+	__prepare_for_exit();
+	_Exit(code);
+}
+#endif

@@ -3729,6 +3729,7 @@
 #define __tm_gmtoff tm_gmtoff
 #define __tm_zone tm_zone
 #define __va_copy(d,s) __builtin_va_copy(d,s)
+#define __wasi__ 1
 #define __wasi_h 
 #define __wasilibc___errno_values_h 
 #define __wasilibc___fd_set_h 

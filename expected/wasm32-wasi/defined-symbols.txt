@@ -135,7 +135,6 @@ __lgamma_r
 __lgammaf_r
 __lgammal_r
 __libc
-__libc_exit_fini
 __loc_is_allocated
 __memrchr
 __mkostemps
@@ -156,6 +155,7 @@ __pio2_lo
 __pleval
 __polevll
 __posix_getopt
+__prepare_for_exit
 __progname
 __progname_full
 __rand48_step

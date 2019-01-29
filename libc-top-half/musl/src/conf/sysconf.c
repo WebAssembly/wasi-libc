@@ -66,7 +66,12 @@ long sysconf(int name)
 		[_SC_MQ_PRIO_MAX] = JT_MQ_PRIO_MAX,
 		[_SC_VERSION] = VER,
 		[_SC_PAGE_SIZE] = JT_PAGE_SIZE,
+#ifdef __wasilibc_unmodified_upstream__ // realtime signals
 		[_SC_RTSIG_MAX] = _NSIG - 1 - 31 - 3,
+#else
+                // Not supported on wasi.
+		[_SC_RTSIG_MAX] = -1,
+#endif
 		[_SC_SEM_NSEMS_MAX] = SEM_NSEMS_MAX,
 		[_SC_SEM_VALUE_MAX] = JT_SEM_VALUE_MAX,
 		[_SC_SIGQUEUE_MAX] = -1,

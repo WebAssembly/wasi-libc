@@ -47,23 +47,32 @@
 #define _Static_assert static_assert
 #endif
 
+_Static_assert(_Alignof(int8_t) == 1, "non-wasi data layout");
+_Static_assert(_Alignof(uint8_t) == 1, "non-wasi data layout");
+_Static_assert(_Alignof(int16_t) == 2, "non-wasi data layout");
+_Static_assert(_Alignof(uint16_t) == 2, "non-wasi data layout");
+_Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef uint8_t wasi_advice_t;
+#define WASI_ADVICE_NORMAL     (UINT8_C(0))
 #define WASI_ADVICE_DONTNEED   (UINT8_C(1))
 #define WASI_ADVICE_NOREUSE    (UINT8_C(2))
-#define WASI_ADVICE_NORMAL     (UINT8_C(3))
-#define WASI_ADVICE_RANDOM     (UINT8_C(4))
-#define WASI_ADVICE_SEQUENTIAL (UINT8_C(5))
-#define WASI_ADVICE_WILLNEED   (UINT8_C(6))
+#define WASI_ADVICE_RANDOM     (UINT8_C(3))
+#define WASI_ADVICE_SEQUENTIAL (UINT8_C(4))
+#define WASI_ADVICE_WILLNEED   (UINT8_C(5))
 
 typedef uint32_t wasi_clockid_t;
+#define WASI_CLOCK_REALTIME           (UINT32_C(0))
 #define WASI_CLOCK_MONOTONIC          (UINT32_C(1))
 #define WASI_CLOCK_PROCESS_CPUTIME_ID (UINT32_C(2))
-#define WASI_CLOCK_REALTIME           (UINT32_C(3))
-#define WASI_CLOCK_THREAD_CPUTIME_ID  (UINT32_C(4))
+#define WASI_CLOCK_THREAD_CPUTIME_ID  (UINT32_C(3))
 
 typedef uint32_t wasi_condvar_t;
 #define WASI_CONDVAR_HAS_NO_WAITERS (UINT32_C(0))
@@ -74,16 +83,16 @@ typedef uint64_t wasi_dircookie_t;
 #define WASI_DIRCOOKIE_START (UINT64_C(0))
 
 typedef uint16_t wasi_errno_t;
-#define WASI_ESUCCESS         (UINT16_C(0))
-#define WASI_E2BIG            (UINT16_C(1))
-#define WASI_EACCES           (UINT16_C(2))
-#define WASI_EADDRINUSE       (UINT16_C(3))
-#define WASI_EADDRNOTAVAIL    (UINT16_C(4))
-#define WASI_EAFNOSUPPORT     (UINT16_C(5))
-#define WASI_EAGAIN           (UINT16_C(6))
-#define WASI_EALREADY         (UINT16_C(7))
-#define WASI_EBADF            (UINT16_C(8))
-#define WASI_EBADMSG          (UINT16_C(9))
+#define WASI_ESUCCESS        (UINT16_C(0))
+#define WASI_E2BIG           (UINT16_C(1))
+#define WASI_EACCES          (UINT16_C(2))
+#define WASI_EADDRINUSE      (UINT16_C(3))
+#define WASI_EADDRNOTAVAIL   (UINT16_C(4))
+#define WASI_EAFNOSUPPORT    (UINT16_C(5))
+#define WASI_EAGAIN          (UINT16_C(6))
+#define WASI_EALREADY        (UINT16_C(7))
+#define WASI_EBADF           (UINT16_C(8))
+#define WASI_EBADMSG         (UINT16_C(9))
 #define WASI_EBUSY           (UINT16_C(10))
 #define WASI_ECANCELED       (UINT16_C(11))
 #define WASI_ECHILD          (UINT16_C(12))
@@ -156,18 +165,17 @@ typedef uint16_t wasi_eventrwflags_t;
 #define WASI_EVENT_FD_READWRITE_HANGUP (UINT16_C(0x0001))
 
 typedef uint8_t wasi_eventtype_t;
-#define WASI_EVENTTYPE_CLOCK          (UINT8_C(1))
-#define WASI_EVENTTYPE_CONDVAR        (UINT8_C(2))
-#define WASI_EVENTTYPE_FD_READ        (UINT8_C(3))
-#define WASI_EVENTTYPE_FD_WRITE       (UINT8_C(4))
-#define WASI_EVENTTYPE_LOCK_RDLOCK    (UINT8_C(5))
-#define WASI_EVENTTYPE_LOCK_WRLOCK    (UINT8_C(6))
-#define WASI_EVENTTYPE_PROC_TERMINATE (UINT8_C(7))
+#define WASI_EVENTTYPE_CLOCK          (UINT8_C(0))
+#define WASI_EVENTTYPE_CONDVAR        (UINT8_C(1))
+#define WASI_EVENTTYPE_FD_READ        (UINT8_C(2))
+#define WASI_EVENTTYPE_FD_WRITE       (UINT8_C(3))
+#define WASI_EVENTTYPE_LOCK_RDLOCK    (UINT8_C(4))
+#define WASI_EVENTTYPE_LOCK_WRLOCK    (UINT8_C(5))
+#define WASI_EVENTTYPE_PROC_TERMINATE (UINT8_C(6))
 
 typedef uint32_t wasi_exitcode_t;
 
 typedef uint32_t wasi_fd_t;
-#define WASI_PROCESS_CHILD (UINT32_C(0xffffffff))
 #define WASI_MAP_ANON_FD   (UINT32_C(0xffffffff))
 
 typedef uint16_t wasi_fdflags_t;
@@ -186,16 +194,16 @@ typedef int64_t wasi_filedelta_t;
 typedef uint64_t wasi_filesize_t;
 
 typedef uint8_t wasi_filetype_t;
-#define WASI_FILETYPE_UNKNOWN            (UINT8_C(0))
-#define WASI_FILETYPE_BLOCK_DEVICE      (UINT8_C(16))
-#define WASI_FILETYPE_CHARACTER_DEVICE  (UINT8_C(17))
-#define WASI_FILETYPE_DIRECTORY         (UINT8_C(32))
-#define WASI_FILETYPE_PROCESS           (UINT8_C(80))
-#define WASI_FILETYPE_REGULAR_FILE      (UINT8_C(96))
-#define WASI_FILETYPE_SHARED_MEMORY    (UINT8_C(112))
-#define WASI_FILETYPE_SOCKET_DGRAM     (UINT8_C(128))
-#define WASI_FILETYPE_SOCKET_STREAM    (UINT8_C(130))
-#define WASI_FILETYPE_SYMBOLIC_LINK    (UINT8_C(144))
+#define WASI_FILETYPE_UNKNOWN          (UINT8_C(0))
+#define WASI_FILETYPE_BLOCK_DEVICE     (UINT8_C(1))
+#define WASI_FILETYPE_CHARACTER_DEVICE (UINT8_C(2))
+#define WASI_FILETYPE_DIRECTORY        (UINT8_C(3))
+#define WASI_FILETYPE_PROCESS          (UINT8_C(4))
+#define WASI_FILETYPE_REGULAR_FILE     (UINT8_C(5))
+#define WASI_FILETYPE_SHARED_MEMORY    (UINT8_C(6))
+#define WASI_FILETYPE_SOCKET_DGRAM     (UINT8_C(7))
+#define WASI_FILETYPE_SOCKET_STREAM    (UINT8_C(8))
+#define WASI_FILETYPE_SYMBOLIC_LINK    (UINT8_C(9))
 
 typedef uint16_t wasi_fsflags_t;
 #define WASI_FILESTAT_ATIM     (UINT16_C(0x0001))
@@ -209,10 +217,10 @@ typedef uint64_t wasi_inode_t;
 typedef uint32_t wasi_linkcount_t;
 
 typedef uint32_t wasi_lock_t;
-#define WASI_LOCK_UNLOCKED       (UINT32_C(0x00000000))
-#define WASI_LOCK_WRLOCKED       (UINT32_C(0x40000000))
-#define WASI_LOCK_KERNEL_MANAGED (UINT32_C(0x80000000))
-#define WASI_LOCK_BOGUS          (UINT32_C(0x80000000))
+#define WASI_LOCK_UNLOCKED       (UINT32_C(0x00000001))
+#define WASI_LOCK_WRLOCKED       (UINT32_C(0x00000002))
+#define WASI_LOCK_KERNEL_MANAGED (UINT32_C(0x00000004))
+#define WASI_LOCK_BOGUS          (UINT32_C(0x00000004))
 
 typedef uint32_t wasi_lookupflags_t;
 #define WASI_LOOKUP_SYMLINK_FOLLOW (UINT32_C(0x00000001))
@@ -242,8 +250,8 @@ typedef uint16_t wasi_oflags_t;
 #define WASI_O_TRUNC     (UINT16_C(0x0008))
 
 typedef uint16_t wasi_riflags_t;
-#define WASI_SOCK_RECV_PEEK    (UINT16_C(0x0004))
-#define WASI_SOCK_RECV_WAITALL (UINT16_C(0x0010))
+#define WASI_SOCK_RECV_PEEK    (UINT16_C(0x0001))
+#define WASI_SOCK_RECV_WAITALL (UINT16_C(0x0002))
 
 typedef uint64_t wasi_rights_t;
 #define WASI_RIGHT_FD_DATASYNC           (UINT64_C(0x0000000000000001))
@@ -257,34 +265,32 @@ typedef uint64_t wasi_rights_t;
 #define WASI_RIGHT_FILE_ALLOCATE         (UINT64_C(0x0000000000000100))
 #define WASI_RIGHT_FILE_CREATE_DIRECTORY (UINT64_C(0x0000000000000200))
 #define WASI_RIGHT_FILE_CREATE_FILE      (UINT64_C(0x0000000000000400))
-#define WASI_RIGHT_FILE_LINK_SOURCE      (UINT64_C(0x0000000000001000))
-#define WASI_RIGHT_FILE_LINK_TARGET      (UINT64_C(0x0000000000002000))
-#define WASI_RIGHT_FILE_OPEN             (UINT64_C(0x0000000000004000))
-#define WASI_RIGHT_FILE_READDIR          (UINT64_C(0x0000000000008000))
-#define WASI_RIGHT_FILE_READLINK         (UINT64_C(0x0000000000010000))
-#define WASI_RIGHT_FILE_RENAME_SOURCE    (UINT64_C(0x0000000000020000))
-#define WASI_RIGHT_FILE_RENAME_TARGET    (UINT64_C(0x0000000000040000))
-#define WASI_RIGHT_FILE_STAT_FGET        (UINT64_C(0x0000000000080000))
-#define WASI_RIGHT_FILE_STAT_FPUT_SIZE   (UINT64_C(0x0000000000100000))
-#define WASI_RIGHT_FILE_STAT_FPUT_TIMES  (UINT64_C(0x0000000000200000))
-#define WASI_RIGHT_FILE_STAT_GET         (UINT64_C(0x0000000000400000))
-#define WASI_RIGHT_FILE_STAT_PUT_TIMES   (UINT64_C(0x0000000000800000))
-#define WASI_RIGHT_FILE_SYMLINK          (UINT64_C(0x0000000001000000))
-#define WASI_RIGHT_FILE_UNLINK           (UINT64_C(0x0000000002000000))
-#define WASI_RIGHT_MEM_MAP               (UINT64_C(0x0000000004000000))
-#define WASI_RIGHT_MEM_MAP_EXEC          (UINT64_C(0x0000000008000000))
-#define WASI_RIGHT_POLL_FD_READWRITE     (UINT64_C(0x0000000010000000))
-#define WASI_RIGHT_POLL_PROC_TERMINATE   (UINT64_C(0x0000000040000000))
-#define WASI_RIGHT_PROC_EXEC             (UINT64_C(0x0000000100000000))
-#define WASI_RIGHT_SOCK_SHUTDOWN         (UINT64_C(0x0000008000000000))
+#define WASI_RIGHT_FILE_LINK_SOURCE      (UINT64_C(0x0000000000000800))
+#define WASI_RIGHT_FILE_LINK_TARGET      (UINT64_C(0x0000000000001000))
+#define WASI_RIGHT_FILE_OPEN             (UINT64_C(0x0000000000002000))
+#define WASI_RIGHT_FILE_READDIR          (UINT64_C(0x0000000000004000))
+#define WASI_RIGHT_FILE_READLINK         (UINT64_C(0x0000000000008000))
+#define WASI_RIGHT_FILE_RENAME_SOURCE    (UINT64_C(0x0000000000010000))
+#define WASI_RIGHT_FILE_RENAME_TARGET    (UINT64_C(0x0000000000020000))
+#define WASI_RIGHT_FILE_STAT_FGET        (UINT64_C(0x0000000000040000))
+#define WASI_RIGHT_FILE_STAT_FPUT_SIZE   (UINT64_C(0x0000000000080000))
+#define WASI_RIGHT_FILE_STAT_FPUT_TIMES  (UINT64_C(0x0000000000100000))
+#define WASI_RIGHT_FILE_STAT_GET         (UINT64_C(0x0000000000200000))
+#define WASI_RIGHT_FILE_STAT_PUT_TIMES   (UINT64_C(0x0000000000400000))
+#define WASI_RIGHT_FILE_SYMLINK          (UINT64_C(0x0000000000800000))
+#define WASI_RIGHT_FILE_UNLINK           (UINT64_C(0x0000000001000000))
+#define WASI_RIGHT_MEM_MAP               (UINT64_C(0x0000000002000000))
+#define WASI_RIGHT_POLL_FD_READWRITE     (UINT64_C(0x0000000004000000))
+#define WASI_RIGHT_POLL_PROC_TERMINATE   (UINT64_C(0x0000000008000000))
+#define WASI_RIGHT_SOCK_SHUTDOWN         (UINT64_C(0x0000000010000000))
 
 typedef uint16_t wasi_roflags_t;
 #define WASI_SOCK_RECV_FDS_TRUNCATED  (UINT16_C(0x0001))
-#define WASI_SOCK_RECV_DATA_TRUNCATED (UINT16_C(0x0008))
+#define WASI_SOCK_RECV_DATA_TRUNCATED (UINT16_C(0x0002))
 
 typedef uint8_t wasi_scope_t;
-#define WASI_SCOPE_PRIVATE (UINT8_C(4))
-#define WASI_SCOPE_SHARED  (UINT8_C(8))
+#define WASI_SCOPE_PRIVATE (UINT8_C(0))
+#define WASI_SCOPE_SHARED  (UINT8_C(1))
 
 typedef uint8_t wasi_sdflags_t;
 #define WASI_SHUT_RD (UINT8_C(0x01))
@@ -293,32 +299,37 @@ typedef uint8_t wasi_sdflags_t;
 typedef uint16_t wasi_siflags_t;
 
 typedef uint8_t wasi_signal_t;
-#define WASI_SIGABRT    (UINT8_C(1))
-#define WASI_SIGALRM    (UINT8_C(2))
-#define WASI_SIGBUS     (UINT8_C(3))
-#define WASI_SIGCHLD    (UINT8_C(4))
-#define WASI_SIGCONT    (UINT8_C(5))
-#define WASI_SIGFPE     (UINT8_C(6))
-#define WASI_SIGHUP     (UINT8_C(7))
-#define WASI_SIGILL     (UINT8_C(8))
-#define WASI_SIGINT     (UINT8_C(9))
-#define WASI_SIGKILL   (UINT8_C(10))
-#define WASI_SIGPIPE   (UINT8_C(11))
-#define WASI_SIGQUIT   (UINT8_C(12))
-#define WASI_SIGSEGV   (UINT8_C(13))
-#define WASI_SIGSTOP   (UINT8_C(14))
-#define WASI_SIGSYS    (UINT8_C(15))
-#define WASI_SIGTERM   (UINT8_C(16))
-#define WASI_SIGTRAP   (UINT8_C(17))
-#define WASI_SIGTSTP   (UINT8_C(18))
-#define WASI_SIGTTIN   (UINT8_C(19))
-#define WASI_SIGTTOU   (UINT8_C(20))
-#define WASI_SIGURG    (UINT8_C(21))
-#define WASI_SIGUSR1   (UINT8_C(22))
-#define WASI_SIGUSR2   (UINT8_C(23))
-#define WASI_SIGVTALRM (UINT8_C(24))
-#define WASI_SIGXCPU   (UINT8_C(25))
-#define WASI_SIGXFSZ   (UINT8_C(26))
+// UINT8_C(0) is reserved; POSIX has special semantics for kill(pid, 0).
+#define WASI_SIGHUP    (UINT8_C(1))
+#define WASI_SIGINT    (UINT8_C(2))
+#define WASI_SIGQUIT   (UINT8_C(3))
+#define WASI_SIGILL    (UINT8_C(4))
+#define WASI_SIGTRAP   (UINT8_C(5))
+#define WASI_SIGABRT   (UINT8_C(6))
+#define WASI_SIGBUS    (UINT8_C(7))
+#define WASI_SIGFPE    (UINT8_C(8))
+#define WASI_SIGKILL   (UINT8_C(9))
+#define WASI_SIGUSR1   (UINT8_C(10))
+#define WASI_SIGSEGV   (UINT8_C(11))
+#define WASI_SIGUSR2   (UINT8_C(12))
+#define WASI_SIGPIPE   (UINT8_C(13))
+#define WASI_SIGALRM   (UINT8_C(14))
+#define WASI_SIGTERM   (UINT8_C(15))
+#define WASI_SIGCHLD   (UINT8_C(16))
+#define WASI_SIGCONT   (UINT8_C(17))
+#define WASI_SIGSTOP   (UINT8_C(18))
+#define WASI_SIGTSTP   (UINT8_C(19))
+#define WASI_SIGTTIN   (UINT8_C(20))
+#define WASI_SIGTTOU   (UINT8_C(21))
+#define WASI_SIGURG    (UINT8_C(22))
+#define WASI_SIGXCPU   (UINT8_C(23))
+#define WASI_SIGXFSZ   (UINT8_C(24))
+#define WASI_SIGVTALRM (UINT8_C(25))
+#define WASI_SIGPROF   (UINT8_C(26))
+#define WASI_SIGWINCH  (UINT8_C(27))
+#define WASI_SIGPOLL   (UINT8_C(28))
+#define WASI_SIGPWR    (UINT8_C(29))
+#define WASI_SIGSYS    (UINT8_C(30))
 
 typedef uint16_t wasi_subclockflags_t;
 #define WASI_SUBSCRIPTION_CLOCK_ABSTIME (UINT16_C(0x0001))
@@ -336,9 +347,9 @@ typedef uint8_t wasi_ulflags_t;
 typedef uint64_t wasi_userdata_t;
 
 typedef uint8_t wasi_whence_t;
-#define WASI_WHENCE_CUR (UINT8_C(1))
-#define WASI_WHENCE_END (UINT8_C(2))
-#define WASI_WHENCE_SET (UINT8_C(3))
+#define WASI_WHENCE_CUR (UINT8_C(0))
+#define WASI_WHENCE_END (UINT8_C(1))
+#define WASI_WHENCE_SET (UINT8_C(2))
 
 typedef struct {
     wasi_dircookie_t d_next;
@@ -346,16 +357,12 @@ typedef struct {
     uint32_t d_namlen;
     wasi_filetype_t d_type;
 } wasi_dirent_t;
-_Static_assert(offsetof(
-    wasi_dirent_t, d_next) == 0, "Incorrect layout");
-_Static_assert(offsetof(
-    wasi_dirent_t, d_ino) == 8, "Incorrect layout");
-_Static_assert(offsetof(
-    wasi_dirent_t, d_namlen) == 16, "Incorrect layout");
-_Static_assert(offsetof(
-    wasi_dirent_t, d_type) == 20, "Incorrect layout");
-_Static_assert(sizeof(wasi_dirent_t) == 24, "Incorrect layout");
-_Static_assert(_Alignof(wasi_dirent_t) == 8, "Incorrect layout");
+_Static_assert(offsetof(wasi_dirent_t, d_next) == 0, "non-wasi data layout");
+_Static_assert(offsetof(wasi_dirent_t, d_ino) == 8, "non-wasi data layout");
+_Static_assert(offsetof(wasi_dirent_t, d_namlen) == 16, "non-wasi data layout");
+_Static_assert(offsetof(wasi_dirent_t, d_type) == 20, "non-wasi data layout");
+_Static_assert(sizeof(wasi_dirent_t) == 24, "non-wasi data layout");
+_Static_assert(_Alignof(wasi_dirent_t) == 8, "non-wasi data layout");
 
 typedef struct {
     wasi_userdata_t userdata;
@@ -375,25 +382,25 @@ typedef struct {
     };
 } wasi_event_t;
 _Static_assert(offsetof(
-    wasi_event_t, userdata) == 0, "Incorrect layout");
+    wasi_event_t, userdata) == 0, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_event_t, error) == 8, "Incorrect layout");
+    wasi_event_t, error) == 8, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_event_t, type) == 10, "Incorrect layout");
+    wasi_event_t, type) == 10, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_event_t, fd_readwrite.nbytes) == 16, "Incorrect layout");
+    wasi_event_t, fd_readwrite.nbytes) == 16, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_event_t, fd_readwrite.unused) == 24, "Incorrect layout");
+    wasi_event_t, fd_readwrite.unused) == 24, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_event_t, fd_readwrite.flags) == 28, "Incorrect layout");
+    wasi_event_t, fd_readwrite.flags) == 28, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_event_t, proc_terminate.unused) == 16, "Incorrect layout");
+    wasi_event_t, proc_terminate.unused) == 16, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_event_t, proc_terminate.signal) == 20, "Incorrect layout");
+    wasi_event_t, proc_terminate.signal) == 20, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_event_t, proc_terminate.exitcode) == 24, "Incorrect layout");
-_Static_assert(sizeof(wasi_event_t) == 32, "Incorrect layout");
-_Static_assert(_Alignof(wasi_event_t) == 8, "Incorrect layout");
+    wasi_event_t, proc_terminate.exitcode) == 24, "non-wasi data layout");
+_Static_assert(sizeof(wasi_event_t) == 32, "non-wasi data layout");
+_Static_assert(_Alignof(wasi_event_t) == 8, "non-wasi data layout");
 
 typedef struct {
     wasi_filetype_t fs_filetype;
@@ -402,15 +409,15 @@ typedef struct {
     wasi_rights_t fs_rights_inheriting;
 } wasi_fdstat_t;
 _Static_assert(offsetof(
-    wasi_fdstat_t, fs_filetype) == 0, "Incorrect layout");
+    wasi_fdstat_t, fs_filetype) == 0, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_fdstat_t, fs_flags) == 2, "Incorrect layout");
+    wasi_fdstat_t, fs_flags) == 2, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_fdstat_t, fs_rights_base) == 8, "Incorrect layout");
+    wasi_fdstat_t, fs_rights_base) == 8, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_fdstat_t, fs_rights_inheriting) == 16, "Incorrect layout");
-_Static_assert(sizeof(wasi_fdstat_t) == 24, "Incorrect layout");
-_Static_assert(_Alignof(wasi_fdstat_t) == 8, "Incorrect layout");
+    wasi_fdstat_t, fs_rights_inheriting) == 16, "non-wasi data layout");
+_Static_assert(sizeof(wasi_fdstat_t) == 24, "non-wasi data layout");
+_Static_assert(_Alignof(wasi_fdstat_t) == 8, "non-wasi data layout");
 
 typedef struct {
     wasi_device_t st_dev;
@@ -423,72 +430,72 @@ typedef struct {
     wasi_timestamp_t st_ctim;
 } wasi_filestat_t;
 _Static_assert(offsetof(
-    wasi_filestat_t, st_dev) == 0, "Incorrect layout");
+    wasi_filestat_t, st_dev) == 0, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_filestat_t, st_ino) == 8, "Incorrect layout");
+    wasi_filestat_t, st_ino) == 8, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_filestat_t, st_filetype) == 16, "Incorrect layout");
+    wasi_filestat_t, st_filetype) == 16, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_filestat_t, st_nlink) == 20, "Incorrect layout");
+    wasi_filestat_t, st_nlink) == 20, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_filestat_t, st_size) == 24, "Incorrect layout");
+    wasi_filestat_t, st_size) == 24, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_filestat_t, st_atim) == 32, "Incorrect layout");
+    wasi_filestat_t, st_atim) == 32, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_filestat_t, st_mtim) == 40, "Incorrect layout");
+    wasi_filestat_t, st_mtim) == 40, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_filestat_t, st_ctim) == 48, "Incorrect layout");
-_Static_assert(sizeof(wasi_filestat_t) == 56, "Incorrect layout");
-_Static_assert(_Alignof(wasi_filestat_t) == 8, "Incorrect layout");
+    wasi_filestat_t, st_ctim) == 48, "non-wasi data layout");
+_Static_assert(sizeof(wasi_filestat_t) == 56, "non-wasi data layout");
+_Static_assert(_Alignof(wasi_filestat_t) == 8, "non-wasi data layout");
 
 typedef struct {
     wasi_fd_t fd;
     wasi_lookupflags_t flags;
 } wasi_lookup_t;
 _Static_assert(offsetof(
-    wasi_lookup_t, fd) == 0, "Incorrect layout");
+    wasi_lookup_t, fd) == 0, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_lookup_t, flags) == 4, "Incorrect layout");
-_Static_assert(sizeof(wasi_lookup_t) == 8, "Incorrect layout");
-_Static_assert(_Alignof(wasi_lookup_t) == 4, "Incorrect layout");
+    wasi_lookup_t, flags) == 4, "non-wasi data layout");
+_Static_assert(sizeof(wasi_lookup_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(wasi_lookup_t) == 4, "non-wasi data layout");
 
 typedef struct {
     const void *buf;
     size_t buf_len;
 } wasi_ciovec_t;
 _Static_assert(offsetof(
-    wasi_ciovec_t, buf) == 0, "Incorrect layout");
+    wasi_ciovec_t, buf) == 0, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_ciovec_t, buf_len) == 4, "Incorrect layout");
+    wasi_ciovec_t, buf_len) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_ciovec_t, buf_len) == 8, "Incorrect layout");
+    wasi_ciovec_t, buf_len) == 8, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || sizeof(
-    wasi_ciovec_t) == 8, "Incorrect layout");
+    wasi_ciovec_t) == 8, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || sizeof(
-    wasi_ciovec_t) == 16, "Incorrect layout");
+    wasi_ciovec_t) == 16, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || _Alignof(
-    wasi_ciovec_t) == 4, "Incorrect layout");
+    wasi_ciovec_t) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || _Alignof(
-    wasi_ciovec_t) == 8, "Incorrect layout");
+    wasi_ciovec_t) == 8, "non-wasi data layout");
 
 typedef struct {
     void *buf;
     size_t buf_len;
 } wasi_iovec_t;
 _Static_assert(offsetof(
-    wasi_iovec_t, buf) == 0, "Incorrect layout");
+    wasi_iovec_t, buf) == 0, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_iovec_t, buf_len) == 4, "Incorrect layout");
+    wasi_iovec_t, buf_len) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_iovec_t, buf_len) == 8, "Incorrect layout");
+    wasi_iovec_t, buf_len) == 8, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || sizeof(
-    wasi_iovec_t) == 8, "Incorrect layout");
+    wasi_iovec_t) == 8, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || sizeof(
-    wasi_iovec_t) == 16, "Incorrect layout");
+    wasi_iovec_t) == 16, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || _Alignof(
-    wasi_iovec_t) == 4, "Incorrect layout");
+    wasi_iovec_t) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || _Alignof(
-    wasi_iovec_t) == 8, "Incorrect layout");
+    wasi_iovec_t) == 8, "non-wasi data layout");
 
 typedef struct {
     const wasi_iovec_t *ri_data;
@@ -498,31 +505,31 @@ typedef struct {
     wasi_riflags_t ri_flags;
 } wasi_recv_in_t;
 _Static_assert(offsetof(
-    wasi_recv_in_t, ri_data) == 0, "Incorrect layout");
+    wasi_recv_in_t, ri_data) == 0, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_recv_in_t, ri_data_len) == 4, "Incorrect layout");
+    wasi_recv_in_t, ri_data_len) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_recv_in_t, ri_data_len) == 8, "Incorrect layout");
+    wasi_recv_in_t, ri_data_len) == 8, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_recv_in_t, ri_fds) == 8, "Incorrect layout");
+    wasi_recv_in_t, ri_fds) == 8, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_recv_in_t, ri_fds) == 16, "Incorrect layout");
+    wasi_recv_in_t, ri_fds) == 16, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_recv_in_t, ri_fds_len) == 12, "Incorrect layout");
+    wasi_recv_in_t, ri_fds_len) == 12, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_recv_in_t, ri_fds_len) == 24, "Incorrect layout");
+    wasi_recv_in_t, ri_fds_len) == 24, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_recv_in_t, ri_flags) == 16, "Incorrect layout");
+    wasi_recv_in_t, ri_flags) == 16, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_recv_in_t, ri_flags) == 32, "Incorrect layout");
+    wasi_recv_in_t, ri_flags) == 32, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || sizeof(
-    wasi_recv_in_t) == 20, "Incorrect layout");
+    wasi_recv_in_t) == 20, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || sizeof(
-    wasi_recv_in_t) == 40, "Incorrect layout");
+    wasi_recv_in_t) == 40, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || _Alignof(
-    wasi_recv_in_t) == 4, "Incorrect layout");
+    wasi_recv_in_t) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || _Alignof(
-    wasi_recv_in_t) == 8, "Incorrect layout");
+    wasi_recv_in_t) == 8, "non-wasi data layout");
 
 typedef struct {
     size_t ro_datalen;
@@ -531,27 +538,27 @@ typedef struct {
     wasi_roflags_t ro_flags;
 } wasi_recv_out_t;
 _Static_assert(offsetof(
-    wasi_recv_out_t, ro_datalen) == 0, "Incorrect layout");
+    wasi_recv_out_t, ro_datalen) == 0, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_recv_out_t, ro_fdslen) == 4, "Incorrect layout");
+    wasi_recv_out_t, ro_fdslen) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_recv_out_t, ro_fdslen) == 8, "Incorrect layout");
+    wasi_recv_out_t, ro_fdslen) == 8, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_recv_out_t, ro_unused) == 8, "Incorrect layout");
+    wasi_recv_out_t, ro_unused) == 8, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_recv_out_t, ro_unused) == 16, "Incorrect layout");
+    wasi_recv_out_t, ro_unused) == 16, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_recv_out_t, ro_flags) == 48, "Incorrect layout");
+    wasi_recv_out_t, ro_flags) == 48, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_recv_out_t, ro_flags) == 56, "Incorrect layout");
+    wasi_recv_out_t, ro_flags) == 56, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || sizeof(
-    wasi_recv_out_t) == 52, "Incorrect layout");
+    wasi_recv_out_t) == 52, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || sizeof(
-    wasi_recv_out_t) == 64, "Incorrect layout");
+    wasi_recv_out_t) == 64, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || _Alignof(
-    wasi_recv_out_t) == 4, "Incorrect layout");
+    wasi_recv_out_t) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || _Alignof(
-    wasi_recv_out_t) == 8, "Incorrect layout");
+    wasi_recv_out_t) == 8, "non-wasi data layout");
 
 typedef struct {
     const wasi_ciovec_t *si_data;
@@ -561,45 +568,45 @@ typedef struct {
     wasi_siflags_t si_flags;
 } wasi_send_in_t;
 _Static_assert(offsetof(
-    wasi_send_in_t, si_data) == 0, "Incorrect layout");
+    wasi_send_in_t, si_data) == 0, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_send_in_t, si_data_len) == 4, "Incorrect layout");
+    wasi_send_in_t, si_data_len) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_send_in_t, si_data_len) == 8, "Incorrect layout");
+    wasi_send_in_t, si_data_len) == 8, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_send_in_t, si_fds) == 8, "Incorrect layout");
+    wasi_send_in_t, si_fds) == 8, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_send_in_t, si_fds) == 16, "Incorrect layout");
+    wasi_send_in_t, si_fds) == 16, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_send_in_t, si_fds_len) == 12, "Incorrect layout");
+    wasi_send_in_t, si_fds_len) == 12, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_send_in_t, si_fds_len) == 24, "Incorrect layout");
+    wasi_send_in_t, si_fds_len) == 24, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_send_in_t, si_flags) == 16, "Incorrect layout");
+    wasi_send_in_t, si_flags) == 16, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_send_in_t, si_flags) == 32, "Incorrect layout");
+    wasi_send_in_t, si_flags) == 32, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || sizeof(
-    wasi_send_in_t) == 20, "Incorrect layout");
+    wasi_send_in_t) == 20, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || sizeof(
-    wasi_send_in_t) == 40, "Incorrect layout");
+    wasi_send_in_t) == 40, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || _Alignof(
-    wasi_send_in_t) == 4, "Incorrect layout");
+    wasi_send_in_t) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || _Alignof(
-    wasi_send_in_t) == 8, "Incorrect layout");
+    wasi_send_in_t) == 8, "non-wasi data layout");
 
 typedef struct {
     size_t so_datalen;
 } wasi_send_out_t;
 _Static_assert(offsetof(
-    wasi_send_out_t, so_datalen) == 0, "Incorrect layout");
+    wasi_send_out_t, so_datalen) == 0, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || sizeof(
-    wasi_send_out_t) == 4, "Incorrect layout");
+    wasi_send_out_t) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || sizeof(
-    wasi_send_out_t) == 8, "Incorrect layout");
+    wasi_send_out_t) == 8, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || _Alignof(
-    wasi_send_out_t) == 4, "Incorrect layout");
+    wasi_send_out_t) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || _Alignof(
-    wasi_send_out_t) == 8, "Incorrect layout");
+    wasi_send_out_t) == 8, "non-wasi data layout");
 
 typedef struct {
     wasi_userdata_t userdata;
@@ -633,63 +640,63 @@ typedef struct {
     };
 } wasi_subscription_t;
 _Static_assert(offsetof(
-    wasi_subscription_t, userdata) == 0, "Incorrect layout");
+    wasi_subscription_t, userdata) == 0, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_subscription_t, unused) == 8, "Incorrect layout");
+    wasi_subscription_t, unused) == 8, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_subscription_t, type) == 10, "Incorrect layout");
+    wasi_subscription_t, type) == 10, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_subscription_t, clock.identifier) == 16, "Incorrect layout");
+    wasi_subscription_t, clock.identifier) == 16, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_subscription_t, clock.clock_id) == 24, "Incorrect layout");
+    wasi_subscription_t, clock.clock_id) == 24, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_subscription_t, clock.timeout) == 32, "Incorrect layout");
+    wasi_subscription_t, clock.timeout) == 32, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_subscription_t, clock.precision) == 40, "Incorrect layout");
+    wasi_subscription_t, clock.precision) == 40, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_subscription_t, clock.flags) == 48, "Incorrect layout");
+    wasi_subscription_t, clock.flags) == 48, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_subscription_t, condvar.condvar) == 16, "Incorrect layout");
+    wasi_subscription_t, condvar.condvar) == 16, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_subscription_t, condvar.lock) == 20, "Incorrect layout");
+    wasi_subscription_t, condvar.lock) == 20, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_subscription_t, condvar.lock) == 24, "Incorrect layout");
+    wasi_subscription_t, condvar.lock) == 24, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_subscription_t, condvar.condvar_scope) == 24, "Incorrect layout");
+    wasi_subscription_t, condvar.condvar_scope) == 24, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_subscription_t, condvar.condvar_scope) == 32, "Incorrect layout");
+    wasi_subscription_t, condvar.condvar_scope) == 32, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_subscription_t, condvar.lock_scope) == 25, "Incorrect layout");
+    wasi_subscription_t, condvar.lock_scope) == 25, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_subscription_t, condvar.lock_scope) == 33, "Incorrect layout");
+    wasi_subscription_t, condvar.lock_scope) == 33, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_subscription_t, fd_readwrite.fd) == 16, "Incorrect layout");
+    wasi_subscription_t, fd_readwrite.fd) == 16, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_subscription_t, fd_readwrite.flags) == 20, "Incorrect layout");
+    wasi_subscription_t, fd_readwrite.flags) == 20, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_subscription_t, lock.lock) == 16, "Incorrect layout");
+    wasi_subscription_t, lock.lock) == 16, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_subscription_t, lock.lock_scope) == 20, "Incorrect layout");
+    wasi_subscription_t, lock.lock_scope) == 20, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_subscription_t, lock.lock_scope) == 24, "Incorrect layout");
+    wasi_subscription_t, lock.lock_scope) == 24, "non-wasi data layout");
 _Static_assert(offsetof(
-    wasi_subscription_t, proc_terminate.fd) == 16, "Incorrect layout");
-_Static_assert(sizeof(wasi_subscription_t) == 56, "Incorrect layout");
-_Static_assert(_Alignof(wasi_subscription_t) == 8, "Incorrect layout");
+    wasi_subscription_t, proc_terminate.fd) == 16, "non-wasi data layout");
+_Static_assert(sizeof(wasi_subscription_t) == 56, "non-wasi data layout");
+_Static_assert(_Alignof(wasi_subscription_t) == 8, "non-wasi data layout");
 
 typedef struct {
     void *parent;
 } wasi_tcb_t;
 _Static_assert(offsetof(
-    wasi_tcb_t, parent) == 0, "Incorrect layout");
+    wasi_tcb_t, parent) == 0, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || sizeof(
-    wasi_tcb_t) == 4, "Incorrect layout");
+    wasi_tcb_t) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || sizeof(
-    wasi_tcb_t) == 8, "Incorrect layout");
+    wasi_tcb_t) == 8, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || _Alignof(
-    wasi_tcb_t) == 4, "Incorrect layout");
+    wasi_tcb_t) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || _Alignof(
-    wasi_tcb_t) == 8, "Incorrect layout");
+    wasi_tcb_t) == 8, "non-wasi data layout");
 
 typedef void wasi_threadentry_t(
     wasi_tid_t tid,
@@ -703,27 +710,27 @@ typedef struct {
     void *argument;
 } wasi_threadattr_t;
 _Static_assert(offsetof(
-    wasi_threadattr_t, entry_point) == 0, "Incorrect layout");
+    wasi_threadattr_t, entry_point) == 0, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_threadattr_t, stack) == 4, "Incorrect layout");
+    wasi_threadattr_t, stack) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_threadattr_t, stack) == 8, "Incorrect layout");
+    wasi_threadattr_t, stack) == 8, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_threadattr_t, stack_len) == 8, "Incorrect layout");
+    wasi_threadattr_t, stack_len) == 8, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_threadattr_t, stack_len) == 16, "Incorrect layout");
+    wasi_threadattr_t, stack_len) == 16, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || offsetof(
-    wasi_threadattr_t, argument) == 12, "Incorrect layout");
+    wasi_threadattr_t, argument) == 12, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || offsetof(
-    wasi_threadattr_t, argument) == 24, "Incorrect layout");
+    wasi_threadattr_t, argument) == 24, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || sizeof(
-    wasi_threadattr_t) == 16, "Incorrect layout");
+    wasi_threadattr_t) == 16, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || sizeof(
-    wasi_threadattr_t) == 32, "Incorrect layout");
+    wasi_threadattr_t) == 32, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 4 || _Alignof(
-    wasi_threadattr_t) == 4, "Incorrect layout");
+    wasi_threadattr_t) == 4, "non-wasi data layout");
 _Static_assert(sizeof(void *) != 8 || _Alignof(
-    wasi_threadattr_t) == 8, "Incorrect layout");
+    wasi_threadattr_t) == 8, "non-wasi data layout");
 
 wasi_errno_t wasi_clock_res_get(
     wasi_clockid_t clock_id,
@@ -994,8 +1001,8 @@ wasi_errno_t wasi_sock_recv(
 
 wasi_errno_t wasi_sock_send(
     wasi_fd_t sock,
-   const wasi_send_in_t *in,
-   wasi_send_out_t *out
+    const wasi_send_in_t *in,
+    wasi_send_out_t *out
 ) __attribute__((__warn_unused_result__));
 
 wasi_errno_t wasi_sock_shutdown(

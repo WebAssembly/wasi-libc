@@ -34,8 +34,10 @@ int fcntl(int fildes, int cmd, ...) {
           oflags |= O_RDONLY;
       } else if ((fds.fs_rights_base & WASI_RIGHT_FD_WRITE) != 0) {
         oflags |= O_WRONLY;
+#ifdef __wasilibc_unmodified_upstream__
       } else if ((fds.fs_rights_base & WASI_RIGHT_PROC_EXEC) != 0) {
         oflags |= O_EXEC;
+#endif
       } else {
         oflags |= O_SEARCH;
       }

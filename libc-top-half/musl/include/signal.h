@@ -189,11 +189,13 @@ struct sigevent {
 #define SIGEV_NONE 1
 #define SIGEV_THREAD 2
 
+#ifdef __wasilibc_unmodified_upstream__ // realtime signals
 int __libc_current_sigrtmin(void);
 int __libc_current_sigrtmax(void);
 
 #define SIGRTMIN  (__libc_current_sigrtmin())
 #define SIGRTMAX  (__libc_current_sigrtmax())
+#endif
 
 int kill(pid_t, int);
 

@@ -2,8 +2,10 @@
 #include <__errno_values.h>
 #include <__fd_set.h>
 #include <__function___isatty.h>
+#include <__header_bits_signal.h>
 #include <__header_dirent.h>
 #include <__header_fcntl.h>
+#include <__header_netinet_in.h>
 #include <__header_poll.h>
 #include <__header_sys_ioctl.h>
 #include <__header_sys_mman.h>

@@ -49,7 +49,11 @@ int faccessat(int fd, const char *path, int amode, int flag) {
     if ((amode & W_OK) != 0)
       min |= WASI_RIGHT_FD_WRITE;
     if ((amode & X_OK) != 0 && file.st_filetype != WASI_FILETYPE_DIRECTORY)
+#ifdef __wasilibc_unmodified_upstream__ // RIGHT_PROC_EXEC
       min |= WASI_RIGHT_PROC_EXEC;
+#else
+      (void)0;
+#endif
 
     if ((min & directory.fs_rights_inheriting) != min) {
       errno = EACCES;

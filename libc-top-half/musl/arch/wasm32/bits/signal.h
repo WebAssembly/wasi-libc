@@ -1,2 +1,1 @@
-/* Just a placeholder for now. */
-#define _NSIG 0
+#include <__header_bits_signal.h>

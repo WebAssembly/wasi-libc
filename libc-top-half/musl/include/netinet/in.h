@@ -8,13 +8,15 @@ extern "C" {
 #include <features.h>
 #include <inttypes.h>
 #include <sys/socket.h>
+#ifdef __wasilibc_unmodified_upstream__
+#else
+#include <__header_netinet_in.h>
+#endif
 
 typedef uint16_t in_port_t;
 typedef uint32_t in_addr_t;
 #ifdef __wasilibc_unmodified_upstream__
 struct in_addr { in_addr_t s_addr; };
-#else
-#include <__struct_in_addr.h>
 #endif
 
 #ifdef __wasilibc_unmodified_upstream__
@@ -24,8 +26,6 @@ struct sockaddr_in {
 	struct in_addr sin_addr;
 	uint8_t sin_zero[8];
 };
-#else
-#include <__struct_sockaddr_in.h>
 #endif
 
 #ifdef __wasilibc_unmodified_upstream__
@@ -39,8 +39,6 @@ struct in6_addr {
 #define s6_addr __in6_union.__s6_addr
 #define s6_addr16 __in6_union.__s6_addr16
 #define s6_addr32 __in6_union.__s6_addr32
-#else
-#include <__struct_in6_addr.h>
 #endif
 
 #ifdef __wasilibc_unmodified_upstream__
@@ -51,8 +49,6 @@ struct sockaddr_in6 {
 	struct in6_addr sin6_addr;
 	uint32_t        sin6_scope_id;
 };
-#else
-#include <__struct_sockaddr_in6.h>
 #endif
 
 struct ipv6_mreq {
@@ -87,6 +83,7 @@ uint16_t ntohs(uint16_t);
 
 #define IPPORT_RESERVED 1024
 
+#ifdef __wasilibc_unmodified_upstream__
 #define IPPROTO_IP       0
 #define IPPROTO_HOPOPTS  0
 #define IPPROTO_ICMP     1
@@ -120,6 +117,7 @@ uint16_t ntohs(uint16_t);
 #define IPPROTO_MPLS     137
 #define IPPROTO_RAW      255
 #define IPPROTO_MAX      256
+#endif
 
 #define IN6_IS_ADDR_UNSPECIFIED(a) \
         (((uint32_t *) (a))[0] == 0 && ((uint32_t *) (a))[1] == 0 && \

@@ -19,13 +19,13 @@ int faccessat(int fd, const char *path, int amode, int flag) {
   }
 
   // Check for target file existence and obtain the file type.
-  wasi_lookup_t lookup = {
+  __wasi_lookup_t lookup = {
       .fd = fd,
-      .flags = WASI_LOOKUP_SYMLINK_FOLLOW,
+      .flags = __WASI_LOOKUP_SYMLINK_FOLLOW,
   };
-  wasi_filestat_t file;
-  wasi_errno_t error =
-      wasi_file_stat_get(lookup, path, strlen(path), &file);
+  __wasi_filestat_t file;
+  __wasi_errno_t error =
+      __wasi_file_stat_get(lookup, path, strlen(path), &file);
   if (error != 0) {
     errno = errno_fixup_directory(fd, error);
     return -1;
@@ -34,23 +34,23 @@ int faccessat(int fd, const char *path, int amode, int flag) {
   // Test whether the requested access rights are present on the
   // directory file descriptor.
   if (amode != 0) {
-    wasi_fdstat_t directory;
-    error = wasi_fd_stat_get(fd, &directory);
+    __wasi_fdstat_t directory;
+    error = __wasi_fd_stat_get(fd, &directory);
     if (error != 0) {
       errno = error;
       return -1;
     }
 
-    wasi_rights_t min = 0;
+    __wasi_rights_t min = 0;
     if ((amode & R_OK) != 0)
-      min |= file.st_filetype == WASI_FILETYPE_DIRECTORY
-                 ? WASI_RIGHT_FILE_READDIR
-                 : WASI_RIGHT_FD_READ;
+      min |= file.st_filetype == __WASI_FILETYPE_DIRECTORY
+                 ? __WASI_RIGHT_FILE_READDIR
+                 : __WASI_RIGHT_FD_READ;
     if ((amode & W_OK) != 0)
-      min |= WASI_RIGHT_FD_WRITE;
-    if ((amode & X_OK) != 0 && file.st_filetype != WASI_FILETYPE_DIRECTORY)
+      min |= __WASI_RIGHT_FD_WRITE;
+    if ((amode & X_OK) != 0 && file.st_filetype != __WASI_FILETYPE_DIRECTORY)
 #ifdef __wasilibc_unmodified_upstream__ // RIGHT_PROC_EXEC
-      min |= WASI_RIGHT_PROC_EXEC;
+      min |= __WASI_RIGHT_PROC_EXEC;
 #else
       (void)0;
 #endif

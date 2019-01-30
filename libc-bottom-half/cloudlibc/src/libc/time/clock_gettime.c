@@ -14,8 +14,8 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp) {
 #else
 int __clock_gettime(clockid_t clock_id, struct timespec *tp) {
 #endif
-  wasi_timestamp_t ts;
-  wasi_errno_t error = wasi_clock_time_get(clock_id->id, 1, &ts);
+  __wasi_timestamp_t ts;
+  __wasi_errno_t error = __wasi_clock_time_get(clock_id->id, 1, &ts);
   if (error != 0) {
     errno = error;
     return -1;

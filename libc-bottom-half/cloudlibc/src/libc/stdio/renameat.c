@@ -10,7 +10,7 @@
 #include <string.h>
 
 int renameat(int oldfd, const char *old, int newfd, const char *new) {
-  wasi_errno_t error = wasi_file_rename(oldfd, old, strlen(old),
+  __wasi_errno_t error = __wasi_file_rename(oldfd, old, strlen(old),
                                                     newfd, new, strlen(new));
   if (error != 0) {
     errno = errno_fixup_directory(oldfd, errno_fixup_directory(newfd, error));

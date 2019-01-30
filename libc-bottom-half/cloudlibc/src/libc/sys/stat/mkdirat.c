@@ -15,8 +15,8 @@ int mkdirat(int fd, const char *path, ...) {
 #else
 int mkdirat(int fd, const char *path, mode_t mode) {
 #endif
-  wasi_errno_t error = wasi_file_create(
-      fd, path, strlen(path), WASI_FILETYPE_DIRECTORY);
+  __wasi_errno_t error = __wasi_file_create(
+      fd, path, strlen(path), __WASI_FILETYPE_DIRECTORY);
   if (error != 0) {
     errno = errno_fixup_directory(fd, error);
     return -1;

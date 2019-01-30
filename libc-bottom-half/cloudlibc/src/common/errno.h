@@ -8,50 +8,50 @@
 #include <wasi.h>
 
 // Translates ENOTCAPABLE to ENOTDIR if not a directory.
-static inline wasi_errno_t errno_fixup_directory(wasi_fd_t fd,
-                                                     wasi_errno_t error) {
-  if (error == WASI_ENOTCAPABLE) {
-    wasi_fdstat_t fds;
-    if (wasi_fd_stat_get(fd, &fds) == 0 &&
-        fds.fs_filetype != WASI_FILETYPE_DIRECTORY)
-      return WASI_ENOTDIR;
+static inline __wasi_errno_t errno_fixup_directory(__wasi_fd_t fd,
+                                                     __wasi_errno_t error) {
+  if (error == __WASI_ENOTCAPABLE) {
+    __wasi_fdstat_t fds;
+    if (__wasi_fd_stat_get(fd, &fds) == 0 &&
+        fds.fs_filetype != __WASI_FILETYPE_DIRECTORY)
+      return __WASI_ENOTDIR;
   }
   return error;
 }
 
 // Translates ENOTCAPABLE to EBADF if a regular file or EACCES otherwise.
-static inline wasi_errno_t errno_fixup_executable(wasi_fd_t fd,
-                                                      wasi_errno_t error) {
-  if (error == WASI_ENOTCAPABLE) {
-    wasi_fdstat_t fds;
-    if (wasi_fd_stat_get(fd, &fds) == 0)
-      return fds.fs_filetype == WASI_FILETYPE_REGULAR_FILE
-                 ? WASI_EBADF
-                 : WASI_EACCES;
+static inline __wasi_errno_t errno_fixup_executable(__wasi_fd_t fd,
+                                                      __wasi_errno_t error) {
+  if (error == __WASI_ENOTCAPABLE) {
+    __wasi_fdstat_t fds;
+    if (__wasi_fd_stat_get(fd, &fds) == 0)
+      return fds.fs_filetype == __WASI_FILETYPE_REGULAR_FILE
+                 ? __WASI_EBADF
+                 : __WASI_EACCES;
   }
   return error;
 }
 
 // Translates ENOTCAPABLE to EINVAL if not a process.
-static inline wasi_errno_t errno_fixup_process(wasi_fd_t fd,
-                                                   wasi_errno_t error) {
-  if (error == WASI_ENOTCAPABLE) {
-    wasi_fdstat_t fds;
-    if (wasi_fd_stat_get(fd, &fds) == 0 &&
-        fds.fs_filetype != WASI_FILETYPE_PROCESS)
-      return WASI_EINVAL;
+static inline __wasi_errno_t errno_fixup_process(__wasi_fd_t fd,
+                                                   __wasi_errno_t error) {
+  if (error == __WASI_ENOTCAPABLE) {
+    __wasi_fdstat_t fds;
+    if (__wasi_fd_stat_get(fd, &fds) == 0 &&
+        fds.fs_filetype != __WASI_FILETYPE_PROCESS)
+      return __WASI_EINVAL;
   }
   return error;
 }
 
 // Translates ENOTCAPABLE to ENOTSOCK if not a socket.
-static inline wasi_errno_t errno_fixup_socket(wasi_fd_t fd,
-                                                  wasi_errno_t error) {
-  if (error == WASI_ENOTCAPABLE) {
-    wasi_fdstat_t fds;
-    if (wasi_fd_stat_get(fd, &fds) == 0 &&
+static inline __wasi_errno_t errno_fixup_socket(__wasi_fd_t fd,
+                                                  __wasi_errno_t error) {
+  if (error == __WASI_ENOTCAPABLE) {
+    __wasi_fdstat_t fds;
+    if (__wasi_fd_stat_get(fd, &fds) == 0 &&
         (fds.fs_filetype & 0xf0) != 0x80)
-      return WASI_ENOTSOCK;
+      return __WASI_ENOTSOCK;
   }
   return error;
 }

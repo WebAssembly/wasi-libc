@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 int close(int fildes) {
-  wasi_errno_t error = wasi_fd_close(fildes);
+  __wasi_errno_t error = __wasi_fd_close(fildes);
   if (error != 0) {
     errno = error;
     return -1;

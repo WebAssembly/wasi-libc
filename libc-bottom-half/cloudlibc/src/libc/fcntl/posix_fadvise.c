@@ -7,18 +7,18 @@
 #include <errno.h>
 #include <fcntl.h>
 
-static_assert(POSIX_FADV_DONTNEED == WASI_ADVICE_DONTNEED,
+static_assert(POSIX_FADV_DONTNEED == __WASI_ADVICE_DONTNEED,
               "Value mismatch");
-static_assert(POSIX_FADV_NOREUSE == WASI_ADVICE_NOREUSE, "Value mismatch");
-static_assert(POSIX_FADV_NORMAL == WASI_ADVICE_NORMAL, "Value mismatch");
-static_assert(POSIX_FADV_RANDOM == WASI_ADVICE_RANDOM, "Value mismatch");
-static_assert(POSIX_FADV_SEQUENTIAL == WASI_ADVICE_SEQUENTIAL,
+static_assert(POSIX_FADV_NOREUSE == __WASI_ADVICE_NOREUSE, "Value mismatch");
+static_assert(POSIX_FADV_NORMAL == __WASI_ADVICE_NORMAL, "Value mismatch");
+static_assert(POSIX_FADV_RANDOM == __WASI_ADVICE_RANDOM, "Value mismatch");
+static_assert(POSIX_FADV_SEQUENTIAL == __WASI_ADVICE_SEQUENTIAL,
               "Value mismatch");
-static_assert(POSIX_FADV_WILLNEED == WASI_ADVICE_WILLNEED,
+static_assert(POSIX_FADV_WILLNEED == __WASI_ADVICE_WILLNEED,
               "Value mismatch");
 
 int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
   if (offset < 0 || len < 0)
     return EINVAL;
-  return wasi_file_advise(fd, offset, len, advice);
+  return __wasi_file_advise(fd, offset, len, advice);
 }

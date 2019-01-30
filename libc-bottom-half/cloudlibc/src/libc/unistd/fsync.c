@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 int fsync(int fildes) {
-  wasi_errno_t error = wasi_fd_sync(fildes);
+  __wasi_errno_t error = __wasi_fd_sync(fildes);
   if (error != 0) {
     errno = error == ENOTCAPABLE ? EINVAL : error;
     return -1;

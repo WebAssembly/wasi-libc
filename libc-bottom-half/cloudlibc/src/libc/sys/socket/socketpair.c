@@ -8,8 +8,8 @@
 #include <wasi.h>
 #include <errno.h>
 
-static_assert(SOCK_DGRAM == WASI_FILETYPE_SOCKET_DGRAM, "Value mismatch");
-static_assert(SOCK_STREAM == WASI_FILETYPE_SOCKET_STREAM, "Value mismatch");
+static_assert(SOCK_DGRAM == __WASI_FILETYPE_SOCKET_DGRAM, "Value mismatch");
+static_assert(SOCK_STREAM == __WASI_FILETYPE_SOCKET_STREAM, "Value mismatch");
 
 int socketpair(int domain, int type, int protocol, int *socket_vector) {
   // We can only allocate UNIX socket pairs. Validate the parameters in
@@ -28,8 +28,8 @@ int socketpair(int domain, int type, int protocol, int *socket_vector) {
   }
 
   // Create socket pair.
-  wasi_fd_t fd1, fd2;
-  wasi_errno_t error = wasi_fd_create2(type, &fd1, &fd2);
+  __wasi_fd_t fd1, fd2;
+  __wasi_errno_t error = __wasi_fd_create2(type, &fd1, &fd2);
   if (error != 0) {
     errno = error;
     return -1;

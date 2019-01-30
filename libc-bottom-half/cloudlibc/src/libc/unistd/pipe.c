@@ -7,9 +7,9 @@
 #include <unistd.h>
 
 int pipe(int *fildes) {
-  wasi_fd_t readfd, writefd;
-  wasi_errno_t error = wasi_fd_create2(
-      WASI_FILETYPE_SOCKET_STREAM, &readfd, &writefd);
+  __wasi_fd_t readfd, writefd;
+  __wasi_errno_t error = __wasi_fd_create2(
+      __WASI_FILETYPE_SOCKET_STREAM, &readfd, &writefd);
   if (error != 0) {
     errno = error;
     return -1;

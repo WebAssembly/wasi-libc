@@ -9,7 +9,7 @@
 
 void rewinddir(DIR *dirp) {
   // Update cookie.
-  dirp->cookie = WASI_DIRCOOKIE_START;
+  dirp->cookie = __WASI_DIRCOOKIE_START;
   // Mark entire buffer as processed to force a read of new data.
   dirp->buffer_used = dirp->buffer_processed = dirp->buffer_size;
 }

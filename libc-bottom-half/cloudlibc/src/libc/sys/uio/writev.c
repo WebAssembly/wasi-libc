@@ -10,18 +10,18 @@
 #include <stddef.h>
 
 static_assert(offsetof(struct iovec, iov_base) ==
-                  offsetof(wasi_ciovec_t, buf),
+                  offsetof(__wasi_ciovec_t, buf),
               "Offset mismatch");
 static_assert(sizeof(((struct iovec *)0)->iov_base) ==
-                  sizeof(((wasi_ciovec_t *)0)->buf),
+                  sizeof(((__wasi_ciovec_t *)0)->buf),
               "Size mismatch");
 static_assert(offsetof(struct iovec, iov_len) ==
-                  offsetof(wasi_ciovec_t, buf_len),
+                  offsetof(__wasi_ciovec_t, buf_len),
               "Offset mismatch");
 static_assert(sizeof(((struct iovec *)0)->iov_len) ==
-                  sizeof(((wasi_ciovec_t *)0)->buf_len),
+                  sizeof(((__wasi_ciovec_t *)0)->buf_len),
               "Size mismatch");
-static_assert(sizeof(struct iovec) == sizeof(wasi_ciovec_t),
+static_assert(sizeof(struct iovec) == sizeof(__wasi_ciovec_t),
               "Size mismatch");
 
 ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
@@ -30,8 +30,8 @@ ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
     return -1;
   }
   size_t bytes_written;
-  wasi_errno_t error = wasi_fd_write(
-      fildes, (const wasi_ciovec_t *)iov, iovcnt, &bytes_written);
+  __wasi_errno_t error = __wasi_fd_write(
+      fildes, (const __wasi_ciovec_t *)iov, iovcnt, &bytes_written);
   if (error != 0) {
     errno = error;
     return -1;

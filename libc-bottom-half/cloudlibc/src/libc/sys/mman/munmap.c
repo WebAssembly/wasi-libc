@@ -8,7 +8,7 @@
 #include <errno.h>
 
 int munmap(void *addr, size_t len) {
-  wasi_errno_t error = wasi_mem_unmap(addr, len);
+  __wasi_errno_t error = __wasi_mem_unmap(addr, len);
   if (error != 0) {
     errno = error;
     return -1;

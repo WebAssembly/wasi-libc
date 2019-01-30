@@ -7,8 +7,8 @@
 #include <unistd.h>
 
 int dup(int fildes) {
-  wasi_fd_t newfd;
-  wasi_errno_t error = wasi_fd_dup(fildes, &newfd);
+  __wasi_fd_t newfd;
+  __wasi_errno_t error = __wasi_fd_dup(fildes, &newfd);
   if (error != 0) {
     errno = error;
     return -1;

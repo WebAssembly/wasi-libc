@@ -11,7 +11,7 @@ int getentropy(void *buffer, size_t len) {
         return -1;
     }
 
-    int r = wasi_random_get(buffer, len);
+    int r = __wasi_random_get(buffer, len);
 
     if (r != 0) {
         errno = r;

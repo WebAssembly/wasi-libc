@@ -12,7 +12,7 @@
 
 #include <wasi.h>
 
-#define TIMER_ABSTIME WASI_SUBSCRIPTION_CLOCK_ABSTIME
+#define TIMER_ABSTIME __WASI_SUBSCRIPTION_CLOCK_ABSTIME
 
 extern const struct __clockid _CLOCK_MONOTONIC;
 #define CLOCK_MONOTONIC (&_CLOCK_MONOTONIC)
@@ -23,7 +23,7 @@ extern const struct __clockid _CLOCK_REALTIME;
 extern const struct __clockid _CLOCK_THREAD_CPUTIME_ID;
 #define CLOCK_THREAD_CPUTIME_ID (&_CLOCK_THREAD_CPUTIME_ID)
 
-#define TIME_UTC WASI_CLOCK_REALTIME
+#define TIME_UTC __WASI_CLOCK_REALTIME
 
 /* FIXME: POSIX requires this to be 1000000, and that's what glibc and musl use. */
 #define CLOCKS_PER_SEC (1000000000)

@@ -14,13 +14,13 @@
 
 #include "dirent_impl.h"
 
-static_assert(DT_BLK == WASI_FILETYPE_BLOCK_DEVICE, "Value mismatch");
-static_assert(DT_CHR == WASI_FILETYPE_CHARACTER_DEVICE, "Value mismatch");
-static_assert(DT_DIR == WASI_FILETYPE_DIRECTORY, "Value mismatch");
-static_assert(DT_FIFO == WASI_FILETYPE_SOCKET_STREAM, "Value mismatch");
-static_assert(DT_LNK == WASI_FILETYPE_SYMBOLIC_LINK, "Value mismatch");
-static_assert(DT_REG == WASI_FILETYPE_REGULAR_FILE, "Value mismatch");
-static_assert(DT_UNKNOWN == WASI_FILETYPE_UNKNOWN, "Value mismatch");
+static_assert(DT_BLK == __WASI_FILETYPE_BLOCK_DEVICE, "Value mismatch");
+static_assert(DT_CHR == __WASI_FILETYPE_CHARACTER_DEVICE, "Value mismatch");
+static_assert(DT_DIR == __WASI_FILETYPE_DIRECTORY, "Value mismatch");
+static_assert(DT_FIFO == __WASI_FILETYPE_SOCKET_STREAM, "Value mismatch");
+static_assert(DT_LNK == __WASI_FILETYPE_SYMBOLIC_LINK, "Value mismatch");
+static_assert(DT_REG == __WASI_FILETYPE_REGULAR_FILE, "Value mismatch");
+static_assert(DT_UNKNOWN == __WASI_FILETYPE_UNKNOWN, "Value mismatch");
 
 // Grows a buffer to be large enough to hold a certain amount of data.
 #define GROW(buffer, buffer_size, target_size)      \
@@ -41,16 +41,16 @@ struct dirent *readdir(DIR *dirp) {
   for (;;) {
     // Extract the next dirent header.
     size_t buffer_left = dirp->buffer_used - dirp->buffer_processed;
-    if (buffer_left < sizeof(wasi_dirent_t)) {
+    if (buffer_left < sizeof(__wasi_dirent_t)) {
       // End-of-file.
       if (dirp->buffer_used < dirp->buffer_size)
         return NULL;
       goto read_entries;
     }
-    wasi_dirent_t entry;
+    __wasi_dirent_t entry;
     memcpy(&entry, dirp->buffer + dirp->buffer_processed, sizeof(entry));
 
-    size_t entry_size = sizeof(wasi_dirent_t) + entry.d_namlen;
+    size_t entry_size = sizeof(__wasi_dirent_t) + entry.d_namlen;
     if (entry.d_namlen == 0) {
       // Invalid pathname length. Skip the entry.
       dirp->buffer_processed += entry_size;
@@ -90,8 +90,8 @@ struct dirent *readdir(DIR *dirp) {
     dirp->buffer_used = dirp->buffer_processed = dirp->buffer_size;
 
     // Load more directory entries and continue.
-    wasi_errno_t error =
-        wasi_file_readdir(dirp->fd, dirp->buffer, dirp->buffer_size,
+    __wasi_errno_t error =
+        __wasi_file_readdir(dirp->fd, dirp->buffer, dirp->buffer_size,
                                   dirp->cookie, &dirp->buffer_used);
     if (error != 0) {
       errno = error;

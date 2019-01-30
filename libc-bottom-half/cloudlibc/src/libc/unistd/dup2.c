@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 int dup2(int fildes, int fildes2) {
-  wasi_errno_t error = wasi_fd_replace(fildes, fildes2);
+  __wasi_errno_t error = __wasi_fd_replace(fildes, fildes2);
   if (error != 0) {
     errno = error;
     return -1;

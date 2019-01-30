@@ -10,8 +10,8 @@
 #include <wasi.h>
 #include <errno.h>
 
-static_assert(SHUT_RD == WASI_SHUT_RD, "Value mismatch");
-static_assert(SHUT_WR == WASI_SHUT_WR, "Value mismatch");
+static_assert(SHUT_RD == __WASI_SHUT_RD, "Value mismatch");
+static_assert(SHUT_WR == __WASI_SHUT_WR, "Value mismatch");
 
 int shutdown(int socket, int how) {
   // Validate shutdown flags.
@@ -20,7 +20,7 @@ int shutdown(int socket, int how) {
     return -1;
   }
 
-  wasi_errno_t error = wasi_sock_shutdown(socket, how);
+  __wasi_errno_t error = __wasi_sock_shutdown(socket, how);
   if (error != 0) {
     errno = errno_fixup_socket(socket, error);
     return -1;

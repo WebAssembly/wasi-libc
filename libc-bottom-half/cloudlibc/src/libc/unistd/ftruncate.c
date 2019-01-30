@@ -11,11 +11,11 @@ int ftruncate(int fildes, off_t length) {
     errno = EINVAL;
     return -1;
   }
-  wasi_filestat_t fs = {
+  __wasi_filestat_t fs = {
       .st_size = length,
   };
-  wasi_errno_t error =
-      wasi_file_stat_fput(fildes, &fs, WASI_FILESTAT_SIZE);
+  __wasi_errno_t error =
+      __wasi_file_stat_fput(fildes, &fs, __WASI_FILESTAT_SIZE);
   if (error != 0) {
     errno = error;
     return -1;

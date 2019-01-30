@@ -54,7 +54,7 @@ static inline short get_ydays(time_t year) {
 }
 
 static inline bool timespec_to_timestamp_exact(
-    const struct timespec *timespec, wasi_timestamp_t *timestamp) {
+    const struct timespec *timespec, __wasi_timestamp_t *timestamp) {
   // Invalid nanoseconds field.
   if (timespec->tv_nsec < 0 || timespec->tv_nsec >= NSEC_PER_SEC)
     return false;
@@ -69,7 +69,7 @@ static inline bool timespec_to_timestamp_exact(
 }
 
 static inline bool timespec_to_timestamp_clamp(
-    const struct timespec *timespec, wasi_timestamp_t *timestamp) {
+    const struct timespec *timespec, __wasi_timestamp_t *timestamp) {
   // Invalid nanoseconds field.
   if (timespec->tv_nsec < 0 || timespec->tv_nsec >= NSEC_PER_SEC)
     return false;
@@ -80,20 +80,20 @@ static inline bool timespec_to_timestamp_clamp(
   } else if (mul_overflow(timespec->tv_sec, NSEC_PER_SEC, timestamp) ||
              add_overflow(*timestamp, timespec->tv_nsec, timestamp)) {
     // Make sure our timestamp does not overflow.
-    *timestamp = NUMERIC_MAX(wasi_timestamp_t);
+    *timestamp = NUMERIC_MAX(__wasi_timestamp_t);
   }
   return true;
 }
 
 static inline struct timespec timestamp_to_timespec(
-    wasi_timestamp_t timestamp) {
+    __wasi_timestamp_t timestamp) {
   // Decompose timestamp into seconds and nanoseconds.
   return (struct timespec){.tv_sec = timestamp / NSEC_PER_SEC,
                            .tv_nsec = timestamp % NSEC_PER_SEC};
 }
 
 static inline struct timeval timestamp_to_timeval(
-    wasi_timestamp_t timestamp) {
+    __wasi_timestamp_t timestamp) {
   struct timespec ts = timestamp_to_timespec(timestamp);
   return (struct timeval){.tv_sec = ts.tv_sec, ts.tv_nsec / 1000};
 }

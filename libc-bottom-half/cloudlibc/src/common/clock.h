@@ -13,7 +13,7 @@
 // future we can use this to provide support for pthread_getcpuclockid()
 // and clock file descriptors.
 struct __clockid {
-  wasi_clockid_t id;
+  __wasi_clockid_t id;
 };
 
 #endif

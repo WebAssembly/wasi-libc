@@ -25,13 +25,13 @@ int getsockopt(int socket, int level, int option_name,
     case SO_TYPE: {
       // Return the type of the socket. This information can simply be
       // obtained by looking at the file descriptor type.
-      wasi_fdstat_t fsb;
-      if (wasi_fd_stat_get(socket, &fsb) != 0) {
+      __wasi_fdstat_t fsb;
+      if (__wasi_fd_stat_get(socket, &fsb) != 0) {
         errno = EBADF;
         return -1;
       }
-      if (fsb.fs_filetype != WASI_FILETYPE_SOCKET_DGRAM &&
-          fsb.fs_filetype != WASI_FILETYPE_SOCKET_STREAM) {
+      if (fsb.fs_filetype != __WASI_FILETYPE_SOCKET_DGRAM &&
+          fsb.fs_filetype != __WASI_FILETYPE_SOCKET_STREAM) {
         errno = ENOTSOCK;
         return -1;
       }

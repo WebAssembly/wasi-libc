@@ -17,8 +17,8 @@ int fcntl(int fildes, int cmd, ...) {
       return 0;
     case F_GETFL: {
       // Obtain the flags and the rights of the descriptor.
-      wasi_fdstat_t fds;
-      wasi_errno_t error = wasi_fd_stat_get(fildes, &fds);
+      __wasi_fdstat_t fds;
+      __wasi_errno_t error = __wasi_fd_stat_get(fildes, &fds);
       if (error != 0) {
         errno = error;
         return -1;
@@ -27,15 +27,15 @@ int fcntl(int fildes, int cmd, ...) {
       // Roughly approximate the access mode by converting the rights.
       int oflags = fds.fs_flags;
       if ((fds.fs_rights_base &
-           (WASI_RIGHT_FD_READ | WASI_RIGHT_FILE_READDIR)) != 0) {
-        if ((fds.fs_rights_base & WASI_RIGHT_FD_WRITE) != 0)
+           (__WASI_RIGHT_FD_READ | __WASI_RIGHT_FILE_READDIR)) != 0) {
+        if ((fds.fs_rights_base & __WASI_RIGHT_FD_WRITE) != 0)
           oflags |= O_RDWR;
         else
           oflags |= O_RDONLY;
-      } else if ((fds.fs_rights_base & WASI_RIGHT_FD_WRITE) != 0) {
+      } else if ((fds.fs_rights_base & __WASI_RIGHT_FD_WRITE) != 0) {
         oflags |= O_WRONLY;
 #ifdef __wasilibc_unmodified_upstream__
-      } else if ((fds.fs_rights_base & WASI_RIGHT_PROC_EXEC) != 0) {
+      } else if ((fds.fs_rights_base & __WASI_RIGHT_PROC_EXEC) != 0) {
         oflags |= O_EXEC;
 #endif
       } else {
@@ -50,9 +50,9 @@ int fcntl(int fildes, int cmd, ...) {
       int flags = va_arg(ap, int);
       va_end(ap);
 
-      wasi_fdstat_t fds = {.fs_flags = flags & 0xfff};
-      wasi_errno_t error =
-          wasi_fd_stat_put(fildes, &fds, WASI_FDSTAT_FLAGS);
+      __wasi_fdstat_t fds = {.fs_flags = flags & 0xfff};
+      __wasi_errno_t error =
+          __wasi_fd_stat_put(fildes, &fds, __WASI_FDSTAT_FLAGS);
       if (error != 0) {
         errno = error;
         return -1;

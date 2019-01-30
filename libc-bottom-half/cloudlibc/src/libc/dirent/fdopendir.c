@@ -24,9 +24,9 @@ DIR *fdopendir(int fd) {
 
   // Ensure that this is really a directory by already loading the first
   // chunk of data.
-  wasi_errno_t error =
-      wasi_file_readdir(fd, dirp->buffer, DIRENT_DEFAULT_BUFFER_SIZE,
-                                WASI_DIRCOOKIE_START, &dirp->buffer_used);
+  __wasi_errno_t error =
+      __wasi_file_readdir(fd, dirp->buffer, DIRENT_DEFAULT_BUFFER_SIZE,
+                                __WASI_DIRCOOKIE_START, &dirp->buffer_used);
   if (error != 0) {
     free(dirp->buffer);
     free(dirp);
@@ -36,7 +36,7 @@ DIR *fdopendir(int fd) {
 
   // Initialize other members.
   dirp->fd = fd;
-  dirp->cookie = WASI_DIRCOOKIE_START;
+  dirp->cookie = __WASI_DIRCOOKIE_START;
   dirp->buffer_processed = 0;
   dirp->buffer_size = DIRENT_DEFAULT_BUFFER_SIZE;
   dirp->dirent = NULL;

@@ -14,20 +14,20 @@ static_assert(CLOCKS_PER_SEC == NSEC_PER_SEC,
 
 clock_t times(struct tms *buffer) {
   // Obtain user time.
-  wasi_timestamp_t usertime = 0;
+  __wasi_timestamp_t usertime = 0;
 #ifdef __wasilibc_unmodified_upstream__ // bug fix
 #else
   (void)
 #endif
-  wasi_clock_time_get(WASI_CLOCK_PROCESS_CPUTIME_ID, 0, &usertime);
+  __wasi_clock_time_get(__WASI_CLOCK_PROCESS_CPUTIME_ID, 0, &usertime);
   *buffer = (struct tms){.tms_utime = usertime};
 
   // Obtain real time.
-  wasi_timestamp_t realtime = 0;
+  __wasi_timestamp_t realtime = 0;
 #ifdef __wasilibc_unmodified_upstream__ // bug fix
 #else
   (void)
 #endif
-  wasi_clock_time_get(WASI_CLOCK_MONOTONIC, 0, &realtime);
+  __wasi_clock_time_get(__WASI_CLOCK_MONOTONIC, 0, &realtime);
   return realtime;
 }

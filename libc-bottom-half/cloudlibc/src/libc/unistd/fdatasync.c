@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 int fdatasync(int fildes) {
-  wasi_errno_t error = wasi_fd_datasync(fildes);
+  __wasi_errno_t error = __wasi_fd_datasync(fildes);
   if (error != 0) {
     errno = error == ENOTCAPABLE ? EBADF : error;
     return -1;

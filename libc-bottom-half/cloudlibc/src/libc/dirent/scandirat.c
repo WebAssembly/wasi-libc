@@ -43,20 +43,20 @@ int scandirat(int dirfd, const char *dir, struct dirent ***namelist,
   size_t dirents_size = 0;
   size_t dirents_used = 0;
 
-  wasi_dircookie_t cookie = WASI_DIRCOOKIE_START;
+  __wasi_dircookie_t cookie = __WASI_DIRCOOKIE_START;
   for (;;) {
     // Extract the next dirent header.
     size_t buffer_left = buffer_used - buffer_processed;
-    if (buffer_left < sizeof(wasi_dirent_t)) {
+    if (buffer_left < sizeof(__wasi_dirent_t)) {
       // End-of-file.
       if (buffer_used < buffer_size)
         break;
       goto read_entries;
     }
-    wasi_dirent_t entry;
+    __wasi_dirent_t entry;
     memcpy(&entry, buffer + buffer_processed, sizeof(entry));
 
-    size_t entry_size = sizeof(wasi_dirent_t) + entry.d_namlen;
+    size_t entry_size = sizeof(__wasi_dirent_t) + entry.d_namlen;
     if (entry.d_namlen == 0) {
       // Invalid pathname length. Skip the entry.
       buffer_processed += entry_size;
@@ -114,7 +114,7 @@ int scandirat(int dirfd, const char *dir, struct dirent ***namelist,
 
   read_entries:;
     // Load more directory entries and continue.
-    wasi_errno_t error = wasi_file_readdir(fd, buffer, buffer_size,
+    __wasi_errno_t error = __wasi_file_readdir(fd, buffer, buffer_size,
                                                        cookie, &buffer_used);
     if (error != 0) {
       errno = error;

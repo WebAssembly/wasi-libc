@@ -10,8 +10,8 @@
 #include <time.h>
 
 int clock_getres(clockid_t clock_id, struct timespec *res) {
-  wasi_timestamp_t ts;
-  wasi_errno_t error = wasi_clock_res_get(clock_id->id, &ts);
+  __wasi_timestamp_t ts;
+  __wasi_errno_t error = __wasi_clock_res_get(clock_id->id, &ts);
   if (error != 0) {
     errno = error;
     return -1;

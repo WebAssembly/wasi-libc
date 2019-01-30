@@ -21,7 +21,7 @@ static_assert(S_ISLNK(S_IFLNK), "Value mismatch");
 static_assert(S_ISREG(S_IFREG), "Value mismatch");
 static_assert(S_ISSOCK(S_IFSOCK), "Value mismatch");
 
-static inline void to_public_stat(const wasi_filestat_t *in,
+static inline void to_public_stat(const __wasi_filestat_t *in,
                                   struct stat *out) {
   // Ensure that we don't truncate any values.
   static_assert(sizeof(in->st_dev) == sizeof(out->st_dev), "Size mismatch");
@@ -62,45 +62,45 @@ static inline void to_public_stat(const wasi_filestat_t *in,
 
   // Convert file type to legacy types encoded in st_mode.
   switch (in->st_filetype) {
-    case WASI_FILETYPE_BLOCK_DEVICE:
+    case __WASI_FILETYPE_BLOCK_DEVICE:
       out->st_mode |= S_IFBLK;
       break;
-    case WASI_FILETYPE_CHARACTER_DEVICE:
+    case __WASI_FILETYPE_CHARACTER_DEVICE:
       out->st_mode |= S_IFCHR;
       break;
-    case WASI_FILETYPE_DIRECTORY:
+    case __WASI_FILETYPE_DIRECTORY:
       out->st_mode |= S_IFDIR;
       break;
-    case WASI_FILETYPE_REGULAR_FILE:
+    case __WASI_FILETYPE_REGULAR_FILE:
       out->st_mode |= S_IFREG;
       break;
-    case WASI_FILETYPE_SOCKET_DGRAM:
-    case WASI_FILETYPE_SOCKET_STREAM:
+    case __WASI_FILETYPE_SOCKET_DGRAM:
+    case __WASI_FILETYPE_SOCKET_STREAM:
       out->st_mode |= S_IFSOCK;
       break;
-    case WASI_FILETYPE_SYMBOLIC_LINK:
+    case __WASI_FILETYPE_SYMBOLIC_LINK:
       out->st_mode |= S_IFLNK;
       break;
   }
 }
 
 static inline bool utimens_get_timestamps(const struct timespec *times,
-                                          wasi_filestat_t *fs,
-                                          wasi_fsflags_t *flags) {
+                                          __wasi_filestat_t *fs,
+                                          __wasi_fsflags_t *flags) {
   if (times == NULL) {
     // Update both timestamps.
-    *flags = WASI_FILESTAT_ATIM_NOW | WASI_FILESTAT_MTIM_NOW;
+    *flags = __WASI_FILESTAT_ATIM_NOW | __WASI_FILESTAT_MTIM_NOW;
   } else {
     // Set individual timestamps.
     *flags = 0;
     switch (times[0].tv_nsec) {
       case UTIME_NOW:
-        *flags |= WASI_FILESTAT_ATIM_NOW;
+        *flags |= __WASI_FILESTAT_ATIM_NOW;
         break;
       case UTIME_OMIT:
         break;
       default:
-        *flags |= WASI_FILESTAT_ATIM;
+        *flags |= __WASI_FILESTAT_ATIM;
         if (!timespec_to_timestamp_exact(&times[0], &fs->st_atim))
           return false;
         break;
@@ -108,12 +108,12 @@ static inline bool utimens_get_timestamps(const struct timespec *times,
 
     switch (times[1].tv_nsec) {
       case UTIME_NOW:
-        *flags |= WASI_FILESTAT_MTIM_NOW;
+        *flags |= __WASI_FILESTAT_MTIM_NOW;
         break;
       case UTIME_OMIT:
         break;
       default:
-        *flags |= WASI_FILESTAT_MTIM;
+        *flags |= __WASI_FILESTAT_MTIM;
         if (!timespec_to_timestamp_exact(&times[1], &fs->st_mtim))
           return false;
         break;

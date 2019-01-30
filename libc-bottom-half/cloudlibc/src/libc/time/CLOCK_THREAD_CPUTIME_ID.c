@@ -8,5 +8,5 @@
 #include <time.h>
 
 const struct __clockid _CLOCK_THREAD_CPUTIME_ID = {
-    .id = WASI_CLOCK_THREAD_CPUTIME_ID,
+    .id = __WASI_CLOCK_THREAD_CPUTIME_ID,
 };

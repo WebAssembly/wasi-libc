@@ -15,7 +15,7 @@ struct dirent;
 struct _DIR {
   // Directory file descriptor and cookie.
   int fd;
-  wasi_dircookie_t cookie;
+  __wasi_dircookie_t cookie;
 
   // Read buffer.
   char *buffer;

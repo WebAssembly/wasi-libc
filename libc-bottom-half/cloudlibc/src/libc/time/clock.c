@@ -12,11 +12,11 @@ static_assert(CLOCKS_PER_SEC == NSEC_PER_SEC,
               "Timestamp should need no conversion");
 
 clock_t clock(void) {
-  wasi_timestamp_t ts = 0;
+  __wasi_timestamp_t ts = 0;
 #ifdef __wasilibc_unmodified_upstream__ // bug fix
 #else
   (void)
 #endif
-  wasi_clock_time_get(WASI_CLOCK_PROCESS_CPUTIME_ID, 0, &ts);
+  __wasi_clock_time_get(__WASI_CLOCK_PROCESS_CPUTIME_ID, 0, &ts);
   return ts;
 }

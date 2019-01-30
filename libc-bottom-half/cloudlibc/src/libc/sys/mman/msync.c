@@ -8,12 +8,12 @@
 #include <wasi.h>
 #include <errno.h>
 
-static_assert(MS_ASYNC == WASI_MS_ASYNC, "Value mismatch");
-static_assert(MS_INVALIDATE == WASI_MS_INVALIDATE, "Value mismatch");
-static_assert(MS_SYNC == WASI_MS_SYNC, "Value mismatch");
+static_assert(MS_ASYNC == __WASI_MS_ASYNC, "Value mismatch");
+static_assert(MS_INVALIDATE == __WASI_MS_INVALIDATE, "Value mismatch");
+static_assert(MS_SYNC == __WASI_MS_SYNC, "Value mismatch");
 
 int msync(void *addr, size_t len, int flags) {
-  wasi_errno_t error = wasi_mem_sync(addr, len, flags);
+  __wasi_errno_t error = __wasi_mem_sync(addr, len, flags);
   if (error != 0) {
     errno = error;
     return -1;

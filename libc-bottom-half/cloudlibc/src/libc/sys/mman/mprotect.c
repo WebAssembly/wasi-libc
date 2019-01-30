@@ -8,7 +8,7 @@
 #include <errno.h>
 
 int mprotect(void *addr, size_t len, int prot) {
-  wasi_errno_t error = wasi_mem_protect(addr, len, prot);
+  __wasi_errno_t error = __wasi_mem_protect(addr, len, prot);
   if (error != 0) {
     errno = error;
     return -1;

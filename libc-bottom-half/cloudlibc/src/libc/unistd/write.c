@@ -7,10 +7,10 @@
 #include <unistd.h>
 
 ssize_t write(int fildes, const void *buf, size_t nbyte) {
-  wasi_ciovec_t iov = {.buf = buf, .buf_len = nbyte};
+  __wasi_ciovec_t iov = {.buf = buf, .buf_len = nbyte};
   size_t bytes_written;
-  wasi_errno_t error =
-      wasi_fd_write(fildes, &iov, 1, &bytes_written);
+  __wasi_errno_t error =
+      __wasi_fd_write(fildes, &iov, 1, &bytes_written);
   if (error != 0) {
     errno = error == ENOTCAPABLE ? EBADF : error;
     return -1;

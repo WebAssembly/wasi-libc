@@ -7,7 +7,7 @@
 #include <sched.h>
 
 int sched_yield(void) {
-  wasi_errno_t error = wasi_thread_yield();
+  __wasi_errno_t error = __wasi_thread_yield();
   if (error != 0) {
     errno = error;
     return -1;

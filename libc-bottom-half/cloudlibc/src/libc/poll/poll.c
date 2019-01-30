@@ -10,7 +10,7 @@
 int poll(struct pollfd *fds, size_t nfds, int timeout) {
   // Construct events for poll().
   size_t maxevents = 2 * nfds + 1;
-  wasi_subscription_t subscriptions[maxevents];
+  __wasi_subscription_t subscriptions[maxevents];
   size_t nevents = 0;
   for (size_t i = 0; i < nfds; ++i) {
     struct pollfd *pollfd = &fds[i];
@@ -18,22 +18,22 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
       continue;
     bool created_events = false;
     if ((pollfd->events & POLLRDNORM) != 0) {
-      wasi_subscription_t *subscription = &subscriptions[nevents++];
-      *subscription = (wasi_subscription_t){
+      __wasi_subscription_t *subscription = &subscriptions[nevents++];
+      *subscription = (__wasi_subscription_t){
           .userdata = (uintptr_t)pollfd,
-          .type = WASI_EVENTTYPE_FD_READ,
+          .type = __WASI_EVENTTYPE_FD_READ,
           .fd_readwrite.fd = pollfd->fd,
-          .fd_readwrite.flags = WASI_SUBSCRIPTION_FD_READWRITE_POLL,
+          .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
       };
       created_events = true;
     }
     if ((pollfd->events & POLLWRNORM) != 0) {
-      wasi_subscription_t *subscription = &subscriptions[nevents++];
-      *subscription = (wasi_subscription_t){
+      __wasi_subscription_t *subscription = &subscriptions[nevents++];
+      *subscription = (__wasi_subscription_t){
           .userdata = (uintptr_t)pollfd,
-          .type = WASI_EVENTTYPE_FD_WRITE,
+          .type = __WASI_EVENTTYPE_FD_WRITE,
           .fd_readwrite.fd = pollfd->fd,
-          .fd_readwrite.flags = WASI_SUBSCRIPTION_FD_READWRITE_POLL,
+          .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
       };
       created_events = true;
     }
@@ -49,18 +49,18 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
 
   // Create extra event for the timeout.
   if (timeout >= 0) {
-    wasi_subscription_t *subscription = &subscriptions[nevents++];
-    *subscription = (wasi_subscription_t){
-        .type = WASI_EVENTTYPE_CLOCK,
-        .clock.clock_id = WASI_CLOCK_REALTIME,
-        .clock.timeout = (wasi_timestamp_t)timeout * 1000000,
+    __wasi_subscription_t *subscription = &subscriptions[nevents++];
+    *subscription = (__wasi_subscription_t){
+        .type = __WASI_EVENTTYPE_CLOCK,
+        .clock.clock_id = __WASI_CLOCK_REALTIME,
+        .clock.timeout = (__wasi_timestamp_t)timeout * 1000000,
     };
   }
 
   // Execute poll().
-  wasi_event_t events[nevents];
-  wasi_errno_t error =
-      wasi_poll(subscriptions, events, nevents, &nevents);
+  __wasi_event_t events[nevents];
+  __wasi_errno_t error =
+      __wasi_poll(subscriptions, events, nevents, &nevents);
   if (error != 0) {
     errno = error;
     return -1;
@@ -74,14 +74,14 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
 
   // Set revents fields.
   for (size_t i = 0; i < nevents; ++i) {
-    const wasi_event_t *event = &events[i];
-    if (event->type == WASI_EVENTTYPE_FD_READ ||
-        event->type == WASI_EVENTTYPE_FD_WRITE) {
+    const __wasi_event_t *event = &events[i];
+    if (event->type == __WASI_EVENTTYPE_FD_READ ||
+        event->type == __WASI_EVENTTYPE_FD_WRITE) {
       struct pollfd *pollfd = (struct pollfd *)(uintptr_t)event->userdata;
-      if (event->error == WASI_EBADF) {
+      if (event->error == __WASI_EBADF) {
         // Invalid file descriptor.
         pollfd->revents |= POLLNVAL;
-      } else if (event->error == WASI_EPIPE) {
+      } else if (event->error == __WASI_EPIPE) {
         // Hangup on write side of pipe.
         pollfd->revents |= POLLHUP;
       } else if (event->error != 0) {
@@ -90,8 +90,8 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
       } else {
         // Data can be read or written.
         pollfd->revents |=
-            event->type == WASI_EVENTTYPE_FD_READ ? POLLRDNORM : POLLWRNORM;
-        if (event->fd_readwrite.flags & WASI_EVENT_FD_READWRITE_HANGUP)
+            event->type == __WASI_EVENTTYPE_FD_READ ? POLLRDNORM : POLLWRNORM;
+        if (event->fd_readwrite.flags & __WASI_EVENT_FD_READWRITE_HANGUP)
           pollfd->revents |= POLLHUP;
       }
     }

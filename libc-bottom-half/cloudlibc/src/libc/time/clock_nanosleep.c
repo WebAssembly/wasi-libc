@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <time.h>
 
-static_assert(TIMER_ABSTIME == WASI_SUBSCRIPTION_CLOCK_ABSTIME,
+static_assert(TIMER_ABSTIME == __WASI_SUBSCRIPTION_CLOCK_ABSTIME,
               "Value mismatch");
 
 #ifdef __wasilibc_unmodified_upstream__
@@ -24,8 +24,8 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
     return EINVAL;
 
   // Prepare polling subscription.
-  wasi_subscription_t sub = {
-      .type = WASI_EVENTTYPE_CLOCK,
+  __wasi_subscription_t sub = {
+      .type = __WASI_EVENTTYPE_CLOCK,
       .clock.clock_id = clock_id->id,
       .clock.flags = flags,
   };
@@ -34,7 +34,7 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
 
   // Block until polling event is triggered.
   size_t nevents;
-  wasi_event_t ev;
-  wasi_errno_t error = wasi_poll(&sub, &ev, 1, &nevents);
+  __wasi_event_t ev;
+  __wasi_errno_t error = __wasi_poll(&sub, &ev, 1, &nevents);
   return error == 0 && ev.error == 0 ? 0 : ENOTSUP;
 }

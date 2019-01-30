@@ -9,5 +9,5 @@
 int posix_fallocate(int fd, off_t offset, off_t len) {
   if (offset < 0 || len < 0)
     return EINVAL;
-  return wasi_file_allocate(fd, offset, len);
+  return __wasi_file_allocate(fd, offset, len);
 }

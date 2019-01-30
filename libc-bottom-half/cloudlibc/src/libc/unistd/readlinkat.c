@@ -12,7 +12,7 @@
 ssize_t readlinkat(int fd, const char *restrict path, char *restrict buf,
                    size_t bufsize) {
   size_t bufused;
-  wasi_errno_t error = wasi_file_readlink(fd, path, strlen(path),
+  __wasi_errno_t error = __wasi_file_readlink(fd, path, strlen(path),
                                                       buf, bufsize, &bufused);
   if (error != 0) {
     errno = errno_fixup_directory(fd, error);

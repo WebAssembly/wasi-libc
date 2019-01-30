@@ -10,8 +10,8 @@
 #include "stat_impl.h"
 
 int fstat(int fildes, struct stat *buf) {
-  wasi_filestat_t internal_stat;
-  wasi_errno_t error = wasi_file_stat_fget(fildes, &internal_stat);
+  __wasi_filestat_t internal_stat;
+  __wasi_errno_t error = __wasi_file_stat_fget(fildes, &internal_stat);
   if (error != 0) {
     errno = error;
     return -1;

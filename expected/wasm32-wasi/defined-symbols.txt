@@ -589,6 +589,7 @@ index
 initstate
 insque
 ioctl
+iprintf
 isalnum
 isalnum_l
 isalpha
@@ -788,6 +789,7 @@ powl
 pread
 preadv
 printf
+printf_no_Lf
 program_invocation_name
 program_invocation_short_name
 pselect

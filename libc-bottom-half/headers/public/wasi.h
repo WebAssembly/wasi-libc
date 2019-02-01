@@ -717,54 +717,53 @@ _Static_assert(sizeof(void *) != 4 ||
 _Static_assert(sizeof(void *) != 8 ||
     _Alignof(__wasi_threadattr_t) == 8, "non-wasi data layout");
 
-#ifdef NEW
-#define __WASI_SYSCALL(name) \
-    __asm__(#name) \
-    __attribute__((__import_module__("wasi")))
+#ifdef __wasi_namespaces
+#define __WASI_SYSCALL_NAME(name) \
+    __attribute__((__import_module__("wasi"), __import_name__(#name)))
 #else
-#define __WASI_SYSCALL(name)
+#define __WASI_SYSCALL_NAME(name)
 #endif
 
 __wasi_errno_t __wasi_clock_res_get(
     __wasi_clockid_t clock_id,
     __wasi_timestamp_t *resolution
-) __WASI_SYSCALL(clock_res_get) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(clock_res_get) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_clock_time_get(
     __wasi_clockid_t clock_id,
     __wasi_timestamp_t precision,
     __wasi_timestamp_t *time
-) __WASI_SYSCALL(clock_time_get) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(clock_time_get) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_condvar_signal(
     _Atomic(__wasi_condvar_t) *condvar,
     __wasi_scope_t scope,
     __wasi_nthreads_t nwaiters
-) __WASI_SYSCALL(condvar_signal) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(condvar_signal) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_close(
     __wasi_fd_t fd
-) __WASI_SYSCALL(fd_close) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_close) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_create1(
     __wasi_filetype_t type,
     __wasi_fd_t *fd
-) __WASI_SYSCALL(fd_create1) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_create1) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_create2(
     __wasi_filetype_t type,
     __wasi_fd_t *fd0,
     __wasi_fd_t *fd1
-) __WASI_SYSCALL(fd_create2) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_create2) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_datasync(
     __wasi_fd_t fd
-) __WASI_SYSCALL(fd_datasync) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_datasync) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_dup(
     __wasi_fd_t from,
     __wasi_fd_t *fd
-) __WASI_SYSCALL(fd_dup) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_dup) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_pread(
     __wasi_fd_t fd,
@@ -772,7 +771,7 @@ __wasi_errno_t __wasi_fd_pread(
     size_t iovs_len,
     __wasi_filesize_t offset,
     size_t *nread
-) __WASI_SYSCALL(fd_pread) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_pread) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_pwrite(
     __wasi_fd_t fd,
@@ -780,68 +779,68 @@ __wasi_errno_t __wasi_fd_pwrite(
     size_t iovs_len,
     __wasi_filesize_t offset,
     size_t *nwritten
-) __WASI_SYSCALL(fd_pwrite) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_pwrite) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_read(
     __wasi_fd_t fd,
     const __wasi_iovec_t *iovs,
     size_t iovs_len,
     size_t *nread
-) __WASI_SYSCALL(fd_read) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_read) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_replace(
     __wasi_fd_t from,
     __wasi_fd_t to
-) __WASI_SYSCALL(fd_replace) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_replace) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_seek(
     __wasi_fd_t fd,
     __wasi_filedelta_t offset,
     __wasi_whence_t whence,
     __wasi_filesize_t *newoffset
-) __WASI_SYSCALL(fd_seek) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_seek) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_stat_get(
     __wasi_fd_t fd,
     __wasi_fdstat_t *buf
-) __WASI_SYSCALL(fd_stat_get) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_stat_get) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_stat_put(
     __wasi_fd_t fd,
     const __wasi_fdstat_t *buf,
     __wasi_fdsflags_t flags
-) __WASI_SYSCALL(fd_stat_put) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_stat_put) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_sync(
     __wasi_fd_t fd
-) __WASI_SYSCALL(fd_sync) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_sync) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_write(
     __wasi_fd_t fd,
     const __wasi_ciovec_t *iovs,
     size_t iovs_len,
     size_t *nwritten
-) __WASI_SYSCALL(fd_write) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_write) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_advise(
     __wasi_fd_t fd,
     __wasi_filesize_t offset,
     __wasi_filesize_t len,
     __wasi_advice_t advice
-) __WASI_SYSCALL(file_advise) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(file_advise) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_allocate(
     __wasi_fd_t fd,
     __wasi_filesize_t offset,
     __wasi_filesize_t len
-) __WASI_SYSCALL(file_allocate) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(file_allocate) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_create(
     __wasi_fd_t fd,
     const char *path,
     size_t path_len,
     __wasi_filetype_t type
-) __WASI_SYSCALL(file_create) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(file_create) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_link(
     __wasi_lookup_t old_fd,
@@ -850,7 +849,7 @@ __wasi_errno_t __wasi_file_link(
     __wasi_fd_t new_fd,
     const char *new_path,
     size_t new_path_len
-) __WASI_SYSCALL(file_link) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(file_link) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_open(
     __wasi_lookup_t dirfd,
@@ -859,7 +858,7 @@ __wasi_errno_t __wasi_file_open(
     __wasi_oflags_t oflags,
     const __wasi_fdstat_t *fds,
     __wasi_fd_t *fd
-) __WASI_SYSCALL(file_open) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(file_open) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_readdir(
     __wasi_fd_t fd,
@@ -867,7 +866,7 @@ __wasi_errno_t __wasi_file_readdir(
     size_t buf_len,
     __wasi_dircookie_t cookie,
     size_t *bufused
-) __WASI_SYSCALL(file_readdir) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(file_readdir) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_readlink(
     __wasi_fd_t fd,
@@ -876,7 +875,7 @@ __wasi_errno_t __wasi_file_readlink(
     char *buf,
     size_t buf_len,
     size_t *bufused
-) __WASI_SYSCALL(file_readlink) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(file_readlink) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_rename(
     __wasi_fd_t old_fd0,
@@ -885,25 +884,25 @@ __wasi_errno_t __wasi_file_rename(
     __wasi_fd_t new_fd,
     const char *new_path,
     size_t new_path_len
-) __WASI_SYSCALL(file_rename) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(file_rename) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_stat_fget(
     __wasi_fd_t fd,
     __wasi_filestat_t *buf
-) __WASI_SYSCALL(file_stat_fget) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(file_stat_fget) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_stat_fput(
     __wasi_fd_t fd,
     const __wasi_filestat_t *buf,
     __wasi_fsflags_t flags
-) __WASI_SYSCALL(file_stat_fput) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(file_stat_fput) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_stat_get(
     __wasi_lookup_t fd,
     const char *path,
     size_t path_len,
     __wasi_filestat_t *buf
-) __WASI_SYSCALL(file_stat_get) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(file_stat_get) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_stat_put(
     __wasi_lookup_t fd,
@@ -911,7 +910,7 @@ __wasi_errno_t __wasi_file_stat_put(
     size_t path_len,
     const __wasi_filestat_t *buf,
     __wasi_fsflags_t flags
-) __WASI_SYSCALL(file_stat_put) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(file_stat_put) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_symlink(
     const char *path1,
@@ -919,25 +918,25 @@ __wasi_errno_t __wasi_file_symlink(
     __wasi_fd_t fd,
     const char *path2,
     size_t path2_len
-) __WASI_SYSCALL(file_symlink) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(file_symlink) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_unlink(
     __wasi_fd_t fd,
     const char *path,
     size_t path_len,
     __wasi_ulflags_t flags
-) __WASI_SYSCALL(file_unlink) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(file_unlink) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_lock_unlock(
     _Atomic(__wasi_lock_t) *lock,
     __wasi_scope_t scope
-) __WASI_SYSCALL(lock_unlock) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(lock_unlock) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_mem_advise(
     void *mapping,
     size_t mapping_len,
     __wasi_advice_t advice
-) __WASI_SYSCALL(mem_advise) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(mem_advise) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_mem_map(
     void *addr,
@@ -947,74 +946,74 @@ __wasi_errno_t __wasi_mem_map(
     __wasi_fd_t fd,
     __wasi_filesize_t off,
     void **mem
-) __WASI_SYSCALL(mem_map) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(mem_map) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_mem_protect(
     void *mapping,
     size_t mapping_len,
     __wasi_mprot_t prot
-) __WASI_SYSCALL(mem_protect) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(mem_protect) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_mem_sync(
     void *mapping,
     size_t mapping_len,
     __wasi_msflags_t flags
-) __WASI_SYSCALL(mem_sync) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(mem_sync) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_mem_unmap(
     void *mapping,
     size_t mapping_len
-) __WASI_SYSCALL(mem_unmap) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(mem_unmap) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_poll(
     const __wasi_subscription_t *in,
     __wasi_event_t *out,
     size_t nsubscriptions,
     size_t *nevents
-) __WASI_SYSCALL(poll) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(poll) __attribute__((__warn_unused_result__));
 
 _Noreturn void __wasi_proc_exit(
     __wasi_exitcode_t rval
-) __WASI_SYSCALL(proc_exit);
+) __WASI_SYSCALL_NAME(proc_exit);
 
 __wasi_errno_t __wasi_proc_raise(
     __wasi_signal_t sig
-) __WASI_SYSCALL(proc_raise) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(proc_raise) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_random_get(
     void *buf,
     size_t buf_len
-) __WASI_SYSCALL(random_get) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(random_get) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_sock_recv(
     __wasi_fd_t sock,
     const __wasi_recv_in_t *in,
     __wasi_recv_out_t *out
-) __WASI_SYSCALL(sock_recv) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(sock_recv) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_sock_send(
     __wasi_fd_t sock,
     const __wasi_send_in_t *in,
     __wasi_send_out_t *out
-) __WASI_SYSCALL(sock_send) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(sock_send) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_sock_shutdown(
     __wasi_fd_t sock,
     __wasi_sdflags_t how
-) __WASI_SYSCALL(sock_shutdown) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(sock_shutdown) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_thread_create(
     __wasi_threadattr_t *attr,
     __wasi_tid_t *tid
-) __WASI_SYSCALL(thread_create) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(thread_create) __attribute__((__warn_unused_result__));
 
 _Noreturn void __wasi_thread_exit(
     _Atomic(__wasi_lock_t) *lock,
     __wasi_scope_t scope
-) __WASI_SYSCALL(thread_exit);
+) __WASI_SYSCALL_NAME(thread_exit);
 
 __wasi_errno_t __wasi_thread_yield(void)
-    __WASI_SYSCALL(thread_exit) __attribute__((__warn_unused_result__));
+    __WASI_SYSCALL_NAME(thread_exit) __attribute__((__warn_unused_result__));
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -1016,7 +1016,7 @@ __wasi_errno_t __wasi_thread_yield(void)
     __WASI_SYSCALL_NAME(thread_exit) __attribute__((__warn_unused_result__));
 
 #ifdef __cplusplus
-}  // extern "C"
+}
 #endif
 
 #endif

@@ -136,6 +136,7 @@ __lgammaf_r
 __lgammal_r
 __libc
 __loc_is_allocated
+__localtime_r
 __memrchr
 __mkostemps
 __mo_lookup
@@ -165,6 +166,7 @@ __rem_pio2_large
 __rem_pio2f
 __rem_pio2l
 __secs_to_tm
+__secs_to_zone
 __seed48
 __shgetc
 __shlim
@@ -390,6 +392,7 @@ ctanh
 ctanhf
 ctanhl
 ctanl
+ctime_r
 difftime
 dirfd
 dirname
@@ -674,6 +677,7 @@ llround
 llroundf
 llroundl
 localeconv
+localtime_r
 log
 log10
 log10f
@@ -732,6 +736,7 @@ mkstemp64
 mkstemps
 mkstemps64
 mktemp
+mktime
 mmap
 modf
 modff

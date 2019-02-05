@@ -86,6 +86,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/at_quick_exit.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/strftime.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/asctime_r.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/ctime_r.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/wcsftime.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/strptime.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/difftime.c \
@@ -95,6 +96,8 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/gmtime_r.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/timespec_get.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/getdate.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/localtime_r.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/mktime.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/__tm_to_secs.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/__month_to_secs.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/__secs_to_tm.c \

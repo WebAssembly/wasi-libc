@@ -21,7 +21,7 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #ifdef __cplusplus
 #define NULL 0L
 #else
@@ -35,7 +35,7 @@ extern "C" {
 #undef EOF
 #define EOF (-1)
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #undef SEEK_SET
 #undef SEEK_CUR
 #undef SEEK_END
@@ -53,7 +53,7 @@ extern "C" {
 #define BUFSIZ 1024
 #define FILENAME_MAX 4096
 #define FOPEN_MAX 1000
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #define TMP_MAX 10000
 #define L_tmpnam 20
 #endif
@@ -104,7 +104,7 @@ int putc(int, FILE *);
 int putchar(int);
 
 char *fgets(char *__restrict, int, FILE *__restrict);
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #if __STDC_VERSION__ < 201112L
 char *gets(char *);
 #endif
@@ -135,7 +135,7 @@ void perror(const char *);
 int setvbuf(FILE *__restrict, char *__restrict, int, size_t);
 void setbuf(FILE *__restrict, char *__restrict);
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 char *tmpnam(char *);
 FILE *tmpfile(void);
 #endif
@@ -168,7 +168,7 @@ char *ctermid(char *);
 #endif
 
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #if defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) \
  || defined(_BSD_SOURCE)
 #define P_tmpdir "/tmp"

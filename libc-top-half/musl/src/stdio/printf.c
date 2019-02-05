@@ -10,7 +10,7 @@ int printf(const char *restrict fmt, ...)
 	va_end(ap);
 	return ret;
 }
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 weak_alias(printf, iprintf);
 weak_alias(printf, printf_no_Lf);

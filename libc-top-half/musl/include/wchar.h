@@ -34,7 +34,7 @@ extern "C" {
 #define WCHAR_MIN (-1-0x7fffffff+L'\0')
 #endif
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #ifdef __cplusplus
 #define NULL 0L
 #else

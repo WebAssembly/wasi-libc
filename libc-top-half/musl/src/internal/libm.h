@@ -71,7 +71,7 @@ union ldshape {
 #error Unsupported long double representation
 #endif
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #define FORCE_EVAL(x) do {                        \
 	if (sizeof(x) == sizeof(float)) {         \
 		volatile float __x;               \

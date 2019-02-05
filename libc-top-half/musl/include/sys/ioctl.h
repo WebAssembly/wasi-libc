@@ -1,6 +1,6 @@
 #ifndef	_SYS_IOCTL_H
 #define	_SYS_IOCTL_H
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #ifdef __cplusplus
 extern "C" {
 #endif

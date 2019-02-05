@@ -6,13 +6,13 @@ FILE *__fopen_rb_ca(const char *filename, FILE *f, unsigned char *buf, size_t le
 {
 	memset(f, 0, sizeof *f);
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 	f->fd = sys_open(filename, O_RDONLY|O_CLOEXEC);
 #else
 	f->fd = open(filename, O_RDONLY|O_CLOEXEC);
 #endif
 	if (f->fd < 0) return 0;
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 	__syscall(SYS_fcntl, f->fd, F_SETFD, FD_CLOEXEC);
 #else
 	fcntl(f->fd, F_SETFD, FD_CLOEXEC);

@@ -256,7 +256,7 @@ long double fmal(long double x, long double y, long double z)
 		 * the correct sign.
 		 */
 		fesetround(oround);
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 		volatile long double vzs = zs; /* XXX gcc CSE bug workaround */
 #else
 		long double vzs = zs;

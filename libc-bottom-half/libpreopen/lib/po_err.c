@@ -34,14 +34,14 @@
  * @brief Error handling for libpreopen
  */
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #include <sys/cdefs.h>
 #include <sys/param.h>
 #endif
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #include <sys/wait.h>
 #endif
 
@@ -58,12 +58,12 @@
 #include "internal.h"
 #include "libpreopen.h"
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 /* Disable all this error reporting code. */
 static char error_buffer[1024];
 #endif
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 static
 #endif
@@ -87,7 +87,7 @@ po_map_assertvalid(const struct po_map *map)
 }
 #endif /* !defined(NDEBUG) */
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 void
 po_errormessage(const char *msg)
 {

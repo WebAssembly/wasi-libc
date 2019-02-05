@@ -26,7 +26,7 @@ static inline void to_public_stat(const __wasi_filestat_t *in,
   // Ensure that we don't truncate any values.
   static_assert(sizeof(in->st_dev) == sizeof(out->st_dev), "Size mismatch");
   static_assert(sizeof(in->st_ino) == sizeof(out->st_ino), "Size mismatch");
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
   static_assert(sizeof(in->st_filetype) == sizeof(out->__st_filetype),
                 "Size mismatch");
 #else
@@ -35,7 +35,7 @@ static inline void to_public_stat(const __wasi_filestat_t *in,
    * memory, which we don't currently support.
    */
 #endif
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
   static_assert(sizeof(in->st_nlink) == sizeof(out->st_nlink), "Size mismatch");
 #else
   /* nlink_t is 64-bit on wasm32, following the x32 ABI. */
@@ -47,7 +47,7 @@ static inline void to_public_stat(const __wasi_filestat_t *in,
 #define COPY_FIELD(field) .field = in->field
       COPY_FIELD(st_dev),
       COPY_FIELD(st_ino),
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
       .__st_filetype = in->st_filetype,
 #endif
       COPY_FIELD(st_nlink),

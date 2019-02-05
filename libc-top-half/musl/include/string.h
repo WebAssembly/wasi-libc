@@ -7,7 +7,7 @@ extern "C" {
 
 #include <features.h>
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #ifdef __cplusplus
 #define NULL 0L
 #else
@@ -99,7 +99,7 @@ void *memmem(const void *, size_t, const void *, size_t);
 void *memrchr(const void *, int, size_t);
 void *mempcpy(void *, const void *, size_t);
 #ifndef __cplusplus
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 char *basename();
 #else
 /* Don't use unprototyped functions. */

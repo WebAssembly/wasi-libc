@@ -10,7 +10,7 @@
 #include <inttypes.h>
 #include <math.h>
 #include <float.h>
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 #include "printscan.h"
 #endif

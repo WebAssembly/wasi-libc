@@ -1,4 +1,4 @@
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 #include <unistd.h>
 #endif
@@ -13,7 +13,7 @@ weak_alias(dummy, __aio_close);
 
 int __stdio_close(FILE *f)
 {
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 	return syscall(SYS_close, __aio_close(f->fd));
 #else
 	return close(__aio_close(f->fd));

@@ -6,7 +6,7 @@
 #include <limits.h>
 #include <string.h>
 #include <stdint.h>
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 #include "printscan.h"
 #endif

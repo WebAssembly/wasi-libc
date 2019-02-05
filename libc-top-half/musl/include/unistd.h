@@ -11,7 +11,7 @@ extern "C" {
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #define SEEK_SET 0
 #define SEEK_CUR 1
 #define SEEK_END 2
@@ -19,7 +19,7 @@ extern "C" {
 #include <__header_unistd.h>
 #endif
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #ifdef __cplusplus
 #define NULL 0L
 #else
@@ -74,7 +74,7 @@ int rmdir(const char *);
 int truncate(const char *, off_t);
 int ftruncate(int, off_t);
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #define F_OK 0
 #define R_OK 4
 #define W_OK 2
@@ -92,7 +92,7 @@ unsigned alarm(unsigned);
 unsigned sleep(unsigned);
 int pause(void);
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 pid_t fork(void);
 int execve(const char *, char *const [], char *const []);
 int execv(const char *, char *const []);
@@ -168,15 +168,15 @@ unsigned ualarm(unsigned, unsigned);
 #define L_SET 0
 #define L_INCR 1
 #define L_XTND 2
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 int brk(void *);
 #endif
 void *sbrk(intptr_t);
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 pid_t vfork(void);
 #endif
 int vhangup(void);
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 int chroot(const char *);
 int getpagesize(void);
 int getdtablesize(void);
@@ -192,7 +192,7 @@ void endusershell(void);
 char *getusershell(void);
 int acct(const char *);
 long syscall(long, ...);
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 int execvpe(const char *, char *const [], char *const []);
 #endif
 int issetugid(void);

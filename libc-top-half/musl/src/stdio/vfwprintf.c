@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <wchar.h>
 #include <inttypes.h>
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 #include "printscan.h"
 #endif

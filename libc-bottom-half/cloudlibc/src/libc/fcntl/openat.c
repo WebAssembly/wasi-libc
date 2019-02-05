@@ -30,7 +30,7 @@ int openat(int fd, const char *path, int oflag, ...) {
       ~(__WASI_RIGHT_FD_DATASYNC | __WASI_RIGHT_FD_READ |
         __WASI_RIGHT_FD_WRITE | __WASI_RIGHT_FILE_ALLOCATE |
         __WASI_RIGHT_FILE_READDIR | __WASI_RIGHT_FILE_STAT_FPUT_SIZE |
-#ifdef __wasilibc_unmodified_upstream__ // RIGHT_MEM_MAP_EXEC
+#ifdef __wasilibc_unmodified_upstream // RIGHT_MEM_MAP_EXEC
         __WASI_RIGHT_MEM_MAP_EXEC);
 #else
         0);
@@ -43,7 +43,7 @@ int openat(int fd, const char *path, int oflag, ...) {
         min |= (oflag & O_DIRECTORY) == 0 ? __WASI_RIGHT_FD_READ
                                           : __WASI_RIGHT_FILE_READDIR;
         max |= __WASI_RIGHT_FD_READ | __WASI_RIGHT_FILE_READDIR |
-#ifdef __wasilibc_unmodified_upstream__ // RIGHT_MEM_MAP_EXEC
+#ifdef __wasilibc_unmodified_upstream // RIGHT_MEM_MAP_EXEC
                __WASI_RIGHT_MEM_MAP_EXEC;
 #else
                0;
@@ -59,7 +59,7 @@ int openat(int fd, const char *path, int oflag, ...) {
       }
       break;
     case O_EXEC:
-#ifdef __wasilibc_unmodified_upstream__ // RIGHT_PROC_EXEC
+#ifdef __wasilibc_unmodified_upstream // RIGHT_PROC_EXEC
       min |= __WASI_RIGHT_PROC_EXEC;
 #endif
       break;

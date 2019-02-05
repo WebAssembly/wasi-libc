@@ -40,7 +40,7 @@
 #include <sys/un.h>
 
 #include <fcntl.h>
-#ifdef __wasilibc_unmodified_upstream__ // dlfcn
+#ifdef __wasilibc_unmodified_upstream // dlfcn
 #include <dlfcn.h>
 #endif
 #include <stdarg.h>
@@ -48,13 +48,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 #include <errno.h>
 #endif
 
 #include "internal.h"
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 // Make all of the po_* implementation details private.
 #include "libpreopen.c"
@@ -101,7 +101,7 @@ static struct po_map*	get_shared_map(void);
  * the same as the unwrapped `open(2)` call (i.e., will fail with `ECAPMODE`).
  */
 int
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 _open(const char *path, int flags, ...)
 #else
 /* We just need a plain open definition. */
@@ -112,7 +112,7 @@ open(const char *path, int flags, ...)
 	va_list args;
 	int mode;
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 	va_start(args, flags);
 	mode = va_arg(args, int);
 #else
@@ -152,7 +152,7 @@ access(const char *path, int mode)
 	return faccessat(rel.dirfd, rel.relative_path, mode,0);
 }
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 /**
  * Capability-safe wrapper around the `connect(2)` system call.
  *
@@ -172,7 +172,7 @@ connect(int s, const struct sockaddr *name, socklen_t namelen)
 	if (name->sa_family == AF_UNIX) {
 	    struct sockaddr_un *usock = (struct sockaddr_un *)name;
 	    rel = find_relative(usock->sun_path, NULL);
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 	    strlcpy(usock->sun_path, rel.relative_path, sizeof(usock->sun_path));
 #else
 	    if (strlen(rel.relative_path) + 1 > sizeof(usock->sun_path)) {
@@ -226,7 +226,7 @@ lstat(const char *path, struct stat *st)
 	return fstatat(rel.dirfd, rel.relative_path,st,AT_SYMLINK_NOFOLLOW);
 }
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 /**
  * Capability-safe wrapper around the `open(2)` system call.
  *
@@ -289,7 +289,7 @@ stat(const char *path, struct stat *st)
  * Wrappers around other libc calls:
  */
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 /**
  * Capability-safe wrapper around the `dlopen(3)` libc function.
  *
@@ -309,7 +309,7 @@ dlopen(const char *path, int mode)
 	return fdlopen(openat(rel.dirfd, rel.relative_path, 0, mode), mode);
 }
 #endif
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 #include <dirent.h>
 
@@ -385,7 +385,7 @@ symlink(const char *target, const char *linkpath)
 }
 #endif
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 static
 #endif
@@ -411,7 +411,7 @@ find_relative(const char *path, cap_rights_t *rights)
 	struct po_map *map;
 
 	map = get_shared_map();
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 	if (map == NULL) {
 		rel.dirfd = AT_FDCWD;
 		rel.relative_path = path;
@@ -428,7 +428,7 @@ find_relative(const char *path, cap_rights_t *rights)
 static struct po_map*
 get_shared_map()
 {
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 	struct po_map *map;
 	char *end, *env;
 	long fd;
@@ -466,7 +466,7 @@ get_shared_map()
 	return global_map;
 #endif
 }
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 /*
  * Register the given pre-opened file descriptor under the given path.

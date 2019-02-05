@@ -26,7 +26,7 @@ long sysconf(int name)
 {
 	static const short values[] = {
 		[_SC_ARG_MAX] = JT_ARG_MAX,
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 		[_SC_CHILD_MAX] = RLIM(NPROC),
 #else
                 // Not supported on wasi.
@@ -34,7 +34,7 @@ long sysconf(int name)
 #endif
 		[_SC_CLK_TCK] = 100,
 		[_SC_NGROUPS_MAX] = 32,
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 		[_SC_OPEN_MAX] = RLIM(NOFILE),
 #else
                 // Not supported on wasi.
@@ -66,7 +66,7 @@ long sysconf(int name)
 		[_SC_MQ_PRIO_MAX] = JT_MQ_PRIO_MAX,
 		[_SC_VERSION] = VER,
 		[_SC_PAGE_SIZE] = JT_PAGE_SIZE,
-#ifdef __wasilibc_unmodified_upstream__ // realtime signals
+#ifdef __wasilibc_unmodified_upstream // realtime signals
 		[_SC_RTSIG_MAX] = _NSIG - 1 - 31 - 3,
 #else
                 // Not supported on wasi.
@@ -188,7 +188,7 @@ long sysconf(int name)
 	} else if (values[name] >= -1) {
 		return values[name];
 	} else if (values[name] < -256) {
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 		struct rlimit lim;
 		getrlimit(values[name]&16383, &lim);
 		if (lim.rlim_cur == RLIM_INFINITY)
@@ -216,7 +216,7 @@ long sysconf(int name)
 		return DELAYTIMER_MAX;
 	case JT_NPROCESSORS_CONF & 255:
 	case JT_NPROCESSORS_ONLN & 255: ;
-#if defined(__wasilibc_unmodified_upstream__) || defined(_REENTRANT)
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 		unsigned char set[128] = {1};
 		int i, cnt;
 		__syscall(SYS_sched_getaffinity, 0, sizeof set, set);
@@ -227,10 +227,10 @@ long sysconf(int name)
                 // With no thread support, just say there's 1 processor.
 		return 1;
 #endif
-#if defined(__wasilibc_unmodified_upstream__)
+#if defined(__wasilibc_unmodified_upstream)
 	case JT_PHYS_PAGES & 255:
 	case JT_AVPHYS_PAGES & 255: ;
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 		unsigned long long mem;
 		struct sysinfo si;
 		__lsysinfo(&si);

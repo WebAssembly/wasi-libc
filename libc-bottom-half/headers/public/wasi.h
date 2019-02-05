@@ -18,12 +18,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#if defined(__cplusplus)
-#define _Alignof alignof
-#define _Atomic(x) x
-#define _Static_assert static_assert
-#endif
-
 _Static_assert(_Alignof(int8_t) == 1, "non-wasi data layout");
 _Static_assert(_Alignof(uint8_t) == 1, "non-wasi data layout");
 _Static_assert(_Alignof(int16_t) == 2, "non-wasi data layout");

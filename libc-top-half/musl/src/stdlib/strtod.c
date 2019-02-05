@@ -9,7 +9,7 @@
 #include "floatscan.h"
 #include "stdio_impl.h"
 
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 static long_double strtox(const char *s, char **p, int prec)
 #else
 static long double strtox(const char *s, char **p, int prec)
@@ -18,7 +18,7 @@ static long double strtox(const char *s, char **p, int prec)
 	FILE f;
 	sh_fromstring(&f, s);
 	shlim(&f, 0);
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 	long_double y = __floatscan(&f, prec, 1);
 #else
 	long double y = __floatscan(&f, prec, 1);
@@ -40,7 +40,7 @@ double strtod(const char *restrict s, char **restrict p)
 
 long double strtold(const char *restrict s, char **restrict p)
 {
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 	long_double_not_supported();
 #else
 	return strtox(s, p, 2);

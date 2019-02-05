@@ -717,7 +717,7 @@ _Static_assert(sizeof(void *) != 4 ||
 _Static_assert(sizeof(void *) != 8 ||
     _Alignof(__wasi_threadattr_t) == 8, "non-wasi data layout");
 
-#ifdef __wasi_namespaces
+#if defined(__wasi_namespaces)
 #define __WASI_SYSCALL_NAME(name) \
     __attribute__((__import_module__("wasi"), __import_name__(#name)))
 #else

@@ -72,7 +72,7 @@ int vfscanf(FILE *restrict f, const char *restrict fmt, va_list ap)
 	int invert;
 	int matches=0;
 	unsigned long long x;
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 	long_double y;
 #else
 	long double y;
@@ -317,7 +317,7 @@ int vfscanf(FILE *restrict f, const char *restrict fmt, va_list ap)
 				*(double *)dest = y;
 				break;
 			case SIZE_L:
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 				long_double_not_supported();
 #else
 				*(long double *)dest = y;

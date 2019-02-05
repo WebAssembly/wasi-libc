@@ -276,7 +276,7 @@ typedef uint8_t __wasi_sdflags_t;
 typedef uint16_t __wasi_siflags_t;
 
 typedef uint8_t __wasi_signal_t;
-// UINT8_C(0) is reserved; POSIX has special semantics for kill(pid, 0).
+/* UINT8_C(0) is reserved; POSIX has special semantics for kill(pid, 0). */
 #define __WASI_SIGHUP    (UINT8_C(1))
 #define __WASI_SIGINT    (UINT8_C(2))
 #define __WASI_SIGQUIT   (UINT8_C(3))

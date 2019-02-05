@@ -102,7 +102,7 @@ void *mempcpy(void *, const void *, size_t);
 #ifdef __wasilibc_unmodified_upstream__
 char *basename();
 #else
-// Don't use unprototyped functions.
+/* Don't use unprototyped functions. */
 char *basename(char *);
 #endif
 #endif

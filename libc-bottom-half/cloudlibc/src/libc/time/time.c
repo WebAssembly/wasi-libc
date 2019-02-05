@@ -9,7 +9,7 @@
 
 time_t time(time_t *tloc) {
   __wasi_timestamp_t ts = 0;
-#ifdef __wasilibc_unmodified_upstream__ // bug fix
+#ifdef __wasilibc_unmodified_upstream // bug fix
 #else
   (void)
 #endif

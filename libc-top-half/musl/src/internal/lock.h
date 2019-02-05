@@ -1,7 +1,7 @@
 #ifndef LOCK_H
 #define LOCK_H
 
-#if defined(__wasilibc_unmodified_upstream__) || defined(_REENTRANT)
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 hidden void __lock(volatile int *);
 hidden void __unlock(volatile int *);
 #define LOCK(x) __lock(x)

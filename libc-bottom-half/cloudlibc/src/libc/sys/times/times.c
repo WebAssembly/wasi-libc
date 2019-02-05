@@ -15,7 +15,7 @@ static_assert(CLOCKS_PER_SEC == NSEC_PER_SEC,
 clock_t times(struct tms *buffer) {
   // Obtain user time.
   __wasi_timestamp_t usertime = 0;
-#ifdef __wasilibc_unmodified_upstream__ // bug fix
+#ifdef __wasilibc_unmodified_upstream // bug fix
 #else
   (void)
 #endif
@@ -24,7 +24,7 @@ clock_t times(struct tms *buffer) {
 
   // Obtain real time.
   __wasi_timestamp_t realtime = 0;
-#ifdef __wasilibc_unmodified_upstream__ // bug fix
+#ifdef __wasilibc_unmodified_upstream // bug fix
 #else
   (void)
 #endif

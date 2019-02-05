@@ -3,7 +3,7 @@
 #include <pthread.h>
 #include "locale_impl.h"
 
-#if defined(__wasilibc_unmodified_upstream__) || defined(_REENTRANT)
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 static pthread_once_t default_locale_once;
 #endif
 static struct __locale_struct default_locale, default_ctype_locale;
@@ -44,7 +44,7 @@ locale_t __newlocale(int mask, const char *name, locale_t loc)
 	if (!memcmp(&tmp, C_LOCALE, sizeof tmp)) return C_LOCALE;
 	if (!memcmp(&tmp, UTF8_LOCALE, sizeof tmp)) return UTF8_LOCALE;
 
-#if defined(__wasilibc_unmodified_upstream__) || defined(_REENTRANT)
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	/* And provide builtins for the initial default locale, and a
 	 * variant of the C locale honoring the default locale's encoding. */
 	pthread_once(&default_locale_once, default_locale_init);

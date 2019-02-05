@@ -9,7 +9,7 @@
 #include <string.h>
 
 int getsockopt(int socket, int level, int option_name,
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
                void *restrict option_value, size_t *restrict option_len) {
 #else
                void *restrict option_value, socklen_t *restrict option_len) {

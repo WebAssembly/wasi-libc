@@ -13,7 +13,7 @@
 static_assert(TIMER_ABSTIME == __WASI_SUBSCRIPTION_CLOCK_ABSTIME,
               "Value mismatch");
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
                     ...) {
 #else

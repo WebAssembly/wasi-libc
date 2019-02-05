@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <string.h>
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 int mkdirat(int fd, const char *path, ...) {
 #else
 int mkdirat(int fd, const char *path, mode_t mode) {

@@ -69,7 +69,7 @@
 #include <_/limits.h>
 #include <_/types.h>
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #define EXIT_FAILURE 1
 #define EXIT_SUCCESS 0
 
@@ -101,7 +101,7 @@ typedef __wchar_t wchar_t;
 #define _WCHAR_T_DECLARED
 #endif
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 // Process wide locale always uses ASCII.
 #define MB_CUR_MAX ((size_t)1)
 #endif
@@ -117,7 +117,7 @@ size_t MB_CUR_MAX_L(__locale_t);
 long a64l(const char *);
 #endif
 _Noreturn void abort(void);
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 int abs(int) __pure2;
 int at_quick_exit(void (*)(void));
 int atexit(void (*)(void));
@@ -133,14 +133,14 @@ void *bsearch(const void *, const void *, size_t, size_t,
               int (*)(const void *, const void *));
 #endif
 void *calloc(size_t, size_t);
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 div_t div(int, int) __pure2;
 double drand48(void);
 double erand48(__uint16_t *);
 _Noreturn void exit(int);
 #endif
 void free(void *);
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 char *getenv(const char *);
 int getsubopt(char **, char *const *, char **);
 long jrand48(__uint16_t *);
@@ -152,7 +152,7 @@ lldiv_t lldiv(long long, long long) __pure2;
 long lrand48(void);
 #endif
 void *malloc(size_t);
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 int mblen(const char *, size_t);
 int mblen_l(const char *, size_t, __locale_t);
 size_t mbstowcs(wchar_t *__restrict, const char *__restrict, size_t);
@@ -165,7 +165,7 @@ long nrand48(__uint16_t *);
 int posix_memalign(void **, size_t, size_t);
 #endif
 void qsort(void *, size_t, size_t, int (*)(const void *, const void *));
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 void qsort_r(void *, size_t, size_t,
              int (*)(const void *, const void *, void *), void *);
 _Noreturn void quick_exit(int);
@@ -173,7 +173,7 @@ int rand(void);
 long random(void);
 #endif
 void *realloc(void *, size_t);
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 void *reallocarray(void *, size_t, size_t);
 double strtod(const char *__restrict, char **__restrict);
 double strtod_l(const char *__restrict, char **__restrict, __locale_t);
@@ -200,7 +200,7 @@ __END_DECLS
 #endif
 
 #if _CLOUDLIBC_INLINE_FUNCTIONS
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 static __inline double __atof(const char *__str) {
   return strtod(__str, NULL);
 }

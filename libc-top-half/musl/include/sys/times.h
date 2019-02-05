@@ -8,7 +8,7 @@ extern "C" {
 #define __NEED_clock_t
 #include <bits/alltypes.h>
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 struct tms {
 	clock_t tms_utime;
 	clock_t tms_stime;

@@ -16,7 +16,7 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #define MAP_FAILED ((void *) -1)
 
 #define MAP_SHARED     0x01

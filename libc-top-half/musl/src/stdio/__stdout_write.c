@@ -1,17 +1,17 @@
 #include "stdio_impl.h"
 #include <sys/ioctl.h>
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 #include <__function___isatty.h>
 #endif
 
 size_t __stdout_write(FILE *f, const unsigned char *buf, size_t len)
 {
-#ifdef __wasilibc_unmodified_upstream__ // isatty
+#ifdef __wasilibc_unmodified_upstream // isatty
 	struct winsize wsz;
 #endif
 	f->write = __stdio_write;
-#ifdef __wasilibc_unmodified_upstream__ // isatty
+#ifdef __wasilibc_unmodified_upstream // isatty
 	if (!(f->flags & F_SVB) && __syscall(SYS_ioctl, f->fd, TIOCGWINSZ, &wsz))
 #else
 	if (!(f->flags & F_SVB) && !__isatty(f->fd))

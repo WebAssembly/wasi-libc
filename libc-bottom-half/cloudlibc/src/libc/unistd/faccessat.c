@@ -49,7 +49,7 @@ int faccessat(int fd, const char *path, int amode, int flag) {
     if ((amode & W_OK) != 0)
       min |= __WASI_RIGHT_FD_WRITE;
     if ((amode & X_OK) != 0 && file.st_filetype != __WASI_FILETYPE_DIRECTORY)
-#ifdef __wasilibc_unmodified_upstream__ // RIGHT_PROC_EXEC
+#ifdef __wasilibc_unmodified_upstream // RIGHT_PROC_EXEC
       min |= __WASI_RIGHT_PROC_EXEC;
 #else
       (void)0;

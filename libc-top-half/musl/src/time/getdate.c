@@ -10,7 +10,7 @@ struct tm *getdate(const char *s)
 {
 	static struct tm tmbuf;
 	struct tm *ret = 0;
-#ifdef __wasilibc_unmodified_upstream__ // getenv
+#ifdef __wasilibc_unmodified_upstream // getenv
 	char *datemsk = getenv("DATEMSK");
 #else
 	char *datemsk = NULL;
@@ -19,7 +19,7 @@ struct tm *getdate(const char *s)
 	char fmt[100], *p;
 	int cs;
 
-#if defined(__wasilibc_unmodified_upstream__) || defined(_REENTRANT)
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	pthread_setcancelstate(PTHREAD_CANCEL_DEFERRED, &cs);
 #endif
 
@@ -47,7 +47,7 @@ struct tm *getdate(const char *s)
 	else getdate_err = 7;
 out:
 	if (f) fclose(f);
-#if defined(__wasilibc_unmodified_upstream__) || defined(_REENTRANT)
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	pthread_setcancelstate(cs, 0);
 #endif
 	return ret;

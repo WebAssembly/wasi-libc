@@ -1,4 +1,4 @@
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #ifndef _STDDEF_H
 #define _STDDEF_H
 

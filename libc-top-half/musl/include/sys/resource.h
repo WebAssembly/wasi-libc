@@ -17,7 +17,7 @@ extern "C" {
 #include <bits/alltypes.h>
 #include <bits/resource.h>
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 typedef unsigned long long rlim_t;
 
 struct rlimit {
@@ -62,7 +62,7 @@ int prlimit(pid_t, int, const struct rlimit *, struct rlimit *);
 #define prlimit64 prlimit
 #endif
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #define PRIO_MIN (-20)
 #define PRIO_MAX 20
 

@@ -1,6 +1,6 @@
 #ifndef	_SYS_SOCKET_H
 #define	_SYS_SOCKET_H
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 #include <__header_sys_socket.h>
 #endif
@@ -46,7 +46,7 @@ struct linger {
 	int l_linger;
 };
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #define SHUT_RD 0
 #define SHUT_WR 1
 #define SHUT_RDWR 2
@@ -316,7 +316,7 @@ struct linger {
 #define SCM_CREDENTIALS 0x02
 #endif
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 struct sockaddr {
 	sa_family_t sa_family;
 	char sa_data[14];
@@ -325,7 +325,7 @@ struct sockaddr {
 #include <__struct_sockaddr.h>
 #endif
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 struct sockaddr_storage {
 	sa_family_t ss_family;
 	char __ss_padding[128-sizeof(long)-sizeof(sa_family_t)];

@@ -32,7 +32,7 @@ const struct __locale_map *__get_locale(int cat, const char *val)
 	size_t l, n;
 
 	if (!*val) {
-#ifdef __wasilibc_unmodified_upstream__ // getenv
+#ifdef __wasilibc_unmodified_upstream // getenv
 		(val = getenv("LC_ALL")) && *val ||
 		(val = getenv(envvars[cat])) && *val ||
 		(val = getenv("LANG")) && *val ||
@@ -64,7 +64,7 @@ const struct __locale_map *__get_locale(int cat, const char *val)
 			return p;
 		}
 
-#ifdef __wasilibc_unmodified_upstream__ // locales
+#ifdef __wasilibc_unmodified_upstream // locales
 	if (!libc.secure) path = getenv("MUSL_LOCPATH");
 	/* FIXME: add a default path? */
 

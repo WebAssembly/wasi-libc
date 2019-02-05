@@ -1,4 +1,4 @@
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 #include <unistd.h>
 #endif
@@ -9,7 +9,7 @@
 
 int remove(const char *path)
 {
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #ifdef SYS_unlink
 	int r = __syscall(SYS_unlink, path);
 #else

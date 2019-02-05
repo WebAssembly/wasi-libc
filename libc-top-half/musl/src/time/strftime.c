@@ -122,7 +122,7 @@ const char *__strftime_fmt_1(char (*s)[100], size_t *l, int f, const struct tm *
 	case 'R':
 		fmt = "%H:%M";
 		goto recu_strftime;
-#ifdef __wasilibc_unmodified_upstream__ // timezone data
+#ifdef __wasilibc_unmodified_upstream // timezone data
 	case 's':
 		val = __tm_to_secs(tm) - tm->__tm_gmtoff;
 		width = 1;

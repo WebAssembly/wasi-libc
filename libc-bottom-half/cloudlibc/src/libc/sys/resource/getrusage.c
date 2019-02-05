@@ -13,7 +13,7 @@ int getrusage(int who, struct rusage *r_usage) {
   switch (who) {
     case RUSAGE_SELF: {
       __wasi_timestamp_t usertime = 0;
-#ifdef __wasilibc_unmodified_upstream__ // bug fix
+#ifdef __wasilibc_unmodified_upstream // bug fix
 #else
       (void)
 #endif

@@ -38,11 +38,11 @@
 #ifndef LIBPO_INTERNAL_H
 #define LIBPO_INTERNAL_H
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #include <sys/cdefs.h>
 #endif
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 #define WITH_CAPSICUM
 #endif
@@ -98,7 +98,7 @@ struct po_map {
  *
  * @internal
  */
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 static
 #endif
@@ -113,7 +113,7 @@ bool	po_isprefix(const char *dir, size_t dirlen, const char *path);
 #ifdef NDEBUG
 #define po_map_assertvalid(...)
 #else
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 static
 #endif
@@ -129,13 +129,13 @@ void	po_map_assertvalid(const struct po_map *);
  *
  * @internal
  */
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 static
 #endif
 struct po_map* po_map_enlarge(struct po_map *map);
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 /**
  * Store an error message in the global "last error message" buffer.
  *
@@ -150,7 +150,7 @@ void po_errormessage(const char *msg);
  * If there is an existing default map, it will be freed before it is replaced.
  * Passing NULL to this function will thus clear the default map.
  */
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 void po_set_libc_map(struct po_map *);
 #endif
 

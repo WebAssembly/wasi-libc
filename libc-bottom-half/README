@@ -16,7 +16,7 @@ cloudlibc - https://github.com/NuxiNL/cloudlibc 92cb7670f864adc625c24eb214ff1c6d
 libpreopen - https://github.com/musec/libpreopen 8265fc50b9db3730c250597bdd084f1e728f3e48
 
 Whole files which are unused are omitted. Changes to upstream code are wrapped
-in preprocessor directives controlled by the macro `__wasilibc_unmodified_upstream__`,
+in preprocessor directives controlled by the macro `__wasilibc_unmodified_upstream`,
 except that CloudABI names have also been renamed to WASI names without annotations.
 
 WASI libc currently depends on the basics and dlmalloc components of reference-sysroot.

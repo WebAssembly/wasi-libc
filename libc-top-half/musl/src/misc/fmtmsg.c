@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#if defined(__wasilibc_unmodified_upstream__) || defined(_REENTRANT)
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #include <pthread.h>
 #endif
 
@@ -27,7 +27,7 @@ int fmtmsg(long classification, const char *label, int severity,
            const char *text, const char *action, const char *tag)
 {
 	int ret = 0, i, consolefd, verb = 0;
-#ifdef __wasilibc_unmodified_upstream__ // getenv
+#ifdef __wasilibc_unmodified_upstream // getenv
 	char *errstring = MM_NULLSEV, *cmsg = getenv("MSGVERB");
 #else
 	char *errstring = MM_NULLSEV, *cmsg = NULL;
@@ -37,7 +37,7 @@ int fmtmsg(long classification, const char *label, int severity,
 	};
 	int cs;
 
-#if defined(__wasilibc_unmodified_upstream__) || defined(_REENTRANT)
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
 #endif
 
@@ -92,7 +92,7 @@ int fmtmsg(long classification, const char *label, int severity,
 	if ((ret & (MM_NOCON|MM_NOMSG)) == (MM_NOCON|MM_NOMSG))
 		ret = MM_NOTOK;
 
-#if defined(__wasilibc_unmodified_upstream__) || defined(_REENTRANT)
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	pthread_setcancelstate(cs, 0);
 #endif
 

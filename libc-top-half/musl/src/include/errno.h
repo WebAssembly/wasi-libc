@@ -3,7 +3,7 @@
 
 #include "../../include/errno.h"
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 hidden int *___errno_location(void);
 
 #undef errno

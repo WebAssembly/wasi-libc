@@ -1,9 +1,9 @@
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #include "stdio_impl.h"
 #endif
 #include <fcntl.h>
 #include <unistd.h>
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 // Move this below fcntl.h and unistd.h so that the __syscall macro doesn't
 // cause trouble.
@@ -29,13 +29,13 @@ FILE *freopen(const char *restrict filename, const char *restrict mode, FILE *re
 
 	if (!filename) {
 		if (fl&O_CLOEXEC)
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 			__syscall(SYS_fcntl, f->fd, F_SETFD, FD_CLOEXEC);
 #else
 			fcntl(f->fd, F_SETFD, FD_CLOEXEC);
 #endif
 		fl &= ~(O_CREAT|O_EXCL|O_CLOEXEC);
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 		if (syscall(SYS_fcntl, f->fd, F_SETFL, fl) < 0)
 #else
 		if (fcntl(f->fd, F_SETFL, fl) < 0)
@@ -45,7 +45,7 @@ FILE *freopen(const char *restrict filename, const char *restrict mode, FILE *re
 		f2 = fopen(filename, mode);
 		if (!f2) goto fail;
 		if (f2->fd == f->fd) f2->fd = -1; /* avoid closing in fclose */
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 		else if (__dup3(f2->fd, f->fd, fl&O_CLOEXEC)<0) goto fail2;
 #else
                 // WASI doesn't have dup3, but doesn't do anything with

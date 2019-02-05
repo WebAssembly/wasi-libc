@@ -40,7 +40,7 @@
 
 #include "internal.h"
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 static
 #endif
@@ -69,7 +69,7 @@ po_map_create(int capacity)
 	return (map);
 }
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 static
 #endif
@@ -88,7 +88,7 @@ po_map_enlarge(struct po_map *map)
 	return map;
 }
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 size_t
 po_map_foreach(const struct po_map *map, po_map_iter_cb cb)
 {
@@ -109,7 +109,7 @@ po_map_foreach(const struct po_map *map, po_map_iter_cb cb)
 }
 #endif
 
-#ifdef __wasilibc_unmodified_upstream__
+#ifdef __wasilibc_unmodified_upstream
 #else
 static
 #endif

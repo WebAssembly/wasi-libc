@@ -13,7 +13,7 @@ static_assert(CLOCKS_PER_SEC == NSEC_PER_SEC,
 
 clock_t clock(void) {
   __wasi_timestamp_t ts = 0;
-#ifdef __wasilibc_unmodified_upstream__ // bug fix
+#ifdef __wasilibc_unmodified_upstream // bug fix
 #else
   (void)
 #endif

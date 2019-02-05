@@ -67,7 +67,7 @@ static long long scanexp(FILE *f, int pok)
 }
 
 
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 static long_double decfloat(FILE *f, int c, int bits, int emin, int sign, int pok)
 #else
 static long double decfloat(FILE *f, int c, int bits, int emin, int sign, int pok)
@@ -84,7 +84,7 @@ static long double decfloat(FILE *f, int c, int bits, int emin, int sign, int po
 	int e2;
 	int emax = -emin-bits+3;
 	int denormal = 0;
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 	long_double y;
 	long_double frac=0;
 	long_double bias=0;
@@ -158,7 +158,7 @@ static long double decfloat(FILE *f, int c, int bits, int emin, int sign, int po
 
 	/* Optimize small integers (w/no exponent) and over/under-flow */
 	if (lrp==dc && dc<10 && (bits>30 || x[0]>>bits==0))
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 		return sign * (long_double)x[0];
 #else
 		return sign * (long double)x[0];
@@ -186,7 +186,7 @@ static long double decfloat(FILE *f, int c, int bits, int emin, int sign, int po
 
 	/* Optimize small to mid-size integers (even in exp. notation) */
 	if (lnz<9 && lnz<=rp && rp < 18) {
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 		if (rp == 9) return sign * (long_double)x[0];
 		if (rp < 9) return sign * (long_double)x[0] / p10s[8-rp];
 #else
@@ -195,7 +195,7 @@ static long double decfloat(FILE *f, int c, int bits, int emin, int sign, int po
 #endif
 		int bitlim = bits-3*(int)(rp-9);
 		if (bitlim>30 || x[0]>>bitlim==0)
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 			return sign * (long_double)x[0] * p10s[rp-10];
 #else
 			return sign * (long double)x[0] * p10s[rp-10];
@@ -341,14 +341,14 @@ static long double decfloat(FILE *f, int c, int bits, int emin, int sign, int po
 	return scalbnl(y, e2);
 }
 
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 static long_double hexfloat(FILE *f, int bits, int emin, int sign, int pok)
 #else
 static long double hexfloat(FILE *f, int bits, int emin, int sign, int pok)
 #endif
 {
 	uint32_t x = 0;
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 	long_double y = 0;
 	long_double scale = 1;
 	long_double bias = 0;
@@ -455,7 +455,7 @@ static long double hexfloat(FILE *f, int bits, int emin, int sign, int pok)
 
 	if (bits<32 && y && !(x&1)) x++, y=0;
 
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 	y = bias + sign*(long_double)x + sign*y;
 #else
 	y = bias + sign*(long double)x + sign*y;
@@ -467,7 +467,7 @@ static long double hexfloat(FILE *f, int bits, int emin, int sign, int pok)
 	return scalbnl(y, e2);
 }
 
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 long_double __floatscan(FILE *f, int prec, int pok)
 #else
 long double __floatscan(FILE *f, int prec, int pok)

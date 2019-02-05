@@ -31,7 +31,7 @@ static size_t do_read(FILE *f, unsigned char *buf, size_t len)
 	return 0;
 }
 
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 static long_double wcstox(const wchar_t *s, wchar_t **p, int prec)
 #else
 static long double wcstox(const wchar_t *s, wchar_t **p, int prec)
@@ -49,7 +49,7 @@ static long double wcstox(const wchar_t *s, wchar_t **p, int prec)
 	while (iswspace(*t)) t++;
 	f.cookie = (void *)t;
 	shlim(&f, 0);
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 	long_double y = __floatscan(&f, prec, 1);
 #else
 	long double y = __floatscan(&f, prec, 1);
@@ -73,7 +73,7 @@ double wcstod(const wchar_t *restrict s, wchar_t **restrict p)
 
 long double wcstold(const wchar_t *restrict s, wchar_t **restrict p)
 {
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 	long_double_not_supported();
 #else
 	return wcstox(s, p, 2);

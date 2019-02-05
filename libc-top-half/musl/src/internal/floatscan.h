@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#ifdef __wasilibc_printscan_no_long_double
+#if defined(__wasilibc_printscan_no_long_double)
 hidden long_double __floatscan(FILE *, int, int);
 #else
 hidden long double __floatscan(FILE *, int, int);

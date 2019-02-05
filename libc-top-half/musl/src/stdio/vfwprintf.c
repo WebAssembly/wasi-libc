@@ -97,7 +97,7 @@ static const unsigned char states[]['z'-'A'+1] = {
 union arg
 {
 	uintmax_t i;
-#ifndef __wasilibc_printscan_no_floating_point
+#if !defined(__wasilibc_printscan_no_floating_point)
 #if defined(__wasilibc_printscan_no_long_double)
 	long_double f;
 #else

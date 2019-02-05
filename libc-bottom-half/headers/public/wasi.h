@@ -1013,4 +1013,6 @@ __wasi_errno_t __wasi_thread_yield(void)
 }
 #endif
 
+#undef __WASI_SYSCALL_NAME
+
 #endif

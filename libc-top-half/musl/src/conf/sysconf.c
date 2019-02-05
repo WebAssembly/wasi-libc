@@ -227,10 +227,9 @@ long sysconf(int name)
                 // With no thread support, just say there's 1 processor.
 		return 1;
 #endif
-#if defined(__wasilibc_unmodified_upstream)
+#ifdef __wasilibc_unmodified_upstream
 	case JT_PHYS_PAGES & 255:
 	case JT_AVPHYS_PAGES & 255: ;
-#ifdef __wasilibc_unmodified_upstream
 		unsigned long long mem;
 		struct sysinfo si;
 		__lsysinfo(&si);
@@ -240,11 +239,6 @@ long sysconf(int name)
 		mem *= si.mem_unit;
 		mem /= PAGE_SIZE;
 		return (mem > LONG_MAX) ? LONG_MAX : mem;
-#else
-                // Not supported on wasi.
-		errno = EINVAL;
-		return -1;
-#endif
 #endif
 	case JT_ZERO & 255:
 		return 0;

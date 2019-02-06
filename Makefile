@@ -106,6 +106,12 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fcntl/creat.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/dirent/alphasort.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/dirent/versionsort.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/__environ.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/clearenv.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/getenv.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/putenv.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/setenv.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/unsetenv.c \
     $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/*.c)) \
     $(filter-out %/flockfile.c %/funlockfile.c %/__lockfile.c %/ftrylockfile.c \

@@ -60,9 +60,9 @@ __wasi_mem_unmap
 __wasi_poll
 __wasi_proc_exit
 __wasi_random_get
+__wasi_sched_yield
 __wasi_sock_recv
 __wasi_sock_send
 __wasi_sock_shutdown
-__wasi_thread_yield
 __wasm_call_ctors
 main

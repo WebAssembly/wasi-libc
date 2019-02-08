@@ -37,8 +37,8 @@
 #ifdef __wasilibc_unmodified_upstream
 #include <sys/cdefs.h>
 #include <sys/param.h>
-#endif
 #include <sys/mman.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 #ifdef __wasilibc_unmodified_upstream

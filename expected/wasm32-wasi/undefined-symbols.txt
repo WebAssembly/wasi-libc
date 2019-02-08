@@ -52,11 +52,6 @@ __wasi_file_stat_get
 __wasi_file_stat_put
 __wasi_file_symlink
 __wasi_file_unlink
-__wasi_mem_advise
-__wasi_mem_map
-__wasi_mem_protect
-__wasi_mem_sync
-__wasi_mem_unmap
 __wasi_poll
 __wasi_proc_exit
 __wasi_random_get

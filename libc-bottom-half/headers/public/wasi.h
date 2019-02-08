@@ -181,22 +181,6 @@ typedef uint32_t __wasi_linkcount_t;
 typedef uint32_t __wasi_lookupflags_t;
 #define __WASI_LOOKUP_SYMLINK_FOLLOW (UINT32_C(0x00000001))
 
-typedef uint8_t __wasi_mflags_t;
-#define __WASI_MAP_ANON    (UINT8_C(0x01))
-#define __WASI_MAP_FIXED   (UINT8_C(0x02))
-#define __WASI_MAP_PRIVATE (UINT8_C(0x04))
-#define __WASI_MAP_SHARED  (UINT8_C(0x08))
-
-typedef uint8_t __wasi_mprot_t;
-#define __WASI_PROT_READ  (UINT8_C(0x01))
-#define __WASI_PROT_WRITE (UINT8_C(0x02))
-#define __WASI_PROT_EXEC  (UINT8_C(0x04))
-
-typedef uint8_t __wasi_msflags_t;
-#define __WASI_MS_ASYNC      (UINT8_C(0x01))
-#define __WASI_MS_INVALIDATE (UINT8_C(0x02))
-#define __WASI_MS_SYNC       (UINT8_C(0x04))
-
 typedef uint16_t __wasi_oflags_t;
 #define __WASI_O_CREAT     (UINT16_C(0x0001))
 #define __WASI_O_DIRECTORY (UINT16_C(0x0002))
@@ -233,9 +217,8 @@ typedef uint64_t __wasi_rights_t;
 #define __WASI_RIGHT_FILE_STAT_PUT_TIMES   (UINT64_C(0x0000000000400000))
 #define __WASI_RIGHT_FILE_SYMLINK          (UINT64_C(0x0000000000800000))
 #define __WASI_RIGHT_FILE_UNLINK           (UINT64_C(0x0000000001000000))
-#define __WASI_RIGHT_MEM_MAP               (UINT64_C(0x0000000002000000))
-#define __WASI_RIGHT_POLL_FD_READWRITE     (UINT64_C(0x0000000004000000))
-#define __WASI_RIGHT_SOCK_SHUTDOWN         (UINT64_C(0x0000000008000000))
+#define __WASI_RIGHT_POLL_FD_READWRITE     (UINT64_C(0x0000000002000000))
+#define __WASI_RIGHT_SOCK_SHUTDOWN         (UINT64_C(0x0000000004000000))
 
 typedef uint16_t __wasi_roflags_t;
 #define __WASI_SOCK_RECV_FDS_TRUNCATED  (UINT16_C(0x0001))
@@ -767,39 +750,6 @@ __wasi_errno_t __wasi_file_unlink(
     size_t path_len,
     __wasi_ulflags_t flags
 ) __WASI_SYSCALL_NAME(file_unlink) __attribute__((__warn_unused_result__));
-
-__wasi_errno_t __wasi_mem_advise(
-    void *mapping,
-    size_t mapping_len,
-    __wasi_advice_t advice
-) __WASI_SYSCALL_NAME(mem_advise) __attribute__((__warn_unused_result__));
-
-__wasi_errno_t __wasi_mem_map(
-    void *addr,
-    size_t len,
-    __wasi_mprot_t prot,
-    __wasi_mflags_t flags,
-    __wasi_fd_t fd,
-    __wasi_filesize_t off,
-    void **mem
-) __WASI_SYSCALL_NAME(mem_map) __attribute__((__warn_unused_result__));
-
-__wasi_errno_t __wasi_mem_protect(
-    void *mapping,
-    size_t mapping_len,
-    __wasi_mprot_t prot
-) __WASI_SYSCALL_NAME(mem_protect) __attribute__((__warn_unused_result__));
-
-__wasi_errno_t __wasi_mem_sync(
-    void *mapping,
-    size_t mapping_len,
-    __wasi_msflags_t flags
-) __WASI_SYSCALL_NAME(mem_sync) __attribute__((__warn_unused_result__));
-
-__wasi_errno_t __wasi_mem_unmap(
-    void *mapping,
-    size_t mapping_len
-) __WASI_SYSCALL_NAME(mem_unmap) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_poll(
     const __wasi_subscription_t *in,

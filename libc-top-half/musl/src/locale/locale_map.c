@@ -1,6 +1,8 @@
 #include <locale.h>
 #include <string.h>
+#ifdef __wasilibc_unmodified_upstream
 #include <sys/mman.h>
+#endif
 #include "locale_impl.h"
 #include "libc.h"
 #include "lock.h"

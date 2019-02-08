@@ -8,7 +8,6 @@
 #include <__header_netinet_in.h>
 #include <__header_poll.h>
 #include <__header_sys_ioctl.h>
-#include <__header_sys_mman.h>
 #include <__header_sys_resource.h>
 #include <__header_sys_socket.h>
 #include <__header_sys_stat.h>
@@ -153,8 +152,6 @@
 #include <sys/file.h>
 #include <sys/ioctl.h.~1~>
 #include <sys/ioctl.h>
-#include <sys/mman.h.~1~>
-#include <sys/mman.h>
 #include <sys/param.h>
 #include <sys/poll.h>
 #include <sys/random.h>

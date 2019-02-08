@@ -1352,11 +1352,6 @@
 #define L_ctermid 20
 #define L_cuserid 20
 #define MAGIC "070707"
-#define MAP_ANON __WASI_MAP_ANON
-#define MAP_FAILED ((void *)-1)
-#define MAP_FIXED __WASI_MAP_FIXED
-#define MAP_PRIVATE __WASI_MAP_PRIVATE
-#define MAP_SHARED __WASI_MAP_SHARED
 #define MATH_ERREXCEPT 2
 #define MATH_ERRNO 1
 #define MAX(a,b) (((a)>(b))?(a):(b))
@@ -1468,9 +1463,6 @@
 #define MSG_PEEK __WASI_SOCK_RECV_PEEK
 #define MSG_TRUNC __WASI_SOCK_RECV_DATA_TRUNCATED
 #define MSG_WAITALL __WASI_SOCK_RECV_WAITALL
-#define MS_ASYNC __WASI_MS_ASYNC
-#define MS_INVALIDATE __WASI_MS_INVALIDATE
-#define MS_SYNC __WASI_MS_SYNC
 #define MUXID_ALL (-1)
 #define M_1_PI 0.31830988618379067154
 #define M_2_PI 0.63661977236758134308
@@ -1724,11 +1716,6 @@
 #define POSIX_FADV_RANDOM __WASI_ADVICE_RANDOM
 #define POSIX_FADV_SEQUENTIAL __WASI_ADVICE_SEQUENTIAL
 #define POSIX_FADV_WILLNEED __WASI_ADVICE_WILLNEED
-#define POSIX_MADV_DONTNEED __WASI_ADVICE_DONTNEED
-#define POSIX_MADV_NORMAL __WASI_ADVICE_NORMAL
-#define POSIX_MADV_RANDOM __WASI_ADVICE_RANDOM
-#define POSIX_MADV_SEQUENTIAL __WASI_ADVICE_SEQUENTIAL
-#define POSIX_MADV_WILLNEED __WASI_ADVICE_WILLNEED
 #define POSIX_SPAWN_RESETIDS 1
 #define POSIX_SPAWN_SETPGROUP 2
 #define POSIX_SPAWN_SETSCHEDPARAM 16
@@ -1822,9 +1809,6 @@
 #define PRIxLEAST8 "x"
 #define PRIxMAX __PRI64 "x"
 #define PRIxPTR __PRIPTR "x"
-#define PROT_EXEC __WASI_PROT_EXEC
-#define PROT_READ __WASI_PROT_READ
-#define PROT_WRITE __WASI_PROT_WRITE
 #define PTHREAD_BARRIER_SERIAL_THREAD (-1)
 #define PTHREAD_CANCELED ((void *)-1)
 #define PTHREAD_CANCEL_ASYNCHRONOUS 1
@@ -2956,7 +2940,6 @@
 #define _SYS_EVENTFD_H 
 #define _SYS_FILE_H 
 #define _SYS_IOCTL_H 
-#define _SYS_MMAN_H 
 #define _SYS_PARAM_H 
 #define _SYS_RANDOM_H 
 #define _SYS_REG_H 
@@ -3606,21 +3589,11 @@
 #define __WASI_FILETYPE_SYMBOLIC_LINK (UINT8_C(7))
 #define __WASI_FILETYPE_UNKNOWN (UINT8_C(0))
 #define __WASI_LOOKUP_SYMLINK_FOLLOW (UINT32_C(0x00000001))
-#define __WASI_MAP_ANON (UINT8_C(0x01))
 #define __WASI_MAP_ANON_FD (UINT32_C(0xffffffff))
-#define __WASI_MAP_FIXED (UINT8_C(0x02))
-#define __WASI_MAP_PRIVATE (UINT8_C(0x04))
-#define __WASI_MAP_SHARED (UINT8_C(0x08))
-#define __WASI_MS_ASYNC (UINT8_C(0x01))
-#define __WASI_MS_INVALIDATE (UINT8_C(0x02))
-#define __WASI_MS_SYNC (UINT8_C(0x04))
 #define __WASI_O_CREAT (UINT16_C(0x0001))
 #define __WASI_O_DIRECTORY (UINT16_C(0x0002))
 #define __WASI_O_EXCL (UINT16_C(0x0004))
 #define __WASI_O_TRUNC (UINT16_C(0x0008))
-#define __WASI_PROT_EXEC (UINT8_C(0x04))
-#define __WASI_PROT_READ (UINT8_C(0x01))
-#define __WASI_PROT_WRITE (UINT8_C(0x02))
 #define __WASI_RIGHT_FD_DATASYNC (UINT64_C(0x0000000000000001))
 #define __WASI_RIGHT_FD_READ (UINT64_C(0x0000000000000002))
 #define __WASI_RIGHT_FD_SEEK (UINT64_C(0x0000000000000004))
@@ -3730,7 +3703,6 @@
 #define __wasilibc___header_netinet_in_h 
 #define __wasilibc___header_poll_h 
 #define __wasilibc___header_sys_ioctl_h 
-#define __wasilibc___header_sys_mman_h 
 #define __wasilibc___header_sys_resource_h 
 #define __wasilibc___header_sys_socket_h 
 #define __wasilibc___header_sys_stat_h 
@@ -3770,7 +3742,6 @@
 #define __wasilibc_stdlib_h 
 #define __wasilibc_string_h 
 #define __wasilibc_sys_ioctl_h 
-#define __wasilibc_sys_mman_h 
 #define __wasilibc_sys_resource_h 
 #define __wasilibc_sys_select_h 
 #define __wasilibc_sys_socket_h 

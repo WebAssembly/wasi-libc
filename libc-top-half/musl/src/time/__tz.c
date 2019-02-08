@@ -3,7 +3,9 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef __wasilibc_unmodified_upstream // timezone data
 #include <sys/mman.h>
+#endif
 #include "libc.h"
 #include "lock.h"
 

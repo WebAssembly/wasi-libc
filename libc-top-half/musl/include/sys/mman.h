@@ -1,3 +1,7 @@
+#ifndef _WASI_EMULATED_MMAN
+#error "WASI lacks a true mmap; to enable minimal mmap emulation, \
+compile with -D_WASI_EMULATED_MMAN and link with -lwasi-emulated-mman"
+#else
 #ifndef	_SYS_MMAN_H
 #define	_SYS_MMAN_H
 #ifdef __cplusplus
@@ -16,7 +20,6 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
-#ifdef __wasilibc_unmodified_upstream
 #define MAP_FAILED ((void *) -1)
 
 #define MAP_SHARED     0x01
@@ -107,9 +110,6 @@ extern "C" {
 #endif
 
 #include <bits/mman.h>
-#else
-#include <__header_sys_mman.h>
-#endif
 
 void *mmap (void *, size_t, int, int, int, off_t);
 int munmap (void *, size_t);
@@ -146,5 +146,6 @@ int shm_unlink (const char *);
 
 #ifdef __cplusplus
 }
+#endif
 #endif
 #endif

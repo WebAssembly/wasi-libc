@@ -748,14 +748,10 @@ mkstemps
 mkstemps64
 mktemp
 mktime
-mmap
 modf
 modff
 modfl
-mprotect
 mrand48
-msync
-munmap
 nan
 nanf
 nanl
@@ -794,7 +790,6 @@ pipe
 poll
 posix_fadvise
 posix_fallocate
-posix_madvise
 posix_memalign
 pow
 pow10

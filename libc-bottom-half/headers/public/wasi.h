@@ -140,7 +140,6 @@ typedef uint8_t __wasi_eventtype_t;
 typedef uint32_t __wasi_exitcode_t;
 
 typedef uint32_t __wasi_fd_t;
-#define __WASI_MAP_ANON_FD (UINT32_C(0xffffffff))
 
 typedef uint16_t __wasi_fdflags_t;
 #define __WASI_FDFLAG_APPEND   (UINT16_C(0x0001))

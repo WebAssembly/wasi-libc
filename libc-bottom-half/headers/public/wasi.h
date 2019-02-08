@@ -573,12 +573,6 @@ __wasi_errno_t __wasi_fd_close(
     __wasi_fd_t fd
 ) __WASI_SYSCALL_NAME(fd_close) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_fd_create2(
-    __wasi_filetype_t type,
-    __wasi_fd_t *fd0,
-    __wasi_fd_t *fd1
-) __WASI_SYSCALL_NAME(fd_create2) __attribute__((__warn_unused_result__));
-
 __wasi_errno_t __wasi_fd_datasync(
     __wasi_fd_t fd
 ) __WASI_SYSCALL_NAME(fd_datasync) __attribute__((__warn_unused_result__));

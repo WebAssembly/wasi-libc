@@ -32,6 +32,7 @@ static inline __wasi_errno_t errno_fixup_executable(__wasi_fd_t fd,
   return error;
 }
 
+#ifdef __wasilibc_unmodified_upstream // process file descriptors
 // Translates ENOTCAPABLE to EINVAL if not a process.
 static inline __wasi_errno_t errno_fixup_process(__wasi_fd_t fd,
                                                    __wasi_errno_t error) {
@@ -43,6 +44,7 @@ static inline __wasi_errno_t errno_fixup_process(__wasi_fd_t fd,
   }
   return error;
 }
+#endif
 
 // Translates ENOTCAPABLE to ENOTSOCK if not a socket.
 static inline __wasi_errno_t errno_fixup_socket(__wasi_fd_t fd,

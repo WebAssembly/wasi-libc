@@ -786,7 +786,6 @@ optopt
 optreset
 pathconf
 perror
-pipe
 poll
 posix_fadvise
 posix_fallocate
@@ -896,7 +895,6 @@ sinl
 sleep
 snprintf
 socket
-socketpair
 sprintf
 sqrt
 sqrtf

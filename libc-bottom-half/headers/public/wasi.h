@@ -162,12 +162,10 @@ typedef uint8_t __wasi_filetype_t;
 #define __WASI_FILETYPE_BLOCK_DEVICE     (UINT8_C(1))
 #define __WASI_FILETYPE_CHARACTER_DEVICE (UINT8_C(2))
 #define __WASI_FILETYPE_DIRECTORY        (UINT8_C(3))
-#define __WASI_FILETYPE_PROCESS          (UINT8_C(4))
-#define __WASI_FILETYPE_REGULAR_FILE     (UINT8_C(5))
-#define __WASI_FILETYPE_SHARED_MEMORY    (UINT8_C(6))
-#define __WASI_FILETYPE_SOCKET_DGRAM     (UINT8_C(7))
-#define __WASI_FILETYPE_SOCKET_STREAM    (UINT8_C(8))
-#define __WASI_FILETYPE_SYMBOLIC_LINK    (UINT8_C(9))
+#define __WASI_FILETYPE_REGULAR_FILE     (UINT8_C(4))
+#define __WASI_FILETYPE_SOCKET_DGRAM     (UINT8_C(5))
+#define __WASI_FILETYPE_SOCKET_STREAM    (UINT8_C(6))
+#define __WASI_FILETYPE_SYMBOLIC_LINK    (UINT8_C(7))
 
 typedef uint16_t __wasi_fsflags_t;
 #define __WASI_FILESTAT_ATIM     (UINT16_C(0x0001))
@@ -592,11 +590,6 @@ __wasi_errno_t __wasi_clock_time_get(
 __wasi_errno_t __wasi_fd_close(
     __wasi_fd_t fd
 ) __WASI_SYSCALL_NAME(fd_close) __attribute__((__warn_unused_result__));
-
-__wasi_errno_t __wasi_fd_create1(
-    __wasi_filetype_t type,
-    __wasi_fd_t *fd
-) __WASI_SYSCALL_NAME(fd_create1) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_create2(
     __wasi_filetype_t type,

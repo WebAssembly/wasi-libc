@@ -104,9 +104,11 @@ int putc(int, FILE *);
 int putchar(int);
 
 char *fgets(char *__restrict, int, FILE *__restrict);
-#ifdef __wasilibc_unmodified_upstream
 #if __STDC_VERSION__ < 201112L
+#ifdef __wasilibc_unmodified_upstream
 char *gets(char *);
+#else
+char *gets(char *) __attribute__((__deprecated__("gets is not defined on WASI")));
 #endif
 #endif
 
@@ -138,6 +140,9 @@ void setbuf(FILE *__restrict, char *__restrict);
 #ifdef __wasilibc_unmodified_upstream
 char *tmpnam(char *);
 FILE *tmpfile(void);
+#else
+char *tmpnam(char *) __attribute__((__deprecated__("tmpnam is not defined on WASI")));
+FILE *tmpfile(void) __attribute__((__deprecated__("tmpfile is not defined on WASI")));
 #endif
 
 #if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) \

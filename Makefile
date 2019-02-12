@@ -276,8 +276,8 @@ $(SYSROOT_INC):
 	# Install the include files.
 	#
 	mkdir -p "$(SYSROOT_INC)"
-	cp -r --backup=numbered "$(BASICS_INC)" "$(SYSROOT)"
-	cp -r --backup=numbered "$(LIBC_BOTTOM_HALF_HEADERS_PUBLIC)"/* "$(SYSROOT_INC)"
+	cp -r "$(BASICS_INC)" "$(SYSROOT)"
+	cp -r "$(LIBC_BOTTOM_HALF_HEADERS_PUBLIC)"/* "$(SYSROOT_INC)"
 
 	# Generate musl's bits/alltypes.h header.
 	mkdir -p "$(SYSROOT_INC)/bits"
@@ -287,9 +287,9 @@ $(SYSROOT_INC):
 	    > "$(SYSROOT_INC)/bits/alltypes.h"
 
 	# Copy in the bulk of musl's public header files.
-	cp -r --backup=numbered "$(LIBC_TOP_HALF_MUSL_INC)"/* "$(SYSROOT_INC)"
+	cp -r "$(LIBC_TOP_HALF_MUSL_INC)"/* "$(SYSROOT_INC)"
 	# Copy in the musl's "bits" header files.
-	cp -r --backup=numbered "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/generic/bits/* "$(SYSROOT_INC)/bits"
+	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/generic/bits/* "$(SYSROOT_INC)/bits"
 	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/wasm32/bits/* "$(SYSROOT_INC)/bits"
 
 	# Remove files that aren't headers or that aren't supported yet or that aren't relevant for wasm.

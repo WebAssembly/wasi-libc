@@ -3732,25 +3732,6 @@
 #define __wasilibc___typedef_sa_family_t_h 
 #define __wasilibc___typedef_sigset_t_h 
 #define __wasilibc___typedef_socklen_t_h 
-#define __wasilibc_dirent_h 
-#define __wasilibc_errno_h 
-#define __wasilibc_fcntl_h 
-#define __wasilibc_netinet_in_h 
-#define __wasilibc_poll_h 
-#define __wasilibc_stdlib_h 
-#define __wasilibc_string_h 
-#define __wasilibc_sys_ioctl_h 
-#define __wasilibc_sys_resource_h 
-#define __wasilibc_sys_select_h 
-#define __wasilibc_sys_socket_h 
-#define __wasilibc_sys_stat_h 
-#define __wasilibc_sys_time_h 
-#define __wasilibc_sys_times_h 
-#define __wasilibc_sys_types_h 
-#define __wasilibc_sys_uio_h 
-#define __wasilibc_sys_un_h 
-#define __wasilibc_time_h 
-#define __wasilibc_unistd_h 
 #define __wasm 1
 #define __wasm32 1
 #define __wasm32__ 1
@@ -3772,13 +3753,6 @@
 #define __wasm_basics___typedef_suseconds_t_h 
 #define __wasm_basics___typedef_time_t_h 
 #define __wasm_basics___typedef_uid_t_h 
-#define __wasm_basics_errno_h 
-#define __wasm_basics_stdlib_h 
-#define __wasm_basics_string_h 
-#define __wasm_basics_sys_stat_h 
-#define __wasm_basics_sys_types_h 
-#define __wasm_basics_time_h 
-#define __wasm_basics_wchar_h 
 #define _tolower(a) ((a)|0x20)
 #define _toupper(a) ((a)&0x5f)
 #define acos(x) __tg_real_complex(acos, (x))

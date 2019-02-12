@@ -390,8 +390,8 @@ finish: $(SYSROOT_INC) libc
 	mkdir -p "$(SYSROOT_SHARE)"
 
 	# Collect symbol information.
-	# TODO: Use llvm-nm --extern-only instead of grep once
-	# https://bugs.llvm.org/show_bug.cgi?id=40497 is fixed.
+	# TODO: Use llvm-nm --extern-only instead of grep. This is blocked on
+	# LLVM PR40497, which is fixed in 9.0, but not in 8.0.
 	$(WASM_NM) --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_COLLATE=C sort > "$(SYSROOT_SHARE)/defined-symbols.txt"
 	for undef_sym in $$($(WASM_NM) --undefined-only "$(SYSROOT_LIB)"/*.a "$(SYSROOT_LIB)"/*.o \

@@ -551,12 +551,8 @@ _Static_assert(
 _Static_assert(sizeof(__wasi_subscription_t) == 56, "non-wasi data layout");
 _Static_assert(_Alignof(__wasi_subscription_t) == 8, "non-wasi data layout");
 
-#if defined(__wasi_namespaces)
 #define __WASI_SYSCALL_NAME(name) \
     __attribute__((__import_module__("wasi"), __import_name__(#name)))
-#else
-#define __WASI_SYSCALL_NAME(name)
-#endif
 
 __wasi_errno_t __wasi_clock_res_get(
     __wasi_clockid_t clock_id,

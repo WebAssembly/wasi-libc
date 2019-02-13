@@ -50,8 +50,13 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
       *subscription = (__wasi_subscription_t){
           .userdata = fd,
           .type = __WASI_EVENTTYPE_FD_READ,
+#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
           .fd_readwrite.fd = fd,
           .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
+#else
+          .u.fd_readwrite.fd = fd,
+          .u.fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
+#endif
       };
     }
   }
@@ -64,8 +69,13 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
       *subscription = (__wasi_subscription_t){
           .userdata = fd,
           .type = __WASI_EVENTTYPE_FD_WRITE,
+#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
           .fd_readwrite.fd = fd,
           .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
+#else
+          .u.fd_readwrite.fd = fd,
+          .u.fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
+#endif
       };
     }
   }
@@ -75,9 +85,17 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
     __wasi_subscription_t *subscription = &subscriptions[nevents++];
     *subscription = (__wasi_subscription_t){
         .type = __WASI_EVENTTYPE_CLOCK,
+#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
         .clock.clock_id = __WASI_CLOCK_REALTIME,
+#else
+        .u.clock.clock_id = __WASI_CLOCK_REALTIME,
+#endif
     };
+#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
     if (!timespec_to_timestamp_clamp(timeout, &subscription->clock.timeout)) {
+#else
+    if (!timespec_to_timestamp_clamp(timeout, &subscription->u.clock.timeout)) {
+#endif
       errno = EINVAL;
       return -1;
     }

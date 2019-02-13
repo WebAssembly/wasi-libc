@@ -26,10 +26,19 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
   // Prepare polling subscription.
   __wasi_subscription_t sub = {
       .type = __WASI_EVENTTYPE_CLOCK,
+#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
       .clock.clock_id = clock_id->id,
       .clock.flags = flags,
+#else
+      .u.clock.clock_id = clock_id->id,
+      .u.clock.flags = flags,
+#endif
   };
+#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
   if (!timespec_to_timestamp_clamp(rqtp, &sub.clock.timeout))
+#else
+  if (!timespec_to_timestamp_clamp(rqtp, &sub.u.clock.timeout))
+#endif
     return EINVAL;
 
   // Block until polling event is triggered.

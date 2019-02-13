@@ -15,12 +15,21 @@ int ioctl(int fildes, int request, ...) {
       __wasi_subscription_t subscriptions[2] = {
           {
               .type = __WASI_EVENTTYPE_FD_READ,
+#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
               .fd_readwrite.fd = fildes,
               .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
+#else
+              .u.fd_readwrite.fd = fildes,
+              .u.fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
+#endif
           },
           {
               .type = __WASI_EVENTTYPE_CLOCK,
+#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
               .clock.clock_id = __WASI_CLOCK_MONOTONIC,
+#else
+              .u.clock.clock_id = __WASI_CLOCK_MONOTONIC,
+#endif
           },
       };
       __wasi_event_t events[__arraycount(subscriptions)];
@@ -46,7 +55,11 @@ int ioctl(int fildes, int request, ...) {
           return -1;
         }
         if (event->type == __WASI_EVENTTYPE_FD_READ) {
+#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
           *result = event->fd_readwrite.nbytes;
+#else
+          *result = event->u.fd_readwrite.nbytes;
+#endif
           return 0;
         }
       }

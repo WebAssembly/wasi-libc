@@ -297,7 +297,7 @@ typedef struct __wasi_event_t {
     __wasi_userdata_t userdata;
     __wasi_errno_t error;
     __wasi_eventtype_t type;
-    union {
+    union __wasi_event_u {
         struct {
             __wasi_filesize_t nbytes;
             __wasi_eventrwflags_t flags;
@@ -511,7 +511,7 @@ _Static_assert(sizeof(void *) != 8 ||
 typedef struct __wasi_subscription_t {
     __wasi_userdata_t userdata;
     __wasi_eventtype_t type;
-    union {
+    union __wasi_subscription_u {
         struct {
             __wasi_userdata_t identifier;
             __wasi_clockid_t clock_id;

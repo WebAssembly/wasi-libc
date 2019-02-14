@@ -358,15 +358,6 @@ _Static_assert(
 _Static_assert(sizeof(__wasi_filestat_t) == 56, "non-wasi data layout");
 _Static_assert(_Alignof(__wasi_filestat_t) == 8, "non-wasi data layout");
 
-typedef struct __wasi_lookup_t {
-    __wasi_fd_t fd;
-    __wasi_lookupflags_t flags;
-} __wasi_lookup_t;
-_Static_assert(offsetof(__wasi_lookup_t, fd) == 0, "non-wasi data layout");
-_Static_assert(offsetof(__wasi_lookup_t, flags) == 4, "non-wasi data layout");
-_Static_assert(sizeof(__wasi_lookup_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(__wasi_lookup_t) == 4, "non-wasi data layout");
-
 typedef struct __wasi_ciovec_t {
     const void *buf;
     size_t buf_len;
@@ -656,7 +647,8 @@ __wasi_errno_t __wasi_file_create(
 ) __WASI_SYSCALL_NAME(file_create) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_link(
-    __wasi_lookup_t old_fd,
+    __wasi_fd_t old_fd,
+    __wasi_lookupflags_t old_flags,
     const char *old_path,
     size_t old_path_len,
     __wasi_fd_t new_fd,
@@ -665,7 +657,8 @@ __wasi_errno_t __wasi_file_link(
 ) __WASI_SYSCALL_NAME(file_link) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_open(
-    __wasi_lookup_t dirfd,
+    __wasi_fd_t dirfd,
+    __wasi_lookupflags_t dirflags,
     const char *path,
     size_t path_len,
     __wasi_oflags_t oflags,
@@ -707,22 +700,24 @@ __wasi_errno_t __wasi_file_stat_fget(
 __wasi_errno_t __wasi_file_stat_fput(
     __wasi_fd_t fd,
     const __wasi_filestat_t *buf,
-    __wasi_fsflags_t flags
+    __wasi_fsflags_t fsflags
 ) __WASI_SYSCALL_NAME(file_stat_fput) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_stat_get(
-    __wasi_lookup_t fd,
+    __wasi_fd_t fd,
+    __wasi_lookupflags_t flags,
     const char *path,
     size_t path_len,
     __wasi_filestat_t *buf
 ) __WASI_SYSCALL_NAME(file_stat_get) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_stat_put(
-    __wasi_lookup_t fd,
+    __wasi_fd_t fd,
+    __wasi_lookupflags_t flags,
     const char *path,
     size_t path_len,
     const __wasi_filestat_t *buf,
-    __wasi_fsflags_t flags
+    __wasi_fsflags_t fsflags
 ) __WASI_SYSCALL_NAME(file_stat_put) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_symlink(

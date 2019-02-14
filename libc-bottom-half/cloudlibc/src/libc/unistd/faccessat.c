@@ -19,13 +19,21 @@ int faccessat(int fd, const char *path, int amode, int flag) {
   }
 
   // Check for target file existence and obtain the file type.
+#ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
   __wasi_lookup_t lookup = {
       .fd = fd,
       .flags = __WASI_LOOKUP_SYMLINK_FOLLOW,
   };
+#else
+  __wasi_lookupflags_t lookup_flags = __WASI_LOOKUP_SYMLINK_FOLLOW;
+#endif
   __wasi_filestat_t file;
   __wasi_errno_t error =
+#ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
       __wasi_file_stat_get(lookup, path, strlen(path), &file);
+#else
+      __wasi_file_stat_get(fd, lookup_flags, path, strlen(path), &file);
+#endif
   if (error != 0) {
     errno = errno_fixup_directory(fd, error);
     return -1;

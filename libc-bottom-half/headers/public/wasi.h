@@ -735,12 +735,12 @@ __wasi_errno_t __wasi_file_unlink(
     __wasi_ulflags_t flags
 ) __WASI_SYSCALL_NAME(file_unlink) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_poll(
+__wasi_errno_t __wasi_poll_oneoff(
     const __wasi_subscription_t *in,
     __wasi_event_t *out,
     size_t nsubscriptions,
     size_t *nevents
-) __WASI_SYSCALL_NAME(poll) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(poll_oneoff) __attribute__((__warn_unused_result__));
 
 _Noreturn void __wasi_proc_exit(
     __wasi_exitcode_t rval

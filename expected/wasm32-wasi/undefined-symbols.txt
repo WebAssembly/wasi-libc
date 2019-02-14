@@ -51,7 +51,7 @@ __wasi_file_stat_get
 __wasi_file_stat_put
 __wasi_file_symlink
 __wasi_file_unlink
-__wasi_poll
+__wasi_poll_oneoff
 __wasi_proc_exit
 __wasi_random_get
 __wasi_sched_yield

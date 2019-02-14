@@ -89,9 +89,17 @@ int openat(int fd, const char *path, int oflag, ...) {
   }
 
   // Path lookup properties.
+#ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
   __wasi_lookup_t lookup = {.fd = fd, .flags = 0};
+#else
+  __wasi_lookupflags_t lookup_flags = 0;
+#endif
   if ((oflag & O_NOFOLLOW) == 0)
+#ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
     lookup.flags |= __WASI_LOOKUP_SYMLINK_FOLLOW;
+#else
+    lookup_flags |= __WASI_LOOKUP_SYMLINK_FOLLOW;
+#endif
 
   // Open file with appropriate rights.
   __wasi_fdstat_t fsb_new = {
@@ -100,10 +108,18 @@ int openat(int fd, const char *path, int oflag, ...) {
       .fs_rights_inheriting = fsb_cur.fs_rights_inheriting,
   };
   __wasi_fd_t newfd;
+#ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
   error = __wasi_file_open(lookup, path, strlen(path),
+#else
+  error = __wasi_file_open(fd, lookup_flags, path, strlen(path),
+#endif
                                  (oflag >> 12) & 0xfff, &fsb_new, &newfd);
   if (error != 0) {
+#ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
     errno = errno_fixup_directory(lookup.fd, error);
+#else
+    errno = errno_fixup_directory(fd, error);
+#endif
     return -1;
   }
   return newfd;

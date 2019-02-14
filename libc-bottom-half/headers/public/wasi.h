@@ -691,7 +691,7 @@ __wasi_errno_t __wasi_file_readlink(
 ) __WASI_SYSCALL_NAME(file_readlink) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_rename(
-    __wasi_fd_t old_fd0,
+    __wasi_fd_t old_fd,
     const char *old_path,
     size_t old_path_len,
     __wasi_fd_t new_fd,
@@ -726,11 +726,11 @@ __wasi_errno_t __wasi_file_stat_put(
 ) __WASI_SYSCALL_NAME(file_stat_put) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_symlink(
-    const char *path1,
-    size_t path1_len,
+    const char *old_path,
+    size_t old_path_len,
     __wasi_fd_t fd,
-    const char *path2,
-    size_t path2_len
+    const char *new_path,
+    size_t new_path_len
 ) __WASI_SYSCALL_NAME(file_symlink) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_unlink(

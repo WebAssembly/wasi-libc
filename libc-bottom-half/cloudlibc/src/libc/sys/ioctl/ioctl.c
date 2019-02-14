@@ -34,7 +34,7 @@ int ioctl(int fildes, int request, ...) {
       };
       __wasi_event_t events[__arraycount(subscriptions)];
       size_t nevents;
-      __wasi_errno_t error = __wasi_poll(
+      __wasi_errno_t error = __wasi_poll_oneoff(
           subscriptions, events, __arraycount(subscriptions), &nevents);
       if (error != 0) {
         errno = error;

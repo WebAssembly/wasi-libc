@@ -604,6 +604,11 @@ __wasi_errno_t __wasi_fd_seek(
     __wasi_filesize_t *newoffset
 ) __WASI_SYSCALL_NAME(fd_seek) __attribute__((__warn_unused_result__));
 
+__wasi_errno_t __wasi_fd_tell(
+    __wasi_fd_t fd,
+    __wasi_filesize_t *newoffset
+) __WASI_SYSCALL_NAME(fd_tell) __attribute__((__warn_unused_result__));
+
 __wasi_errno_t __wasi_fd_stat_get(
     __wasi_fd_t fd,
     __wasi_fdstat_t *buf

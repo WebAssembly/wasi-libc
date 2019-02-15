@@ -788,6 +788,7 @@ pathconf
 pause
 perror
 poll
+posix_close
 posix_fadvise
 posix_fallocate
 posix_memalign

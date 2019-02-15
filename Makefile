@@ -114,6 +114,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/putenv.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/setenv.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/unsetenv.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/unistd/posix_close.c \
     $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/*.c)) \
     $(filter-out %/flockfile.c %/funlockfile.c %/__lockfile.c %/ftrylockfile.c \

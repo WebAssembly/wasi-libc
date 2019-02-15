@@ -639,12 +639,11 @@ __wasi_errno_t __wasi_file_allocate(
     __wasi_filesize_t len
 ) __WASI_SYSCALL_NAME(file_allocate) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_create(
+__wasi_errno_t __wasi_file_mkdir(
     __wasi_fd_t fd,
     const char *path,
-    size_t path_len,
-    __wasi_filetype_t type
-) __WASI_SYSCALL_NAME(file_create) __attribute__((__warn_unused_result__));
+    size_t path_len
+) __WASI_SYSCALL_NAME(file_mkdir) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_file_link(
     __wasi_fd_t old_fd,

@@ -648,7 +648,7 @@
 #define FLT_MIN_10_EXP (-37)
 #define FLT_MIN_EXP (-125)
 #define FLT_RADIX 2
-#define FLT_ROUNDS (__flt_rounds())
+#define FLT_ROUNDS (__builtin_flt_rounds())
 #define FLT_TRUE_MIN 1.40129846432481707092e-45F
 #define FLUSHBAND 0x04
 #define FLUSHO 0010000

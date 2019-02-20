@@ -5,8 +5,12 @@
 extern "C" {
 #endif
 
+#ifdef __wasilibc_unmodified_upstream
 int __flt_rounds(void);
 #define FLT_ROUNDS (__flt_rounds())
+#else
+#define FLT_ROUNDS (__builtin_flt_rounds())
+#endif
 
 #define FLT_RADIX 2
 

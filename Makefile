@@ -359,7 +359,11 @@ $(SYSROOT_INC):
 	      "$(SYSROOT_INC)/netdb.h" \
 	      "$(SYSROOT_INC)/resolv.h" \
 	      "$(SYSROOT_INC)/pty.h" \
-	      "$(SYSROOT_INC)/dlfcn.h"
+	      "$(SYSROOT_INC)/dlfcn.h" \
+	      "$(SYSROOT_INC)/ulimit.h" \
+	      "$(SYSROOT_INC)/xattr.h" \
+	      "$(SYSROOT_INC)/wordexp.h" \
+	      "$(SYSROOT_INC)/spawn.h"
 
 startup_files: $(SYSROOT_INC)
 	#

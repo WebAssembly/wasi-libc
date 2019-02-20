@@ -41,13 +41,17 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
+#ifdef __wasilibc_unmodified_upstream /* pipe */
 int pipe(int [2]);
 int pipe2(int [2], int);
+#endif
 int close(int);
 int posix_close(int, int);
+#ifdef __wasilibc_unmodified_upstream /* dup */
 int dup(int);
 int dup2(int, int);
 int dup3(int, int, int);
+#endif
 off_t lseek(int, off_t, int);
 int fsync(int);
 int fdatasync(int);
@@ -57,10 +61,12 @@ ssize_t write(int, const void *, size_t);
 ssize_t pread(int, void *, size_t, off_t);
 ssize_t pwrite(int, const void *, size_t, off_t);
 
+#ifdef __wasilibc_unmodified_upstream /* chown */
 int chown(const char *, uid_t, gid_t);
 int fchown(int, uid_t, gid_t);
 int lchown(const char *, uid_t, gid_t);
 int fchownat(int, const char *, uid_t, gid_t, int);
+#endif
 
 int link(const char *, const char *);
 int linkat(int, const char *, int, const char *, int);
@@ -84,9 +90,11 @@ int ftruncate(int, off_t);
 int access(const char *, int);
 int faccessat(int, const char *, int, int);
 
+#ifdef __wasilibc_unmodified_upstream /* cwd */
 int chdir(const char *);
 int fchdir(int);
 char *getcwd(char *, size_t);
+#endif
 
 unsigned alarm(unsigned);
 unsigned sleep(unsigned);
@@ -104,6 +112,7 @@ int fexecve(int, char *const [], char *const []);
 #endif
 _Noreturn void _exit(int);
 
+#ifdef __wasilibc_unmodified_upstream /* getpid */
 pid_t getpid(void);
 pid_t getppid(void);
 pid_t getpgrp(void);
@@ -111,12 +120,14 @@ pid_t getpgid(pid_t);
 int setpgid(pid_t, pid_t);
 pid_t setsid(void);
 pid_t getsid(pid_t);
+#endif
 char *ttyname(int);
 int ttyname_r(int, char *, size_t);
 int isatty(int);
 pid_t tcgetpgrp(int);
 int tcsetpgrp(int, pid_t);
 
+#ifdef __wasilibc_unmodified_upstream /* getpid */
 uid_t getuid(void);
 uid_t geteuid(void);
 gid_t getgid(void);
@@ -126,6 +137,7 @@ int setuid(uid_t);
 int seteuid(uid_t);
 int setgid(gid_t);
 int setegid(gid_t);
+#endif
 
 char *getlogin(void);
 int getlogin_r(char *, size_t);
@@ -146,8 +158,10 @@ size_t confstr(int, char *, size_t);
 #define F_LOCK  1
 #define F_TLOCK 2
 #define F_TEST  3
+#ifdef __wasilibc_unmodified_upstream /* getpid */
 int setreuid(uid_t, uid_t);
 int setregid(gid_t, gid_t);
+#endif
 int lockf(int, int, off_t);
 long gethostid(void);
 int nice(int);
@@ -201,14 +215,20 @@ int getentropy(void *, size_t);
 
 #ifdef _GNU_SOURCE
 extern char **environ;
+#ifdef __wasilibc_unmodified_upstream /* getpid */
 int setresuid(uid_t, uid_t, uid_t);
 int setresgid(gid_t, gid_t, gid_t);
 int getresuid(uid_t *, uid_t *, uid_t *);
 int getresgid(gid_t *, gid_t *, gid_t *);
+#endif
+#ifdef __wasilibc_unmodified_upstream /* cwd */
 char *get_current_dir_name(void);
+#endif
 int syncfs(int);
+#ifdef __wasilibc_unmodified_upstream /* getpid */
 int euidaccess(const char *, int);
 int eaccess(const char *, int);
+#endif
 #endif
 
 #if defined(_LARGEFILE64_SOURCE) || defined(_GNU_SOURCE)
@@ -233,20 +253,24 @@ int eaccess(const char *, int);
 #define _POSIX_ADVISORY_INFO    _POSIX_VERSION
 #define _POSIX_CHOWN_RESTRICTED 1
 #define _POSIX_IPV6             _POSIX_VERSION
+#ifdef __wasilibc_unmodified_upstream
 #define _POSIX_JOB_CONTROL      1
 #define _POSIX_MAPPED_FILES     _POSIX_VERSION
 #define _POSIX_MEMLOCK          _POSIX_VERSION
 #define _POSIX_MEMLOCK_RANGE    _POSIX_VERSION
 #define _POSIX_MEMORY_PROTECTION _POSIX_VERSION
 #define _POSIX_MESSAGE_PASSING  _POSIX_VERSION
+#endif
 #define _POSIX_FSYNC            _POSIX_VERSION
 #define _POSIX_NO_TRUNC         1
 #define _POSIX_RAW_SOCKETS      _POSIX_VERSION
 #define _POSIX_REALTIME_SIGNALS _POSIX_VERSION
 #define _POSIX_REGEXP           1
+#ifdef __wasilibc_unmodified_upstream
 #define _POSIX_SAVED_IDS        1
 #define _POSIX_SHELL            1
 #define _POSIX_SPAWN            _POSIX_VERSION
+#endif
 #define _POSIX_VDISABLE         0
 
 #define _POSIX_THREADS          _POSIX_VERSION

@@ -15,7 +15,6 @@
 #include <sys/types.h>
 
 struct map {
-    int dup_fd;
     int prot;
     int flags;
     off_t offset;
@@ -50,7 +49,10 @@ void *mmap(void *addr, size_t length, int prot, int flags,
 
     // Check for unsupported protection requests.
     if (prot == PROT_NONE ||
-        (prot & PROT_EXEC) != 0)
+#ifdef PROT_EXEC
+        (prot & PROT_EXEC) != 0 ||
+#endif
+        0)
     {
         errno = EINVAL;
         return MAP_FAILED;
@@ -63,12 +65,7 @@ void *mmap(void *addr, size_t length, int prot, int flags,
         return MAP_FAILED;
     }
 
-    int dup_fd = dup(fd);
-    if (dup_fd < 0)
-        return MAP_FAILED;
-
     // Initialize the header.
-    map->dup_fd = dup_fd;
     map->prot = prot;
     map->flags = flags;
     map->offset = offset;
@@ -79,7 +76,7 @@ void *mmap(void *addr, size_t length, int prot, int flags,
     if ((flags & MAP_ANON) == 0) {
         char *body = map->body;
         while (length > 0) {
-            ssize_t nread = pread(dup_fd, body, length, offset);
+            ssize_t nread = pread(fd, body, length, offset);
             if (nread < 0) {
                 if (errno == EINTR)
                     continue;
@@ -100,7 +97,6 @@ void *mmap(void *addr, size_t length, int prot, int flags,
 
 int munmap(void *addr, size_t length) {
     struct map *map = (struct map *)addr - 1;
-    int dup_fd = map->dup_fd;
     off_t offset = map->offset;
     int flags = map->flags;
     int prot = map->prot;
@@ -108,30 +104,6 @@ int munmap(void *addr, size_t length) {
     // We don't support partial munmapping.
     if (map->length != length) {
         errno = EINVAL;
-        return -1;
-    }
-
-    // If needed, sync the contents of memory back to the file.
-    if ((flags & MAP_ANON) == 0 &&
-        (flags & MAP_SHARED) != 0 &&
-        (prot & PROT_WRITE) != 0)
-    {
-        char *body = map->body;
-        while (length > 0) {
-            ssize_t nwritten = pwrite(dup_fd, body, length, offset);
-            if (nwritten < 0) {
-                if (errno == EINTR)
-                    continue;
-                return -1;
-            }
-            length -= (size_t)nwritten;
-            offset += (size_t)nwritten;
-            body += (size_t)nwritten;
-        }
-    }
-
-    // Close the dup'd file descriptor.
-    if (close(dup_fd) != 0) {
         return -1;
     }
 

@@ -27,11 +27,10 @@ __wasi_clock_res_get
 __wasi_clock_time_get
 __wasi_fd_close
 __wasi_fd_datasync
-__wasi_fd_dup
 __wasi_fd_pread
 __wasi_fd_pwrite
 __wasi_fd_read
-__wasi_fd_replace
+__wasi_fd_renumber
 __wasi_fd_seek
 __wasi_fd_stat_get
 __wasi_fd_stat_put

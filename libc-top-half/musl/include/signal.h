@@ -197,6 +197,7 @@ int __libc_current_sigrtmax(void);
 #define SIGRTMAX  (__libc_current_sigrtmax())
 #endif
 
+#ifdef __wasilibc_unmodified_upstream /* signals */
 int kill(pid_t, int);
 
 int sigemptyset(sigset_t *);
@@ -213,15 +214,19 @@ int sigwait(const sigset_t *__restrict, int *__restrict);
 int sigwaitinfo(const sigset_t *__restrict, siginfo_t *__restrict);
 int sigtimedwait(const sigset_t *__restrict, siginfo_t *__restrict, const struct timespec *__restrict);
 int sigqueue(pid_t, int, union sigval);
+#endif
 
 int pthread_sigmask(int, const sigset_t *__restrict, sigset_t *__restrict);
 int pthread_kill(pthread_t, int);
 
+#ifdef __wasilibc_unmodified_upstream /* signals */
 void psiginfo(const siginfo_t *, const char *);
 void psignal(int, const char *);
+#endif
 
 #endif
 
+#ifdef __wasilibc_unmodified_upstream /* signals */
 #if defined(_XOPEN_SOURCE) || defined(_BSD_SOURCE) || defined(_GNU_SOURCE)
 int killpg(pid_t, int);
 int sigaltstack(const stack_t *__restrict, stack_t *__restrict);
@@ -247,7 +252,9 @@ void (*sigset(int, void (*)(int)))(int);
 #define SS_AUTODISARM (1U << 31)
 #define SS_FLAG_BITS SS_AUTODISARM
 #endif
+#endif
 
+#ifdef __wasilibc_unmodified_upstream /* signals */
 #if defined(_BSD_SOURCE) || defined(_GNU_SOURCE)
 #define NSIG _NSIG
 typedef void (*sig_t)(int);
@@ -267,10 +274,13 @@ int sigandset(sigset_t *, const sigset_t *, const sigset_t *);
 #define SIG_ERR  ((void (*)(int))-1)
 #define SIG_DFL  ((void (*)(int)) 0)
 #define SIG_IGN  ((void (*)(int)) 1)
+#endif
 
 typedef int sig_atomic_t;
 
+#ifdef __wasilibc_unmodified_upstream /* signals */
 void (*signal(int, void (*)(int)))(int);
+#endif
 int raise(int);
 
 #ifdef __cplusplus

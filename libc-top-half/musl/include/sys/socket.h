@@ -336,30 +336,42 @@ struct sockaddr_storage {
 #endif
 
 int socket (int, int, int);
+#ifdef __wasilibc_unmodified_upstream /* socketpair */
 int socketpair (int, int, int, int [2]);
+#endif
 
 int shutdown (int, int);
 
 int bind (int, const struct sockaddr *, socklen_t);
+#ifdef __wasilibc_unmodified_upstream /* connect/listen/accept */
 int connect (int, const struct sockaddr *, socklen_t);
 int listen (int, int);
 int accept (int, struct sockaddr *__restrict, socklen_t *__restrict);
 int accept4(int, struct sockaddr *__restrict, socklen_t *__restrict, int);
+#endif
 
+#ifdef __wasilibc_unmodified_upstream /* getsockname/getpeername */
 int getsockname (int, struct sockaddr *__restrict, socklen_t *__restrict);
 int getpeername (int, struct sockaddr *__restrict, socklen_t *__restrict);
+#endif
 
 ssize_t send (int, const void *, size_t, int);
 ssize_t recv (int, void *, size_t, int);
+#ifdef __wasilibc_unmodified_upstream /* sendto/recvfrom */
 ssize_t sendto (int, const void *, size_t, int, const struct sockaddr *, socklen_t);
 ssize_t recvfrom (int, void *__restrict, size_t, int, struct sockaddr *__restrict, socklen_t *__restrict);
+#endif
 ssize_t sendmsg (int, const struct msghdr *, int);
 ssize_t recvmsg (int, struct msghdr *, int);
 
 int getsockopt (int, int, int, void *__restrict, socklen_t *__restrict);
+#ifdef __wasilibc_unmodified_upstream /* setsockopt */
 int setsockopt (int, int, int, const void *, socklen_t);
+#endif
 
+#ifdef __wasilibc_unmodified_upstream /* sockatmark */
 int sockatmark (int);
+#endif
 
 #ifdef __cplusplus
 }

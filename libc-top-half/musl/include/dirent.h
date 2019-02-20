@@ -47,7 +47,9 @@ int            closedir(DIR *);
 DIR           *fdopendir(int);
 DIR           *opendir(const char *);
 struct dirent *readdir(DIR *);
+#ifdef __wasilibc_unmodified_upstream /* readdir_r is obsolete */
 int            readdir_r(DIR *__restrict, struct dirent *__restrict, struct dirent **__restrict);
+#endif
 void           rewinddir(DIR *);
 int            dirfd(DIR *);
 

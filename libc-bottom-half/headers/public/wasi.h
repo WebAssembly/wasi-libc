@@ -564,11 +564,6 @@ __wasi_errno_t __wasi_fd_datasync(
     __wasi_fd_t fd
 ) __WASI_SYSCALL_NAME(fd_datasync) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_fd_dup(
-    __wasi_fd_t from,
-    __wasi_fd_t *fd
-) __WASI_SYSCALL_NAME(fd_dup) __attribute__((__warn_unused_result__));
-
 __wasi_errno_t __wasi_fd_pread(
     __wasi_fd_t fd,
     const __wasi_iovec_t *iovs,
@@ -592,10 +587,10 @@ __wasi_errno_t __wasi_fd_read(
     size_t *nread
 ) __WASI_SYSCALL_NAME(fd_read) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_fd_replace(
+__wasi_errno_t __wasi_fd_renumber(
     __wasi_fd_t from,
     __wasi_fd_t to
-) __WASI_SYSCALL_NAME(fd_replace) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_renumber) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_seek(
     __wasi_fd_t fd,

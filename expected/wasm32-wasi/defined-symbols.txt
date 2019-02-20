@@ -243,6 +243,7 @@ __uflow
 __unlist_locked_file
 __uselocale
 __utc
+__wasilibc_fd_renumber
 __wasilibc_register_preopened_fd
 __wcscoll_l
 __wcsftime_l
@@ -410,8 +411,6 @@ dprintf
 drand48
 drem
 dremf
-dup
-dup2
 duplocale
 eaccess
 ecvt

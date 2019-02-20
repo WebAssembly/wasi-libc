@@ -10,7 +10,9 @@
 #define JT(x) (-256|(x))
 #define VER JT(1)
 #define JT_ARG_MAX JT(2)
+#ifdef __wasilibc_unmodified_upstream // mq
 #define JT_MQ_PRIO_MAX JT(3)
+#endif
 #define JT_PAGE_SIZE JT(4)
 #define JT_SEM_VALUE_MAX JT(5)
 #define JT_NPROCESSORS_CONF JT(6)
@@ -62,8 +64,10 @@ long sysconf(int name)
 		[_SC_AIO_MAX] = -1,
 		[_SC_AIO_PRIO_DELTA_MAX] = JT_ZERO, /* ?? */
 		[_SC_DELAYTIMER_MAX] = JT_DELAYTIMER_MAX,
+#ifdef __wasilibc_unmodified_upstream // mq
 		[_SC_MQ_OPEN_MAX] = -1,
 		[_SC_MQ_PRIO_MAX] = JT_MQ_PRIO_MAX,
+#endif
 		[_SC_VERSION] = VER,
 		[_SC_PAGE_SIZE] = JT_PAGE_SIZE,
 #ifdef __wasilibc_unmodified_upstream // realtime signals
@@ -206,8 +210,10 @@ long sysconf(int name)
 		return _POSIX_VERSION;
 	case JT_ARG_MAX & 255:
 		return ARG_MAX;
+#ifdef __wasilibc_unmodified_upstream // mq
 	case JT_MQ_PRIO_MAX & 255:
 		return MQ_PRIO_MAX;
+#endif
 	case JT_PAGE_SIZE & 255:
 		return PAGE_SIZE;
 	case JT_SEM_VALUE_MAX & 255:

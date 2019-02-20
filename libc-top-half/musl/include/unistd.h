@@ -96,7 +96,9 @@ int fchdir(int);
 char *getcwd(char *, size_t);
 #endif
 
+#ifdef __wasilibc_unmodified_upstream /* signals */
 unsigned alarm(unsigned);
+#endif
 unsigned sleep(unsigned);
 int pause(void);
 

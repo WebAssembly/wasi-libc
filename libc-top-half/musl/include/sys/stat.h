@@ -78,25 +78,37 @@ int stat(const char *__restrict, struct stat *__restrict);
 int fstat(int, struct stat *);
 int lstat(const char *__restrict, struct stat *__restrict);
 int fstatat(int, const char *__restrict, struct stat *__restrict, int);
+#ifdef __wasilibc_unmodified_upstream /* chmod */
 int chmod(const char *, mode_t);
 int fchmod(int, mode_t);
 int fchmodat(int, const char *, mode_t, int);
+#endif
+#ifdef __wasilibc_unmodified_upstream /* umask */
 mode_t umask(mode_t);
+#endif
 int mkdir(const char *, mode_t);
+#ifdef __wasilibc_unmodified_upstream /* fifo */
 int mkfifo(const char *, mode_t);
+#endif
 int mkdirat(int, const char *, mode_t);
+#ifdef __wasilibc_unmodified_upstream /* fifo */
 int mkfifoat(int, const char *, mode_t);
+#endif
 
+#ifdef __wasilibc_unmodified_upstream /* mknod */
 #if defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 int mknod(const char *, mode_t, dev_t);
 int mknodat(int, const char *, mode_t, dev_t);
+#endif
 #endif
 
 int futimens(int, const struct timespec [2]);
 int utimensat(int, const char *, const struct timespec [2], int);
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
+#ifdef __wasilibc_unmodified_upstream /* chmod */
 int lchmod(const char *, mode_t);
+#endif
 #define S_IREAD S_IRUSR
 #define S_IWRITE S_IWUSR
 #define S_IEXEC S_IXUSR

@@ -3676,6 +3676,7 @@
 #define __wasilibc___typedef_sa_family_t_h 
 #define __wasilibc___typedef_sigset_t_h 
 #define __wasilibc___typedef_socklen_t_h 
+#define __wasilibc_wasilibc_h 
 #define __wasm 1
 #define __wasm32 1
 #define __wasm32__ 1

@@ -121,7 +121,6 @@
 #include <search.h>
 #include <semaphore.h>
 #include <signal.h>
-#include <spawn.h>
 #include <stdalign.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -177,11 +176,9 @@
 #include <time.h>
 #include <uchar.h>
 #include <ucontext.h>
-#include <ulimit.h>
 #include <unistd.h>
 #include <utime.h>
 #include <values.h>
 #include <wasi.h>
 #include <wchar.h>
 #include <wctype.h>
-#include <wordexp.h>

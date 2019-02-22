@@ -1531,7 +1531,6 @@
 #define NOTZONE ns_r_notzone
 #define NR_ICMP_TYPES 18
 #define NR_ICMP_UNREACH 15
-#define NSIG _NSIG
 #define NSLC 18
 #define NS_ALG_DH 2
 #define NS_ALG_DSA 3
@@ -1702,12 +1701,6 @@
 #define POLLOUT POLLWRNORM
 #define POLLRDNORM 0x1
 #define POLLWRNORM 0x2
-#define POLL_ERR 4
-#define POLL_HUP 6
-#define POLL_IN 1
-#define POLL_MSG 3
-#define POLL_OUT 2
-#define POLL_PRI 5
 #define POSIX_CLOSE_RESTART 0
 #define POSIX_FADV_DONTNEED __WASI_ADVICE_DONTNEED
 #define POSIX_FADV_NOREUSE __WASI_ADVICE_NOREUSE
@@ -1715,14 +1708,6 @@
 #define POSIX_FADV_RANDOM __WASI_ADVICE_RANDOM
 #define POSIX_FADV_SEQUENTIAL __WASI_ADVICE_SEQUENTIAL
 #define POSIX_FADV_WILLNEED __WASI_ADVICE_WILLNEED
-#define POSIX_SPAWN_RESETIDS 1
-#define POSIX_SPAWN_SETPGROUP 2
-#define POSIX_SPAWN_SETSCHEDPARAM 16
-#define POSIX_SPAWN_SETSCHEDULER 32
-#define POSIX_SPAWN_SETSID 128
-#define POSIX_SPAWN_SETSIGDEF 4
-#define POSIX_SPAWN_SETSIGMASK 8
-#define POSIX_SPAWN_USEVFORK 64
 #define PRELIM 1
 #define PRIX16 "X"
 #define PRIX32 "X"
@@ -2087,10 +2072,7 @@
 #define SIG_ATOMIC_MAX INT32_MAX
 #define SIG_ATOMIC_MIN INT32_MIN
 #define SIG_BLOCK 0
-#define SIG_DFL ((void (*)(int)) 0)
-#define SIG_ERR ((void (*)(int))-1)
 #define SIG_HOLD ((void (*)(int)) 2)
-#define SIG_IGN ((void (*)(int)) 1)
 #define SIG_SETMASK 2
 #define SIG_UNBLOCK 1
 #define SIZE_MAX UINT32_MAX
@@ -2148,10 +2130,6 @@
 #define SOL_UDP 17
 #define SO_TYPE 3
 #define SSIZE_MAX LONG_MAX
-#define SS_AUTODISARM (1U << 31)
-#define SS_DISABLE 2
-#define SS_FLAG_BITS SS_AUTODISARM
-#define SS_ONSTACK 1
 #define STATUS ns_o_status
 #define STA_CLK 0x8000
 #define STA_CLOCKERR 0x1000
@@ -2382,11 +2360,6 @@
 #define TOSTOP 0000400
 #define TOWRITE 00002
 #define TRANSIENT 4
-#define TRAP_BRANCH 3
-#define TRAP_BRKPT 1
-#define TRAP_HWBKPT 4
-#define TRAP_TRACE 2
-#define TRAP_UNK 5
 #define TSGID 02000
 #define TSS_DTOR_ITERATIONS 4
 #define TSUID 04000
@@ -2486,8 +2459,6 @@
 #define UIO_MAXIOV 1024
 #define ULLONG_MAX (2ULL*LLONG_MAX+1)
 #define ULONG_MAX (2UL*LONG_MAX+1)
-#define UL_GETFSIZE 1
-#define UL_SETFSIZE 2
 #define USHRT_MAX 0xffff
 #define UTIME_NOW (-1)
 #define UTIME_OMIT (-2)
@@ -2526,18 +2497,6 @@
 #define WNOHANG 1
 #define WONT 252
 #define WORD_BIT 32
-#define WRDE_APPEND 2
-#define WRDE_BADCHAR 2
-#define WRDE_BADVAL 3
-#define WRDE_CMDSUB 4
-#define WRDE_DOOFFS 1
-#define WRDE_NOCMD 4
-#define WRDE_NOSPACE 1
-#define WRDE_NOSYS -1
-#define WRDE_REUSE 8
-#define WRDE_SHOWERR 16
-#define WRDE_SYNTAX 5
-#define WRDE_UNDEF 32
 #define WRQ 02
 #define WSTOPSIG(s) WEXITSTATUS(s)
 #define WTERMSIG(s) ((s) & 0x7f)
@@ -2910,7 +2869,6 @@
 #define _SEMAPHORE_H 
 #define _SIGNAL_H 
 #define _SIZE_T 
-#define _SPAWN_H 
 #define _STDALIGN_H 
 #define _STDARG_H 
 #define _STDBOOL_H 
@@ -2957,7 +2915,6 @@
 #define _TIME_H 
 #define _UCHAR_H 
 #define _UCONTEXT_H 
-#define _ULIMIT_H 
 #define _UNISTD_H 
 #define _UTIME_H 
 #define _VALUES_H 
@@ -2966,7 +2923,6 @@
 #define _WCHAR_T 
 #define _WCTYPE_H 
 #define _WINT_T 
-#define _WORDEXP_H 
 #define _XOPEN_ENH_I18N 1
 #define _XOPEN_IOV_MAX 16
 #define _XOPEN_NAME_MAX 255

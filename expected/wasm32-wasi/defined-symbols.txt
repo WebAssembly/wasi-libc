@@ -599,6 +599,9 @@ ilogbl
 imaxabs
 imaxdiv
 index
+inet_aton
+inet_ntop
+inet_pton
 initstate
 insque
 ioctl

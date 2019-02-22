@@ -179,6 +179,7 @@
 #include <unistd.h>
 #include <utime.h>
 #include <values.h>
+#include <wasi-libc.h>
 #include <wasi.h>
 #include <wchar.h>
 #include <wctype.h>

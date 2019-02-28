@@ -15,7 +15,6 @@
 #include <__header_unistd.h>
 #include <__macro_FD_SETSIZE.h>
 #include <__macro_PAGESIZE.h>
-#include <__struct_cmsghdr.h>
 #include <__struct_dirent.h>
 #include <__struct_in6_addr.h>
 #include <__struct_in_addr.h>

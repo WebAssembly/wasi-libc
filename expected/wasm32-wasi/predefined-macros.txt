@@ -244,11 +244,6 @@
 #define CMPLX(x,y) __CMPLX(x, y, double)
 #define CMPLXF(x,y) __CMPLX(x, y, float)
 #define CMPLXL(x,y) __CMPLX(x, y, long double)
-#define CMSG_DATA(cmsg) ((cmsg)->__cmsg_data)
-#define CMSG_FIRSTHDR CMSG_FIRSTHDR
-#define CMSG_LEN(len) (__builtin_offsetof(struct cmsghdr, __cmsg_data[(len)]))
-#define CMSG_NXTHDR CMSG_NXTHDR
-#define CMSG_SPACE(len) ((CMSG_LEN((len)) + (_Alignof(struct cmsghdr) - 1)) & (_Alignof(struct cmsghdr) - 1))
 #define CMSPAR 010000000000
 #define CODESET 14
 #define COLL_WEIGHTS_MAX 2
@@ -1457,7 +1452,6 @@
 #define MOREDATA 2
 #define MSG_ANY 0x02
 #define MSG_BAND 0x04
-#define MSG_CTRUNC __WASI_SOCK_RECV_FDS_TRUNCATED
 #define MSG_HIPRI 0x01
 #define MSG_PEEK __WASI_SOCK_RECV_PEEK
 #define MSG_TRUNC __WASI_SOCK_RECV_DATA_TRUNCATED
@@ -1941,7 +1935,6 @@
 #define SCHED_OTHER 0
 #define SCHED_RESET_ON_FORK 0x40000000
 #define SCHED_RR 2
-#define SCM_RIGHTS 1
 #define SCNd16 "hd"
 #define SCNd32 "d"
 #define SCNd64 __PRI64 "d"
@@ -3596,8 +3589,7 @@
 #define __WASI_SIGWINCH (UINT8_C(27))
 #define __WASI_SIGXCPU (UINT8_C(23))
 #define __WASI_SIGXFSZ (UINT8_C(24))
-#define __WASI_SOCK_RECV_DATA_TRUNCATED (UINT16_C(0x0002))
-#define __WASI_SOCK_RECV_FDS_TRUNCATED (UINT16_C(0x0001))
+#define __WASI_SOCK_RECV_DATA_TRUNCATED (UINT16_C(0x0001))
 #define __WASI_SOCK_RECV_PEEK (UINT16_C(0x0001))
 #define __WASI_SOCK_RECV_WAITALL (UINT16_C(0x0002))
 #define __WASI_SUBSCRIPTION_CLOCK_ABSTIME (UINT16_C(0x0001))
@@ -3651,7 +3643,6 @@
 #define __wasilibc___header_time_h 
 #define __wasilibc___header_unistd_h 
 #define __wasilibc___macro_FD_SETSIZE_h 
-#define __wasilibc___struct_cmsghdr_h 
 #define __wasilibc___struct_dirent_h 
 #define __wasilibc___struct_in6_addr_h 
 #define __wasilibc___struct_in_addr_h 

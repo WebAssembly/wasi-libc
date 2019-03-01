@@ -7,4 +7,4 @@
 #define _SC_PAGESIZE
 
 /* Declare sbrk. */
-void *sbrk(intptr_t increment);
+void *sbrk(intptr_t increment) __attribute__((__warn_unused_result__));

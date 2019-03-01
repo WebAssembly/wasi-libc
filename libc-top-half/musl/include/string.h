@@ -14,6 +14,7 @@ extern "C" {
 #define NULL ((void*)0)
 #endif
 #else
+#include <__header_string.h>
 #define __need_NULL
 #include <stddef.h>
 #endif

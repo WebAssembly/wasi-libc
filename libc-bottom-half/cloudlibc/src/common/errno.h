@@ -19,6 +19,7 @@ static inline __wasi_errno_t errno_fixup_directory(__wasi_fd_t fd,
   return error;
 }
 
+#ifdef __wasilibc_unmodified_upstream // posix_spawn etc.
 // Translates ENOTCAPABLE to EBADF if a regular file or EACCES otherwise.
 static inline __wasi_errno_t errno_fixup_executable(__wasi_fd_t fd,
                                                       __wasi_errno_t error) {
@@ -31,6 +32,7 @@ static inline __wasi_errno_t errno_fixup_executable(__wasi_fd_t fd,
   }
   return error;
 }
+#endif
 
 #ifdef __wasilibc_unmodified_upstream // process file descriptors
 // Translates ENOTCAPABLE to EINVAL if not a process.
@@ -52,7 +54,12 @@ static inline __wasi_errno_t errno_fixup_socket(__wasi_fd_t fd,
   if (error == __WASI_ENOTCAPABLE) {
     __wasi_fdstat_t fds;
     if (__wasi_fd_stat_get(fd, &fds) == 0 &&
+#ifdef __wasilibc_unmodified_upstream // don't hard-code magic numbers
         (fds.fs_filetype & 0xf0) != 0x80)
+#else
+        (fds.fs_filetype != __WASI_FILETYPE_SOCKET_STREAM &&
+         fds.fs_filetype != __WASI_FILETYPE_SOCKET_DGRAM))
+#endif
       return __WASI_ENOTSOCK;
   }
   return error;

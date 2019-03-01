@@ -38,11 +38,11 @@ __wasi_fd_sync
 __wasi_fd_write
 __wasi_file_advise
 __wasi_file_allocate
+__wasi_file_create_directory
 __wasi_file_fstat_get
 __wasi_file_fstat_set_size
 __wasi_file_fstat_set_times
 __wasi_file_link
-__wasi_file_mkdir
 __wasi_file_open
 __wasi_file_readdir
 __wasi_file_readlink

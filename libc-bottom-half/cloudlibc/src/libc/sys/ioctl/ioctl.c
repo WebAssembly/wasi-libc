@@ -87,7 +87,11 @@ int ioctl(int fildes, int request, ...) {
       va_end(ap);
 
       // Update the file descriptor flags.
+#ifdef __wasilibc_unmodified_upstream // fstat
       error = __wasi_fd_stat_put(fildes, &fds, __WASI_FDSTAT_FLAGS);
+#else
+      error = __wasi_fd_stat_set_flags(fildes, fds.fs_flags);
+#endif
       if (error != 0) {
         errno = error;
         return -1;

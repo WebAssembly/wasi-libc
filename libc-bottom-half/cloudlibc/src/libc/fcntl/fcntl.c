@@ -50,9 +50,15 @@ int fcntl(int fildes, int cmd, ...) {
       int flags = va_arg(ap, int);
       va_end(ap);
 
+#ifdef __wasilibc_unmodified_upstream // fstat
       __wasi_fdstat_t fds = {.fs_flags = flags & 0xfff};
       __wasi_errno_t error =
           __wasi_fd_stat_put(fildes, &fds, __WASI_FDSTAT_FLAGS);
+#else
+      __wasi_fdflags_t fs_flags = flags & 0xfff;
+      __wasi_errno_t error =
+          __wasi_fd_stat_set_flags(fildes, fs_flags);
+#endif
       if (error != 0) {
         errno = error;
         return -1;

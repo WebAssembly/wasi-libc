@@ -85,36 +85,64 @@ static inline void to_public_stat(const __wasi_filestat_t *in,
 }
 
 static inline bool utimens_get_timestamps(const struct timespec *times,
+#ifdef __wasilibc_unmodified_upstream // fstat
                                           __wasi_filestat_t *fs,
                                           __wasi_fsflags_t *flags) {
+#else
+                                          __wasi_timestamp_t *st_atim,
+                                          __wasi_timestamp_t *st_mtim,
+                                          __wasi_fstflags_t *flags) {
+#endif
   if (times == NULL) {
     // Update both timestamps.
+#ifdef __wasilibc_unmodified_upstream // fstat
     *flags = __WASI_FILESTAT_ATIM_NOW | __WASI_FILESTAT_MTIM_NOW;
+#else
+    *flags = __WASI_FILE_STAT_ATIM_NOW | __WASI_FILE_STAT_MTIM_NOW;
+#endif
   } else {
     // Set individual timestamps.
     *flags = 0;
     switch (times[0].tv_nsec) {
       case UTIME_NOW:
+#ifdef __wasilibc_unmodified_upstream // fstat
         *flags |= __WASI_FILESTAT_ATIM_NOW;
+#else
+        *flags |= __WASI_FILE_STAT_ATIM_NOW;
+#endif
         break;
       case UTIME_OMIT:
         break;
       default:
+#ifdef __wasilibc_unmodified_upstream // fstat
         *flags |= __WASI_FILESTAT_ATIM;
         if (!timespec_to_timestamp_exact(&times[0], &fs->st_atim))
+#else
+        *flags |= __WASI_FILE_STAT_ATIM;
+        if (!timespec_to_timestamp_exact(&times[0], st_atim))
+#endif
           return false;
         break;
     }
 
     switch (times[1].tv_nsec) {
       case UTIME_NOW:
+#ifdef __wasilibc_unmodified_upstream // fstat
         *flags |= __WASI_FILESTAT_MTIM_NOW;
+#else
+        *flags |= __WASI_FILE_STAT_MTIM_NOW;
+#endif
         break;
       case UTIME_OMIT:
         break;
       default:
+#ifdef __wasilibc_unmodified_upstream // fstat
         *flags |= __WASI_FILESTAT_MTIM;
         if (!timespec_to_timestamp_exact(&times[1], &fs->st_mtim))
+#else
+        *flags |= __WASI_FILE_STAT_MTIM;
+        if (!timespec_to_timestamp_exact(&times[1], st_mtim))
+#endif
           return false;
         break;
     }

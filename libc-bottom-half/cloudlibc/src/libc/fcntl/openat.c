@@ -29,7 +29,11 @@ int openat(int fd, const char *path, int oflag, ...) {
   __wasi_rights_t max =
       ~(__WASI_RIGHT_FD_DATASYNC | __WASI_RIGHT_FD_READ |
         __WASI_RIGHT_FD_WRITE | __WASI_RIGHT_FILE_ALLOCATE |
+#ifdef __wasilibc_unmodified_upstream // fstat
         __WASI_RIGHT_FILE_READDIR | __WASI_RIGHT_FILE_STAT_FPUT_SIZE |
+#else
+        __WASI_RIGHT_FILE_READDIR | __WASI_RIGHT_FILE_STAT_SET_SIZE |
+#endif
 #ifdef __wasilibc_unmodified_upstream // RIGHT_MEM_MAP_EXEC
         __WASI_RIGHT_MEM_MAP_EXEC);
 #else
@@ -55,7 +59,11 @@ int openat(int fd, const char *path, int oflag, ...) {
           min |= __WASI_RIGHT_FD_SEEK;
         max |= __WASI_RIGHT_FD_DATASYNC | __WASI_RIGHT_FD_WRITE |
                __WASI_RIGHT_FILE_ALLOCATE |
+#ifdef __wasilibc_unmodified_upstream // fstat
                __WASI_RIGHT_FILE_STAT_FPUT_SIZE;
+#else
+               __WASI_RIGHT_FILE_STAT_SET_SIZE;
+#endif
       }
       break;
     case O_EXEC:

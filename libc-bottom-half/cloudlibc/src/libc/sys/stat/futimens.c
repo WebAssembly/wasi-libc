@@ -11,15 +11,26 @@
 
 int futimens(int fd, const struct timespec *times) {
   // Convert timestamps and extract NOW/OMIT flags.
+#ifdef __wasilibc_unmodified_upstream // fstat
   __wasi_filestat_t fs;
   __wasi_fsflags_t flags;
   if (!utimens_get_timestamps(times, &fs, &flags)) {
+#else
+  __wasi_timestamp_t st_atim;
+  __wasi_timestamp_t st_mtim;
+  __wasi_fstflags_t flags;
+  if (!utimens_get_timestamps(times, &st_atim, &st_mtim, &flags)) {
+#endif
     errno = EINVAL;
     return -1;
   }
 
   // Perform system call.
+#ifdef __wasilibc_unmodified_upstream // fstat
   __wasi_errno_t error = __wasi_file_stat_fput(fd, &fs, flags);
+#else
+  __wasi_errno_t error = __wasi_file_fstat_set_times(fd, st_atim, st_mtim, flags);
+#endif
   if (error != 0) {
     errno = error;
     return -1;

@@ -32,7 +32,7 @@ int openat(int fd, const char *path, int oflag, ...) {
 #ifdef __wasilibc_unmodified_upstream // fstat
         __WASI_RIGHT_FILE_READDIR | __WASI_RIGHT_FILE_STAT_FPUT_SIZE |
 #else
-        __WASI_RIGHT_FILE_READDIR | __WASI_RIGHT_FILE_STAT_SET_SIZE |
+        __WASI_RIGHT_FILE_READDIR | __WASI_RIGHT_FILE_FSTAT_SET_SIZE |
 #endif
 #ifdef __wasilibc_unmodified_upstream // RIGHT_MEM_MAP_EXEC
         __WASI_RIGHT_MEM_MAP_EXEC);
@@ -62,7 +62,7 @@ int openat(int fd, const char *path, int oflag, ...) {
 #ifdef __wasilibc_unmodified_upstream // fstat
                __WASI_RIGHT_FILE_STAT_FPUT_SIZE;
 #else
-               __WASI_RIGHT_FILE_STAT_SET_SIZE;
+               __WASI_RIGHT_FILE_FSTAT_SET_SIZE;
 #endif
       }
       break;
@@ -110,18 +110,25 @@ int openat(int fd, const char *path, int oflag, ...) {
 #endif
 
   // Open file with appropriate rights.
+#ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t and __wasi_fdstat_t
   __wasi_fdstat_t fsb_new = {
       .fs_flags = oflag & 0xfff,
       .fs_rights_base = max & fsb_cur.fs_rights_inheriting,
       .fs_rights_inheriting = fsb_cur.fs_rights_inheriting,
   };
   __wasi_fd_t newfd;
-#ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
   error = __wasi_file_open(lookup, path, strlen(path),
-#else
-  error = __wasi_file_open(fd, lookup_flags, path, strlen(path),
-#endif
                                  (oflag >> 12) & 0xfff, &fsb_new, &newfd);
+#else
+  __wasi_fdflags_t fs_flags = oflag & 0xfff;
+  __wasi_rights_t fs_rights_base = max & fsb_cur.fs_rights_inheriting;
+  __wasi_rights_t fs_rights_inheriting = fsb_cur.fs_rights_inheriting;
+  __wasi_fd_t newfd;
+  error = __wasi_file_open(fd, lookup_flags, path, strlen(path),
+                                 (oflag >> 12) & 0xfff,
+                                 fs_rights_base, fs_rights_inheriting, fs_flags,
+                                 &newfd);
+#endif
   if (error != 0) {
 #ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
     errno = errno_fixup_directory(lookup.fd, error);

@@ -207,10 +207,13 @@ typedef uint64_t __wasi_rights_t;
 #define __WASI_RIGHT_FILE_STAT_GET         (UINT64_C(0x0000000000040000))
 #define __WASI_RIGHT_FILE_STAT_SET_SIZE    (UINT64_C(0x0000000000080000))
 #define __WASI_RIGHT_FILE_STAT_SET_TIMES   (UINT64_C(0x0000000000100000))
-#define __WASI_RIGHT_FILE_SYMLINK          (UINT64_C(0x0000000000200000))
-#define __WASI_RIGHT_FILE_UNLINK           (UINT64_C(0x0000000000400000))
-#define __WASI_RIGHT_POLL_FD_READWRITE     (UINT64_C(0x0000000000800000))
-#define __WASI_RIGHT_SOCK_SHUTDOWN         (UINT64_C(0x0000000001000000))
+#define __WASI_RIGHT_FILE_FSTAT_GET        (UINT64_C(0x0000000000200000))
+#define __WASI_RIGHT_FILE_FSTAT_SET_SIZE   (UINT64_C(0x0000000000400000))
+#define __WASI_RIGHT_FILE_FSTAT_SET_TIMES  (UINT64_C(0x0000000000800000))
+#define __WASI_RIGHT_FILE_SYMLINK          (UINT64_C(0x0000000001000000))
+#define __WASI_RIGHT_FILE_UNLINK           (UINT64_C(0x0000000002000000))
+#define __WASI_RIGHT_POLL_FD_READWRITE     (UINT64_C(0x0000000004000000))
+#define __WASI_RIGHT_SOCK_SHUTDOWN         (UINT64_C(0x0000000008000000))
 
 typedef uint16_t __wasi_roflags_t;
 #define __WASI_SOCK_RECV_DATA_TRUNCATED (UINT16_C(0x0001))
@@ -546,7 +549,9 @@ __wasi_errno_t __wasi_file_open(
     const char *path,
     size_t path_len,
     __wasi_oflags_t oflags,
-    const __wasi_fdstat_t *fds,
+    __wasi_rights_t fs_rights_base,
+    __wasi_rights_t fs_rights_inheriting,
+    __wasi_fdflags_t fs_flags,
     __wasi_fd_t *fd
 ) __WASI_SYSCALL_NAME(file_open) __attribute__((__warn_unused_result__));
 

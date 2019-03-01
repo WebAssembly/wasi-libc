@@ -1,5 +1,5 @@
-#ifndef __wasilibc_wasilibc_h
-#define __wasilibc_wasilibc_h
+#ifndef __wasi_libc_h
+#define __wasi_libc_h
 
 #ifdef __cplusplus
 extern "C" {

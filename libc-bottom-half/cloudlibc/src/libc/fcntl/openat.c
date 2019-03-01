@@ -5,7 +5,7 @@
 #include <common/errno.h>
 
 #include <assert.h>
-#include <wasi.h>
+#include <wasi/core.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>

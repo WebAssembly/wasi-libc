@@ -4,7 +4,7 @@
 
 #include <sys/stat.h>
 
-#include <wasi.h>
+#include <wasi/core.h>
 #include <errno.h>
 
 #include "stat_impl.h"

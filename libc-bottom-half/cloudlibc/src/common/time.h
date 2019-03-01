@@ -10,7 +10,7 @@
 
 #include <sys/time.h>
 
-#include <wasi.h>
+#include <wasi/core.h>
 #include <stdbool.h>
 #include <time.h>
 

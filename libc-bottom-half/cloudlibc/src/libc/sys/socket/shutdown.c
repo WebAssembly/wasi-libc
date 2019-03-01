@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 
 #include <assert.h>
-#include <wasi.h>
+#include <wasi/core.h>
 #include <errno.h>
 
 static_assert(SHUT_RD == __WASI_SHUT_RD, "Value mismatch");

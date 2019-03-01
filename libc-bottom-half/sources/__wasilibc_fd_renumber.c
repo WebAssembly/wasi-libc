@@ -1,4 +1,4 @@
-#include <wasi.h>
+#include <wasi/core.h>
 #include <errno.h>
 #include <unistd.h>
 

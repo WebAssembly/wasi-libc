@@ -6,7 +6,7 @@
 #include <common/time.h>
 
 #include <assert.h>
-#include <wasi.h>
+#include <wasi/core.h>
 #include <errno.h>
 #include <time.h>
 

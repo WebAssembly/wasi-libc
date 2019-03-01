@@ -1,7 +1,7 @@
 #ifndef __wasilibc___header_fcntl_h
 #define __wasilibc___header_fcntl_h
 
-#include <wasi.h>
+#include <wasi/core.h>
 
 #define O_APPEND __WASI_FDFLAG_APPEND
 #define O_DSYNC __WASI_FDFLAG_DSYNC

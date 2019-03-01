@@ -3,7 +3,7 @@
 
 struct stat;
 
-#include <wasi.h>
+#include <wasi/core.h>
 
 #define SEEK_CUR __WASI_WHENCE_CUR
 #define SEEK_END __WASI_WHENCE_END

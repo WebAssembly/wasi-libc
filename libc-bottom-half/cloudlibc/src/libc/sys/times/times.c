@@ -7,7 +7,7 @@
 #include <sys/times.h>
 
 #include <assert.h>
-#include <wasi.h>
+#include <wasi/core.h>
 
 static_assert(CLOCKS_PER_SEC == NSEC_PER_SEC,
               "Timestamp should need no conversion");

@@ -6,7 +6,7 @@
 
 #include <sys/resource.h>
 
-#include <wasi.h>
+#include <wasi/core.h>
 #include <errno.h>
 
 int getrusage(int who, struct rusage *r_usage) {

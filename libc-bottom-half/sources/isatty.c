@@ -1,4 +1,4 @@
-#include <wasi.h>
+#include <wasi/core.h>
 #include <__errno.h>
 #include <__function___isatty.h>
 

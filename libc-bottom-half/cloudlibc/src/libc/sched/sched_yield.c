@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <wasi.h>
+#include <wasi/core.h>
 #include <errno.h>
 #include <sched.h>
 

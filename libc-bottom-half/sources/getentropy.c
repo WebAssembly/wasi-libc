@@ -1,4 +1,4 @@
-#include <wasi.h>
+#include <wasi/core.h>
 #include <errno.h>
 
 #ifdef _REENTRANT

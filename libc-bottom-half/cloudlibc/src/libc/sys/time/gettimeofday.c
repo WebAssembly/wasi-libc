@@ -6,7 +6,7 @@
 
 #include <sys/time.h>
 
-#include <wasi.h>
+#include <wasi/core.h>
 
 #ifdef __wasilibc_unmodified_upstream
 int gettimeofday(struct timeval *restrict tp, ...) {

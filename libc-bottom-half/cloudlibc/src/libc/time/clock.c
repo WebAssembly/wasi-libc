@@ -5,7 +5,7 @@
 #include <common/time.h>
 
 #include <assert.h>
-#include <wasi.h>
+#include <wasi/core.h>
 #include <time.h>
 
 static_assert(CLOCKS_PER_SEC == NSEC_PER_SEC,

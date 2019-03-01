@@ -4,7 +4,7 @@
 
 #include <sys/ioctl.h>
 
-#include <wasi.h>
+#include <wasi/core.h>
 #include <errno.h>
 #include <stdarg.h>
 

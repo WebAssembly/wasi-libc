@@ -1,7 +1,7 @@
 #ifndef __wasilibc___errno_values_h
 #define __wasilibc___errno_values_h
 
-#include <wasi.h>
+#include <wasi/core.h>
 
 #define E2BIG __WASI_E2BIG
 #define EACCES __WASI_EACCES

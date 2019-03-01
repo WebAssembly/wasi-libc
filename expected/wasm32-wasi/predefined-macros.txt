@@ -3639,6 +3639,8 @@
 #define __wasilibc___header_sys_stat_h 
 #define __wasilibc___header_time_h 
 #define __wasilibc___header_unistd_h 
+#define __wasilibc___headers_stdlib_h 
+#define __wasilibc___headers_string_h 
 #define __wasilibc___macro_FD_SETSIZE_h 
 #define __wasilibc___struct_dirent_h 
 #define __wasilibc___struct_in6_addr_h 
@@ -3669,6 +3671,8 @@
 #define __wasm32 1
 #define __wasm32__ 1
 #define __wasm__ 1
+#define __wasm___functions_malloc_h 
+#define __wasm___functions_memcpy_h 
 #define __wasm_basics___errno_h 
 #define __wasm_basics___macro_PAGESIZE_h 
 #define __wasm_basics___struct_stat_h 

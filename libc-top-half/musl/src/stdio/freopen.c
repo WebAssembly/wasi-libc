@@ -1,7 +1,7 @@
 #ifdef __wasilibc_unmodified_upstream
 #include "stdio_impl.h"
 #else
-#include <wasi-libc.h>
+#include <wasi/libc.h>
 #endif
 #include <fcntl.h>
 #include <unistd.h>

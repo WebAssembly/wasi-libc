@@ -5,7 +5,7 @@
 #ifndef COMMON_ERRNO_H
 #define COMMON_ERRNO_H
 
-#include <wasi.h>
+#include <wasi/core.h>
 
 // Translates ENOTCAPABLE to ENOTDIR if not a directory.
 static inline __wasi_errno_t errno_fixup_directory(__wasi_fd_t fd,

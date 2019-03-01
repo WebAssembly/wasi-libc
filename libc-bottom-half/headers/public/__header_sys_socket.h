@@ -5,7 +5,7 @@
 #include <__struct_sockaddr.h>
 #include <__struct_sockaddr_storage.h>
 
-#include <wasi.h>
+#include <wasi/core.h>
 
 #define SHUT_RD __WASI_SHUT_RD
 #define SHUT_WR __WASI_SHUT_WR

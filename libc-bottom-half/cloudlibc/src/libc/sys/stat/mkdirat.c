@@ -6,7 +6,7 @@
 
 #include <sys/stat.h>
 
-#include <wasi.h>
+#include <wasi/core.h>
 #include <errno.h>
 #include <string.h>
 

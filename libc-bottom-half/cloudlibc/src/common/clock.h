@@ -5,7 +5,7 @@
 #ifndef COMMON_CLOCK_H
 #define COMMON_CLOCK_H
 
-#include <wasi.h>
+#include <wasi/core.h>
 
 // In this implementation we define clockid_t as a pointer type, so that
 // we can implement them as full objects. Right now we only use those

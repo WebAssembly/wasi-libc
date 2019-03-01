@@ -4,7 +4,7 @@
 
 #include <common/errno.h>
 
-#include <wasi.h>
+#include <wasi/core.h>
 #include <dirent.h>
 #include <errno.h>
 #include <stdlib.h>

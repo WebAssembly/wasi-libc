@@ -4,7 +4,7 @@
 
 #include <common/clock.h>
 
-#include <wasi.h>
+#include <wasi/core.h>
 #include <time.h>
 
 const struct __clockid _CLOCK_MONOTONIC = {

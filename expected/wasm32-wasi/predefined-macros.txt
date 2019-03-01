@@ -3624,7 +3624,8 @@
 #define __tm_zone tm_zone
 #define __va_copy(d,s) __builtin_va_copy(d,s)
 #define __wasi__ 1
-#define __wasi_h 
+#define __wasi_core_h 
+#define __wasi_libc_h 
 #define __wasilibc___errno_values_h 
 #define __wasilibc___fd_set_h 
 #define __wasilibc___function___isatty_h 
@@ -3666,7 +3667,6 @@
 #define __wasilibc___typedef_sa_family_t_h 
 #define __wasilibc___typedef_sigset_t_h 
 #define __wasilibc___typedef_socklen_t_h 
-#define __wasilibc_wasilibc_h 
 #define __wasm 1
 #define __wasm32 1
 #define __wasm32__ 1

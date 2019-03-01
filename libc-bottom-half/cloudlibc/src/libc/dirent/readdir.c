@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 
 #include <assert.h>
-#include <wasi.h>
+#include <wasi/core.h>
 #include <dirent.h>
 #include <errno.h>
 #include <stddef.h>

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <assert.h>
-#include <wasi.h>
+#include <wasi/core.h>
 #include <errno.h>
 #include <fcntl.h>
 

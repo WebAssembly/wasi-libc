@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 
 #include <assert.h>
-#include <wasi.h>
+#include <wasi/core.h>
 #include <stdbool.h>
 
 static_assert(S_ISBLK(S_IFBLK), "Value mismatch");

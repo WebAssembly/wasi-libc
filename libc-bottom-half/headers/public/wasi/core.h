@@ -8,11 +8,11 @@
  * [CloudABI]: https://github.com/NuxiNL/cloudlibc
  */
 
-#ifndef __wasi_h
-#define __wasi_h
+#ifndef __wasi_core_h
+#define __wasi_core_h
 
 #ifndef __wasi__
-#error <wasi.h> is only supported on WASI platforms.
+#error <wasi/core.h> is only supported on WASI platforms.
 #endif
 
 #include <stddef.h>

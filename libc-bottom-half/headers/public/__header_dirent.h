@@ -1,7 +1,7 @@
 #ifndef __wasilibc___header_dirent_h
 #define __wasilibc___header_dirent_h
 
-#include <wasi.h>
+#include <wasi/core.h>
 
 #define DT_BLK __WASI_FILETYPE_BLOCK_DEVICE
 #define DT_CHR __WASI_FILETYPE_CHARACTER_DEVICE

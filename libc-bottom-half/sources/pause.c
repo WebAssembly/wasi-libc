@@ -1,6 +1,6 @@
 #include <stddef.h>
 #include <errno.h>
-#include <wasi.h>
+#include <wasi/core.h>
 
 int pause(void) {
     size_t n;

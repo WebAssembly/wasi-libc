@@ -6,7 +6,7 @@
 
 #include <sys/select.h>
 
-#include <wasi.h>
+#include <wasi/core.h>
 #include <errno.h>
 
 int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,

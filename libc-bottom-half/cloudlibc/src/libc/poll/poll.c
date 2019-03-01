@@ -27,7 +27,6 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
           .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
 #else
           .u.fd_readwrite.fd = pollfd->fd,
-          .u.fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
 #endif
       };
       created_events = true;
@@ -42,7 +41,6 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
           .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
 #else
           .u.fd_readwrite.fd = pollfd->fd,
-          .u.fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
 #endif
       };
       created_events = true;

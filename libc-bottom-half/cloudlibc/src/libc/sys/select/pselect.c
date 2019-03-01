@@ -55,7 +55,6 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
           .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
 #else
           .u.fd_readwrite.fd = fd,
-          .u.fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
 #endif
       };
     }
@@ -74,7 +73,6 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
           .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
 #else
           .u.fd_readwrite.fd = fd,
-          .u.fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
 #endif
       };
     }

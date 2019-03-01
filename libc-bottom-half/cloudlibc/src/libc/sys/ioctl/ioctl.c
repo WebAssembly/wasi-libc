@@ -20,7 +20,6 @@ int ioctl(int fildes, int request, ...) {
               .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
 #else
               .u.fd_readwrite.fd = fildes,
-              .u.fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
 #endif
           },
           {

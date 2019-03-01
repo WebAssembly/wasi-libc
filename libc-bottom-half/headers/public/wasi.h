@@ -163,11 +163,10 @@ typedef uint8_t __wasi_filetype_t;
 #define __WASI_FILETYPE_SYMBOLIC_LINK    (UINT8_C(7))
 
 typedef uint16_t __wasi_fstflags_t;
-#define __WASI_FILE_STAT_ATIM     (UINT16_C(0x0001))
-#define __WASI_FILE_STAT_ATIM_NOW (UINT16_C(0x0002))
-#define __WASI_FILE_STAT_MTIM     (UINT16_C(0x0004))
-#define __WASI_FILE_STAT_MTIM_NOW (UINT16_C(0x0008))
-#define __WASI_FILE_STAT_SIZE     (UINT16_C(0x0010))
+#define __WASI_FILE_STAT_SET_ATIM     (UINT16_C(0x0001))
+#define __WASI_FILE_STAT_SET_ATIM_NOW (UINT16_C(0x0002))
+#define __WASI_FILE_STAT_SET_MTIM     (UINT16_C(0x0004))
+#define __WASI_FILE_STAT_SET_MTIM_NOW (UINT16_C(0x0008))
 
 typedef uint64_t __wasi_inode_t;
 
@@ -190,7 +189,7 @@ typedef uint64_t __wasi_rights_t;
 #define __WASI_RIGHT_FD_DATASYNC           (UINT64_C(0x0000000000000001))
 #define __WASI_RIGHT_FD_READ               (UINT64_C(0x0000000000000002))
 #define __WASI_RIGHT_FD_SEEK               (UINT64_C(0x0000000000000004))
-#define __WASI_RIGHT_FD_STAT_PUT_FLAGS     (UINT64_C(0x0000000000000008))
+#define __WASI_RIGHT_FD_STAT_SET_FLAGS     (UINT64_C(0x0000000000000008))
 #define __WASI_RIGHT_FD_SYNC               (UINT64_C(0x0000000000000010))
 #define __WASI_RIGHT_FD_TELL               (UINT64_C(0x0000000000000020))
 #define __WASI_RIGHT_FD_WRITE              (UINT64_C(0x0000000000000040))
@@ -257,9 +256,6 @@ typedef uint8_t __wasi_signal_t;
 
 typedef uint16_t __wasi_subclockflags_t;
 #define __WASI_SUBSCRIPTION_CLOCK_ABSTIME (UINT16_C(0x0001))
-
-typedef uint16_t __wasi_subrwflags_t;
-#define __WASI_SUBSCRIPTION_FD_READWRITE_POLL (UINT16_C(0x0001))
 
 typedef uint64_t __wasi_timestamp_t;
 
@@ -400,7 +396,6 @@ typedef struct __wasi_subscription_t {
         } clock;
         struct __wasi_subscription_u_fd_readwrite_t {
             __wasi_fd_t fd;
-            __wasi_subrwflags_t flags;
         } fd_readwrite;
     } u;
 } __wasi_subscription_t;
@@ -423,9 +418,6 @@ _Static_assert(
     offsetof(__wasi_subscription_t, u.clock.flags) == 48, "non-wasi data layout");
 _Static_assert(
     offsetof(__wasi_subscription_t, u.fd_readwrite.fd) == 16,
-    "non-wasi data layout");
-_Static_assert(
-    offsetof(__wasi_subscription_t, u.fd_readwrite.flags) == 20,
     "non-wasi data layout");
 _Static_assert(sizeof(__wasi_subscription_t) == 56, "non-wasi data layout");
 _Static_assert(_Alignof(__wasi_subscription_t) == 8, "non-wasi data layout");
@@ -504,7 +496,8 @@ __wasi_errno_t __wasi_fd_stat_set_flags(
 
 __wasi_errno_t __wasi_fd_stat_set_rights(
     __wasi_fd_t fd,
-    __wasi_rights_t rights
+    __wasi_rights_t fs_rights_base,
+    __wasi_rights_t fs_rights_inheriting
 ) __WASI_SYSCALL_NAME(fd_stat_set_rights) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_sync(

@@ -24,9 +24,6 @@
 /* Make malloc deterministic. */
 #define LACKS_TIME_H 1
 
-/* WebAssembly has no sched_yield or similar. */
-#define LACKS_SCHED_H
-
 /* Disable malloc statistics generation to reduce code size. */
 #define NO_MALLINFO 1
 #define NO_MALLOC_STATS 1

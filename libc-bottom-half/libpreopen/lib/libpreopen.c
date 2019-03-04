@@ -79,10 +79,22 @@ po_add(struct po_map *map, const char *path, int fd)
 	entry->fd = fd;
 
 #ifdef WITH_CAPSICUM
+#ifdef __wasilibc_unmodified_upstream
 	if (cap_rights_get(fd, &entry->rights) != 0) {
 		return (NULL);
 	}
+#else
+	__wasi_fdstat_t statbuf;
+	int r = __wasi_fd_stat_get(fd, &statbuf);
+	if (r != 0) {
+		errno = r;
+		return NULL; // fixme: actually there should be an infallible way to get the rights
+	}
+
+	entry->rights = statbuf.fs_rights_base;
 #endif
+#endif
+
 
 	po_map_assertvalid(map);
 
@@ -90,11 +102,12 @@ po_add(struct po_map *map, const char *path, int fd)
 }
 
 #ifdef __wasilibc_unmodified_upstream
-#else
-static
-#endif
 struct po_relpath
 po_find(struct po_map* map, const char *path, cap_rights_t *rights)
+#else
+static struct po_relpath
+po_find(struct po_map* map, const char *path, __wasi_rights_t rights)
+#endif
 {
 	const char *relpath ;
 	struct po_relpath match = { .relative_path = NULL, .dirfd = -1 };
@@ -121,7 +134,11 @@ po_find(struct po_map* map, const char *path, cap_rights_t *rights)
 		}
 
 #ifdef WITH_CAPSICUM
+#ifdef __wasilibc_unmodified_upstream
 		if (rights && !cap_rights_contains(&entry->rights, rights)) {
+#else
+		if ((rights & ~entry->rights) != 0) {
+#endif
 			continue;
 		}
 #endif

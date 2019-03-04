@@ -43,11 +43,13 @@
 #endif
 
 #ifdef __wasilibc_unmodified_upstream
-#else
-#define WITH_CAPSICUM
-#endif
 #ifdef WITH_CAPSICUM
 #include <sys/capsicum.h>
+#endif
+#else
+// We do Capsicum-style rights-checking, though we use the WASI API directly
+// rather than the Capsicum API.
+#define WITH_CAPSICUM
 #endif
 
 #include <assert.h>
@@ -74,7 +76,11 @@ struct po_map_entry {
 
 #ifdef WITH_CAPSICUM
 	/** Capability rights associated with the file descriptor */
+#ifdef __wasilibc_unmodified_upstream
 	cap_rights_t rights;
+#else
+	__wasi_rights_t rights;
+#endif
 #endif
 };
 

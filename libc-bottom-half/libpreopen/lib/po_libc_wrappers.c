@@ -77,7 +77,11 @@ static struct po_map *global_map;
  * @returns  a struct po_relpath with dirfd and relative_path as set by po_find
  *           if there is an available po_map, or AT_FDCWD/path otherwise
  */
+#ifdef __wasilibc_unmodified_upstream
 static struct po_relpath find_relative(const char *path, cap_rights_t *);
+#else
+static struct po_relpath find_relative(const char *path, __wasi_rights_t rights);
+#endif
 
 /**
  * Get the map that was handed into the process via `SHARED_MEMORYFD`
@@ -116,6 +120,7 @@ open(const char *path, int flags, ...)
 #ifdef __wasilibc_unmodified_upstream
 	va_start(args, flags);
 	mode = va_arg(args, int);
+	rel = find_relative(path, NULL);
 #else
 	if (flags & O_CREAT) {
 		va_start(args, flags);
@@ -124,14 +129,18 @@ open(const char *path, int flags, ...)
 	} else {
 		mode = 0;
 	}
+	rel = find_relative(path, __WASI_RIGHT_FILE_OPEN);
 #endif
-	rel = find_relative(path, NULL);
 
+#ifdef __wasilibc_unmodified_upstream
 	// If the file is already opened, no need of relative opening!
 	if( strcmp(rel.relative_path,".") == 0 )
 		return dup(rel.dirfd);
 	else
 		return openat(rel.dirfd, rel.relative_path, flags, mode);
+#else
+	return openat(rel.dirfd, rel.relative_path, flags, mode);
+#endif
 }
 
 /**
@@ -148,7 +157,11 @@ open(const char *path, int flags, ...)
 int
 access(const char *path, int mode)
 {
+#ifdef __wasilibc_unmodified_upstream
 	struct po_relpath rel = find_relative(path, NULL);
+#else
+	struct po_relpath rel = find_relative(path, __WASI_RIGHT_FILE_STAT_GET);
+#endif
 
 	return faccessat(rel.dirfd, rel.relative_path, mode,0);
 }
@@ -172,10 +185,11 @@ connect(int s, const struct sockaddr *name, socklen_t namelen)
 
 	if (name->sa_family == AF_UNIX) {
 	    struct sockaddr_un *usock = (struct sockaddr_un *)name;
-	    rel = find_relative(usock->sun_path, NULL);
 #ifdef __wasilibc_unmodified_upstream
+	    rel = find_relative(usock->sun_path, NULL);
 	    strlcpy(usock->sun_path, rel.relative_path, sizeof(usock->sun_path));
 #else
+	    rel = find_relative(usock->sun_path, __WASI_RIGHT_CONNECT);
 	    if (strlen(rel.relative_path) + 1 > sizeof(usock->sun_path)) {
 		errno = ENOMEM;
 		return -1;
@@ -203,7 +217,11 @@ connect(int s, const struct sockaddr *name, socklen_t namelen)
 int
 eaccess(const char *path, int mode)
 {
+#ifdef __wasilibc_unmodified_upstream
 	struct po_relpath rel = find_relative(path, NULL);
+#else
+	struct po_relpath rel = find_relative(path, __WASI_RIGHT_FILE_STAT_GET);
+#endif
 
 	return faccessat(rel.dirfd, rel.relative_path, mode, 0);
 }
@@ -222,7 +240,11 @@ eaccess(const char *path, int mode)
 int
 lstat(const char *path, struct stat *st)
 {
+#ifdef __wasilibc_unmodified_upstream
 	struct po_relpath rel = find_relative(path, NULL);
+#else
+	struct po_relpath rel = find_relative(path, __WASI_RIGHT_FILE_STAT_GET);
+#endif
 
 	return fstatat(rel.dirfd, rel.relative_path,st,AT_SYMLINK_NOFOLLOW);
 }
@@ -260,8 +282,13 @@ open(const char *path, int flags, ...)
 int
 rename(const char *from, const char *to)
 {
+#ifdef __wasilibc_unmodified_upstream
 	struct po_relpath rel_from = find_relative(from, NULL);
 	struct po_relpath rel_to = find_relative(to, NULL);
+#else
+	struct po_relpath rel_from = find_relative(from, __WASI_RIGHT_FILE_RENAME_SOURCE);
+	struct po_relpath rel_to = find_relative(to, __WASI_RIGHT_FILE_RENAME_TARGET);
+#endif
 
 	return renameat(rel_from.dirfd, rel_from.relative_path, rel_to.dirfd,
 		rel_to.relative_path);
@@ -281,7 +308,11 @@ rename(const char *from, const char *to)
 int
 stat(const char *path, struct stat *st)
 {
+#ifdef __wasilibc_unmodified_upstream
 	struct po_relpath rel = find_relative(path, NULL);
+#else
+	struct po_relpath rel = find_relative(path, __WASI_RIGHT_FILE_STAT_GET);
+#endif
 
 	return fstatat(rel.dirfd, rel.relative_path,st, AT_SYMLINK_NOFOLLOW);
 }
@@ -317,7 +348,7 @@ dlopen(const char *path, int mode)
 int
 unlink(const char *pathname)
 {
-	struct po_relpath rel_pathname = find_relative(pathname, NULL);
+	struct po_relpath rel_pathname = find_relative(pathname, __WASI_RIGHT_FILE_UNLINK_FILE);
 
 	return __wasilibc_rmfileat(rel_pathname.dirfd, rel_pathname.relative_path);
 }
@@ -325,7 +356,7 @@ unlink(const char *pathname)
 int
 rmdir(const char *pathname)
 {
-	struct po_relpath rel_pathname = find_relative(pathname, NULL);
+	struct po_relpath rel_pathname = find_relative(pathname, __WASI_RIGHT_FILE_UNLINK_DIRECTORY);
 
 	return __wasilibc_rmdirat(rel_pathname.dirfd, rel_pathname.relative_path);
 }
@@ -333,10 +364,21 @@ rmdir(const char *pathname)
 int
 remove(const char *pathname)
 {
-	struct po_relpath rel_pathname = find_relative(pathname, NULL);
+	struct po_relpath rel_pathname = find_relative(pathname,
+	                                               __WASI_RIGHT_FILE_UNLINK_FILE |
+	                                               __WASI_RIGHT_FILE_UNLINK_DIRECTORY);
+
+	// If searching for both file and directory rights failed, try searching
+	// for either individually.
+	if (rel_pathname.dirfd == -1) {
+		rel_pathname = find_relative(pathname, __WASI_RIGHT_FILE_UNLINK_FILE);
+		if (rel_pathname.dirfd == -1) {
+			rel_pathname = find_relative(pathname, __WASI_RIGHT_FILE_UNLINK_DIRECTORY);
+		}
+	}
 
 	int r = __wasilibc_rmfileat(rel_pathname.dirfd, rel_pathname.relative_path);
-	if (r != 0 && errno == EISDIR)
+	if (r != 0 && (errno == EISDIR || errno == ENOTCAPABLE))
 		r = __wasilibc_rmdirat(rel_pathname.dirfd, rel_pathname.relative_path);
 	return r;
 }
@@ -344,56 +386,58 @@ remove(const char *pathname)
 int
 link(const char *oldpath, const char *newpath)
 {
-	struct po_relpath rel_oldpath = find_relative(oldpath, NULL);
-	struct po_relpath rel_newpath = find_relative(newpath, NULL);
+	struct po_relpath rel_oldpath = find_relative(oldpath, __WASI_RIGHT_FILE_LINK_SOURCE);
+	struct po_relpath rel_newpath = find_relative(newpath, __WASI_RIGHT_FILE_LINK_TARGET);
 
 	return linkat(rel_oldpath.dirfd, rel_oldpath.relative_path,
-                      rel_newpath.dirfd, rel_newpath.relative_path,
-                      0);
+	              rel_newpath.dirfd, rel_newpath.relative_path,
+	              0);
 }
 
 int
 mkdir(const char *pathname, mode_t mode)
 {
-	struct po_relpath rel_pathname = find_relative(pathname, NULL);
+	struct po_relpath rel_pathname = find_relative(pathname, __WASI_RIGHT_FILE_CREATE_DIRECTORY);
 
-        return mkdirat(rel_pathname.dirfd, rel_pathname.relative_path, mode);
+	return mkdirat(rel_pathname.dirfd, rel_pathname.relative_path, mode);
 }
 
 DIR *
 opendir(const char *name)
 {
-	struct po_relpath rel_name = find_relative(name, NULL);
+	struct po_relpath rel_name = find_relative(name, __WASI_RIGHT_FILE_OPEN);
 
-        return opendirat(rel_name.dirfd, rel_name.relative_path);
+	return opendirat(rel_name.dirfd, rel_name.relative_path);
 }
 
 ssize_t
 readlink(const char *pathname, char *buf, size_t bufsiz)
 {
-	struct po_relpath rel_pathname = find_relative(pathname, NULL);
+	struct po_relpath rel_pathname = find_relative(pathname, __WASI_RIGHT_FILE_READLINK);
 
-        return readlinkat(rel_pathname.dirfd, rel_pathname.relative_path,
-                          buf, bufsiz);
+	return readlinkat(rel_pathname.dirfd, rel_pathname.relative_path,
+	                  buf, bufsiz);
 }
 
 int
 scandir(const char *dirp, struct dirent ***namelist,
-        int (*filter)(const struct dirent *),
-        int (*compar)(const struct dirent **, const struct dirent **))
+	int (*filter)(const struct dirent *),
+	int (*compar)(const struct dirent **, const struct dirent **))
 {
-	struct po_relpath rel_dirp = find_relative(dirp, NULL);
+	struct po_relpath rel_dirp = find_relative(dirp,
+	                                           __WASI_RIGHT_FILE_OPEN |
+	                                           __WASI_RIGHT_FILE_READDIR);
 
-        return scandirat(rel_dirp.dirfd, rel_dirp.relative_path,
-                         namelist, filter, compar);
+	return scandirat(rel_dirp.dirfd, rel_dirp.relative_path,
+	                 namelist, filter, compar);
 }
 
 int
 symlink(const char *target, const char *linkpath)
 {
-	struct po_relpath rel_linkpath = find_relative(linkpath, NULL);
+	struct po_relpath rel_linkpath = find_relative(linkpath, __WASI_RIGHT_FILE_SYMLINK);
 
-        return symlinkat(target, rel_linkpath.dirfd, rel_linkpath.relative_path);
+	return symlinkat(target, rel_linkpath.dirfd, rel_linkpath.relative_path);
 }
 #endif
 
@@ -417,7 +461,11 @@ po_set_libc_map(struct po_map *map)
 }
 
 static struct po_relpath
+#ifdef __wasilibc_unmodified_upstream
 find_relative(const char *path, cap_rights_t *rights)
+#else
+find_relative(const char *path, __wasi_rights_t rights)
+#endif
 {
 	struct po_relpath rel;
 	struct po_map *map;
@@ -431,7 +479,7 @@ find_relative(const char *path, cap_rights_t *rights)
 		rel = po_find(map, path, NULL);
 	}
 #else
-	rel = po_find(map, path, NULL);
+	rel = po_find(map, path, 0);
 #endif
 
 	return (rel);
@@ -475,35 +523,45 @@ get_shared_map()
 	return (map);
 #else
 	assert(global_map);
+	po_map_assertvalid(global_map);
 	return global_map;
 #endif
 }
 #ifdef __wasilibc_unmodified_upstream
 #else
+int
+__wasilibc_init_preopen(void)
+{
+	global_map = po_map_create(4);
+	if (global_map == NULL)
+		__builtin_trap();
+	po_map_assertvalid(global_map);
+}
+
 /*
  * Register the given pre-opened file descriptor under the given path.
  */
 int
 __wasilibc_register_preopened_fd(int fd, const char *path)
 {
-        po_map_assertvalid(global_map);
+	po_map_assertvalid(global_map);
 
-        if (path == NULL) {
-                return -1;
-        }
+	if (path == NULL) {
+		return -1;
+	}
 
 #ifdef _REENTRANT
 #error "__wasilibc_register_preopened_fd doesn't yet support multiple threads"
 #endif
 
 	struct po_map *map = po_add(global_map, path, fd);
-        if (map == NULL) {
-                return -1;
-        }
+	if (map == NULL) {
+		return -1;
+	}
 
-        po_map_assertvalid(map);
-        global_map = map;
+	po_map_assertvalid(map);
+	global_map = map;
 
-        return 0;
+	return 0;
 }
 #endif

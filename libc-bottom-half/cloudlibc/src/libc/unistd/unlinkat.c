@@ -5,6 +5,10 @@
 #include <common/errno.h>
 
 #include <wasi/core.h>
+#ifdef __wasilibc_unmodified_upstream // unlink
+#else
+#include <wasi/libc.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -21,22 +25,11 @@ int unlinkat(int fd, const char *path, int flag) {
     errno = errno_fixup_directory(fd, error);
     return -1;
   }
-#else
-  __wasi_errno_t error;
-  size_t path_len = strlen(path);
-  if ((flag & AT_REMOVEDIR) != 0) {
-    error = __wasi_file_unlink_directory(fd, path, path_len);
-    if (error != 0) {
-      errno = errno_fixup_directory(fd, error);
-      return -1;
-    }
-  } else {
-    error = __wasi_file_unlink_file(fd, path, path_len);
-    if (error != 0) {
-      errno = error;
-      return -1;
-    }
-  }
-#endif
   return 0;
+#else
+  if ((flag & AT_REMOVEDIR) != 0) {
+    return __wasilibc_rmdirat(fd, path);
+  }
+  return __wasilibc_rmfileat(fd, path);
+#endif
 }

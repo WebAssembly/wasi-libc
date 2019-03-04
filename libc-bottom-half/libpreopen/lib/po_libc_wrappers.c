@@ -51,6 +51,7 @@
 #ifdef __wasilibc_unmodified_upstream
 #else
 #include <errno.h>
+#include <wasi/libc.h>
 #endif
 
 #include "internal.h"
@@ -318,7 +319,7 @@ unlink(const char *pathname)
 {
 	struct po_relpath rel_pathname = find_relative(pathname, NULL);
 
-	return unlinkat(rel_pathname.dirfd, rel_pathname.relative_path, 0);
+	return __wasilibc_rmfileat(rel_pathname.dirfd, rel_pathname.relative_path);
 }
 
 int
@@ -326,7 +327,18 @@ rmdir(const char *pathname)
 {
 	struct po_relpath rel_pathname = find_relative(pathname, NULL);
 
-	return unlinkat(rel_pathname.dirfd, rel_pathname.relative_path, AT_REMOVEDIR);
+	return __wasilibc_rmdirat(rel_pathname.dirfd, rel_pathname.relative_path);
+}
+
+int
+remove(const char *pathname)
+{
+	struct po_relpath rel_pathname = find_relative(pathname, NULL);
+
+	int r = __wasilibc_rmfileat(rel_pathname.dirfd, rel_pathname.relative_path);
+	if (r != 0 && errno == EISDIR)
+		r = __wasilibc_rmdirat(rel_pathname.dirfd, rel_pathname.relative_path);
+	return r;
 }
 
 int

@@ -1,7 +1,3 @@
-#ifdef __wasilibc_unmodified_upstream
-#else
-#include <unistd.h>
-#endif
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -9,7 +5,6 @@
 
 int remove(const char *path)
 {
-#ifdef __wasilibc_unmodified_upstream
 #ifdef SYS_unlink
 	int r = __syscall(SYS_unlink, path);
 #else
@@ -21,9 +16,4 @@ int remove(const char *path)
 	if (r==-EISDIR) r = __syscall(SYS_unlinkat, AT_FDCWD, path, AT_REMOVEDIR);
 #endif
 	return __syscall_ret(r);
-#else
-	int r = unlink(path);
-	if (r != 0 && errno==EISDIR) r = rmdir(path);
-	return r;
-#endif
 }

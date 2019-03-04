@@ -163,11 +163,12 @@ int po_preopen(struct po_map *map, const char *path, int flags, ...);
  *          path, relative to the file (or undefined if no match found)
  */
 #ifdef __wasilibc_unmodified_upstream
-#else
-static
-#endif
 struct po_relpath po_find(struct po_map *map, const char *path,
 	cap_rights_t *rights);
+#else
+static struct po_relpath po_find(struct po_map *map, const char *path,
+	__wasi_rights_t rights);
+#endif
 
 #ifdef __wasilibc_unmodified_upstream
 /**

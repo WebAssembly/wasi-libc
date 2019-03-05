@@ -34,7 +34,7 @@ int fstatat(int fd, const char *restrict path, struct stat *restrict buf,
 #ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
       __wasi_file_stat_get(lookup, path, strlen(path), &internal_stat);
 #else
-      __wasi_file_stat_get(fd, lookup_flags, path, strlen(path), &internal_stat);
+      __wasi_path_filestat_get(fd, lookup_flags, path, strlen(path), &internal_stat);
 #endif
   if (error != 0) {
     errno = errno_fixup_directory(fd, error);

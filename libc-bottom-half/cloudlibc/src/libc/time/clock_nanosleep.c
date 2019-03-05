@@ -44,6 +44,10 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
   // Block until polling event is triggered.
   size_t nevents;
   __wasi_event_t ev;
+#ifdef __wasilibc_unmodified_upstream
+  __wasi_errno_t error = __wasi_poll(&sub, &ev, 1, &nevents);
+#else
   __wasi_errno_t error = __wasi_poll_oneoff(&sub, &ev, 1, &nevents);
+#endif
   return error == 0 && ev.error == 0 ? 0 : ENOTSUP;
 }

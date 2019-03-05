@@ -73,7 +73,11 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
   // Execute poll().
   __wasi_event_t events[nevents];
   __wasi_errno_t error =
+#ifdef __wasilibc_unmodified_upstream
+      __wasi_poll(subscriptions, events, nevents, &nevents);
+#else
       __wasi_poll_oneoff(subscriptions, events, nevents, &nevents);
+#endif
   if (error != 0) {
     errno = error;
     return -1;

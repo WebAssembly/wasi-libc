@@ -28,11 +28,12 @@ int openat(int fd, const char *path, int oflag, ...) {
   __wasi_rights_t min = 0;
   __wasi_rights_t max =
       ~(__WASI_RIGHT_FD_DATASYNC | __WASI_RIGHT_FD_READ |
-        __WASI_RIGHT_FD_WRITE | __WASI_RIGHT_FILE_ALLOCATE |
 #ifdef __wasilibc_unmodified_upstream // fstat
+        __WASI_RIGHT_FD_WRITE | __WASI_RIGHT_FILE_ALLOCATE |
         __WASI_RIGHT_FILE_READDIR | __WASI_RIGHT_FILE_STAT_FPUT_SIZE |
 #else
-        __WASI_RIGHT_FILE_READDIR | __WASI_RIGHT_FILE_FSTAT_SET_SIZE |
+        __WASI_RIGHT_FD_WRITE | __WASI_RIGHT_FD_ALLOCATE |
+        __WASI_RIGHT_FD_READDIR | __WASI_RIGHT_FD_FILESTAT_SET_SIZE |
 #endif
 #ifdef __wasilibc_unmodified_upstream // RIGHT_MEM_MAP_EXEC
         __WASI_RIGHT_MEM_MAP_EXEC);
@@ -44,13 +45,15 @@ int openat(int fd, const char *path, int oflag, ...) {
     case O_RDWR:
     case O_WRONLY:
       if ((oflag & O_RDONLY) != 0) {
+#ifdef __wasilibc_unmodified_upstream // RIGHT_MEM_MAP_EXEC
         min |= (oflag & O_DIRECTORY) == 0 ? __WASI_RIGHT_FD_READ
                                           : __WASI_RIGHT_FILE_READDIR;
         max |= __WASI_RIGHT_FD_READ | __WASI_RIGHT_FILE_READDIR |
-#ifdef __wasilibc_unmodified_upstream // RIGHT_MEM_MAP_EXEC
                __WASI_RIGHT_MEM_MAP_EXEC;
 #else
-               0;
+        min |= (oflag & O_DIRECTORY) == 0 ? __WASI_RIGHT_FD_READ
+                                          : __WASI_RIGHT_FD_READDIR;
+        max |= __WASI_RIGHT_FD_READ | __WASI_RIGHT_FD_READDIR;
 #endif
       }
       if ((oflag & O_WRONLY) != 0) {
@@ -58,11 +61,12 @@ int openat(int fd, const char *path, int oflag, ...) {
         if ((oflag & O_APPEND) == 0)
           min |= __WASI_RIGHT_FD_SEEK;
         max |= __WASI_RIGHT_FD_DATASYNC | __WASI_RIGHT_FD_WRITE |
-               __WASI_RIGHT_FILE_ALLOCATE |
 #ifdef __wasilibc_unmodified_upstream // fstat
+               __WASI_RIGHT_FILE_ALLOCATE |
                __WASI_RIGHT_FILE_STAT_FPUT_SIZE;
 #else
-               __WASI_RIGHT_FILE_FSTAT_SET_SIZE;
+               __WASI_RIGHT_FD_ALLOCATE |
+               __WASI_RIGHT_FD_FILESTAT_SET_SIZE;
 #endif
       }
       break;
@@ -82,7 +86,11 @@ int openat(int fd, const char *path, int oflag, ...) {
 
   // Ensure that we can actually obtain the minimal rights needed.
   __wasi_fdstat_t fsb_cur;
+#ifdef __wasilibc_unmodified_upstream
   __wasi_errno_t error = __wasi_fd_stat_get(fd, &fsb_cur);
+#else
+  __wasi_errno_t error = __wasi_fd_fdstat_get(fd, &fsb_cur);
+#endif
   if (error != 0) {
     errno = error;
     return -1;
@@ -124,7 +132,7 @@ int openat(int fd, const char *path, int oflag, ...) {
   __wasi_rights_t fs_rights_base = max & fsb_cur.fs_rights_inheriting;
   __wasi_rights_t fs_rights_inheriting = fsb_cur.fs_rights_inheriting;
   __wasi_fd_t newfd;
-  error = __wasi_file_open(fd, lookup_flags, path, strlen(path),
+  error = __wasi_path_open(fd, lookup_flags, path, strlen(path),
                                  (oflag >> 12) & 0xfff,
                                  fs_rights_base, fs_rights_inheriting, fs_flags,
                                  &newfd);

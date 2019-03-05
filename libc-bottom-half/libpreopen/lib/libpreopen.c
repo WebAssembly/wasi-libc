@@ -85,13 +85,14 @@ po_add(struct po_map *map, const char *path, int fd)
 	}
 #else
 	__wasi_fdstat_t statbuf;
-	int r = __wasi_fd_stat_get(fd, &statbuf);
+	int r = __wasi_fd_fdstat_get(fd, &statbuf);
 	if (r != 0) {
 		errno = r;
 		return NULL; // fixme: actually there should be an infallible way to get the rights
 	}
 
-	entry->rights = statbuf.fs_rights_base;
+	entry->rights_base = statbuf.fs_rights_base;
+	entry->rights_inheriting = statbuf.fs_rights_inheriting;
 #endif
 #endif
 
@@ -106,7 +107,8 @@ struct po_relpath
 po_find(struct po_map* map, const char *path, cap_rights_t *rights)
 #else
 static struct po_relpath
-po_find(struct po_map* map, const char *path, __wasi_rights_t rights)
+po_find(struct po_map* map, const char *path,
+        __wasi_rights_t rights_base, __wasi_rights_t rights_inheriting)
 #endif
 {
 	const char *relpath ;
@@ -137,7 +139,8 @@ po_find(struct po_map* map, const char *path, __wasi_rights_t rights)
 #ifdef __wasilibc_unmodified_upstream
 		if (rights && !cap_rights_contains(&entry->rights, rights)) {
 #else
-		if ((rights & ~entry->rights) != 0) {
+		if ((rights_base & ~entry->rights_base) != 0 ||
+                    (rights_inheriting & ~entry->rights_inheriting) != 0) {
 #endif
 			continue;
 		}

@@ -32,7 +32,7 @@ int faccessat(int fd, const char *path, int amode, int flag) {
 #ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
       __wasi_file_stat_get(lookup, path, strlen(path), &file);
 #else
-      __wasi_file_stat_get(fd, lookup_flags, path, strlen(path), &file);
+      __wasi_path_filestat_get(fd, lookup_flags, path, strlen(path), &file);
 #endif
   if (error != 0) {
     errno = errno_fixup_directory(fd, error);
@@ -43,7 +43,11 @@ int faccessat(int fd, const char *path, int amode, int flag) {
   // directory file descriptor.
   if (amode != 0) {
     __wasi_fdstat_t directory;
+#ifdef __wasilibc_unmodified_upstream
     error = __wasi_fd_stat_get(fd, &directory);
+#else
+    error = __wasi_fd_fdstat_get(fd, &directory);
+#endif
     if (error != 0) {
       errno = error;
       return -1;
@@ -52,7 +56,11 @@ int faccessat(int fd, const char *path, int amode, int flag) {
     __wasi_rights_t min = 0;
     if ((amode & R_OK) != 0)
       min |= file.st_filetype == __WASI_FILETYPE_DIRECTORY
+#ifdef __wasilibc_unmodified_upstream
                  ? __WASI_RIGHT_FILE_READDIR
+#else
+                 ? __WASI_RIGHT_FD_READDIR
+#endif
                  : __WASI_RIGHT_FD_READ;
     if ((amode & W_OK) != 0)
       min |= __WASI_RIGHT_FD_WRITE;

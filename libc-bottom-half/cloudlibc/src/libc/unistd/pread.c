@@ -17,7 +17,11 @@ ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
       __wasi_fd_pread(fildes, &iov, 1, offset, &bytes_read);
   if (error != 0) {
     __wasi_fdstat_t fds;
+#ifdef __wasilibc_unmodified_upstream
     if (error == ENOTCAPABLE && __wasi_fd_stat_get(fildes, &fds) == 0) {
+#else
+    if (error == ENOTCAPABLE && __wasi_fd_fdstat_get(fildes, &fds) == 0) {
+#endif
       // Determine why we got ENOTCAPABLE.
       if ((fds.fs_rights_base & __WASI_RIGHT_FD_READ) == 0)
         error = EBADF;

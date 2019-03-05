@@ -26,7 +26,11 @@ int getsockopt(int socket, int level, int option_name,
       // Return the type of the socket. This information can simply be
       // obtained by looking at the file descriptor type.
       __wasi_fdstat_t fsb;
+#ifdef __wasilibc_unmodified_upstream
       if (__wasi_fd_stat_get(socket, &fsb) != 0) {
+#else
+      if (__wasi_fd_fdstat_get(socket, &fsb) != 0) {
+#endif
         errno = EBADF;
         return -1;
       }

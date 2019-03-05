@@ -102,7 +102,11 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
   // Execute poll().
   __wasi_event_t events[nevents];
   __wasi_errno_t error =
+#ifdef __wasilibc_unmodified_upstream
+      __wasi_poll(subscriptions, events, nevents, &nevents);
+#else
       __wasi_poll_oneoff(subscriptions, events, nevents, &nevents);
+#endif
   if (error != 0) {
     errno = error;
     return -1;

@@ -33,7 +33,11 @@ int ioctl(int fildes, int request, ...) {
       };
       __wasi_event_t events[__arraycount(subscriptions)];
       size_t nevents;
+#ifdef __wasilibc_unmodified_upstream
+      __wasi_errno_t error = __wasi_poll(
+#else
       __wasi_errno_t error = __wasi_poll_oneoff(
+#endif
           subscriptions, events, __arraycount(subscriptions), &nevents);
       if (error != 0) {
         errno = error;
@@ -70,7 +74,11 @@ int ioctl(int fildes, int request, ...) {
     case FIONBIO: {
       // Obtain the current file descriptor flags.
       __wasi_fdstat_t fds;
+#ifdef __wasilibc_unmodified_upstream
       __wasi_errno_t error = __wasi_fd_stat_get(fildes, &fds);
+#else
+      __wasi_errno_t error = __wasi_fd_fdstat_get(fildes, &fds);
+#endif
       if (error != 0) {
         errno = error;
         return -1;
@@ -89,7 +97,7 @@ int ioctl(int fildes, int request, ...) {
 #ifdef __wasilibc_unmodified_upstream // fstat
       error = __wasi_fd_stat_put(fildes, &fds, __WASI_FDSTAT_FLAGS);
 #else
-      error = __wasi_fd_stat_set_flags(fildes, fds.fs_flags);
+      error = __wasi_fd_fdstat_set_flags(fildes, fds.fs_flags);
 #endif
       if (error != 0) {
         errno = error;

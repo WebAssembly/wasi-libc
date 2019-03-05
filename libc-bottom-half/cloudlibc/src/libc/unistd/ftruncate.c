@@ -22,7 +22,7 @@ int ftruncate(int fildes, off_t length) {
 #ifdef __wasilibc_unmodified_upstream // fstat
       __wasi_file_stat_fput(fildes, &fs, __WASI_FILESTAT_SIZE);
 #else
-      __wasi_file_fstat_set_size(fildes, st_size);
+      __wasi_fd_filestat_set_size(fildes, st_size);
 #endif
   if (error != 0) {
     errno = error;

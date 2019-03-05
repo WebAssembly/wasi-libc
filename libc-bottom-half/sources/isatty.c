@@ -4,7 +4,7 @@
 
 int __isatty(int fd) {
     __wasi_fdstat_t statbuf;
-    int r = __wasi_fd_stat_get(fd, &statbuf);
+    int r = __wasi_fd_fdstat_get(fd, &statbuf);
     if (r != 0) {
         errno = r;
         return 0;

@@ -91,7 +91,11 @@ struct dirent *readdir(DIR *dirp) {
 
     // Load more directory entries and continue.
     __wasi_errno_t error =
+#ifdef __wasilibc_unmodified_upstream
         __wasi_file_readdir(dirp->fd, dirp->buffer, dirp->buffer_size,
+#else
+        __wasi_fd_readdir(dirp->fd, dirp->buffer, dirp->buffer_size,
+#endif
                                   dirp->cookie, &dirp->buffer_used);
     if (error != 0) {
       errno = error;

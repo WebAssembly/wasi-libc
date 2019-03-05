@@ -5,7 +5,7 @@
 
 int __wasilibc_rmfileat(int fd, const char *path) {
     size_t path_len = strlen(path);
-    __wasi_errno_t error = __wasi_file_unlink_file(fd, path, path_len);
+    __wasi_errno_t error = __wasi_path_unlink_file(fd, path, path_len);
     if (error != 0) {
         errno = error;
         return -1;

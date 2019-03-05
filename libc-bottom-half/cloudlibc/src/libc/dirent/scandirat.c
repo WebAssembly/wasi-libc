@@ -114,7 +114,11 @@ int scandirat(int dirfd, const char *dir, struct dirent ***namelist,
 
   read_entries:;
     // Load more directory entries and continue.
+#ifdef __wasilibc_unmodified_upstream
     __wasi_errno_t error = __wasi_file_readdir(fd, buffer, buffer_size,
+#else
+    __wasi_errno_t error = __wasi_fd_readdir(fd, buffer, buffer_size,
+#endif
                                                        cookie, &buffer_used);
     if (error != 0) {
       errno = error;

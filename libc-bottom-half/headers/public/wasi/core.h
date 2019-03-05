@@ -163,10 +163,10 @@ typedef uint8_t __wasi_filetype_t;
 #define __WASI_FILETYPE_SYMBOLIC_LINK    (UINT8_C(7))
 
 typedef uint16_t __wasi_fstflags_t;
-#define __WASI_FILE_STAT_SET_ATIM     (UINT16_C(0x0001))
-#define __WASI_FILE_STAT_SET_ATIM_NOW (UINT16_C(0x0002))
-#define __WASI_FILE_STAT_SET_MTIM     (UINT16_C(0x0004))
-#define __WASI_FILE_STAT_SET_MTIM_NOW (UINT16_C(0x0008))
+#define __WASI_PATH_FILESTAT_SET_ATIM     (UINT16_C(0x0001))
+#define __WASI_PATH_FILESTAT_SET_ATIM_NOW (UINT16_C(0x0002))
+#define __WASI_PATH_FILESTAT_SET_MTIM     (UINT16_C(0x0004))
+#define __WASI_PATH_FILESTAT_SET_MTIM_NOW (UINT16_C(0x0008))
 
 typedef uint64_t __wasi_inode_t;
 
@@ -189,30 +189,30 @@ typedef uint64_t __wasi_rights_t;
 #define __WASI_RIGHT_FD_DATASYNC           (UINT64_C(0x0000000000000001))
 #define __WASI_RIGHT_FD_READ               (UINT64_C(0x0000000000000002))
 #define __WASI_RIGHT_FD_SEEK               (UINT64_C(0x0000000000000004))
-#define __WASI_RIGHT_FD_STAT_SET_FLAGS     (UINT64_C(0x0000000000000008))
+#define __WASI_RIGHT_FD_FDSTAT_SET_FLAGS   (UINT64_C(0x0000000000000008))
 #define __WASI_RIGHT_FD_SYNC               (UINT64_C(0x0000000000000010))
 #define __WASI_RIGHT_FD_TELL               (UINT64_C(0x0000000000000020))
 #define __WASI_RIGHT_FD_WRITE              (UINT64_C(0x0000000000000040))
-#define __WASI_RIGHT_FILE_ADVISE           (UINT64_C(0x0000000000000080))
-#define __WASI_RIGHT_FILE_ALLOCATE         (UINT64_C(0x0000000000000100))
-#define __WASI_RIGHT_FILE_CREATE_DIRECTORY (UINT64_C(0x0000000000000200))
-#define __WASI_RIGHT_FILE_CREATE_FILE      (UINT64_C(0x0000000000000400))
-#define __WASI_RIGHT_FILE_LINK_SOURCE      (UINT64_C(0x0000000000000800))
-#define __WASI_RIGHT_FILE_LINK_TARGET      (UINT64_C(0x0000000000001000))
-#define __WASI_RIGHT_FILE_OPEN             (UINT64_C(0x0000000000002000))
-#define __WASI_RIGHT_FILE_READDIR          (UINT64_C(0x0000000000004000))
-#define __WASI_RIGHT_FILE_READLINK         (UINT64_C(0x0000000000008000))
-#define __WASI_RIGHT_FILE_RENAME_SOURCE    (UINT64_C(0x0000000000010000))
-#define __WASI_RIGHT_FILE_RENAME_TARGET    (UINT64_C(0x0000000000020000))
-#define __WASI_RIGHT_FILE_STAT_GET         (UINT64_C(0x0000000000040000))
-#define __WASI_RIGHT_FILE_STAT_SET_SIZE    (UINT64_C(0x0000000000080000))
-#define __WASI_RIGHT_FILE_STAT_SET_TIMES   (UINT64_C(0x0000000000100000))
-#define __WASI_RIGHT_FILE_FSTAT_GET        (UINT64_C(0x0000000000200000))
-#define __WASI_RIGHT_FILE_FSTAT_SET_SIZE   (UINT64_C(0x0000000000400000))
-#define __WASI_RIGHT_FILE_FSTAT_SET_TIMES  (UINT64_C(0x0000000000800000))
-#define __WASI_RIGHT_FILE_SYMLINK          (UINT64_C(0x0000000001000000))
-#define __WASI_RIGHT_FILE_UNLINK_FILE      (UINT64_C(0x0000000002000000))
-#define __WASI_RIGHT_FILE_UNLINK_DIRECTORY (UINT64_C(0x0000000004000000))
+#define __WASI_RIGHT_FD_ADVISE             (UINT64_C(0x0000000000000080))
+#define __WASI_RIGHT_FD_ALLOCATE           (UINT64_C(0x0000000000000100))
+#define __WASI_RIGHT_PATH_CREATE_DIRECTORY (UINT64_C(0x0000000000000200))
+#define __WASI_RIGHT_PATH_CREATE_FILE      (UINT64_C(0x0000000000000400))
+#define __WASI_RIGHT_PATH_LINK_SOURCE      (UINT64_C(0x0000000000000800))
+#define __WASI_RIGHT_PATH_LINK_TARGET      (UINT64_C(0x0000000000001000))
+#define __WASI_RIGHT_PATH_OPEN             (UINT64_C(0x0000000000002000))
+#define __WASI_RIGHT_FD_READDIR            (UINT64_C(0x0000000000004000))
+#define __WASI_RIGHT_PATH_READLINK         (UINT64_C(0x0000000000008000))
+#define __WASI_RIGHT_PATH_RENAME_SOURCE    (UINT64_C(0x0000000000010000))
+#define __WASI_RIGHT_PATH_RENAME_TARGET    (UINT64_C(0x0000000000020000))
+#define __WASI_RIGHT_PATH_FILESTAT_GET       (UINT64_C(0x0000000000040000))
+#define __WASI_RIGHT_PATH_FILESTAT_SET_SIZE  (UINT64_C(0x0000000000080000))
+#define __WASI_RIGHT_PATH_FILESTAT_SET_TIMES (UINT64_C(0x0000000000100000))
+#define __WASI_RIGHT_FD_FILESTAT_GET        (UINT64_C(0x0000000000200000))
+#define __WASI_RIGHT_FD_FILESTAT_SET_SIZE   (UINT64_C(0x0000000000400000))
+#define __WASI_RIGHT_FD_FILESTAT_SET_TIMES  (UINT64_C(0x0000000000800000))
+#define __WASI_RIGHT_PATH_SYMLINK          (UINT64_C(0x0000000001000000))
+#define __WASI_RIGHT_PATH_UNLINK_DIRECTORY (UINT64_C(0x0000000002000000))
+#define __WASI_RIGHT_PATH_UNLINK_FILE      (UINT64_C(0x0000000004000000))
 #define __WASI_RIGHT_POLL_FD_READWRITE     (UINT64_C(0x0000000008000000))
 #define __WASI_RIGHT_SOCK_SHUTDOWN         (UINT64_C(0x0000000010000000))
 
@@ -485,21 +485,21 @@ __wasi_errno_t __wasi_fd_tell(
     __wasi_filesize_t *newoffset
 ) __WASI_SYSCALL_NAME(fd_tell) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_fd_stat_get(
+__wasi_errno_t __wasi_fd_fdstat_get(
     __wasi_fd_t fd,
     __wasi_fdstat_t *buf
-) __WASI_SYSCALL_NAME(fd_stat_get) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_fdstat_get) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_fd_stat_set_flags(
+__wasi_errno_t __wasi_fd_fdstat_set_flags(
     __wasi_fd_t fd,
     __wasi_fdflags_t flags
-) __WASI_SYSCALL_NAME(fd_stat_set_flags) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_fdstat_set_flags) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_fd_stat_set_rights(
+__wasi_errno_t __wasi_fd_fdstat_set_rights(
     __wasi_fd_t fd,
     __wasi_rights_t fs_rights_base,
     __wasi_rights_t fs_rights_inheriting
-) __WASI_SYSCALL_NAME(fd_stat_set_rights) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_fdstat_set_rights) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_sync(
     __wasi_fd_t fd
@@ -512,26 +512,26 @@ __wasi_errno_t __wasi_fd_write(
     size_t *nwritten
 ) __WASI_SYSCALL_NAME(fd_write) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_advise(
+__wasi_errno_t __wasi_fd_advise(
     __wasi_fd_t fd,
     __wasi_filesize_t offset,
     __wasi_filesize_t len,
     __wasi_advice_t advice
-) __WASI_SYSCALL_NAME(file_advise) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_advise) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_allocate(
+__wasi_errno_t __wasi_fd_allocate(
     __wasi_fd_t fd,
     __wasi_filesize_t offset,
     __wasi_filesize_t len
-) __WASI_SYSCALL_NAME(file_allocate) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_allocate) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_create_directory(
+__wasi_errno_t __wasi_path_create_directory(
     __wasi_fd_t fd,
     const char *path,
     size_t path_len
-) __WASI_SYSCALL_NAME(file_create_directory) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(path_create_directory) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_link(
+__wasi_errno_t __wasi_path_link(
     __wasi_fd_t old_fd,
     __wasi_lookupflags_t old_flags,
     const char *old_path,
@@ -539,9 +539,9 @@ __wasi_errno_t __wasi_file_link(
     __wasi_fd_t new_fd,
     const char *new_path,
     size_t new_path_len
-) __WASI_SYSCALL_NAME(file_link) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(path_link) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_open(
+__wasi_errno_t __wasi_path_open(
     __wasi_fd_t dirfd,
     __wasi_lookupflags_t dirflags,
     const char *path,
@@ -551,60 +551,60 @@ __wasi_errno_t __wasi_file_open(
     __wasi_rights_t fs_rights_inheriting,
     __wasi_fdflags_t fs_flags,
     __wasi_fd_t *fd
-) __WASI_SYSCALL_NAME(file_open) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(path_open) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_readdir(
+__wasi_errno_t __wasi_fd_readdir(
     __wasi_fd_t fd,
     void *buf,
     size_t buf_len,
     __wasi_dircookie_t cookie,
     size_t *bufused
-) __WASI_SYSCALL_NAME(file_readdir) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_readdir) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_readlink(
+__wasi_errno_t __wasi_path_readlink(
     __wasi_fd_t fd,
     const char *path,
     size_t path_len,
     char *buf,
     size_t buf_len,
     size_t *bufused
-) __WASI_SYSCALL_NAME(file_readlink) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(path_readlink) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_rename(
+__wasi_errno_t __wasi_path_rename(
     __wasi_fd_t old_fd,
     const char *old_path,
     size_t old_path_len,
     __wasi_fd_t new_fd,
     const char *new_path,
     size_t new_path_len
-) __WASI_SYSCALL_NAME(file_rename) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(path_rename) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_fstat_get(
+__wasi_errno_t __wasi_fd_filestat_get(
     __wasi_fd_t fd,
     __wasi_filestat_t *buf
-) __WASI_SYSCALL_NAME(file_fstat_get) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_filestat_get) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_fstat_set_times(
+__wasi_errno_t __wasi_fd_filestat_set_times(
     __wasi_fd_t fd,
     __wasi_timestamp_t st_atim,
     __wasi_timestamp_t st_mtim,
     __wasi_fstflags_t fstflags
-) __WASI_SYSCALL_NAME(file_fstat_set_times) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_filestat_set_times) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_fstat_set_size(
+__wasi_errno_t __wasi_fd_filestat_set_size(
     __wasi_fd_t fd,
     __wasi_filesize_t st_size
-) __WASI_SYSCALL_NAME(file_fstat_set_size) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(fd_filestat_set_size) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_stat_get(
+__wasi_errno_t __wasi_path_filestat_get(
     __wasi_fd_t fd,
     __wasi_lookupflags_t flags,
     const char *path,
     size_t path_len,
     __wasi_filestat_t *buf
-) __WASI_SYSCALL_NAME(file_stat_get) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(path_filestat_get) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_stat_set_times(
+__wasi_errno_t __wasi_path_filestat_set_times(
     __wasi_fd_t fd,
     __wasi_lookupflags_t flags,
     const char *path,
@@ -612,27 +612,27 @@ __wasi_errno_t __wasi_file_stat_set_times(
     __wasi_timestamp_t st_atim,
     __wasi_timestamp_t st_mtim,
     __wasi_fstflags_t fstflags
-) __WASI_SYSCALL_NAME(file_stat_set_times) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(path_filestat_set_times) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_symlink(
+__wasi_errno_t __wasi_path_symlink(
     const char *old_path,
     size_t old_path_len,
     __wasi_fd_t fd,
     const char *new_path,
     size_t new_path_len
-) __WASI_SYSCALL_NAME(file_symlink) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(path_symlink) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_unlink_file(
+__wasi_errno_t __wasi_path_unlink_file(
     __wasi_fd_t fd,
     const char *path,
     size_t path_len
-) __WASI_SYSCALL_NAME(file_unlink_file) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(path_unlink_file) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_file_unlink_directory(
+__wasi_errno_t __wasi_path_unlink_directory(
     __wasi_fd_t fd,
     const char *path,
     size_t path_len
-) __WASI_SYSCALL_NAME(file_unlink_directory) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(path_unlink_directory) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_poll_oneoff(
     const __wasi_subscription_t *in,

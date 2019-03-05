@@ -79,7 +79,8 @@ struct po_map_entry {
 #ifdef __wasilibc_unmodified_upstream
 	cap_rights_t rights;
 #else
-	__wasi_rights_t rights;
+	__wasi_rights_t rights_base;
+	__wasi_rights_t rights_inheriting;
 #endif
 #endif
 };

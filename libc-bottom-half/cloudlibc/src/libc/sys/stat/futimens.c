@@ -29,7 +29,7 @@ int futimens(int fd, const struct timespec *times) {
 #ifdef __wasilibc_unmodified_upstream // fstat
   __wasi_errno_t error = __wasi_file_stat_fput(fd, &fs, flags);
 #else
-  __wasi_errno_t error = __wasi_file_fstat_set_times(fd, st_atim, st_mtim, flags);
+  __wasi_errno_t error = __wasi_fd_filestat_set_times(fd, st_atim, st_mtim, flags);
 #endif
   if (error != 0) {
     errno = error;

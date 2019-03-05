@@ -167,7 +167,7 @@ struct po_relpath po_find(struct po_map *map, const char *path,
 	cap_rights_t *rights);
 #else
 static struct po_relpath po_find(struct po_map *map, const char *path,
-	__wasi_rights_t rights);
+	__wasi_rights_t rights_base, __wasi_rights_t rights_inheriting);
 #endif
 
 #ifdef __wasilibc_unmodified_upstream

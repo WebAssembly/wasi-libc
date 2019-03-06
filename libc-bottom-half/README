@@ -7,6 +7,7 @@ This is largely based on [CloudABI], [cloudlibc], and [libpreopen], however we
 use just the low-level syscall wrappers rather than all of cloudlibc and
 libpreopen, and we have several customizations for use in a WebAssembly sysroot.
 
+[CloudABI]: https://github.com/NuxiNL/cloudabi
 [cloudlibc]: https://github.com/NuxiNL/cloudlibc
 [libpreopen]: https://github.com/musec/libpreopen
 

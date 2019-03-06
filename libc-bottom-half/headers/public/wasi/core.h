@@ -163,10 +163,10 @@ typedef uint8_t __wasi_filetype_t;
 #define __WASI_FILETYPE_SYMBOLIC_LINK    (UINT8_C(7))
 
 typedef uint16_t __wasi_fstflags_t;
-#define __WASI_PATH_FILESTAT_SET_ATIM     (UINT16_C(0x0001))
-#define __WASI_PATH_FILESTAT_SET_ATIM_NOW (UINT16_C(0x0002))
-#define __WASI_PATH_FILESTAT_SET_MTIM     (UINT16_C(0x0004))
-#define __WASI_PATH_FILESTAT_SET_MTIM_NOW (UINT16_C(0x0008))
+#define __WASI_FILESTAT_SET_ATIM     (UINT16_C(0x0001))
+#define __WASI_FILESTAT_SET_ATIM_NOW (UINT16_C(0x0002))
+#define __WASI_FILESTAT_SET_MTIM     (UINT16_C(0x0004))
+#define __WASI_FILESTAT_SET_MTIM_NOW (UINT16_C(0x0008))
 
 typedef uint64_t __wasi_inode_t;
 

@@ -123,11 +123,15 @@ int setpgid(pid_t, pid_t);
 pid_t setsid(void);
 pid_t getsid(pid_t);
 #endif
+#ifdef __wasilibc_unmodified_upstream
 char *ttyname(int);
 int ttyname_r(int, char *, size_t);
+#endif
 int isatty(int);
+#ifdef __wasilibc_unmodified_upstream
 pid_t tcgetpgrp(int);
 int tcsetpgrp(int, pid_t);
+#endif
 
 #ifdef __wasilibc_unmodified_upstream /* getpid */
 uid_t getuid(void);
@@ -164,11 +168,15 @@ size_t confstr(int, char *, size_t);
 int setreuid(uid_t, uid_t);
 int setregid(gid_t, gid_t);
 #endif
+#ifdef __wasilibc_unmodified_upstream
 int lockf(int, int, off_t);
+#endif
 long gethostid(void);
+#ifdef __wasilibc_unmodified_upstream
 int nice(int);
 void sync(void);
 pid_t setpgrp(void);
+#endif
 char *crypt(const char *, const char *);
 void encrypt(char *, int);
 void swab(const void *__restrict, void *__restrict, ssize_t);
@@ -190,13 +198,10 @@ int brk(void *);
 void *sbrk(intptr_t);
 #ifdef __wasilibc_unmodified_upstream
 pid_t vfork(void);
-#endif
 int vhangup(void);
-#ifdef __wasilibc_unmodified_upstream
 int chroot(const char *);
 int getpagesize(void);
 int getdtablesize(void);
-#endif
 int sethostname(const char *, size_t);
 int getdomainname(char *, size_t);
 int setdomainname(const char *, size_t);
@@ -208,10 +213,9 @@ void endusershell(void);
 char *getusershell(void);
 int acct(const char *);
 long syscall(long, ...);
-#ifdef __wasilibc_unmodified_upstream
 int execvpe(const char *, char *const [], char *const []);
-#endif
 int issetugid(void);
+#endif
 int getentropy(void *, size_t);
 #endif
 
@@ -226,7 +230,9 @@ int getresgid(gid_t *, gid_t *, gid_t *);
 #ifdef __wasilibc_unmodified_upstream /* cwd */
 char *get_current_dir_name(void);
 #endif
+#ifdef __wasilibc_unmodified_upstream /* syncfs */
 int syncfs(int);
+#endif
 #ifdef __wasilibc_unmodified_upstream /* getpid */
 int euidaccess(const char *, int);
 int eaccess(const char *, int);
@@ -265,7 +271,9 @@ int eaccess(const char *, int);
 #endif
 #define _POSIX_FSYNC            _POSIX_VERSION
 #define _POSIX_NO_TRUNC         1
+#ifdef __wasilibc_unmodified_upstream
 #define _POSIX_RAW_SOCKETS      _POSIX_VERSION
+#endif
 #define _POSIX_REALTIME_SIGNALS _POSIX_VERSION
 #define _POSIX_REGEXP           1
 #ifdef __wasilibc_unmodified_upstream
@@ -290,9 +298,11 @@ int eaccess(const char *, int);
 #define _POSIX_BARRIERS         _POSIX_VERSION
 #define _POSIX_SPIN_LOCKS       _POSIX_VERSION
 #define _POSIX_READER_WRITER_LOCKS _POSIX_VERSION
+#ifdef __wasilibc_unmodified_upstream
 #define _POSIX_ASYNCHRONOUS_IO  _POSIX_VERSION
 #define _POSIX_SEMAPHORES       _POSIX_VERSION
 #define _POSIX_SHARED_MEMORY_OBJECTS _POSIX_VERSION
+#endif
 
 #define _POSIX2_C_BIND          _POSIX_VERSION
 

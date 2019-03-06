@@ -211,7 +211,7 @@ typedef uint64_t __wasi_rights_t;
 #define __WASI_RIGHT_FD_FILESTAT_SET_SIZE   (UINT64_C(0x0000000000400000))
 #define __WASI_RIGHT_FD_FILESTAT_SET_TIMES  (UINT64_C(0x0000000000800000))
 #define __WASI_RIGHT_PATH_SYMLINK          (UINT64_C(0x0000000001000000))
-#define __WASI_RIGHT_PATH_UNLINK_DIRECTORY (UINT64_C(0x0000000002000000))
+#define __WASI_RIGHT_PATH_REMOVE_DIRECTORY (UINT64_C(0x0000000002000000))
 #define __WASI_RIGHT_PATH_UNLINK_FILE      (UINT64_C(0x0000000004000000))
 #define __WASI_RIGHT_POLL_FD_READWRITE     (UINT64_C(0x0000000008000000))
 #define __WASI_RIGHT_SOCK_SHUTDOWN         (UINT64_C(0x0000000010000000))
@@ -628,11 +628,11 @@ __wasi_errno_t __wasi_path_unlink_file(
     size_t path_len
 ) __WASI_SYSCALL_NAME(path_unlink_file) __attribute__((__warn_unused_result__));
 
-__wasi_errno_t __wasi_path_unlink_directory(
+__wasi_errno_t __wasi_path_remove_directory(
     __wasi_fd_t fd,
     const char *path,
     size_t path_len
-) __WASI_SYSCALL_NAME(path_unlink_directory) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(path_remove_directory) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_poll_oneoff(
     const __wasi_subscription_t *in,

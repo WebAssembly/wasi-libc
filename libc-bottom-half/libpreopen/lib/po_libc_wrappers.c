@@ -358,7 +358,7 @@ unlink(const char *pathname)
 int
 rmdir(const char *pathname)
 {
-	struct po_relpath rel_pathname = find_relative(pathname, __WASI_RIGHT_PATH_UNLINK_DIRECTORY, 0);
+	struct po_relpath rel_pathname = find_relative(pathname, __WASI_RIGHT_PATH_REMOVE_DIRECTORY, 0);
 
 	return __wasilibc_rmdirat(rel_pathname.dirfd, rel_pathname.relative_path);
 }
@@ -368,7 +368,7 @@ remove(const char *pathname)
 {
 	struct po_relpath rel_pathname = find_relative(pathname,
 	                                               __WASI_RIGHT_PATH_UNLINK_FILE |
-	                                               __WASI_RIGHT_PATH_UNLINK_DIRECTORY,
+	                                               __WASI_RIGHT_PATH_REMOVE_DIRECTORY,
                                                        0);
 
 	// If searching for both file and directory rights failed, try searching
@@ -376,7 +376,7 @@ remove(const char *pathname)
 	if (rel_pathname.dirfd == -1) {
 		rel_pathname = find_relative(pathname, __WASI_RIGHT_PATH_UNLINK_FILE, 0);
 		if (rel_pathname.dirfd == -1) {
-			rel_pathname = find_relative(pathname, __WASI_RIGHT_PATH_UNLINK_DIRECTORY, 0);
+			rel_pathname = find_relative(pathname, __WASI_RIGHT_PATH_REMOVE_DIRECTORY, 0);
 		}
 	}
 

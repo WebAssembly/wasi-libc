@@ -403,7 +403,7 @@ finish: $(SYSROOT_INC) libc
 	for undef_sym in $$($(WASM_NM) --undefined-only "$(SYSROOT_LIB)"/*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' U ' |sed 's/.* U //' |LC_COLLATE=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$(SYSROOT_SHARE)/defined-symbols.txt" || echo $$undef_sym; \
-	done   > "$(SYSROOT_SHARE)/undefined-symbols.txt"
+	done > "$(SYSROOT_SHARE)/undefined-symbols.txt"
 	grep '^_*wasi_' "$(SYSROOT_SHARE)/undefined-symbols.txt" \
 	    > "$(SYSROOT_LIB)/libc.imports"
 

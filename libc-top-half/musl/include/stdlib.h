@@ -173,6 +173,13 @@ long double strtold_l(const char *__restrict, char **__restrict, struct __locale
 #endif
 #endif
 
+#if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
+#include <stdint.h>
+uint32_t arc4random(void);
+void arc4random_buf(void *, size_t);
+uint32_t arc4random_uniform(uint32_t);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

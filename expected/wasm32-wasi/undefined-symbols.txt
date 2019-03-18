@@ -23,8 +23,12 @@ __subtf3
 __trunctfdf2
 __trunctfsf2
 __unordtf2
+__wasi_arg_sizes_get
+__wasi_argv_get
 __wasi_clock_res_get
 __wasi_clock_time_get
+__wasi_environ_get
+__wasi_environ_sizes_get
 __wasi_fd_advise
 __wasi_fd_allocate
 __wasi_fd_close

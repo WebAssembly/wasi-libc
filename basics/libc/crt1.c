@@ -17,6 +17,9 @@ static __wasi_errno_t populate_args(size_t *argc, char **argv) {
     if (err != __WASI_ESUCCESS) {
         return err;
     }
+    if (*argc == 0) {
+        return __WASI_ESUCCESS;
+    }
 
     /* Allocate memory for the array of pointers. */
     argv = malloc(sizeof(char *) * *argc);
@@ -40,9 +43,14 @@ static __wasi_errno_t populate_environ() {
     if (err != __WASI_ESUCCESS) {
         return err;
     }
+    /* If there's no environment pairs, make sure environ is null and return. */
+    if (environ_count == 0) {
+        environ = NULL;
+        return __WASI_ESUCCESS;
+    }
 
-    /* Allocate memory for the array of pointers. */
-    environ = malloc(sizeof(char *) * environ_count);
+    /* Allocate memory for the array of pointers, plus one terminating null pointer. */
+    environ = malloc(sizeof(char *) * (environ_count + 1));
     /* Allocate memory for storing the environment chars. */
     char *environ_buf = malloc(sizeof(char) * environ_size);
     if (environ == NULL || environ_buf == NULL) {

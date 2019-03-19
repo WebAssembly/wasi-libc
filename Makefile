@@ -55,6 +55,7 @@ LIBC_BOTTOM_HALF_ALL_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c)
 LIBWASI_EMULATED_MMAN_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_DIR)/mman -name \*.c)
+LIBC_BOTTOM_HALF_CRT_SOURCES = $(wildcard $(LIBC_BOTTOM_HALF_DIR)/crt/*.c)
 LIBC_TOP_HALF_DIR = $(CURDIR)/libc-top-half
 LIBC_TOP_HALF_MUSL_DIR = $(LIBC_TOP_HALF_DIR)/musl
 LIBC_TOP_HALF_MUSL_SRC_DIR = $(LIBC_TOP_HALF_MUSL_DIR)/src
@@ -366,13 +367,19 @@ $(SYSROOT_INC):
 	      "$(SYSROOT_INC)/wordexp.h" \
 	      "$(SYSROOT_INC)/spawn.h"
 
+ifeq ($(BUILD_LIBC_BOTTOM_HALF),no)
+override CRT_SOURCES = $(BASICS_CRT_SOURCES)
+else
+override CRT_SOURCES = $(LIBC_BOTTOM_HALF_CRT_SOURCES)
+endif
+
 startup_files: $(SYSROOT_INC)
 	#
 	# Build the startup files.
 	#
 	@mkdir -p "$(OBJDIR)"
 	cd "$(OBJDIR)" && \
-	"$(WASM_CC)" $(WASM_CFLAGS) -c $(BASICS_CRT_SOURCES) -MD -MP && \
+	"$(WASM_CC)" $(WASM_CFLAGS) -c $(CRT_SOURCES) -MD -MP && \
 	mkdir -p "$(SYSROOT_LIB)" && \
 	mv *.o "$(SYSROOT_LIB)"
 

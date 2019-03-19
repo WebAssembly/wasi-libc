@@ -426,15 +426,15 @@ _Static_assert(_Alignof(__wasi_subscription_t) == 8, "non-wasi data layout");
 #define __WASI_SYSCALL_NAME(name) \
     __attribute__((__import_module__("wasi_unstable"), __import_name__(#name)))
 
-__wasi_errno_t __wasi_arg_sizes_get(
-    size_t *argc,
-    size_t *argv_size
-) __WASI_SYSCALL_NAME(arg_sizes_get) __attribute__((__warn_unused_result__));
-
-__wasi_errno_t __wasi_argv_get(
+__wasi_errno_t __wasi_args_get(
     char **argv,
     char *argv_buf
-) __WASI_SYSCALL_NAME(argv_get) __attribute__((__warn_unused_result__));
+) __WASI_SYSCALL_NAME(args_get) __attribute__((__warn_unused_result__));
+
+__wasi_errno_t __wasi_args_sizes_get(
+    size_t *argc,
+    size_t *argv_buf_size
+) __WASI_SYSCALL_NAME(args_sizes_get) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_clock_res_get(
     __wasi_clockid_t clock_id,
@@ -454,7 +454,7 @@ __wasi_errno_t __wasi_environ_get(
 
 __wasi_errno_t __wasi_environ_sizes_get(
     size_t *environ_count,
-    size_t *environ_size
+    size_t *environ_buf_size
 ) __WASI_SYSCALL_NAME(environ_sizes_get) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_close(

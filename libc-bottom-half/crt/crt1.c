@@ -65,9 +65,6 @@ static __wasi_errno_t populate_environ() {
 }
 
 void _start(void) {
-    /* The linker synthesizes this to call constructors. */
-    __wasm_call_ctors();
-
     /* Fill in the environment from WASI syscalls. */
     if (populate_environ() != __WASI_ESUCCESS) {
         _Exit(EX_OSERR);
@@ -79,6 +76,9 @@ void _start(void) {
     if (populate_args(&argc, &argv) != __WASI_ESUCCESS) {
         _Exit(EX_OSERR);
     }
+
+    /* The linker synthesizes this to call constructors. */
+    __wasm_call_ctors();
 
     /* Call main with the arguments. */
     int r = main(argc, argv);

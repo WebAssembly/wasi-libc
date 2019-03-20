@@ -1,8 +1,8 @@
 # These variables are specifically meant to be overridable via
 # the make command-line.
 WASM_CC = clang
-WASM_NM = $(subst clang,llvm-nm,$(WASM_CC))
-WASM_AR = $(subst clang,llvm-ar,$(WASM_CC))
+WASM_NM = $(patsubst %clang,%llvm-nm,$(WASM_CC))
+WASM_AR = $(patsubst %clang,%llvm-ar,$(WASM_CC))
 WASM_CFLAGS = -O2
 # The directory where we build the sysroot.
 SYSROOT = $(CURDIR)/sysroot

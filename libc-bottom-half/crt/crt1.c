@@ -33,7 +33,7 @@ static __wasi_errno_t populate_args(size_t *argc, char ***argv) {
     return __wasi_args_get(*argv, argv_buf);
 }
 
-static __wasi_errno_t populate_environ() {
+static __wasi_errno_t populate_environ(void) {
     __wasi_errno_t err;
 
     /* Get the sizes of the arrays we'll have to create to copy in the environment. */

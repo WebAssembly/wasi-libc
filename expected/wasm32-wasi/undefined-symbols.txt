@@ -39,6 +39,8 @@ __wasi_fd_filestat_get
 __wasi_fd_filestat_set_size
 __wasi_fd_filestat_set_times
 __wasi_fd_pread
+__wasi_fd_prestat_dir_name
+__wasi_fd_prestat_get
 __wasi_fd_pwrite
 __wasi_fd_read
 __wasi_fd_readdir

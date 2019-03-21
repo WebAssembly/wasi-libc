@@ -28,11 +28,11 @@ FILE *fopen(const char *restrict filename, const char *restrict mode)
 	fd = open(filename, flags, 0666);
 #endif
 	if (fd < 0) return 0;
-	if (flags & O_CLOEXEC)
 #ifdef __wasilibc_unmodified_upstream
+	if (flags & O_CLOEXEC)
 		__syscall(SYS_fcntl, fd, F_SETFD, FD_CLOEXEC);
 #else
-		/* Avoid __syscall, but also, FD_CLOEXEC is not supported in WASI. */
+	/* Avoid __syscall, but also, FD_CLOEXEC is not supported in WASI. */
 #endif
 
 	f = __fdopen(fd, mode);

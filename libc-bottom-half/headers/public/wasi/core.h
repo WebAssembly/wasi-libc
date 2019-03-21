@@ -270,6 +270,9 @@ typedef uint8_t __wasi_whence_t;
 #define __WASI_WHENCE_END (UINT8_C(1))
 #define __WASI_WHENCE_SET (UINT8_C(2))
 
+typedef uint8_t __wasi_preopentype_t;
+#define __WASI_PREOPENTYPE_DIR              (UINT8_C(0))
+
 typedef struct __wasi_dirent_t {
     __wasi_dircookie_t d_next;
     __wasi_inode_t d_ino;
@@ -303,6 +306,28 @@ _Static_assert(
     offsetof(__wasi_event_t, u.fd_readwrite.flags) == 24, "non-wasi data layout");
 _Static_assert(sizeof(__wasi_event_t) == 32, "non-wasi data layout");
 _Static_assert(_Alignof(__wasi_event_t) == 8, "non-wasi data layout");
+
+typedef struct __wasi_prestat_t {
+    __wasi_preopentype_t pr_type;
+    union __wasi_prestat_u {
+        struct __wasi_prestat_u_dir_t {
+            size_t pr_name_len;
+        } dir;
+    } u;
+} __wasi_prestat_t;
+_Static_assert(offsetof(__wasi_prestat_t, pr_type) == 0, "non-wasi data layout");
+_Static_assert(sizeof(void *) != 4 ||
+    offsetof(__wasi_prestat_t, u.dir.pr_name_len) == 4, "non-wasi data layout");
+_Static_assert(sizeof(void *) != 8 ||
+    offsetof(__wasi_prestat_t, u.dir.pr_name_len) == 8, "non-wasi data layout");
+_Static_assert(sizeof(void *) != 4 ||
+    sizeof(__wasi_prestat_t) == 8, "non-wasi data layout");
+_Static_assert(sizeof(void *) != 8 ||
+    sizeof(__wasi_prestat_t) == 16, "non-wasi data layout");
+_Static_assert(sizeof(void *) != 4 ||
+    _Alignof(__wasi_prestat_t) == 4, "non-wasi data layout");
+_Static_assert(sizeof(void *) != 8 ||
+    _Alignof(__wasi_prestat_t) == 8, "non-wasi data layout");
 
 typedef struct __wasi_fdstat_t {
     __wasi_filetype_t fs_filetype;
@@ -456,6 +481,17 @@ __wasi_errno_t __wasi_environ_sizes_get(
     size_t *environ_count,
     size_t *environ_buf_size
 ) __WASI_SYSCALL_NAME(environ_sizes_get) __attribute__((__warn_unused_result__));
+
+__wasi_errno_t __wasi_fd_prestat_get(
+    __wasi_fd_t fd,
+    __wasi_prestat_t *buf
+) __WASI_SYSCALL_NAME(fd_prestat_get) __attribute__((__warn_unused_result__));
+
+__wasi_errno_t __wasi_fd_prestat_dir_name(
+    __wasi_fd_t fd,
+    char *path,
+    size_t path_len
+) __WASI_SYSCALL_NAME(fd_prestat_dir_name) __attribute__((__warn_unused_result__));
 
 __wasi_errno_t __wasi_fd_close(
     __wasi_fd_t fd

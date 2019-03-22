@@ -88,7 +88,7 @@ po_add(struct po_map *map, const char *path, int fd)
 	int r = __wasi_fd_fdstat_get(fd, &statbuf);
 	if (r != 0) {
 		errno = r;
-		return NULL; // fixme: actually there should be an infallible way to get the rights
+		return NULL; // TODO: Add an infallible way to get the rights?
 	}
 
 	entry->rights_base = statbuf.fs_rights_base;

@@ -181,6 +181,10 @@ po_isprefix(const char *dir, size_t dirlen, const char *path)
 		if (path[i] != dir[i])
 			return false;
 	}
+	// Ignore trailing slashes in directory names.
+	while (i > 0 && dir[i - 1] == '/') {
+		--i;
+	}
 	return path[i] == '/' || path[i] == '\0';
 }
 

@@ -129,9 +129,27 @@ po_find(struct po_map* map, const char *path,
 		size_t len = strnlen(name, MAXPATHLEN);
 #else
 		size_t len = strlen(name);
+		bool any_matches = false;
+
+		if (path[0] != '/' && (path[0] != '.' || (path[1] != '/' && path[1] != '\0'))) {
+			// We're matching a relative path that doesn't start with "./" and isn't ".".
+			if (len >= 2 && name[0] == '.' && name[1] == '/') {
+				// The entry starts with "./", so skip that prefix.
+				name += 2;
+				len -= 2;
+			} else if (len == 1 && name[0] == '.') {
+				// The entry is ".", so match it as an empty string.
+				name += 1;
+				len -= 1;
+			}
+		}
 #endif
 
+#ifdef __wasilibc_unmodified_upstream
 		if ((len <= bestlen) || !po_isprefix(name, len, path)) {
+#else
+		if ((any_matches && len <= bestlen) || !po_isprefix(name, len, path)) {
+#endif
 			continue;
 		}
 
@@ -140,7 +158,7 @@ po_find(struct po_map* map, const char *path,
 		if (rights && !cap_rights_contains(&entry->rights, rights)) {
 #else
 		if ((rights_base & ~entry->rights_base) != 0 ||
-                    (rights_inheriting & ~entry->rights_inheriting) != 0) {
+		    (rights_inheriting & ~entry->rights_inheriting) != 0) {
 #endif
 			continue;
 		}
@@ -148,6 +166,10 @@ po_find(struct po_map* map, const char *path,
 
 		best = entry->fd;
 		bestlen = len;
+#ifdef __wasilibc_unmodified_upstream
+#else
+		any_matches = true;
+#endif
 	}
 
 	relpath = path + bestlen;
@@ -176,15 +198,24 @@ po_isprefix(const char *dir, size_t dirlen, const char *path)
 	size_t i;
 	assert(dir != NULL);
 	assert(path != NULL);
+#ifdef __wasilibc_unmodified_upstream
+#else
+	// Allow an empty string as a prefix of any relative path.
+	if (path[0] != '/' && dirlen == 0)
+		return true;
+#endif
 	for (i = 0; i < dirlen; i++)
 	{
 		if (path[i] != dir[i])
 			return false;
 	}
+#ifdef __wasilibc_unmodified_upstream
+#else
 	// Ignore trailing slashes in directory names.
 	while (i > 0 && dir[i - 1] == '/') {
 		--i;
 	}
+#endif
 	return path[i] == '/' || path[i] == '\0';
 }
 

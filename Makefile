@@ -15,7 +15,7 @@ BUILD_DLMALLOC = yes
 BUILD_LIBC_BOTTOM_HALF = yes
 BUILD_LIBC_TOP_HALF = yes
 # The directory where we're store intermediate artifacts.
-OBJDIR = $(SYSROOT)/tmp
+OBJDIR = $(CURDIR)/build
 
 # Check dependencies.
 ifeq ($(BUILD_LIBC_TOP_HALF),yes)

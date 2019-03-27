@@ -1,5 +1,5 @@
-#ifndef __wasm_sysroot___struct_stat_h
-#define __wasm_sysroot___struct_stat_h
+#ifndef __wasm_basics___struct_stat_h
+#define __wasm_basics___struct_stat_h
 
 #include <__typedef_dev_t.h>
 #include <__typedef_ino_t.h>
@@ -29,7 +29,7 @@ struct stat {
     struct timespec st_atim;
     struct timespec st_mtim;
     struct timespec st_ctim;
-    long long __unused[3];
+    long long __reserved[3];
 };
 
 #endif

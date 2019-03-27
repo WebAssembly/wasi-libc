@@ -1,5 +1,5 @@
-#ifndef __wasm_sysroot_sys_types_h
-#define __wasm_sysroot_sys_types_h
+#ifndef __wasm_basics_sys_types_h
+#define __wasm_basics_sys_types_h
 
 #define __need_size_t
 #include <stddef.h>

@@ -10,17 +10,14 @@ locale_t __uselocale(locale_t new)
 	pthread_t self = __pthread_self();
 	locale_t old = self->locale;
 #else
-	locale_t old = &libc.global_locale;
+	locale_t old = libc.current_locale;
 #endif
 	locale_t global = &libc.global_locale;
 
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	if (new) self->locale = new == LC_GLOBAL_LOCALE ? global : new;
 #else
-        if (new != NULL && new != global && new != LC_GLOBAL_LOCALE) {
-            fputs("non-global locale not supported yet", stderr);
-            __builtin_trap();
-        }
+	if (new) libc.current_locale = new == LC_GLOBAL_LOCALE ? global : new;
 #endif
 
 	return old == global ? LC_GLOBAL_LOCALE : old;

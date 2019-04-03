@@ -1,7 +1,7 @@
 #ifndef	_FCNTL_H
 #define	_FCNTL_H
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #else
 #include <__header_fcntl.h>
 #endif
@@ -40,7 +40,7 @@ int openat(int, const char *, int, ...);
 int posix_fadvise(int, off_t, off_t, int);
 int posix_fallocate(int, off_t, off_t);
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define O_SEARCH  O_PATH
 #define O_EXEC    O_PATH
 

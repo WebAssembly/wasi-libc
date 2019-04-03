@@ -22,7 +22,7 @@ extern "C" {
 
 #include <bits/stat.h>
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define st_atime st_atim.tv_sec
 #define st_mtime st_mtim.tv_sec
 #define st_ctime st_ctim.tv_sec
@@ -78,24 +78,24 @@ int stat(const char *__restrict, struct stat *__restrict);
 int fstat(int, struct stat *);
 int lstat(const char *__restrict, struct stat *__restrict);
 int fstatat(int, const char *__restrict, struct stat *__restrict, int);
-#ifdef __wasilibc_unmodified_upstream /* chmod */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no chmod */
 int chmod(const char *, mode_t);
 int fchmod(int, mode_t);
 int fchmodat(int, const char *, mode_t, int);
 #endif
-#ifdef __wasilibc_unmodified_upstream /* umask */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no umask */
 mode_t umask(mode_t);
 #endif
 int mkdir(const char *, mode_t);
-#ifdef __wasilibc_unmodified_upstream /* fifo */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no fifo */
 int mkfifo(const char *, mode_t);
 #endif
 int mkdirat(int, const char *, mode_t);
-#ifdef __wasilibc_unmodified_upstream /* fifo */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no fifo */
 int mkfifoat(int, const char *, mode_t);
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* mknod */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no mknod */
 #if defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 int mknod(const char *, mode_t, dev_t);
 int mknodat(int, const char *, mode_t, dev_t);
@@ -106,7 +106,7 @@ int futimens(int, const struct timespec [2]);
 int utimensat(int, const char *, const struct timespec [2], int);
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
-#ifdef __wasilibc_unmodified_upstream /* chmod */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no chmod */
 int lchmod(const char *, mode_t);
 #endif
 #define S_IREAD S_IRUSR

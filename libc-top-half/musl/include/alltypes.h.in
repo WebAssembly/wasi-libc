@@ -34,7 +34,7 @@ TYPEDEF unsigned long wctype_t;
 TYPEDEF void * timer_t;
 TYPEDEF int clockid_t;
 TYPEDEF long clock_t;
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 STRUCT timeval { time_t tv_sec; suseconds_t tv_usec; };
 STRUCT timespec { time_t tv_sec; long tv_nsec; };
 #else
@@ -70,7 +70,7 @@ TYPEDEF struct __locale_struct * locale_t;
 
 TYPEDEF struct __sigset_t { unsigned long __bits[128/sizeof(long)]; } sigset_t;
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 STRUCT iovec { void *iov_base; size_t iov_len; };
 #else
 #include <__struct_iovec.h>

@@ -12,7 +12,7 @@ size_t __stdio_write(FILE *f, const unsigned char *buf, size_t len)
 	int iovcnt = 2;
 	ssize_t cnt;
 	for (;;) {
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no syscall
 		cnt = syscall(SYS_writev, f->fd, iov, iovcnt);
 #else
 		cnt = writev(f->fd, iov, iovcnt);

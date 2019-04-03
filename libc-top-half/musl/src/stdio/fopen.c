@@ -1,4 +1,4 @@
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no syscall
 #else
 #include <unistd.h>
 #endif
@@ -22,13 +22,13 @@ FILE *fopen(const char *restrict filename, const char *restrict mode)
 	/* Compute the flags to pass to open() */
 	flags = __fmodeflags(mode);
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no sys_open
 	fd = sys_open(filename, flags, 0666);
 #else
 	fd = open(filename, flags, 0666);
 #endif
 	if (fd < 0) return 0;
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no syscall
 	if (flags & O_CLOEXEC)
 		__syscall(SYS_fcntl, fd, F_SETFD, FD_CLOEXEC);
 #else
@@ -38,7 +38,7 @@ FILE *fopen(const char *restrict filename, const char *restrict mode)
 	f = __fdopen(fd, mode);
 	if (f) return f;
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no syscall
 	__syscall(SYS_close, fd);
 #else
         close(fd);

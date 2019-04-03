@@ -1,4 +1,4 @@
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use the compiler's stddef.h */
 #ifndef _STDDEF_H
 #define _STDDEF_H
 

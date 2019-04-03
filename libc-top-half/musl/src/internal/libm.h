@@ -71,7 +71,7 @@ union ldshape {
 #error Unsupported long double representation
 #endif
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no floating-point status flags
 #define FORCE_EVAL(x) do {                        \
 	if (sizeof(x) == sizeof(float)) {         \
 		volatile float __x;               \

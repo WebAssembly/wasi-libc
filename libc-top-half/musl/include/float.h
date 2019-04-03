@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use the compiler's definition of FLT_ROUNDS */
 int __flt_rounds(void);
 #define FLT_ROUNDS (__flt_rounds())
 #else

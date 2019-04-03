@@ -80,7 +80,7 @@ float fmaf(float x, float y, float z)
 #ifdef FE_TOWARDZERO
 	fesetround(FE_TOWARDZERO);
 #endif
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI doesn't need old GCC workarounds
 	volatile double vxy = xy;  /* XXX work around gcc CSE bug */
 #else
 	double vxy = xy;

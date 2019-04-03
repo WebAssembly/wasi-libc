@@ -7,7 +7,7 @@ extern "C" {
 
 #include <features.h>
 
-#ifdef __wasilibc_unmodified_upstream /* setjmp */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no setjmp */
 #include <bits/setjmp.h>
 
 typedef struct __jmp_buf_tag {

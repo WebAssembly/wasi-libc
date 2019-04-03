@@ -10,7 +10,7 @@
 #define JT(x) (-256|(x))
 #define VER JT(1)
 #define JT_ARG_MAX JT(2)
-#ifdef __wasilibc_unmodified_upstream // mq
+#ifdef __wasilibc_unmodified_upstream // WASI has no mq
 #define JT_MQ_PRIO_MAX JT(3)
 #endif
 #define JT_PAGE_SIZE JT(4)
@@ -28,7 +28,7 @@ long sysconf(int name)
 {
 	static const short values[] = {
 		[_SC_ARG_MAX] = JT_ARG_MAX,
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no processes
 		[_SC_CHILD_MAX] = RLIM(NPROC),
 #else
                 // Not supported on wasi.
@@ -36,12 +36,13 @@ long sysconf(int name)
 #endif
 		[_SC_CLK_TCK] = 100,
 		[_SC_NGROUPS_MAX] = 32,
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no rlimit
 		[_SC_OPEN_MAX] = RLIM(NOFILE),
 #else
-                // Not supported on wasi.
+		// Rlimit is not supported on wasi.
 		[_SC_OPEN_MAX] = -1,
 #endif
+
 		[_SC_STREAM_MAX] = -1,
 		[_SC_TZNAME_MAX] = TZNAME_MAX,
 		[_SC_JOB_CONTROL] = 1,
@@ -64,13 +65,13 @@ long sysconf(int name)
 		[_SC_AIO_MAX] = -1,
 		[_SC_AIO_PRIO_DELTA_MAX] = JT_ZERO, /* ?? */
 		[_SC_DELAYTIMER_MAX] = JT_DELAYTIMER_MAX,
-#ifdef __wasilibc_unmodified_upstream // mq
+#ifdef __wasilibc_unmodified_upstream // WASI has no mq
 		[_SC_MQ_OPEN_MAX] = -1,
 		[_SC_MQ_PRIO_MAX] = JT_MQ_PRIO_MAX,
 #endif
 		[_SC_VERSION] = VER,
 		[_SC_PAGE_SIZE] = JT_PAGE_SIZE,
-#ifdef __wasilibc_unmodified_upstream // realtime signals
+#ifdef __wasilibc_unmodified_upstream // WASI has no realtime signals
 		[_SC_RTSIG_MAX] = _NSIG - 1 - 31 - 3,
 #else
                 // Not supported on wasi.
@@ -192,7 +193,7 @@ long sysconf(int name)
 	} else if (values[name] >= -1) {
 		return values[name];
 	} else if (values[name] < -256) {
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no getrlimit
 		struct rlimit lim;
 		getrlimit(values[name]&16383, &lim);
 		if (lim.rlim_cur == RLIM_INFINITY)
@@ -210,7 +211,7 @@ long sysconf(int name)
 		return _POSIX_VERSION;
 	case JT_ARG_MAX & 255:
 		return ARG_MAX;
-#ifdef __wasilibc_unmodified_upstream // mq
+#ifdef __wasilibc_unmodified_upstream // WASI has no mq
 	case JT_MQ_PRIO_MAX & 255:
 		return MQ_PRIO_MAX;
 #endif
@@ -233,7 +234,7 @@ long sysconf(int name)
                 // With no thread support, just say there's 1 processor.
 		return 1;
 #endif
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no sysinfo
 	case JT_PHYS_PAGES & 255:
 	case JT_AVPHYS_PAGES & 255: ;
 		unsigned long long mem;

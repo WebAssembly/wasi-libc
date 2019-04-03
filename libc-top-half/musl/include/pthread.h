@@ -55,12 +55,11 @@ extern "C" {
 #define PTHREAD_PROCESS_SHARED 1
 
 
-#ifdef __wasilibc_unmodified_upstream
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #define PTHREAD_MUTEX_INITIALIZER {{{0}}}
 #define PTHREAD_RWLOCK_INITIALIZER {{{0}}}
 #define PTHREAD_COND_INITIALIZER {{{0}}}
 #else
-/* TODO: Threads support. */
 #define PTHREAD_MUTEX_INITIALIZER 0
 #define PTHREAD_RWLOCK_INITIALIZER 0
 #define PTHREAD_COND_INITIALIZER 0

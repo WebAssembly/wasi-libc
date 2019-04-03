@@ -14,7 +14,7 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no UNIX-domain sockets */
 struct sockaddr_un {
 	sa_family_t sun_family;
 	char sun_path[108];

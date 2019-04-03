@@ -42,7 +42,15 @@ hidden char *__gettextdomain(void);
 
 #define CURRENT_UTF8 (!!__pthread_self()->locale->cat[LC_CTYPE])
 #else
-#define CURRENT_LOCALE (*(libc.current_locale = &libc.global_locale, &libc.current_locale))
+// If we haven't set up the current_local field yet, do so. Then return an
+// lvalue for the current_locale field.
+#define CURRENT_LOCALE \
+    (*({ \
+        if (!libc.current_locale) { \
+            libc.current_locale = &libc.global_locale; \
+        } \
+        &libc.current_locale; \
+    }))
 
 #define CURRENT_UTF8 (!!libc.global_locale.cat[LC_CTYPE])
 #endif

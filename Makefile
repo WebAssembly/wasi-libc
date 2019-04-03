@@ -429,6 +429,7 @@ finish: $(SYSROOT_INC) libc
 	# macros, squash individual compiler names to attempt, toward keeping
 	# these files compiler-independent.
 	# TODO: Undefine __FLOAT128__ for now since it's not in clang 8.0.
+	# TODO: Filter out __FLT16_* for now, as not all versions of clang have these.
 	"$(WASM_CC)" $(WASM_CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -E -dM -Wno-\#warnings \
 	    -U__llvm__ \
@@ -443,6 +444,7 @@ finish: $(SYSROOT_INC) libc
 	    -U__VERSION__ \
 	    -U__FLOAT128__ \
 	    | sed -e 's/__[[:upper:][:digit:]]*_ATOMIC_\([[:upper:][:digit:]_]*\)_LOCK_FREE/__compiler_ATOMIC_\1_LOCK_FREE/' \
+	    | grep -v '^#define __FLT16_' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
 
 	#

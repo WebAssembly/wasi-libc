@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <string.h>
 #include "libc.h"
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no syscall
 #else
 #include <__function___isatty.h>
 #endif
@@ -13,7 +13,7 @@
 FILE *__fdopen(int fd, const char *mode)
 {
 	FILE *f;
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no syscall
 	struct winsize wsz;
 #endif
 
@@ -33,7 +33,7 @@ FILE *__fdopen(int fd, const char *mode)
 	if (!strchr(mode, '+')) f->flags = (*mode == 'r') ? F_NOWR : F_NORD;
 
 	/* Apply close-on-exec flag */
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no syscall
 	if (strchr(mode, 'e')) __syscall(SYS_fcntl, fd, F_SETFD, FD_CLOEXEC);
 #else
 	if (strchr(mode, 'e')) fcntl(fd, F_SETFD, FD_CLOEXEC);
@@ -41,13 +41,13 @@ FILE *__fdopen(int fd, const char *mode)
 
 	/* Set append mode on fd if opened for append */
 	if (*mode == 'a') {
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no syscall
 		int flags = __syscall(SYS_fcntl, fd, F_GETFL);
 #else
 		int flags = fcntl(fd, F_GETFL);
 #endif
 		if (!(flags & O_APPEND))
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no syscall
 			__syscall(SYS_fcntl, fd, F_SETFL, flags | O_APPEND);
 #else
 			fcntl(fd, F_SETFL, flags | O_APPEND);
@@ -61,7 +61,7 @@ FILE *__fdopen(int fd, const char *mode)
 
 	/* Activate line buffered mode for terminals */
 	f->lbf = EOF;
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no syscall
 	if (!(f->flags & F_NOWR) && !__syscall(SYS_ioctl, fd, TIOCGWINSZ, &wsz))
 #else
 	if (!(f->flags & F_NOWR) && __isatty(fd))

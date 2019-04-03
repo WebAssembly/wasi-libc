@@ -61,7 +61,7 @@
 #define SEM_VALUE_MAX 0x7fffffff
 #define SEM_NSEMS_MAX 256
 #define DELAYTIMER_MAX 0x7fffffff
-#ifdef __wasilibc_unmodified_upstream /* mq */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no mq */
 #define MQ_PRIO_MAX 32768
 #endif
 #define LOGIN_NAME_MAX 256
@@ -116,7 +116,7 @@
 #define _POSIX_LOGIN_NAME_MAX   9
 #define _POSIX_MAX_CANON        255
 #define _POSIX_MAX_INPUT        255
-#ifdef __wasilibc_unmodified_upstream /* mq */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no mq */
 #define _POSIX_MQ_OPEN_MAX      8
 #define _POSIX_MQ_PRIO_MAX      32
 #endif

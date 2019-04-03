@@ -6,7 +6,7 @@
 #include <limits.h>
 #include <string.h>
 #include <stdint.h>
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // Changes to optimize printf/scanf when long double isn't needed
 #else
 #include "printscan.h"
 #endif

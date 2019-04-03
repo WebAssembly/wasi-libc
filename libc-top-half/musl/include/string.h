@@ -7,14 +7,13 @@ extern "C" {
 
 #include <features.h>
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use the compiler's definition of NULL */
 #ifdef __cplusplus
 #define NULL 0L
 #else
 #define NULL ((void*)0)
 #endif
 #else
-#include <__header_string.h>
 #define __need_NULL
 #include <stddef.h>
 #endif
@@ -99,12 +98,9 @@ char *strcasestr(const char *, const char *);
 void *memmem(const void *, size_t, const void *, size_t);
 void *memrchr(const void *, int, size_t);
 void *mempcpy(void *, const void *, size_t);
+#ifdef __wasilibc_unmodified_upstream /* avoid unprototyped decls; use <libgen.h> */
 #ifndef __cplusplus
-#ifdef __wasilibc_unmodified_upstream
 char *basename();
-#else
-/* Don't use unprototyped functions. */
-char *basename(char *);
 #endif
 #endif
 #endif

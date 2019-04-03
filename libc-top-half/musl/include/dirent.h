@@ -1,7 +1,7 @@
 #ifndef	_DIRENT_H
 #define	_DIRENT_H
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #else
 #include <__header_dirent.h>
 #endif
@@ -19,7 +19,7 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 typedef struct __dirstream DIR;
 #else
 #include <__typedef_DIR.h>
@@ -29,7 +29,7 @@ typedef struct __dirstream DIR;
 #define _DIRENT_HAVE_D_OFF
 #define _DIRENT_HAVE_D_TYPE
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 struct dirent {
 	ino_t d_ino;
 	off_t d_off;
@@ -62,7 +62,7 @@ long           telldir(DIR *);
 #endif
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define DT_UNKNOWN 0
 #define DT_FIFO 1
 #define DT_CHR 2

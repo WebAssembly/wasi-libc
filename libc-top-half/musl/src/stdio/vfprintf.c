@@ -10,7 +10,7 @@
 #include <inttypes.h>
 #include <math.h>
 #include <float.h>
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // Changes to optimize printf/scanf when long double isn't needed
 #else
 #include "printscan.h"
 #endif

@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // Changes to optimize printf/scanf when long double isn't needed
 #else
 #include "printscan.h"
 #define __NEED_locale_t
@@ -47,7 +47,7 @@ long double strtold(const char *restrict s, char **restrict p)
 #endif
 }
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI doesn't support signature-changing aliases
 weak_alias(strtof, strtof_l);
 weak_alias(strtod, strtod_l);
 weak_alias(strtold, strtold_l);

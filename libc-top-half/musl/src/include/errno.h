@@ -3,7 +3,7 @@
 
 #include "../../include/errno.h"
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // Use alternate WASI libc headers
 hidden int *___errno_location(void);
 
 #undef errno

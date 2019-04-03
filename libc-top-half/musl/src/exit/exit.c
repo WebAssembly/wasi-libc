@@ -26,7 +26,7 @@ static void libc_exit_fini(void)
 weak_alias(libc_exit_fini, __libc_exit_fini);
 #endif
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI libc uses a custom exit
 _Noreturn void exit(int code)
 {
 	__funcs_on_exit();

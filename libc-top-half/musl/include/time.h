@@ -7,7 +7,7 @@ extern "C" {
 
 #include <features.h>
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use the compiler's definition of NULL */
 #ifdef __cplusplus
 #define NULL 0L
 #else
@@ -40,7 +40,7 @@ extern "C" {
 #define __tm_zone tm_zone
 #endif
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 struct tm {
 	int tm_sec;
 	int tm_min;
@@ -69,7 +69,7 @@ char *asctime (const struct tm *);
 char *ctime (const time_t *);
 int timespec_get(struct timespec *, int);
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define CLOCKS_PER_SEC 1000000L
 
 #define TIME_UTC 1
@@ -93,7 +93,7 @@ struct itimerspec {
 	struct timespec it_value;
 };
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define CLOCK_REALTIME           0
 #define CLOCK_MONOTONIC          1
 #define CLOCK_PROCESS_CPUTIME_ID 2
@@ -113,15 +113,15 @@ struct itimerspec {
 int nanosleep (const struct timespec *, struct timespec *);
 int clock_getres (clockid_t, struct timespec *);
 int clock_gettime (clockid_t, struct timespec *);
-#ifdef __wasilibc_unmodified_upstream /* clock_settime */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no clock_settime */
 int clock_settime (clockid_t, const struct timespec *);
 #endif
 int clock_nanosleep (clockid_t, int, const struct timespec *, struct timespec *);
-#ifdef __wasilibc_unmodified_upstream /* clock_getcpuclockid */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no clock_getcpuclockid */
 int clock_getcpuclockid (pid_t, clockid_t *);
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* timers */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no timers */
 struct sigevent;
 int timer_create (clockid_t, struct sigevent *__restrict, timer_t *__restrict);
 int timer_delete (timer_t);
@@ -145,7 +145,7 @@ struct tm *getdate (const char *);
 
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
-#ifdef __wasilibc_unmodified_upstream /* stime */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no stime */
 int stime(const time_t *);
 #endif
 time_t timegm(struct tm *);

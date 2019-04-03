@@ -8,18 +8,18 @@ extern "C" {
 #include <features.h>
 #include <inttypes.h>
 #include <sys/socket.h>
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #else
 #include <__header_netinet_in.h>
 #endif
 
 typedef uint16_t in_port_t;
 typedef uint32_t in_addr_t;
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 struct in_addr { in_addr_t s_addr; };
 #endif
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 struct sockaddr_in {
 	sa_family_t sin_family;
 	in_port_t sin_port;
@@ -28,7 +28,7 @@ struct sockaddr_in {
 };
 #endif
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 struct in6_addr {
 	union {
 		uint8_t __s6_addr[16];
@@ -41,7 +41,7 @@ struct in6_addr {
 #define s6_addr32 __in6_union.__s6_addr32
 #endif
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 struct sockaddr_in6 {
 	sa_family_t     sin6_family;
 	in_port_t       sin6_port;
@@ -83,7 +83,7 @@ uint16_t ntohs(uint16_t);
 
 #define IPPORT_RESERVED 1024
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define IPPROTO_IP       0
 #define IPPROTO_HOPOPTS  0
 #define IPPROTO_ICMP     1

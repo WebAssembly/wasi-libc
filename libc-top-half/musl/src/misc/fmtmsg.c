@@ -27,11 +27,7 @@ int fmtmsg(long classification, const char *label, int severity,
            const char *text, const char *action, const char *tag)
 {
 	int ret = 0, i, consolefd, verb = 0;
-#ifdef __wasilibc_unmodified_upstream // getenv
 	char *errstring = MM_NULLSEV, *cmsg = getenv("MSGVERB");
-#else
-	char *errstring = MM_NULLSEV, *cmsg = NULL;
-#endif
 	char *const msgs[] = {
 		"label", "severity", "text", "action", "tag", NULL
 	};

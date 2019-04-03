@@ -21,7 +21,7 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use the compiler's definition of NULL */
 #ifdef __cplusplus
 #define NULL 0L
 #else
@@ -35,7 +35,7 @@ extern "C" {
 #undef EOF
 #define EOF (-1)
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #undef SEEK_SET
 #undef SEEK_CUR
 #undef SEEK_END
@@ -53,7 +53,7 @@ extern "C" {
 #define BUFSIZ 1024
 #define FILENAME_MAX 4096
 #define FOPEN_MAX 1000
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no tmpnam */
 #define TMP_MAX 10000
 #define L_tmpnam 20
 #endif
@@ -105,7 +105,7 @@ int putchar(int);
 
 char *fgets(char *__restrict, int, FILE *__restrict);
 #if __STDC_VERSION__ < 201112L
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* gets is obsolete */
 char *gets(char *);
 #else
 char *gets(char *) __attribute__((__deprecated__("gets is not defined on WASI")));
@@ -137,7 +137,7 @@ void perror(const char *);
 int setvbuf(FILE *__restrict, char *__restrict, int, size_t);
 void setbuf(FILE *__restrict, char *__restrict);
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no tmpnam or tmpfile */
 char *tmpnam(char *);
 FILE *tmpfile(void);
 #else
@@ -173,7 +173,7 @@ char *ctermid(char *);
 #endif
 
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no tempnam */
 #if defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) \
  || defined(_BSD_SOURCE)
 #define P_tmpdir "/tmp"

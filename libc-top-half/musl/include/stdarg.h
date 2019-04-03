@@ -1,7 +1,7 @@
 #ifndef _STDARG_H
 #define _STDARG_H
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use the compiler's stdarg.h */
 #ifdef __cplusplus
 extern "C" {
 #endif

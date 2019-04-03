@@ -1,4 +1,4 @@
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no syscall
 #else
 #include <unistd.h>
 #endif
@@ -13,7 +13,7 @@ size_t __stdio_read(FILE *f, unsigned char *buf, size_t len)
 	};
 	ssize_t cnt;
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no syscall
 	cnt = iov[0].iov_len ? syscall(SYS_readv, f->fd, iov, 2)
 		: syscall(SYS_read, f->fd, iov[1].iov_base, iov[1].iov_len);
 #else

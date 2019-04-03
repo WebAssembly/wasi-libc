@@ -1,13 +1,13 @@
 #include <sys/utsname.h>
 #include "syscall.h"
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // Implement uname with placeholders
 #else
 #include <string.h>
 #endif
 
 int uname(struct utsname *uts)
 {
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // Implement uname with placeholders
 	return syscall(SYS_uname, uts);
 #else
         // Just fill in the fields with placeholder values.

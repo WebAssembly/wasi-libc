@@ -1,6 +1,6 @@
 #include <locale.h>
 #include <string.h>
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // WASI has no mmap
 #include <sys/mman.h>
 #endif
 #include "locale_impl.h"
@@ -34,11 +34,9 @@ const struct __locale_map *__get_locale(int cat, const char *val)
 	size_t l, n;
 
 	if (!*val) {
-#ifdef __wasilibc_unmodified_upstream // getenv
 		(val = getenv("LC_ALL")) && *val ||
 		(val = getenv(envvars[cat])) && *val ||
 		(val = getenv("LANG")) && *val ||
-#endif
 		(val = "C.UTF-8");
 	}
 
@@ -66,7 +64,7 @@ const struct __locale_map *__get_locale(int cat, const char *val)
 			return p;
 		}
 
-#ifdef __wasilibc_unmodified_upstream // locales
+#ifdef __wasilibc_unmodified_upstream // WASI has no mmap, though this code could be made to use something else
 	if (!libc.secure) path = getenv("MUSL_LOCPATH");
 	/* FIXME: add a default path? */
 

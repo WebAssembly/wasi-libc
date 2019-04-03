@@ -26,13 +26,13 @@ struct FTW {
 	int level;
 };
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI libc doesn't build the legacy functions */
 int ftw(const char *, int (*)(const char *, const struct stat *, int), int);
 #endif
 int nftw(const char *, int (*)(const char *, const struct stat *, int, struct FTW *), int, int);
 
 #if defined(_LARGEFILE64_SOURCE) || defined(_GNU_SOURCE)
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI libc doesn't build the legacy functions */
 #define ftw64 ftw
 #endif
 #define nftw64 nftw

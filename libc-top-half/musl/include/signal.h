@@ -189,7 +189,7 @@ struct sigevent {
 #define SIGEV_NONE 1
 #define SIGEV_THREAD 2
 
-#ifdef __wasilibc_unmodified_upstream /* realtime signals */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no realtime signals */
 int __libc_current_sigrtmin(void);
 int __libc_current_sigrtmax(void);
 
@@ -197,7 +197,7 @@ int __libc_current_sigrtmax(void);
 #define SIGRTMAX  (__libc_current_sigrtmax())
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* signals */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no signals */
 int kill(pid_t, int);
 
 int sigemptyset(sigset_t *);
@@ -219,14 +219,14 @@ int sigqueue(pid_t, int, union sigval);
 int pthread_sigmask(int, const sigset_t *__restrict, sigset_t *__restrict);
 int pthread_kill(pthread_t, int);
 
-#ifdef __wasilibc_unmodified_upstream /* signals */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no signals */
 void psiginfo(const siginfo_t *, const char *);
 void psignal(int, const char *);
 #endif
 
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* signals */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no signals */
 #if defined(_XOPEN_SOURCE) || defined(_BSD_SOURCE) || defined(_GNU_SOURCE)
 int killpg(pid_t, int);
 int sigaltstack(const stack_t *__restrict, stack_t *__restrict);
@@ -254,7 +254,7 @@ void (*sigset(int, void (*)(int)))(int);
 #endif
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* signals */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no signals */
 #if defined(_BSD_SOURCE) || defined(_GNU_SOURCE)
 #define NSIG _NSIG
 typedef void (*sig_t)(int);
@@ -278,7 +278,7 @@ int sigandset(sigset_t *, const sigset_t *, const sigset_t *);
 
 typedef int sig_atomic_t;
 
-#ifdef __wasilibc_unmodified_upstream /* signals */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no signals */
 void (*signal(int, void (*)(int)))(int);
 #endif
 int raise(int);

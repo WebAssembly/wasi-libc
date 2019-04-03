@@ -11,7 +11,7 @@ extern "C" {
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define SEEK_SET 0
 #define SEEK_CUR 1
 #define SEEK_END 2
@@ -19,7 +19,7 @@ extern "C" {
 #include <__header_unistd.h>
 #endif
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use the compiler's definition of NULL */
 #ifdef __cplusplus
 #define NULL 0L
 #else
@@ -41,13 +41,13 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
-#ifdef __wasilibc_unmodified_upstream /* pipe */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no pipe */
 int pipe(int [2]);
 int pipe2(int [2], int);
 #endif
 int close(int);
 int posix_close(int, int);
-#ifdef __wasilibc_unmodified_upstream /* dup */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no dup */
 int dup(int);
 int dup2(int, int);
 int dup3(int, int, int);
@@ -61,7 +61,7 @@ ssize_t write(int, const void *, size_t);
 ssize_t pread(int, void *, size_t, off_t);
 ssize_t pwrite(int, const void *, size_t, off_t);
 
-#ifdef __wasilibc_unmodified_upstream /* chown */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no chown */
 int chown(const char *, uid_t, gid_t);
 int fchown(int, uid_t, gid_t);
 int lchown(const char *, uid_t, gid_t);
@@ -80,7 +80,7 @@ int rmdir(const char *);
 int truncate(const char *, off_t);
 int ftruncate(int, off_t);
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define F_OK 0
 #define R_OK 4
 #define W_OK 2
@@ -90,19 +90,19 @@ int ftruncate(int, off_t);
 int access(const char *, int);
 int faccessat(int, const char *, int, int);
 
-#ifdef __wasilibc_unmodified_upstream /* cwd */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no cwd */
 int chdir(const char *);
 int fchdir(int);
 char *getcwd(char *, size_t);
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* signals */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no signals */
 unsigned alarm(unsigned);
 #endif
 unsigned sleep(unsigned);
 int pause(void);
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no fork/exec */
 pid_t fork(void);
 int execve(const char *, char *const [], char *const []);
 int execv(const char *, char *const []);
@@ -114,7 +114,7 @@ int fexecve(int, char *const [], char *const []);
 #endif
 _Noreturn void _exit(int);
 
-#ifdef __wasilibc_unmodified_upstream /* getpid */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no getpid etc. */
 pid_t getpid(void);
 pid_t getppid(void);
 pid_t getpgrp(void);
@@ -123,17 +123,17 @@ int setpgid(pid_t, pid_t);
 pid_t setsid(void);
 pid_t getsid(pid_t);
 #endif
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no ttyname */
 char *ttyname(int);
 int ttyname_r(int, char *, size_t);
 #endif
 int isatty(int);
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no process groups */
 pid_t tcgetpgrp(int);
 int tcsetpgrp(int, pid_t);
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* getpid */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no getuid etc. */
 uid_t getuid(void);
 uid_t geteuid(void);
 gid_t getgid(void);
@@ -164,15 +164,15 @@ size_t confstr(int, char *, size_t);
 #define F_LOCK  1
 #define F_TLOCK 2
 #define F_TEST  3
-#ifdef __wasilibc_unmodified_upstream /* getpid */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no setreuid */
 int setreuid(uid_t, uid_t);
 int setregid(gid_t, gid_t);
 #endif
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no POSIX file locking */
 int lockf(int, int, off_t);
 #endif
 long gethostid(void);
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no nice, sync, or setpgrp */
 int nice(int);
 void sync(void);
 pid_t setpgrp(void);
@@ -192,11 +192,11 @@ unsigned ualarm(unsigned, unsigned);
 #define L_SET 0
 #define L_INCR 1
 #define L_XTND 2
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no brk */
 int brk(void *);
 #endif
 void *sbrk(intptr_t);
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no processes */
 pid_t vfork(void);
 int vhangup(void);
 int chroot(const char *);
@@ -221,19 +221,19 @@ int getentropy(void *, size_t);
 
 #ifdef _GNU_SOURCE
 extern char **environ;
-#ifdef __wasilibc_unmodified_upstream /* getpid */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no get/setresuid */
 int setresuid(uid_t, uid_t, uid_t);
 int setresgid(gid_t, gid_t, gid_t);
 int getresuid(uid_t *, uid_t *, uid_t *);
 int getresgid(gid_t *, gid_t *, gid_t *);
 #endif
-#ifdef __wasilibc_unmodified_upstream /* cwd */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no cwd */
 char *get_current_dir_name(void);
 #endif
-#ifdef __wasilibc_unmodified_upstream /* syncfs */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no syncfs */
 int syncfs(int);
 #endif
-#ifdef __wasilibc_unmodified_upstream /* getpid */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no eaccess */
 int euidaccess(const char *, int);
 int eaccess(const char *, int);
 #endif
@@ -261,7 +261,7 @@ int eaccess(const char *, int);
 #define _POSIX_ADVISORY_INFO    _POSIX_VERSION
 #define _POSIX_CHOWN_RESTRICTED 1
 #define _POSIX_IPV6             _POSIX_VERSION
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no processes, mmap, or mq */
 #define _POSIX_JOB_CONTROL      1
 #define _POSIX_MAPPED_FILES     _POSIX_VERSION
 #define _POSIX_MEMLOCK          _POSIX_VERSION
@@ -271,12 +271,12 @@ int eaccess(const char *, int);
 #endif
 #define _POSIX_FSYNC            _POSIX_VERSION
 #define _POSIX_NO_TRUNC         1
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no raw sockets */
 #define _POSIX_RAW_SOCKETS      _POSIX_VERSION
 #endif
 #define _POSIX_REALTIME_SIGNALS _POSIX_VERSION
 #define _POSIX_REGEXP           1
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no processes */
 #define _POSIX_SAVED_IDS        1
 #define _POSIX_SHELL            1
 #define _POSIX_SPAWN            _POSIX_VERSION
@@ -298,7 +298,7 @@ int eaccess(const char *, int);
 #define _POSIX_BARRIERS         _POSIX_VERSION
 #define _POSIX_SPIN_LOCKS       _POSIX_VERSION
 #define _POSIX_READER_WRITER_LOCKS _POSIX_VERSION
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no POSIX async I/O, semaphores, or shared memory */
 #define _POSIX_ASYNCHRONOUS_IO  _POSIX_VERSION
 #define _POSIX_SEMAPHORES       _POSIX_VERSION
 #define _POSIX_SHARED_MEMORY_OBJECTS _POSIX_VERSION

@@ -3622,6 +3622,7 @@
 #define __va_copy(d,s) __builtin_va_copy(d,s)
 #define __wasi__ 1
 #define __wasi_core_h 
+#define __wasi_libc_find_relpath_h 
 #define __wasi_libc_h 
 #define __wasilibc___errno_values_h 
 #define __wasilibc___fd_set_h 

@@ -682,4 +682,11 @@ __wasilibc_register_preopened_fd(int fd, const char *path)
 
 	return 0;
 }
+
+struct __wasilibc_relpath __wasilibc_find_relpath(const char *path,
+                                                  __wasi_rights_t rights_base,
+                                                  __wasi_rights_t rights_inheriting)
+{
+    return find_relative(path, rights_base, rights_inheriting);
+}
 #endif

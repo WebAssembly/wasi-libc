@@ -17,17 +17,18 @@ struct __wasilibc_relpath {
 };
 
 /**
- * Look up the given path in the preopened directory map and return
- * a file descriptor and relative path that can be used to access it.
- * Ignore preopened directories which don't provide the specified
- * rights.
+ * Look up the given path in the preopened directory map and store
+ * a file descriptor and relative path that can be used to access it
+ * in *relpath. Ignore preopened directories which don't provide the
+ * specified rights.
  *
- * Returns a `__wasilibc_relpath` with a `dirfd` of -1 if no preopened
- * directories were suitable.
+ * Returns 0 if a suitable preopened directory was found, or -1 if
+ * no directories were suitable.
  */
-struct __wasilibc_relpath __wasilibc_find_relpath(const char *path,
-                                                  __wasi_rights_t rights_base,
-                                                  __wasi_rights_t rights_inheriting);
+int __wasilibc_find_relpath(const char *path,
+                            __wasi_rights_t rights_base,
+                            __wasi_rights_t rights_inheriting,
+                            struct __wasilibc_relpath *relpath);
 
 #ifdef __cplusplus
 }

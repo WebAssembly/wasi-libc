@@ -11,8 +11,10 @@ extern "C" {
  || defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) \
  || defined(_BSD_SOURCE)
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no ucontext support */
 #ifdef _GNU_SOURCE
 #define __ucontext ucontext
+#endif
 #endif
 
 #define __NEED_size_t

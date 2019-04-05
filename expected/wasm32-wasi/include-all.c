@@ -165,7 +165,6 @@
 #include <sys/timex.h>
 #include <sys/ttydefaults.h>
 #include <sys/types.h>
-#include <sys/ucontext.h>
 #include <sys/uio.h>
 #include <sys/un.h>
 #include <sys/utsname.h>
@@ -178,7 +177,6 @@
 #include <threads.h>
 #include <time.h>
 #include <uchar.h>
-#include <ucontext.h>
 #include <unistd.h>
 #include <utime.h>
 #include <values.h>

@@ -242,6 +242,7 @@ __unlist_locked_file
 __uselocale
 __utc
 __wasilibc_fd_renumber
+__wasilibc_find_relpath
 __wasilibc_init_preopen
 __wasilibc_register_preopened_fd
 __wasilibc_rmdirat

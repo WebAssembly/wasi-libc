@@ -82,6 +82,12 @@ struct po_relpath {
 	/** The path, relative to the directory represented by @ref dirfd */
 	const char *relative_path;
 };
+#ifdef __wasilibc_unmodified_upstream
+#else
+// This functionality is exposed in a libc header, so include that header
+// and use its declarations.
+#include <wasi/libc-find-relpath.h>
+#endif
 
 /**
  * Create a @ref po_map of at least the specified capacity.

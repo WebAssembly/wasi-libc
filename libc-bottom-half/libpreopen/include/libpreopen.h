@@ -72,7 +72,6 @@ typedef bool (po_map_iter_cb)(const char *dirname, int dirfd, cap_rights_t);
 po_map_iter_cb	po_print_entry;
 #endif
 
-#ifdef __wasilibc_unmodified_upstream
 /**
  * A filesystem path, relative to a directory descriptor.
  */
@@ -83,11 +82,11 @@ struct po_relpath {
 	/** The path, relative to the directory represented by @ref dirfd */
 	const char *relative_path;
 };
+#ifdef __wasilibc_unmodified_upstream
 #else
 // This functionality is exposed in a libc header, so include that header
 // and use its declarations.
 #include <wasi/libc-find-relpath.h>
-#define po_relpath __wasilibc_relpath
 #endif
 
 /**

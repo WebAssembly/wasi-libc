@@ -133,7 +133,6 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/search/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/multibyte/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/regex/*.c) \
-    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/temp/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/prng/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/conf/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/ctype/*.c) \
@@ -368,6 +367,10 @@ $(SYSROOT_INC):
 	      "$(SYSROOT_INC)/spawn.h" \
 	      "$(SYSROOT_INC)/ucontext.h" \
 	      "$(SYSROOT_INC)/sys/ucontext.h"
+ifeq ($(THREAD_MODEL), single)
+	$(RM) "$(SYSROOT_INC)/aio.h" \
+	      "$(SYSROOT_INC)/pthread.h"
+endif
 
 ifeq ($(BUILD_LIBC_BOTTOM_HALF),no)
 override CRT_SOURCES = $(BASICS_CRT_SOURCES)
@@ -434,6 +437,7 @@ finish: $(SYSROOT_INC) libc
 	# TODO: Filter out __FLT16_* for now, as not all versions of clang have these.
 	"$(WASM_CC)" $(WASM_CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -E -dM -Wno-\#warnings \
+	    -D_ALL_SOURCE \
 	    -U__llvm__ \
 	    -U__clang__ \
 	    -U__clang_major__ \

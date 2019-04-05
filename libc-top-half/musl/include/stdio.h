@@ -53,7 +53,7 @@ extern "C" {
 #define BUFSIZ 1024
 #define FILENAME_MAX 4096
 #define FOPEN_MAX 1000
-#ifdef __wasilibc_unmodified_upstream /* WASI has no tmpnam */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no temp directories */
 #define TMP_MAX 10000
 #define L_tmpnam 20
 #endif
@@ -137,7 +137,7 @@ void perror(const char *);
 int setvbuf(FILE *__restrict, char *__restrict, int, size_t);
 void setbuf(FILE *__restrict, char *__restrict);
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no tmpnam or tmpfile */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no temp directories */
 char *tmpnam(char *);
 FILE *tmpfile(void);
 #else
@@ -173,7 +173,7 @@ char *ctermid(char *);
 #endif
 
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no tempnam */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no temp directories */
 #if defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) \
  || defined(_BSD_SOURCE)
 #define P_tmpdir "/tmp"
@@ -222,7 +222,9 @@ FILE *fopencookie(void *, const char *, cookie_io_functions_t);
 #endif
 
 #if defined(_LARGEFILE64_SOURCE) || defined(_GNU_SOURCE)
+#ifdef __wasilibc_unmodified_upstream /* WASI has no temp directories */
 #define tmpfile64 tmpfile
+#endif
 #define fopen64 fopen
 #define freopen64 freopen
 #define fseeko64 fseeko

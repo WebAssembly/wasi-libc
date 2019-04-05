@@ -105,9 +105,11 @@ size_t __ctype_get_mb_cur_max(void);
 int posix_memalign (void **, size_t, size_t);
 int setenv (const char *, const char *, int);
 int unsetenv (const char *);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no temp directories */
 int mkstemp (char *);
 int mkostemp (char *, int);
 char *mkdtemp (char *);
+#endif
 int getsubopt (char **, char *const *, char **);
 int rand_r (unsigned *);
 
@@ -164,6 +166,7 @@ double strtod_l(const char *__restrict, char **__restrict, struct __locale_struc
 long double strtold_l(const char *__restrict, char **__restrict, struct __locale_struct *);
 #endif
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no temp directories */
 #if defined(_LARGEFILE64_SOURCE) || defined(_GNU_SOURCE)
 #define mkstemp64 mkstemp
 #define mkostemp64 mkostemp
@@ -172,12 +175,16 @@ long double strtold_l(const char *__restrict, char **__restrict, struct __locale
 #define mkostemps64 mkostemps
 #endif
 #endif
+#endif
 
+#ifdef __wasilibc_unmodified_upstream /* Declare arc4random functions */
+#else
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 #include <stdint.h>
 uint32_t arc4random(void);
 void arc4random_buf(void *, size_t);
 uint32_t arc4random_uniform(uint32_t);
+#endif
 #endif
 
 #ifdef __cplusplus

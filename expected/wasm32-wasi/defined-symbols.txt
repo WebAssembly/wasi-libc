@@ -17,7 +17,6 @@ _IO_putc_unlocked
 __EINVAL
 __ENOMEM
 ___environ
-__aio_close
 __asctime_r
 __assert_fail
 __c_dot_utf8
@@ -142,7 +141,6 @@ __libc
 __loc_is_allocated
 __localtime_r
 __memrchr
-__mkostemps
 __mo_lookup
 __month_to_secs
 __newlocale
@@ -165,7 +163,6 @@ __progname
 __progname_full
 __putenv
 __rand48_step
-__randname
 __rem_pio2
 __rem_pio2_large
 __rem_pio2f
@@ -744,16 +741,6 @@ memrchr
 memset
 mkdir
 mkdirat
-mkdtemp
-mkostemp
-mkostemp64
-mkostemps
-mkostemps64
-mkstemp
-mkstemp64
-mkstemps
-mkstemps64
-mktemp
 mktime
 modf
 modff

@@ -1499,7 +1499,6 @@
 #define ND_ROUTER_SOLICIT 133
 #define NEW_ENV_VALUE 1
 #define NEW_ENV_VAR 0
-#define NGREG (sizeof(gregset_t)/sizeof(greg_t))
 #define NGROUPS 32
 #define NGROUPS_MAX 32
 #define NL0 0000000
@@ -2903,7 +2902,6 @@
 #define _THREADS_H 
 #define _TIME_H 
 #define _UCHAR_H 
-#define _UCONTEXT_H 
 #define _UNISTD_H 
 #define _UTIME_H 
 #define _VALUES_H 

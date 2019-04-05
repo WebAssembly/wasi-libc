@@ -365,7 +365,9 @@ $(SYSROOT_INC):
 	      "$(SYSROOT_INC)/ulimit.h" \
 	      "$(SYSROOT_INC)/xattr.h" \
 	      "$(SYSROOT_INC)/wordexp.h" \
-	      "$(SYSROOT_INC)/spawn.h"
+	      "$(SYSROOT_INC)/spawn.h" \
+	      "$(SYSROOT_INC)/ucontext.h" \
+	      "$(SYSROOT_INC)/sys/ucontext.h"
 
 ifeq ($(BUILD_LIBC_BOTTOM_HALF),no)
 override CRT_SOURCES = $(BASICS_CRT_SOURCES)

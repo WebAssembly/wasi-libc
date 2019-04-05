@@ -14,7 +14,9 @@
 #define JT_MQ_PRIO_MAX JT(3)
 #endif
 #define JT_PAGE_SIZE JT(4)
+#ifdef __wasilibc_unmodified_upstream // WASI has no semaphores
 #define JT_SEM_VALUE_MAX JT(5)
+#endif
 #define JT_NPROCESSORS_CONF JT(6)
 #define JT_NPROCESSORS_ONLN JT(7)
 #define JT_PHYS_PAGES JT(8)
@@ -77,14 +79,26 @@ long sysconf(int name)
                 // Not supported on wasi.
 		[_SC_RTSIG_MAX] = -1,
 #endif
+#ifdef __wasilibc_unmodified_upstream // WASI has no semaphores
 		[_SC_SEM_NSEMS_MAX] = SEM_NSEMS_MAX,
 		[_SC_SEM_VALUE_MAX] = JT_SEM_VALUE_MAX,
+#else
+		[_SC_SEM_NSEMS_MAX] = -1,
+		[_SC_SEM_VALUE_MAX] = -1,
+#endif
 		[_SC_SIGQUEUE_MAX] = -1,
 		[_SC_TIMER_MAX] = -1,
+#ifdef __wasilibc_unmodified_upstream // WASI has no shell commands
 		[_SC_BC_BASE_MAX] = _POSIX2_BC_BASE_MAX,
 		[_SC_BC_DIM_MAX] = _POSIX2_BC_DIM_MAX,
 		[_SC_BC_SCALE_MAX] = _POSIX2_BC_SCALE_MAX,
 		[_SC_BC_STRING_MAX] = _POSIX2_BC_STRING_MAX,
+#else
+		[_SC_BC_BASE_MAX] = -1,
+		[_SC_BC_DIM_MAX] = -1,
+		[_SC_BC_SCALE_MAX] = -1,
+		[_SC_BC_STRING_MAX] = -1,
+#endif
 		[_SC_COLL_WEIGHTS_MAX] = COLL_WEIGHTS_MAX,
 		[_SC_EXPR_NEST_MAX] = -1,
 		[_SC_LINE_MAX] = -1,
@@ -103,9 +117,15 @@ long sysconf(int name)
 		[_SC_GETPW_R_SIZE_MAX] = -1,
 		[_SC_LOGIN_NAME_MAX] = 256,
 		[_SC_TTY_NAME_MAX] = TTY_NAME_MAX,
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 		[_SC_THREAD_DESTRUCTOR_ITERATIONS] = PTHREAD_DESTRUCTOR_ITERATIONS,
 		[_SC_THREAD_KEYS_MAX] = PTHREAD_KEYS_MAX,
 		[_SC_THREAD_STACK_MIN] = PTHREAD_STACK_MIN,
+#else
+		[_SC_THREAD_DESTRUCTOR_ITERATIONS] = -1,
+		[_SC_THREAD_KEYS_MAX] = -1,
+		[_SC_THREAD_STACK_MIN] = -1,
+#endif
 		[_SC_THREAD_THREADS_MAX] = -1,
 		[_SC_THREAD_ATTR_STACKADDR] = VER,
 		[_SC_THREAD_ATTR_STACKSIZE] = VER,
@@ -217,8 +237,10 @@ long sysconf(int name)
 #endif
 	case JT_PAGE_SIZE & 255:
 		return PAGE_SIZE;
+#ifdef __wasilibc_unmodified_upstream // WASI has no semaphores
 	case JT_SEM_VALUE_MAX & 255:
 		return SEM_VALUE_MAX;
+#endif
 	case JT_DELAYTIMER_MAX & 255:
 		return DELAYTIMER_MAX;
 	case JT_NPROCESSORS_CONF & 255:

@@ -37,9 +37,6 @@
 #define AF_INET6 2
 #define AF_UNIX 3
 #define AF_UNSPEC 0
-#define AIO_ALLDONE 2
-#define AIO_CANCELED 0
-#define AIO_NOTCANCELED 1
 #define ALT_DIGITS 0x2002F
 #define AM_STR 0x20026
 #define ANYMARK 0x01
@@ -183,10 +180,6 @@
 #define B75 0000002
 #define B921600 0010007
 #define B9600 0000015
-#define BC_BASE_MAX 99
-#define BC_DIM_MAX 2048
-#define BC_SCALE_MAX 99
-#define BC_STRING_MAX 1000
 #define BIG_ENDIAN __BIG_ENDIAN
 #define BITSPERBYTE CHAR_BIT
 #define BLKTYPE '4'
@@ -589,7 +582,6 @@
 #define EXDEV __WASI_EXDEV
 #define EXIT_FAILURE 1
 #define EXIT_SUCCESS 0
-#define EXPR_NEST_MAX 32
 #define EXTA 0000016
 #define EXTB 0000017
 #define EXTPROC 0200000
@@ -1319,12 +1311,6 @@
 #define LFLOW_ON 1
 #define LFLOW_RESTART_ANY 2
 #define LFLOW_RESTART_XON 3
-#define LINE_MAX 4096
-#define LIO_NOP 2
-#define LIO_NOWAIT 1
-#define LIO_READ 0
-#define LIO_WAIT 0
-#define LIO_WRITE 1
 #define LITTLE_ENDIAN __LITTLE_ENDIAN
 #define LLONG_MAX (0x7fffffffffffffffLL)
 #define LLONG_MIN (-LLONG_MAX-1)
@@ -1336,7 +1322,6 @@
 #define LOCK_NB 4
 #define LOCK_SH 1
 #define LOCK_UN 8
-#define LOGIN_NAME_MAX 256
 #define LONGBITS (sizeof(long) * 8)
 #define LONG_BIT (32)
 #define LONG_MAX (0x7fffffffL)
@@ -1507,6 +1492,7 @@
 #define NL_ARGMAX 9
 #define NL_CAT_LOCALE 1
 #define NL_LANGMAX 32
+#define NL_LOCALE_NAME(cat) _NL_LOCALE_NAME(cat)
 #define NL_MSGMAX 32767
 #define NL_NMAX 16
 #define NL_SETD 1
@@ -1685,7 +1671,6 @@
 #define PATH_MAX 4096
 #define PDP_ENDIAN __PDP_ENDIAN
 #define PENDIN 0040000
-#define PIPE_BUF 4096
 #define PM_STR 0x20027
 #define POLLERR 0x1000
 #define POLLHUP 0x2000
@@ -1786,37 +1771,6 @@
 #define PRIxLEAST8 "x"
 #define PRIxMAX __PRI64 "x"
 #define PRIxPTR __PRIPTR "x"
-#define PTHREAD_BARRIER_SERIAL_THREAD (-1)
-#define PTHREAD_CANCELED ((void *)-1)
-#define PTHREAD_CANCEL_ASYNCHRONOUS 1
-#define PTHREAD_CANCEL_DEFERRED 0
-#define PTHREAD_CANCEL_DISABLE 1
-#define PTHREAD_CANCEL_ENABLE 0
-#define PTHREAD_CANCEL_MASKED 2
-#define PTHREAD_COND_INITIALIZER 0
-#define PTHREAD_CREATE_DETACHED 1
-#define PTHREAD_CREATE_JOINABLE 0
-#define PTHREAD_DESTRUCTOR_ITERATIONS 4
-#define PTHREAD_EXPLICIT_SCHED 1
-#define PTHREAD_INHERIT_SCHED 0
-#define PTHREAD_KEYS_MAX 128
-#define PTHREAD_MUTEX_DEFAULT 0
-#define PTHREAD_MUTEX_ERRORCHECK 2
-#define PTHREAD_MUTEX_INITIALIZER 0
-#define PTHREAD_MUTEX_NORMAL 0
-#define PTHREAD_MUTEX_RECURSIVE 1
-#define PTHREAD_MUTEX_ROBUST 1
-#define PTHREAD_MUTEX_STALLED 0
-#define PTHREAD_ONCE_INIT 0
-#define PTHREAD_PRIO_INHERIT 1
-#define PTHREAD_PRIO_NONE 0
-#define PTHREAD_PRIO_PROTECT 2
-#define PTHREAD_PROCESS_PRIVATE 0
-#define PTHREAD_PROCESS_SHARED 1
-#define PTHREAD_RWLOCK_INITIALIZER 0
-#define PTHREAD_SCOPE_PROCESS 1
-#define PTHREAD_SCOPE_SYSTEM 0
-#define PTHREAD_STACK_MIN 2048
 #define PTRBITS (sizeof(char *) * 8)
 #define PTRDIFF_MAX INT32_MAX
 #define PTRDIFF_MIN INT32_MIN
@@ -1927,13 +1881,6 @@
 #define SB 250
 #define SCHAR_MAX 127
 #define SCHAR_MIN (-128)
-#define SCHED_BATCH 3
-#define SCHED_DEADLINE 6
-#define SCHED_FIFO 1
-#define SCHED_IDLE 5
-#define SCHED_OTHER 0
-#define SCHED_RESET_ON_FORK 0x40000000
-#define SCHED_RR 2
 #define SCNd16 "hd"
 #define SCNd32 "d"
 #define SCNd64 __PRI64 "d"
@@ -2014,8 +1961,6 @@
 #define SEGV_MAPERR 1
 #define SEGV_PKUERR 4
 #define SEM_FAILED ((sem_t *)0)
-#define SEM_NSEMS_MAX 256
-#define SEM_VALUE_MAX 0x7fffffff
 #define SERVFAIL ns_r_servfail
 #define SFD_CLOEXEC O_CLOEXEC
 #define SFD_NONBLOCK O_NONBLOCK
@@ -2211,6 +2156,10 @@
 #define TCOFLUSH 1
 #define TCOOFF 0
 #define TCOON 1
+#define TCPI_OPT_ECN 8
+#define TCPI_OPT_SACK 2
+#define TCPI_OPT_TIMESTAMPS 1
+#define TCPI_OPT_WSCALE 4
 #define TCPOLEN_MAXSEG 4
 #define TCPOLEN_SACK_PERMITTED 2
 #define TCPOLEN_TIMESTAMP 10
@@ -2222,6 +2171,11 @@
 #define TCPOPT_SACK_PERMITTED 4
 #define TCPOPT_TIMESTAMP 8
 #define TCPOPT_WINDOW 3
+#define TCP_CA_CWR 2
+#define TCP_CA_Disorder 1
+#define TCP_CA_Loss 4
+#define TCP_CA_Open 0
+#define TCP_CA_Recovery 3
 #define TCP_CC_INFO 26
 #define TCP_CLOSE 7
 #define TCP_CLOSE_WAIT 8
@@ -2248,11 +2202,16 @@
 #define TCP_MAXSEG 2
 #define TCP_MD5SIG 14
 #define TCP_MD5SIG_EXT 32
+#define TCP_MD5SIG_FLAG_PREFIX 1
+#define TCP_MD5SIG_MAXKEYLEN 80
 #define TCP_NODELAY 1
 #define TCP_NOTSENT_LOWAT 25
 #define TCP_QUEUE_SEQ 21
 #define TCP_QUICKACK 12
 #define TCP_REPAIR 19
+#define TCP_REPAIR_OFF 0
+#define TCP_REPAIR_OFF_NO_WP -1
+#define TCP_REPAIR_ON 1
 #define TCP_REPAIR_OPTIONS 22
 #define TCP_REPAIR_QUEUE 20
 #define TCP_REPAIR_WINDOW 29
@@ -2337,6 +2296,8 @@
 #define TH_SYN 0x02
 #define TH_URG 0x20
 #define TIMER_ABSTIME __WASI_SUBSCRIPTION_CLOCK_ABSTIME
+#define TIMESPEC_TO_TIMEVAL(tv,ts) ( (tv)->tv_sec = (ts)->tv_sec, (tv)->tv_usec = (ts)->tv_nsec / 1000, (void)0 )
+#define TIMEVAL_TO_TIMESPEC(tv,ts) ( (ts)->tv_sec = (tv)->tv_sec, (ts)->tv_nsec = (tv)->tv_usec * 1000, (void)0 )
 #define TIME_BAD TIME_ERROR
 #define TIME_DEL 2
 #define TIME_ERROR 5
@@ -2503,15 +2464,14 @@
 #define YESSTR 0x50002
 #define YXDOMAIN ns_r_yxdomain
 #define YXRRSET ns_r_yxrrset
-#define _AIO_H 
 #define _ALLOCA_H 
+#define _ALL_SOURCE 1
 #define _ARPA_FTP_H 
 #define _ARPA_INET_H 
 #define _ARPA_NAMESER_H 
 #define _ARPA_TELNET_H 
 #define _ARPA_TFTP_H 
 #define _AR_H 
-#define _BSD_SOURCE 1
 #define _BYTESWAP_H 
 #define _COMPLEX_H 
 #define _CPIO_H 
@@ -2574,6 +2534,7 @@
 #define _FTW_H 
 #define _GETOPT_H 
 #define _GLOB_H 
+#define _GNU_SOURCE 1
 #define _ICONV_H 
 #define _IFADDRS_H 
 #define _ILP32 1
@@ -2665,6 +2626,8 @@
 #define _POSIX_MAX_CANON 255
 #define _POSIX_MAX_INPUT 255
 #define _POSIX_MONOTONIC_CLOCK _POSIX_VERSION
+#define _POSIX_MQ_OPEN_MAX 8
+#define _POSIX_MQ_PRIO_MAX 32
 #define _POSIX_NAME_MAX 14
 #define _POSIX_NGROUPS_MAX 8
 #define _POSIX_NO_TRUNC 1
@@ -2708,7 +2671,6 @@
 #define _POSIX_V7_ILP32_OFFBIG (1)
 #define _POSIX_VDISABLE 0
 #define _POSIX_VERSION 200809L
-#define _PTHREAD_H 
 #define _PTRDIFF_T 
 #define _REGEX_H 
 #define _SCHED_H 
@@ -2914,7 +2876,6 @@
 #define _XOPEN_IOV_MAX 16
 #define _XOPEN_NAME_MAX 255
 #define _XOPEN_PATH_MAX 1024
-#define _XOPEN_SOURCE 700
 #define _XOPEN_UNIX 1
 #define _XOPEN_VERSION 700
 #define __ARE_4_EQUAL(a,b) (!( (0[a]-0[b]) | (1[a]-1[b]) | (2[a]-2[b]) | (3[a]-3[b]) ))
@@ -3678,6 +3639,7 @@
 #define acosh(x) __tg_real_complex(acosh, (x))
 #define alignas _Alignas
 #define alignof _Alignof
+#define alphasort64 alphasort
 #define and &&
 #define and_eq &=
 #define arp_hln ea_hdr.ar_hln
@@ -3699,6 +3661,7 @@
 #define betoh64(x) __bswap64(x)
 #define bitand &
 #define bitor |
+#define blkcnt64_t blkcnt_t
 #define bool _Bool
 #define bswap_16(x) __bswap_16(x)
 #define bswap_32(x) __bswap_32(x)
@@ -3720,8 +3683,10 @@
 #define creal(x) __tg_complex_retreal(creal, (x))
 #define crealf(x) ((float)(x))
 #define creall(x) ((long double)(x))
+#define creat64 creat
 #define d_fileno d_ino
 #define direct dirent
+#define dirent64 dirent
 #define erf(x) __tg_real(erf, (x))
 #define erfc(x) __tg_real(erfc, (x))
 #define errno errno
@@ -3731,13 +3696,29 @@
 #define fabs(x) __tg_real_complex_fabs(x)
 #define false 0
 #define fdim(x,y) __tg_real_2(fdim, (x), (y))
+#define fgetpos64 fgetpos
 #define floor(x) __tg_real(floor, (x))
 #define fma(x,y,z) __tg_real_fma((x), (y), (z))
 #define fmax(x,y) __tg_real_2(fmax, (x), (y))
 #define fmin(x,y) __tg_real_2(fmin, (x), (y))
 #define fmod(x,y) __tg_real_2(fmod, (x), (y))
+#define fopen64 fopen
 #define fpclassify(x) ( sizeof(x) == sizeof(float) ? __fpclassifyf(x) : sizeof(x) == sizeof(double) ? __fpclassify(x) : __fpclassifyl(x) )
+#define fpos64_t fpos_t
+#define freopen64 freopen
 #define frexp(x,y) __tg_real_2_1(frexp, (x), (y))
+#define fsblkcnt64_t fsblkcnt_t
+#define fseeko64 fseeko
+#define fsetpos64 fsetpos
+#define fsfilcnt64_t fsfilcnt_t
+#define fstat64 fstat
+#define fstatat64 fstatat
+#define ftello64 ftello
+#define ftruncate64 ftruncate
+#define getdents64 getdents
+#define glob64 glob
+#define glob64_t glob_t
+#define globfree64 globfree
 #define howmany(n,d) (((n)+((d)-1))/(d))
 #define htobe16(x) __bswap16(x)
 #define htobe32(x) __bswap32(x)
@@ -3792,6 +3773,7 @@
 #define ifr_qlen ifr_ifru.ifru_ivalue
 #define ifr_slave ifr_ifru.ifru_slave
 #define ilogb(x) __tg_real_nocast(ilogb, (x))
+#define ino64_t ino_t
 #define ip6_flow ip6_ctlun.ip6_un1.ip6_un1_flow
 #define ip6_hlim ip6_ctlun.ip6_un1.ip6_un1_hlim
 #define ip6_hops ip6_ctlun.ip6_un1.ip6_un1_hlim
@@ -3829,6 +3811,7 @@
 #define lgamma(x) __tg_real(lgamma, (x))
 #define llrint(x) __tg_real_nocast(llrint, (x))
 #define llround(x) __tg_real_nocast(llround, (x))
+#define loff_t off_t
 #define log(x) __tg_real_complex(log, (x))
 #define log10(x) __tg_real(log10, (x))
 #define log1p(x) __tg_real(log1p, (x))
@@ -3836,6 +3819,8 @@
 #define logb(x) __tg_real(logb, (x))
 #define lrint(x) __tg_real_nocast(lrint, (x))
 #define lround(x) __tg_real_nocast(lround, (x))
+#define lseek64 lseek
+#define lstat64 lstat
 #define major(x) ((unsigned)( (((x)>>31>>1) & 0xfffff000) | (((x)>>8) & 0x00000fff) ))
 #define makedev(x,y) ( (((x)&0xfffff000ULL) << 32) | (((x)&0x00000fffULL) << 8) | (((y)&0xffffff00ULL) << 12) | (((y)&0x000000ffULL)) )
 #define math_errhandling 2
@@ -3870,6 +3855,7 @@
 #define nearbyint(x) __tg_real(nearbyint, (x))
 #define nextafter(x,y) __tg_real_2(nextafter, (x), (y))
 #define nexttoward(x,y) __tg_real_2(nexttoward, (x), (y))
+#define nftw64 nftw
 #define no_argument 0
 #define noreturn _Noreturn
 #define not !
@@ -3891,15 +3877,23 @@
 #define ns_t_rr_p(t) (!ns_t_qt_p(t) && !ns_t_mrr_p(t))
 #define ns_t_udp_p(t) ((t) != ns_t_axfr && (t) != ns_t_zxfr)
 #define ns_t_xfr_p(t) ((t) == ns_t_axfr || (t) == ns_t_ixfr || (t) == ns_t_zxfr)
+#define off64_t off_t
 #define offsetof(t,d) __builtin_offsetof(t, d)
+#define open64 open
+#define openat64 openat
 #define optional_argument 2
 #define or ||
 #define or_eq |=
+#define posix_fadvise64 posix_fadvise
+#define posix_fallocate64 posix_fallocate
 #define pow(x,y) __tg_real_complex_pow((x), (y))
 #define powerof2(n) !(((n)-1) & (n))
-#define pthread_cleanup_pop(r) _pthread_cleanup_pop(&__cb, (r)); } while(0)
-#define pthread_cleanup_push(f,x) do { struct __ptcb __cb; _pthread_cleanup_push(&__cb, f, x);
-#define pthread_equal(x,y) ((x)==(y))
+#define pread64 pread
+#define preadv64 preadv
+#define pwrite64 pwrite
+#define pwritev64 pwritev
+#define readdir64 readdir
+#define readdir64_r readdir_r
 #define remainder(x,y) __tg_real_2(remainder, (x), (y))
 #define remquo(x,y,z) __tg_real_remquo((x), (y), (z))
 #define required_argument 1
@@ -3915,6 +3909,7 @@
 #define sa_sigaction __sa_handler.sa_sigaction
 #define scalbln(x,y) __tg_real_2_1(scalbln, (x), (y))
 #define scalbn(x,y) __tg_real_2_1(scalbn, (x), (y))
+#define scandir64 scandir
 #define setbit(x,i) __bitop(x,i,|=)
 #define si_addr __si_fields.__sigfault.si_addr
 #define si_addr_lsb __si_fields.__sigfault.si_addr_lsb
@@ -3943,10 +3938,12 @@
 #define st_atime st_atim.tv_sec
 #define st_ctime st_ctim.tv_sec
 #define st_mtime st_mtim.tv_sec
+#define stat64 stat
 #define static_assert _Static_assert
 #define stderr (stderr)
 #define stdin (stdin)
 #define stdout (stdout)
+#define strdupa(x) strcpy(alloca(strlen(x)+1),x)
 #define tan(x) __tg_real_complex(tan, (x))
 #define tanh(x) __tg_real_complex(tanh, (x))
 #define telcmds ((char [][6]){ "EOF", "SUSP", "ABORT", "EOR", "SE", "NOP", "DMARK", "BRK", "IP", "AO", "AYT", "EC", "EL", "GA", "SB", "WILL", "WONT", "DO", "DONT", "IAC", 0 })
@@ -3964,10 +3961,15 @@
 #define timersub(s,t,a) (void) ( (a)->tv_sec = (s)->tv_sec - (t)->tv_sec, ((a)->tv_usec = (s)->tv_usec - (t)->tv_usec) < 0 && ((a)->tv_usec += 1000000, (a)->tv_sec--) )
 #define true 1
 #define trunc(x) __tg_real(trunc, (x))
+#define uh_dport dest
+#define uh_sport source
+#define uh_sum check
+#define uh_ulen len
 #define va_arg(ap,type) __builtin_va_arg(ap, type)
 #define va_copy(dest,src) __builtin_va_copy(dest, src)
 #define va_end(ap) __builtin_va_end(ap)
 #define va_start(ap,param) __builtin_va_start(ap, param)
+#define versionsort64 versionsort
 #define xEOF 236
 #define xor ^
 #define xor_eq ^=

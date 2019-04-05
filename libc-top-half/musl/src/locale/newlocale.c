@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #include <pthread.h>
+#endif
 #include "locale_impl.h"
 
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)

@@ -4,12 +4,16 @@
 #endif
 #include "stdio_impl.h"
 
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 static int dummy(int fd)
 {
 	return fd;
 }
 
 weak_alias(dummy, __aio_close);
+#else
+#define __aio_close(fd) (fd)
+#endif
 
 int __stdio_close(FILE *f)
 {

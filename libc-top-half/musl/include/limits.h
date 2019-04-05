@@ -39,7 +39,9 @@
 #if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) \
  || defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no pipes */
 #define PIPE_BUF 4096
+#endif
 #define FILESIZEBITS 64
 #define NAME_MAX 255
 #define PATH_MAX 4096
@@ -55,27 +57,37 @@
 
 /* Implementation choices... */
 
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #define PTHREAD_KEYS_MAX 128
 #define PTHREAD_STACK_MIN 2048
 #define PTHREAD_DESTRUCTOR_ITERATIONS 4
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no semaphores */
 #define SEM_VALUE_MAX 0x7fffffff
 #define SEM_NSEMS_MAX 256
+#endif
 #define DELAYTIMER_MAX 0x7fffffff
 #ifdef __wasilibc_unmodified_upstream /* WASI has no mq */
 #define MQ_PRIO_MAX 32768
 #endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no usernames */
 #define LOGIN_NAME_MAX 256
+#endif
 
 /* Arbitrary numbers... */
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no shell commands */
 #define BC_BASE_MAX 99
 #define BC_DIM_MAX 2048
 #define BC_SCALE_MAX 99
 #define BC_STRING_MAX 1000
+#endif
 #define CHARCLASS_NAME_MAX 14
 #define COLL_WEIGHTS_MAX 2
+#ifdef __wasilibc_unmodified_upstream /* WASI has no shell commands */
 #define EXPR_NEST_MAX 32
 #define LINE_MAX 4096
+#endif
 #define RE_DUP_MAX 255
 
 #define NL_ARGMAX 9
@@ -116,10 +128,8 @@
 #define _POSIX_LOGIN_NAME_MAX   9
 #define _POSIX_MAX_CANON        255
 #define _POSIX_MAX_INPUT        255
-#ifdef __wasilibc_unmodified_upstream /* WASI has no mq */
 #define _POSIX_MQ_OPEN_MAX      8
 #define _POSIX_MQ_PRIO_MAX      32
-#endif
 #define _POSIX_NAME_MAX         14
 #define _POSIX_NGROUPS_MAX      8
 #define _POSIX_OPEN_MAX         20

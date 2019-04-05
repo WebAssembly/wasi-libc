@@ -5,7 +5,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <limits.h>
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #include <pthread.h>
+#endif
 
 struct history
 {

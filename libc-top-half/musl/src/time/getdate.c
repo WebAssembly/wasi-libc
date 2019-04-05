@@ -1,5 +1,7 @@
 #include <time.h>
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #include <pthread.h>
+#endif
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>

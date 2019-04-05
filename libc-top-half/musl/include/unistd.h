@@ -243,9 +243,13 @@ int eaccess(const char *, int);
 #define lseek64 lseek
 #define pread64 pread
 #define pwrite64 pwrite
+#ifdef __wasilibc_unmodified_upstream /* WASI has no truncate */
 #define truncate64 truncate
+#endif
 #define ftruncate64 ftruncate
+#ifdef __wasilibc_unmodified_upstream /* WASI has no POSIX file locking */
 #define lockf64 lockf
+#endif
 #define off64_t off_t
 #endif
 

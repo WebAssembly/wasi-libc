@@ -3612,9 +3612,9 @@
 #define __wasm32 1
 #define __wasm32__ 1
 #define __wasm__ 1
-#define __wasm___functions_malloc_h 
-#define __wasm___functions_memcpy_h 
 #define __wasm_basics___errno_h 
+#define __wasm_basics___functions_malloc_h 
+#define __wasm_basics___functions_memcpy_h 
 #define __wasm_basics___include_inttypes_h 
 #define __wasm_basics___macro_PAGESIZE_h 
 #define __wasm_basics___struct_stat_h 

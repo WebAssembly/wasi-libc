@@ -2820,7 +2820,6 @@
 #define _SIGNAL_H 
 #define _SIZE_T 
 #define _STDALIGN_H 
-#define _STDARG_H 
 #define _STDBOOL_H 
 #define _STDC_PREDEF_H 
 #define _STDDEF_H 

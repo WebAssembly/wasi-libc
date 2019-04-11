@@ -1,6 +1,10 @@
 #ifndef	_STRING_H
 #define	_STRING_H
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
+#else
+#include <__header_string.h>
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -27,11 +31,15 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 void *memcpy (void *__restrict, const void *__restrict, size_t);
 void *memmove (void *, const void *, size_t);
 void *memset (void *, int, size_t);
+#endif
 int memcmp (const void *, const void *, size_t);
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 void *memchr (const void *, int, size_t);
+#endif
 
 char *strcpy (char *__restrict, const char *__restrict);
 char *strncpy (char *__restrict, const char *__restrict, size_t);
@@ -39,7 +47,9 @@ char *strncpy (char *__restrict, const char *__restrict, size_t);
 char *strcat (char *__restrict, const char *__restrict);
 char *strncat (char *__restrict, const char *__restrict, size_t);
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 int strcmp (const char *, const char *);
+#endif
 int strncmp (const char *, const char *, size_t);
 
 int strcoll (const char *, const char *);
@@ -54,7 +64,9 @@ char *strpbrk (const char *, const char *);
 char *strstr (const char *, const char *);
 char *strtok (char *__restrict, const char *__restrict);
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 size_t strlen (const char *);
+#endif
 
 char *strerror (int);
 
@@ -70,7 +82,9 @@ int strerror_r (int, char *, size_t);
 char *stpcpy(char *__restrict, const char *__restrict);
 char *stpncpy(char *__restrict, const char *__restrict, size_t);
 size_t strnlen (const char *, size_t);
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 char *strdup (const char *);
+#endif
 char *strndup (const char *, size_t);
 char *strsignal(int);
 char *strerror_l (int, locale_t);

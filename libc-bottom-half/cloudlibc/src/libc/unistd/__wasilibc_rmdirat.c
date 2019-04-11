@@ -1,5 +1,6 @@
 #include <common/errno.h>
 #include <wasi/core.h>
+#include <wasi/libc.h>
 #include <errno.h>
 #include <string.h>
 

@@ -1,6 +1,11 @@
 #ifndef _STDLIB_H
 #define _STDLIB_H
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
+#else
+#include <__functions_malloc.h>
+#include <__header_stdlib.h>
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -14,7 +19,6 @@ extern "C" {
 #define NULL ((void*)0)
 #endif
 #else
-#include <__header_stdlib.h>
 #define __need_NULL
 #include <stddef.h>
 #endif
@@ -41,10 +45,12 @@ unsigned long long strtoull (const char *__restrict, char **__restrict, int);
 int rand (void);
 void srand (unsigned);
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 void *malloc (size_t);
 void *calloc (size_t, size_t);
 void *realloc (void *, size_t);
 void free (void *);
+#endif
 void *aligned_alloc(size_t, size_t);
 
 _Noreturn void abort (void);

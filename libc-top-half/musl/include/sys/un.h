@@ -24,7 +24,11 @@ struct sockaddr_un {
 #endif
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
+#ifdef __wasilibc_unmodified_upstream /* Declare strlen with the same attributes as <string.h> uses */
 size_t strlen(const char *);
+#else
+size_t strlen(const char *) __attribute__((__nothrow__, __leaf__, __pure__, __nonnull__(1)));
+#endif
 #define SUN_LEN(s) (2+strlen((s)->sun_path))
 #endif
 

@@ -4,6 +4,7 @@
  */
 
 #include <stddef.h>
+#include <malloc.h>
 
 /* Define configuration macros for dlmalloc. */
 
@@ -54,7 +55,7 @@ void *malloc(size_t size) {
 }
 
 void free(void *ptr) {
-    return dlfree(ptr);
+    dlfree(ptr);
 }
 
 void *calloc(size_t nmemb, size_t size) {

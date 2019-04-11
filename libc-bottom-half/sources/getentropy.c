@@ -1,5 +1,6 @@
 #include <wasi/core.h>
 #include <errno.h>
+#include <unistd.h>
 
 #ifdef _REENTRANT
 #error With threads support, getentropy is not intended to be a cancellation point.

@@ -17,8 +17,8 @@ static int locking_getc(FILE *f)
 
 static inline int do_getc(FILE *f)
 {
-	int l = f->lock;
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
+	int l = f->lock;
 	if (l < 0 || l && (l & ~MAYBE_WAITERS) == __pthread_self()->tid)
 		return getc_unlocked(f);
 	return locking_getc(f);

@@ -1,5 +1,5 @@
-#ifndef __wasm_stdlib_h
-#define __wasm_stdlib_h
+#ifndef __wasm_basics_stdlib_h
+#define __wasm_basics_stdlib_h
 
 /*
  * Include the real implementation, which is factored into a separate file so

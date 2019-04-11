@@ -1,5 +1,5 @@
-#ifndef __wasm___functions_memcpy_h
-#define __wasm___functions_memcpy_h
+#ifndef __wasm_basics___functions_memcpy_h
+#define __wasm_basics___functions_memcpy_h
 
 #define __need_size_t
 #define __need_NULL

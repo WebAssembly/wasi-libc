@@ -335,15 +335,15 @@ struct sockaddr_storage {
 #include <__struct_sockaddr_storage.h>
 #endif
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no socket/socketpair */
 int socket (int, int, int);
-#ifdef __wasilibc_unmodified_upstream /* WASI has no socketpair */
 int socketpair (int, int, int, int [2]);
 #endif
 
 int shutdown (int, int);
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no bind/connect/listen/accept */
 int bind (int, const struct sockaddr *, socklen_t);
-#ifdef __wasilibc_unmodified_upstream /* WASI has no connect/listen/accept */
 int connect (int, const struct sockaddr *, socklen_t);
 int listen (int, int);
 int accept (int, struct sockaddr *__restrict, socklen_t *__restrict);

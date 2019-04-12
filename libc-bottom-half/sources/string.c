@@ -28,13 +28,13 @@ int strcmp(const char *a, const char *b) {
 }
 
 void *memchr(const void *ptr, int c, size_t len) {
-	const unsigned char *p = ptr;
-	while (len != 0 && *p != (unsigned char)c) {
-            ++p;
-            --len;
-        }
-        if (len == 0) {
-            return NULL;
-        }
-	return (void *)p;
+    const unsigned char *p = ptr;
+    while (len != 0 && *p != (unsigned char)c) {
+        ++p;
+        --len;
+    }
+    if (len == 0) {
+        return NULL;
+    }
+    return (void *)p;
 }

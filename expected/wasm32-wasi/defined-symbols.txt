@@ -888,7 +888,6 @@ sinhl
 sinl
 sleep
 snprintf
-socket
 sprintf
 sqrt
 sqrtf

@@ -13,10 +13,6 @@ static_assert(CLOCKS_PER_SEC == NSEC_PER_SEC,
 
 clock_t clock(void) {
   __wasi_timestamp_t ts = 0;
-#ifdef __wasilibc_unmodified_upstream // bug fix
-#else
-  (void)
-#endif
-  __wasi_clock_time_get(__WASI_CLOCK_PROCESS_CPUTIME_ID, 0, &ts);
+  (void)__wasi_clock_time_get(__WASI_CLOCK_PROCESS_CPUTIME_ID, 0, &ts);
   return ts;
 }

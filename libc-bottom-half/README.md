@@ -13,7 +13,7 @@ libpreopen, and we have several customizations for use in a WebAssembly sysroot.
 
 The upstream repositories and versions used here are:
 
-cloudlibc - https://github.com/NuxiNL/cloudlibc 92cb7670f864adc625c24eb214ff1c6d888adf6b
+cloudlibc - https://github.com/NuxiNL/cloudlibc 8835639f27fc42d32096d59d294a0bbb857dc368
 libpreopen - https://github.com/musec/libpreopen 8265fc50b9db3730c250597bdd084f1e728f3e48
 
 Whole files which are unused are omitted. Changes to upstream code are wrapped

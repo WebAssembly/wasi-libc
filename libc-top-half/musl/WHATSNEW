@@ -2036,3 +2036,44 @@ bugs fixed:
 arch-specfic bugs fixed:
 - soft deadlocks (missing futex wake) on powerpc locking
 - dlsym returned wrong address for thread-local symbols on ppc/mips/m68k
+
+
+1.1.22 release notes
+
+new features:
+- priority-inheritance mutexes
+- membarrier syscall, pre-registration to use it, fallback emulation
+- header-level support for new linux features in 4.19, 4.20, 5.0
+
+major internal changes:
+- complete, async-safe view of all existent threads as global list
+- robust __synccall based on new thread list
+- new dynamic TLS is installed synchronously at dlopen
+- TLSDESC resolver functions no longer make bad ABI assumptions to call C
+- resolved shared library dependencies are now recorded
+
+compatibility & conformance:
+- dependency-order shared library constructor execution
+- sigaltstack no longer rejects SS_AUTODISARM, future flags
+- FILE is now a complete (dummy) type in pre-C11 feature profiles
+- setvbuf reports failure on invalid arguments
+- TSVTX is exposed unconditionally in tar.h
+- multithreaded set*id() no longer depends on /proc
+- key slot reuse after pthread_key_delete no longer depends on /proc
+
+bugs fixed:
+- failures in multithreaded set*id() with concurrent thread creation/exit
+- interposed free was called from invalid/inconsistent contexts
+- freeaddrinfo performed invalid free of some partial results lists
+- dlsym dependency order search had false negatives and false positives
+- dn_skipname gave wrong results for labels with 8-bit content
+- dcngettext clobbered errno, often breaking printing of error messages
+- sscanf read past end of buffer under certain conditions (1.1.21 regression)
+- pthread_key_create spuriously failed under race condition (1.1.21 regression)
+- fdopendir wrongly succeeded with O_PATH file descriptors
+- gets behaved incorrectly in presence of null bytes
+- namespace violations in c11 tsd and mutex function dependencies
+- incorrect prototype for makecontext (unimplemented)
+
+arch-specfic bugs fixed:
+- s390x had wrong values for POSIX_FADV_DONTNEED/_NOREUSE

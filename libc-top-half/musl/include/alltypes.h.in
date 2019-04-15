@@ -62,6 +62,9 @@ TYPEDEF struct { unsigned __attr; } pthread_condattr_t;
 TYPEDEF struct { unsigned __attr; } pthread_barrierattr_t;
 TYPEDEF struct { unsigned __attr[2]; } pthread_rwlockattr_t;
 
+#ifdef __wasilibc_unmodified_upstream /* WASI doesn't need to define FILE as a complete type */
+STRUCT _IO_FILE { char __x; };
+#endif
 TYPEDEF struct _IO_FILE FILE;
 
 TYPEDEF struct __mbstate_t { unsigned __opaque1, __opaque2; } mbstate_t;

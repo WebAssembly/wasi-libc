@@ -17,6 +17,8 @@
 #include <pthread.h>
 #include <ctype.h>
 #include <dlfcn.h>
+#include <semaphore.h>
+#include <sys/membarrier.h>
 #include "pthread_impl.h"
 #include "libc.h"
 #include "dynlink.h"
@@ -26,6 +28,9 @@ static void error(const char *, ...);
 
 #define MAXP2(a,b) (-(-(a)&-(b)))
 #define ALIGN(x,y) ((x)+(y)-1 & -(y))
+
+#define container_of(p,t,m) ((t*)((char *)(p)-offsetof(t,m)))
+#define countof(a) ((sizeof (a))/(sizeof (a)[0]))
 
 struct debug {
 	int ver;
@@ -67,7 +72,13 @@ struct dso {
 	char relocated;
 	char constructed;
 	char kernel_mapped;
+	char mark;
+	char bfs_built;
+	char runtime_loaded;
 	struct dso **deps, *needed_by;
+	size_t ndeps_direct;
+	size_t next_dep;
+	int ctor_visitor;
 	char *rpath_orig, *rpath;
 	struct tls_module tls;
 	size_t tls_id;
@@ -114,16 +125,21 @@ static int runtime;
 static int ldd_mode;
 static int ldso_fail;
 static int noload;
+static int shutting_down;
 static jmp_buf *rtld_fail;
 static pthread_rwlock_t lock;
 static struct debug debug;
 static struct tls_module *tls_tail;
 static size_t tls_cnt, tls_offset, tls_align = MIN_TLS_ALIGN;
 static size_t static_tls_cnt;
-static pthread_mutex_t init_fini_lock = { ._m_type = PTHREAD_MUTEX_RECURSIVE };
+static pthread_mutex_t init_fini_lock;
+static pthread_cond_t ctor_cond;
+static struct dso *builtin_deps[2];
+static struct dso *const no_deps[1];
+static struct dso *builtin_ctor_queue[4];
+static struct dso **main_ctor_queue;
 static struct fdpic_loadmap *app_loadmap;
 static struct fdpic_dummy_loadmap app_dummy_loadmap;
-static struct dso *const nodeps_dummy;
 
 struct debug *_dl_debug_addr = &debug;
 
@@ -904,7 +920,7 @@ static void *dl_mmap(size_t n)
 #else
 	p = (void *)__syscall(SYS_mmap, 0, n, prot, flags, -1, 0);
 #endif
-	return p == MAP_FAILED ? 0 : p;
+	return (unsigned long)p > -4096UL ? 0 : p;
 }
 
 static void makefuncdescs(struct dso *p)
@@ -1101,6 +1117,7 @@ static struct dso *load_library(const char *name, struct dso *needed_by)
 	p->ino = st.st_ino;
 	p->needed_by = needed_by;
 	p->name = p->buf;
+	p->runtime_loaded = runtime;
 	strcpy(p->name, pathname);
 	/* Add a shortname only if name arg was not an explicit pathname. */
 	if (pathname != name) p->shortname = strrchr(p->name, '/')+1;
@@ -1136,30 +1153,99 @@ static struct dso *load_library(const char *name, struct dso *needed_by)
 	return p;
 }
 
+static void load_direct_deps(struct dso *p)
+{
+	size_t i, cnt=0;
+
+	if (p->deps) return;
+	/* For head, all preloads are direct pseudo-dependencies.
+	 * Count and include them now to avoid realloc later. */
+	if (p==head) for (struct dso *q=p->next; q; q=q->next)
+		cnt++;
+	for (i=0; p->dynv[i]; i+=2)
+		if (p->dynv[i] == DT_NEEDED) cnt++;
+	/* Use builtin buffer for apps with no external deps, to
+	 * preserve property of no runtime failure paths. */
+	p->deps = (p==head && cnt<2) ? builtin_deps :
+		calloc(cnt+1, sizeof *p->deps);
+	if (!p->deps) {
+		error("Error loading dependencies for %s", p->name);
+		if (runtime) longjmp(*rtld_fail, 1);
+	}
+	cnt=0;
+	if (p==head) for (struct dso *q=p->next; q; q=q->next)
+		p->deps[cnt++] = q;
+	for (i=0; p->dynv[i]; i+=2) {
+		if (p->dynv[i] != DT_NEEDED) continue;
+		struct dso *dep = load_library(p->strings + p->dynv[i+1], p);
+		if (!dep) {
+			error("Error loading shared library %s: %m (needed by %s)",
+				p->strings + p->dynv[i+1], p->name);
+			if (runtime) longjmp(*rtld_fail, 1);
+			continue;
+		}
+		p->deps[cnt++] = dep;
+	}
+	p->deps[cnt] = 0;
+	p->ndeps_direct = cnt;
+}
+
 static void load_deps(struct dso *p)
 {
-	size_t i, ndeps=0;
-	struct dso ***deps = &p->deps, **tmp, *dep;
-	for (; p; p=p->next) {
-		for (i=0; p->dynv[i]; i+=2) {
-			if (p->dynv[i] != DT_NEEDED) continue;
-			dep = load_library(p->strings + p->dynv[i+1], p);
-			if (!dep) {
-				error("Error loading shared library %s: %m (needed by %s)",
-					p->strings + p->dynv[i+1], p->name);
-				if (runtime) longjmp(*rtld_fail, 1);
-				continue;
-			}
-			if (runtime) {
-				tmp = realloc(*deps, sizeof(*tmp)*(ndeps+2));
-				if (!tmp) longjmp(*rtld_fail, 1);
-				tmp[ndeps++] = dep;
-				tmp[ndeps] = 0;
-				*deps = tmp;
-			}
+	if (p->deps) return;
+	for (; p; p=p->next)
+		load_direct_deps(p);
+}
+
+static void extend_bfs_deps(struct dso *p)
+{
+	size_t i, j, cnt, ndeps_all;
+	struct dso **tmp;
+
+	/* Can't use realloc if the original p->deps was allocated at
+	 * program entry and malloc has been replaced, or if it's
+	 * the builtin non-allocated trivial main program deps array. */
+	int no_realloc = (__malloc_replaced && !p->runtime_loaded)
+		|| p->deps == builtin_deps;
+
+	if (p->bfs_built) return;
+	ndeps_all = p->ndeps_direct;
+
+	/* Mark existing (direct) deps so they won't be duplicated. */
+	for (i=0; p->deps[i]; i++)
+		p->deps[i]->mark = 1;
+
+	/* For each dependency already in the list, copy its list of direct
+	 * dependencies to the list, excluding any items already in the
+	 * list. Note that the list this loop iterates over will grow during
+	 * the loop, but since duplicates are excluded, growth is bounded. */
+	for (i=0; p->deps[i]; i++) {
+		struct dso *dep = p->deps[i];
+		for (j=cnt=0; j<dep->ndeps_direct; j++)
+			if (!dep->deps[j]->mark) cnt++;
+		tmp = no_realloc ? 
+			malloc(sizeof(*tmp) * (ndeps_all+cnt+1)) :
+			realloc(p->deps, sizeof(*tmp) * (ndeps_all+cnt+1));
+		if (!tmp) {
+			error("Error recording dependencies for %s", p->name);
+			if (runtime) longjmp(*rtld_fail, 1);
+			continue;
 		}
+		if (no_realloc) {
+			memcpy(tmp, p->deps, sizeof(*tmp) * (ndeps_all+1));
+			no_realloc = 0;
+		}
+		p->deps = tmp;
+		for (j=0; j<dep->ndeps_direct; j++) {
+			if (dep->deps[j]->mark) continue;
+			dep->deps[j]->mark = 1;
+			p->deps[ndeps_all++] = dep->deps[j];
+		}
+		p->deps[ndeps_all] = 0;
 	}
-	if (!*deps) *deps = (struct dso **)&nodeps_dummy;
+	p->bfs_built = 1;
+	for (p=head; p; p=p->next)
+		p->mark = 0;
 }
 
 static void load_preload(char *s)
@@ -1275,7 +1361,18 @@ void __libc_exit_fini()
 {
 	struct dso *p;
 	size_t dyn[DYN_CNT];
+	int self = __pthread_self()->tid;
+
+	/* Take both locks before setting shutting_down, so that
+	 * either lock is sufficient to read its value. The lock
+	 * order matches that in dlopen to avoid deadlock. */
+	pthread_rwlock_wrlock(&lock);
+	pthread_mutex_lock(&init_fini_lock);
+	shutting_down = 1;
+	pthread_rwlock_unlock(&lock);
 	for (p=fini_head; p; p=p->fini_next) {
+		while (p->ctor_visitor && p->ctor_visitor!=self)
+			pthread_cond_wait(&ctor_cond, &init_fini_lock);
 		if (!p->constructed) continue;
 		decode_vec(p->dynv, dyn, DYN_CNT);
 		if (dyn[0] & (1<<DT_FINI_ARRAY)) {
@@ -1290,22 +1387,90 @@ void __libc_exit_fini()
 	}
 }
 
-static void do_init_fini(struct dso *p)
+static struct dso **queue_ctors(struct dso *dso)
 {
-	size_t dyn[DYN_CNT];
-	int need_locking = libc.threads_minus_1;
-	/* Allow recursive calls that arise when a library calls
-	 * dlopen from one of its constructors, but block any
-	 * other threads until all ctors have finished. */
-	if (need_locking) pthread_mutex_lock(&init_fini_lock);
-	for (; p; p=p->prev) {
-		if (p->constructed) continue;
-		p->constructed = 1;
+	size_t cnt, qpos, spos, i;
+	struct dso *p, **queue, **stack;
+
+	if (ldd_mode) return 0;
+
+	/* Bound on queue size is the total number of indirect deps.
+	 * If a bfs deps list was built, we can use it. Otherwise,
+	 * bound by the total number of DSOs, which is always safe and
+	 * is reasonable we use it (for main app at startup). */
+	if (dso->bfs_built) {
+		for (cnt=0; dso->deps[cnt]; cnt++)
+			dso->deps[cnt]->mark = 0;
+		cnt++; /* self, not included in deps */
+	} else {
+		for (cnt=0, p=head; p; cnt++, p=p->next)
+			p->mark = 0;
+	}
+	cnt++; /* termination slot */
+	if (dso==head && cnt <= countof(builtin_ctor_queue))
+		queue = builtin_ctor_queue;
+	else
+		queue = calloc(cnt, sizeof *queue);
+
+	if (!queue) {
+		error("Error allocating constructor queue: %m\n");
+		if (runtime) longjmp(*rtld_fail, 1);
+		return 0;
+	}
+
+	/* Opposite ends of the allocated buffer serve as an output queue
+	 * and a working stack. Setup initial stack with just the argument
+	 * dso and initial queue empty... */
+	stack = queue;
+	qpos = 0;
+	spos = cnt;
+	stack[--spos] = dso;
+	dso->next_dep = 0;
+	dso->mark = 1;
+
+	/* Then perform pseudo-DFS sort, but ignoring circular deps. */
+	while (spos<cnt) {
+		p = stack[spos++];
+		while (p->next_dep < p->ndeps_direct) {
+			if (p->deps[p->next_dep]->mark) {
+				p->next_dep++;
+			} else {
+				stack[--spos] = p;
+				p = p->deps[p->next_dep];
+				p->next_dep = 0;
+				p->mark = 1;
+			}
+		}
+		queue[qpos++] = p;
+	}
+	queue[qpos] = 0;
+	for (i=0; i<qpos; i++) queue[i]->mark = 0;
+
+	return queue;
+}
+
+static void do_init_fini(struct dso **queue)
+{
+	struct dso *p;
+	size_t dyn[DYN_CNT], i;
+	int self = __pthread_self()->tid;
+
+	pthread_mutex_lock(&init_fini_lock);
+	for (i=0; (p=queue[i]); i++) {
+		while ((p->ctor_visitor && p->ctor_visitor!=self) || shutting_down)
+			pthread_cond_wait(&ctor_cond, &init_fini_lock);
+		if (p->ctor_visitor || p->constructed)
+			continue;
+		p->ctor_visitor = self;
+		
 		decode_vec(p->dynv, dyn, DYN_CNT);
 		if (dyn[0] & ((1<<DT_FINI) | (1<<DT_FINI_ARRAY))) {
 			p->fini_next = fini_head;
 			fini_head = p;
 		}
+
+		pthread_mutex_unlock(&init_fini_lock);
+
 #ifndef NO_LEGACY_INITFINI
 		if ((dyn[0] & (1<<DT_INIT)) && dyn[DT_INIT])
 			fpaddr(p, dyn[DT_INIT])();
@@ -1315,17 +1480,21 @@ static void do_init_fini(struct dso *p)
 			size_t *fn = laddr(p, dyn[DT_INIT_ARRAY]);
 			while (n--) ((void (*)(void))*fn++)();
 		}
-		if (!need_locking && libc.threads_minus_1) {
-			need_locking = 1;
-			pthread_mutex_lock(&init_fini_lock);
-		}
+
+		pthread_mutex_lock(&init_fini_lock);
+		p->ctor_visitor = 0;
+		p->constructed = 1;
+		pthread_cond_broadcast(&ctor_cond);
 	}
-	if (need_locking) pthread_mutex_unlock(&init_fini_lock);
+	pthread_mutex_unlock(&init_fini_lock);
 }
 
 void __libc_start_init(void)
 {
-	do_init_fini(tail);
+	do_init_fini(main_ctor_queue);
+	if (!__malloc_replaced && main_ctor_queue != builtin_ctor_queue)
+		free(main_ctor_queue);
+	main_ctor_queue = 0;
 }
 
 static void dl_debug_state(void)
@@ -1338,48 +1507,6 @@ void __init_tls(size_t *auxv)
 {
 }
 
-hidden void *__tls_get_new(tls_mod_off_t *v)
-{
-	pthread_t self = __pthread_self();
-
-	/* Block signals to make accessing new TLS async-signal-safe */
-	sigset_t set;
-	__block_all_sigs(&set);
-	if (v[0] <= self->dtv[0]) {
-		__restore_sigs(&set);
-		return (void *)(self->dtv[v[0]] + v[1]);
-	}
-
-	/* This is safe without any locks held because, if the caller
-	 * is able to request the Nth entry of the DTV, the DSO list
-	 * must be valid at least that far out and it was synchronized
-	 * at program startup or by an already-completed call to dlopen. */
-	struct dso *p;
-	for (p=head; p->tls_id != v[0]; p=p->next);
-
-	/* Get new DTV space from new DSO */
-	uintptr_t *newdtv = p->new_dtv +
-		(v[0]+1)*a_fetch_add(&p->new_dtv_idx,1);
-	memcpy(newdtv, self->dtv, (self->dtv[0]+1) * sizeof(uintptr_t));
-	newdtv[0] = v[0];
-	self->dtv = self->dtv_copy = newdtv;
-
-	/* Get new TLS memory from all new DSOs up to the requested one */
-	unsigned char *mem;
-	for (p=head; ; p=p->next) {
-		if (!p->tls_id || self->dtv[p->tls_id]) continue;
-		mem = p->new_tls + (p->tls.size + p->tls.align)
-			* a_fetch_add(&p->new_tls_idx,1);
-		mem += ((uintptr_t)p->tls.image - (uintptr_t)mem)
-			& (p->tls.align-1);
-		self->dtv[p->tls_id] = (uintptr_t)mem + DTP_OFFSET;
-		memcpy(mem, p->tls.image, p->tls.len);
-		if (p->tls_id == v[0]) break;
-	}
-	__restore_sigs(&set);
-	return mem + v[1] + DTP_OFFSET;
-}
-
 static void update_tls_size()
 {
 	libc.tls_cnt = tls_cnt;
@@ -1390,6 +1517,56 @@ static void update_tls_size()
 		sizeof(struct pthread) +
 		tls_align * 2,
 	tls_align);
+}
+
+static void install_new_tls(void)
+{
+	sigset_t set;
+	pthread_t self = __pthread_self(), td;
+	struct dso *dtv_provider = container_of(tls_tail, struct dso, tls);
+	uintptr_t (*newdtv)[tls_cnt+1] = (void *)dtv_provider->new_dtv;
+	struct dso *p;
+	size_t i, j;
+	size_t old_cnt = self->dtv[0];
+
+	__block_app_sigs(&set);
+	__tl_lock();
+	/* Copy existing dtv contents from all existing threads. */
+	for (i=0, td=self; !i || td!=self; i++, td=td->next) {
+		memcpy(newdtv+i, td->dtv,
+			(old_cnt+1)*sizeof(uintptr_t));
+		newdtv[i][0] = tls_cnt;
+	}
+	/* Install new dtls into the enlarged, uninstalled dtv copies. */
+	for (p=head; ; p=p->next) {
+		if (p->tls_id <= old_cnt) continue;
+		unsigned char *mem = p->new_tls;
+		for (j=0; j<i; j++) {
+			unsigned char *new = mem;
+			new += ((uintptr_t)p->tls.image - (uintptr_t)mem)
+				& (p->tls.align-1);
+			memcpy(new, p->tls.image, p->tls.len);
+			newdtv[j][p->tls_id] =
+				(uintptr_t)new + DTP_OFFSET;
+			mem += p->tls.size + p->tls.align;
+		}
+		if (p->tls_id == tls_cnt) break;
+	}
+
+	/* Broadcast barrier to ensure contents of new dtv is visible
+	 * if the new dtv pointer is. The __membarrier function has a
+	 * fallback emulation using signals for kernels that lack the
+	 * feature at the syscall level. */
+
+	__membarrier(MEMBARRIER_CMD_PRIVATE_EXPEDITED, 0);
+
+	/* Install new dtv for each thread. */
+	for (j=0, td=self; !j || td!=self; j++, td=td->next) {
+		td->dtv = td->dtv_copy = newdtv[j];
+	}
+
+	__tl_unlock();
+	__restore_sigs(&set);
 }
 
 /* Stage 1 of the dynamic linker is defined in dlstart.c. It calls the
@@ -1650,6 +1827,7 @@ _Noreturn void __dls3(size_t *sp)
 	reclaim_gaps(&ldso);
 
 	/* Load preload/needed libraries, add symbols to global namespace. */
+	ldso.deps = (struct dso **)no_deps;
 	if (env_preload) load_preload(env_preload);
  	load_deps(&app);
 	for (struct dso *p=head; p; p=p->next)
@@ -1671,6 +1849,7 @@ _Noreturn void __dls3(size_t *sp)
 		vdso.name = "";
 		vdso.shortname = "linux-gate.so.1";
 		vdso.relocated = 1;
+		vdso.deps = (struct dso **)no_deps;
 		decode_dyn(&vdso);
 		vdso.prev = tail;
 		tail->next = &vdso;
@@ -1685,6 +1864,14 @@ _Noreturn void __dls3(size_t *sp)
 			*ptr = (size_t)&debug;
 		}
 	}
+
+	/* This must be done before final relocations, since it calls
+	 * malloc, which may be provided by the application. Calling any
+	 * application code prior to the jump to its entry point is not
+	 * valid in our model and does not work with FDPIC, where there
+	 * are additional relocation-like fixups that only the entry point
+	 * code can see to perform. */
+	main_ctor_queue = queue_ctors(&app);
 
 	/* The main program must be relocated LAST since it may contin
 	 * copy relocations which depend on libraries' relocations. */
@@ -1773,6 +1960,7 @@ void *dlopen(const char *file, int mode)
 	size_t i;
 	int cs;
 	jmp_buf jb;
+	struct dso **volatile ctor_queue = 0;
 
 	if (!file) return head;
 
@@ -1781,6 +1969,10 @@ void *dlopen(const char *file, int mode)
 	__inhibit_ptc();
 
 	p = 0;
+	if (shutting_down) {
+		error("Cannot dlopen while program is exiting.");
+		goto end;
+	}
 	orig_tls_tail = tls_tail;
 	orig_tls_cnt = tls_cnt;
 	orig_tls_offset = tls_offset;
@@ -1804,11 +1996,12 @@ void *dlopen(const char *file, int mode)
 			free(p->funcdescs);
 			if (p->rpath != p->rpath_orig)
 				free(p->rpath);
-			if (p->deps != &nodeps_dummy)
-				free(p->deps);
+			free(p->deps);
 			unmap_library(p);
 			free(p);
 		}
+		free(ctor_queue);
+		ctor_queue = 0;
 		if (!orig_tls_tail) libc.tls_head = 0;
 		tls_tail = orig_tls_tail;
 		if (tls_tail) tls_tail->next = 0;
@@ -1831,24 +2024,25 @@ void *dlopen(const char *file, int mode)
 	}
 
 	/* First load handling */
-	int first_load = !p->deps;
-	if (first_load) {
-		load_deps(p);
-		if (!p->relocated && (mode & RTLD_LAZY)) {
-			prepare_lazy(p);
-			for (i=0; p->deps[i]; i++)
-				if (!p->deps[i]->relocated)
-					prepare_lazy(p->deps[i]);
-		}
+	load_deps(p);
+	extend_bfs_deps(p);
+	pthread_mutex_lock(&init_fini_lock);
+	if (!p->constructed) ctor_queue = queue_ctors(p);
+	pthread_mutex_unlock(&init_fini_lock);
+	if (!p->relocated && (mode & RTLD_LAZY)) {
+		prepare_lazy(p);
+		for (i=0; p->deps[i]; i++)
+			if (!p->deps[i]->relocated)
+				prepare_lazy(p->deps[i]);
 	}
-	if (first_load || (mode & RTLD_GLOBAL)) {
+	if (!p->relocated || (mode & RTLD_GLOBAL)) {
 		/* Make new symbols global, at least temporarily, so we can do
 		 * relocations. If not RTLD_GLOBAL, this is reverted below. */
 		add_syms(p);
 		for (i=0; p->deps[i]; i++)
 			add_syms(p->deps[i]);
 	}
-	if (first_load) {
+	if (!p->relocated) {
 		reloc_all(p);
 	}
 
@@ -1864,13 +2058,18 @@ void *dlopen(const char *file, int mode)
 	redo_lazy_relocs();
 
 	update_tls_size();
+	if (tls_cnt != orig_tls_cnt)
+		install_new_tls();
 	_dl_debug_state();
 	orig_tail = tail;
 end:
 	__release_ptc();
 	if (p) gencnt++;
 	pthread_rwlock_unlock(&lock);
-	if (p) do_init_fini(orig_tail);
+	if (ctor_queue) {
+		do_init_fini(ctor_queue);
+		free(ctor_queue);
+	}
 	pthread_setcancelstate(cs, 0);
 	return p;
 }

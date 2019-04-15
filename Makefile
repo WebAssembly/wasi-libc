@@ -366,7 +366,8 @@ $(SYSROOT_INC):
 	      "$(SYSROOT_INC)/wordexp.h" \
 	      "$(SYSROOT_INC)/spawn.h" \
 	      "$(SYSROOT_INC)/ucontext.h" \
-	      "$(SYSROOT_INC)/sys/ucontext.h"
+	      "$(SYSROOT_INC)/sys/ucontext.h" \
+	      "$(SYSROOT_INC)/sys/membarrier.h"
 ifeq ($(THREAD_MODEL), single)
 	$(RM) "$(SYSROOT_INC)/aio.h" \
 	      "$(SYSROOT_INC)/pthread.h"

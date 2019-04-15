@@ -71,8 +71,10 @@ int posix_fallocate(int, off_t, off_t);
 #define POSIX_FADV_RANDOM     1
 #define POSIX_FADV_SEQUENTIAL 2
 #define POSIX_FADV_WILLNEED   3
+#ifndef POSIX_FADV_DONTNEED
 #define POSIX_FADV_DONTNEED   4
 #define POSIX_FADV_NOREUSE    5
+#endif
 
 #undef SEEK_SET
 #undef SEEK_CUR

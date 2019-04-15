@@ -14,6 +14,12 @@ extern "C" {
 #define __NEED_wint_t
 #define __NEED_mbstate_t
 
+#ifdef __wasilibc_unmodified_upstream /* WASI doesn't need to define FILE as a complete type */
+#if __STDC_VERSION__ < 201112L
+#define __NEED_struct__IO_FILE
+#endif
+#endif
+
 #if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) \
  || defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 #define __NEED_locale_t

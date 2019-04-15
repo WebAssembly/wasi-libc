@@ -1,6 +1,7 @@
 #ifndef _INTTYPES_H
 #define _INTTYPES_H
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -223,6 +224,9 @@ uintmax_t wcstoumax(const wchar_t *__restrict, wchar_t **__restrict, int);
 
 #ifdef __cplusplus
 }
+#endif
+#else
+#include <__header_inttypes.h>
 #endif
 
 #endif

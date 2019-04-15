@@ -23,7 +23,7 @@ static inline int do_getc(FILE *f)
 		return getc_unlocked(f);
 	return locking_getc(f);
 #else
-        // With no threads, locking is unnecessary.
+	// With no threads, locking is unnecessary.
 	return getc_unlocked(f);
 #endif
 }

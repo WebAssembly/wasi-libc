@@ -85,10 +85,8 @@ union ldshape {
 	}                                         \
 } while(0)
 #else
-/*
- * WebAssembly doesn't have floating-point status flags, so there's no reason
- * to force evaluations.
- * */
+/* WebAssembly doesn't have floating-point status flags, so there's no reason
+ * to force evaluations. */
 #define FORCE_EVAL(x) ((void)(x))
 #endif
 

@@ -41,7 +41,7 @@ FILE *fopen(const char *restrict filename, const char *restrict mode)
 #ifdef __wasilibc_unmodified_upstream // WASI has no syscall
 	__syscall(SYS_close, fd);
 #else
-        close(fd);
+	close(fd);
 #endif
 	return 0;
 }

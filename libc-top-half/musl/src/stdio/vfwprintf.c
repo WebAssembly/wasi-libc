@@ -320,7 +320,7 @@ static int wprintf_core(FILE *f, const wchar_t *fmt, va_list *ap, union arg *nl_
 
 		if (xp && p<0) goto overflow;
 #if defined(__wasilibc_printscan_no_long_double)
-                // Omit the 'L' modifier for floating-point cases.
+		// Omit the 'L' modifier for floating-point cases.
 		switch (t|32) {
 		case 'a': case 'e': case 'f': case 'g':
 			snprintf(charfmt, sizeof charfmt, "%%%s%s%s%s%s*.*%c",

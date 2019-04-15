@@ -14,11 +14,7 @@ int gettimeofday(struct timeval *restrict tp, ...) {
 int gettimeofday(struct timeval *restrict tp, void *tz) {
 #endif
   __wasi_timestamp_t ts = 0;
-#ifdef __wasilibc_unmodified_upstream // bug fix
-#else
-  (void)
-#endif
-  __wasi_clock_time_get(__WASI_CLOCK_REALTIME, 1000, &ts);
+  (void)__wasi_clock_time_get(__WASI_CLOCK_REALTIME, 1000, &ts);
   *tp = timestamp_to_timeval(ts);
   return 0;
 }

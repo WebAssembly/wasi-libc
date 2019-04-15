@@ -23,7 +23,7 @@ static inline int do_putc(int c, FILE *f)
 		return putc_unlocked(c, f);
 	return locking_putc(c, f);
 #else
-        // With no threads, locking is unnecessary.
+	// With no threads, locking is unnecessary.
 	return putc_unlocked(c, f);
 #endif
 }

@@ -33,7 +33,7 @@ long sysconf(int name)
 #ifdef __wasilibc_unmodified_upstream // WASI has no processes
 		[_SC_CHILD_MAX] = RLIM(NPROC),
 #else
-                // Not supported on wasi.
+		// Not supported on wasi.
 		[_SC_CHILD_MAX] = -1,
 #endif
 		[_SC_CLK_TCK] = 100,
@@ -76,7 +76,7 @@ long sysconf(int name)
 #ifdef __wasilibc_unmodified_upstream // WASI has no realtime signals
 		[_SC_RTSIG_MAX] = _NSIG - 1 - 31 - 3,
 #else
-                // Not supported on wasi.
+		// Not supported on wasi.
 		[_SC_RTSIG_MAX] = -1,
 #endif
 #ifdef __wasilibc_unmodified_upstream // WASI has no semaphores
@@ -220,7 +220,7 @@ long sysconf(int name)
 			return -1;
 		return lim.rlim_cur > LONG_MAX ? LONG_MAX : lim.rlim_cur;
 #else
-                // Not supported on wasi.
+		// Not supported on wasi.
 		errno = EINVAL;
 		return -1;
 #endif
@@ -253,7 +253,7 @@ long sysconf(int name)
 			for (; set[i]; set[i]&=set[i]-1, cnt++);
 		return cnt;
 #else
-                // With no thread support, just say there's 1 processor.
+		// With no thread support, just say there's 1 processor.
 		return 1;
 #endif
 #ifdef __wasilibc_unmodified_upstream // WASI has no sysinfo

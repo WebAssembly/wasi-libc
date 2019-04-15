@@ -51,13 +51,13 @@ locale_t __newlocale(int mask, const char *name, locale_t loc)
 	 * variant of the C locale honoring the default locale's encoding. */
 	pthread_once(&default_locale_once, default_locale_init);
 #else
-        {
-            static int called;
-            if (called == 0) {
-	        default_locale_init();
-                called = 1;
-            }
-        }
+	{
+		static int called;
+		if (called == 0) {
+			default_locale_init();
+			called = 1;
+		}
+	}
 #endif
 	if (!memcmp(&tmp, &default_locale, sizeof tmp)) return &default_locale;
 	if (!memcmp(&tmp, &default_ctype_locale, sizeof tmp))

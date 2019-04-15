@@ -50,12 +50,12 @@ FILE *freopen(const char *restrict filename, const char *restrict mode, FILE *re
 #ifdef __wasilibc_unmodified_upstream // WASI has no dup
 		else if (__dup3(f2->fd, f->fd, fl&O_CLOEXEC)<0) goto fail2;
 #else
-                // WASI doesn't have dup3, but does have a way to renumber
-                // an existing file descriptor.
+		// WASI doesn't have dup3, but does have a way to renumber
+		// an existing file descriptor.
 		else {
-                    if (__wasilibc_fd_renumber(f2->fd, f->fd)<0) goto fail2;
-                    f2->fd = -1; /* avoid closing in fclose */
-                }
+			if (__wasilibc_fd_renumber(f2->fd, f->fd)<0) goto fail2;
+			f2->fd = -1; /* avoid closing in fclose */
+		}
 #endif
 
 		f->flags = (f->flags & F_PERM) | f2->flags;

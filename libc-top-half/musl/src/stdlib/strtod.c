@@ -58,12 +58,12 @@ weak_alias(strtold, __strtold_l);
 // WebAssembly doesn't permit signature-changing aliases, so use wrapper
 // functions instead.
 weak float strtof_l(const char *restrict s, char **restrict p, locale_t loc) {
-    return strtof(s, p);
+	return strtof(s, p);
 }
 weak double strtod_l(const char *restrict s, char **restrict p, locale_t loc) {
-    return strtod(s, p);
+	return strtod(s, p);
 }
 weak long double strtold_l(const char *restrict s, char **restrict p, locale_t loc) {
-    return strtold(s, p);
+	return strtold(s, p);
 }
 #endif

@@ -412,9 +412,9 @@ finish: $(SYSROOT_INC) libc
 	# TODO: Use llvm-nm --extern-only instead of grep. This is blocked on
 	# LLVM PR40497, which is fixed in 9.0, but not in 8.0.
 	$(WASM_NM) --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/*.o \
-	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_COLLATE=C sort > "$(SYSROOT_SHARE)/defined-symbols.txt"
+	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_ALL=C sort > "$(SYSROOT_SHARE)/defined-symbols.txt"
 	for undef_sym in $$($(WASM_NM) --undefined-only "$(SYSROOT_LIB)"/*.a "$(SYSROOT_LIB)"/*.o \
-	    |grep ' U ' |sed 's/.* U //' |LC_COLLATE=C sort |uniq); do \
+	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$(SYSROOT_SHARE)/defined-symbols.txt" || echo $$undef_sym; \
 	done > "$(SYSROOT_SHARE)/undefined-symbols.txt"
 	grep '^_*wasi_' "$(SYSROOT_SHARE)/undefined-symbols.txt" \
@@ -424,7 +424,7 @@ finish: $(SYSROOT_INC) libc
 	cd "$(SYSROOT)" && \
 	for header in $$(find include -type f -not -name mman.h |grep -v /bits/); do \
 	    echo '#include <'$$header'>' | sed 's/include\///' ; \
-	done |LC_COLLATE=C sort >share/$(MULTIARCH_TRIPLE)/include-all.c ; \
+	done |LC_ALL=C sort >share/$(MULTIARCH_TRIPLE)/include-all.c ; \
 	cd - >/dev/null
 
 	# Test that it compiles.

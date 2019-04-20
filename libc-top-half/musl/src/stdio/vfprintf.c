@@ -237,9 +237,9 @@ static int fmt_fp(FILE *f, long double y, int w, int p, int fl, int t)
 	}
 
 #if defined(__wasilibc_printscan_no_long_double)
-	y = frexpl(y, &e2) * 2;
-#else
 	y = frexp(y, &e2) * 2;
+#else
+	y = frexpl(y, &e2) * 2;
 #endif
 	if (y) e2--;
 

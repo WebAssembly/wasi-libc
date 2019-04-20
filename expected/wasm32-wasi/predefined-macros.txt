@@ -1964,8 +1964,6 @@
 #define SEGV_PKUERR 4
 #define SEM_FAILED ((sem_t *)0)
 #define SERVFAIL ns_r_servfail
-#define SFD_CLOEXEC O_CLOEXEC
-#define SFD_NONBLOCK O_NONBLOCK
 #define SHORTBITS (sizeof(short) * 8)
 #define SHRT_MAX 0x7fff
 #define SHRT_MIN (-1-0x7fff)
@@ -2844,7 +2842,6 @@
 #define _SYS_REG_H 
 #define _SYS_RESOURCE_H 
 #define _SYS_SELECT_H 
-#define _SYS_SIGNALFD_H 
 #define _SYS_SOCKET_H 
 #define _SYS_STAT_H 
 #define _SYS_SYSCALL_H 

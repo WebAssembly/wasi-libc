@@ -604,12 +604,12 @@
 #define EX__BASE 64
 #define EX__MAX 78
 #define FD_CLOEXEC (1)
-#define FD_CLR(fd,set) FD_CLR((fd), (set))
-#define FD_COPY(from,to) FD_COPY(from, to)
-#define FD_ISSET(fd,set) FD_ISSET((fd), (set))
-#define FD_SET(fd,set) FD_SET((fd), (set))
+#define FD_CLR(fd,set) (FD_CLR((fd), (set)))
+#define FD_COPY(from,to) (FD_COPY((from), (to)))
+#define FD_ISSET(fd,set) (FD_ISSET((fd), (set)))
+#define FD_SET(fd,set) (FD_SET((fd), (set)))
 #define FD_SETSIZE 1024
-#define FD_ZERO(set) FD_ZERO((set))
+#define FD_ZERO(set) (FD_ZERO((set)))
 #define FE_ALL_EXCEPT 0
 #define FE_DFL_ENV ((const fenv_t *) -1)
 #define FE_TONEAREST 0

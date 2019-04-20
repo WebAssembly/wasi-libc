@@ -236,7 +236,11 @@ static int fmt_fp(FILE *f, long double y, int w, int p, int fl, int t)
 		return MAX(w, 3+pl);
 	}
 
+#if defined(__wasilibc_printscan_no_long_double)
 	y = frexpl(y, &e2) * 2;
+#else
+    y = frexp(y, &e2) * 2;
+#endif
 	if (y) e2--;
 
 	if ((t|32)=='a') {

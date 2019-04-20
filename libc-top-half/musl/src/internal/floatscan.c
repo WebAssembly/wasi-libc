@@ -301,8 +301,13 @@ static long double decfloat(FILE *f, int c, int bits, int emin, int sign, int po
 
 	/* Calculate bias term to force rounding, move out lower bits */
 	if (bits < LDBL_MANT_DIG) {
-		bias = copysignl(scalbn(1, 2*LDBL_MANT_DIG-bits-1), y);
-		frac = fmodl(y, scalbn(1, LDBL_MANT_DIG-bits));
+#if defined(__wasilibc_printscan_no_long_double)
+		bias = copysign(scalbn(1, 2*LDBL_MANT_DIG-bits-1), y);
+		frac = fmod(y, scalbn(1, LDBL_MANT_DIG-bits));
+#else
+        bias = copysignl(scalbn(1, 2*LDBL_MANT_DIG-bits-1), y);
+        frac = fmodl(y, scalbn(1, LDBL_MANT_DIG-bits));
+#endif
 		y -= frac;
 		y += bias;
 	}
@@ -320,7 +325,11 @@ static long double decfloat(FILE *f, int c, int bits, int emin, int sign, int po
 			else
 				frac += 0.75*sign;
 		}
-		if (LDBL_MANT_DIG-bits >= 2 && !fmodl(frac, 1))
+#if defined(__wasilibc_printscan_no_long_double)
+		if (LDBL_MANT_DIG-bits >= 2 && !fmod(frac, 1))
+#else
+        if (LDBL_MANT_DIG-bits >= 2 && !fmodl(frac, 1))
+#endif
 			frac++;
 	}
 
@@ -338,7 +347,11 @@ static long double decfloat(FILE *f, int c, int bits, int emin, int sign, int po
 			errno = ERANGE;
 	}
 
-	return scalbnl(y, e2);
+#if defined(__wasilibc_printscan_no_long_double)
+	return scalbn(y, e2);
+#else
+    return scalbnl(y, e2);
+#endif
 }
 
 #if defined(__wasilibc_printscan_no_long_double)
@@ -451,7 +464,11 @@ static long double hexfloat(FILE *f, int bits, int emin, int sign, int pok)
 	}
 
 	if (bits < LDBL_MANT_DIG)
-		bias = copysignl(scalbn(1, 32+LDBL_MANT_DIG-bits-1), sign);
+#if defined(__wasilibc_printscan_no_long_double)
+		bias = copysign(scalbn(1, 32+LDBL_MANT_DIG-bits-1), sign);
+#else
+        bias = copysignl(scalbn(1, 32+LDBL_MANT_DIG-bits-1), sign);
+#endif
 
 	if (bits<32 && y && !(x&1)) x++, y=0;
 
@@ -464,7 +481,11 @@ static long double hexfloat(FILE *f, int bits, int emin, int sign, int pok)
 
 	if (!y) errno = ERANGE;
 
-	return scalbnl(y, e2);
+#if defined(__wasilibc_printscan_no_long_double)
+	return scalbn(y, e2);
+#else
+    return scalbnl(y, e2);
+#endif
 }
 
 #if defined(__wasilibc_printscan_no_long_double)

@@ -692,6 +692,7 @@ llround
 llroundf
 llroundl
 localeconv
+localtime
 localtime_r
 log
 log10

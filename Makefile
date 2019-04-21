@@ -99,6 +99,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/gmtime_r.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/timespec_get.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/getdate.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/localtime.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/localtime_r.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/mktime.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/__tm_to_secs.c \

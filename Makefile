@@ -33,9 +33,8 @@ endif
 # directories in the source tree.
 BASICS_DIR = $(CURDIR)/basics
 BASICS_INC = $(BASICS_DIR)/include
-BASICS_LIBC_DIR = $(BASICS_DIR)/libc
-BASICS_CRT_SOURCES = $(wildcard $(BASICS_LIBC_DIR)/crt*.c)
-BASICS_LIBC_SOURCES = $(BASICS_LIBC_DIR)/string.c
+BASICS_CRT_SOURCES = $(wildcard $(BASICS_DIR)/crt/*.c)
+BASICS_SOURCES = $(wildcard $(BASICS_DIR)/sources/*.c)
 DLMALLOC_DIR = $(CURDIR)/dlmalloc
 DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
 DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/dlmalloc.c
@@ -182,11 +181,11 @@ endif
 override WASM_CFLAGS += --sysroot="$(SYSROOT)"
 
 objs = $(patsubst $(CURDIR)/%.c,$(OBJDIR)/%.o,$(1))
-override BASICS_LIBC_OBJS = $(call objs,$(BASICS_LIBC_SOURCES))
+override BASICS_OBJS = $(call objs,$(BASICS_SOURCES))
 override DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 override LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 override LIBC_TOP_HALF_ALL_OBJS = $(call objs,$(LIBC_TOP_HALF_ALL_SOURCES))
-override LIBC_OBJS := $(BASICS_LIBC_OBJS)
+override LIBC_OBJS := $(BASICS_OBJS)
 ifeq ($(BUILD_DLMALLOC),yes)
 override LIBC_OBJS += $(DLMALLOC_OBJS)
 endif

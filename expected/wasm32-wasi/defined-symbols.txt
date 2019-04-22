@@ -163,6 +163,7 @@ __progname
 __progname_full
 __putenv
 __rand48_step
+__reallocarray
 __rem_pio2
 __rem_pio2_large
 __rem_pio2f
@@ -823,6 +824,7 @@ readlink
 readlinkat
 readv
 realloc
+reallocarray
 recv
 regcomp
 regerror

@@ -15,6 +15,10 @@ void free(void *ptr);
 void *calloc(size_t nmemb, size_t size) __attribute__((__malloc__, __warn_unused_result__));
 void *realloc(void *ptr, size_t size) __attribute__((__warn_unused_result__));
 
+#if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
+void *reallocarray(void *, size_t, size_t) __attribute__((__warn_unused_result__));
+#endif
+
 #ifdef __cplusplus
 }
 #endif

@@ -37,6 +37,12 @@ typedef double long_double;
 #define LDBL_MAX_10_EXP DBL_MAX_10_EXP
 #undef frexpl
 #define frexpl(x, exp) frexp(x, exp)
+#undef copysignl
+#define copysignl(x, y) copysign(x, y)
+#undef fmodl
+#define fmodl(x, y) fmod(x, y)
+#undef scalbnl
+#define scalbnl(arg, exp) scalbn(arg, exp)
 __attribute__((__cold__, __noreturn__))
 static void long_double_not_supported(void) {
     void abort(void) __attribute__((__noreturn__));

@@ -4055,12 +4055,26 @@ static void* sys_alloc(mstate m, size_t nb) {
   }
 
   asize = granularity_align(nb + SYS_ALLOC_PADDING);
+#ifdef __wasilibc_unmodified_upstream // Bug fix: set ENOMEM on size overflow
   if (asize <= nb)
     return 0; /* wraparound */
+#else
+  if (asize <= nb) {
+    MALLOC_FAILURE_ACTION;
+    return 0; /* wraparound */
+  }
+#endif
   if (m->footprint_limit != 0) {
     size_t fp = m->footprint + asize;
+#ifdef __wasilibc_unmodified_upstream // Bug fix: set ENOMEM on footprint overrun
     if (fp <= m->footprint || fp > m->footprint_limit)
       return 0;
+#else
+    if (fp <= m->footprint || fp > m->footprint_limit) {
+      MALLOC_FAILURE_ACTION;
+      return 0;
+    }
+#endif
   }
 
   /*

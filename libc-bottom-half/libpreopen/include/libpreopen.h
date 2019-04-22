@@ -36,8 +36,8 @@
 
 #ifdef __wasilibc_unmodified_upstream
 #include <sys/cdefs.h>
-#endif
 #include <sys/capsicum.h>
+#endif
 
 #include <stdbool.h>
 

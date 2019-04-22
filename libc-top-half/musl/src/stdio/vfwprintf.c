@@ -355,9 +355,11 @@ static int wprintf_core(FILE *f, const wchar_t *fmt, va_list *ap, union arg *nl_
 			sizeprefix[(t|32)-'a'], t);
 
 		switch (t|32) {
+#if !defined(__wasilibc_printscan_no_floating_point)
 		case 'a': case 'e': case 'f': case 'g':
 			l = fprintf(f, charfmt, w, p, arg.f);
 			break;
+#endif
 		case 'd': case 'i': case 'o': case 'u': case 'x': case 'p':
 			l = fprintf(f, charfmt, w, p, arg.i);
 			break;

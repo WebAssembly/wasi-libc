@@ -144,6 +144,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
 MUSL_PRINTSCAN_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/floatscan.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfprintf.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfwprintf.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfscanf.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/strtod.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/wcstod.c

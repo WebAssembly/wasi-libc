@@ -290,7 +290,7 @@ static long double decfloat(FILE *f, int c, int bits, int emin, int sign, int po
 #if defined(__wasilibc_printscan_no_long_double)
 		y = 1000000000.0 * y + x[a+i & MASK];
 #else
-        y = 1000000000.0L * y + x[a+i & MASK];
+		y = 1000000000.0L * y + x[a+i & MASK];
 #endif
 	}
 

@@ -273,6 +273,7 @@ alphasort64
 arc4random
 arc4random_buf
 arc4random_uniform
+asctime
 asctime_r
 asin
 asinf

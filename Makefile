@@ -88,6 +88,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/quick_exit.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/at_quick_exit.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/strftime.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/asctime.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/asctime_r.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/ctime_r.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/wcsftime.c \

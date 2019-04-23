@@ -24,7 +24,7 @@ is implemented using calls to WASI functions.
 ## Usage
 
 The easiest way to get started with this is to use one of the
-[prepackaged releases](https://github.com/CraneStation/wasmtime-wasi/blob/wasi/docs/WASI-intro.md#how-can-i-write-programs-that-use-wasi).
+[prepackaged releases](https://github.com/CraneStation/wasmtime/blob/master/docs/WASI-intro.md#how-can-i-write-programs-that-use-wasi).
 
 ## Building from source
 

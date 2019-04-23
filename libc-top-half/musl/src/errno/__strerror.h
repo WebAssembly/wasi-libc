@@ -4,6 +4,10 @@
  * macro E() along with double-inclusion is used to ensure that ordering
  * of the strings remains synchronized. */
 
+#ifdef __wasilibc_unmodified_upstream // Print "Success" for ESUCCESS.
+#else
+E(0,            "Success")
+#endif
 E(EILSEQ,       "Illegal byte sequence")
 E(EDOM,         "Domain error")
 E(ERANGE,       "Result not representable")
@@ -125,4 +129,8 @@ E(EMULTIHOP,    "Multihop attempted")
 E(ENOTCAPABLE,  "Capabilities insufficient")
 #endif
 
+#ifdef __wasilibc_unmodified_upstream // Print "Success" for ESUCCESS.
 E(0,            "No error information")
+#else
+E(UCHAR_MAX,    "No error information")
+#endif

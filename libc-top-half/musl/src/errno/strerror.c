@@ -23,7 +23,11 @@ char *__strerror_l(int e, locale_t loc)
 		if (e==109) e=-1;
 		else if (e==EDQUOT) e=109;
 	}
+#ifdef __wasilibc_unmodified_upstream // Print "Success" for ESUCCESS.
 	for (i=0; errid[i] && errid[i] != e; i++);
+#else
+	for (i=0; errid[i] != UCHAR_MAX && errid[i] != e; i++);
+#endif
 	for (s=errmsg; i; s++, i--) for (; *s; s++);
 	return (char *)LCTRANS(s, LC_MESSAGES, loc);
 }

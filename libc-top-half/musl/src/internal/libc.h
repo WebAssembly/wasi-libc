@@ -18,14 +18,26 @@ struct tls_module {
 };
 
 struct __libc {
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	int can_do_threads;
 	int threaded;
+#endif
+#ifdef __wasilibc_unmodified_upstream // WASI doesn't currently use any code that needs "secure" mode
 	int secure;
+#endif
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	volatile int threads_minus_1;
+#endif
+#ifdef __wasilibc_unmodified_upstream // WASI has no auxv
 	size_t *auxv;
+#endif
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	struct tls_module *tls_head;
 	size_t tls_size, tls_align, tls_cnt;
+#endif
+#ifdef __wasilibc_unmodified_upstream // WASI doesn't get the page size from auxv
 	size_t page_size;
+#endif
 	struct __locale_struct global_locale;
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #else

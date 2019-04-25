@@ -42,7 +42,9 @@ int vswprintf(wchar_t *restrict s, size_t n, const wchar_t *restrict fmt, va_lis
 	FILE f = {
 		.lbf = EOF,
 		.write = sw_write,
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 		.lock = -1,
+#endif
 		.buf = buf,
 		.buf_size = sizeof buf,
 		.cookie = &c,

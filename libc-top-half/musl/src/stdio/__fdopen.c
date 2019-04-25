@@ -74,7 +74,9 @@ FILE *__fdopen(int fd, const char *mode)
 	f->seek = __stdio_seek;
 	f->close = __stdio_close;
 
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	if (!libc.threaded) f->lock = -1;
+#endif
 
 	/* Add new FILE to open file list */
 	return __ofl_add(f);

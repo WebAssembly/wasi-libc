@@ -94,7 +94,9 @@ FILE *open_wmemstream(wchar_t **bufp, size_t *sizep)
 	f->f.seek = wms_seek;
 	f->f.close = wms_close;
 
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	if (!libc.threaded) f->f.lock = -1;
+#endif
 
 	fwide(&f->f, 1);
 

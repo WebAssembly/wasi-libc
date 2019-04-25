@@ -40,7 +40,9 @@ int vsnprintf(char *restrict s, size_t n, const char *restrict fmt, va_list ap)
 	FILE f = {
 		.lbf = EOF,
 		.write = sn_write,
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 		.lock = -1,
+#endif
 		.buf = buf,
 		.cookie = &c,
 	};

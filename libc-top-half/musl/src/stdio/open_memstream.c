@@ -93,7 +93,9 @@ FILE *open_memstream(char **bufp, size_t *sizep)
 	f->f.close = ms_close;
 	f->f.mode = -1;
 
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	if (!libc.threaded) f->f.lock = -1;
+#endif
 
 	return __ofl_add(&f->f);
 }

@@ -30,7 +30,11 @@ int vswscanf(const wchar_t *restrict s, const wchar_t *restrict fmt, va_list ap)
 	FILE f = {
 		.buf = buf, .buf_size = sizeof buf,
 		.cookie = (void *)s,
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 		.read = wstring_read, .lock = -1
+#else
+		.read = wstring_read
+#endif
 	};
 	return vfwscanf(&f, fmt, ap);
 }

@@ -24,7 +24,9 @@ FILE *__fopen_rb_ca(const char *filename, FILE *f, unsigned char *buf, size_t le
 	f->read = __stdio_read;
 	f->seek = __stdio_seek;
 	f->close = __stdio_close;
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	f->lock = -1;
+#endif
 
 	return f;
 }

@@ -53,6 +53,28 @@ int dup2(int, int);
 int dup3(int, int, int);
 #endif
 off_t lseek(int, off_t, int);
+#ifdef __wasilibc_unmodified_upstream /* Optimize the readonly case of lseek */
+#else
+/*
+ * Optimize lseek in the case where it's just returning the current offset.
+ * This avoids importing `__wasi_fd_seek` altogether in many common cases.
+ */
+
+off_t __wasilibc_tell(int);
+
+#define lseek(fd, offset, whence)      \
+  ({                                   \
+     off_t __f = (fd);                 \
+     off_t __o = (offset);             \
+     off_t __w = (whence);             \
+     __builtin_constant_p((offset)) && \
+     __builtin_constant_p((whence)) && \
+     __o == 0 &&                       \
+     __w == SEEK_CUR                   \
+     ? __wasilibc_tell(__f)            \
+     : lseek(__f, __o, __w);           \
+  })
+#endif
 int fsync(int);
 int fdatasync(int);
 

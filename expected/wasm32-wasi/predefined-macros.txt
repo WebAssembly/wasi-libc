@@ -3816,6 +3816,7 @@
 #define logb(x) __tg_real(logb, (x))
 #define lrint(x) __tg_real_nocast(lrint, (x))
 #define lround(x) __tg_real_nocast(lround, (x))
+#define lseek(fd,offset,whence) ({ off_t __f = (fd); off_t __o = (offset); off_t __w = (whence); __builtin_constant_p((offset)) && __builtin_constant_p((whence)) && __o == 0 && __w == SEEK_CUR ? __wasilibc_tell(__f) : lseek(__f, __o, __w); })
 #define lseek64 lseek
 #define lstat64 lstat
 #define major(x) ((unsigned)( (((x)>>31>>1) & 0xfffff000) | (((x)>>8) & 0x00000fff) ))

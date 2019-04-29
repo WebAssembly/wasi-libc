@@ -2370,7 +2370,6 @@
 #define _STDALIGN_H 
 #define _STDBOOL_H 
 #define _STDC_PREDEF_H 
-#define _STDDEF_H 
 #define _STDINT_H 
 #define _STDIO_EXT_H 
 #define _STDIO_H 

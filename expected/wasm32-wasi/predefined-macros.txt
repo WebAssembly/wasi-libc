@@ -2304,7 +2304,7 @@
 #define TIME_INS 1
 #define TIME_OK 0
 #define TIME_OOP 3
-#define TIME_UTC __WASI_CLOCK_REALTIME
+#define TIME_UTC 1
 #define TIME_WAIT 4
 #define TMAGIC "ustar"
 #define TMAGLEN 6

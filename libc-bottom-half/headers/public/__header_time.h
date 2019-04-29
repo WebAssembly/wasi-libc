@@ -23,7 +23,10 @@ extern const struct __clockid _CLOCK_REALTIME;
 extern const struct __clockid _CLOCK_THREAD_CPUTIME_ID;
 #define CLOCK_THREAD_CPUTIME_ID (&_CLOCK_THREAD_CPUTIME_ID)
 
-#define TIME_UTC __WASI_CLOCK_REALTIME
+/*
+ * TIME_UTC is the only standardized time base value.
+ */
+#define TIME_UTC 1
 
 /*
  * Note that XSI specifies CLOCKS_PER_SEC to be 1000000, rather than

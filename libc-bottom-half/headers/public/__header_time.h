@@ -25,7 +25,10 @@ extern const struct __clockid _CLOCK_THREAD_CPUTIME_ID;
 
 #define TIME_UTC __WASI_CLOCK_REALTIME
 
-/* FIXME: POSIX requires this to be 1000000, and that's what glibc and musl use. */
-#define CLOCKS_PER_SEC (1000000000)
+/*
+ * Note that XSI specifies CLOCKS_PER_SEC to be 1000000, rather than
+ * 1000000000; the clock API is providing more precision than XSI specifies.
+ */
+#define CLOCKS_PER_SEC ((clock_t)1000000000)
 
 #endif

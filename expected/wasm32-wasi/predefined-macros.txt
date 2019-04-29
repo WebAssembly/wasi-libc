@@ -3085,7 +3085,6 @@
 #define __INT_LEAST8_MAX__ 127
 #define __INT_LEAST8_TYPE__ signed char
 #define __INT_MAX__ 2147483647
-#define __ISREL_DEF(rel,op,type) static __inline int __is##rel(type __x, type __y) { return !isunordered(__x,__y) && __x op __y; }
 #define __IS_CX(x) (__IS_FP(x) && sizeof(x) == sizeof((x)+I))
 #define __IS_FP(x) (sizeof((x)+1ULL) == sizeof((x)+1.0f))
 #define __IS_REAL(x) (__IS_FP(x) && 2*sizeof(x) == sizeof((x)+I))
@@ -3548,7 +3547,6 @@
 #define __restrict restrict
 #define __tg_complex(fun,x) (__RETCAST_CX(x)( __FLTCX((x)+I) && __IS_FP(x) ? fun ## f (x) : __LDBLCX((x)+I) ? fun ## l (x) : fun(x) ))
 #define __tg_complex_retreal(fun,x) (__RETCAST_REAL(x)( __FLTCX((x)+I) && __IS_FP(x) ? fun ## f (x) : __LDBLCX((x)+I) ? fun ## l (x) : fun(x) ))
-#define __tg_pred_2(x,y,p) ( sizeof((x)+(y)) == sizeof(float) ? p##f(x, y) : sizeof((x)+(y)) == sizeof(double) ? p(x, y) : p##l(x, y) )
 #define __tg_real(fun,x) (__RETCAST(x)__tg_real_nocast(fun, x))
 #define __tg_real_2(fun,x,y) (__RETCAST_2(x, y)( __FLT(x) && __FLT(y) ? fun ## f (x, y) : __LDBL((x)+(y)) ? fun ## l (x, y) : fun(x, y) ))
 #define __tg_real_2_1(fun,x,y) (__RETCAST(x)( __FLT(x) ? fun ## f (x, y) : __LDBL(x) ? fun ## l (x, y) : fun(x, y) ))
@@ -3700,7 +3698,7 @@
 #define fmin(x,y) __tg_real_2(fmin, (x), (y))
 #define fmod(x,y) __tg_real_2(fmod, (x), (y))
 #define fopen64 fopen
-#define fpclassify(x) __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, x)
+#define fpclassify(x) (__builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, x))
 #define fpos64_t fpos_t
 #define freopen64 freopen
 #define frexp(x,y) __tg_real_2_1(frexp, (x), (y))
@@ -3781,21 +3779,21 @@
 #define isascii(a) (0 ? isascii(a) : (unsigned)(a) < 128)
 #define isclr(x,i) !isset(x,i)
 #define isdigit(a) (0 ? isdigit(a) : ((unsigned)(a)-'0') < 10)
-#define isfinite(x) __builtin_isfinite(x)
+#define isfinite(x) (__builtin_isfinite(x))
 #define isgraph(a) (0 ? isgraph(a) : ((unsigned)(a)-0x21) < 0x5e)
-#define isgreater(x,y) __tg_pred_2(x, y, __isgreater)
-#define isgreaterequal(x,y) __tg_pred_2(x, y, __isgreaterequal)
-#define isinf(x) __builtin_isinf(x)
-#define isless(x,y) __tg_pred_2(x, y, __isless)
-#define islessequal(x,y) __tg_pred_2(x, y, __islessequal)
-#define islessgreater(x,y) __tg_pred_2(x, y, __islessgreater)
+#define isgreater(x,y) (__builtin_isgreater(x, y))
+#define isgreaterequal(x,y) (__builtin_isgreaterequal(x, y))
+#define isinf(x) (__builtin_isinf(x))
+#define isless(x,y) (__builtin_isless(x, y))
+#define islessequal(x,y) (__builtin_islessequal(x, y))
+#define islessgreater(x,y) (__builtin_islessgreater(x, y))
 #define islower(a) (0 ? islower(a) : ((unsigned)(a)-'a') < 26)
-#define isnan(x) __builtin_isnan(x)
-#define isnormal(x) __builtin_isnormal(x)
+#define isnan(x) (__builtin_isnan(x))
+#define isnormal(x) (__builtin_isnormal(x))
 #define isprint(a) (0 ? isprint(a) : ((unsigned)(a)-0x20) < 0x5f)
 #define isset(x,i) __bitop(x,i,&)
 #define isspace(a) __isspace(a)
-#define isunordered(x,y) (isnan((x)) ? ((void)(y),1) : isnan((y)))
+#define isunordered(x,y) (__builtin_isunordered(x, y))
 #define isupper(a) (0 ? isupper(a) : ((unsigned)(a)-'A') < 26)
 #define iswdigit(a) (0 ? iswdigit(a) : ((unsigned)(a)-'0') < 10)
 #define ldexp(x,y) __tg_real_2_1(ldexp, (x), (y))
@@ -3929,7 +3927,7 @@
 #define si_upper __si_fields.__sigfault.__first.__addr_bnd.si_upper
 #define si_utime __si_fields.__si_common.__second.__sigchld.si_utime
 #define si_value __si_fields.__si_common.__second.si_value
-#define signbit(x) __builtin_signbit(x)
+#define signbit(x) (__builtin_signbit(x))
 #define sin(x) __tg_real_complex(sin, (x))
 #define sinh(x) __tg_real_complex(sinh, (x))
 #define sqrt(x) __tg_real_complex(sqrt, (x))

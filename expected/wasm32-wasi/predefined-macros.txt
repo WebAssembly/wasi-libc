@@ -2891,7 +2891,6 @@
 #define __CHAR16_TYPE__ unsigned short
 #define __CHAR32_TYPE__ unsigned int
 #define __CHAR_BIT__ 8
-#define __CIMAG(x,t) (+(union { _Complex t __z; t __xy[2]; }){(_Complex t)(x)}.__xy[1])
 #define __compiler_ATOMIC_BOOL_LOCK_FREE 2
 #define __compiler_ATOMIC_CHAR16_T_LOCK_FREE 2
 #define __compiler_ATOMIC_CHAR32_T_LOCK_FREE 2
@@ -3666,8 +3665,6 @@
 #define cbrt(x) __tg_real(cbrt, (x))
 #define ceil(x) __tg_real(ceil, (x))
 #define cimag(x) __tg_complex_retreal(cimag, (x))
-#define cimagf(x) __CIMAG(x, float)
-#define cimagl(x) __CIMAG(x, long double)
 #define clrbit(x,i) __bitop(x,i,&=~)
 #define compl ~
 #define complex _Complex
@@ -3677,8 +3674,6 @@
 #define cosh(x) __tg_real_complex(cosh, (x))
 #define cproj(x) __tg_complex(cproj, (x))
 #define creal(x) __tg_complex_retreal(creal, (x))
-#define crealf(x) ((float)(x))
-#define creall(x) ((long double)(x))
 #define creat64 creat
 #define d_fileno d_ino
 #define direct dirent

@@ -52,9 +52,6 @@ __flbf
 __floatscan
 __fmodeflags
 __fopen_rb_ca
-__fpclassify
-__fpclassifyf
-__fpclassifyl
 __fpending
 __fpurge
 __fputwc_unlocked
@@ -170,9 +167,6 @@ __secs_to_zone
 __seed48
 __shgetc
 __shlim
-__signbit
-__signbitf
-__signbitl
 __signgam
 __sin
 __sindf

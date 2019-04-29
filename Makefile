@@ -233,6 +233,83 @@ override MUSL_PRINTSCAN_LONG_DOUBLE_OBJS = $(patsubst %.o,%.long-double.o,$(MUSL
 override MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS = $(patsubst %.o,%.no-floating-point.o,$(MUSL_PRINTSCAN_OBJS))
 override LIBWASI_EMULATED_MMAN_OBJS = $(call objs,$(LIBWASI_EMULATED_MMAN_SOURCES))
 
+# Files from musl's include directory that we don't want to install in the
+# sysroot's include directory.
+override MUSL_OMIT_HEADERS :=
+
+# Remove files which aren't headers (we generate alltypes.h below).
+override MUSL_OMIT_HEADERS += \
+    "bits/syscall.h.in" \
+    "bits/alltypes.h.in" \
+    "alltypes.h.in"
+
+# Use the WASI errno definitions.
+override MUSL_OMIT_HEADERS += \
+    "bits/errno.h"
+
+# Remove headers that aren't supported yet or that aren't relevant for WASI.
+override MUSL_OMIT_HEADERS += \
+    "sys/procfs.h" \
+    "sys/user.h" \
+    "sys/kd.h" "sys/vt.h" "sys/soundcard.h" "sys/sem.h" \
+    "sys/shm.h" "sys/msg.h" "sys/ipc.h" "sys/ptrace.h" \
+    "sys/statfs.h" \
+    "bits/kd.h" "bits/vt.h" "bits/soundcard.h" "bits/sem.h" \
+    "bits/shm.h" "bits/msg.h" "bits/ipc.h" "bits/ptrace.h" \
+    "bits/statfs.h" \
+    "sys/vfs.h" \
+    "sys/statvfs.h" \
+    "syslog.h" "sys/syslog.h" \
+    "wait.h" "sys/wait.h" \
+    "ucontext.h" "sys/ucontext.h" \
+    "paths.h" \
+    "utmp.h" "utmpx.h" \
+    "lastlog.h" \
+    "sys/acct.h" \
+    "sys/cachectl.h" \
+    "sys/epoll.h" "sys/reboot.h" "sys/swap.h" \
+    "sys/sendfile.h" "sys/inotify.h" \
+    "sys/quota.h" \
+    "sys/klog.h" \
+    "sys/fsuid.h" \
+    "sys/io.h" \
+    "sys/prctl.h" \
+    "sys/mtio.h" \
+    "sys/mount.h" \
+    "sys/fanotify.h" \
+    "sys/personality.h" \
+    "elf.h" "link.h" "bits/link.h" \
+    "scsi/scsi.h" "scsi/scsi_ioctl.h" "scsi/sg.h" \
+    "sys/auxv.h" \
+    "pwd.h" "shadow.h" "grp.h" \
+    "mntent.h" \
+    "netdb.h" \
+    "resolv.h" \
+    "pty.h" \
+    "dlfcn.h" \
+    "setjmp.h" \
+    "ulimit.h" \
+    "sys/xattr.h" \
+    "wordexp.h" \
+    "spawn.h" \
+    "sys/membarrier.h" \
+    "sys/signalfd.h" \
+    "termios.h" \
+    "sys/termios.h" \
+    "bits/termios.h" \
+    "net/if.h" \
+    "net/if_arp.h" \
+    "net/ethernet.h" \
+    "net/route.h" \
+    "netinet/if_ether.h" \
+    "netinet/ether.h" \
+    "sys/timerfd.h"
+
+ifeq ($(THREAD_MODEL), single)
+# Remove headers not supported in single-threaded mode.
+override MUSL_OMIT_HEADERS += "aio.h" "pthread.h"
+endif
+
 default: check
 
 $(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
@@ -323,95 +400,8 @@ include_dirs:
 	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/generic/bits/* "$(SYSROOT_INC)/bits"
 	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/wasm32/bits/* "$(SYSROOT_INC)/bits"
 
-	# Remove files that aren't headers or that aren't supported yet or that aren't relevant for wasm.
-	$(RM) "$(SYSROOT_INC)/bits/syscall.h.in" \
-	      "$(SYSROOT_INC)/bits/alltypes.h.in" \
-	      "$(SYSROOT_INC)/alltypes.h.in" \
-	      "$(SYSROOT_INC)/sys/procfs.h" \
-	      "$(SYSROOT_INC)/sys/user.h" \
-	      "$(SYSROOT_INC)/sys/kd.h" \
-	      "$(SYSROOT_INC)/bits/kd.h" \
-	      "$(SYSROOT_INC)/sys/vt.h" \
-	      "$(SYSROOT_INC)/bits/vt.h" \
-	      "$(SYSROOT_INC)/sys/soundcard.h" \
-	      "$(SYSROOT_INC)/bits/soundcard.h" \
-	      "$(SYSROOT_INC)/sys/sem.h" \
-	      "$(SYSROOT_INC)/bits/sem.h" \
-	      "$(SYSROOT_INC)/sys/statfs.h" \
-	      "$(SYSROOT_INC)/sys/vfs.h" \
-	      "$(SYSROOT_INC)/bits/statfs.h" \
-	      "$(SYSROOT_INC)/sys/statvfs.h" \
-	      "$(SYSROOT_INC)/sys/shm.h" \
-	      "$(SYSROOT_INC)/bits/shm.h" \
-	      "$(SYSROOT_INC)/sys/msg.h" \
-	      "$(SYSROOT_INC)/bits/msg.h" \
-	      "$(SYSROOT_INC)/sys/ipc.h" \
-	      "$(SYSROOT_INC)/bits/ipc.h" \
-	      "$(SYSROOT_INC)/syslog.h" \
-	      "$(SYSROOT_INC)/sys/syslog.h" \
-	      "$(SYSROOT_INC)/paths.h" \
-	      "$(SYSROOT_INC)/utmp.h" \
-	      "$(SYSROOT_INC)/utmpx.h" \
-	      "$(SYSROOT_INC)/lastlog.h" \
-	      "$(SYSROOT_INC)/sys/acct.h" \
-	      "$(SYSROOT_INC)/sys/cachectl.h" \
-	      "$(SYSROOT_INC)/sys/epoll.h" \
-	      "$(SYSROOT_INC)/sys/ptrace.h" \
-	      "$(SYSROOT_INC)/bits/ptrace.h" \
-	      "$(SYSROOT_INC)/sys/reboot.h" \
-	      "$(SYSROOT_INC)/sys/swap.h" \
-	      "$(SYSROOT_INC)/sys/sendfile.h" \
-	      "$(SYSROOT_INC)/sys/quota.h" \
-	      "$(SYSROOT_INC)/sys/inotify.h" \
-	      "$(SYSROOT_INC)/sys/klog.h" \
-	      "$(SYSROOT_INC)/sys/fsuid.h" \
-	      "$(SYSROOT_INC)/sys/io.h" \
-	      "$(SYSROOT_INC)/sys/prctl.h" \
-	      "$(SYSROOT_INC)/sys/mtio.h" \
-	      "$(SYSROOT_INC)/sys/mount.h" \
-	      "$(SYSROOT_INC)/sys/fanotify.h" \
-	      "$(SYSROOT_INC)/sys/personality.h" \
-	      "$(SYSROOT_INC)/sys/wait.h" \
-	      "$(SYSROOT_INC)/wait.h" \
-	      "$(SYSROOT_INC)/bits/errno.h" \
-	      "$(SYSROOT_INC)/bits/link.h" \
-	      "$(SYSROOT_INC)/link.h" \
-	      "$(SYSROOT_INC)/elf.h" \
-	      "$(SYSROOT_INC)/scsi/scsi.h" \
-	      "$(SYSROOT_INC)/scsi/scsi_ioctl.h" \
-	      "$(SYSROOT_INC)/scsi/sg.h" \
-	      "$(SYSROOT_INC)/sys/auxv.h" \
-	      "$(SYSROOT_INC)/setjmp.h" \
-	      "$(SYSROOT_INC)/pwd.h" \
-	      "$(SYSROOT_INC)/shadow.h" \
-	      "$(SYSROOT_INC)/grp.h" \
-	      "$(SYSROOT_INC)/mntent.h" \
-	      "$(SYSROOT_INC)/netdb.h" \
-	      "$(SYSROOT_INC)/resolv.h" \
-	      "$(SYSROOT_INC)/pty.h" \
-	      "$(SYSROOT_INC)/dlfcn.h" \
-	      "$(SYSROOT_INC)/ulimit.h" \
-	      "$(SYSROOT_INC)/sys/xattr.h" \
-	      "$(SYSROOT_INC)/wordexp.h" \
-	      "$(SYSROOT_INC)/spawn.h" \
-	      "$(SYSROOT_INC)/ucontext.h" \
-	      "$(SYSROOT_INC)/sys/ucontext.h" \
-	      "$(SYSROOT_INC)/sys/membarrier.h" \
-	      "$(SYSROOT_INC)/sys/signalfd.h" \
-	      "$(SYSROOT_INC)/termios.h" \
-	      "$(SYSROOT_INC)/sys/termios.h" \
-	      "$(SYSROOT_INC)/bits/termios.h" \
-	      "$(SYSROOT_INC)/net/if.h" \
-	      "$(SYSROOT_INC)/net/if_arp.h" \
-	      "$(SYSROOT_INC)/net/ethernet.h" \
-	      "$(SYSROOT_INC)/net/route.h" \
-	      "$(SYSROOT_INC)/netinet/if_ether.h" \
-	      "$(SYSROOT_INC)/netinet/ether.h" \
-	      "$(SYSROOT_INC)/sys/timerfd.h"
-ifeq ($(THREAD_MODEL), single)
-	$(RM) "$(SYSROOT_INC)/aio.h" \
-	      "$(SYSROOT_INC)/pthread.h"
-endif
+	# Remove selected header files.
+	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
 
 ifeq ($(BUILD_LIBC_BOTTOM_HALF),no)
 override CRT_SOURCES = $(BASICS_CRT_SOURCES)

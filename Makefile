@@ -137,7 +137,9 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/prng/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/conf/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/ctype/*.c) \
-    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/math/*.c) \
+    $(filter-out %/__signbit.c %/__signbitf.c %/__signbitl.c \
+                 %/__fpclassify.c %/__fpclassifyf.c %/__fpclassifyl.c, \
+                 $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/math/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
 MUSL_PRINTSCAN_SOURCES = \

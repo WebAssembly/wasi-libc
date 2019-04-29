@@ -47,6 +47,7 @@ __wasi_fd_readdir
 __wasi_fd_renumber
 __wasi_fd_seek
 __wasi_fd_sync
+__wasi_fd_tell
 __wasi_fd_write
 __wasi_path_create_directory
 __wasi_path_filestat_get

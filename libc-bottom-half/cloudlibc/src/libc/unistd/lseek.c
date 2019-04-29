@@ -11,7 +11,11 @@ static_assert(SEEK_CUR == __WASI_WHENCE_CUR, "Value mismatch");
 static_assert(SEEK_END == __WASI_WHENCE_END, "Value mismatch");
 static_assert(SEEK_SET == __WASI_WHENCE_SET, "Value mismatch");
 
+#ifdef __wasilibc_unmodified_upstream /* Optimize the readonly case of lseek */
 off_t lseek(int fildes, off_t offset, int whence) {
+#else
+off_t (lseek)(int fildes, off_t offset, int whence) {
+#endif
   __wasi_filesize_t new_offset;
   __wasi_errno_t error =
       __wasi_fd_seek(fildes, offset, whence, &new_offset);

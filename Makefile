@@ -153,9 +153,9 @@ LIBC_TOP_HALF_ALL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SOURCES) \
     $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.c)
 
-# Set the target variables. The multiarch triple is the same as the
-# regular triple for wasm, except that it excludes the vendor field.
-TARGET_TRIPLE = wasm32-unknown-wasi
+# Set the target variables. Multiarch triples notably omit the vendor
+# field, which happens to be what we do for the main target triple too.
+TARGET_TRIPLE = wasm32-wasi
 MULTIARCH_TRIPLE = wasm32-wasi
 
 # These variables describe the locations of various files and

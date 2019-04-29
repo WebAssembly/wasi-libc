@@ -35,7 +35,7 @@ _Noreturn void longjmp (jmp_buf, int);
 
 #define setjmp setjmp
 #else
-#warning setjmp is not yet implemented for wasm32-unknown-wasi
+#warning setjmp is not yet implemented for WASI
 #endif
 
 #ifdef __cplusplus

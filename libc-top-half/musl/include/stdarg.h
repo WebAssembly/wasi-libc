@@ -1,4 +1,3 @@
-#ifdef __wasilibc_unmodified_upstream /* Use the compiler's stdarg.h */
 #ifndef _STDARG_H
 #define _STDARG_H
 
@@ -19,8 +18,4 @@ extern "C" {
 }
 #endif
 
-#endif
-#else
-/* Just use the compiler's stdarg.h. */
-#include_next <stdarg.h>
 #endif

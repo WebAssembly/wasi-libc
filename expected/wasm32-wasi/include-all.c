@@ -120,10 +120,8 @@
 #include <semaphore.h>
 #include <signal.h>
 #include <stdalign.h>
-#include <stdarg.h>
 #include <stdbool.h>
 #include <stdc-predef.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdio_ext.h>

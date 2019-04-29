@@ -243,6 +243,11 @@ override MUSL_OMIT_HEADERS += \
     "bits/alltypes.h.in" \
     "alltypes.h.in"
 
+# Use the compiler's version of these headers.
+override MUSL_OMIT_HEADERS += \
+    "stdarg.h" \
+    "stddef.h"
+
 # Use the WASI errno definitions.
 override MUSL_OMIT_HEADERS += \
     "bits/errno.h"

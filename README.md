@@ -8,8 +8,8 @@ aren't stable yet.
 It's several things.
 
 First, it's a usable libc. It builds a "sysroot" which can be pointed to by
-compilers, such as Clang 8.0, using the wasm32-unknown-wasi target triple.
-It's a work in progress, but it is already sufficient to run basic programs.
+compilers, such as Clang 8.0, using the wasm32-wasi target. It's a work in
+progress, but it is already sufficient to run basic programs.
 
 Second, it's a "reference" implementation, which means the interfaces defined
 here can be used by other tools and libraries, even if they don't use all the

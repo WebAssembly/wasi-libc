@@ -711,8 +711,6 @@
 #define GLOB_NOSPACE 1
 #define GLOB_NOSYS 4
 #define GLOB_PERIOD 0x80
-#define GRND_NONBLOCK 0x0001
-#define GRND_RANDOM 0x0002
 #define GROUP_FILTER_SIZE(numsrc) (sizeof(struct group_filter) - sizeof(struct sockaddr_storage) + (numsrc) * sizeof(struct sockaddr_storage))
 #define HFIXEDSZ NS_HFIXEDSZ
 #define HIBITL MINLONG

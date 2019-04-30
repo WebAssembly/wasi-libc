@@ -80,6 +80,7 @@ __fwritex
 __fwriting
 __get_locale
 __getdelim
+__getentropy
 __getopt_msg
 __gmtime_r
 __hwcap

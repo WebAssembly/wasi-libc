@@ -6,7 +6,7 @@
 #error With threads support, getentropy is not intended to be a cancellation point.
 #endif
 
-int getentropy(void *buffer, size_t len) {
+int __getentropy(void *buffer, size_t len) {
     if (len > 256) {
         errno = EIO;
         return -1;
@@ -21,3 +21,4 @@ int getentropy(void *buffer, size_t len) {
 
     return 0;
 }
+extern __typeof(__getentropy) getentropy __attribute__((weak, alias("__getentropy")));

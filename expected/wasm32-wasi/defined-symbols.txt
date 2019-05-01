@@ -176,6 +176,7 @@ __signgam
 __sin
 __sindf
 __sinl
+__small_printf
 __stderr_FILE
 __stderr_used
 __stderr_used
@@ -795,7 +796,6 @@ powl
 pread
 preadv
 printf
-printf_no_Lf
 program_invocation_name
 program_invocation_short_name
 pselect

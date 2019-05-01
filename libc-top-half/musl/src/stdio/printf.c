@@ -13,5 +13,5 @@ int printf(const char *restrict fmt, ...)
 #ifdef __wasilibc_unmodified_upstream // Changes to optimize printf/scanf when long double isn't needed
 #else
 weak_alias(printf, iprintf);
-weak_alias(printf, printf_no_Lf);
+weak_alias(printf, __small_printf);
 #endif

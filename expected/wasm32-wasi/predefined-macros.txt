@@ -3700,7 +3700,7 @@
 #define fmin(x,y) __tg_real_2(fmin, (x), (y))
 #define fmod(x,y) __tg_real_2(fmod, (x), (y))
 #define fopen64 fopen
-#define fpclassify(x) __builtin_fpclassify (FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, x)
+#define fpclassify(x) __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, x)
 #define fpos64_t fpos_t
 #define freopen64 freopen
 #define frexp(x,y) __tg_real_2_1(frexp, (x), (y))

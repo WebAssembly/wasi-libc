@@ -233,15 +233,15 @@ $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): override WASM_CFLAGS += \
 	    -D__wasilibc_printscan_no_floating_point \
 	    -D__wasilibc_printscan_floating_point_support_option="\"remove -lc-printscan-no-floating-point from the link command\""
 
-$(OBJDIR)/%.long-double.o: $(CURDIR)/%.c $(SYSROOT_INC)
+$(OBJDIR)/%.long-double.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
 	"$(WASM_CC)" $(WASM_CFLAGS) -MD -MP -o $@ -c $<
 
-$(OBJDIR)/%.no-floating-point.o: $(CURDIR)/%.c $(SYSROOT_INC)
+$(OBJDIR)/%.no-floating-point.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
 	"$(WASM_CC)" $(WASM_CFLAGS) -MD -MP -o $@ -c $<
 
-$(OBJDIR)/%.o: $(CURDIR)/%.c $(SYSROOT_INC)
+$(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
 	"$(WASM_CC)" $(WASM_CFLAGS) -MD -MP -o $@ -c $<
 
@@ -271,9 +271,7 @@ $(LIBC_TOP_HALF_ALL_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO
     -Wno-dangling-else \
     -Wno-unknown-pragmas
 
-$(SYSROOT): startup_files libc finish check
-
-$(SYSROOT_INC):
+include_dirs:
 	$(RM) -r "$(SYSROOT)"
 
 	#
@@ -382,7 +380,7 @@ else
 override CRT_SOURCES = $(LIBC_BOTTOM_HALF_CRT_SOURCES)
 endif
 
-startup_files: $(SYSROOT_INC)
+startup_files: include_dirs
 	#
 	# Build the startup files.
 	#
@@ -392,13 +390,13 @@ startup_files: $(SYSROOT_INC)
 	mkdir -p "$(SYSROOT_LIB)" && \
 	mv *.o "$(SYSROOT_LIB)"
 
-libc: $(SYSROOT_INC) \
+libc: include_dirs \
     $(SYSROOT_LIB)/libc.a \
     $(SYSROOT_LIB)/libc-printscan-long-double.a \
     $(SYSROOT_LIB)/libc-printscan-no-floating-point.a \
     $(SYSROOT_LIB)/libwasi-emulated-mman.a
 
-finish: $(SYSROOT_INC) libc
+finish: startup_files libc
 	#
 	# Create empty placeholder libraries.
 	#
@@ -461,12 +459,12 @@ finish: $(SYSROOT_INC) libc
 	# The build succeeded! The generated sysroot is in $(SYSROOT).
 	#
 
-check: $(SYSROOT) finish
+check: finish
 	# Check that the computed metadata matches the expected metadata.
 	diff -ur "$(CURDIR)/expected/$(MULTIARCH_TRIPLE)" "$(SYSROOT_SHARE)"
 
-install: $(SYSROOT)
+install: finish
 	mkdir -p "$(INSTALL_DIR)"
 	cp -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"
 
-.PHONY: $(SYSROOT) default startup_files libc finish check install $(SYSROOT_INC)
+.PHONY: default startup_files libc finish check install include_dirs

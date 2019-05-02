@@ -40,6 +40,7 @@ int __fpclassify(double);
 int __fpclassifyf(float);
 int __fpclassifyl(long double);
 
+#ifdef __wasilibc_unmodified_upstream /* Force compiler to optimize these macros */
 static __inline unsigned __FLOAT_BITS(float __f)
 {
 	union {float __f; unsigned __i;} __u;
@@ -77,15 +78,35 @@ static __inline unsigned long long __DOUBLE_BITS(double __f)
 	sizeof(x) == sizeof(float) ? (__FLOAT_BITS(x) & 0x7fffffff) < 0x7f800000 : \
 	sizeof(x) == sizeof(double) ? (__DOUBLE_BITS(x) & -1ULL>>1) < 0x7ffULL<<52 : \
 	__fpclassifyl(x) > FP_INFINITE)
+#else
+
+#define fpclassify(x) __builtin_fpclassify(FP_NAN, FP_INFINITE, \
+	FP_NORMAL, FP_SUBNORMAL, FP_ZERO, x)
+
+#define isinf(x) __builtin_isinf(x)
+
+#define isnan(x) __builtin_isnan(x)
+
+#define isnormal(x) __builtin_isnormal(x)
+
+#define isfinite(x) __builtin_isfinite(x)
+
+#endif
 
 int __signbit(double);
 int __signbitf(float);
 int __signbitl(long double);
 
+#ifdef __wasilibc_unmodified_upstream /* Force compiler to optimize this macro */
 #define signbit(x) ( \
 	sizeof(x) == sizeof(float) ? (int)(__FLOAT_BITS(x)>>31) : \
 	sizeof(x) == sizeof(double) ? (int)(__DOUBLE_BITS(x)>>63) : \
 	__signbitl(x) )
+#else
+
+#define signbit(x) __builtin_signbit(x)
+
+#endif
 
 #define isunordered(x,y) (isnan((x)) ? ((void)(y),1) : isnan((y)))
 

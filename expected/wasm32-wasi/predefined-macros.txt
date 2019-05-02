@@ -3700,7 +3700,7 @@
 #define fmin(x,y) __tg_real_2(fmin, (x), (y))
 #define fmod(x,y) __tg_real_2(fmod, (x), (y))
 #define fopen64 fopen
-#define fpclassify(x) ( sizeof(x) == sizeof(float) ? __fpclassifyf(x) : sizeof(x) == sizeof(double) ? __fpclassify(x) : __fpclassifyl(x) )
+#define fpclassify(x) __builtin_fpclassify (FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, x)
 #define fpos64_t fpos_t
 #define freopen64 freopen
 #define frexp(x,y) __tg_real_2_1(frexp, (x), (y))
@@ -3781,17 +3781,17 @@
 #define isascii(a) (0 ? isascii(a) : (unsigned)(a) < 128)
 #define isclr(x,i) !isset(x,i)
 #define isdigit(a) (0 ? isdigit(a) : ((unsigned)(a)-'0') < 10)
-#define isfinite(x) ( sizeof(x) == sizeof(float) ? (__FLOAT_BITS(x) & 0x7fffffff) < 0x7f800000 : sizeof(x) == sizeof(double) ? (__DOUBLE_BITS(x) & -1ULL>>1) < 0x7ffULL<<52 : __fpclassifyl(x) > FP_INFINITE)
+#define isfinite(x) __builtin_isfinite(x)
 #define isgraph(a) (0 ? isgraph(a) : ((unsigned)(a)-0x21) < 0x5e)
 #define isgreater(x,y) __tg_pred_2(x, y, __isgreater)
 #define isgreaterequal(x,y) __tg_pred_2(x, y, __isgreaterequal)
-#define isinf(x) ( sizeof(x) == sizeof(float) ? (__FLOAT_BITS(x) & 0x7fffffff) == 0x7f800000 : sizeof(x) == sizeof(double) ? (__DOUBLE_BITS(x) & -1ULL>>1) == 0x7ffULL<<52 : __fpclassifyl(x) == FP_INFINITE)
+#define isinf(x) __builtin_isinf(x)
 #define isless(x,y) __tg_pred_2(x, y, __isless)
 #define islessequal(x,y) __tg_pred_2(x, y, __islessequal)
 #define islessgreater(x,y) __tg_pred_2(x, y, __islessgreater)
 #define islower(a) (0 ? islower(a) : ((unsigned)(a)-'a') < 26)
-#define isnan(x) ( sizeof(x) == sizeof(float) ? (__FLOAT_BITS(x) & 0x7fffffff) > 0x7f800000 : sizeof(x) == sizeof(double) ? (__DOUBLE_BITS(x) & -1ULL>>1) > 0x7ffULL<<52 : __fpclassifyl(x) == FP_NAN)
-#define isnormal(x) ( sizeof(x) == sizeof(float) ? ((__FLOAT_BITS(x)+0x00800000) & 0x7fffffff) >= 0x01000000 : sizeof(x) == sizeof(double) ? ((__DOUBLE_BITS(x)+(1ULL<<52)) & -1ULL>>1) >= 1ULL<<53 : __fpclassifyl(x) == FP_NORMAL)
+#define isnan(x) __builtin_isnan(x)
+#define isnormal(x) __builtin_isnormal(x)
 #define isprint(a) (0 ? isprint(a) : ((unsigned)(a)-0x20) < 0x5f)
 #define isset(x,i) __bitop(x,i,&)
 #define isspace(a) __isspace(a)
@@ -3929,7 +3929,7 @@
 #define si_upper __si_fields.__sigfault.__first.__addr_bnd.si_upper
 #define si_utime __si_fields.__si_common.__second.__sigchld.si_utime
 #define si_value __si_fields.__si_common.__second.si_value
-#define signbit(x) ( sizeof(x) == sizeof(float) ? (int)(__FLOAT_BITS(x)>>31) : sizeof(x) == sizeof(double) ? (int)(__DOUBLE_BITS(x)>>63) : __signbitl(x) )
+#define signbit(x) __builtin_signbit(x)
 #define sin(x) __tg_real_complex(sin, (x))
 #define sinh(x) __tg_real_complex(sinh, (x))
 #define sqrt(x) __tg_real_complex(sqrt, (x))

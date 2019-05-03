@@ -141,7 +141,15 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/conf/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/ctype/*.c) \
     $(filter-out %/__signbit.c %/__signbitf.c %/__signbitl.c \
-                 %/__fpclassify.c %/__fpclassifyf.c %/__fpclassifyl.c, \
+                 %/__fpclassify.c %/__fpclassifyf.c %/__fpclassifyl.c \
+                 %/ceilf.c %/ceil.c \
+                 %/floorf.c %/floor.c \
+                 %/truncf.c %/trunc.c \
+                 %/rintf.c %/rint.c \
+                 %/nearbyintf.c %/nearbyint.c \
+                 %/sqrtf.c %/sqrt.c \
+                 %/fabsf.c %/fabs.c \
+                 %/copysignf.c %/copysign.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/math/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)

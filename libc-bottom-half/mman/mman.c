@@ -58,6 +58,12 @@ void *mmap(void *addr, size_t length, int prot, int flags,
         return MAP_FAILED;
     }
 
+    // Check for overflow
+    if(sizeof(struct map) + length < sizeof(struct map)) {
+        errno = EINVAL;
+        return MAP_FAILED;
+    }
+
     // Allocate the memory.
     struct map *map = malloc(sizeof(struct map) + length);
     if (!map) {
@@ -76,7 +82,7 @@ void *mmap(void *addr, size_t length, int prot, int flags,
     if ((flags & MAP_ANON) == 0) {
         char *body = map->body;
         while (length > 0) {
-            ssize_t nread = pread(fd, body, length, offset);
+            const ssize_t nread = pread(fd, body, length, offset);
             if (nread < 0) {
                 if (errno == EINTR)
                     continue;
@@ -97,9 +103,6 @@ void *mmap(void *addr, size_t length, int prot, int flags,
 
 int munmap(void *addr, size_t length) {
     struct map *map = (struct map *)addr - 1;
-    off_t offset = map->offset;
-    int flags = map->flags;
-    int prot = map->prot;
     
     // We don't support partial munmapping.
     if (map->length != length) {

@@ -30,6 +30,6 @@ int unlinkat(int fd, const char *path, int flag) {
   if ((flag & AT_REMOVEDIR) != 0) {
     return __wasilibc_rmdirat(fd, path);
   }
-  return __wasilibc_rmfileat(fd, path);
+  return __wasilibc_unlinkat(fd, path);
 #endif
 }

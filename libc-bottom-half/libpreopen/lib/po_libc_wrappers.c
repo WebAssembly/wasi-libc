@@ -409,7 +409,7 @@ unlink(const char *pathname)
 	    return -1;
 	}
 
-	return __wasilibc_rmfileat(rel_pathname.dirfd, rel_pathname.relative_path);
+	return __wasilibc_unlinkat(rel_pathname.dirfd, rel_pathname.relative_path);
 }
 
 int
@@ -451,7 +451,7 @@ remove(const char *pathname)
 	    return -1;
 	}
 
-	int r = __wasilibc_rmfileat(rel_pathname.dirfd, rel_pathname.relative_path);
+	int r = __wasilibc_unlinkat(rel_pathname.dirfd, rel_pathname.relative_path);
 	if (r != 0 && (errno == EISDIR || errno == ENOTCAPABLE))
 		r = __wasilibc_rmdirat(rel_pathname.dirfd, rel_pathname.relative_path);
 	return r;

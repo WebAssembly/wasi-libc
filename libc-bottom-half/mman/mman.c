@@ -58,7 +58,7 @@ void *mmap(void *addr, size_t length, int prot, int flags,
         return MAP_FAILED;
     }
 
-    // Check for overflow
+    // Check for integer overflow.
     if(sizeof(struct map) + length < sizeof(struct map)) {
         errno = EINVAL;
         return MAP_FAILED;

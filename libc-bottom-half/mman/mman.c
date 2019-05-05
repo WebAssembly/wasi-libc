@@ -58,10 +58,16 @@ void *mmap(void *addr, size_t length, int prot, int flags,
         return MAP_FAILED;
     }
 
+    //  To be consistent with POSIX.
+    if (length == 0) {
+        errno = EINVAL;
+        return MAP_FAILED;
+    }
+
     // Check for integer overflow.
     size_t buf_len = 0;
-    if(__builtin_add_overflow(length, sizeof(struct map), &buf_len)) {
-        errno = EINVAL;
+    if (__builtin_add_overflow(length, sizeof(struct map), &buf_len)) {
+        errno = ENOMEM;
         return MAP_FAILED;
     }
 

@@ -58,10 +58,9 @@ void *mmap(void *addr, size_t length, int prot, int flags,
         return MAP_FAILED;
     }
 
-    const size_t buf_len = sizeof(struct map) + length;
-
     // Check for integer overflow.
-    if(buf_len < length) {
+    size_t buf_len = 0;
+    if(__builtin_add_overflow(length, sizeof(struct map), &buf_len)) {
         errno = EINVAL;
         return MAP_FAILED;
     }

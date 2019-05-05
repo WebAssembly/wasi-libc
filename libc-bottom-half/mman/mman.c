@@ -58,14 +58,16 @@ void *mmap(void *addr, size_t length, int prot, int flags,
         return MAP_FAILED;
     }
 
+    const size_t buf_len = sizeof(struct map) + length;
+
     // Check for integer overflow.
-    if(sizeof(struct map) + length < sizeof(struct map)) {
+    if(buf_len < length) {
         errno = EINVAL;
         return MAP_FAILED;
     }
 
     // Allocate the memory.
-    struct map *map = malloc(sizeof(struct map) + length);
+    struct map *map = malloc(buf_len);
     if (!map) {
         errno = ENOMEM;
         return MAP_FAILED;

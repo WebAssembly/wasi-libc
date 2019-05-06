@@ -29,11 +29,13 @@ The easiest way to get started with this is to use one of the
 ## Building from source
 
 To build a WASI sysroot from source, obtain a WebAssembly-supporting C compiler
-(currently this is only clang, though we'd like to support other compilers as well),
+(currently this is only clang 8+, though we'd like to support other compilers as well),
 and then run:
 
-```
-make WASM_CC=/path/to/wasm/supporting/c/compiler
+```sh
+make WASM_CC=/path/to/clang/with/wasm/support \
+     WASM_AR=/path/to/llvm-ar \
+     WASM_NM=/path/to/llvm-nm
 ```
 
 This makes a directory called "sysroot", by default. See the top of the Makefile
@@ -41,7 +43,7 @@ for customization options.
 
 To use the sysroot, use the `--sysroot=` option:
 
-```
+```sh
 /path/to/wasm/supporting/c/compiler --sysroot=/path/to/the/newly/built/sysroot ...
 ```
 

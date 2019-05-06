@@ -188,8 +188,6 @@ SYSROOT_SHARE = $(SYSROOT)/share/$(MULTIARCH_TRIPLE)
 
 # Set the target.
 override WASM_CFLAGS += --target=$(TARGET_TRIPLE)
-# We're compiling libc.
-override WASM_CFLAGS += -fno-builtin
 # WebAssembly floating-point match doesn't trap.
 # TODO: Add -fno-signaling-nans when the compiler supports it.
 override WASM_CFLAGS += -fno-trapping-math

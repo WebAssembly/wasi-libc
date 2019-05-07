@@ -13,8 +13,13 @@
 
 #include "stat_impl.h"
 
+#ifdef __wasilibc_unmodified_upstream // Rename for AT_FDCWD support
 int utimensat(int fd, const char *path, const struct timespec times[2],
               int flag) {
+#else
+int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec times[2],
+                               int flag) {
+#endif
   // Convert timestamps and extract NOW/OMIT flags.
 #ifdef __wasilibc_unmodified_upstream // fstat
   __wasi_filestat_t fs;

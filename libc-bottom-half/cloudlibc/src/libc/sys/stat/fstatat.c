@@ -13,8 +13,13 @@
 
 #include "stat_impl.h"
 
+#ifdef __wasilibc_unmodified_upstream // Rename for AT_FDCWD support
 int fstatat(int fd, const char *restrict path, struct stat *restrict buf,
             int flag) {
+#else
+int __wasilibc_nocwd_fstatat(int fd, const char *restrict path, struct stat *restrict buf,
+                             int flag) {
+#endif
   // Create lookup properties.
 #ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
   __wasi_lookup_t lookup = {.fd = fd, .flags = 0};

@@ -191,6 +191,10 @@ override WASM_CFLAGS += --target=$(TARGET_TRIPLE)
 # WebAssembly floating-point match doesn't trap.
 # TODO: Add -fno-signaling-nans when the compiler supports it.
 override WASM_CFLAGS += -fno-trapping-math
+# We should have proper declarations for everything.
+override WASM_CFLAGS += \
+    -Werror=missing-declarations \
+    -Werror=implicit-function-declaration \
 
 # Configure support for threads.
 ifeq ($(THREAD_MODEL), single)

@@ -9,7 +9,11 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifdef __wasilibc_unmodified_upstream // Rename for AT_FDCWD support
 int symlinkat(const char *path1, int fd, const char *path2) {
+#else
+int __wasilibc_nocwd_symlinkat(const char *path1, int fd, const char *path2) {
+#endif
   __wasi_errno_t error =
 #ifdef __wasilibc_unmodified_upstream
       __wasi_file_symlink(path1, strlen(path1), fd, path2, strlen(path2));

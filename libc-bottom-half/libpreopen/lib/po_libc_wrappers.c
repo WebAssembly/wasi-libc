@@ -577,6 +577,141 @@ symlink(const char *target, const char *linkpath)
 
 	return symlinkat(target, rel_linkpath.dirfd, rel_linkpath.relative_path);
 }
+
+// Like `access`, but with `faccessat`'s flags argument.
+int
+__wasilibc_access(const char *path, int mode, int flags)
+{
+	struct po_relpath rel = find_relative(path, __WASI_RIGHT_PATH_FILESTAT_GET, 0);
+
+	// If we can't find a preopened directory handle to open this file with,
+	// indicate that the program lacks the capabilities.
+	if (rel.dirfd == -1) {
+		errno = ENOTCAPABLE;
+		return -1;
+	}
+
+	return faccessat(rel.dirfd, rel.relative_path, mode, flags);
+}
+
+// Like `utimensat`, but without the `at` part.
+int
+__wasilibc_utimens(const char *path, const struct timespec times[2], int flags)
+{
+	struct po_relpath rel = find_relative(path, __WASI_RIGHT_PATH_FILESTAT_SET_TIMES, 0);
+
+	// If we can't find a preopened directory handle to open this file with,
+	// indicate that the program lacks the capabilities.
+	if (rel.dirfd == -1) {
+		errno = ENOTCAPABLE;
+		return -1;
+	}
+
+	return utimensat(rel.dirfd, rel.relative_path, times, flags);
+}
+
+// Like `stat`, but with `fstatat`'s flags argument.
+int
+__wasilibc_stat(const char *__restrict path, struct stat *__restrict st, int flags)
+{
+	struct po_relpath rel = find_relative(path, __WASI_RIGHT_PATH_FILESTAT_GET, 0);
+
+	// If we can't find a preopened directory handle to open this file with,
+	// indicate that the program lacks the capabilities.
+	if (rel.dirfd == -1) {
+	    errno = ENOTCAPABLE;
+	    return -1;
+	}
+
+	return fstatat(rel.dirfd, rel.relative_path, st, flags);
+}
+
+// Like `link`, but with `linkat`'s flags argument.
+int
+__wasilibc_link(const char *oldpath, const char *newpath, int flags)
+{
+	struct po_relpath rel_oldpath = find_relative(oldpath, __WASI_RIGHT_PATH_LINK_SOURCE, 0);
+	struct po_relpath rel_newpath = find_relative(newpath, __WASI_RIGHT_PATH_LINK_TARGET, 0);
+
+	// If we can't find a preopened directory handle to open this file with,
+	// indicate that the program lacks the capabilities.
+	if (rel_oldpath.dirfd == -1 || rel_newpath.dirfd == -1) {
+	    errno = ENOTCAPABLE;
+	    return -1;
+	}
+
+	return linkat(rel_oldpath.dirfd, rel_oldpath.relative_path,
+	              rel_newpath.dirfd, rel_newpath.relative_path,
+	              flags);
+}
+
+// Like `__wasilibc_link`, but oldpath is relative to olddirfd.
+int
+__wasilibc_link_oldat(int olddirfd, const char *oldpath, const char *newpath, int flags)
+{
+	struct po_relpath rel_newpath = find_relative(newpath, __WASI_RIGHT_PATH_LINK_TARGET, 0);
+
+	// If we can't find a preopened directory handle to open this file with,
+	// indicate that the program lacks the capabilities.
+	if (rel_newpath.dirfd == -1) {
+	    errno = ENOTCAPABLE;
+	    return -1;
+	}
+
+	return linkat(olddirfd, oldpath,
+	              rel_newpath.dirfd, rel_newpath.relative_path,
+	              flags);
+}
+
+// Like `__wasilibc_link`, but newpath is relative to newdirfd.
+int
+__wasilibc_link_newat(const char *oldpath, int newdirfd, const char *newpath, int flags)
+{
+	struct po_relpath rel_oldpath = find_relative(oldpath, __WASI_RIGHT_PATH_LINK_SOURCE, 0);
+
+	// If we can't find a preopened directory handle to open this file with,
+	// indicate that the program lacks the capabilities.
+	if (rel_oldpath.dirfd == -1) {
+	    errno = ENOTCAPABLE;
+	    return -1;
+	}
+
+	return linkat(rel_oldpath.dirfd, rel_oldpath.relative_path,
+	              newdirfd, newpath,
+	              flags);
+}
+
+// Like `rename`, but from is relative to fromdirfd.
+int
+__wasilibc_rename_oldat(int fromdirfd, const char *from, const char *to)
+{
+	struct po_relpath rel_to = find_relative(to, __WASI_RIGHT_PATH_RENAME_TARGET, 0);
+
+	// If we can't find a preopened directory handle to open this file with,
+	// indicate that the program lacks the capabilities.
+	if (rel_to.dirfd == -1) {
+	    errno = ENOTCAPABLE;
+	    return -1;
+	}
+
+	return renameat(fromdirfd, from, rel_to.dirfd, rel_to.relative_path);
+}
+
+// Like `rename`, but to is relative to todirfd.
+int
+__wasilibc_rename_newat(const char *from, int todirfd, const char *to)
+{
+	struct po_relpath rel_from = find_relative(from, __WASI_RIGHT_PATH_RENAME_SOURCE, 0);
+
+	// If we can't find a preopened directory handle to open this file with,
+	// indicate that the program lacks the capabilities.
+	if (rel_from.dirfd == -1) {
+	    errno = ENOTCAPABLE;
+	    return -1;
+	}
+
+	return renameat(rel_from.dirfd, rel_from.relative_path, todirfd, to);
+}
 #endif
 
 #ifdef __wasilibc_unmodified_upstream

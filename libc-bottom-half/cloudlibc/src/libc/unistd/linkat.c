@@ -10,7 +10,11 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifdef __wasilibc_unmodified_upstream // Rename for AT_FDCWD support
 int linkat(int fd1, const char *path1, int fd2, const char *path2, int flag) {
+#else
+int __wasilibc_nocwd_linkat(int fd1, const char *path1, int fd2, const char *path2, int flag) {
+#endif
   // Create lookup properties.
 #ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
   __wasi_lookup_t lookup1 = {.fd = fd1, .flags = 0};

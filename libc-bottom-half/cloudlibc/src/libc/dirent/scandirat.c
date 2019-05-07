@@ -16,9 +16,15 @@ static int sel_true(const struct dirent *de) {
   return 1;
 }
 
+#ifdef __wasilibc_unmodified_upstream // Rename for AT_FDCWD support
 int scandirat(int dirfd, const char *dir, struct dirent ***namelist,
               int (*sel)(const struct dirent *),
               int (*compar)(const struct dirent **, const struct dirent **)) {
+#else
+int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***namelist,
+                               int (*sel)(const struct dirent *),
+                               int (*compar)(const struct dirent **, const struct dirent **)) {
+#endif
   // Match all files if no select function is provided.
   if (sel == NULL)
     sel = sel_true;

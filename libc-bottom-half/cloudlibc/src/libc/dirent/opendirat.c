@@ -7,7 +7,11 @@
 #include <stddef.h>
 #include <unistd.h>
 
+#ifdef __wasilibc_unmodified_upstream // Rename for AT_FDCWD support
 DIR *opendirat(int dir, const char *dirname) {
+#else
+DIR *__wasilibc_nocwd_opendirat(int dir, const char *dirname) {
+#endif
   // Open directory.
   int fd = openat(dir, dirname, O_RDONLY | O_NONBLOCK | O_DIRECTORY);
   if (fd == -1)

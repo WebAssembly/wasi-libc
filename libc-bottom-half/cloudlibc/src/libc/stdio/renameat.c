@@ -9,7 +9,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef __wasilibc_unmodified_upstream // Rename for AT_FDCWD support
 int renameat(int oldfd, const char *old, int newfd, const char *new) {
+#else
+int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char *new) {
+#endif
 #ifdef __wasilibc_unmodified_upstream
   __wasi_errno_t error = __wasi_file_rename(oldfd, old, strlen(old),
 #else

@@ -10,7 +10,11 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifdef __wasilibc_unmodified_upstream // Rename for AT_FDCWD support
 int faccessat(int fd, const char *path, int amode, int flag) {
+#else
+int __wasilibc_nocwd_faccessat(int fd, const char *path, int amode, int flag) {
+#endif
   // Validate function parameters.
   if ((amode & ~(F_OK | R_OK | W_OK | X_OK)) != 0 ||
       (flag & ~AT_EACCESS) != 0) {

@@ -10,10 +10,10 @@
 #include <errno.h>
 #include <string.h>
 
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream // Rename for AT_FDCWD support, and don't use varargs
 int mkdirat(int fd, const char *path, ...) {
 #else
-int mkdirat(int fd, const char *path, mode_t mode) {
+int __wasilibc_nocwd_mkdirat(int fd, const char *path, mode_t mode) {
 #endif
 #ifdef __wasilibc_unmodified_upstream // __wasi_path_create_directory
   __wasi_errno_t error = __wasi_file_create(

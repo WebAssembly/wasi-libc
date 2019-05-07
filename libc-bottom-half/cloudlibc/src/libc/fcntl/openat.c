@@ -21,7 +21,11 @@ static_assert(O_DIRECTORY >> 12 == __WASI_O_DIRECTORY, "Value mismatch");
 static_assert(O_EXCL >> 12 == __WASI_O_EXCL, "Value mismatch");
 static_assert(O_TRUNC >> 12 == __WASI_O_TRUNC, "Value mismatch");
 
+#ifdef __wasilibc_unmodified_upstream // Rename for AT_FDCWD support
 int openat(int fd, const char *path, int oflag, ...) {
+#else
+int __wasilibc_nocwd_openat(int fd, const char *path, int oflag, ...) {
+#endif
   // Compute rights corresponding with the access modes provided.
   // Attempt to obtain all rights, except the ones that contradict the
   // access mode provided to openat().

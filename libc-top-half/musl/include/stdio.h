@@ -164,9 +164,11 @@ int fseeko(FILE *, off_t, int);
 off_t ftello(FILE *);
 int dprintf(int, const char *__restrict, ...);
 int vdprintf(int, const char *__restrict, __isoc_va_list);
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 void flockfile(FILE *);
 int ftrylockfile(FILE *);
 void funlockfile(FILE *);
+#endif
 int getc_unlocked(FILE *);
 int getchar_unlocked(void);
 int putc_unlocked(int, FILE *);

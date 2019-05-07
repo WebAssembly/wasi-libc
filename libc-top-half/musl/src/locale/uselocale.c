@@ -11,6 +11,7 @@ locale_t __uselocale(locale_t new)
 	locale_t old = self->locale;
 #else
 	locale_t old = libc.current_locale;
+	if (!old) old = LC_GLOBAL_LOCALE;
 #endif
 	locale_t global = &libc.global_locale;
 

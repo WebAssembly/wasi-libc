@@ -174,7 +174,7 @@ po_find(struct po_map* map, const char *path,
 
 	relpath = path + bestlen;
 
-	if (*relpath == '/') {
+	while (*relpath == '/') {
 		relpath++;
 	}
 

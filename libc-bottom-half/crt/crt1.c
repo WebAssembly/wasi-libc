@@ -44,11 +44,6 @@ static __wasi_errno_t populate_environ(void) {
     if (err != __WASI_ESUCCESS) {
         return err;
     }
-    /* If there's no environment pairs, make sure environ is null and return. */
-    if (environ_count == 0) {
-        __environ = NULL;
-        return __WASI_ESUCCESS;
-    }
 
     /* Allocate memory for the array of pointers, plus one terminating null pointer. */
     __environ = malloc(sizeof(char *) * (environ_count + 1));

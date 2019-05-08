@@ -3582,6 +3582,7 @@
 #define __wasilibc___headers_stdlib_h 
 #define __wasilibc___headers_string_h 
 #define __wasilibc___macro_FD_SETSIZE_h 
+#define __wasilibc___seek_h 
 #define __wasilibc___struct_dirent_h 
 #define __wasilibc___struct_in6_addr_h 
 #define __wasilibc___struct_in_addr_h 

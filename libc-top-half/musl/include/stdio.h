@@ -49,7 +49,7 @@ extern "C" {
 #define SEEK_CUR 1
 #define SEEK_END 2
 #else
-#include <__header_unistd.h>
+#include <__seek.h>
 #endif
 
 #define _IOFBF 0

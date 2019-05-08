@@ -79,6 +79,9 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/htons.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/ntohl.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/ntohs.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/inet_ntop.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/inet_pton.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/inet_aton.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/fenv.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/fesetround.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/exit.c \

@@ -819,11 +819,11 @@ __wasilibc_init_preopen(void)
 int
 __wasilibc_register_preopened_fd(int fd, const char *path)
 {
+	// Check preconditions.
 	po_map_assertvalid(global_map);
-
-	if (path == NULL) {
-		return -1;
-	}
+	assert(fd != AT_FDCWD);
+	assert(fd != -1);
+	assert(path != NULL);
 
 #ifdef _REENTRANT
 #error "__wasilibc_register_preopened_fd doesn't yet support multiple threads"

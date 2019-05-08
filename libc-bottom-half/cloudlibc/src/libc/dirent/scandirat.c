@@ -9,6 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#ifdef __wasilibc_unmodified_upstream // Use WASI libc's nocwd functions.
+#else
+#include <wasi/libc-nocwd.h>
+#endif
 
 #include "dirent_impl.h"
 
@@ -30,7 +34,11 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***name
     sel = sel_true;
 
   // Open the directory.
+#ifdef __wasilibc_unmodified_upstream // Call the nocwd function directly.
   int fd = openat(dirfd, dir, O_RDONLY | O_NONBLOCK | O_DIRECTORY);
+#else
+  int fd = __wasilibc_nocwd_openat(dirfd, dir, O_RDONLY | O_NONBLOCK | O_DIRECTORY);
+#endif
   if (fd == -1)
     return -1;
 

@@ -103,10 +103,10 @@ int linkat(int olddirfd, const char *oldpath, int newdirfd, const char *newpath,
         return __wasilibc_link(oldpath, newpath, flags);
     }
     if (olddirfd == AT_FDCWD || oldpath[0] == '/') {
-        return __wasilibc_link_oldat(olddirfd, oldpath, newpath, flags);
+        return __wasilibc_link_newat(oldpath, newdirfd, newpath, flags);
     }
     if (newdirfd == AT_FDCWD || newpath[0] == '/') {
-        return __wasilibc_link_newat(oldpath, newdirfd, newpath, flags);
+        return __wasilibc_link_oldat(olddirfd, oldpath, newpath, flags);
     }
 
     return __wasilibc_nocwd_linkat(olddirfd, oldpath, newdirfd, newpath, flags);
@@ -118,10 +118,10 @@ int renameat(int olddirfd, const char *oldpath, int newdirfd, const char *newpat
         return rename(oldpath, newpath);
     }
     if (olddirfd == AT_FDCWD || oldpath[0] == '/') {
-        return __wasilibc_rename_oldat(olddirfd, oldpath, newpath);
+        return __wasilibc_rename_newat(oldpath, newdirfd, newpath);
     }
     if (newdirfd == AT_FDCWD || newpath[0] == '/') {
-        return __wasilibc_rename_newat(oldpath, newdirfd, newpath);
+        return __wasilibc_rename_oldat(olddirfd, oldpath, newpath);
     }
 
     return __wasilibc_nocwd_renameat(olddirfd, oldpath, newdirfd, newpath);

@@ -52,6 +52,7 @@
 #else
 #include <errno.h>
 #include <wasi/libc.h>
+#include <wasi/libc-nocwd.h>
 #endif
 
 #include "internal.h"
@@ -148,7 +149,7 @@ open(const char *path, int flags, ...)
 	else
 		return openat(rel.dirfd, rel.relative_path, flags, mode);
 #else
-	return openat(rel.dirfd, rel.relative_path, flags, mode);
+	return __wasilibc_nocwd_openat(rel.dirfd, rel.relative_path, flags, mode);
 #endif
 }
 
@@ -168,6 +169,8 @@ access(const char *path, int mode)
 {
 #ifdef __wasilibc_unmodified_upstream
 	struct po_relpath rel = find_relative(path, NULL);
+
+	return faccessat(rel.dirfd, rel.relative_path, mode,0);
 #else
 	struct po_relpath rel = find_relative(path, __WASI_RIGHT_PATH_FILESTAT_GET, 0);
 
@@ -177,9 +180,9 @@ access(const char *path, int mode)
 		errno = ENOTCAPABLE;
 		return -1;
 	}
-#endif
 
-	return faccessat(rel.dirfd, rel.relative_path, mode,0);
+	return __wasilibc_nocwd_faccessat(rel.dirfd, rel.relative_path, mode,0);
+#endif
 }
 
 #ifdef __wasilibc_unmodified_upstream
@@ -243,6 +246,8 @@ eaccess(const char *path, int mode)
 {
 #ifdef __wasilibc_unmodified_upstream
 	struct po_relpath rel = find_relative(path, NULL);
+
+	return faccessat(rel.dirfd, rel.relative_path, mode, 0);
 #else
 	struct po_relpath rel = find_relative(path, __WASI_RIGHT_PATH_FILESTAT_GET, 0);
 
@@ -252,9 +257,9 @@ eaccess(const char *path, int mode)
 	    errno = ENOTCAPABLE;
 	    return -1;
 	}
-#endif
 
-	return faccessat(rel.dirfd, rel.relative_path, mode, 0);
+	return __wasilibc_nocwd_faccessat(rel.dirfd, rel.relative_path, mode, 0);
+#endif
 }
 
 /**
@@ -273,6 +278,8 @@ lstat(const char *path, struct stat *st)
 {
 #ifdef __wasilibc_unmodified_upstream
 	struct po_relpath rel = find_relative(path, NULL);
+
+	return fstatat(rel.dirfd, rel.relative_path,st,AT_SYMLINK_NOFOLLOW);
 #else
 	struct po_relpath rel = find_relative(path, __WASI_RIGHT_PATH_FILESTAT_GET, 0);
 
@@ -282,9 +289,10 @@ lstat(const char *path, struct stat *st)
 	    errno = ENOTCAPABLE;
 	    return -1;
 	}
-#endif
 
-	return fstatat(rel.dirfd, rel.relative_path,st,AT_SYMLINK_NOFOLLOW);
+	return __wasilibc_nocwd_fstatat(rel.dirfd, rel.relative_path, st,
+	                                AT_SYMLINK_NOFOLLOW);
+#endif
 }
 
 #ifdef __wasilibc_unmodified_upstream
@@ -323,6 +331,9 @@ rename(const char *from, const char *to)
 #ifdef __wasilibc_unmodified_upstream
 	struct po_relpath rel_from = find_relative(from, NULL);
 	struct po_relpath rel_to = find_relative(to, NULL);
+
+	return renameat(rel_from.dirfd, rel_from.relative_path, rel_to.dirfd,
+		rel_to.relative_path);
 #else
 	struct po_relpath rel_from = find_relative(from, __WASI_RIGHT_PATH_RENAME_SOURCE, 0);
 	struct po_relpath rel_to = find_relative(to, __WASI_RIGHT_PATH_RENAME_TARGET, 0);
@@ -333,10 +344,10 @@ rename(const char *from, const char *to)
 	    errno = ENOTCAPABLE;
 	    return -1;
 	}
-#endif
 
-	return renameat(rel_from.dirfd, rel_from.relative_path, rel_to.dirfd,
-		rel_to.relative_path);
+	return __wasilibc_nocwd_renameat(rel_from.dirfd, rel_from.relative_path,
+	                                 rel_to.dirfd, rel_to.relative_path);
+#endif
 }
 
 /**
@@ -355,6 +366,8 @@ stat(const char *path, struct stat *st)
 {
 #ifdef __wasilibc_unmodified_upstream
 	struct po_relpath rel = find_relative(path, NULL);
+
+	return fstatat(rel.dirfd, rel.relative_path,st, AT_SYMLINK_NOFOLLOW);
 #else
 	struct po_relpath rel = find_relative(path, __WASI_RIGHT_PATH_FILESTAT_GET, 0);
 
@@ -364,9 +377,10 @@ stat(const char *path, struct stat *st)
 	    errno = ENOTCAPABLE;
 	    return -1;
 	}
-#endif
 
-	return fstatat(rel.dirfd, rel.relative_path,st, AT_SYMLINK_NOFOLLOW);
+	return __wasilibc_nocwd_fstatat(rel.dirfd, rel.relative_path, st,
+	                                AT_SYMLINK_NOFOLLOW);
+#endif
 }
 
 /**
@@ -402,7 +416,8 @@ unlink(const char *path)
 	// `unlinkat` ends up importing `__wasi_path_remove_directory` even
 	// though we're not passing `AT_REMOVEDIR` here. So instead, use a
 	// specialized function which just imports `__wasi_path_unlink_file`.
-	return __wasilibc_unlinkat(rel_pathname.dirfd, rel_pathname.relative_path);
+	return __wasilibc_nocwd___wasilibc_unlinkat(rel_pathname.dirfd,
+	                                            rel_pathname.relative_path);
 #endif
 }
 
@@ -446,7 +461,8 @@ rmdir(const char *pathname)
 	    return -1;
 	}
 
-	return __wasilibc_rmdirat(rel_pathname.dirfd, rel_pathname.relative_path);
+	return __wasilibc_nocwd___wasilibc_rmdirat(rel_pathname.dirfd,
+	                                           rel_pathname.relative_path);
 }
 
 int
@@ -455,7 +471,7 @@ remove(const char *pathname)
 	struct po_relpath rel_pathname = find_relative(pathname,
 	                                               __WASI_RIGHT_PATH_UNLINK_FILE |
 	                                               __WASI_RIGHT_PATH_REMOVE_DIRECTORY,
-                                                       0);
+	                                               0);
 
 	// If searching for both file and directory rights failed, try searching
 	// for either individually.
@@ -473,9 +489,11 @@ remove(const char *pathname)
 	    return -1;
 	}
 
-	int r = __wasilibc_unlinkat(rel_pathname.dirfd, rel_pathname.relative_path);
+	int r = __wasilibc_nocwd___wasilibc_unlinkat(rel_pathname.dirfd,
+	                                             rel_pathname.relative_path);
 	if (r != 0 && (errno == EISDIR || errno == ENOTCAPABLE))
-		r = __wasilibc_rmdirat(rel_pathname.dirfd, rel_pathname.relative_path);
+		r = __wasilibc_nocwd___wasilibc_rmdirat(rel_pathname.dirfd,
+		                                        rel_pathname.relative_path);
 	return r;
 }
 
@@ -492,9 +510,11 @@ link(const char *oldpath, const char *newpath)
 	    return -1;
 	}
 
-	return linkat(rel_oldpath.dirfd, rel_oldpath.relative_path,
-	              rel_newpath.dirfd, rel_newpath.relative_path,
-	              0);
+	return __wasilibc_nocwd_linkat(rel_oldpath.dirfd,
+	                               rel_oldpath.relative_path,
+	                               rel_newpath.dirfd,
+	                               rel_newpath.relative_path,
+	                               0);
 }
 
 int
@@ -509,7 +529,7 @@ mkdir(const char *pathname, mode_t mode)
 	    return -1;
 	}
 
-	return mkdirat(rel_pathname.dirfd, rel_pathname.relative_path, mode);
+	return __wasilibc_nocwd_mkdirat(rel_pathname.dirfd, rel_pathname.relative_path, mode);
 }
 
 DIR *
@@ -524,7 +544,8 @@ opendir(const char *name)
 	    return NULL;
 	}
 
-	return opendirat(rel_name.dirfd, rel_name.relative_path);
+	return __wasilibc_nocwd_opendirat(rel_name.dirfd,
+	                                  rel_name.relative_path);
 }
 
 ssize_t
@@ -539,8 +560,9 @@ readlink(const char *pathname, char *buf, size_t bufsiz)
 	    return -1;
 	}
 
-	return readlinkat(rel_pathname.dirfd, rel_pathname.relative_path,
-	                  buf, bufsiz);
+	return __wasilibc_nocwd_readlinkat(rel_pathname.dirfd,
+	                                   rel_pathname.relative_path,
+	                                   buf, bufsiz);
 }
 
 int
@@ -559,8 +581,9 @@ scandir(const char *dirp, struct dirent ***namelist,
 	    return -1;
 	}
 
-	return scandirat(rel_dirp.dirfd, rel_dirp.relative_path,
-	                 namelist, filter, compar);
+	return __wasilibc_nocwd_scandirat(rel_dirp.dirfd,
+	                                  rel_dirp.relative_path,
+	                                  namelist, filter, compar);
 }
 
 int
@@ -575,7 +598,8 @@ symlink(const char *target, const char *linkpath)
 	    return -1;
 	}
 
-	return symlinkat(target, rel_linkpath.dirfd, rel_linkpath.relative_path);
+	return __wasilibc_nocwd_symlinkat(target, rel_linkpath.dirfd,
+	                                  rel_linkpath.relative_path);
 }
 
 // Like `access`, but with `faccessat`'s flags argument.
@@ -591,7 +615,8 @@ __wasilibc_access(const char *path, int mode, int flags)
 		return -1;
 	}
 
-	return faccessat(rel.dirfd, rel.relative_path, mode, flags);
+	return __wasilibc_nocwd_faccessat(rel.dirfd, rel.relative_path,
+	                                  mode, flags);
 }
 
 // Like `utimensat`, but without the `at` part.
@@ -607,7 +632,8 @@ __wasilibc_utimens(const char *path, const struct timespec times[2], int flags)
 		return -1;
 	}
 
-	return utimensat(rel.dirfd, rel.relative_path, times, flags);
+	return __wasilibc_nocwd_utimensat(rel.dirfd, rel.relative_path,
+	                                  times, flags);
 }
 
 // Like `stat`, but with `fstatat`'s flags argument.
@@ -623,7 +649,7 @@ __wasilibc_stat(const char *__restrict path, struct stat *__restrict st, int fla
 	    return -1;
 	}
 
-	return fstatat(rel.dirfd, rel.relative_path, st, flags);
+	return __wasilibc_nocwd_fstatat(rel.dirfd, rel.relative_path, st, flags);
 }
 
 // Like `link`, but with `linkat`'s flags argument.
@@ -640,9 +666,11 @@ __wasilibc_link(const char *oldpath, const char *newpath, int flags)
 	    return -1;
 	}
 
-	return linkat(rel_oldpath.dirfd, rel_oldpath.relative_path,
-	              rel_newpath.dirfd, rel_newpath.relative_path,
-	              flags);
+	return __wasilibc_nocwd_linkat(rel_oldpath.dirfd,
+	                               rel_oldpath.relative_path,
+	                               rel_newpath.dirfd,
+	                               rel_newpath.relative_path,
+	                               flags);
 }
 
 // Like `__wasilibc_link`, but oldpath is relative to olddirfd.
@@ -658,9 +686,10 @@ __wasilibc_link_oldat(int olddirfd, const char *oldpath, const char *newpath, in
 	    return -1;
 	}
 
-	return linkat(olddirfd, oldpath,
-	              rel_newpath.dirfd, rel_newpath.relative_path,
-	              flags);
+	return __wasilibc_nocwd_linkat(olddirfd, oldpath,
+	                               rel_newpath.dirfd,
+	                               rel_newpath.relative_path,
+	                               flags);
 }
 
 // Like `__wasilibc_link`, but newpath is relative to newdirfd.
@@ -676,9 +705,10 @@ __wasilibc_link_newat(const char *oldpath, int newdirfd, const char *newpath, in
 	    return -1;
 	}
 
-	return linkat(rel_oldpath.dirfd, rel_oldpath.relative_path,
-	              newdirfd, newpath,
-	              flags);
+	return __wasilibc_nocwd_linkat(rel_oldpath.dirfd,
+	                               rel_oldpath.relative_path,
+	                               newdirfd, newpath,
+	                               flags);
 }
 
 // Like `rename`, but from is relative to fromdirfd.
@@ -694,7 +724,7 @@ __wasilibc_rename_oldat(int fromdirfd, const char *from, const char *to)
 	    return -1;
 	}
 
-	return renameat(fromdirfd, from, rel_to.dirfd, rel_to.relative_path);
+	return __wasilibc_nocwd_renameat(fromdirfd, from, rel_to.dirfd, rel_to.relative_path);
 }
 
 // Like `rename`, but to is relative to todirfd.
@@ -710,7 +740,7 @@ __wasilibc_rename_newat(const char *from, int todirfd, const char *to)
 	    return -1;
 	}
 
-	return renameat(rel_from.dirfd, rel_from.relative_path, todirfd, to);
+	return __wasilibc_nocwd_renameat(rel_from.dirfd, rel_from.relative_path, todirfd, to);
 }
 #endif
 

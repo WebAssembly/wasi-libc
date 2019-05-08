@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <__typedef_ssize_t.h>
 #include <__typedef_mode_t.h>
+#include <__typedef_DIR.h>
 
 #ifdef __cplusplus
 extern "C" {

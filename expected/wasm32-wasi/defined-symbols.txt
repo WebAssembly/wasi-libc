@@ -84,6 +84,7 @@ __getentropy
 __getopt_msg
 __gmtime_r
 __hwcap
+__inet_aton
 __intscan
 __invtrigl_R
 __isalnum_l

@@ -1,4 +1,10 @@
 // Handle AT_FDCWD and absolute paths for the *at functions.
+//
+// In the case of an AT_FDCWD file descriptor or an absolute path, call the
+// corresponding non-`at` function. This will send it through the libpreopen
+// wrappers to convert the path into a directory file descriptor and relative
+// path before translating it into the corresponding `__wasilibc_nocwd_*at`
+// function, which then calls the appropriate WASI function.
 
 #include <fcntl.h>
 #include <stdio.h>

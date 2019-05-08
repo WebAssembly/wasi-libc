@@ -52,6 +52,11 @@
 #define FD_CLOEXEC (1)
 
 #define AT_FDCWD            (-2)
+/*
+ * WASI doesn't make a distinction between the "real UID" and the
+ * "effective UID", so AT_EACCESS is 0 because it doesn't change
+ * anything.
+ */
 #define AT_EACCESS          (0x0)
 #define AT_SYMLINK_NOFOLLOW (0x1)
 #define AT_SYMLINK_FOLLOW   (0x2)

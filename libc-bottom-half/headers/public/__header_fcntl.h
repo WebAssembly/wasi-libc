@@ -3,6 +3,7 @@
 
 #include <wasi/core.h>
 #include <__seek.h>
+#include <__mode_t.h>
 
 #define O_APPEND __WASI_FDFLAG_APPEND
 #define O_DSYNC __WASI_FDFLAG_DSYNC

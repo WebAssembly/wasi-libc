@@ -20,6 +20,7 @@
 #include <__header_unistd.h>
 #include <__macro_FD_SETSIZE.h>
 #include <__macro_PAGESIZE.h>
+#include <__mode_t.h>
 #include <__seek.h>
 #include <__struct_dirent.h>
 #include <__struct_in6_addr.h>

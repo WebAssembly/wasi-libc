@@ -504,8 +504,11 @@ check: finish
 	# This ignores whitespace because on Windows the output has CRLF line endings.
 	diff -wur "$(CURDIR)/expected/$(MULTIARCH_TRIPLE)" "$(SYSROOT_SHARE)"
 
+test: check
+	cd libc-test && ./test.sh "$(WASM_CC)" "$(WASM_AR)"
+
 install: finish
 	mkdir -p "$(INSTALL_DIR)"
 	cp -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"
 
-.PHONY: default startup_files libc finish check install include_dirs
+.PHONY: default startup_files libc finish check test install include_dirs

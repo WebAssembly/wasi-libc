@@ -12,3 +12,4 @@ libc-bottom-half/mman/        - CC0 1.0 Universal (CC0 1.0) Public Domain Dedica
 libc-top-half/musl            - MIT; see libc-top-half/musl/COPYRIGHT for details
 libc-top-half/headers         - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
 libc-top-half/sources         - CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
+libc-test                     - MIT; see libc-test/COPYRIGHT for details

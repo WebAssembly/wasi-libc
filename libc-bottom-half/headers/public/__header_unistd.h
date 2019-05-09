@@ -20,7 +20,6 @@ extern "C" {
 
 int close(int fd);
 int faccessat(int, const char *, int, int);
-int dup(int);
 int fstatat(int, const char *__restrict, struct stat *__restrict, int);
 int renameat(int, const char *, int, const char *);
 int openat(int, const char *, int, ...);

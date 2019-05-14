@@ -82,8 +82,14 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/inet_ntop.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/inet_pton.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/inet_aton.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/in6addr_any.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/in6addr_loopback.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/fenv.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/fesetround.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/feupdateenv.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/fesetexceptflag.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/fegetexceptflag.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/feholdexcept.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/exit.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/atexit.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/assert.c \
@@ -92,6 +98,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/strftime.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/asctime.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/asctime_r.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/ctime.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/ctime_r.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/wcsftime.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/strptime.c \
@@ -373,7 +380,17 @@ include_dirs:
 	      "$(SYSROOT_INC)/ucontext.h" \
 	      "$(SYSROOT_INC)/sys/ucontext.h" \
 	      "$(SYSROOT_INC)/sys/membarrier.h" \
-	      "$(SYSROOT_INC)/sys/signalfd.h"
+	      "$(SYSROOT_INC)/sys/signalfd.h" \
+	      "$(SYSROOT_INC)/termios.h" \
+	      "$(SYSROOT_INC)/sys/termios.h" \
+	      "$(SYSROOT_INC)/bits/termios.h" \
+	      "$(SYSROOT_INC)/net/if.h" \
+	      "$(SYSROOT_INC)/net/if_arp.h" \
+	      "$(SYSROOT_INC)/net/ethernet.h" \
+	      "$(SYSROOT_INC)/net/route.h" \
+	      "$(SYSROOT_INC)/netinet/if_ether.h" \
+	      "$(SYSROOT_INC)/netinet/ether.h" \
+	      "$(SYSROOT_INC)/sys/timerfd.h"
 ifeq ($(THREAD_MODEL), single)
 	$(RM) "$(SYSROOT_INC)/aio.h" \
 	      "$(SYSROOT_INC)/pthread.h"

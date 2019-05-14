@@ -992,6 +992,7 @@ towlower_l
 towupper
 towupper_l
 trunc
+truncate
 truncf
 truncl
 tsearch

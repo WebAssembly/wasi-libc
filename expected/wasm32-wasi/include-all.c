@@ -153,7 +153,6 @@
 #include <sys/sysmacros.h>
 #include <sys/time.h>
 #include <sys/timeb.h>
-#include <sys/timerfd.h>
 #include <sys/times.h>
 #include <sys/timex.h>
 #include <sys/ttydefaults.h>
@@ -161,7 +160,6 @@
 #include <sys/uio.h>
 #include <sys/un.h>
 #include <sys/utsname.h>
-#include <sys/xattr.h>
 #include <syscall.h>
 #include <sysexits.h>
 #include <tar.h>

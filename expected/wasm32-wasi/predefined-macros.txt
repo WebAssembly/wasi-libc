@@ -1876,10 +1876,6 @@
 #define TELQUAL_NAME 3
 #define TELQUAL_REPLY 2
 #define TELQUAL_SEND 1
-#define TFD_CLOEXEC O_CLOEXEC
-#define TFD_NONBLOCK O_NONBLOCK
-#define TFD_TIMER_ABSTIME 1
-#define TFD_TIMER_CANCEL_ON_SET (1 << 1)
 #define TGEXEC 00010
 #define TGREAD 00040
 #define TGWRITE 00020
@@ -2398,7 +2394,6 @@
 #define _SYS_SYSINFO_H 
 #define _SYS_SYSMACROS_H 
 #define _SYS_TIMEB_H 
-#define _SYS_TIMERFD_H 
 #define _SYS_TIMES_H 
 #define _SYS_TIMEX_H 
 #define _SYS_TIME_H 
@@ -2407,7 +2402,6 @@
 #define _SYS_UIO_H 
 #define _SYS_UN_H 
 #define _SYS_UTSNAME_H 
-#define _SYS_XATTR_H 
 #define _TAR_H 
 #define _TGMATH_H 
 #define _THREADS_H 
@@ -2798,7 +2792,6 @@
 #define __UAPI_DEF_IP_MREQ 0
 #define __UAPI_DEF_SOCKADDR_IN 0
 #define __UAPI_DEF_SOCKADDR_IN6 0
-#define __UAPI_DEF_XATTR 0
 #define __UINT16_C_SUFFIX__ 
 #define __UINT16_FMTX__ "hX"
 #define __UINT16_FMTo__ "ho"

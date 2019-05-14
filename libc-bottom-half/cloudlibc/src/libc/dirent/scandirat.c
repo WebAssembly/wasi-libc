@@ -37,7 +37,7 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***name
 #ifdef __wasilibc_unmodified_upstream // Call the nocwd function directly.
   int fd = openat(dirfd, dir, O_RDONLY | O_NONBLOCK | O_DIRECTORY);
 #else
-  int fd = __wasilibc_nocwd_openat(dirfd, dir, O_RDONLY | O_NONBLOCK | O_DIRECTORY);
+  int fd = __wasilibc_nocwd_openat(dirfd, dir, O_RDONLY | O_NONBLOCK | O_DIRECTORY, 0);
 #endif
   if (fd == -1)
     return -1;

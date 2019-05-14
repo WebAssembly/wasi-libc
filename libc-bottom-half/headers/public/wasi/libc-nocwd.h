@@ -38,7 +38,7 @@ int __wasilibc_nocwd_faccessat(int, const char *, int, int)
     __attribute__((__warn_unused_result__));
 int __wasilibc_nocwd_renameat(int, const char *, int, const char *)
     __attribute__((__warn_unused_result__));
-int __wasilibc_nocwd_openat(int, const char *, int, ...)
+int __wasilibc_nocwd_openat(int, const char *, int, mode_t)
     __attribute__((__warn_unused_result__));
 int __wasilibc_nocwd_fstatat(int, const char *__restrict, struct stat *__restrict, int)
     __attribute__((__warn_unused_result__));

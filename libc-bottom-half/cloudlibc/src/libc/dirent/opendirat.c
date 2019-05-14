@@ -20,7 +20,7 @@ DIR *__wasilibc_nocwd_opendirat(int dir, const char *dirname) {
 #ifdef __wasilibc_unmodified_upstream // Call the nocwd function directly.
   int fd = openat(dir, dirname, O_RDONLY | O_NONBLOCK | O_DIRECTORY);
 #else
-  int fd = __wasilibc_nocwd_openat(dir, dirname, O_RDONLY | O_NONBLOCK | O_DIRECTORY);
+  int fd = __wasilibc_nocwd_openat(dir, dirname, O_RDONLY | O_NONBLOCK | O_DIRECTORY, 0);
 #endif
   if (fd == -1)
     return NULL;

@@ -15,6 +15,7 @@
 #include <wasi/libc.h>
 #include <wasi/libc-nocwd.h>
 
+// If the platform doesn't define O_TMPFILE, we don't need to worry about it.
 #ifndef O_TMPFILE
 #define O_TMPFILE 0
 #endif

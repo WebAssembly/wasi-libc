@@ -15,9 +15,13 @@
 #include <wasi/libc.h>
 #include <wasi/libc-nocwd.h>
 
+#ifndef O_TMPFILE
+#define O_TMPFILE 0
+#endif
+
 int openat(int dirfd, const char *pathname, int flags, ...) {
     mode_t mode = 0;
-    if (flags & O_CREAT) {
+    if ((flags & O_CREAT) != 0 || (flags & O_TMPFILE) == O_TMPFILE) {
         va_list args;
         va_start(args, flags);
         mode = va_arg(args, mode_t);

@@ -151,7 +151,9 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  %/fabsf.c %/fabs.c \
                  %/copysignf.c %/copysign.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/math/*.c)) \
-    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c) \
+    $(filter-out %/crealf.c %/creal.c \
+                 %/cimagf.c %/cimag.c, \
+                 $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
 MUSL_PRINTSCAN_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/floatscan.c \

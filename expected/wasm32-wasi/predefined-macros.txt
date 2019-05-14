@@ -2013,23 +2013,13 @@
 #define UTIME_OMIT (-2)
 #define WCHAR_MAX (0x7fffffff+L'\0')
 #define WCHAR_MIN (-1-0x7fffffff+L'\0')
-#define WCOREDUMP(s) ((s) & 0x80)
 #define WEOF 0xffffffffU
-#define WEXITSTATUS(s) (((s) & 0xff00) >> 8)
-#define WIFCONTINUED(s) ((s) == 0xffff)
-#define WIFEXITED(s) (!WTERMSIG(s))
-#define WIFSIGNALED(s) (((s)&0xffff)-1U < 0xffu)
-#define WIFSTOPPED(s) ((short)((((s)&0xffff)*0x10001)>>8) > 0x7f00)
 #define WILL 251
 #define WINT_MAX UINT32_MAX
 #define WINT_MIN 0U
-#define WNOHANG 1
 #define WONT 252
 #define WORD_BIT 32
 #define WRQ 02
-#define WSTOPSIG(s) WEXITSTATUS(s)
-#define WTERMSIG(s) ((s) & 0x7f)
-#define WUNTRACED 2
 #define W_OK 2
 #define X_OK 4
 #define YESEXPR 0x50000

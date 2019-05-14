@@ -399,6 +399,7 @@ ctanh
 ctanhf
 ctanhl
 ctanl
+ctime
 ctime_r
 difftime
 dirfd
@@ -451,15 +452,19 @@ fdopen
 fdopendir
 feclearexcept
 fegetenv
+fegetexceptflag
 fegetround
+feholdexcept
 feof
 feof_unlocked
 feraiseexcept
 ferror
 ferror_unlocked
 fesetenv
+fesetexceptflag
 fesetround
 fetestexcept
+feupdateenv
 fflush
 fflush_unlocked
 ffs
@@ -595,6 +600,8 @@ ilogbf
 ilogbl
 imaxabs
 imaxdiv
+in6addr_any
+in6addr_loopback
 index
 inet_aton
 inet_ntop

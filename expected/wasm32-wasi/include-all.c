@@ -102,13 +102,7 @@
 #include <memory.h>
 #include <monetary.h>
 #include <mqueue.h>
-#include <net/ethernet.h>
-#include <net/if.h>
-#include <net/if_arp.h>
-#include <net/route.h>
-#include <netinet/ether.h>
 #include <netinet/icmp6.h>
-#include <netinet/if_ether.h>
 #include <netinet/igmp.h>
 #include <netinet/in.h>
 #include <netinet/in_systm.h>
@@ -157,7 +151,6 @@
 #include <sys/syscall.h>
 #include <sys/sysinfo.h>
 #include <sys/sysmacros.h>
-#include <sys/termios.h>
 #include <sys/time.h>
 #include <sys/timeb.h>
 #include <sys/timerfd.h>
@@ -172,7 +165,6 @@
 #include <syscall.h>
 #include <sysexits.h>
 #include <tar.h>
-#include <termios.h>
 #include <tgmath.h>
 #include <threads.h>
 #include <time.h>

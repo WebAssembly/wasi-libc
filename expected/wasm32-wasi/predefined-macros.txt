@@ -45,90 +45,6 @@
 #define ARFMAG "`\n"
 #define ARG_MAX 131072
 #define ARMAG "!<arch>\n"
-#define ARPD_FLUSH 0x03
-#define ARPD_LOOKUP 0x02
-#define ARPD_UPDATE 0x01
-#define ARPHRD_6LOWPAN 825
-#define ARPHRD_ADAPT 264
-#define ARPHRD_APPLETLK 8
-#define ARPHRD_ARCNET 7
-#define ARPHRD_ASH 781
-#define ARPHRD_ATM 19
-#define ARPHRD_AX25 3
-#define ARPHRD_BIF 775
-#define ARPHRD_CAIF 822
-#define ARPHRD_CAN 280
-#define ARPHRD_CHAOS 5
-#define ARPHRD_CISCO 513
-#define ARPHRD_CSLIP 257
-#define ARPHRD_CSLIP6 259
-#define ARPHRD_DDCMP 517
-#define ARPHRD_DLCI 15
-#define ARPHRD_ECONET 782
-#define ARPHRD_EETHER 2
-#define ARPHRD_ETHER 1
-#define ARPHRD_EUI64 27
-#define ARPHRD_FCAL 785
-#define ARPHRD_FCFABRIC 787
-#define ARPHRD_FCPL 786
-#define ARPHRD_FCPP 784
-#define ARPHRD_FDDI 774
-#define ARPHRD_FRAD 770
-#define ARPHRD_HDLC ARPHRD_CISCO
-#define ARPHRD_HIPPI 780
-#define ARPHRD_HWX25 272
-#define ARPHRD_IEEE1394 24
-#define ARPHRD_IEEE802 6
-#define ARPHRD_IEEE80211 801
-#define ARPHRD_IEEE80211_PRISM 802
-#define ARPHRD_IEEE80211_RADIOTAP 803
-#define ARPHRD_IEEE802154 804
-#define ARPHRD_IEEE802154_MONITOR 805
-#define ARPHRD_IEEE802_TR 800
-#define ARPHRD_INFINIBAND 32
-#define ARPHRD_IP6GRE 823
-#define ARPHRD_IPDDP 777
-#define ARPHRD_IPGRE 778
-#define ARPHRD_IRDA 783
-#define ARPHRD_LAPB 516
-#define ARPHRD_LOCALTLK 773
-#define ARPHRD_LOOPBACK 772
-#define ARPHRD_METRICOM 23
-#define ARPHRD_NETLINK 824
-#define ARPHRD_NETROM 0
-#define ARPHRD_NONE 0xFFFE
-#define ARPHRD_PHONET 820
-#define ARPHRD_PHONET_PIPE 821
-#define ARPHRD_PIMREG 779
-#define ARPHRD_PPP 512
-#define ARPHRD_PRONET 4
-#define ARPHRD_RAWHDLC 518
-#define ARPHRD_RAWIP 519
-#define ARPHRD_ROSE 270
-#define ARPHRD_RSRVD 260
-#define ARPHRD_SIT 776
-#define ARPHRD_SKIP 771
-#define ARPHRD_SLIP 256
-#define ARPHRD_SLIP6 258
-#define ARPHRD_TUNNEL 768
-#define ARPHRD_TUNNEL6 769
-#define ARPHRD_VOID 0xFFFF
-#define ARPHRD_VSOCKMON 826
-#define ARPHRD_X25 271
-#define ARPOP_InREPLY 9
-#define ARPOP_InREQUEST 8
-#define ARPOP_NAK 10
-#define ARPOP_REPLY 2
-#define ARPOP_REQUEST 1
-#define ARPOP_RREPLY 4
-#define ARPOP_RREQUEST 3
-#define ATF_COM 0x02
-#define ATF_DONTPUB 0x40
-#define ATF_MAGIC 0x80
-#define ATF_NETMASK 0x20
-#define ATF_PERM 0x04
-#define ATF_PUBL 0x08
-#define ATF_USETRAILERS 0x10
 #define AT_EACCESS (0x0)
 #define AT_REMOVEDIR (0x4)
 #define AT_SYMLINK_FOLLOW (0x2)
@@ -149,37 +65,6 @@
 #define AUTH_WHO_MASK 1
 #define AUTH_WHO_SERVER 1
 #define AYT 246
-#define B0 0000000
-#define B1000000 0010010
-#define B110 0000003
-#define B115200 0010002
-#define B1152000 0010011
-#define B1200 0000011
-#define B134 0000004
-#define B150 0000005
-#define B1500000 0010012
-#define B1800 0000012
-#define B19200 0000016
-#define B200 0000006
-#define B2000000 0010013
-#define B230400 0010003
-#define B2400 0000013
-#define B2500000 0010014
-#define B300 0000007
-#define B3000000 0010015
-#define B3500000 0010016
-#define B38400 0000017
-#define B4000000 0010017
-#define B460800 0010004
-#define B4800 0000014
-#define B50 0000001
-#define B500000 0010005
-#define B57600 0010001
-#define B576000 0010006
-#define B600 0000010
-#define B75 0000002
-#define B921600 0010007
-#define B9600 0000015
 #define BIG_ENDIAN __BIG_ENDIAN
 #define BITSPERBYTE CHAR_BIT
 #define BLKTYPE '4'
@@ -189,10 +74,6 @@
 #define BLK_ERRORS 0x20
 #define BLK_RESTART 0x10
 #define BREAK 243
-#define BRKINT 0000002
-#define BS0 0000000
-#define BS1 0020000
-#define BSDLY 0020000
 #define BUFSIZ 1024
 #define BUS_ADRALN 1
 #define BUS_ADRERR 2
@@ -201,8 +82,6 @@
 #define BUS_OBJERR 3
 #define BYTE_ORDER __BYTE_ORDER
 #define CANBSIZ 255
-#define CBAUD 0010017
-#define CBAUDEX 0010000
 #define CBRK CEOL
 #define CDISCARD CTRL('o')
 #define CDSUSP CTRL('y')
@@ -217,7 +96,6 @@
 #define CHAR_MAX 127
 #define CHAR_MIN (-128)
 #define CHRTYPE '3'
-#define CIBAUD 002003600000
 #define CINTR CTRL('c')
 #define CKILL CTRL('u')
 #define CLD_CONTINUED 6
@@ -227,7 +105,6 @@
 #define CLD_STOPPED 5
 #define CLD_TRAPPED 4
 #define CLNEXT CTRL('v')
-#define CLOCAL 0004000
 #define CLOCKS_PER_SEC ((clock_t)1000000000)
 #define CLOCK_MONOTONIC (&_CLOCK_MONOTONIC)
 #define CLOCK_PROCESS_CPUTIME_ID (&_CLOCK_PROCESS_CPUTIME_ID)
@@ -237,32 +114,18 @@
 #define CMPLX(x,y) __CMPLX(x, y, double)
 #define CMPLXF(x,y) __CMPLX(x, y, float)
 #define CMPLXL(x,y) __CMPLX(x, y, long double)
-#define CMSPAR 010000000000
 #define CODESET 14
 #define COLL_WEIGHTS_MAX 2
 #define COMPLETE 2
 #define CONTINUE 3
 #define CONTTYPE '7'
 #define CQUIT 034
-#define CR0 0000000
-#define CR1 0001000
-#define CR2 0002000
-#define CR3 0003000
-#define CRDLY 0003000
-#define CREAD 0000200
 #define CREPRINT CTRL('r')
 #define CRNCYSTR 0x4000F
 #define CRPRNT CREPRINT
-#define CRTSCTS 020000000000
-#define CS5 0000000
-#define CS6 0000020
-#define CS7 0000040
-#define CS8 0000060
-#define CSIZE 0000060
 #define CSTART CTRL('q')
 #define CSTATUS _POSIX_VDISABLE
 #define CSTOP CTRL('s')
-#define CSTOPB 0000100
 #define CSUSP CTRL('z')
 #define CTIME 0
 #define CTRL(x) (x&037)
@@ -348,13 +211,6 @@
 #define EC 247
 #define ECANCELED __WASI_ECANCELED
 #define ECHILD __WASI_ECHILD
-#define ECHO 0000010
-#define ECHOCTL 0001000
-#define ECHOE 0000020
-#define ECHOK 0000040
-#define ECHOKE 0004000
-#define ECHONL 0000100
-#define ECHOPRT 0002000
 #define ECONNABORTED __WASI_ECONNABORTED
 #define ECONNREFUSED __WASI_ECONNREFUSED
 #define ECONNRESET __WASI_ECONNRESET
@@ -452,129 +308,6 @@
 #define ESPIPE __WASI_ESPIPE
 #define ESRCH __WASI_ESRCH
 #define ESTALE __WASI_ESTALE
-#define ETHERMIN (ETHER_MIN_LEN - ETHER_HDR_LEN - ETHER_CRC_LEN)
-#define ETHERMTU ETH_DATA_LEN
-#define ETHERTYPE_AARP 0x80F3
-#define ETHERTYPE_ARP 0x0806
-#define ETHERTYPE_AT 0x809B
-#define ETHERTYPE_IP 0x0800
-#define ETHERTYPE_IPV6 0x86dd
-#define ETHERTYPE_IPX 0x8137
-#define ETHERTYPE_LOOPBACK 0x9000
-#define ETHERTYPE_NTRAILER 16
-#define ETHERTYPE_PUP 0x0200
-#define ETHERTYPE_REVARP 0x8035
-#define ETHERTYPE_SPRITE 0x0500
-#define ETHERTYPE_TRAIL 0x1000
-#define ETHERTYPE_VLAN 0x8100
-#define ETHER_ADDR_LEN ETH_ALEN
-#define ETHER_CRC_LEN 4
-#define ETHER_HDR_LEN ETH_HLEN
-#define ETHER_IS_VALID_LEN(foo) ((foo) >= ETHER_MIN_LEN && (foo) <= ETHER_MAX_LEN)
-#define ETHER_MAP_IP_MULTICAST(ipaddr,enaddr) do { (enaddr)[0] = 0x01; (enaddr)[1] = 0x00; (enaddr)[2] = 0x5e; (enaddr)[3] = ((uint8_t *)ipaddr)[1] & 0x7f; (enaddr)[4] = ((uint8_t *)ipaddr)[2]; (enaddr)[5] = ((uint8_t *)ipaddr)[3]; } while(0)
-#define ETHER_MAX_LEN (ETH_FRAME_LEN + ETHER_CRC_LEN)
-#define ETHER_MIN_LEN (ETH_ZLEN + ETHER_CRC_LEN)
-#define ETHER_TYPE_LEN 2
-#define ETH_ALEN 6
-#define ETH_DATA_LEN 1500
-#define ETH_FCS_LEN 4
-#define ETH_FRAME_LEN 1514
-#define ETH_HLEN 14
-#define ETH_MAX_MTU 0xFFFFU
-#define ETH_MIN_MTU 68
-#define ETH_P_1588 0x88F7
-#define ETH_P_8021AD 0x88A8
-#define ETH_P_8021AH 0x88E7
-#define ETH_P_8021Q 0x8100
-#define ETH_P_80221 0x8917
-#define ETH_P_802_2 0x0004
-#define ETH_P_802_3 0x0001
-#define ETH_P_802_3_MIN 0x0600
-#define ETH_P_802_EX1 0x88B5
-#define ETH_P_AARP 0x80F3
-#define ETH_P_AF_IUCV 0xFBFB
-#define ETH_P_ALL 0x0003
-#define ETH_P_AOE 0x88A2
-#define ETH_P_ARCNET 0x001A
-#define ETH_P_ARP 0x0806
-#define ETH_P_ATALK 0x809B
-#define ETH_P_ATMFATE 0x8884
-#define ETH_P_ATMMPOA 0x884c
-#define ETH_P_AX25 0x0002
-#define ETH_P_BATMAN 0x4305
-#define ETH_P_BPQ 0x08FF
-#define ETH_P_CAIF 0x00F7
-#define ETH_P_CAN 0x000C
-#define ETH_P_CANFD 0x000D
-#define ETH_P_CONTROL 0x0016
-#define ETH_P_CUST 0x6006
-#define ETH_P_DDCMP 0x0006
-#define ETH_P_DEC 0x6000
-#define ETH_P_DIAG 0x6005
-#define ETH_P_DNA_DL 0x6001
-#define ETH_P_DNA_RC 0x6002
-#define ETH_P_DNA_RT 0x6003
-#define ETH_P_DSA 0x001B
-#define ETH_P_ECONET 0x0018
-#define ETH_P_EDSA 0xDADA
-#define ETH_P_ERSPAN 0x88BE
-#define ETH_P_ERSPAN2 0x22EB
-#define ETH_P_FCOE 0x8906
-#define ETH_P_FIP 0x8914
-#define ETH_P_HDLC 0x0019
-#define ETH_P_HSR 0x892F
-#define ETH_P_IBOE 0x8915
-#define ETH_P_IEEE802154 0x00F6
-#define ETH_P_IEEEPUP 0x0a00
-#define ETH_P_IEEEPUPAT 0x0a01
-#define ETH_P_IFE 0xED3E
-#define ETH_P_IP 0x0800
-#define ETH_P_IPV6 0x86DD
-#define ETH_P_IPX 0x8137
-#define ETH_P_IRDA 0x0017
-#define ETH_P_LAT 0x6004
-#define ETH_P_LINK_CTL 0x886c
-#define ETH_P_LOCALTALK 0x0009
-#define ETH_P_LOOP 0x0060
-#define ETH_P_LOOPBACK 0x9000
-#define ETH_P_MACSEC 0x88E5
-#define ETH_P_MAP 0x00F9
-#define ETH_P_MOBITEX 0x0015
-#define ETH_P_MPLS_MC 0x8848
-#define ETH_P_MPLS_UC 0x8847
-#define ETH_P_MVRP 0x88F5
-#define ETH_P_NCSI 0x88F8
-#define ETH_P_NSH 0x894F
-#define ETH_P_PAE 0x888E
-#define ETH_P_PAUSE 0x8808
-#define ETH_P_PHONET 0x00F5
-#define ETH_P_PPPTALK 0x0010
-#define ETH_P_PPP_DISC 0x8863
-#define ETH_P_PPP_MP 0x0008
-#define ETH_P_PPP_SES 0x8864
-#define ETH_P_PREAUTH 0x88C7
-#define ETH_P_PRP 0x88FB
-#define ETH_P_PUP 0x0200
-#define ETH_P_PUPAT 0x0201
-#define ETH_P_QINQ1 0x9100
-#define ETH_P_QINQ2 0x9200
-#define ETH_P_QINQ3 0x9300
-#define ETH_P_RARP 0x8035
-#define ETH_P_SCA 0x6007
-#define ETH_P_SLOW 0x8809
-#define ETH_P_SNAP 0x0005
-#define ETH_P_TDLS 0x890D
-#define ETH_P_TEB 0x6558
-#define ETH_P_TIPC 0x88CA
-#define ETH_P_TRAILER 0x001C
-#define ETH_P_TR_802_2 0x0011
-#define ETH_P_TSN 0x22F0
-#define ETH_P_WAN_PPP 0x0007
-#define ETH_P_WCCP 0x883E
-#define ETH_P_X25 0x0805
-#define ETH_P_XDSA 0x00F8
-#define ETH_TLEN 2
-#define ETH_ZLEN 60
 #define ETIMEDOUT __WASI_ETIMEDOUT
 #define ETXTBSY __WASI_ETXTBSY
 #define EUNDEF 0
@@ -582,9 +315,6 @@
 #define EXDEV __WASI_EXDEV
 #define EXIT_FAILURE 1
 #define EXIT_SUCCESS 0
-#define EXTA 0000016
-#define EXTB 0000017
-#define EXTPROC 0200000
 #define EX_CANTCREAT 73
 #define EX_CONFIG 78
 #define EX_DATAERR 65
@@ -613,9 +343,6 @@
 #define FE_ALL_EXCEPT 0
 #define FE_DFL_ENV ((const fenv_t *) -1)
 #define FE_TONEAREST 0
-#define FF0 0000000
-#define FF1 0100000
-#define FFDLY 0100000
 #define FIFOTYPE '6'
 #define FILENAME_MAX 4096
 #define FILESIZEBITS 64
@@ -638,7 +365,6 @@
 #define FLT_ROUNDS (__builtin_flt_rounds())
 #define FLT_TRUE_MIN 1.40129846432481707092e-45F
 #define FLUSHBAND 0x04
-#define FLUSHO 0010000
 #define FLUSHR 0x01
 #define FLUSHRW 0x03
 #define FLUSHW 0x02
@@ -720,10 +446,8 @@
 #define HUGE_VAL ((double)INFINITY)
 #define HUGE_VALF INFINITY
 #define HUGE_VALL ((long double)INFINITY)
-#define HUPCL 0002000
 #define I _Complex_I
 #define IAC 255
-#define ICANON 0000002
 #define ICMP6_DST_UNREACH 1
 #define ICMP6_DST_UNREACH_ADDR 3
 #define ICMP6_DST_UNREACH_ADMIN 1
@@ -841,31 +565,6 @@
 #define ICMP_UNREACH_SRCFAIL 5
 #define ICMP_UNREACH_TOSHOST 12
 #define ICMP_UNREACH_TOSNET 11
-#define ICRNL 0000400
-#define IEXTEN 0100000
-#define IFF_ALLMULTI 0x200
-#define IFF_AUTOMEDIA 0x4000
-#define IFF_BROADCAST 0x2
-#define IFF_DEBUG 0x4
-#define IFF_DORMANT 0x20000
-#define IFF_DYNAMIC 0x8000
-#define IFF_ECHO 0x40000
-#define IFF_LOOPBACK 0x8
-#define IFF_LOWER_UP 0x10000
-#define IFF_MASTER 0x400
-#define IFF_MULTICAST 0x1000
-#define IFF_NOARP 0x80
-#define IFF_NOTRAILERS 0x20
-#define IFF_POINTOPOINT 0x10
-#define IFF_PORTSEL 0x2000
-#define IFF_PROMISC 0x100
-#define IFF_RUNNING 0x40
-#define IFF_SLAVE 0x800
-#define IFF_UP 0x1
-#define IFF_VOLATILE (IFF_LOOPBACK|IFF_POINTOPOINT|IFF_BROADCAST| IFF_ECHO|IFF_MASTER|IFF_SLAVE|IFF_RUNNING|IFF_LOWER_UP|IFF_DORMANT)
-#define IFHWADDRLEN 6
-#define IFNAMSIZ IF_NAMESIZE
-#define IF_NAMESIZE 16
 #define IGMP_AWAKENING_MEMBER 5
 #define IGMP_DELAYING_MEMBER 1
 #define IGMP_DVMRP 0x13
@@ -889,9 +588,6 @@
 #define IGMP_V2_MEMBERSHIP_REPORT 0x16
 #define IGMP_v1_ROUTER 1
 #define IGMP_v2_ROUTER 2
-#define IGNBRK 0000001
-#define IGNCR 0000200
-#define IGNPAR 0000004
 #define ILL_BADSTK 8
 #define ILL_COPROC 7
 #define ILL_ILLADR 3
@@ -900,7 +596,6 @@
 #define ILL_ILLTRP 4
 #define ILL_PRVOPC 5
 #define ILL_PRVREG 6
-#define IMAXBEL 0020000
 #define IN6ADDRSZ NS_IN6ADDRSZ
 #define IN6ADDR_ANY_INIT { { { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 } } }
 #define IN6ADDR_LOOPBACK_INIT { { { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 } } }
@@ -930,8 +625,6 @@
 #define INET6_ADDRSTRLEN 46
 #define INET_ADDRSTRLEN 16
 #define INFINITY 1e5000f
-#define INLCR 0000100
-#define INPCK 0000020
 #define INT16SZ NS_INT16SZ
 #define INT16_C(c) c
 #define INT16_MAX (0x7fff)
@@ -1239,16 +932,6 @@
 #define IP_UNICAST_IF 50
 #define IP_XFRM_POLICY 17
 #define IQUERY ns_o_iquery
-#define ISIG 0000001
-#define ISTRIP 0000040
-#define ITIMER_PROF 2
-#define ITIMER_REAL 0
-#define ITIMER_VIRTUAL 1
-#define IUCLC 0001000
-#define IUTF8 0040000
-#define IXANY 0004000
-#define IXOFF 0010000
-#define IXON 0002000
 #define I_ATMARK (__SID |31)
 #define I_CANPUT (__SID |34)
 #define I_CKBAND (__SID |29)
@@ -1348,7 +1031,6 @@
 #define MAXSYMLINKS 20
 #define MAXTC 6
 #define MAXTTL 255
-#define MAX_ADDR_LEN 7
 #define MAX_IPOPTLEN 40
 #define MB_CUR_MAX (__ctype_get_mb_cur_max())
 #define MB_LEN_MAX 4
@@ -1459,7 +1141,6 @@
 #define NAN (0.0f/0.0f)
 #define NBBY 8
 #define NCARGS 131072
-#define NCCS 32
 #define ND_NA_FLAG_OVERRIDE 0x00000020
 #define ND_NA_FLAG_ROUTER 0x00000080
 #define ND_NA_FLAG_SOLICITED 0x00000040
@@ -1485,9 +1166,6 @@
 #define NEW_ENV_VAR 0
 #define NGROUPS 32
 #define NGROUPS_MAX 32
-#define NL0 0000000
-#define NL1 0000400
-#define NLDLY 0000400
 #define NL_ARGMAX 9
 #define NL_CAT_LOCALE 1
 #define NL_LANGMAX 32
@@ -1500,7 +1178,6 @@
 #define NOERROR ns_r_noerror
 #define NOEXPR 0x50001
 #define NOFILE 256
-#define NOFLSH 0000200
 #define NOGROUP (-1)
 #define NOP 241
 #define NOSTR 0x50003
@@ -1600,17 +1277,9 @@
 #define NXDOMAIN ns_r_nxdomain
 #define NXRRSET ns_r_nxrrset
 #define NZERO 20
-#define OCRNL 0000010
-#define OFDEL 0000200
-#define OFILL 0000100
-#define OLCUC 0000002
 #define OLD_ENV_VALUE 0
 #define OLD_ENV_VAR 1
 #define ONCE_FLAG_INIT 0
-#define ONLCR 0000004
-#define ONLRET 0000040
-#define ONOCR 0000020
-#define OPOST 0000001
 #define O_ACCMODE (O_EXEC | O_RDWR | O_SEARCH)
 #define O_APPEND __WASI_FDFLAG_APPEND
 #define O_CLOEXEC (0)
@@ -1666,12 +1335,8 @@
 #define PACKET_VNET_HDR 15
 #define PAGESIZE (0x10000)
 #define PAGE_SIZE PAGESIZE
-#define PARENB 0000400
-#define PARMRK 0000010
-#define PARODD 0001000
 #define PATH_MAX 4096
 #define PDP_ENDIAN __PDP_ENDIAN
-#define PENDIN 0040000
 #define PM_STR 0x20027
 #define POLLERR 0x1000
 #define POLLHUP 0x2000
@@ -1821,60 +1486,6 @@
 #define RRFIXEDSZ NS_RRFIXEDSZ
 #define RRQ 01
 #define RS_HIPRI 0x01
-#define RTCF_DIRECTSRC 0x04000000
-#define RTCF_DOREDIRECT 0x01000000
-#define RTCF_LOG 0x02000000
-#define RTCF_MASQ 0x00400000
-#define RTCF_NAT 0x00800000
-#define RTCF_VALVE 0x00200000
-#define RTF_ADDRCLASSMASK 0xF8000000
-#define RTF_ADDRCONF 0x00040000
-#define RTF_ALLONLINK 0x00020000
-#define RTF_BROADCAST 0x10000000
-#define RTF_CACHE 0x01000000
-#define RTF_DEFAULT 0x00010000
-#define RTF_DYNAMIC 0x0010
-#define RTF_FLOW 0x02000000
-#define RTF_GATEWAY 0x0002
-#define RTF_HOST 0x0004
-#define RTF_INTERFACE 0x40000000
-#define RTF_IRTT 0x0100
-#define RTF_LINKRT 0x00100000
-#define RTF_LOCAL 0x80000000
-#define RTF_MODIFIED 0x0020
-#define RTF_MSS RTF_MTU
-#define RTF_MTU 0x0040
-#define RTF_MULTICAST 0x20000000
-#define RTF_NAT 0x08000000
-#define RTF_NOFORWARD 0x1000
-#define RTF_NONEXTHOP 0x00200000
-#define RTF_NOPMTUDISC 0x4000
-#define RTF_POLICY 0x04000000
-#define RTF_REINSTATE 0x0008
-#define RTF_REJECT 0x0200
-#define RTF_STATIC 0x0400
-#define RTF_THROW 0x2000
-#define RTF_UP 0x0001
-#define RTF_WINDOW 0x0080
-#define RTF_XRESOLVE 0x0800
-#define RTMSG_ACK NLMSG_ACK
-#define RTMSG_AR_FAILED 0x51
-#define RTMSG_CONTROL 0x40
-#define RTMSG_DELDEVICE 0x12
-#define RTMSG_DELROUTE 0x22
-#define RTMSG_DELRULE 0x32
-#define RTMSG_NEWDEVICE 0x11
-#define RTMSG_NEWROUTE 0x21
-#define RTMSG_NEWRULE 0x31
-#define RTMSG_OVERRUN NLMSG_OVERRUN
-#define RT_ADDRCLASS(flags) ((uint32_t) flags >> 23)
-#define RT_CLASS_DEFAULT 253
-#define RT_CLASS_LOCAL 255
-#define RT_CLASS_MAIN 254
-#define RT_CLASS_MAX 255
-#define RT_CLASS_UNSPEC 0
-#define RT_LOCALADDR(flags) ((flags & RTF_ADDRCLASSMASK) == (RTF_LOCAL|RTF_INTERFACE))
-#define RT_TOS(tos) ((tos) & IPTOS_TOS_MASK)
 #define RUSAGE_CHILDREN 2
 #define RUSAGE_SELF 1
 #define R_OK 1
@@ -2143,18 +1754,6 @@
 #define S_WRBAND 0x0100
 #define S_WRNORM S_OUTPUT
 #define S_ZONE ns_s_zn
-#define TAB0 0000000
-#define TAB1 0004000
-#define TAB2 0010000
-#define TAB3 0014000
-#define TABDLY 0014000
-#define TCIFLUSH 0
-#define TCIOFF 2
-#define TCIOFLUSH 2
-#define TCION 3
-#define TCOFLUSH 1
-#define TCOOFF 0
-#define TCOON 1
 #define TCPI_OPT_ECN 8
 #define TCPI_OPT_SACK 2
 #define TCPI_OPT_TIMESTAMPS 1
@@ -2227,9 +1826,6 @@
 #define TCP_USER_TIMEOUT 18
 #define TCP_WINDOW_CLAMP 10
 #define TCP_ZEROCOPY_RECEIVE 35
-#define TCSADRAIN 1
-#define TCSAFLUSH 2
-#define TCSANOW 0
 #define TELCMD(x) telcmds[(x)-TELCMD_FIRST]
 #define TELCMD_FIRST xEOF
 #define TELCMD_LAST IAC
@@ -2309,7 +1905,6 @@
 #define TMAGLEN 6
 #define TOEXEC 00001
 #define TOREAD 00004
-#define TOSTOP 0000400
 #define TOWRITE 00002
 #define TRANSIENT 4
 #define TSGID 02000
@@ -2416,26 +2011,6 @@
 #define USHRT_MAX 0xffff
 #define UTIME_NOW (-1)
 #define UTIME_OMIT (-2)
-#define VDISCARD 13
-#define VEOF 4
-#define VEOL 11
-#define VEOL2 16
-#define VERASE 2
-#define VINTR 0
-#define VKILL 3
-#define VLNEXT 15
-#define VMIN 6
-#define VQUIT 1
-#define VREPRINT 12
-#define VSTART 8
-#define VSTOP 9
-#define VSUSP 10
-#define VSWTC 7
-#define VT0 0000000
-#define VT1 0040000
-#define VTDLY 0040000
-#define VTIME 5
-#define VWERASE 14
 #define WCHAR_MAX (0x7fffffff+L'\0')
 #define WCHAR_MIN (-1-0x7fffffff+L'\0')
 #define WCOREDUMP(s) ((s) & 0x80)
@@ -2456,10 +2031,6 @@
 #define WTERMSIG(s) ((s) & 0x7f)
 #define WUNTRACED 2
 #define W_OK 2
-#define XATTR_CREATE 1
-#define XATTR_REPLACE 2
-#define XCASE 0000004
-#define XTABS 0014000
 #define X_OK 4
 #define YESEXPR 0x50000
 #define YESSTR 0x50002
@@ -2543,10 +2114,6 @@
 #define _IOFBF 0
 #define _IOLBF 1
 #define _IONBF 2
-#define _IOT_ifconf _IOT(_IOTS(struct ifconf),1,0,0,0,0)
-#define _IOT_ifreq _IOT(_IOTS(char),IFNAMSIZ,_IOTS(char),16,0,0)
-#define _IOT_ifreq_int _IOT(_IOTS(char),IFNAMSIZ,_IOTS(int),1,0,0)
-#define _IOT_ifreq_short _IOT(_IOTS(char),IFNAMSIZ,_IOTS(short),1,0,0)
 #define _ISO646_H 
 #define _LANGINFO_H 
 #define _LIBGEN_H 
@@ -2557,9 +2124,7 @@
 #define _MATH_H 
 #define _MONETARY_H 
 #define _MQUEUE_H 
-#define _NETINET_ETHER_H 
 #define _NETINET_ICMP6_H 
-#define _NETINET_IF_ETHER_H 
 #define _NETINET_IGMP_H 
 #define _NETINET_IN_H 
 #define _NETINET_IN_SYSTM_H 
@@ -2569,10 +2134,6 @@
 #define _NETINET_TCP_H 
 #define _NETINET_UDP_H 
 #define _NETPACKET_PACKET_H 
-#define _NET_ETHERNET_H 
-#define _NET_IF_ARP_H 
-#define _NET_IF_H 
-#define _NET_ROUTE_H 
 #define _NL_LOCALE_NAME(cat) (((cat)<<16) | 0xffff)
 #define _NL_TYPES_H 
 #define _PC_2_SYMLINKS 20
@@ -2858,7 +2419,6 @@
 #define _SYS_UTSNAME_H 
 #define _SYS_XATTR_H 
 #define _TAR_H 
-#define _TERMIOS_H 
 #define _TGMATH_H 
 #define _THREADS_H 
 #define _TIME_H 
@@ -3234,13 +2794,6 @@
 #define __STDC_VERSION__ 201112L
 #define __STDC__ 1
 #define __STDDEF_H 
-#define __UAPI_DEF_ETHHDR 0
-#define __UAPI_DEF_IF_IFCONF 0
-#define __UAPI_DEF_IF_IFMAP 0
-#define __UAPI_DEF_IF_IFNAMSIZ 0
-#define __UAPI_DEF_IF_IFREQ 0
-#define __UAPI_DEF_IF_NET_DEVICE_FLAGS 0
-#define __UAPI_DEF_IF_NET_DEVICE_FLAGS_LOWER_UP_DORMANT_ECHO 0
 #define __UAPI_DEF_IN6_ADDR 0
 #define __UAPI_DEF_IN6_ADDR_ALT 0
 #define __UAPI_DEF_IN6_PKTINFO 0
@@ -3639,11 +3192,6 @@
 #define alphasort64 alphasort
 #define and &&
 #define and_eq &=
-#define arp_hln ea_hdr.ar_hln
-#define arp_hrd ea_hdr.ar_hrd
-#define arp_op ea_hdr.ar_op
-#define arp_pln ea_hdr.ar_pln
-#define arp_pro ea_hdr.ar_pro
 #define asin(x) __tg_real_complex(asin, (x))
 #define asinh(x) __tg_real_complex(asinh, (x))
 #define assert(x) ((void)((x) || (__assert_fail(#x, __FILE__, __LINE__, __func__),0)))
@@ -3747,24 +3295,6 @@
 #define icmp_wpa icmp_hun.ih_rtradv.irt_wpa
 #define ifa_broadaddr ifa_ifu.ifu_broadaddr
 #define ifa_dstaddr ifa_ifu.ifu_dstaddr
-#define ifc_buf ifc_ifcu.ifcu_buf
-#define ifc_req ifc_ifcu.ifcu_req
-#define ifr_addr ifr_ifru.ifru_addr
-#define ifr_bandwidth ifr_ifru.ifru_ivalue
-#define ifr_broadaddr ifr_ifru.ifru_broadaddr
-#define ifr_data ifr_ifru.ifru_data
-#define ifr_dstaddr ifr_ifru.ifru_dstaddr
-#define ifr_flags ifr_ifru.ifru_flags
-#define ifr_hwaddr ifr_ifru.ifru_hwaddr
-#define ifr_ifindex ifr_ifru.ifru_ivalue
-#define ifr_map ifr_ifru.ifru_map
-#define ifr_metric ifr_ifru.ifru_ivalue
-#define ifr_mtu ifr_ifru.ifru_mtu
-#define ifr_name ifr_ifrn.ifrn_name
-#define ifr_netmask ifr_ifru.ifru_netmask
-#define ifr_newname ifr_ifru.ifru_newname
-#define ifr_qlen ifr_ifru.ifru_ivalue
-#define ifr_slave ifr_ifru.ifru_slave
 #define ilogb(x) __tg_real_nocast(ilogb, (x))
 #define ino64_t ino_t
 #define ip6_flow ip6_ctlun.ip6_un1.ip6_un1_flow
@@ -3898,7 +3428,6 @@
 #define rr_code rr_hdr.icmp6_code
 #define rr_seqnum rr_hdr.icmp6_data32[0]
 #define rr_type rr_hdr.icmp6_type
-#define rt_mss rt_mtu
 #define sa_handler __sa_handler.sa_handler
 #define sa_sigaction __sa_handler.sa_sigaction
 #define scalbln(x,y) __tg_real_2_1(scalbln, (x), (y))

@@ -98,6 +98,7 @@ size_t __ctype_get_mb_cur_max(void);
  || defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) \
  || defined(_BSD_SOURCE)
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no wait */
 #define WNOHANG    1
 #define WUNTRACED  2
 
@@ -107,6 +108,7 @@ size_t __ctype_get_mb_cur_max(void);
 #define WIFEXITED(s) (!WTERMSIG(s))
 #define WIFSTOPPED(s) ((short)((((s)&0xffff)*0x10001)>>8) > 0x7f00)
 #define WIFSIGNALED(s) (((s)&0xffff)-1U < 0xffu)
+#endif
 
 int posix_memalign (void **, size_t, size_t);
 int setenv (const char *, const char *, int);
@@ -150,19 +152,27 @@ void lcong48 (unsigned short [7]);
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 #include <alloca.h>
+#ifdef __wasilibc_unmodified_upstream /* WASI has no temp directories */
 char *mktemp (char *);
 int mkstemps (char *, int);
 int mkostemps (char *, int, int);
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI libc doesn't build the legacy functions */
 void *valloc (size_t);
 void *memalign(size_t, size_t);
 int getloadavg(double *, int);
+#endif
 int clearenv(void);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no wait */
 #define WCOREDUMP(s) ((s) & 0x80)
 #define WIFCONTINUED(s) ((s) == 0xffff)
 #endif
+#endif
 
 #ifdef _GNU_SOURCE
+#ifdef __wasilibc_unmodified_upstream /* WASI has no pseudo-terminals */
 int ptsname_r(int, char *, size_t);
+#endif
 char *ecvt(double, int, int *, int *);
 char *fcvt(double, int, int *, int *);
 char *gcvt(double, int, char *);

@@ -19,8 +19,10 @@ void *calloc (size_t, size_t);
 void *realloc (void *, size_t);
 void free (void *);
 #endif
+#ifdef __wasilibc_unmodified_upstream /* WASI libc doesn't build the legacy functions */
 void *valloc (size_t);
 void *memalign(size_t, size_t);
+#endif
 
 size_t malloc_usable_size(void *);
 

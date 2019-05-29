@@ -22,13 +22,16 @@ static __wasi_errno_t populate_args(size_t *argc, char ***argv) {
         return __WASI_ESUCCESS;
     }
 
-    /* Allocate memory for the array of pointers. */
-    *argv = malloc(sizeof(char *) * *argc);
+    /* Allocate memory for the array of pointers, adding null terminator. */
+    *argv = malloc(sizeof(char *) * (*argc + 1));
     /* Allocate memory for storing the argument chars. */
     char *argv_buf = malloc(sizeof(char) * argv_buf_size);
     if (*argv == NULL || argv_buf == NULL) {
         return __WASI_ENOMEM;
     }
+
+    /* Make sure the last pointer in the array is NULL. */
+    *argv[*argc] = NULL;
 
     /* Fill the argument chars, and the argv array with pointers into those chars. */
     return __wasi_args_get(*argv, argv_buf);
@@ -45,7 +48,7 @@ static __wasi_errno_t populate_environ(void) {
         return err;
     }
 
-    /* Allocate memory for the array of pointers, plus one terminating null pointer. */
+    /* Allocate memory for the array of pointers, adding null terminator. */
     __environ = malloc(sizeof(char *) * (environ_count + 1));
     /* Allocate memory for storing the environment chars. */
     char *environ_buf = malloc(sizeof(char) * environ_buf_size);

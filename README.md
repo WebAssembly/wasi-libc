@@ -7,7 +7,7 @@ aren't stable yet.
 
 It's several things.
 
-First, it's a usable libc. It builds a "sysroot" which can be pointed to by
+First, it's a usable libc. It builds a "libc" which can be used by
 compilers, such as Clang 8.0, using the wasm32-wasi target. It's a work in
 progress, but it is already sufficient to run basic programs.
 

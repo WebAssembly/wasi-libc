@@ -1,4 +1,4 @@
-# WASI Sysroot
+# WASI Libc
 
 This is a work in progress. It's usable for many purposes, though the APIs
 aren't stable yet.

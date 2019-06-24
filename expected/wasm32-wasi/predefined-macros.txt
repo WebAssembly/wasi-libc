@@ -92,9 +92,9 @@
 #define CFLUSH CDISCARD
 #define CHARBITS (sizeof(char) * 8)
 #define CHARCLASS_NAME_MAX 14
-#define CHAR_BIT 8
-#define CHAR_MAX 127
-#define CHAR_MIN (-128)
+#define CHAR_BIT __CHAR_BIT__
+#define CHAR_MAX __SCHAR_MAX__
+#define CHAR_MIN SCHAR_MIN
 #define CHRTYPE '3'
 #define CINTR CTRL('c')
 #define CKILL CTRL('u')
@@ -163,19 +163,19 @@
 #define DAY_5 0x2000B
 #define DAY_6 0x2000C
 #define DAY_7 0x2000D
-#define DBL_DECIMAL_DIG 17
-#define DBL_DIG 15
-#define DBL_EPSILON 2.22044604925031308085e-16
-#define DBL_HAS_SUBNORM 1
-#define DBL_MANT_DIG 53
-#define DBL_MAX 1.79769313486231570815e+308
-#define DBL_MAX_10_EXP 308
-#define DBL_MAX_EXP 1024
-#define DBL_MIN 2.22507385850720138309e-308
-#define DBL_MIN_10_EXP (-307)
-#define DBL_MIN_EXP (-1021)
-#define DBL_TRUE_MIN 4.94065645841246544177e-324
-#define DECIMAL_DIG 36
+#define DBL_DECIMAL_DIG __DBL_DECIMAL_DIG__
+#define DBL_DIG __DBL_DIG__
+#define DBL_EPSILON __DBL_EPSILON__
+#define DBL_HAS_SUBNORM __DBL_HAS_DENORM__
+#define DBL_MANT_DIG __DBL_MANT_DIG__
+#define DBL_MAX __DBL_MAX__
+#define DBL_MAX_10_EXP __DBL_MAX_10_EXP__
+#define DBL_MAX_EXP __DBL_MAX_EXP__
+#define DBL_MIN __DBL_MIN__
+#define DBL_MIN_10_EXP __DBL_MIN_10_EXP__
+#define DBL_MIN_EXP __DBL_MIN_EXP__
+#define DBL_TRUE_MIN __DBL_DENORM_MIN__
+#define DECIMAL_DIG __DECIMAL_DIG__
 #define DELAYTIMER_MAX 0x7fffffff
 #define DELETE ns_uop_delete
 #define DEV_BSIZE 512
@@ -349,21 +349,21 @@
 #define FIONBIO 2
 #define FIONREAD 1
 #define FLOATBITS (sizeof(float) * 8)
-#define FLT_DECIMAL_DIG 9
-#define FLT_DIG 6
-#define FLT_EPSILON 1.1920928955078125e-07F
-#define FLT_EVAL_METHOD 0
-#define FLT_HAS_SUBNORM 1
-#define FLT_MANT_DIG 24
-#define FLT_MAX 3.40282346638528859812e+38F
-#define FLT_MAX_10_EXP 38
-#define FLT_MAX_EXP 128
-#define FLT_MIN 1.17549435082228750797e-38F
-#define FLT_MIN_10_EXP (-37)
-#define FLT_MIN_EXP (-125)
-#define FLT_RADIX 2
+#define FLT_DECIMAL_DIG __FLT_DECIMAL_DIG__
+#define FLT_DIG __FLT_DIG__
+#define FLT_EPSILON __FLT_EPSILON__
+#define FLT_EVAL_METHOD __FLT_EVAL_METHOD__
+#define FLT_HAS_SUBNORM __FLT_HAS_DENORM__
+#define FLT_MANT_DIG __FLT_MANT_DIG__
+#define FLT_MAX __FLT_MAX__
+#define FLT_MAX_10_EXP __FLT_MAX_10_EXP__
+#define FLT_MAX_EXP __FLT_MAX_EXP__
+#define FLT_MIN __FLT_MIN__
+#define FLT_MIN_10_EXP __FLT_MIN_10_EXP__
+#define FLT_MIN_EXP __FLT_MIN_EXP__
+#define FLT_RADIX __FLT_RADIX__
 #define FLT_ROUNDS (__builtin_flt_rounds())
-#define FLT_TRUE_MIN 1.40129846432481707092e-45F
+#define FLT_TRUE_MIN __FLT_DENORM_MIN__
 #define FLUSHBAND 0x04
 #define FLUSHR 0x01
 #define FLUSHRW 0x03
@@ -662,8 +662,8 @@
 #define INT_LEAST64_MIN INT64_MIN
 #define INT_LEAST8_MAX INT8_MAX
 #define INT_LEAST8_MIN INT8_MIN
-#define INT_MAX 0x7fffffff
-#define INT_MIN (-1-0x7fffffff)
+#define INT_MAX __INT_MAX__
+#define INT_MIN (-__INT_MAX__ -1)
 #define IN_BADCLASS(a) ((((in_addr_t)(a)) & 0xf0000000) == 0xf0000000)
 #define IN_CLASSA(a) ((((in_addr_t)(a)) & 0x80000000) == 0)
 #define IN_CLASSA_HOST (0xffffffff & ~IN_CLASSA_NET)
@@ -977,25 +977,25 @@
 #define LC_NUMERIC_MASK (1<<LC_NUMERIC)
 #define LC_TIME 2
 #define LC_TIME_MASK (1<<LC_TIME)
-#define LDBL_DECIMAL_DIG DECIMAL_DIG
-#define LDBL_DIG 33
-#define LDBL_EPSILON 1.92592994438723585305597794258492732e-34L
-#define LDBL_HAS_SUBNORM 1
-#define LDBL_MANT_DIG 113
-#define LDBL_MAX 1.18973149535723176508575932662800702e+4932L
-#define LDBL_MAX_10_EXP 4932
-#define LDBL_MAX_EXP 16384
-#define LDBL_MIN 3.36210314311209350626267781732175260e-4932L
-#define LDBL_MIN_10_EXP (-4931)
-#define LDBL_MIN_EXP (-16381)
-#define LDBL_TRUE_MIN 6.47517511943802511092443895822764655e-4966L
+#define LDBL_DECIMAL_DIG __LDBL_DECIMAL_DIG__
+#define LDBL_DIG __LDBL_DIG__
+#define LDBL_EPSILON __LDBL_EPSILON__
+#define LDBL_HAS_SUBNORM __LDBL_HAS_DENORM__
+#define LDBL_MANT_DIG __LDBL_MANT_DIG__
+#define LDBL_MAX __LDBL_MAX__
+#define LDBL_MAX_10_EXP __LDBL_MAX_10_EXP__
+#define LDBL_MAX_EXP __LDBL_MAX_EXP__
+#define LDBL_MIN __LDBL_MIN__
+#define LDBL_MIN_10_EXP __LDBL_MIN_10_EXP__
+#define LDBL_MIN_EXP __LDBL_MIN_EXP__
+#define LDBL_TRUE_MIN __LDBL_DENORM_MIN__
 #define LFLOW_OFF 0
 #define LFLOW_ON 1
 #define LFLOW_RESTART_ANY 2
 #define LFLOW_RESTART_XON 3
 #define LITTLE_ENDIAN __LITTLE_ENDIAN
-#define LLONG_MAX (0x7fffffffffffffffLL)
-#define LLONG_MIN (-LLONG_MAX-1)
+#define LLONG_MAX __LONG_LONG_MAX__
+#define LLONG_MIN (-__LONG_LONG_MAX__-1LL)
 #define LM_FORWARDMASK 2
 #define LM_MODE 1
 #define LM_SLC 3
@@ -1006,8 +1006,10 @@
 #define LOCK_UN 8
 #define LONGBITS (sizeof(long) * 8)
 #define LONG_BIT (32)
-#define LONG_MAX (0x7fffffffL)
-#define LONG_MIN (-LONG_MAX-1)
+#define LONG_LONG_MAX __LONG_LONG_MAX__
+#define LONG_LONG_MIN (-__LONG_LONG_MAX__-1LL)
+#define LONG_MAX __LONG_MAX__
+#define LONG_MIN (-__LONG_MAX__ -1L)
 #define L_INCR 1
 #define L_SET 0
 #define L_XTND 2
@@ -1491,8 +1493,8 @@
 #define R_OK 1
 #define SARMAG 8
 #define SB 250
-#define SCHAR_MAX 127
-#define SCHAR_MIN (-128)
+#define SCHAR_MAX __SCHAR_MAX__
+#define SCHAR_MIN (-__SCHAR_MAX__-1)
 #define SCNd16 __INT16_FMTd__
 #define SCNd32 __INT32_FMTd__
 #define SCNd64 __INT64_FMTd__
@@ -1575,8 +1577,8 @@
 #define SEM_FAILED ((sem_t *)0)
 #define SERVFAIL ns_r_servfail
 #define SHORTBITS (sizeof(short) * 8)
-#define SHRT_MAX 0x7fff
-#define SHRT_MIN (-1-0x7fff)
+#define SHRT_MAX __SHRT_MAX__
+#define SHRT_MIN (-__SHRT_MAX__ -1)
 #define SHUT_RD __WASI_SHUT_RD
 #define SHUT_RDWR (SHUT_RD | SHUT_WR)
 #define SHUT_WR __WASI_SHUT_WR
@@ -1968,7 +1970,7 @@
 #define T_TXT ns_t_txt
 #define T_WKS ns_t_wks
 #define T_X25 ns_t_x25
-#define UCHAR_MAX 255
+#define UCHAR_MAX (__SCHAR_MAX__*2 +1)
 #define UDP_CORK 1
 #define UDP_ENCAP 100
 #define UDP_ENCAP_ESPINUDP 2
@@ -2000,11 +2002,12 @@
 #define UINT_LEAST32_MAX UINT32_MAX
 #define UINT_LEAST64_MAX UINT64_MAX
 #define UINT_LEAST8_MAX UINT8_MAX
-#define UINT_MAX 0xffffffffU
+#define UINT_MAX (__INT_MAX__ *2U +1U)
 #define UIO_MAXIOV 1024
-#define ULLONG_MAX (2ULL*LLONG_MAX+1)
-#define ULONG_MAX (2UL*LONG_MAX+1)
-#define USHRT_MAX 0xffff
+#define ULLONG_MAX (__LONG_LONG_MAX__*2ULL+1ULL)
+#define ULONG_LONG_MAX (__LONG_LONG_MAX__*2ULL+1ULL)
+#define ULONG_MAX (__LONG_MAX__ *2UL+1UL)
+#define USHRT_MAX (__SHRT_MAX__ *2 +1)
 #define UTIME_NOW (-1)
 #define UTIME_OMIT (-2)
 #define WCHAR_MAX (0x7fffffff+L'\0')
@@ -2086,7 +2089,6 @@
 #define _FCNTL_H 
 #define _FEATURES_H 
 #define _FENV_H 
-#define _FLOAT_H 
 #define _FMTMSG_H 
 #define _FNMATCH_H 
 #define _FTW_H 
@@ -2100,7 +2102,6 @@
 #define _IOFBF 0
 #define _IOLBF 1
 #define _IONBF 2
-#define _ISO646_H 
 #define _LANGINFO_H 
 #define _LIBGEN_H 
 #define _LIBINTL_H 
@@ -2367,15 +2368,11 @@
 #define _SEMAPHORE_H 
 #define _SIGNAL_H 
 #define _SIZE_T 
-#define _STDALIGN_H 
-#define _STDBOOL_H 
 #define _STDC_PREDEF_H 
-#define _STDDEF_H 
 #define _STDINT_H 
 #define _STDIO_EXT_H 
 #define _STDIO_H 
 #define _STDLIB_H 
-#define _STDNORETURN_H 
 #define _STRINGS_H 
 #define _STRING_H 
 #define _STROPTS_H 
@@ -2403,7 +2400,6 @@
 #define _SYS_UN_H 
 #define _SYS_UTSNAME_H 
 #define _TAR_H 
-#define _TGMATH_H 
 #define _THREADS_H 
 #define _TIME_H 
 #define _UCHAR_H 
@@ -2446,10 +2442,14 @@
 #define __compiler_ATOMIC_POINTER_LOCK_FREE 2
 #define __compiler_ATOMIC_SHORT_LOCK_FREE 2
 #define __compiler_ATOMIC_WCHAR_T_LOCK_FREE 2
+#define __CLANG_FLOAT_H 
+#define __CLANG_INTTYPES_H 
+#define __CLANG_LIMITS_H 
 #define __CLANG_MAX_ALIGN_T_DEFINED 
+#define __CLANG_STDINT_H 
+#define __CLANG_TGMATH_H 
 #define __CMPLX(x,y,t) (__builtin_complex((t)(x), (t)(y)))
 #define __CONSTANT_CFSTRINGS__ 1
-#define __DBLCX(x) (__IS_CX(x) && sizeof(x) == sizeof(double complex))
 #define __DBL_DECIMAL_DIG__ 17
 #define __DBL_DENORM_MIN__ 4.9406564584124654e-324
 #define __DBL_DIG__ 15
@@ -2531,8 +2531,6 @@
 #define __DEFINED_wctype_t 
 #define __DEFINED_wint_t 
 #define __FINITE_MATH_ONLY__ 0
-#define __FLT(x) (__IS_REAL(x) && sizeof(x) == sizeof(float))
-#define __FLTCX(x) (__IS_CX(x) && sizeof(x) == sizeof(float complex))
 #define __FLT_DECIMAL_DIG__ 9
 #define __FLT_DENORM_MIN__ 1.40129846e-45F
 #define __FLT_DIG__ 6
@@ -2629,11 +2627,7 @@
 #define __INT_LEAST8_MAX__ 127
 #define __INT_LEAST8_TYPE__ signed char
 #define __INT_MAX__ 2147483647
-#define __IS_CX(x) (__IS_FP(x) && sizeof(x) == sizeof((x)+I))
-#define __IS_FP(x) (sizeof((x)+1ULL) == sizeof((x)+1.0f))
-#define __IS_REAL(x) (__IS_FP(x) && 2*sizeof(x) == sizeof((x)+I))
-#define __LDBL(x) (__IS_REAL(x) && sizeof(x) == sizeof(long double) && sizeof(long double) != sizeof(double))
-#define __LDBLCX(x) (__IS_CX(x) && sizeof(x) == sizeof(long double complex) && sizeof(long double) != sizeof(double))
+#define __ISO646_H 
 #define __LDBL_DECIMAL_DIG__ 36
 #define __LDBL_DENORM_MIN__ 6.47517511943802511092443895822764655e-4966L
 #define __LDBL_DIG__ 33
@@ -2739,11 +2733,6 @@
 #define __PTRDIFF_MAX__ 2147483647L
 #define __PTRDIFF_TYPE__ long int
 #define __PTRDIFF_WIDTH__ 32
-#define __RETCAST(x) 
-#define __RETCAST_2(x,y) 
-#define __RETCAST_3(x,y,z) 
-#define __RETCAST_CX(x) 
-#define __RETCAST_REAL(x) 
 #define __SCHAR_MAX__ 127
 #define __SHRT_MAX__ 32767
 #define __SID ('S' << 8)
@@ -2769,7 +2758,9 @@
 #define __SIZE_MAX__ 4294967295UL
 #define __SIZE_TYPE__ long unsigned int
 #define __SIZE_WIDTH__ 32
+#define __STDALIGN_H 
 #define __STDARG_H 
+#define __STDBOOL_H 
 #define __STDC_HOSTED__ 1
 #define __STDC_IEC_559__ 1
 #define __STDC_ISO_10646__ 201206L
@@ -2778,6 +2769,7 @@
 #define __STDC_VERSION__ 201112L
 #define __STDC__ 1
 #define __STDDEF_H 
+#define __STDNORETURN_H 
 #define __UAPI_DEF_IN6_ADDR 0
 #define __UAPI_DEF_IN6_ADDR_ALT 0
 #define __UAPI_DEF_IN6_PKTINFO 0
@@ -3080,18 +3072,11 @@
 #define __bitop(x,i,o) ((x)[(i)/8] o (1<<(i)%8))
 #define __bool_true_false_are_defined 1
 #define __inline inline
+#define __noreturn_is_defined 1
 #define __restrict restrict
-#define __tg_complex(fun,x) (__RETCAST_CX(x)( __FLTCX((x)+I) && __IS_FP(x) ? fun ## f (x) : __LDBLCX((x)+I) ? fun ## l (x) : fun(x) ))
-#define __tg_complex_retreal(fun,x) (__RETCAST_REAL(x)( __FLTCX((x)+I) && __IS_FP(x) ? fun ## f (x) : __LDBLCX((x)+I) ? fun ## l (x) : fun(x) ))
-#define __tg_real(fun,x) (__RETCAST(x)__tg_real_nocast(fun, x))
-#define __tg_real_2(fun,x,y) (__RETCAST_2(x, y)( __FLT(x) && __FLT(y) ? fun ## f (x, y) : __LDBL((x)+(y)) ? fun ## l (x, y) : fun(x, y) ))
-#define __tg_real_2_1(fun,x,y) (__RETCAST(x)( __FLT(x) ? fun ## f (x, y) : __LDBL(x) ? fun ## l (x, y) : fun(x, y) ))
-#define __tg_real_complex(fun,x) (__RETCAST(x)( __FLTCX(x) ? c ## fun ## f (x) : __DBLCX(x) ? c ## fun (x) : __LDBLCX(x) ? c ## fun ## l (x) : __FLT(x) ? fun ## f (x) : __LDBL(x) ? fun ## l (x) : fun(x) ))
-#define __tg_real_complex_fabs(x) (__RETCAST_REAL(x)( __FLTCX(x) ? cabsf(x) : __DBLCX(x) ? cabs(x) : __LDBLCX(x) ? cabsl(x) : __FLT(x) ? fabsf(x) : __LDBL(x) ? fabsl(x) : fabs(x) ))
-#define __tg_real_complex_pow(x,y) (__RETCAST_2(x, y)( __FLTCX((x)+(y)) && __IS_FP(x) && __IS_FP(y) ? cpowf(x, y) : __FLTCX((x)+(y)) ? cpow(x, y) : __DBLCX((x)+(y)) ? cpow(x, y) : __LDBLCX((x)+(y)) ? cpowl(x, y) : __FLT(x) && __FLT(y) ? powf(x, y) : __LDBL((x)+(y)) ? powl(x, y) : pow(x, y) ))
-#define __tg_real_fma(x,y,z) (__RETCAST_3(x, y, z)( __FLT(x) && __FLT(y) && __FLT(z) ? fmaf(x, y, z) : __LDBL((x)+(y)+(z)) ? fmal(x, y, z) : fma(x, y, z) ))
-#define __tg_real_nocast(fun,x) ( __FLT(x) ? fun ## f (x) : __LDBL(x) ? fun ## l (x) : fun(x) )
-#define __tg_real_remquo(x,y,z) (__RETCAST_2(x, y)( __FLT(x) && __FLT(y) ? remquof(x, y, z) : __LDBL((x)+(y)) ? remquol(x, y, z) : remquo(x, y, z) ))
+#define __tg_promote1(__x) (__typeof__(__tg_promote(__x)))
+#define __tg_promote2(__x,__y) (__typeof__(__tg_promote(__x) + __tg_promote(__y)))
+#define __tg_promote3(__x,__y,__z) (__typeof__(__tg_promote(__x) + __tg_promote(__y) + __tg_promote(__z)))
 #define __tm_gmtoff tm_gmtoff
 #define __tm_zone tm_zone
 #define __va_copy(d,s) __builtin_va_copy(d,s)
@@ -3168,19 +3153,19 @@
 #define __wasm_basics___typedef_uid_t_h 
 #define _tolower(a) ((a)|0x20)
 #define _toupper(a) ((a)&0x5f)
-#define acos(x) __tg_real_complex(acos, (x))
-#define acosh(x) __tg_real_complex(acosh, (x))
+#define acos(__x) __tg_acos(__tg_promote1((__x))(__x))
+#define acosh(__x) __tg_acosh(__tg_promote1((__x))(__x))
 #define alignas _Alignas
 #define alignof _Alignof
 #define alphasort64 alphasort
 #define and &&
 #define and_eq &=
-#define asin(x) __tg_real_complex(asin, (x))
-#define asinh(x) __tg_real_complex(asinh, (x))
+#define asin(__x) __tg_asin(__tg_promote1((__x))(__x))
+#define asinh(__x) __tg_asinh(__tg_promote1((__x))(__x))
 #define assert(x) ((void)((x) || (__assert_fail(#x, __FILE__, __LINE__, __func__),0)))
-#define atan(x) __tg_real_complex(atan, (x))
-#define atan2(x,y) __tg_real_2(atan2, (x), (y))
-#define atanh(x) __tg_real_complex(atanh, (x))
+#define atan(__x) __tg_atan(__tg_promote1((__x))(__x))
+#define atan2(__x,__y) __tg_atan2(__tg_promote2((__x), (__y))(__x), __tg_promote2((__x), (__y))(__y))
+#define atanh(__x) __tg_atanh(__tg_promote1((__x))(__x))
 #define be16toh(x) __bswap16(x)
 #define be32toh(x) __bswap32(x)
 #define be64toh(x) __bswap64(x)
@@ -3194,43 +3179,43 @@
 #define bswap_16(x) __bswap_16(x)
 #define bswap_32(x) __bswap_32(x)
 #define bswap_64(x) __bswap_64(x)
-#define carg(x) __tg_complex_retreal(carg, (x))
-#define cbrt(x) __tg_real(cbrt, (x))
-#define ceil(x) __tg_real(ceil, (x))
-#define cimag(x) __tg_complex_retreal(cimag, (x))
+#define carg(__x) __tg_carg(__tg_promote1((__x))(__x))
+#define cbrt(__x) __tg_cbrt(__tg_promote1((__x))(__x))
+#define ceil(__x) __tg_ceil(__tg_promote1((__x))(__x))
+#define cimag(__x) __tg_cimag(__tg_promote1((__x))(__x))
 #define clrbit(x,i) __bitop(x,i,&=~)
 #define compl ~
 #define complex _Complex
-#define conj(x) __tg_complex(conj, (x))
-#define copysign(x,y) __tg_real_2(copysign, (x), (y))
-#define cos(x) __tg_real_complex(cos, (x))
-#define cosh(x) __tg_real_complex(cosh, (x))
-#define cproj(x) __tg_complex(cproj, (x))
-#define creal(x) __tg_complex_retreal(creal, (x))
+#define conj(__x) __tg_conj(__tg_promote1((__x))(__x))
+#define copysign(__x,__y) __tg_copysign(__tg_promote2((__x), (__y))(__x), __tg_promote2((__x), (__y))(__y))
+#define cos(__x) __tg_cos(__tg_promote1((__x))(__x))
+#define cosh(__x) __tg_cosh(__tg_promote1((__x))(__x))
+#define cproj(__x) __tg_cproj(__tg_promote1((__x))(__x))
+#define creal(__x) __tg_creal(__tg_promote1((__x))(__x))
 #define creat64 creat
 #define d_fileno d_ino
 #define direct dirent
 #define dirent64 dirent
-#define erf(x) __tg_real(erf, (x))
-#define erfc(x) __tg_real(erfc, (x))
+#define erf(__x) __tg_erf(__tg_promote1((__x))(__x))
+#define erfc(__x) __tg_erfc(__tg_promote1((__x))(__x))
 #define errno errno
-#define exp(x) __tg_real_complex(exp, (x))
-#define exp2(x) __tg_real(exp2, (x))
-#define expm1(x) __tg_real(expm1, (x))
-#define fabs(x) __tg_real_complex_fabs(x)
+#define exp(__x) __tg_exp(__tg_promote1((__x))(__x))
+#define exp2(__x) __tg_exp2(__tg_promote1((__x))(__x))
+#define expm1(__x) __tg_expm1(__tg_promote1((__x))(__x))
+#define fabs(__x) __tg_fabs(__tg_promote1((__x))(__x))
 #define false 0
-#define fdim(x,y) __tg_real_2(fdim, (x), (y))
+#define fdim(__x,__y) __tg_fdim(__tg_promote2((__x), (__y))(__x), __tg_promote2((__x), (__y))(__y))
 #define fgetpos64 fgetpos
-#define floor(x) __tg_real(floor, (x))
-#define fma(x,y,z) __tg_real_fma((x), (y), (z))
-#define fmax(x,y) __tg_real_2(fmax, (x), (y))
-#define fmin(x,y) __tg_real_2(fmin, (x), (y))
-#define fmod(x,y) __tg_real_2(fmod, (x), (y))
+#define floor(__x) __tg_floor(__tg_promote1((__x))(__x))
+#define fma(__x,__y,__z) __tg_fma(__tg_promote3((__x), (__y), (__z))(__x), __tg_promote3((__x), (__y), (__z))(__y), __tg_promote3((__x), (__y), (__z))(__z))
+#define fmax(__x,__y) __tg_fmax(__tg_promote2((__x), (__y))(__x), __tg_promote2((__x), (__y))(__y))
+#define fmin(__x,__y) __tg_fmin(__tg_promote2((__x), (__y))(__x), __tg_promote2((__x), (__y))(__y))
+#define fmod(__x,__y) __tg_fmod(__tg_promote2((__x), (__y))(__x), __tg_promote2((__x), (__y))(__y))
 #define fopen64 fopen
 #define fpclassify(x) (__builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, x))
 #define fpos64_t fpos_t
 #define freopen64 freopen
-#define frexp(x,y) __tg_real_2_1(frexp, (x), (y))
+#define frexp(__x,__y) __tg_frexp(__tg_promote1((__x))(__x), __y)
 #define fsblkcnt64_t fsblkcnt_t
 #define fseeko64 fseeko
 #define fsetpos64 fsetpos
@@ -3250,7 +3235,7 @@
 #define htole16(x) (uint16_t)(x)
 #define htole32(x) (uint32_t)(x)
 #define htole64(x) (uint64_t)(x)
-#define hypot(x,y) __tg_real_2(hypot, (x), (y))
+#define hypot(__x,__y) __tg_hypot(__tg_promote2((__x), (__y))(__x), __tg_promote2((__x), (__y))(__y))
 #define icmp6_data16 icmp6_dataun.icmp6_un_data16
 #define icmp6_data32 icmp6_dataun.icmp6_un_data32
 #define icmp6_data8 icmp6_dataun.icmp6_un_data8
@@ -3278,7 +3263,7 @@
 #define icmp_wpa icmp_hun.ih_rtradv.irt_wpa
 #define ifa_broadaddr ifa_ifu.ifu_broadaddr
 #define ifa_dstaddr ifa_ifu.ifu_dstaddr
-#define ilogb(x) __tg_real_nocast(ilogb, (x))
+#define ilogb(__x) __tg_ilogb(__tg_promote1((__x))(__x))
 #define ino64_t ino_t
 #define ip6_flow ip6_ctlun.ip6_un1.ip6_un1_flow
 #define ip6_hlim ip6_ctlun.ip6_un1.ip6_un1_hlim
@@ -3307,24 +3292,24 @@
 #define isunordered(x,y) (__builtin_isunordered(x, y))
 #define isupper(a) (0 ? isupper(a) : ((unsigned)(a)-'A') < 26)
 #define iswdigit(a) (0 ? iswdigit(a) : ((unsigned)(a)-'0') < 10)
-#define ldexp(x,y) __tg_real_2_1(ldexp, (x), (y))
+#define ldexp(__x,__y) __tg_ldexp(__tg_promote1((__x))(__x), __y)
 #define le16toh(x) (uint16_t)(x)
 #define le32toh(x) (uint32_t)(x)
 #define le64toh(x) (uint64_t)(x)
 #define letoh16(x) (uint16_t)(x)
 #define letoh32(x) (uint32_t)(x)
 #define letoh64(x) (uint64_t)(x)
-#define lgamma(x) __tg_real(lgamma, (x))
-#define llrint(x) __tg_real_nocast(llrint, (x))
-#define llround(x) __tg_real_nocast(llround, (x))
+#define lgamma(__x) __tg_lgamma(__tg_promote1((__x))(__x))
+#define llrint(__x) __tg_llrint(__tg_promote1((__x))(__x))
+#define llround(__x) __tg_llround(__tg_promote1((__x))(__x))
 #define loff_t off_t
-#define log(x) __tg_real_complex(log, (x))
-#define log10(x) __tg_real(log10, (x))
-#define log1p(x) __tg_real(log1p, (x))
-#define log2(x) __tg_real(log2, (x))
-#define logb(x) __tg_real(logb, (x))
-#define lrint(x) __tg_real_nocast(lrint, (x))
-#define lround(x) __tg_real_nocast(lround, (x))
+#define log(__x) __tg_log(__tg_promote1((__x))(__x))
+#define log10(__x) __tg_log10(__tg_promote1((__x))(__x))
+#define log1p(__x) __tg_log1p(__tg_promote1((__x))(__x))
+#define log2(__x) __tg_log2(__tg_promote1((__x))(__x))
+#define logb(__x) __tg_logb(__tg_promote1((__x))(__x))
+#define lrint(__x) __tg_lrint(__tg_promote1((__x))(__x))
+#define lround(__x) __tg_lround(__tg_promote1((__x))(__x))
 #define lseek(fd,offset,whence) ({ off_t __f = (fd); off_t __o = (offset); off_t __w = (whence); __builtin_constant_p((offset)) && __builtin_constant_p((whence)) && __o == 0 && __w == SEEK_CUR ? __wasilibc_tell(__f) : lseek(__f, __o, __w); })
 #define lseek64 lseek
 #define lstat64 lstat
@@ -3359,9 +3344,9 @@
 #define nd_rs_code nd_rs_hdr.icmp6_code
 #define nd_rs_reserved nd_rs_hdr.icmp6_data32[0]
 #define nd_rs_type nd_rs_hdr.icmp6_type
-#define nearbyint(x) __tg_real(nearbyint, (x))
-#define nextafter(x,y) __tg_real_2(nextafter, (x), (y))
-#define nexttoward(x,y) __tg_real_2(nexttoward, (x), (y))
+#define nearbyint(__x) __tg_nearbyint(__tg_promote1((__x))(__x))
+#define nextafter(__x,__y) __tg_nextafter(__tg_promote2((__x), (__y))(__x), __tg_promote2((__x), (__y))(__y))
+#define nexttoward(__x,__y) __tg_nexttoward(__tg_promote1((__x))(__x), (__y))
 #define nftw64 nftw
 #define no_argument 0
 #define noreturn _Noreturn
@@ -3393,7 +3378,7 @@
 #define or_eq |=
 #define posix_fadvise64 posix_fadvise
 #define posix_fallocate64 posix_fallocate
-#define pow(x,y) __tg_real_complex_pow((x), (y))
+#define pow(__x,__y) __tg_pow(__tg_promote2((__x), (__y))(__x), __tg_promote2((__x), (__y))(__y))
 #define powerof2(n) !(((n)-1) & (n))
 #define pread64 pread
 #define preadv64 preadv
@@ -3401,11 +3386,11 @@
 #define pwritev64 pwritev
 #define readdir64 readdir
 #define readdir64_r readdir_r
-#define remainder(x,y) __tg_real_2(remainder, (x), (y))
-#define remquo(x,y,z) __tg_real_remquo((x), (y), (z))
+#define remainder(__x,__y) __tg_remainder(__tg_promote2((__x), (__y))(__x), __tg_promote2((__x), (__y))(__y))
+#define remquo(__x,__y,__z) __tg_remquo(__tg_promote2((__x), (__y))(__x), __tg_promote2((__x), (__y))(__y), (__z))
 #define required_argument 1
-#define rint(x) __tg_real(rint, (x))
-#define round(x) __tg_real(round, (x))
+#define rint(__x) __tg_rint(__tg_promote1((__x))(__x))
+#define round(__x) __tg_round(__tg_promote1((__x))(__x))
 #define roundup(n,d) (howmany(n,d)*(d))
 #define rr_cksum rr_hdr.icmp6_cksum
 #define rr_code rr_hdr.icmp6_code
@@ -3413,8 +3398,8 @@
 #define rr_type rr_hdr.icmp6_type
 #define sa_handler __sa_handler.sa_handler
 #define sa_sigaction __sa_handler.sa_sigaction
-#define scalbln(x,y) __tg_real_2_1(scalbln, (x), (y))
-#define scalbn(x,y) __tg_real_2_1(scalbn, (x), (y))
+#define scalbln(__x,__y) __tg_scalbln(__tg_promote1((__x))(__x), __y)
+#define scalbn(__x,__y) __tg_scalbn(__tg_promote1((__x))(__x), __y)
 #define scandir64 scandir
 #define setbit(x,i) __bitop(x,i,|=)
 #define si_addr __si_fields.__sigfault.si_addr
@@ -3438,9 +3423,9 @@
 #define si_utime __si_fields.__si_common.__second.__sigchld.si_utime
 #define si_value __si_fields.__si_common.__second.si_value
 #define signbit(x) (__builtin_signbit(x))
-#define sin(x) __tg_real_complex(sin, (x))
-#define sinh(x) __tg_real_complex(sinh, (x))
-#define sqrt(x) __tg_real_complex(sqrt, (x))
+#define sin(__x) __tg_sin(__tg_promote1((__x))(__x))
+#define sinh(__x) __tg_sinh(__tg_promote1((__x))(__x))
+#define sqrt(__x) __tg_sqrt(__tg_promote1((__x))(__x))
 #define st_atime st_atim.tv_sec
 #define st_ctime st_ctim.tv_sec
 #define st_mtime st_mtim.tv_sec
@@ -3450,10 +3435,10 @@
 #define stdin (stdin)
 #define stdout (stdout)
 #define strdupa(x) strcpy(alloca(strlen(x)+1),x)
-#define tan(x) __tg_real_complex(tan, (x))
-#define tanh(x) __tg_real_complex(tanh, (x))
+#define tan(__x) __tg_tan(__tg_promote1((__x))(__x))
+#define tanh(__x) __tg_tanh(__tg_promote1((__x))(__x))
 #define telcmds ((char [][6]){ "EOF", "SUSP", "ABORT", "EOR", "SE", "NOP", "DMARK", "BRK", "IP", "AO", "AYT", "EC", "EL", "GA", "SB", "WILL", "WONT", "DO", "DONT", "IAC", 0 })
-#define tgamma(x) __tg_real(tgamma, (x))
+#define tgamma(__x) __tg_tgamma(__tg_promote1((__x))(__x))
 #define th_block th_u.tu_block
 #define th_code th_u.tu_code
 #define th_msg th_data
@@ -3466,7 +3451,7 @@
 #define timerisset(t) ((t)->tv_sec || (t)->tv_usec)
 #define timersub(s,t,a) (void) ( (a)->tv_sec = (s)->tv_sec - (t)->tv_sec, ((a)->tv_usec = (s)->tv_usec - (t)->tv_usec) < 0 && ((a)->tv_usec += 1000000, (a)->tv_sec--) )
 #define true 1
-#define trunc(x) __tg_real(trunc, (x))
+#define trunc(__x) __tg_trunc(__tg_promote1((__x))(__x))
 #define uh_dport dest
 #define uh_sport source
 #define uh_sum check

@@ -245,10 +245,14 @@ $(SYSROOT_LIB)/libwasi-emulated-mman.a: $(LIBWASI_EMULATED_MMAN_OBJS)
 
 %.a:
 	@mkdir -p "$(@D)"
-	$(WASM_AR) crs $@ $(wordlist 1, 200, $(patsubst $(CURDIR)/%.o,%.o,$^))
-	$(WASM_AR) crs $@ $(wordlist 200, 400, $(patsubst $(CURDIR)/%.o,%.o,$^))
-	$(WASM_AR) crs $@ $(wordlist 400, 600, $(patsubst $(CURDIR)/%.o,%.o,$^))
-	$(WASM_AR) crs $@ $(wordlist 600, 1000, $(patsubst $(CURDIR)/%.o,%.o,$^))
+	# On Windows, the commandline for the ar invocation got too long, so it needs to be split up.
+	$(WASM_AR) crs $@ $(wordlist 1, 199, $^)
+	$(WASM_AR) crs $@ $(wordlist 200, 399, $^)
+	$(WASM_AR) crs $@ $(wordlist 400, 599, $^)
+	$(WASM_AR) crs $@ $(wordlist 600, 799, $^)
+	# This might eventually overflow again, but at least it'll do so in a loud way instead of
+	# silently dropping the tail.
+	$(WASM_AR) crs $@ $(wordlist 800, 100000, $^)
 
 $(MUSL_PRINTSCAN_OBJS): override WASM_CFLAGS += \
 	    -D__wasilibc_printscan_no_long_double \
@@ -496,6 +500,7 @@ finish: startup_files libc
 
 check: finish
 	# Check that the computed metadata matches the expected metadata.
+	# This ignores whitespace because on Windows the output has CRLF line endings.
 	diff -wur "$(CURDIR)/expected/$(MULTIARCH_TRIPLE)" "$(SYSROOT_SHARE)"
 
 install: finish

@@ -25,28 +25,26 @@ jobs:
       condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'))
       displayName: Install clang (Windows)
     - bash: |
-        set -e
+        set -euo pipefail
         curl -f http://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-apple-darwin.tar.xz | tar xJf -
         export CLANG_DIR=`pwd`/clang+llvm-8.0.0-x86_64-apple-darwin/bin
         echo "##vso[task.prependpath]$CLANG_DIR"
       displayName: Install clang (OSX)
       condition: and(succeeded(), eq(variables['Agent.OS'], 'Darwin'))
     - bash: |
-        set -e
+        set -euo pipefail
         curl -f http://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz | tar xJf -
         export CLANG_DIR=`pwd`/clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-16.04/bin
         echo "##vso[task.prependpath]$CLANG_DIR"
       displayName: Install clang (Linux)
       condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
     - bash: |
-        set -e
+        set -euo pipefail
         rustup update stable
         rustup default stable
         rustup component add llvm-tools-preview
         echo "##vso[task.setvariable variable=WASM_NM;]$(rustc --print sysroot|sed 's|C:|/c|'|sed 's|\\|/|g')/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-nm.exe"
       displayName: Install llvm-nm (Windows)
       condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
-    - bash: |
-        set -e
-        make -j4
+    - script: make -j4
       displayName: Build

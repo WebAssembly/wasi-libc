@@ -39,6 +39,9 @@ jobs:
       displayName: Install clang (Linux)
       condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
     - bash: |
+        # Windows releases of LLVM don't include the llvm-nm tool, which is needed for building
+        # wasi-libc. Rust's llvm-tools include llvm-nm, and Rust is installed on Azure's Windows
+        # images, so we can use that to make llvm-nm available without too much overhead.
         set -euo pipefail
         rustup update stable
         rustup default stable

@@ -3,7 +3,7 @@
  * and defined values (macros).
  *
  * The interface described here is greatly inspired by [CloudABI]'s clean,
- * thoughtfully-designed, cabability-oriented, POSIX-style API.
+ * thoughtfully-designed, capability-oriented, POSIX-style API.
  *
  * [CloudABI]: https://github.com/NuxiNL/cloudlibc
  */

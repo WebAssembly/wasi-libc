@@ -55,13 +55,18 @@ int dup3(int, int, int);
 off_t lseek(int, off_t, int);
 #ifdef __wasilibc_unmodified_upstream /* Optimize the readonly case of lseek */
 #else
+off_t __wasilibc_tell(int);
+
+#ifndef __cplusplus
 /*
  * Optimize lseek in the case where it's just returning the current offset.
  * This avoids importing `__wasi_fd_seek` altogether in many common cases.
+ *
+ * But don't do this for C++ because a simple macro wouldn't handle namespaces
+ * correctly:
+ *  - User code could qualify the `lseek` call with `::`.
+ *  - There may be another `lseek` in scope from a `using` declaration.
  */
-
-off_t __wasilibc_tell(int);
-
 #define lseek(fd, offset, whence)      \
   ({                                   \
      off_t __f = (fd);                 \
@@ -74,6 +79,7 @@ off_t __wasilibc_tell(int);
      ? __wasilibc_tell(__f)            \
      : lseek(__f, __o, __w);           \
   })
+#endif
 #endif
 int fsync(int);
 int fdatasync(int);

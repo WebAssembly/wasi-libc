@@ -467,9 +467,15 @@ finish: startup_files libc
 	# which we don't need to track here. For the __*_ATOMIC_*_LOCK_FREE
 	# macros, squash individual compiler names to attempt, toward keeping
 	# these files compiler-independent.
+	#
+	# We have to add `-isystem $(SYSROOT_INC)` because otherwise clang puts
+	# its builtin include path first, which produces compiler-specific
+	# output.
+	#
 	# TODO: Undefine __FLOAT128__ for now since it's not in clang 8.0.
 	# TODO: Filter out __FLT16_* for now, as not all versions of clang have these.
 	"$(WASM_CC)" $(WASM_CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
+	    -isystem $(SYSROOT_INC) \
 	    -E -dM -Wno-\#warnings \
 	    -D_ALL_SOURCE \
 	    -U__llvm__ \

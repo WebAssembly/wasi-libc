@@ -242,6 +242,7 @@ struct linger {
 #define SO_ZEROCOPY             60
 #define SO_TXTIME               61
 #define SCM_TXTIME              SO_TXTIME
+#define SO_BINDTOIFINDEX        62
 
 #ifndef SOL_SOCKET
 #define SOL_SOCKET      1

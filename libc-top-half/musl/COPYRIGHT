@@ -1,7 +1,7 @@
 musl as a whole is licensed under the following standard MIT license:
 
 ----------------------------------------------------------------------
-Copyright © 2005-2014 Rich Felker, et al.
+Copyright © 2005-2019 Rich Felker, et al.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -27,11 +27,15 @@ Authors/contributors include:
 
 A. Wilcox
 Alex Dowad
+Alex Suykov
 Alexander Monakov
+Andre McCurdy
 Andrew Kelley
 Anthony G. Basile
+Aric Belsito
 Arvid Picciani
 Bartosz Brachaczek
+Benjamin Peterson
 Bobby Bingham
 Boris Brezillon
 Brent Cook
@@ -40,11 +44,14 @@ Clément Vasseur
 Daniel Micay
 Daniel Sabogal
 Daurnimator
+David Carlier
 David Edelsohn
 Denys Vlasenko
 Dmitry Ivanov
 Dmitry V. Levin
+Drew DeVault
 Emil Renner Berthing
+Fangrui Song
 Felix Fietkau
 Felix Janda
 Gianluca Anzolin
@@ -61,6 +68,7 @@ John Spencer
 Josiah Worcester
 Julien Ramseier
 Justin Cormack
+Kaarle Ritvanen
 Khem Raj
 Kylie McClain
 Leah Neukirchen
@@ -68,28 +76,35 @@ Luca Barbato
 Luka Perkov
 M Farkas-Dyck (Strake)
 Mahesh Bodapati
+Markus Wichmann
 Masanori Ogino
+Michael Clark
 Michael Forney
 Mikhail Kremnyov
 Natanael Copa
 Nicholas J. Kain
 orc
 Pascal Cuoq
+Patrick Oppenlander
 Petr Hosek
 Petr Skocik
 Pierre Carrier
 Reini Urban
 Rich Felker
 Richard Pennington
+Ryan Fairfax
 Samuel Holland
+Segev Finer
 Shiz
 sin
 Solar Designer
 Stefan Kristiansson
+Stefan O'Rear
 Szabolcs Nagy
 Timo Teräs
 Trutz Behn
 Valentin Ochs
+Will Dietz
 William Haddon
 William Pitcock
 

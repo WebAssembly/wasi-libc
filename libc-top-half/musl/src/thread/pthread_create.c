@@ -315,6 +315,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	}
 	new->robust_list.head = &new->robust_list.head;
 	new->CANARY = self->CANARY;
+	new->sysinfo = self->sysinfo;
 
 	/* Setup argument structure for the new thread on its stack.
 	 * It's safe to access from the caller only until the thread

@@ -145,6 +145,7 @@ struct prctl_mm_map {
 #define PR_SPEC_ENABLE (1UL << 1)
 #define PR_SPEC_DISABLE (1UL << 2)
 #define PR_SPEC_FORCE_DISABLE (1UL << 3)
+#define PR_SPEC_DISABLE_NOEXEC (1UL << 4)
 
 #define PR_PAC_RESET_KEYS       54
 #define PR_PAC_APIAKEY (1UL << 0)

@@ -29,6 +29,9 @@
 #define NO_MALLINFO 1
 #define NO_MALLOC_STATS 1
 
+/* Align malloc regions to 16, to avoid unaligned SIMD accesses. */
+#define MALLOC_ALIGNMENT 16
+
 /*
  * Declare errno values used by dlmalloc. We define them like this to avoid
  * putting specific errno values in the ABI.

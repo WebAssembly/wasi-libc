@@ -63,7 +63,7 @@ and ABI combinations:
       is required
 
 * MIPS64
-    * ABI is n64 (LP64)
+    * ABI is n64 (LP64) or n32 (ILP32)
     * Big-endian default; little-endian variants also supported
     * Default ABI variant uses FPU registers; alternate soft-float ABI
       that does not use FPU registers or instructions is available
@@ -95,6 +95,11 @@ and ABI combinations:
     * Requires support for lwx/swx instructions
 
 * OpenRISC 1000 (or1k)
+
+* RISC-V 64
+    * Little endian
+    * Hard, soft, and hard-single/soft-double floating point ABIs
+    * Standard ELF; no shared-text NOMMU support
 
 
 

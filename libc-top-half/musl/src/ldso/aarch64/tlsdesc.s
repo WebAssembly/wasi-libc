@@ -23,16 +23,13 @@ __tlsdesc_static:
 .hidden __tlsdesc_dynamic
 .type __tlsdesc_dynamic,@function
 __tlsdesc_dynamic:
-	stp x1,x2,[sp,#-32]!
-	stp x3,x4,[sp,#16]
+	stp x1,x2,[sp,#-16]!
 	mrs x1,tpidr_el0      // tp
 	ldr x0,[x0,#8]        // p
-	ldr x2,[x0]           // p->modidx
-	ldr x3,[x1,#-8]       // dtv
-	ldr x2,[x3,x2,lsl #3] // dtv[p->modidx]
-	ldr x0,[x0,#8]        // p->off
-	add x0,x0,x2
-	sub x0,x0,x1
-	ldp x3,x4,[sp,#16]
-	ldp x1,x2,[sp],#32
+	ldp x0,x2,[x0]        // p->modidx, p->off
+	sub x2,x2,x1          // p->off - tp
+	ldr x1,[x1,#-8]       // dtv
+	ldr x1,[x1,x0,lsl #3] // dtv[p->modidx]
+	add x0,x1,x2          // dtv[p->modidx] + p->off - tp
+	ldp x1,x2,[sp],#16
 	ret

@@ -2077,3 +2077,41 @@ bugs fixed:
 
 arch-specfic bugs fixed:
 - s390x had wrong values for POSIX_FADV_DONTNEED/_NOREUSE
+
+
+
+1.1.23 release notes
+
+new features:
+- riscv64 port
+- configure now allows customizing AR and RANLIB vars
+- header-level support for new linux features in 5.1
+
+major internal changes:
+- removed extern __syscall; syscall header code is now fully self-contained
+
+performance:
+- new math library implementation for log/exp/pow
+- aarch64 dynamic tlsdesc function is streamlined
+
+compatibility & conformance:
+- O_TTY_INIT is now defined
+- sys/types.h no longer pollutes namespace with sys/sysmacros.h in any profile
+- powerpc asm is now compatible with clang internal assembler
+
+changes for new POSIX interpretations:
+- fgetwc now sets stream error indicator on encoding errors
+- fmemopen no longer rejects 0 size
+
+bugs fixed:
+- static TLS for shared libraries was allocated wrong on "Variant I" archs
+- crash in dladdr reading through uninitialized pointer on non-match
+- sigaltstack wrongly errored out on invalid ss_size when doing SS_DISABLE
+- getdents function misbehaved with buffer length larger than INT_MAX
+- set*id could deadlock after fork from multithreaded process
+
+arch-specfic bugs fixed:
+- s390x SO_PEERSEC definition was wrong
+- passing of 64-bit syscall arguments was broken on microblaze
+- posix_fadvise was broken on mips due to missing 7-arg syscall support
+- vrregset_t layout and member naming was wrong on powerpc64

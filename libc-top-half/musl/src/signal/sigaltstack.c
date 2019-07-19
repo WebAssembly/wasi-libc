@@ -5,7 +5,7 @@
 int sigaltstack(const stack_t *restrict ss, stack_t *restrict old)
 {
 	if (ss) {
-		if (ss->ss_size < MINSIGSTKSZ) {
+		if (!(ss->ss_flags & SS_DISABLE) && ss->ss_size < MINSIGSTKSZ) {
 			errno = ENOMEM;
 			return -1;
 		}

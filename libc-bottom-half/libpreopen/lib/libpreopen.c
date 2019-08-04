@@ -49,6 +49,39 @@
 
 #include "internal.h"
 
+static char* convert_to_posix(char *path) {
+  size_t path_len = strlen(path);
+  if (path_len == 0) {
+    return (NULL);
+  }
+
+  // does it have Windows-style "C:\" or "C:/" prefix?
+  int offset = 0;
+  if (path_len >= 3 && path[1] == ':' && (path[2] == '\\' || path[2] == '/')) {
+    offset = 2;
+  }
+
+  // allocate
+  size_t po_path_len = path_len - offset + 1;
+  char *po_path = calloc(sizeof(char), po_path_len);
+
+  // convert to POSIX "/"
+  int i = offset;
+  char c;
+  while (i < path_len) {
+    c = path[i];
+    if (c == '\\') {
+      po_path[i - offset] = '/';
+    } else {
+      po_path[i - offset] = c;
+    }
+    ++i;
+  }
+
+  po_path[po_path_len] = '\0';
+
+  return po_path;
+}
 
 #ifdef __wasilibc_unmodified_upstream
 #else
@@ -58,6 +91,7 @@ struct po_map*
 po_add(struct po_map *map, const char *path, int fd)
 {
 	struct po_map_entry *entry;
+  char *po_path;
 
 	po_map_assertvalid(map);
 
@@ -75,8 +109,13 @@ po_add(struct po_map *map, const char *path, int fd)
 	entry = map->entries + map->length;
 	map->length++;
 
-	entry->name = strdup(path);
+#ifdef __wasilibc_unmodified_upstream
+	entry->name = path;
+#else
+	entry->name = convert_to_posix(path);
+#endif
 	entry->fd = fd;
+
 
 #ifdef WITH_CAPSICUM
 #ifdef __wasilibc_unmodified_upstream
@@ -107,10 +146,15 @@ struct po_relpath
 po_find(struct po_map* map, const char *path, cap_rights_t *rights)
 #else
 static struct po_relpath
-po_find(struct po_map* map, const char *path,
+po_find(struct po_map* map, const char *po_path,
         __wasi_rights_t rights_base, __wasi_rights_t rights_inheriting)
 #endif
 {
+#ifdef __wasilibc_unmodified_upstream
+#else
+  char *path = convert_to_posix(po_path);
+#endif
+
 	const char *relpath ;
 	struct po_relpath match = { .relative_path = NULL, .dirfd = -1 };
 	size_t bestlen = 0;
@@ -184,6 +228,11 @@ po_find(struct po_map* map, const char *path,
 
 	match.relative_path = relpath;
 	match.dirfd = best;
+
+#ifdef __wasilibc_unmodified_upstream
+#else
+  free(path);
+#endif
 
 	return match;
 }

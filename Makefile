@@ -1,13 +1,13 @@
 # These variables are specifically meant to be overridable via
 # the make command-line.
-WASM_CC = clang
-WASM_NM = $(patsubst %clang,%llvm-nm,$(WASM_CC))
-WASM_AR = $(patsubst %clang,%llvm-ar,$(WASM_CC))
-WASM_CFLAGS = -O2
+WASM_CC ?= clang
+WASM_NM ?= $(patsubst %clang,%llvm-nm,$(WASM_CC))
+WASM_AR ?= $(patsubst %clang,%llvm-ar,$(WASM_CC))
+WASM_CFLAGS ?= -O2
 # The directory where we build the sysroot.
-SYSROOT = $(CURDIR)/sysroot
+SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
-INSTALL_DIR = /usr/local
+INSTALL_DIR ?= /usr/local
 # single or posix
 THREAD_MODEL = single
 # yes or no
@@ -245,7 +245,14 @@ $(SYSROOT_LIB)/libwasi-emulated-mman.a: $(LIBWASI_EMULATED_MMAN_OBJS)
 
 %.a:
 	@mkdir -p "$(@D)"
-	$(WASM_AR) crs $@ $^
+	# On Windows, the commandline for the ar invocation got too long, so it needs to be split up.
+	$(WASM_AR) crs $@ $(wordlist 1, 199, $^)
+	$(WASM_AR) crs $@ $(wordlist 200, 399, $^)
+	$(WASM_AR) crs $@ $(wordlist 400, 599, $^)
+	$(WASM_AR) crs $@ $(wordlist 600, 799, $^)
+	# This might eventually overflow again, but at least it'll do so in a loud way instead of
+	# silently dropping the tail.
+	$(WASM_AR) crs $@ $(wordlist 800, 100000, $^)
 
 $(MUSL_PRINTSCAN_OBJS): override WASM_CFLAGS += \
 	    -D__wasilibc_printscan_no_long_double \
@@ -267,7 +274,7 @@ $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
 	"$(WASM_CC)" $(WASM_CFLAGS) -MD -MP -o $@ -c $<
 
-include $(shell find $(OBJDIR) -name \*.d) /dev/null
+-include $(shell find $(OBJDIR) -name \*.d)
 
 $(DLMALLOC_OBJS): override WASM_CFLAGS += \
     -I$(DLMALLOC_INC)
@@ -444,9 +451,9 @@ finish: startup_files libc
 	# Collect symbol information.
 	# TODO: Use llvm-nm --extern-only instead of grep. This is blocked on
 	# LLVM PR40497, which is fixed in 9.0, but not in 8.0.
-	$(WASM_NM) --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/*.o \
+	"$(WASM_NM)" --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_ALL=C sort > "$(SYSROOT_SHARE)/defined-symbols.txt"
-	for undef_sym in $$($(WASM_NM) --undefined-only "$(SYSROOT_LIB)"/*.a "$(SYSROOT_LIB)"/*.o \
+	for undef_sym in $$("$(WASM_NM)" --undefined-only "$(SYSROOT_LIB)"/*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$(SYSROOT_SHARE)/defined-symbols.txt" || echo $$undef_sym; \
 	done > "$(SYSROOT_SHARE)/undefined-symbols.txt"
@@ -499,7 +506,8 @@ finish: startup_files libc
 
 check: finish
 	# Check that the computed metadata matches the expected metadata.
-	diff -ur "$(CURDIR)/expected/$(MULTIARCH_TRIPLE)" "$(SYSROOT_SHARE)"
+	# This ignores whitespace because on Windows the output has CRLF line endings.
+	diff -wur "$(CURDIR)/expected/$(MULTIARCH_TRIPLE)" "$(SYSROOT_SHARE)"
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"

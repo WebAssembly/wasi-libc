@@ -63,11 +63,11 @@
 static char error_buffer[1024];
 #endif
 
+#if !defined(NDEBUG)
 #ifdef __wasilibc_unmodified_upstream
 #else
 static
 #endif
-#if !defined(NDEBUG)
 void
 po_map_assertvalid(const struct po_map *map)
 {

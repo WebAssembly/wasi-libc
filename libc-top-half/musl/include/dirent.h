@@ -25,11 +25,11 @@ typedef struct __dirstream DIR;
 #include <__typedef_DIR.h>
 #endif
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define _DIRENT_HAVE_D_RECLEN
 #define _DIRENT_HAVE_D_OFF
 #define _DIRENT_HAVE_D_TYPE
 
-#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 struct dirent {
 	ino_t d_ino;
 	off_t d_off;

@@ -2079,8 +2079,6 @@
 #define _CTYPE_H 
 #define _Complex_I (0.0f+1.0fi)
 #define _DIRENT_H 
-#define _DIRENT_HAVE_D_OFF 
-#define _DIRENT_HAVE_D_RECLEN 
 #define _DIRENT_HAVE_D_TYPE 
 #define _ENDIAN_H 
 #define _ERRNO_H 

@@ -12,11 +12,6 @@ __getf2
 __gttf2
 __letf2
 __lttf2
-__muldc3
-__muloti4
-__mulsc3
-__multc3
-__multf3
 __netf2
 __stack_pointer
 __subtf3

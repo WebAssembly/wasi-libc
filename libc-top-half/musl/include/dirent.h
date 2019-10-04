@@ -85,7 +85,9 @@ int versionsort(const struct dirent **, const struct dirent **);
 #if defined(_LARGEFILE64_SOURCE) || defined(_GNU_SOURCE)
 #define dirent64 dirent
 #define readdir64 readdir
+#ifdef __wasilibc_unmodified_upstream /* readdir_r is obsolete */
 #define readdir64_r readdir_r
+#endif
 #define scandir64 scandir
 #define alphasort64 alphasort
 #define versionsort64 versionsort

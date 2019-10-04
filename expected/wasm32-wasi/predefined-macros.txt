@@ -3400,7 +3400,6 @@
 #define pwrite64 pwrite
 #define pwritev64 pwritev
 #define readdir64 readdir
-#define readdir64_r readdir_r
 #define remainder(x,y) __tg_real_2(remainder, (x), (y))
 #define remquo(x,y,z) __tg_real_remquo((x), (y), (z))
 #define required_argument 1

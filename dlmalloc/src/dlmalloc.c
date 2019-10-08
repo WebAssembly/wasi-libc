@@ -41,7 +41,24 @@ extern const int __ENOMEM;
 extern const int __EINVAL;
 #define EINVAL __EINVAL
 
-/* Prefix dlmalloc's names with 'dl'. We wrap them with public names below. */
+/*
+ * Define USE_DL_PREFIX so that we leave dlmalloc's names prefixed with 'dl'.
+ * We define them as "static", and we wrap them with public names below. This
+ * serves two purposes:
+ *
+ * One is to make it easy to control which symbols are exported; dlmalloc
+ * defines several non-standard functions and we wish to explicitly control
+ * which functions are part of our public-facing interface.
+ *
+ * The other is to protect against compilers optimizing based on the assumption
+ * that they know what functions with names like "malloc" do. Code in the
+ * implementation will call functions like "dlmalloc" and assume it can use
+ * the resulting pointers to access the metadata outside of the nominally
+ * allocated objects. However, if the function were named "malloc", compilers
+ * might see code like that and assume it has undefined behavior and can be
+ * optimized away. By using "dlmalloc" in the implementation, we don't need
+ * -fno-builtin to avoid this problem.
+ */
 #define USE_DL_PREFIX 1
 #define DLMALLOC_EXPORT static inline
 

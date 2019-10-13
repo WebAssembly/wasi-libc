@@ -5,7 +5,7 @@
 
 /* Bare-bones implementation of sbrk: just call memory.grow. */
 void *sbrk(intptr_t increment) {
-    /* We only supprt page-size increments. */
+    /* We only support page-size increments. */
     if (increment % PAGESIZE != 0) {
         abort();
     }
@@ -15,7 +15,7 @@ void *sbrk(intptr_t increment) {
         abort();
     }
 
-    uintptr_t old = __builtin_wasm_memory_grow(0, (uintptr_t)increment / PAGESIZE);
+    const uintptr_t old = __builtin_wasm_memory_grow(0, (uintptr_t)increment / PAGESIZE);
    
     if (old == SIZE_MAX) {
         errno = ENOMEM;

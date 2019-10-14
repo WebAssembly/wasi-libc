@@ -175,7 +175,11 @@ const char *__strftime_fmt_1(char (*s)[100], size_t *l, int f, const struct tm *
 			*l = 0;
 			return "";
 		}
+#ifdef __wasilibc_unmodified_upstream // wasi-libc's __tm_gmtoff is an int
 		*l = snprintf(*s, sizeof *s, "%+.4ld",
+#else
+		*l = snprintf(*s, sizeof *s, "%+.4d",
+#endif
 			tm->__tm_gmtoff/3600*100 + tm->__tm_gmtoff%3600/60);
 		return *s;
 	case 'Z':

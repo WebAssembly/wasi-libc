@@ -245,6 +245,7 @@ int execvpe(const char *, char *const [], char *const []);
 int issetugid(void);
 #endif
 int getentropy(void *, size_t);
+extern int optreset;
 #endif
 
 #ifdef _GNU_SOURCE
@@ -264,6 +265,7 @@ int syncfs(int);
 #ifdef __wasilibc_unmodified_upstream /* WASI has no eaccess */
 int euidaccess(const char *, int);
 int eaccess(const char *, int);
+ssize_t copy_file_range(int, off_t *, int, off_t *, size_t, unsigned);
 #endif
 #endif
 

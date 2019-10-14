@@ -10,7 +10,7 @@ long fpathconf(int fd, int name)
 		[_PC_MAX_INPUT] = _POSIX_MAX_INPUT,
 		[_PC_NAME_MAX] = NAME_MAX,
 		[_PC_PATH_MAX] = PATH_MAX,
-#ifdef __wasilibc_unmodified_upstream /* WASI has no pipes */
+#ifdef __wasilibc_unmodified_upstream // WASI has no pipes
 		[_PC_PIPE_BUF] = PIPE_BUF,
 #else
 		[_PC_PIPE_BUF] = -1,

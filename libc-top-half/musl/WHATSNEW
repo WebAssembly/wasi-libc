@@ -2115,3 +2115,52 @@ arch-specfic bugs fixed:
 - passing of 64-bit syscall arguments was broken on microblaze
 - posix_fadvise was broken on mips due to missing 7-arg syscall support
 - vrregset_t layout and member naming was wrong on powerpc64
+
+
+
+1.1.24 release notes
+
+new features:
+- GLOB_TILDE extension to glob
+- non-stub catgets localization API, using netbsd binary catalog format
+- posix_spawn file actions for [f]chdir (extension, pending future standard)
+- secure_getenv function (extension)
+- copy_file_range syscall wrapper (Linux extension)
+- header-level support for new linux features in 5.2
+
+performance:
+- new fast path for lrint (generic C version) on 32-bit archs
+
+major internal changes:
+- functions involving time are overhauled to be time64-ready in 32-bit archs
+- x32 uses the new time64 code paths to replace nasty hacks in syscall glue
+
+compatibility & conformance:
+- support for powerpc[64] unaligned relocation types
+- powerpc[64] and sh sys/user.h no longer clash with kernel asm/ptrace.h
+- select no longer modifies timeout on failure (or at all)
+- mips64 stat results are no longer limited to 32-bit time range
+- optreset (BSD extension) now has a public declaration
+- support for clang inconsistencies in wchar_t type vs some 32-bit archs
+- mips r6 syscall asm no longer has invalid lo/hi register clobbers
+- vestigial asm declarations of __tls_get_new are removed (broke some tooling)
+- riscv64 mcontext_t mismatch glibc's member naming is corrected
+
+bugs fixed:
+- glob failed to match broken symlinks consistently
+- invalid use of interposed calloc to allocate initial TLS
+- various dlsym symbol resolution logic errors
+- semctl with SEM_STAT_ANY didn't work
+- pthread_create with explicit scheduling was subject to priority inversion
+- pthread_create failure path had data race for thread count
+- timer_create with SIGEV_THREAD notification had data race getting timer id
+- wide printf family failed to support l modifier for float formats
+
+arch-specific bugs fixed:
+- x87 floating point stack imbalance in math asm (i386-only CVE-2019-14697)
+- x32 clock_adjtime, getrusage, wait3, wait4 produced junk (struct mismatches)
+- lseek broken on x32 and mipsn32 with large file offsets
+- riscv64 atomics weren't compiler barriers
+- riscv64 atomics had broken asm constraints (missing earlyclobber flag)
+- arm clone() was broken when compiled as thumb if start function returned
+- mipsr6 setjmp/longjmp did not preserve fpu register state correctly

@@ -1,6 +1,3 @@
-#include <string.h>
-#include <bits/alltypes.h>
-
 struct stat {
 	dev_t st_dev;
 	long __pad1[2];

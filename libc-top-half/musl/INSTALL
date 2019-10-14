@@ -55,12 +55,13 @@ and ABI combinations:
     * Little-endian default; big-endian variants also supported
 
 * MIPS
-    * ABI is o32
+    * ABI is o32, fp32/fpxx (except on r6 which is fp64)
     * Big-endian default; little-endian variants also supported
     * Default ABI variant uses FPU registers; alternate soft-float ABI
       that does not use FPU registers or instructions is available
     * MIPS2 or later, or kernel emulation of ll/sc (standard in Linux)
       is required
+    * MIPS32r6, an incompatible ISA, is supported as a variant "mipsr6"
 
 * MIPS64
     * ABI is n64 (LP64) or n32 (ILP32)

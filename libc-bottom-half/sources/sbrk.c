@@ -5,7 +5,7 @@
 
 /* Bare-bones implementation of sbrk: just call memory.grow. */
 void *sbrk(intptr_t increment) {
-    /* We only supprt page-size increments. */
+    /* We only support page-size increments. */
     if (increment % PAGESIZE != 0) {
         abort();
     }

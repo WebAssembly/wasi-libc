@@ -290,6 +290,12 @@
 #define __NR_io_uring_setup (0x40000000 + 425)
 #define __NR_io_uring_enter (0x40000000 + 426)
 #define __NR_io_uring_register (0x40000000 + 427)
+#define __NR_open_tree		(0x40000000 + 428)
+#define __NR_move_mount		(0x40000000 + 429)
+#define __NR_fsopen		(0x40000000 + 430)
+#define __NR_fsconfig		(0x40000000 + 431)
+#define __NR_fsmount		(0x40000000 + 432)
+#define __NR_fspick		(0x40000000 + 433)
 
 #define __NR_rt_sigaction (0x40000000 + 512)
 #define __NR_rt_sigreturn (0x40000000 + 513)

@@ -9,5 +9,3 @@ struct ipc_perm {
 	long long __pad1;
 	long long __pad2;
 };
-
-#define IPC_64 0

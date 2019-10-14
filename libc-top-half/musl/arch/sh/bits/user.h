@@ -17,34 +17,6 @@
 #define REG_FPSCR	55
 #define REG_FPUL	56
 
-struct pt_regs {
-	unsigned long regs[16];
-	unsigned long pc;
-	unsigned long pr;
-	unsigned long sr;
-	unsigned long gbr;
-	unsigned long mach;
-	unsigned long macl;
-	long tra;
-};
-
-struct pt_dspregs {
-	unsigned long a1;
-	unsigned long a0g;
-	unsigned long a1g;
-	unsigned long m0;
-	unsigned long m1;
-	unsigned long a0;
-	unsigned long x0;
-	unsigned long x1;
-	unsigned long y0;
-	unsigned long y1;
-	unsigned long dsr;
-	unsigned long rs;
-	unsigned long re;
-	unsigned long mod;
-};
-
 struct user_fpu_struct {
 	unsigned long fp_regs[16];
 	unsigned long xfp_regs[16];
@@ -58,7 +30,11 @@ typedef elf_greg_t elf_gregset_t[ELF_NGREG];
 typedef struct user_fpu_struct elf_fpregset_t;
 
 struct user {
-	struct pt_regs regs;
+	struct {
+		unsigned long regs[16];
+		unsigned long pc, pr, sr, gbr, mach, macl;
+		long tra;
+	} regs;
 	struct user_fpu_struct fpu;
 	int u_fpvalid;
 	unsigned long u_tsize;

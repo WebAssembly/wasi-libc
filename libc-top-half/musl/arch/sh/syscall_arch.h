@@ -88,3 +88,6 @@ static inline long __syscall6(long n, long a, long b, long c, long d, long e, lo
 }
 
 #define SYSCALL_IPC_BROKEN_MODE
+
+#define SIOCGSTAMP_OLD   (2U<<30 | 's'<<8 | 100 | 8<<16)
+#define SIOCGSTAMPNS_OLD (2U<<30 | 's'<<8 | 101 | 8<<16)

@@ -67,8 +67,10 @@ struct ipv6_mreq {
 #define INADDR_ALLSNOOPERS_GROUP ((in_addr_t) 0xe000006a)
 #define INADDR_MAX_LOCAL_GROUP  ((in_addr_t) 0xe00000ff)
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define IN6ADDR_ANY_INIT      { { { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 } } }
 #define IN6ADDR_LOOPBACK_INIT { { { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 } } }
+#endif
 
 extern const struct in6_addr in6addr_any, in6addr_loopback;
 

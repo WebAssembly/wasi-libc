@@ -111,3 +111,5 @@ static inline long __syscall6(long n, long a, long b, long c, long d, long e, lo
 				"r23", "r25", "r27", "r29", "r31");
 	return r11;
 }
+
+#define IPC_64 0

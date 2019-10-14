@@ -15,7 +15,7 @@ void *sbrk(intptr_t increment) {
         abort();
     }
 
-    const uintptr_t old = __builtin_wasm_memory_grow(0, (uintptr_t)increment / PAGESIZE);
+    uintptr_t old = __builtin_wasm_memory_grow(0, (uintptr_t)increment / PAGESIZE);
    
     if (old == SIZE_MAX) {
         errno = ENOMEM;

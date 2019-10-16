@@ -2,8 +2,9 @@
 #include <sysexits.h>
 #include <wasi/core.h>
 #include <wasi/libc.h>
+#include <wasi/libc-internal.h>
 
-extern char **__environ;
+__wasi_errno_t __wasilibc_populate_environ(void) __attribute__((weak));
 extern void __wasm_call_ctors(void);
 extern int main(int, char *[]);
 extern void __prepare_for_exit(void);
@@ -35,32 +36,6 @@ static __wasi_errno_t populate_args(size_t *argc, char ***argv) {
 
     /* Fill the argument chars, and the argv array with pointers into those chars. */
     return __wasi_args_get(*argv, argv_buf);
-}
-
-static __wasi_errno_t populate_environ(void) {
-    __wasi_errno_t err;
-
-    /* Get the sizes of the arrays we'll have to create to copy in the environment. */
-    size_t environ_count;
-    size_t environ_buf_size;
-    err = __wasi_environ_sizes_get(&environ_count, &environ_buf_size);
-    if (err != __WASI_ESUCCESS) {
-        return err;
-    }
-
-    /* Allocate memory for the array of pointers, adding null terminator. */
-    __environ = malloc(sizeof(char *) * (environ_count + 1));
-    /* Allocate memory for storing the environment chars. */
-    char *environ_buf = malloc(sizeof(char) * environ_buf_size);
-    if (__environ == NULL || environ_buf == NULL) {
-        return __WASI_ENOMEM;
-    }
-
-    /* Make sure the last pointer in the array is NULL. */
-    __environ[environ_count] = NULL;
-
-    /* Fill the environment chars, and the __environ array with pointers into those chars. */
-    return __wasi_environ_get(__environ, environ_buf);
 }
 
 static __wasi_errno_t populate_libpreopen(void) {
@@ -110,9 +85,11 @@ void _start(void) {
         _Exit(EX_OSERR);
     }
 
-    /* Fill in the environment from WASI syscalls. */
-    if (populate_environ() != __WASI_ESUCCESS) {
-        _Exit(EX_OSERR);
+    /* Fill in the environment from WASI syscalls, if needed. */
+    if (&__wasilibc_populate_environ != NULL) {
+        if (__wasilibc_populate_environ() != __WASI_ESUCCESS) {
+            _Exit(EX_OSERR);
+        }
     }
 
     /* Fill in the arguments from WASI syscalls. */

@@ -120,7 +120,6 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fcntl/creat.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/dirent/alphasort.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/dirent/versionsort.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/__environ.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/clearenv.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/getenv.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/putenv.c \
@@ -359,7 +358,7 @@ $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
 $(DLMALLOC_OBJS): override WASM_CFLAGS += \
     -I$(DLMALLOC_INC)
 
-$(LIBC_BOTTOM_HALF_ALL_OBJS): override WASM_CFLAGS += \
+startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS): override WASM_CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_HEADERS_PRIVATE) \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC) \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) \

@@ -6,6 +6,7 @@
 
 #include <assert.h>
 #include <wasi/core.h>
+#include <wasi/libc.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -22,6 +23,13 @@ static_assert(O_EXCL >> 12 == __WASI_O_EXCL, "Value mismatch");
 static_assert(O_TRUNC >> 12 == __WASI_O_TRUNC, "Value mismatch");
 
 int openat(int fd, const char *path, int oflag, ...) {
+#ifdef __wasilibc_unmodified_upstream // fstat
+#else
+    return __wasilibc_openat_nomode(fd, path, oflag);
+}
+
+int __wasilibc_openat_nomode(int fd, const char *path, int oflag) {
+#endif
   // Compute rights corresponding with the access modes provided.
   // Attempt to obtain all rights, except the ones that contradict the
   // access mode provided to openat().

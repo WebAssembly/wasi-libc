@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <wasi/core.h>
+#include <wasi/libc.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -24,7 +25,11 @@ int scandirat(int dirfd, const char *dir, struct dirent ***namelist,
     sel = sel_true;
 
   // Open the directory.
+#ifdef __wasilibc_unmodified_upstream // avoid making a varargs call
   int fd = openat(dirfd, dir, O_RDONLY | O_NONBLOCK | O_DIRECTORY);
+#else
+  int fd = __wasilibc_openat_nomode(dirfd, dir, O_RDONLY | O_NONBLOCK | O_DIRECTORY);
+#endif
   if (fd == -1)
     return -1;
 

@@ -77,9 +77,9 @@ open(const char *path, int flags, ...)
         return -1;
     }
 
-    // WASI libc's openat ignores the mode argument, so don't bother passing
-    // the actual mode value through.
-    return openat(dirfd, relative_path, flags);
+    // WASI libc's openat ignores the mode argument, so call a special
+    // entrypoint which avoids the varargs calling convention.
+    return __wasilibc_openat_nomode(dirfd, relative_path, flags);
 }
 
 int

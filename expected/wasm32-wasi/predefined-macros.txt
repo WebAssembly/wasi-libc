@@ -3106,14 +3106,14 @@
 #define __wasilibc___header_fcntl_h 
 #define __wasilibc___header_netinet_in_h 
 #define __wasilibc___header_poll_h 
+#define __wasilibc___header_stdlib_h 
+#define __wasilibc___header_string_h 
 #define __wasilibc___header_sys_ioctl_h 
 #define __wasilibc___header_sys_resource_h 
 #define __wasilibc___header_sys_socket_h 
 #define __wasilibc___header_sys_stat_h 
 #define __wasilibc___header_time_h 
 #define __wasilibc___header_unistd_h 
-#define __wasilibc___headers_stdlib_h 
-#define __wasilibc___headers_string_h 
 #define __wasilibc___macro_FD_SETSIZE_h 
 #define __wasilibc___mode_t_h 
 #define __wasilibc___seek_h 

@@ -13,29 +13,47 @@ void _Exit(int) __attribute__((noreturn));
 static __wasi_errno_t populate_args(size_t *argc, char ***argv) {
     __wasi_errno_t err;
 
-    /* Get the sizes of the arrays we'll have to create to copy in the args. */
+    // Get the sizes of the arrays we'll have to create to copy in the args.
     size_t argv_buf_size;
-    err = __wasi_args_sizes_get(argc, &argv_buf_size);
+    size_t new_argc;
+    err = __wasi_args_sizes_get(&new_argc, &argv_buf_size);
     if (err != __WASI_ESUCCESS) {
         return err;
     }
-    if (*argc == 0) {
+    if (new_argc == 0) {
         return __WASI_ESUCCESS;
     }
 
-    /* Allocate memory for the array of pointers, adding null terminator. */
-    *argv = malloc(sizeof(char *) * (*argc + 1));
-    /* Allocate memory for storing the argument chars. */
-    char *argv_buf = malloc(sizeof(char) * argv_buf_size);
-    if (*argv == NULL || argv_buf == NULL) {
+    // Add 1 for the NULL pointer to mark the end, and check for overflow.
+    size_t num_ptrs = new_argc + 1;
+    if (num_ptrs == 0) {
         return __WASI_ENOMEM;
     }
 
-    /* Make sure the last pointer in the array is NULL. */
-    *argv[*argc] = NULL;
+    // Allocate memory for storing the argument chars.
+    char *argv_buf = malloc(argv_buf_size);
+    if (argv_buf == NULL) {
+        return __WASI_ENOMEM;
+    }
 
-    /* Fill the argument chars, and the argv array with pointers into those chars. */
-    return __wasi_args_get(*argv, argv_buf);
+    // Allocate memory for the array of pointers. This uses `calloc` both to
+    // handle overflow and to initialize the NULL pointer at the end.
+    char **argv_ptrs = calloc(num_ptrs, sizeof(char *));
+    if (argv_ptrs == NULL) {
+        free(argv_buf);
+        return __WASI_ENOMEM;
+    }
+
+    // Fill the argument chars, and the argv array with pointers into those chars.
+    err = __wasi_args_get(argv_ptrs, argv_buf);
+    if (err == __WASI_ESUCCESS) {
+        *argc = new_argc;
+        *argv = argv_ptrs;
+    } else {
+        free(argv_buf);
+        free(argv_ptrs);
+    }
+    return err;
 }
 
 static __wasi_errno_t populate_libpreopen(void) {
@@ -80,35 +98,35 @@ static __wasi_errno_t populate_libpreopen(void) {
 }
 
 void _start(void) {
-    /* Record the preopened resources. */
+    // Record the preopened resources.
     if (populate_libpreopen() != __WASI_ESUCCESS) {
         _Exit(EX_OSERR);
     }
 
-    /* Fill in the environment from WASI syscalls, if needed. */
+    // Fill in the environment from WASI syscalls, if needed.
     if (&__wasilibc_populate_environ != NULL) {
         if (__wasilibc_populate_environ() != __WASI_ESUCCESS) {
             _Exit(EX_OSERR);
         }
     }
 
-    /* Fill in the arguments from WASI syscalls. */
+    // Fill in the arguments from WASI syscalls.
     size_t argc;
     char **argv;
     if (populate_args(&argc, &argv) != __WASI_ESUCCESS) {
         _Exit(EX_OSERR);
     }
 
-    /* The linker synthesizes this to call constructors. */
+    // The linker synthesizes this to call constructors.
     __wasm_call_ctors();
 
-    /* Call main with the arguments. */
+    // Call main with the arguments.
     int r = main(argc, argv);
 
-    /* Call atexit functions, destructors, stdio cleanup, etc. */
+    // Call atexit functions, destructors, stdio cleanup, etc.
     __prepare_for_exit();
 
-    /* If main exited successfully, just return, otherwise call _Exit. */
+    // If main exited successfully, just return, otherwise call _Exit.
     if (r != 0) {
         _Exit(r);
     }

@@ -21,6 +21,9 @@ __wasi_errno_t __wasilibc_populate_environ(void) {
     if (err != __WASI_ESUCCESS) {
         return err;
     }
+    if (environ_count == 0) {
+        return __WASI_ESUCCESS;
+    }
 
     // Add 1 for the NULL pointer to mark the end, and check for overflow.
     size_t num_ptrs = environ_count + 1;

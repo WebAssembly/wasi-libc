@@ -40,6 +40,9 @@ __wasi_errno_t __wasilibc_populate_environ(void) {
     err = __wasi_environ_get(environ_ptrs, environ_buf);
     if (err == __WASI_ESUCCESS) {
         __environ = environ_ptrs;
+    } else {
+        free(environ_buf);
+        free(environ_ptrs);
     }
     return err;
 }

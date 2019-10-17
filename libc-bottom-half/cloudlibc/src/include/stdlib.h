@@ -110,9 +110,11 @@ typedef __wchar_t wchar_t;
 #define MB_CUR_MAX_L MB_CUR_MAX_L
 
 #define alloca(size) __builtin_alloca(size)
+#endif
 
 __BEGIN_DECLS
 _Noreturn void _Exit(int);
+#ifdef __wasilibc_unmodified_upstream
 size_t MB_CUR_MAX_L(__locale_t);
 long a64l(const char *);
 #endif
@@ -196,8 +198,8 @@ size_t wcstombs_l(char *__restrict, const wchar_t *__restrict, size_t,
                   __locale_t);
 int wctomb(char *, wchar_t);
 int wctomb_l(char *, wchar_t, __locale_t);
-__END_DECLS
 #endif
+__END_DECLS
 
 #if _CLOUDLIBC_INLINE_FUNCTIONS
 #ifdef __wasilibc_unmodified_upstream

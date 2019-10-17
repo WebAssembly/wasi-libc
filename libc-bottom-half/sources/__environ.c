@@ -21,12 +21,15 @@ __wasi_errno_t __wasilibc_populate_environ(void) {
         return err;
     }
 
-    // Allocate memory for the array of pointers, adding null terminator.
-    __environ = malloc(sizeof(char *) * (environ_count + 1));
-
     // Allocate memory for storing the environment chars.
     char *environ_buf = malloc(sizeof(char) * environ_buf_size);
-    if (__environ == NULL || environ_buf == NULL) {
+    if (environ_buf == NULL) {
+        return __WASI_ENOMEM;
+    }
+
+    // Allocate memory for the array of pointers, adding null terminator.
+    __environ = malloc(sizeof(char *) * (environ_count + 1));
+    if (__environ == NULL) {
         return __WASI_ENOMEM;
     }
 

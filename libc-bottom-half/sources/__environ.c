@@ -30,6 +30,7 @@ __wasi_errno_t __wasilibc_populate_environ(void) {
     // Allocate memory for the array of pointers, adding null terminator.
     __environ = malloc(sizeof(char *) * (environ_count + 1));
     if (__environ == NULL) {
+        free(environ_buf);
         return __WASI_ENOMEM;
     }
 

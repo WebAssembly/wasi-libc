@@ -13,7 +13,7 @@ extern __typeof(__environ) environ __attribute__((weak, alias("__environ")));
 __wasi_errno_t __wasilibc_populate_environ(void) {
     __wasi_errno_t err;
 
-    /* Get the sizes of the arrays we'll have to create to copy in the environment. */
+    // Get the sizes of the arrays we'll have to create to copy in the environment.
     size_t environ_count;
     size_t environ_buf_size;
     err = __wasi_environ_sizes_get(&environ_count, &environ_buf_size);
@@ -21,17 +21,18 @@ __wasi_errno_t __wasilibc_populate_environ(void) {
         return err;
     }
 
-    /* Allocate memory for the array of pointers, adding null terminator. */
+    // Allocate memory for the array of pointers, adding null terminator.
     __environ = malloc(sizeof(char *) * (environ_count + 1));
-    /* Allocate memory for storing the environment chars. */
+
+    // Allocate memory for storing the environment chars.
     char *environ_buf = malloc(sizeof(char) * environ_buf_size);
     if (__environ == NULL || environ_buf == NULL) {
         return __WASI_ENOMEM;
     }
 
-    /* Make sure the last pointer in the array is NULL. */
+    // Make sure the last pointer in the array is NULL.
     __environ[environ_count] = NULL;
 
-    /* Fill the environment chars, and the __environ array with pointers into those chars. */
+    // Fill the environment chars, and the __environ array with pointers into those chars.
     return __wasi_environ_get(__environ, environ_buf);
 }

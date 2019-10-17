@@ -30,12 +30,16 @@ __wasi_errno_t __wasilibc_populate_environ(void) {
     // Allocate memory for the array of pointers. Note the `+ 1` to include
     // space for a NULL pointer at the end. This uses `calloc` both to handle
     // overflow and to initialize the NULL pointer at the end.
-    __environ = calloc(environ_count + 1, sizeof(char *));
-    if (__environ == NULL) {
+    char **environ_ptrs = calloc(environ_count + 1, sizeof(char *));
+    if (environ_ptrs == NULL) {
         free(environ_buf);
         return __WASI_ENOMEM;
     }
 
     // Fill the environment chars, and the __environ array with pointers into those chars.
-    return __wasi_environ_get(__environ, environ_buf);
+    err = __wasi_environ_get(environ_ptrs, environ_buf);
+    if (err == __WASI_ESUCCESS) {
+        __environ = environ_ptrs;
+    }
+    return err;
 }

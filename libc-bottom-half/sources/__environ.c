@@ -22,20 +22,19 @@ __wasi_errno_t __wasilibc_populate_environ(void) {
     }
 
     // Allocate memory for storing the environment chars.
-    char *environ_buf = malloc(sizeof(char) * environ_buf_size);
+    char *environ_buf = malloc(environ_buf_size);
     if (environ_buf == NULL) {
         return __WASI_ENOMEM;
     }
 
-    // Allocate memory for the array of pointers, adding null terminator.
-    __environ = malloc(sizeof(char *) * (environ_count + 1));
+    // Allocate memory for the array of pointers. Note the `+ 1` to include
+    // space for a NULL pointer at the end. This uses `calloc` both to handle
+    // overflow and to initialize the NULL pointer at the end.
+    __environ = calloc(environ_count + 1, sizeof(char *));
     if (__environ == NULL) {
         free(environ_buf);
         return __WASI_ENOMEM;
     }
-
-    // Make sure the last pointer in the array is NULL.
-    __environ[environ_count] = NULL;
 
     // Fill the environment chars, and the __environ array with pointers into those chars.
     return __wasi_environ_get(__environ, environ_buf);

@@ -1,5 +1,5 @@
-#ifndef __wasilibc___headers_string_h
-#define __wasilibc___headers_string_h
+#ifndef __wasilibc___header_string_h
+#define __wasilibc___header_string_h
 
 #define __need_size_t
 #define __need_NULL

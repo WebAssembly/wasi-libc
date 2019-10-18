@@ -5,6 +5,6 @@
  * Include the real implementation, which is factored into a separate file so
  * that it can be reused by other libc stdlib implementations.
  */
-#include <__headers_stdlib.h>
+#include <__header_stdlib.h>
 
 #endif

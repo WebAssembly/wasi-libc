@@ -5204,19 +5204,19 @@ static void internal_inspect_all(mstate m,
 
 extern unsigned char __heap_base; /* Symbol marking the end of data, bss and explicit stack, provided by wasm-ld. */
 
-// Initialize the initial state of dlmalloc to use free memory between __heap_base and initial.
+// Initialize the initial state of dlmalloc to be able to use free memory between __heap_base and initial.
 void __wasilibc_try_init_allocator() {
     // Check that it is a first-time initialization.
     if (is_initialized(gm)) {
         return;
     }
 
-    unsigned char *base = granularity_align(&__heap_base);
+    char *base = (char *)&__heap_base;
     // Calls sbrk(0) that returns the initial memory position.
-    unsigned char *init = (unsigned char *)CALL_MORECORE(0);
+    char *init = (char *)CALL_MORECORE(0);
     int initial_heap_size = init - base;
 
-    if(initial_heap_size <= MIN_CHUNK_SIZE + TOP_FOOT_SIZE) {
+    if(initial_heap_size <= MIN_CHUNK_SIZE + TOP_FOOT_SIZE + MALLOC_ALIGNMENT) {
         return;
     }
 

@@ -255,6 +255,7 @@ __wasilibc_init_preopen
 __wasilibc_register_preopened_fd
 __wasilibc_rmdirat
 __wasilibc_tell
+__wasilibc_try_init_allocator
 __wasilibc_unlinkat
 __wcscoll_l
 __wcsftime_l

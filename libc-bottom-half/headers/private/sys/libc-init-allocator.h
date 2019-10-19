@@ -1,5 +1,5 @@
-#ifndef __wasi_libc_internal_h
-#define __wasi_libc_internal_h
+#ifndef __wasi_libc_init_allocator_h
+#define __wasi_libc_init_allocator_h
 
 #include <wasi/core.h>
 

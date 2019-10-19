@@ -2645,43 +2645,6 @@ static struct malloc_state _gm_;
 
 #define is_initialized(M)  ((M)->top != 0)
 
-#ifdef __wasilibc_unmodified_upstream // Define a function that initializes the initial state of the dlmalloc
-#else
-extern unsigned char __heap_base; /* Symbol marking the end of data, bss and explicit stack, provided by wasm-ld. */
-
-// Initialize the initial state of dlmalloc to use free memory between __heap_base and initial.
-void __wasilibc_try_init_allocator() {
-    // Check that it is a first-time initialization.
-    if (is_initialized(gm)) {
-        return;
-    }
-
-    unsigned char *base = granularity_align(&__heap_base);
-    // Calls sbrk(0) that returns the initial memory position.
-    unsigned char *init = (unsigned char *)CALL_MORECORE(0);
-    int initial_heap_size = init - base;
-
-    if(initial_heap_size <= MIN_CHUNK_SIZE + TOP_FOOT_SIZE) {
-        return;
-    }
-
-    // Initialize mstate.
-    ensure_initialization();
-
-    // Initialize the dlmalloc internal state.
-    gm->least_addr = base;
-    gm->seg.base = base;
-    gm->seg.size = initial_heap_size;
-    gm->seg.sflags = mmap_flag;
-    gm->magic = mparams.magic;
-    gm->release_checks = MAX_RELEASE_CHECK_RATE;
-    init_bins(gm);
-    init_top(gm, (mchunkptr)base, initial_heap_size - TOP_FOOT_SIZE);
-
-    return;
-}
-#endif
-
 /* -------------------------- system alloc setup ------------------------- */
 
 /* Operations on mflags */
@@ -5233,6 +5196,45 @@ static void internal_inspect_all(mstate m,
   }
 }
 #endif /* MALLOC_INSPECT_ALL */
+
+#ifdef __wasilibc_unmodified_upstream // Define a function that initializes the initial state of the dlmalloc
+#else
+/* ------------------ Exported __wasilibc_try_init_allocator -------------------- */
+#include <sys/libc-init-allocator.h>
+
+extern unsigned char __heap_base; /* Symbol marking the end of data, bss and explicit stack, provided by wasm-ld. */
+
+// Initialize the initial state of dlmalloc to use free memory between __heap_base and initial.
+void __wasilibc_try_init_allocator() {
+    // Check that it is a first-time initialization.
+    if (is_initialized(gm)) {
+        return;
+    }
+
+    unsigned char *base = granularity_align(&__heap_base);
+    // Calls sbrk(0) that returns the initial memory position.
+    unsigned char *init = (unsigned char *)CALL_MORECORE(0);
+    int initial_heap_size = init - base;
+
+    if(initial_heap_size <= MIN_CHUNK_SIZE + TOP_FOOT_SIZE) {
+        return;
+    }
+
+    // Initialize mstate.
+    ensure_initialization();
+
+    // Initialize the dlmalloc internal state.
+    gm->least_addr = base;
+    gm->seg.base = base;
+    gm->seg.size = initial_heap_size;
+    gm->magic = mparams.magic;
+    gm->release_checks = MAX_RELEASE_CHECK_RATE;
+    init_bins(gm);
+    init_top(gm, (mchunkptr)base, initial_heap_size - TOP_FOOT_SIZE);
+
+    return;
+}
+#endif
 
 /* ------------------ Exported realloc, memalign, etc -------------------- */
 

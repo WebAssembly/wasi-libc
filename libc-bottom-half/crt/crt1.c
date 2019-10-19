@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <sysexits.h>
+#include <sys/libc-init-allocator.h>
 #include <wasi/core.h>
 #include <wasi/libc.h>
-#include <wasi/libc-init-allocator.h>
 
 extern char **__environ;
 extern void __wasm_call_ctors(void);

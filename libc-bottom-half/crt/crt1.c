@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <sysexits.h>
-#include <sys/libc-init-allocator.h>
 #include <wasi/core.h>
 #include <wasi/libc.h>
 
@@ -106,9 +105,6 @@ static __wasi_errno_t populate_libpreopen(void) {
 }
 
 void _start(void) {
-    /* Initialize the WASI allocator at first - other functions could use it. */
-    __wasilibc_try_init_allocator();
-
     /* Record the preopened resources. */
     if (populate_libpreopen() != __WASI_ESUCCESS) {
         _Exit(EX_OSERR);

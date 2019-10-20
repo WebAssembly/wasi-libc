@@ -4560,6 +4560,11 @@ static void* tmalloc_small(mstate m, size_t nb) {
 
 #if !ONLY_MSPACES
 
+#if __wasilibc_unmodified_upstream // Forward declaration of try_init_allocator.
+#else
+void try_init_allocator(void);
+#endif
+
 void* dlmalloc(size_t bytes) {
   /*
      Basic algorithm:
@@ -4586,6 +4591,13 @@ void* dlmalloc(size_t bytes) {
 
 #if USE_LOCKS
   ensure_initialization(); /* initialize in sys_alloc if not using locks */
+#endif
+
+#if __wasilibc_unmodified_upstream // Try to initialize the allocator.
+#else
+  if(!is_initialized(gm)) {
+    try_init_allocator();
+  }
 #endif
 
   if (!PREACTION(gm)) {
@@ -5199,13 +5211,12 @@ static void internal_inspect_all(mstate m,
 
 #ifdef __wasilibc_unmodified_upstream // Define a function that initializes the initial state of the dlmalloc
 #else
-/* ------------------ Exported __wasilibc_try_init_allocator -------------------- */
-#include <sys/libc-init-allocator.h>
+/* ------------------ Exported try_init_allocator -------------------- */
 
 extern unsigned char __heap_base; /* Symbol marking the end of data, bss and explicit stack, provided by wasm-ld. */
 
 // Initialize the initial state of dlmalloc to be able to use free memory between __heap_base and initial.
-void __wasilibc_try_init_allocator() {
+void try_init_allocator(void) {
     // Check that it is a first-time initialization.
     if (is_initialized(gm)) {
         return;
@@ -5216,6 +5227,7 @@ void __wasilibc_try_init_allocator() {
     char *init = (char *)CALL_MORECORE(0);
     int initial_heap_size = init - base;
 
+    // Check initial heap is long enough to serve a minimal allocation request.
     if(initial_heap_size <= MIN_CHUNK_SIZE + TOP_FOOT_SIZE + MALLOC_ALIGNMENT) {
         return;
     }

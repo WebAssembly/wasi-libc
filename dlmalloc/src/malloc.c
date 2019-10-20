@@ -5209,7 +5209,7 @@ static void internal_inspect_all(mstate m,
 }
 #endif /* MALLOC_INSPECT_ALL */
 
-#ifdef __wasilibc_unmodified_upstream // Define a function that initializes the initial state of the dlmalloc
+#ifdef __wasilibc_unmodified_upstream // Define a function that initializes the initial state of dlmalloc
 #else
 /* ------------------ Exported try_init_allocator -------------------- */
 
@@ -5227,7 +5227,7 @@ void try_init_allocator(void) {
     char *init = (char *)CALL_MORECORE(0);
     int initial_heap_size = init - base;
 
-    // Check initial heap is long enough to serve a minimal allocation request.
+    // Check that initial heap is long enough to serve a minimal allocation request.
     if(initial_heap_size <= MIN_CHUNK_SIZE + TOP_FOOT_SIZE + MALLOC_ALIGNMENT) {
         return;
     }

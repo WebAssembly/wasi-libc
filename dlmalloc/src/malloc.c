@@ -5217,34 +5217,32 @@ extern unsigned char __heap_base; /* Symbol marking the end of data, bss and exp
 
 // Initialize the initial state of dlmalloc to be able to use free memory between __heap_base and initial.
 void try_init_allocator(void) {
-    // Check that it is a first-time initialization.
-    if (is_initialized(gm)) {
-        return;
-    }
-
-    char *base = (char *)&__heap_base;
-    // Calls sbrk(0) that returns the initial memory position.
-    char *init = (char *)CALL_MORECORE(0);
-    int initial_heap_size = init - base;
-
-    // Check that initial heap is long enough to serve a minimal allocation request.
-    if(initial_heap_size <= MIN_CHUNK_SIZE + TOP_FOOT_SIZE + MALLOC_ALIGNMENT) {
-        return;
-    }
-
-    // Initialize mstate.
-    ensure_initialization();
-
-    // Initialize the dlmalloc internal state.
-    gm->least_addr = base;
-    gm->seg.base = base;
-    gm->seg.size = initial_heap_size;
-    gm->magic = mparams.magic;
-    gm->release_checks = MAX_RELEASE_CHECK_RATE;
-    init_bins(gm);
-    init_top(gm, (mchunkptr)base, initial_heap_size - TOP_FOOT_SIZE);
-
+  // Check that it is a first-time initialization.
+  if (is_initialized(gm)) {
     return;
+  }
+
+  char *base = (char *)&__heap_base;
+  // Calls sbrk(0) that returns the initial memory position.
+  char *init = (char *)CALL_MORECORE(0);
+  int initial_heap_size = init - base;
+
+  // Check that initial heap is long enough to serve a minimal allocation request.
+  if(initial_heap_size <= MIN_CHUNK_SIZE + TOP_FOOT_SIZE + MALLOC_ALIGNMENT) {
+    return;
+  }
+
+  // Initialize mstate.
+  ensure_initialization();
+
+  // Initialize the dlmalloc internal state.
+  gm->least_addr = base;
+  gm->seg.base = base;
+  gm->seg.size = initial_heap_size;
+  gm->magic = mparams.magic;
+  gm->release_checks = MAX_RELEASE_CHECK_RATE;
+  init_bins(gm);
+  init_top(gm, (mchunkptr)base, initial_heap_size - TOP_FOOT_SIZE);
 }
 #endif
 

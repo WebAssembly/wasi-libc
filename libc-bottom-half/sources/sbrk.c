@@ -6,7 +6,8 @@
 /* Bare-bones implementation of sbrk. */
 void *sbrk(intptr_t increment) {
     /* sbrk(0) returns the current memory size. */
-    if(increment == 0) {
+    if (increment == 0) {
+        /* The wasm spec doesn't guarantee that memory.grow of 0 always succeeds. */
         return (void *)(__builtin_wasm_memory_size(0) * PAGESIZE);
     }
 

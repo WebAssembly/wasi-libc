@@ -4595,7 +4595,7 @@ void* dlmalloc(size_t bytes) {
 
 #if __wasilibc_unmodified_upstream // Try to initialize the allocator.
 #else
-  if(!is_initialized(gm)) {
+  if (!is_initialized(gm)) {
     try_init_allocator();
   }
 #endif
@@ -5213,29 +5213,30 @@ static void internal_inspect_all(mstate m,
 #else
 /* ------------------ Exported try_init_allocator -------------------- */
 
-extern unsigned char __heap_base; /* Symbol marking the end of data, bss and explicit stack, provided by wasm-ld. */
+/* Symbol marking the end of data, bss and explicit stack, provided by wasm-ld. */
+extern unsigned char __heap_base;
 
-// Initialize the initial state of dlmalloc to be able to use free memory between __heap_base and initial.
+/* Initialize the initial state of dlmalloc to be able to use free memory between __heap_base and initial. */
 void try_init_allocator(void) {
-  // Check that it is a first-time initialization.
+  /* Check that it is a first-time initialization. */
   if (is_initialized(gm)) {
     return;
   }
 
   char *base = (char *)&__heap_base;
-  // Calls sbrk(0) that returns the initial memory position.
+  /* Calls sbrk(0) that returns the initial memory position. */
   char *init = (char *)CALL_MORECORE(0);
   int initial_heap_size = init - base;
 
-  // Check that initial heap is long enough to serve a minimal allocation request.
-  if(initial_heap_size <= MIN_CHUNK_SIZE + TOP_FOOT_SIZE + MALLOC_ALIGNMENT) {
+  /* Check that initial heap is long enough to serve a minimal allocation request. */
+  if (initial_heap_size <= MIN_CHUNK_SIZE + TOP_FOOT_SIZE + MALLOC_ALIGNMENT) {
     return;
   }
 
-  // Initialize mstate.
+  /* Initialize mstate. */
   ensure_initialization();
 
-  // Initialize the dlmalloc internal state.
+  /* Initialize the dlmalloc internal state. */
   gm->least_addr = base;
   gm->seg.base = base;
   gm->seg.size = initial_heap_size;

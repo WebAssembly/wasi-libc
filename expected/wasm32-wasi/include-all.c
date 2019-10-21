@@ -94,7 +94,6 @@
 #include <iso646.h>
 #include <langinfo.h>
 #include <libgen.h>
-#include <libintl.h>
 #include <limits.h>
 #include <locale.h>
 #include <malloc.h>
@@ -148,7 +147,6 @@
 #include <sys/stropts.h>
 #include <sys/syscall.h>
 #include <sys/sysinfo.h>
-#include <sys/sysmacros.h>
 #include <sys/time.h>
 #include <sys/timeb.h>
 #include <sys/times.h>
@@ -166,7 +164,6 @@
 #include <time.h>
 #include <uchar.h>
 #include <unistd.h>
-#include <utime.h>
 #include <values.h>
 #include <wasi/core.h>
 #include <wasi/libc-find-relpath.h>

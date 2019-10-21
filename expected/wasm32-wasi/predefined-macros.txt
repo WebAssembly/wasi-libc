@@ -2103,7 +2103,6 @@
 #define _ISO646_H 
 #define _LANGINFO_H 
 #define _LIBGEN_H 
-#define _LIBINTL_H 
 #define _LIMITS_H 
 #define _LOCALE_H 
 #define _MALLOC_H 
@@ -2391,7 +2390,6 @@
 #define _SYS_STAT_H 
 #define _SYS_SYSCALL_H 
 #define _SYS_SYSINFO_H 
-#define _SYS_SYSMACROS_H 
 #define _SYS_TIMEB_H 
 #define _SYS_TIMES_H 
 #define _SYS_TIMEX_H 
@@ -2407,7 +2405,6 @@
 #define _TIME_H 
 #define _UCHAR_H 
 #define _UNISTD_H 
-#define _UTIME_H 
 #define _VALUES_H 
 #define _VA_LIST 
 #define _WCHAR_H 
@@ -2561,7 +2558,6 @@
 #define __compiler_ATOMIC_WCHAR_T_LOCK_FREE 2
 #define __GNUC_STDC_INLINE__ 1
 #define __GNUC_VA_LIST 1
-#define __GNU_GETTEXT_SUPPORTED_REVISION(major) ((major) == 0 ? 1 : -1)
 #define __GXX_ABI_VERSION 1002
 #define __ILP32__ 1
 #define __INT16_C_SUFFIX__ 
@@ -2883,7 +2879,6 @@
 #define __UINT_LEAST8_MAX__ 255
 #define __UINT_LEAST8_TYPE__ unsigned char
 #define __USER_LABEL_PREFIX__ 
-#define __USE_GNU_GETTEXT 1
 #define __WASI_ADVICE_DONTNEED (UINT8_C(4))
 #define __WASI_ADVICE_NOREUSE (UINT8_C(5))
 #define __WASI_ADVICE_NORMAL (UINT8_C(0))
@@ -3327,10 +3322,7 @@
 #define lseek(fd,offset,whence) ({ off_t __f = (fd); off_t __o = (offset); off_t __w = (whence); __builtin_constant_p((offset)) && __builtin_constant_p((whence)) && __o == 0 && __w == SEEK_CUR ? __wasilibc_tell(__f) : lseek(__f, __o, __w); })
 #define lseek64 lseek
 #define lstat64 lstat
-#define major(x) ((unsigned)( (((x)>>31>>1) & 0xfffff000) | (((x)>>8) & 0x00000fff) ))
-#define makedev(x,y) ( (((x)&0xfffff000ULL) << 32) | (((x)&0x00000fffULL) << 8) | (((y)&0xffffff00ULL) << 12) | (((y)&0x000000ffULL)) )
 #define math_errhandling 2
-#define minor(x) ((unsigned)( (((x)>>12) & 0xffffff00) | ((x) & 0x000000ff) ))
 #define mld_cksum mld_icmp6_hdr.icmp6_cksum
 #define mld_code mld_icmp6_hdr.icmp6_code
 #define mld_maxdelay mld_icmp6_hdr.icmp6_data16[0]

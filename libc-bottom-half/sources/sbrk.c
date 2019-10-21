@@ -3,8 +3,14 @@
 #include <errno.h>
 #include <__macro_PAGESIZE.h>
 
-/* Bare-bones implementation of sbrk: just call memory.grow. */
+/* Bare-bones implementation of sbrk. */
 void *sbrk(intptr_t increment) {
+    /* sbrk(0) returns the current memory size. */
+    if (increment == 0) {
+        /* The wasm spec doesn't guarantee that memory.grow of 0 always succeeds. */
+        return (void *)(__builtin_wasm_memory_size(0) * PAGESIZE);
+    }
+
     /* We only support page-size increments. */
     if (increment % PAGESIZE != 0) {
         abort();

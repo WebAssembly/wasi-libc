@@ -137,7 +137,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/*.c)) \
     $(filter-out %/strsignal.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/string/*.c)) \
-    $(filter-out %/dcngettext.c %/textdomain.c, \
+    $(filter-out %/dcngettext.c %/textdomain.c %/bind_textdomain_codeset.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/locale/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/search/*.c) \

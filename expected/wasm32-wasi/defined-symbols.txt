@@ -313,7 +313,6 @@ atoll
 basename
 bcmp
 bcopy
-bind_textdomain_codeset
 bsearch
 btowc
 bzero

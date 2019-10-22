@@ -153,7 +153,9 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  %/nearbyintf.c %/nearbyint.c \
                  %/sqrtf.c %/sqrt.c \
                  %/fabsf.c %/fabs.c \
-                 %/copysignf.c %/copysign.c, \
+                 %/copysignf.c %/copysign.c \
+                 %/fminf.c %/fmaxf.c \
+                 %/fmin.c %/fmax.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/math/*.c)) \
     $(filter-out %/crealf.c %/creal.c \
                  %/cimagf.c %/cimag.c, \

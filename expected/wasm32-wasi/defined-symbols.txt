@@ -11,7 +11,6 @@ _IO_putc
 _IO_putc_unlocked
 __EINVAL
 __ENOMEM
-___environ
 __asctime_r
 __assert_fail
 __c_dot_utf8
@@ -252,6 +251,7 @@ __utc
 __wasilibc_fd_renumber
 __wasilibc_find_relpath
 __wasilibc_init_preopen
+__wasilibc_populate_environ
 __wasilibc_register_preopened_fd
 __wasilibc_rmdirat
 __wasilibc_tell

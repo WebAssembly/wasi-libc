@@ -4562,7 +4562,7 @@ static void* tmalloc_small(mstate m, size_t nb) {
 
 #if __wasilibc_unmodified_upstream // Forward declaration of try_init_allocator.
 #else
-void try_init_allocator(void);
+static void try_init_allocator(void);
 #endif
 
 void* dlmalloc(size_t bytes) {
@@ -5217,11 +5217,9 @@ static void internal_inspect_all(mstate m,
 extern unsigned char __heap_base;
 
 /* Initialize the initial state of dlmalloc to be able to use free memory between __heap_base and initial. */
-void try_init_allocator(void) {
+static void try_init_allocator(void) {
   /* Check that it is a first-time initialization. */
-  if (is_initialized(gm)) {
-    return;
-  }
+  assert(!is_initialized(gm));
 
   char *base = (char *)&__heap_base;
   /* Calls sbrk(0) that returns the initial memory position. */

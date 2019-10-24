@@ -1013,7 +1013,6 @@ trunc
 truncate
 truncf
 truncl
-try_init_allocator
 tsearch
 twalk
 uname

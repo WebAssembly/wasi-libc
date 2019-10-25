@@ -6,55 +6,9 @@
 
 __wasi_errno_t __wasilibc_populate_environ(void) __attribute__((weak));
 extern void __wasm_call_ctors(void);
-extern int main(int, char *[]);
+extern int __original_main(void);
 extern void __prepare_for_exit(void);
 void _Exit(int) __attribute__((noreturn));
-
-static __wasi_errno_t populate_args(size_t *argc, char ***argv) {
-    __wasi_errno_t err;
-
-    // Get the sizes of the arrays we'll have to create to copy in the args.
-    size_t argv_buf_size;
-    size_t new_argc;
-    err = __wasi_args_sizes_get(&new_argc, &argv_buf_size);
-    if (err != __WASI_ESUCCESS) {
-        return err;
-    }
-    if (new_argc == 0) {
-        return __WASI_ESUCCESS;
-    }
-
-    // Add 1 for the NULL pointer to mark the end, and check for overflow.
-    size_t num_ptrs = new_argc + 1;
-    if (num_ptrs == 0) {
-        return __WASI_ENOMEM;
-    }
-
-    // Allocate memory for storing the argument chars.
-    char *argv_buf = malloc(argv_buf_size);
-    if (argv_buf == NULL) {
-        return __WASI_ENOMEM;
-    }
-
-    // Allocate memory for the array of pointers. This uses `calloc` both to
-    // handle overflow and to initialize the NULL pointer at the end.
-    char **argv_ptrs = calloc(num_ptrs, sizeof(char *));
-    if (argv_ptrs == NULL) {
-        free(argv_buf);
-        return __WASI_ENOMEM;
-    }
-
-    // Fill the argument chars, and the argv array with pointers into those chars.
-    err = __wasi_args_get(argv_ptrs, argv_buf);
-    if (err == __WASI_ESUCCESS) {
-        *argc = new_argc;
-        *argv = argv_ptrs;
-    } else {
-        free(argv_buf);
-        free(argv_ptrs);
-    }
-    return err;
-}
 
 static __wasi_errno_t populate_libpreopen(void) {
     __wasilibc_init_preopen();
@@ -110,18 +64,14 @@ void _start(void) {
         }
     }
 
-    // Fill in the arguments from WASI syscalls.
-    size_t argc;
-    char **argv;
-    if (populate_args(&argc, &argv) != __WASI_ESUCCESS) {
-        _Exit(EX_OSERR);
-    }
-
     // The linker synthesizes this to call constructors.
     __wasm_call_ctors();
 
-    // Call main with the arguments.
-    int r = main(argc, argv);
+    // Call `__original_main` which will either be the application's
+    // zero-argument `main` function (renamed by the compiler) or a libc
+    // routine which populates `argv` and `argc` and calls the application's
+    // two-argument `main`.
+    int r = __original_main();
 
     // Call atexit functions, destructors, stdio cleanup, etc.
     __prepare_for_exit();

@@ -4,7 +4,8 @@
 #include <wasi/libc.h>
 #include <wasi/libc-internal.h>
 
-char **__environ = NULL;
+static char *empty_environ[1] = { NULL };
+char **__environ = empty_environ;
 extern __typeof(__environ) _environ __attribute__((weak, alias("__environ")));
 extern __typeof(__environ) environ __attribute__((weak, alias("__environ")));
 

@@ -33,7 +33,9 @@ int __wasilibc_openat_nomode(int fd, const char *path, int oflag) {
   // Compute rights corresponding with the access modes provided.
   // Attempt to obtain all rights, except the ones that contradict the
   // access mode provided to openat().
+#ifdef __wasilibc_unmodified_upstream // Let the WASI implementation check this instead.
   __wasi_rights_t min = 0;
+#endif
   __wasi_rights_t max =
       ~(__WASI_RIGHT_FD_DATASYNC | __WASI_RIGHT_FD_READ |
 #ifdef __wasilibc_unmodified_upstream // fstat
@@ -53,21 +55,23 @@ int __wasilibc_openat_nomode(int fd, const char *path, int oflag) {
     case O_RDWR:
     case O_WRONLY:
       if ((oflag & O_RDONLY) != 0) {
-#ifdef __wasilibc_unmodified_upstream // RIGHT_MEM_MAP_EXEC
+#ifdef __wasilibc_unmodified_upstream // Let the WASI implementation check this instead.
         min |= (oflag & O_DIRECTORY) == 0 ? __WASI_RIGHT_FD_READ
                                           : __WASI_RIGHT_FILE_READDIR;
+#endif
+#ifdef __wasilibc_unmodified_upstream // RIGHT_MEM_MAP_EXEC
         max |= __WASI_RIGHT_FD_READ | __WASI_RIGHT_FILE_READDIR |
                __WASI_RIGHT_MEM_MAP_EXEC;
 #else
-        min |= (oflag & O_DIRECTORY) == 0 ? __WASI_RIGHT_FD_READ
-                                          : __WASI_RIGHT_FD_READDIR;
         max |= __WASI_RIGHT_FD_READ | __WASI_RIGHT_FD_READDIR;
 #endif
       }
       if ((oflag & O_WRONLY) != 0) {
+#ifdef __wasilibc_unmodified_upstream // Let the WASI implementation check this instead.
         min |= __WASI_RIGHT_FD_WRITE;
         if ((oflag & O_APPEND) == 0)
           min |= __WASI_RIGHT_FD_SEEK;
+#endif
         max |= __WASI_RIGHT_FD_DATASYNC | __WASI_RIGHT_FD_WRITE |
 #ifdef __wasilibc_unmodified_upstream // fstat
                __WASI_RIGHT_FILE_ALLOCATE |
@@ -89,8 +93,10 @@ int __wasilibc_openat_nomode(int fd, const char *path, int oflag) {
       errno = EINVAL;
       return -1;
   }
+#ifdef __wasilibc_unmodified_upstream // Let the WASI implementation check this instead.
   assert((min & max) == min &&
          "Minimal rights should be a subset of the maximum");
+#endif
 
   // Ensure that we can actually obtain the minimal rights needed.
   __wasi_fdstat_t fsb_cur;
@@ -103,6 +109,7 @@ int __wasilibc_openat_nomode(int fd, const char *path, int oflag) {
     errno = error;
     return -1;
   }
+#ifdef __wasilibc_unmodified_upstream // Let the WASI implementation check this instead.
   if (fsb_cur.fs_filetype != __WASI_FILETYPE_DIRECTORY) {
     errno = ENOTDIR;
     return -1;
@@ -111,6 +118,7 @@ int __wasilibc_openat_nomode(int fd, const char *path, int oflag) {
     errno = ENOTCAPABLE;
     return -1;
   }
+#endif
 
   // Path lookup properties.
 #ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t

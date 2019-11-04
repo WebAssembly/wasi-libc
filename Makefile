@@ -305,7 +305,10 @@ override MUSL_OMIT_HEADERS += \
     "net/route.h" \
     "netinet/if_ether.h" \
     "netinet/ether.h" \
-    "sys/timerfd.h"
+    "sys/timerfd.h" \
+    "libintl.h" \
+    "sys/sysmacros.h" \
+    "utime.h"
 
 ifeq ($(THREAD_MODEL), single)
 # Remove headers not supported in single-threaded mode.

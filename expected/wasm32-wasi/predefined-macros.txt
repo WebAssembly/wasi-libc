@@ -1143,6 +1143,7 @@
 #define NAN (0.0f/0.0f)
 #define NBBY 8
 #define NCARGS 131072
+#define NDEBUG 1
 #define ND_NA_FLAG_OVERRIDE 0x00000020
 #define ND_NA_FLAG_ROUTER 0x00000080
 #define ND_NA_FLAG_SOLICITED 0x00000040
@@ -3171,7 +3172,7 @@
 #define and_eq &=
 #define asin(x) __tg_real_complex(asin, (x))
 #define asinh(x) __tg_real_complex(asinh, (x))
-#define assert(x) ((void)((x) || (__assert_fail(#x, __FILE__, __LINE__, __func__),0)))
+#define assert(x) (void)0
 #define atan(x) __tg_real_complex(atan, (x))
 #define atan2(x,y) __tg_real_2(atan2, (x), (y))
 #define atanh(x) __tg_real_complex(atanh, (x))

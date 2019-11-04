@@ -11,8 +11,6 @@ extern void __prepare_for_exit(void);
 void _Exit(int) __attribute__((noreturn));
 
 static __wasi_errno_t populate_libpreopen(void) {
-    __wasilibc_init_preopen();
-
     // Skip stdin, stdout, and stderr, and count up until we reach an invalid
     // file descriptor.
     for (__wasi_fd_t fd = 3; fd != 0; ++fd) {

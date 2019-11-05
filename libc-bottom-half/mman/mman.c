@@ -1,10 +1,8 @@
-/*
- * Userspace emulation of mmap and munmap. Restrictions apply.
- *
- * This is meant to be complete enough to be compatible with code that uses
- * mmap for simple file I/O. It just allocates memory with malloc and reads
- * and writes data with pread and pwrite.
- */
+// Userspace emulation of mmap and munmap. Restrictions apply.
+//
+// This is meant to be complete enough to be compatible with code that uses
+// mmap for simple file I/O. It just allocates memory with malloc and reads
+// and writes data with pread and pwrite.
 
 #define _WASI_EMULATED_MMAN
 #include <stdlib.h>
@@ -110,7 +108,7 @@ void *mmap(void *addr, size_t length, int prot, int flags,
 
 int munmap(void *addr, size_t length) {
     struct map *map = (struct map *)addr - 1;
-    
+
     // We don't support partial munmapping.
     if (map->length != length) {
         errno = EINVAL;

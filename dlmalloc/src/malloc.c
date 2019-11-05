@@ -4560,6 +4560,11 @@ static void* tmalloc_small(mstate m, size_t nb) {
 
 #if !ONLY_MSPACES
 
+#if __wasilibc_unmodified_upstream // Forward declaration of try_init_allocator.
+#else
+static void try_init_allocator(void);
+#endif
+
 void* dlmalloc(size_t bytes) {
   /*
      Basic algorithm:
@@ -4586,6 +4591,13 @@ void* dlmalloc(size_t bytes) {
 
 #if USE_LOCKS
   ensure_initialization(); /* initialize in sys_alloc if not using locks */
+#endif
+
+#if __wasilibc_unmodified_upstream // Try to initialize the allocator.
+#else
+  if (!is_initialized(gm)) {
+    try_init_allocator();
+  }
 #endif
 
   if (!PREACTION(gm)) {
@@ -5196,6 +5208,42 @@ static void internal_inspect_all(mstate m,
   }
 }
 #endif /* MALLOC_INSPECT_ALL */
+
+#ifdef __wasilibc_unmodified_upstream // Define a function that initializes the initial state of dlmalloc
+#else
+/* ------------------ Exported try_init_allocator -------------------- */
+
+/* Symbol marking the end of data, bss and explicit stack, provided by wasm-ld. */
+extern unsigned char __heap_base;
+
+/* Initialize the initial state of dlmalloc to be able to use free memory between __heap_base and initial. */
+static void try_init_allocator(void) {
+  /* Check that it is a first-time initialization. */
+  assert(!is_initialized(gm));
+
+  char *base = (char *)&__heap_base;
+  /* Calls sbrk(0) that returns the initial memory position. */
+  char *init = (char *)CALL_MORECORE(0);
+  int initial_heap_size = init - base;
+
+  /* Check that initial heap is long enough to serve a minimal allocation request. */
+  if (initial_heap_size <= MIN_CHUNK_SIZE + TOP_FOOT_SIZE + MALLOC_ALIGNMENT) {
+    return;
+  }
+
+  /* Initialize mstate. */
+  ensure_initialization();
+
+  /* Initialize the dlmalloc internal state. */
+  gm->least_addr = base;
+  gm->seg.base = base;
+  gm->seg.size = initial_heap_size;
+  gm->magic = mparams.magic;
+  gm->release_checks = MAX_RELEASE_CHECK_RATE;
+  init_bins(gm);
+  init_top(gm, (mchunkptr)base, initial_heap_size - TOP_FOOT_SIZE);
+}
+#endif
 
 /* ------------------ Exported realloc, memalign, etc -------------------- */
 

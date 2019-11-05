@@ -66,6 +66,14 @@
 int
 open(const char *path, int flags, ...)
 {
+    // WASI libc's openat ignores the mode argument, so call a special
+    // entrypoint which avoids the varargs calling convention.
+    return __wasilibc_open_nomode(path, flags);
+}
+
+int
+__wasilibc_open_nomode(const char *path, int flags)
+{
     const char *relative_path;
     int dirfd = __wasilibc_find_relpath(path, __WASI_RIGHT_PATH_OPEN, 0,
                                         &relative_path);
@@ -77,9 +85,7 @@ open(const char *path, int flags, ...)
         return -1;
     }
 
-    // WASI libc's openat ignores the mode argument, so don't bother passing
-    // the actual mode value through.
-    return openat(dirfd, relative_path, flags);
+    return __wasilibc_openat_nomode(dirfd, relative_path, flags);
 }
 
 int

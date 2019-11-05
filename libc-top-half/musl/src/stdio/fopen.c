@@ -1,6 +1,7 @@
 #ifdef __wasilibc_unmodified_upstream // WASI has no syscall
 #else
 #include <unistd.h>
+#include <wasi/libc.h>
 #endif
 #include "stdio_impl.h"
 #include <fcntl.h>
@@ -25,7 +26,8 @@ FILE *fopen(const char *restrict filename, const char *restrict mode)
 #ifdef __wasilibc_unmodified_upstream // WASI has no sys_open
 	fd = sys_open(filename, flags, 0666);
 #else
-	fd = open(filename, flags, 0666);
+	// WASI libc ignores the mode parameter anyway, so skip the varargs.
+	fd = __wasilibc_open_nomode(filename, flags);
 #endif
 	if (fd < 0) return 0;
 #ifdef __wasilibc_unmodified_upstream // WASI has no syscall

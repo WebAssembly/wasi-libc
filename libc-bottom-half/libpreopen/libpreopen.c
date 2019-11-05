@@ -75,8 +75,7 @@ int
 __wasilibc_open_nomode(const char *path, int flags)
 {
     const char *relative_path;
-    int dirfd = __wasilibc_find_relpath(path, __WASI_RIGHT_PATH_OPEN, 0,
-                                        &relative_path);
+    int dirfd = __wasilibc_find_relpath(path, &relative_path);
 
     // If we can't find a preopened directory handle to open this file with,
     // indicate that the program lacks the capabilities.
@@ -92,8 +91,7 @@ int
 access(const char *path, int mode)
 {
     const char *relative_path;
-    int dirfd = __wasilibc_find_relpath(path, __WASI_RIGHT_PATH_FILESTAT_GET, 0,
-                                        &relative_path);
+    int dirfd = __wasilibc_find_relpath(path, &relative_path);
 
     // If we can't find a preopened directory handle to open this file with,
     // indicate that the program lacks the capabilities.
@@ -109,8 +107,7 @@ int
 lstat(const char *path, struct stat *st)
 {
     const char *relative_path;
-    int dirfd = __wasilibc_find_relpath(path, __WASI_RIGHT_PATH_FILESTAT_GET, 0,
-                                        &relative_path);
+    int dirfd = __wasilibc_find_relpath(path, &relative_path);
 
     // If we can't find a preopened directory handle to open this file with,
     // indicate that the program lacks the capabilities.
@@ -126,12 +123,10 @@ int
 rename(const char *from, const char *to)
 {
     const char *from_relative_path;
-    int from_dirfd = __wasilibc_find_relpath(from, __WASI_RIGHT_PATH_RENAME_SOURCE, 0,
-                                             &from_relative_path);
+    int from_dirfd = __wasilibc_find_relpath(from, &from_relative_path);
 
     const char *to_relative_path;
-    int to_dirfd = __wasilibc_find_relpath(to, __WASI_RIGHT_PATH_RENAME_TARGET, 0,
-                                           &to_relative_path);
+    int to_dirfd = __wasilibc_find_relpath(to, &to_relative_path);
 
     // If we can't find a preopened directory handle to open this file with,
     // indicate that the program lacks the capabilities.
@@ -147,8 +142,7 @@ int
 stat(const char *path, struct stat *st)
 {
     const char *relative_path;
-    int dirfd = __wasilibc_find_relpath(path, __WASI_RIGHT_PATH_FILESTAT_GET, 0,
-                                        &relative_path);
+    int dirfd = __wasilibc_find_relpath(path, &relative_path);
 
     // If we can't find a preopened directory handle to open this file with,
     // indicate that the program lacks the capabilities.
@@ -164,8 +158,7 @@ int
 unlink(const char *path)
 {
     const char *relative_path;
-    int dirfd = __wasilibc_find_relpath(path, __WASI_RIGHT_PATH_UNLINK_FILE, 0,
-                                        &relative_path);
+    int dirfd = __wasilibc_find_relpath(path, &relative_path);
 
     // If we can't find a preopened directory handle to open this file with,
     // indicate that the program lacks the capabilities.
@@ -184,8 +177,7 @@ int
 rmdir(const char *pathname)
 {
     const char *relative_path;
-    int dirfd = __wasilibc_find_relpath(pathname, __WASI_RIGHT_PATH_REMOVE_DIRECTORY, 0,
-                                        &relative_path);
+    int dirfd = __wasilibc_find_relpath(pathname, &relative_path);
 
     // If we can't find a preopened directory handle to open this file with,
     // indicate that the program lacks the capabilities.
@@ -201,20 +193,14 @@ int
 remove(const char *pathname)
 {
     const char *relative_path;
-    int dirfd = __wasilibc_find_relpath(pathname,
-                                        __WASI_RIGHT_PATH_UNLINK_FILE |
-                                        __WASI_RIGHT_PATH_REMOVE_DIRECTORY,
-                                        0,
-                                        &relative_path);
+    int dirfd = __wasilibc_find_relpath(pathname, &relative_path);
 
     // If searching for both file and directory rights failed, try searching
     // for either individually.
     if (dirfd == -1) {
-        dirfd = __wasilibc_find_relpath(pathname, __WASI_RIGHT_PATH_UNLINK_FILE, 0,
-                                        &relative_path);
+        dirfd = __wasilibc_find_relpath(pathname, &relative_path);
         if (dirfd == -1) {
-            dirfd = __wasilibc_find_relpath(pathname, __WASI_RIGHT_PATH_REMOVE_DIRECTORY, 0,
-                                            &relative_path);
+            dirfd = __wasilibc_find_relpath(pathname, &relative_path);
         }
     }
 
@@ -235,12 +221,10 @@ int
 link(const char *oldpath, const char *newpath)
 {
     const char *old_relative_path;
-    int old_dirfd = __wasilibc_find_relpath(oldpath, __WASI_RIGHT_PATH_LINK_SOURCE, 0,
-                                            &old_relative_path);
+    int old_dirfd = __wasilibc_find_relpath(oldpath, &old_relative_path);
 
     const char *new_relative_path;
-    int new_dirfd = __wasilibc_find_relpath(newpath, __WASI_RIGHT_PATH_LINK_TARGET, 0,
-                                            &new_relative_path);
+    int new_dirfd = __wasilibc_find_relpath(newpath, &new_relative_path);
 
     // If we can't find a preopened directory handle to open this file with,
     // indicate that the program lacks the capabilities.
@@ -256,8 +240,7 @@ int
 mkdir(const char *pathname, mode_t mode)
 {
     const char *relative_path;
-    int dirfd = __wasilibc_find_relpath(pathname, __WASI_RIGHT_PATH_CREATE_DIRECTORY, 0,
-                                        &relative_path);
+    int dirfd = __wasilibc_find_relpath(pathname, &relative_path);
 
     // If we can't find a preopened directory handle to open this file with,
     // indicate that the program lacks the capabilities.
@@ -273,8 +256,7 @@ DIR *
 opendir(const char *name)
 {
     const char *relative_path;
-    int dirfd = __wasilibc_find_relpath(name, __WASI_RIGHT_PATH_OPEN, 0,
-                                        &relative_path);
+    int dirfd = __wasilibc_find_relpath(name, &relative_path);
 
     // If we can't find a preopened directory handle to open this file with,
     // indicate that the program lacks the capabilities.
@@ -290,8 +272,7 @@ ssize_t
 readlink(const char *pathname, char *buf, size_t bufsiz)
 {
     const char *relative_path;
-    int dirfd = __wasilibc_find_relpath(pathname, __WASI_RIGHT_PATH_READLINK, 0,
-                                        &relative_path);
+    int dirfd = __wasilibc_find_relpath(pathname, &relative_path);
 
     // If we can't find a preopened directory handle to open this file with,
     // indicate that the program lacks the capabilities.
@@ -311,10 +292,7 @@ scandir(
     int (*compar)(const struct dirent **, const struct dirent **))
 {
     const char *relative_path;
-    int dirfd = __wasilibc_find_relpath(dirp,
-                                        __WASI_RIGHT_PATH_OPEN,
-                                        __WASI_RIGHT_FD_READDIR,
-                                        &relative_path);
+    int dirfd = __wasilibc_find_relpath(dirp, &relative_path);
 
     // If we can't find a preopened directory handle to open this file with,
     // indicate that the program lacks the capabilities.
@@ -330,8 +308,7 @@ int
 symlink(const char *target, const char *linkpath)
 {
     const char *relative_path;
-    int dirfd = __wasilibc_find_relpath(linkpath, __WASI_RIGHT_PATH_SYMLINK, 0,
-                                        &relative_path);
+    int dirfd = __wasilibc_find_relpath(linkpath, &relative_path);
 
     // If we can't find a preopened directory handle to open this file with,
     // indicate that the program lacks the capabilities.
@@ -359,10 +336,6 @@ struct po_map_entry {
 
     /// File descriptor (which may be a directory)
     int fd;
-
-    /// Capability rights associated with the file descriptor
-    __wasi_rights_t rights_base;
-    __wasi_rights_t rights_inheriting;
 };
 
 /// A vector of po_map_entry.
@@ -472,19 +445,10 @@ internal_register_preopened_fd(int fd, const char *name)
         }
     }
 
-    __wasi_fdstat_t statbuf;
-    int r = __wasi_fd_fdstat_get((__wasi_fd_t)fd, &statbuf);
-    if (r != 0) {
-        errno = r;
-        return -1; // TODO: Add an infallible way to get the rights?
-    }
-
     struct po_map_entry *entry = &global_map.entries[global_map.length++];
 
     entry->name = name;
     entry->fd = fd;
-    entry->rights_base = statbuf.fs_rights_base;
-    entry->rights_inheriting = statbuf.fs_rights_inheriting;
 
     po_map_assertvalid();
 
@@ -504,8 +468,6 @@ __wasilibc_register_preopened_fd(int fd, const char *path)
 int
 __wasilibc_find_relpath(
     const char *path,
-    __wasi_rights_t rights_base,
-    __wasi_rights_t rights_inheriting,
     const char **relative_path)
 {
     size_t bestlen = 0;
@@ -536,11 +498,6 @@ __wasilibc_find_relpath(
         }
 
         if ((any_matches && len <= bestlen) || !po_isprefix(name, len, path)) {
-            continue;
-        }
-
-        if ((rights_base & ~entry->rights_base) != 0 ||
-            (rights_inheriting & ~entry->rights_inheriting) != 0) {
             continue;
         }
 

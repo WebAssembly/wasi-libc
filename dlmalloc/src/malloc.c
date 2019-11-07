@@ -4560,9 +4560,11 @@ static void* tmalloc_small(mstate m, size_t nb) {
 
 #if !ONLY_MSPACES
 
+#if 0 // Temporarily work around https://bugs.llvm.org/show_bug.cgi?id=43613
 #if __wasilibc_unmodified_upstream // Forward declaration of try_init_allocator.
 #else
 static void try_init_allocator(void);
+#endif
 #endif
 
 void* dlmalloc(size_t bytes) {
@@ -4593,11 +4595,13 @@ void* dlmalloc(size_t bytes) {
   ensure_initialization(); /* initialize in sys_alloc if not using locks */
 #endif
 
+#if 0 // Temporarily work around https://bugs.llvm.org/show_bug.cgi?id=43613
 #if __wasilibc_unmodified_upstream // Try to initialize the allocator.
 #else
   if (!is_initialized(gm)) {
     try_init_allocator();
   }
+#endif
 #endif
 
   if (!PREACTION(gm)) {
@@ -5209,6 +5213,7 @@ static void internal_inspect_all(mstate m,
 }
 #endif /* MALLOC_INSPECT_ALL */
 
+#if 0 // Temporarily work around https://bugs.llvm.org/show_bug.cgi?id=43613
 #ifdef __wasilibc_unmodified_upstream // Define a function that initializes the initial state of dlmalloc
 #else
 /* ------------------ Exported try_init_allocator -------------------- */
@@ -5243,6 +5248,7 @@ static void try_init_allocator(void) {
   init_bins(gm);
   init_top(gm, (mchunkptr)base, initial_heap_size - TOP_FOOT_SIZE);
 }
+#endif
 #endif
 
 /* ------------------ Exported realloc, memalign, etc -------------------- */

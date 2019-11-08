@@ -498,7 +498,7 @@ int
 __wasilibc_register_preopened_fd(int fd, const char *path)
 {
     const char *name = strdup(path);
-    return name == NULL ? -1 : __wasilibc_register_preopened_fd(fd, name);
+    return name == NULL ? -1 : internal_register_preopened_fd(fd, name);
 }
 
 int

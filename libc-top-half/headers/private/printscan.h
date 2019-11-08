@@ -53,7 +53,7 @@ static void long_double_not_supported(void) {
 
 #else
 
-/* Full long double support. */
+// Full long double support.
 typedef long double long_double;
 
 #endif

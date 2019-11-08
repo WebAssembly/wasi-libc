@@ -254,6 +254,7 @@ __wasilibc_find_relpath
 __wasilibc_open_nomode
 __wasilibc_openat_nomode
 __wasilibc_populate_environ
+__wasilibc_populate_libpreopen
 __wasilibc_register_preopened_fd
 __wasilibc_rmdirat
 __wasilibc_tell

@@ -9,57 +9,21 @@ extern void __wasm_call_ctors(void);
 extern int __original_main(void);
 extern void __prepare_for_exit(void);
 void _Exit(int) __attribute__((noreturn));
-
-static __wasi_errno_t populate_libpreopen(void) {
-    // Skip stdin, stdout, and stderr, and count up until we reach an invalid
-    // file descriptor.
-    for (__wasi_fd_t fd = 3; fd != 0; ++fd) {
-        __wasi_prestat_t prestat;
-        __wasi_errno_t ret = __wasi_fd_prestat_get(fd, &prestat);
-        if (ret == __WASI_EBADF)
-            break;
-        if (ret != __WASI_ESUCCESS)
-            return ret;
-        switch (prestat.pr_type) {
-        case __WASI_PREOPENTYPE_DIR: {
-            char *path = malloc(prestat.u.dir.pr_name_len + 1);
-            if (path == NULL)
-                return __WASI_ENOMEM;
-
-            ret = __wasi_fd_prestat_dir_name(fd, path, prestat.u.dir.pr_name_len);
-            if (ret != __WASI_ESUCCESS) {
-                free(path);
-                return ret;
-            }
-            path[prestat.u.dir.pr_name_len] = '\0';
-
-            if (__wasilibc_register_preopened_fd(fd, path) != 0) {
-                free(path);
-                return __WASI_ENOMEM;
-            }
-
-            free(path);
-            break;
-        }
-        default:
-            break;
-        }
-    }
-
-    return __WASI_ESUCCESS;
-}
+__wasi_errno_t __wasilibc_populate_libpreopen(void) __attribute__((weak));
 
 void _start(void) {
-    // Record the preopened resources.
-    if (populate_libpreopen() != __WASI_ESUCCESS) {
+    // Record the preopened resources, if needed.
+    if (&__wasilibc_populate_libpreopen != NULL &&
+        __wasilibc_populate_libpreopen() != __WASI_ESUCCESS)
+    {
         _Exit(EX_OSERR);
     }
 
     // Fill in the environment from WASI syscalls, if needed.
-    if (&__wasilibc_populate_environ != NULL) {
-        if (__wasilibc_populate_environ() != __WASI_ESUCCESS) {
-            _Exit(EX_OSERR);
-        }
+    if (&__wasilibc_populate_environ != NULL &&
+        __wasilibc_populate_environ() != __WASI_ESUCCESS)
+    {
+        _Exit(EX_OSERR);
     }
 
     // The linker synthesizes this to call constructors.

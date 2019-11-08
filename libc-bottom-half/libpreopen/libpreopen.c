@@ -452,13 +452,15 @@ po_map_assertvalid(void)
 #endif
 
 /// Register the given pre-opened file descriptor under the given path.
-int
-__wasilibc_register_preopened_fd(int fd, const char *path)
+///
+/// This function takes ownership of `name`.
+static int
+internal_register_preopened_fd(int fd, const char *name)
 {
     po_map_assertvalid();
 
     assert(fd >= 0);
-    assert(path != NULL);
+    assert(name != NULL);
 
     if (global_map.length == global_map.capacity) {
         int n = po_map_enlarge();
@@ -477,11 +479,6 @@ __wasilibc_register_preopened_fd(int fd, const char *path)
         return -1; // TODO: Add an infallible way to get the rights?
     }
 
-    const char *name = strdup(path);
-    if (name == NULL) {
-        return -1;
-    }
-
     struct po_map_entry *entry = &global_map.entries[global_map.length++];
 
     entry->name = name;
@@ -492,6 +489,16 @@ __wasilibc_register_preopened_fd(int fd, const char *path)
     po_map_assertvalid();
 
     return 0;
+}
+
+/// Register the given pre-opened file descriptor under the given path.
+///
+/// This function does not take ownership of `path`.
+int
+__wasilibc_register_preopened_fd(int fd, const char *path)
+{
+    const char *name = strdup(path);
+    return name == NULL ? -1 : __wasilibc_register_preopened_fd(fd, name);
 }
 
 int
@@ -583,12 +590,11 @@ __wasilibc_populate_libpreopen(void)
             }
             path[prestat.u.dir.pr_name_len] = '\0';
 
-            if (__wasilibc_register_preopened_fd(fd, path) != 0) {
+            if (internal_register_preopened_fd(fd, path) != 0) {
                 free(path);
                 return __WASI_ENOMEM;
             }
 
-            free(path);
             break;
         }
         default:

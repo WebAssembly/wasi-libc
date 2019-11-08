@@ -13,17 +13,17 @@ __wasi_errno_t __wasilibc_populate_libpreopen(void) __attribute__((weak));
 
 void _start(void) {
     // Record the preopened resources, if needed.
-    if (&__wasilibc_populate_libpreopen != NULL) {
-        if (__wasilibc_populate_libpreopen() != __WASI_ESUCCESS) {
-            _Exit(EX_OSERR);
-        }
+    if (&__wasilibc_populate_libpreopen != NULL &&
+        __wasilibc_populate_libpreopen() != __WASI_ESUCCESS)
+    {
+        _Exit(EX_OSERR);
     }
 
     // Fill in the environment from WASI syscalls, if needed.
-    if (&__wasilibc_populate_environ != NULL) {
-        if (__wasilibc_populate_environ() != __WASI_ESUCCESS) {
-            _Exit(EX_OSERR);
-        }
+    if (&__wasilibc_populate_environ != NULL &&
+        __wasilibc_populate_environ() != __WASI_ESUCCESS)
+    {
+        _Exit(EX_OSERR);
     }
 
     // The linker synthesizes this to call constructors.

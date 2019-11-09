@@ -170,7 +170,7 @@ typedef uint16_t __wasi_fstflags_t;
 
 typedef uint64_t __wasi_inode_t;
 
-typedef uint32_t __wasi_linkcount_t;
+typedef uint64_t __wasi_linkcount_t;
 
 typedef uint32_t __wasi_lookupflags_t;
 #define __WASI_LOOKUP_SYMLINK_FOLLOW (UINT32_C(0x00000001))
@@ -361,16 +361,16 @@ _Static_assert(offsetof(__wasi_filestat_t, st_ino) == 8, "non-wasi data layout")
 _Static_assert(
     offsetof(__wasi_filestat_t, st_filetype) == 16, "non-wasi data layout");
 _Static_assert(
-    offsetof(__wasi_filestat_t, st_nlink) == 20, "non-wasi data layout");
+    offsetof(__wasi_filestat_t, st_nlink) == 24, "non-wasi data layout");
 _Static_assert(
-    offsetof(__wasi_filestat_t, st_size) == 24, "non-wasi data layout");
+    offsetof(__wasi_filestat_t, st_size) == 32, "non-wasi data layout");
 _Static_assert(
-    offsetof(__wasi_filestat_t, st_atim) == 32, "non-wasi data layout");
+    offsetof(__wasi_filestat_t, st_atim) == 40, "non-wasi data layout");
 _Static_assert(
-    offsetof(__wasi_filestat_t, st_mtim) == 40, "non-wasi data layout");
+    offsetof(__wasi_filestat_t, st_mtim) == 48, "non-wasi data layout");
 _Static_assert(
-    offsetof(__wasi_filestat_t, st_ctim) == 48, "non-wasi data layout");
-_Static_assert(sizeof(__wasi_filestat_t) == 56, "non-wasi data layout");
+    offsetof(__wasi_filestat_t, st_ctim) == 56, "non-wasi data layout");
+_Static_assert(sizeof(__wasi_filestat_t) == 64, "non-wasi data layout");
 _Static_assert(_Alignof(__wasi_filestat_t) == 8, "non-wasi data layout");
 
 typedef struct __wasi_ciovec_t {

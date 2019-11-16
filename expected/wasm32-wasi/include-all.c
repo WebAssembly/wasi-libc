@@ -165,7 +165,7 @@
 #include <uchar.h>
 #include <unistd.h>
 #include <values.h>
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc.h>
 #include <wchar.h>

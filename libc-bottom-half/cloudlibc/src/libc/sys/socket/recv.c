@@ -7,12 +7,17 @@
 #include <sys/socket.h>
 
 #include <assert.h>
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <stdint.h>
 
+#ifdef __wasilibc_unmodified_upstream
 static_assert(MSG_PEEK == __WASI_SOCK_RECV_PEEK, "Value mismatch");
 static_assert(MSG_WAITALL == __WASI_SOCK_RECV_WAITALL, "Value mismatch");
+#else
+static_assert(MSG_PEEK == __WASI_RIFLAGS_RECV_PEEK, "Value mismatch");
+static_assert(MSG_WAITALL == __WASI_RIFLAGS_RECV_WAITALL, "Value mismatch");
+#endif
 
 ssize_t recv(int socket, void *restrict buffer, size_t length, int flags) {
   // Validate flags.

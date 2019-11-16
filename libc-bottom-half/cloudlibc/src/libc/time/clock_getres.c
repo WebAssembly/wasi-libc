@@ -5,7 +5,7 @@
 #include <common/clock.h>
 #include <common/time.h>
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <time.h>
 

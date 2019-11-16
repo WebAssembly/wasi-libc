@@ -1,7 +1,7 @@
 #ifndef __wasi_libc_internal_h
 #define __wasi_libc_internal_h
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,6 +1,6 @@
 #include <stddef.h>
 #include <errno.h>
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <unistd.h>
 
 int pause(void) {

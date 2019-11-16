@@ -6,7 +6,7 @@
 
 #include <sys/select.h>
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <errno.h>
 
 int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
@@ -54,7 +54,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
           .fd_readwrite.fd = fd,
           .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
 #else
-          .u.fd_readwrite.fd = fd,
+          .u.fd_readwrite.file_descriptor = fd,
 #endif
       };
     }
@@ -72,7 +72,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
           .fd_readwrite.fd = fd,
           .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
 #else
-          .u.fd_readwrite.fd = fd,
+          .u.fd_readwrite.file_descriptor = fd,
 #endif
       };
     }
@@ -86,7 +86,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
 #ifdef __wasilibc_unmodified_upstream // non-anonymous unions
         .clock.clock_id = __WASI_CLOCK_REALTIME,
 #else
-        .u.clock.clock_id = __WASI_CLOCK_REALTIME,
+        .u.clock.id = __WASI_CLOCKID_REALTIME,
 #endif
     };
 #ifdef __wasilibc_unmodified_upstream // non-anonymous unions
@@ -117,7 +117,11 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
     const __wasi_event_t *event = &events[i];
     if ((event->type == __WASI_EVENTTYPE_FD_READ ||
          event->type == __WASI_EVENTTYPE_FD_WRITE) &&
+#ifdef __wasilibc_unmodified_upstream // generated constant names
         event->error == __WASI_EBADF) {
+#else
+        event->error == __WASI_ERRNO_BADF) {
+#endif
       errno = EBADF;
       return -1;
     }

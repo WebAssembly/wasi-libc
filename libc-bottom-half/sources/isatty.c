@@ -1,4 +1,4 @@
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <__errno.h>
 #include <__function___isatty.h>
 
@@ -12,8 +12,8 @@ int __isatty(int fd) {
 
     // A tty is a character device that we can't seek or tell on.
     if (statbuf.fs_filetype != __WASI_FILETYPE_CHARACTER_DEVICE ||
-        (statbuf.fs_rights_base & (__WASI_RIGHT_FD_SEEK | __WASI_RIGHT_FD_TELL)) != 0) {
-        errno = __WASI_ENOTTY;
+        (statbuf.fs_rights_base & (__WASI_RIGHTS_FD_SEEK | __WASI_RIGHTS_FD_TELL)) != 0) {
+        errno = __WASI_ERRNO_NOTTY;
         return 0;
     }
 

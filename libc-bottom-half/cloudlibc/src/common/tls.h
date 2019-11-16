@@ -6,7 +6,7 @@
 #define COMMON_TLS_H
 
 #include <assert.h>
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <stdalign.h>
 #include <stddef.h>
 

@@ -5,7 +5,7 @@
 #ifndef COMMON_ERRNO_H
 #define COMMON_ERRNO_H
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 
 #ifdef __wasilibc_unmodified_upstream
 // Translates ENOTCAPABLE to ENOTDIR if not a directory.

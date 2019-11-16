@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <errno.h>
 
 ssize_t preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {

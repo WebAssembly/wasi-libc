@@ -7,11 +7,16 @@
 #include <sys/socket.h>
 
 #include <assert.h>
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <errno.h>
 
+#ifdef __wasilibc_unmodified_upstream // generated constant names
 static_assert(SHUT_RD == __WASI_SHUT_RD, "Value mismatch");
 static_assert(SHUT_WR == __WASI_SHUT_WR, "Value mismatch");
+#else
+static_assert(SHUT_RD == __WASI_SDFLAGS_RD, "Value mismatch");
+static_assert(SHUT_WR == __WASI_SDFLAGS_WR, "Value mismatch");
+#endif
 
 int shutdown(int socket, int how) {
   // Validate shutdown flags.

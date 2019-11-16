@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <wasi/libc.h>
 #include <dirent.h>
 #include <errno.h>
@@ -122,7 +122,8 @@ int scandirat(int dirfd, const char *dir, struct dirent ***namelist,
 #ifdef __wasilibc_unmodified_upstream
     __wasi_errno_t error = __wasi_file_readdir(fd, buffer, buffer_size,
 #else
-    __wasi_errno_t error = __wasi_fd_readdir(fd, buffer, buffer_size,
+    // TODO: Remove the cast on `buffer` once the witx is updated with char8 support.
+    __wasi_errno_t error = __wasi_fd_readdir(fd, (uint8_t *)buffer, buffer_size,
 #endif
                                                        cookie, &buffer_used);
     if (error != 0) {

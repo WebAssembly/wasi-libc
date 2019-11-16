@@ -10,9 +10,9 @@
 #include <__struct_tm.h>
 #include <__typedef_clockid_t.h>
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 
-#define TIMER_ABSTIME __WASI_SUBSCRIPTION_CLOCK_ABSTIME
+#define TIMER_ABSTIME __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME
 
 extern const struct __clockid _CLOCK_MONOTONIC;
 #define CLOCK_MONOTONIC (&_CLOCK_MONOTONIC)

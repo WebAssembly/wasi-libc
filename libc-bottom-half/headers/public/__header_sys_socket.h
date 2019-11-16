@@ -5,15 +5,15 @@
 #include <__struct_sockaddr.h>
 #include <__struct_sockaddr_storage.h>
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 
-#define SHUT_RD __WASI_SHUT_RD
-#define SHUT_WR __WASI_SHUT_WR
+#define SHUT_RD __WASI_SDFLAGS_RD
+#define SHUT_WR __WASI_SDFLAGS_WR
 #define SHUT_RDWR (SHUT_RD | SHUT_WR)
 
-#define MSG_PEEK __WASI_SOCK_RECV_PEEK
-#define MSG_WAITALL __WASI_SOCK_RECV_WAITALL
-#define MSG_TRUNC __WASI_SOCK_RECV_DATA_TRUNCATED
+#define MSG_PEEK __WASI_RIFLAGS_RECV_PEEK
+#define MSG_WAITALL __WASI_RIFLAGS_RECV_WAITALL
+#define MSG_TRUNC __WASI_RIFLAGS_RECV_DATA_TRUNCATED
 
 #define SOCK_DGRAM __WASI_FILETYPE_SOCKET_DGRAM
 #define SOCK_STREAM __WASI_FILETYPE_SOCKET_STREAM

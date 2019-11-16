@@ -1,4 +1,4 @@
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <wasi/libc.h>
 #include <stdlib.h>
 #include <sysexits.h>
@@ -17,7 +17,7 @@ int __original_main(void) {
     size_t argv_buf_size;
     size_t argc;
     err = __wasi_args_sizes_get(&argc, &argv_buf_size);
-    if (err != __WASI_ESUCCESS) {
+    if (err != __WASI_ERRNO_SUCCESS) {
         _Exit(EX_OSERR);
     }
 
@@ -42,8 +42,9 @@ int __original_main(void) {
     }
 
     // Fill the argument chars, and the argv array with pointers into those chars.
-    err = __wasi_args_get(argv, argv_buf);
-    if (err != __WASI_ESUCCESS) {
+    // TODO: Remove the casts on `argv_ptrs` and `argv_buf` once the witx is updated with char8 support.
+    err = __wasi_args_get((uint8_t **)argv, (uint8_t *)argv_buf);
+    if (err != __WASI_ERRNO_SUCCESS) {
         free(argv_buf);
         free(argv);
         _Exit(EX_OSERR);

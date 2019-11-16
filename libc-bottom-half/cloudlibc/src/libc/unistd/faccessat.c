@@ -4,7 +4,7 @@
 
 #include <common/errno.h>
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -25,7 +25,7 @@ int faccessat(int fd, const char *path, int amode, int flag) {
       .flags = __WASI_LOOKUP_SYMLINK_FOLLOW,
   };
 #else
-  __wasi_lookupflags_t lookup_flags = __WASI_LOOKUP_SYMLINK_FOLLOW;
+  __wasi_lookupflags_t lookup_flags = __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
 #endif
   __wasi_filestat_t file;
   __wasi_errno_t error =
@@ -55,20 +55,24 @@ int faccessat(int fd, const char *path, int amode, int flag) {
 
     __wasi_rights_t min = 0;
     if ((amode & R_OK) != 0)
-      min |= file.st_filetype == __WASI_FILETYPE_DIRECTORY
 #ifdef __wasilibc_unmodified_upstream
+      min |= file.st_filetype == __WASI_FILETYPE_DIRECTORY
                  ? __WASI_RIGHT_FILE_READDIR
-#else
-                 ? __WASI_RIGHT_FD_READDIR
-#endif
                  : __WASI_RIGHT_FD_READ;
-    if ((amode & W_OK) != 0)
-      min |= __WASI_RIGHT_FD_WRITE;
-    if ((amode & X_OK) != 0 && file.st_filetype != __WASI_FILETYPE_DIRECTORY)
-#ifdef __wasilibc_unmodified_upstream // RIGHT_PROC_EXEC
-      min |= __WASI_RIGHT_PROC_EXEC;
 #else
-      (void)0;
+      min |= file.filetype == __WASI_FILETYPE_DIRECTORY
+                 ? __WASI_RIGHTS_FD_READDIR
+                 : __WASI_RIGHTS_FD_READ;
+#endif
+    if ((amode & W_OK) != 0)
+#ifdef __wasilibc_unmodified_upstream // generated constant names
+      min |= __WASI_RIGHT_FD_WRITE;
+#else
+      min |= __WASI_RIGHTS_FD_WRITE;
+#endif
+#ifdef __wasilibc_unmodified_upstream // RIGHT_PROC_EXEC
+    if ((amode & X_OK) != 0 && file.st_filetype != __WASI_FILETYPE_DIRECTORY)
+      min |= __WASI_RIGHT_PROC_EXEC;
 #endif
 
     if ((min & directory.fs_rights_inheriting) != min) {

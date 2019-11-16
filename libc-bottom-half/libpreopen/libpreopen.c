@@ -530,18 +530,19 @@ __wasilibc_populate_libpreopen(void)
     for (__wasi_fd_t fd = 3; fd != 0; ++fd) {
         __wasi_prestat_t prestat;
         __wasi_errno_t ret = __wasi_fd_prestat_get(fd, &prestat);
-        if (ret == __WASI_EBADF)
+        if (ret == __WASI_ERRNO_BADF)
             break;
-        if (ret != __WASI_ESUCCESS)
+        if (ret != __WASI_ERRNO_SUCCESS)
             return ret;
         switch (prestat.pr_type) {
         case __WASI_PREOPENTYPE_DIR: {
             char *path = malloc(prestat.u.dir.pr_name_len + 1);
             if (path == NULL)
-                return __WASI_ENOMEM;
+                return __WASI_ERRNO_NOMEM;
 
-            ret = __wasi_fd_prestat_dir_name(fd, path, prestat.u.dir.pr_name_len);
-            if (ret != __WASI_ESUCCESS) {
+            // TODO: Remove the cast on `path` once the witx is updated with char8 support.
+            ret = __wasi_fd_prestat_dir_name(fd, (uint8_t *)path, prestat.u.dir.pr_name_len);
+            if (ret != __WASI_ERRNO_SUCCESS) {
                 free(path);
                 return ret;
             }
@@ -549,7 +550,7 @@ __wasilibc_populate_libpreopen(void)
 
             if (internal_register_preopened_fd(fd, path) != 0) {
                 free(path);
-                return __WASI_ENOMEM;
+                return __WASI_ERRNO_NOMEM;
             }
 
             break;
@@ -559,5 +560,5 @@ __wasilibc_populate_libpreopen(void)
         }
     }
 
-    return __WASI_ESUCCESS;
+    return __WASI_ERRNO_SUCCESS;
 }

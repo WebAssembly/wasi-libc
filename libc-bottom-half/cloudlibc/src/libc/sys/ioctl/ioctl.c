@@ -4,7 +4,7 @@
 
 #include <sys/ioctl.h>
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <stdarg.h>
 
@@ -19,7 +19,7 @@ int ioctl(int fildes, int request, ...) {
               .fd_readwrite.fd = fildes,
               .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
 #else
-              .u.fd_readwrite.fd = fildes,
+              .u.fd_readwrite.file_descriptor = fildes,
 #endif
           },
           {
@@ -27,7 +27,7 @@ int ioctl(int fildes, int request, ...) {
 #ifdef __wasilibc_unmodified_upstream // non-anonymous unions
               .clock.clock_id = __WASI_CLOCK_MONOTONIC,
 #else
-              .u.clock.clock_id = __WASI_CLOCK_MONOTONIC,
+              .u.clock.id = __WASI_CLOCKID_MONOTONIC,
 #endif
           },
       };
@@ -88,9 +88,17 @@ int ioctl(int fildes, int request, ...) {
       va_list ap;
       va_start(ap, request);
       if (*va_arg(ap, const int *) != 0)
+#ifdef __wasilibc_unmodified_upstream // generated constant names
         fds.fs_flags |= __WASI_FDFLAG_NONBLOCK;
+#else
+        fds.fs_flags |= __WASI_FDFLAGS_NONBLOCK;
+#endif
       else
+#ifdef __wasilibc_unmodified_upstream // generated constant names
         fds.fs_flags &= ~__WASI_FDFLAG_NONBLOCK;
+#else
+        fds.fs_flags &= ~__WASI_FDFLAGS_NONBLOCK;
+#endif
       va_end(ap);
 
       // Update the file descriptor flags.

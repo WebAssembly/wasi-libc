@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <unistd.h>
 
@@ -23,7 +23,11 @@ ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
     if (error == ENOTCAPABLE && __wasi_fd_fdstat_get(fildes, &fds) == 0) {
 #endif
       // Determine why we got ENOTCAPABLE.
+#ifdef __wasilibc_unmodified_upstream // generated constant names
       if ((fds.fs_rights_base & __WASI_RIGHT_FD_READ) == 0)
+#else
+      if ((fds.fs_rights_base & __WASI_RIGHTS_FD_READ) == 0)
+#endif
         error = EBADF;
       else
         error = ESPIPE;

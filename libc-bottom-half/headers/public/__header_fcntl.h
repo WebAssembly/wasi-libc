@@ -1,19 +1,19 @@
 #ifndef __wasilibc___header_fcntl_h
 #define __wasilibc___header_fcntl_h
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <__seek.h>
 #include <__mode_t.h>
 
-#define O_APPEND __WASI_FDFLAG_APPEND
-#define O_DSYNC __WASI_FDFLAG_DSYNC
-#define O_NONBLOCK __WASI_FDFLAG_NONBLOCK
-#define O_RSYNC __WASI_FDFLAG_RSYNC
-#define O_SYNC __WASI_FDFLAG_SYNC
-#define O_CREAT (__WASI_O_CREAT << 12)
-#define O_DIRECTORY (__WASI_O_DIRECTORY << 12)
-#define O_EXCL (__WASI_O_EXCL << 12)
-#define O_TRUNC (__WASI_O_TRUNC << 12)
+#define O_APPEND __WASI_FDFLAGS_APPEND
+#define O_DSYNC __WASI_FDFLAGS_DSYNC
+#define O_NONBLOCK __WASI_FDFLAGS_NONBLOCK
+#define O_RSYNC __WASI_FDFLAGS_RSYNC
+#define O_SYNC __WASI_FDFLAGS_SYNC
+#define O_CREAT (__WASI_OFLAGS_CREAT << 12)
+#define O_DIRECTORY (__WASI_OFLAGS_DIRECTORY << 12)
+#define O_EXCL (__WASI_OFLAGS_EXCL << 12)
+#define O_TRUNC (__WASI_OFLAGS_TRUNC << 12)
 
 #define O_NOFOLLOW (0x01000000)
 #define O_EXEC     (0x02000000)

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <poll.h>
 #include <stdbool.h>
@@ -26,7 +26,7 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
           .fd_readwrite.fd = pollfd->fd,
           .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
 #else
-          .u.fd_readwrite.fd = pollfd->fd,
+          .u.fd_readwrite.file_descriptor = pollfd->fd,
 #endif
       };
       created_events = true;
@@ -40,7 +40,7 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
           .fd_readwrite.fd = pollfd->fd,
           .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
 #else
-          .u.fd_readwrite.fd = pollfd->fd,
+          .u.fd_readwrite.file_descriptor = pollfd->fd,
 #endif
       };
       created_events = true;
@@ -64,7 +64,7 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
         .clock.clock_id = __WASI_CLOCK_REALTIME,
         .clock.timeout = (__wasi_timestamp_t)timeout * 1000000,
 #else
-        .u.clock.clock_id = __WASI_CLOCK_REALTIME,
+        .u.clock.id = __WASI_CLOCKID_REALTIME,
         .u.clock.timeout = (__wasi_timestamp_t)timeout * 1000000,
 #endif
     };
@@ -95,10 +95,18 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
     if (event->type == __WASI_EVENTTYPE_FD_READ ||
         event->type == __WASI_EVENTTYPE_FD_WRITE) {
       struct pollfd *pollfd = (struct pollfd *)(uintptr_t)event->userdata;
+#ifdef __wasilibc_unmodified_upstream // generated constant names
       if (event->error == __WASI_EBADF) {
+#else
+      if (event->error == __WASI_ERRNO_BADF) {
+#endif
         // Invalid file descriptor.
         pollfd->revents |= POLLNVAL;
+#ifdef __wasilibc_unmodified_upstream // generated constant names
       } else if (event->error == __WASI_EPIPE) {
+#else
+      } else if (event->error == __WASI_ERRNO_PIPE) {
+#endif
         // Hangup on write side of pipe.
         pollfd->revents |= POLLHUP;
       } else if (event->error != 0) {
@@ -111,7 +119,7 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
 #ifdef __wasilibc_unmodified_upstream // non-anonymous unions
         if (event->fd_readwrite.flags & __WASI_EVENT_FD_READWRITE_HANGUP)
 #else
-        if (event->u.fd_readwrite.flags & __WASI_EVENT_FD_READWRITE_HANGUP)
+        if (event->u.fd_readwrite.flags & __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP)
 #endif
           pollfd->revents |= POLLHUP;
       }

@@ -4,7 +4,7 @@
 
 #include <common/errno.h>
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -21,7 +21,7 @@ int linkat(int fd1, const char *path1, int fd2, const char *path2, int flag) {
 #ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
     lookup1.flags |= __WASI_LOOKUP_SYMLINK_FOLLOW;
 #else
-    lookup1_flags |= __WASI_LOOKUP_SYMLINK_FOLLOW;
+    lookup1_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
 #endif
 
   // Perform system call.

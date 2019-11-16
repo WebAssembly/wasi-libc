@@ -5,22 +5,37 @@
 #include <common/errno.h>
 
 #include <assert.h>
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <wasi/libc.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 
+#ifdef __wasilibc_unmodified_upstream // fstat
 static_assert(O_APPEND == __WASI_FDFLAG_APPEND, "Value mismatch");
 static_assert(O_DSYNC == __WASI_FDFLAG_DSYNC, "Value mismatch");
 static_assert(O_NONBLOCK == __WASI_FDFLAG_NONBLOCK, "Value mismatch");
 static_assert(O_RSYNC == __WASI_FDFLAG_RSYNC, "Value mismatch");
 static_assert(O_SYNC == __WASI_FDFLAG_SYNC, "Value mismatch");
+#else
+static_assert(O_APPEND == __WASI_FDFLAGS_APPEND, "Value mismatch");
+static_assert(O_DSYNC == __WASI_FDFLAGS_DSYNC, "Value mismatch");
+static_assert(O_NONBLOCK == __WASI_FDFLAGS_NONBLOCK, "Value mismatch");
+static_assert(O_RSYNC == __WASI_FDFLAGS_RSYNC, "Value mismatch");
+static_assert(O_SYNC == __WASI_FDFLAGS_SYNC, "Value mismatch");
+#endif
 
+#ifdef __wasilibc_unmodified_upstream // fstat
 static_assert(O_CREAT >> 12 == __WASI_O_CREAT, "Value mismatch");
 static_assert(O_DIRECTORY >> 12 == __WASI_O_DIRECTORY, "Value mismatch");
 static_assert(O_EXCL >> 12 == __WASI_O_EXCL, "Value mismatch");
 static_assert(O_TRUNC >> 12 == __WASI_O_TRUNC, "Value mismatch");
+#else
+static_assert(O_CREAT >> 12 == __WASI_OFLAGS_CREAT, "Value mismatch");
+static_assert(O_DIRECTORY >> 12 == __WASI_OFLAGS_DIRECTORY, "Value mismatch");
+static_assert(O_EXCL >> 12 == __WASI_OFLAGS_EXCL, "Value mismatch");
+static_assert(O_TRUNC >> 12 == __WASI_OFLAGS_TRUNC, "Value mismatch");
+#endif
 
 int openat(int fd, const char *path, int oflag, ...) {
 #ifdef __wasilibc_unmodified_upstream // fstat
@@ -37,13 +52,14 @@ int __wasilibc_openat_nomode(int fd, const char *path, int oflag) {
   __wasi_rights_t min = 0;
 #endif
   __wasi_rights_t max =
-      ~(__WASI_RIGHT_FD_DATASYNC | __WASI_RIGHT_FD_READ |
 #ifdef __wasilibc_unmodified_upstream // fstat
+      ~(__WASI_RIGHT_FD_DATASYNC | __WASI_RIGHT_FD_READ |
         __WASI_RIGHT_FD_WRITE | __WASI_RIGHT_FILE_ALLOCATE |
         __WASI_RIGHT_FILE_READDIR | __WASI_RIGHT_FILE_STAT_FPUT_SIZE |
 #else
-        __WASI_RIGHT_FD_WRITE | __WASI_RIGHT_FD_ALLOCATE |
-        __WASI_RIGHT_FD_READDIR | __WASI_RIGHT_FD_FILESTAT_SET_SIZE |
+      ~(__WASI_RIGHTS_FD_DATASYNC | __WASI_RIGHTS_FD_READ |
+        __WASI_RIGHTS_FD_WRITE | __WASI_RIGHTS_FD_ALLOCATE |
+        __WASI_RIGHTS_FD_READDIR | __WASI_RIGHTS_FD_FILESTAT_SET_SIZE |
 #endif
 #ifdef __wasilibc_unmodified_upstream // RIGHT_MEM_MAP_EXEC
         __WASI_RIGHT_MEM_MAP_EXEC);
@@ -63,7 +79,7 @@ int __wasilibc_openat_nomode(int fd, const char *path, int oflag) {
         max |= __WASI_RIGHT_FD_READ | __WASI_RIGHT_FILE_READDIR |
                __WASI_RIGHT_MEM_MAP_EXEC;
 #else
-        max |= __WASI_RIGHT_FD_READ | __WASI_RIGHT_FD_READDIR;
+        max |= __WASI_RIGHTS_FD_READ | __WASI_RIGHTS_FD_READDIR;
 #endif
       }
       if ((oflag & O_WRONLY) != 0) {
@@ -72,13 +88,14 @@ int __wasilibc_openat_nomode(int fd, const char *path, int oflag) {
         if ((oflag & O_APPEND) == 0)
           min |= __WASI_RIGHT_FD_SEEK;
 #endif
-        max |= __WASI_RIGHT_FD_DATASYNC | __WASI_RIGHT_FD_WRITE |
 #ifdef __wasilibc_unmodified_upstream // fstat
+        max |= __WASI_RIGHT_FD_DATASYNC | __WASI_RIGHT_FD_WRITE |
                __WASI_RIGHT_FILE_ALLOCATE |
                __WASI_RIGHT_FILE_STAT_FPUT_SIZE;
 #else
-               __WASI_RIGHT_FD_ALLOCATE |
-               __WASI_RIGHT_FD_FILESTAT_SET_SIZE;
+        max |= __WASI_RIGHTS_FD_DATASYNC | __WASI_RIGHTS_FD_WRITE |
+               __WASI_RIGHTS_FD_ALLOCATE |
+               __WASI_RIGHTS_FD_FILESTAT_SET_SIZE;
 #endif
       }
       break;
@@ -130,7 +147,7 @@ int __wasilibc_openat_nomode(int fd, const char *path, int oflag) {
 #ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
     lookup.flags |= __WASI_LOOKUP_SYMLINK_FOLLOW;
 #else
-    lookup_flags |= __WASI_LOOKUP_SYMLINK_FOLLOW;
+    lookup_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
 #endif
 
   // Open file with appropriate rights.

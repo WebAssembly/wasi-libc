@@ -7,6 +7,6 @@ edition = "2018"
 publish = false
 
 [dependencies]
-clap = "2"
 heck = "0.3.1"
 witx = "0.5.0"
+anyhow = "1.0.22"

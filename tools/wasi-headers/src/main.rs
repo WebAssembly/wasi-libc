@@ -1,59 +1,29 @@
 mod c_header;
 
 use crate::c_header::to_c_header;
-use clap::{App, Arg};
-use std::fs::File;
-use std::io::Write;
-use std::path::PathBuf;
-use std::process;
+use anyhow::{anyhow, Result};
+use std::fs::{read_dir, File};
+use std::io::{self, Write};
 use witx::load;
 
-pub fn main() {
-    let app = App::new("wasi-headers")
-        .version(env!("CARGO_PKG_VERSION"))
-        .about("Generate C headers for WASI interfaces")
-        .arg(
-            Arg::with_name("input")
-                .required(true)
-                .multiple(true)
-                .help("path to root of witx document"),
-        )
-        .arg(
-            Arg::with_name("verbose")
-                .short("v")
-                .long("verbose")
-                .takes_value(false)
-                .required(false),
-        )
-        .get_matches();
+pub fn main() -> Result<()> {
+    let inputs = read_dir("WASI/phases/snapshot/witx")?
+        .map(|res| res.map(|e| e.path()))
+        .collect::<Result<Vec<_>, io::Error>>()?;
 
-    let inputs = app
-        .values_of("input")
-        .expect("at least one input required")
-        .map(PathBuf::from)
-        .collect::<Vec<PathBuf>>();
+    // TODO: drop the anyhow! part once witx switches to anyhow.
+    let doc = load(&inputs).map_err(|e| anyhow!(e.to_string()))?;
 
-    match load(&inputs) {
-        Ok(doc) => {
-            if app.is_present("verbose") {
-                println!("{:?}", doc)
-            }
+    let inputs_str = &inputs
+        .iter()
+        .map(|p| p.file_name().unwrap().to_str().unwrap().to_string())
+        .collect::<Vec<_>>()
+        .join(", ");
 
-            let c_header = to_c_header(&doc);
-            if let Some(output) = app.value_of("output") {
-                let mut file = File::create(output).expect("create output file");
-                file.write_all(c_header.as_bytes())
-                    .expect("write output file");
-            } else {
-                println!("{}", c_header)
-            }
-        }
-        Err(e) => {
-            println!("{}", e.report());
-            if app.is_present("verbose") {
-                println!("{:?}", e);
-            }
-            process::exit(1)
-        }
-    }
+    let c_header = to_c_header(&doc, &inputs_str);
+    let mut file = File::create("../../libc-bottom-half/headers/public/wasi/api.h")
+        .expect("create output file");
+    file.write_all(c_header.as_bytes())
+        .expect("write output file");
+    Ok(())
 }

@@ -1,5 +1,6 @@
 #include <wasi/core.h>
 #include <wasi/libc.h>
+#include <alloca.h>
 #include <stdlib.h>
 #include <sysexits.h>
 
@@ -28,26 +29,23 @@ int __original_main(void) {
     }
 
     // Allocate memory for storing the argument chars.
-    char *argv_buf = malloc(argv_buf_size);
-    if (argv_buf == NULL) {
-        _Exit(EX_SOFTWARE);
-    }
+    char *argv_buf = alloca(argv_buf_size);
 
-    // Allocate memory for the array of pointers. This uses `calloc` both to
-    // handle overflow and to initialize the NULL pointer at the end.
-    char **argv = calloc(num_ptrs, sizeof(char *));
-    if (argv == NULL) {
-        free(argv_buf);
+    // Allocate memory for the array of pointers.
+    size_t num_ptrs_size;
+    if (__builtin_mul_overflow(num_ptrs, sizeof(char *), &num_ptrs_size)) {
         _Exit(EX_SOFTWARE);
     }
+    char **argv = alloca(num_ptrs_size);
 
     // Fill the argument chars, and the argv array with pointers into those chars.
     err = __wasi_args_get(argv, argv_buf);
     if (err != __WASI_ESUCCESS) {
-        free(argv_buf);
-        free(argv);
         _Exit(EX_OSERR);
     }
+
+    // Make sure the last pointer in the array is NULL.
+    argv[argc] = NULL;
 
     // Call main with the arguments!
     return main(argc, argv);

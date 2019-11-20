@@ -9,6 +9,7 @@ int main(int argc, char *argv[]);
 // If the user's `main` function expects arguments, the compiler won't emit
 // an `__original_main` function so this version will get linked in, which
 // initializes the argument data and calls `main`.
+__attribute__((weak))
 int __original_main(void) {
     __wasi_errno_t err;
 

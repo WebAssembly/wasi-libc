@@ -8,5 +8,5 @@ publish = false
 
 [dependencies]
 heck = "0.3.1"
-witx = "0.5.0"
+witx = { path = "WASI/tools/witx" }
 anyhow = "1.0.22"

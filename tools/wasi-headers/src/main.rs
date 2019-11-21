@@ -6,7 +6,7 @@ use std::fs::{read_dir, File};
 use std::io::{self, Write};
 use witx::load;
 
-pub fn main() -> Result<()> {
+pub fn generate() -> Result<String> {
     let inputs = read_dir("WASI/phases/snapshot/witx")?
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>, io::Error>>()?;
@@ -20,7 +20,11 @@ pub fn main() -> Result<()> {
         .collect::<Vec<_>>()
         .join(", ");
 
-    let c_header = to_c_header(&doc, &inputs_str);
+    Ok(to_c_header(&doc, &inputs_str))
+}
+
+pub fn main() -> Result<()> {
+    let c_header = generate();
     let mut file = File::create("../../libc-bottom-half/headers/public/wasi/api.h")
         .expect("create output file");
     file.write_all(c_header.as_bytes())

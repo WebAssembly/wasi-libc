@@ -46,6 +46,16 @@ fn assert_same_as_src() {
             expected.len(),
             actual.len()
         );
+        for (index, (a, b)) in actual.chars().zip(expected.chars()).enumerate() {
+            if a != b {
+                eprintln!("char difference at index {}: '{}' != '{}'", index, a, b);
+            }
+        }
+        for (index, (a, b)) in actual.bytes().zip(expected.bytes()).enumerate() {
+            if a != b {
+                eprintln!("byte difference at index {}: b'{}' != b'{}'", index, a, b);
+            }
+        }
         eprintln!();
         eprintln!("actual: {}", actual);
         eprintln!();

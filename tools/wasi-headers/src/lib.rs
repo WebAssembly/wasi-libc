@@ -7,9 +7,11 @@ use std::io;
 use witx::load;
 
 pub fn generate() -> Result<String> {
-    let inputs = read_dir("WASI/phases/snapshot/witx")?
+    let mut inputs = read_dir("WASI/phases/snapshot/witx")?
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>, io::Error>>()?;
+
+    inputs.sort();
 
     // TODO: drop the anyhow! part once witx switches to anyhow.
     let doc = load(&inputs).map_err(|e| anyhow!(e.to_string()))?;

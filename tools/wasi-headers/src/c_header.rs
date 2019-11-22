@@ -49,12 +49,12 @@ extern "C" {{
         inputs_str,
     ));
 
-    for d in doc.datatypes() {
-        print_datatype(&mut ret, &*d);
+    for nt in doc.typenames() {
+        print_datatype(&mut ret, &*nt);
     }
 
     for m in doc.modules() {
-        print_module(&mut ret, doc, &m);
+        print_module(&mut ret, &m);
     }
 
     ret.push_str(
@@ -69,44 +69,50 @@ extern "C" {{
     ret
 }
 
-fn print_datatype(ret: &mut String, d: &Datatype) {
-    if !d.docs.is_empty() {
+fn print_datatype(ret: &mut String, nt: &NamedType) {
+    if !nt.docs.is_empty() {
         ret.push_str("/**\n");
-        for line in d.docs.lines() {
+        for line in nt.docs.lines() {
             ret.push_str(&format!(" * {}\n", line));
         }
         ret.push_str(" */\n");
     }
 
-    match &d.variant {
-        DatatypeVariant::Alias(a) => print_alias(ret, a),
-        DatatypeVariant::Enum(e) => print_enum(ret, e),
-        DatatypeVariant::Flags(f) => print_flags(ret, f),
-        DatatypeVariant::Struct(s) => print_struct(ret, s),
-        DatatypeVariant::Union(u) => print_union(ret, u),
-        DatatypeVariant::Handle(h) => print_handle(ret, h),
+    match &nt.dt {
+        TypeRef::Value(v) => match &**v {
+            Type::Enum(e) => print_enum(ret, &nt.name, e),
+            Type::Flags(f) => print_flags(ret, &nt.name, f),
+            Type::Struct(s) => print_struct(ret, &nt.name, s),
+            Type::Union(u) => print_union(ret, &nt.name, u),
+            Type::Handle(h) => print_handle(ret, &nt.name, h),
+            Type::Builtin { .. }
+            | Type::Array { .. }
+            | Type::Pointer { .. }
+            | Type::ConstPointer { .. } => print_alias(ret, &nt.name, &nt.dt),
+        },
+        TypeRef::Name(_) => print_alias(ret, &nt.name, &nt.dt),
     }
 }
 
-fn print_alias(ret: &mut String, a: &AliasDatatype) {
-    match a.to {
-        DatatypeIdent::Array(_) => {
+fn print_alias(ret: &mut String, name: &Id, dest: &TypeRef) {
+    match &*dest.type_() {
+        Type::Array(_) => {
             // Don't emit arrays as top-level types; instead we special-case
             // them in places like parameter lists so that we can pass them
             // as pointer and length pairs.
         }
         _ => {
-            if a.name.as_str() == "size" {
+            if name.as_str() == "size" {
                 // Special-case "size" as "__SIZE_TYPE__" -- TODO: Encode this in witx.
                 ret.push_str(&format!(
                     "typedef __SIZE_TYPE__ __wasi_{}_t;\n",
-                    ident_name(&a.name)
+                    ident_name(name)
                 ));
             } else {
                 ret.push_str(&format!(
                     "typedef {} __wasi_{}_t;\n",
-                    datatype_ident_name(&a.to),
-                    ident_name(&a.name)
+                    typeref_name(dest),
+                    ident_name(name)
                 ));
             }
             ret.push_str("\n");
@@ -114,11 +120,11 @@ fn print_alias(ret: &mut String, a: &AliasDatatype) {
     }
 }
 
-fn print_enum(ret: &mut String, e: &EnumDatatype) {
+fn print_enum(ret: &mut String, name: &Id, e: &EnumDatatype) {
     ret.push_str(&format!(
         "typedef {} __wasi_{}_t;\n",
         intrepr_name(e.repr),
-        ident_name(&e.name)
+        ident_name(name)
     ));
     ret.push_str("\n");
 
@@ -132,20 +138,20 @@ fn print_enum(ret: &mut String, e: &EnumDatatype) {
         }
         ret.push_str(&format!(
             "#define __WASI_{}_{} ((__wasi_{}_t){})\n",
-            ident_name(&e.name).to_shouty_snake_case(),
+            ident_name(&name).to_shouty_snake_case(),
             ident_name(&variant.name).to_shouty_snake_case(),
-            ident_name(&e.name),
+            ident_name(&name),
             index
         ));
         ret.push_str("\n");
     }
 }
 
-fn print_flags(ret: &mut String, f: &FlagsDatatype) {
+fn print_flags(ret: &mut String, name: &Id, f: &FlagsDatatype) {
     ret.push_str(&format!(
         "typedef {} __wasi_{}_t;\n",
         intrepr_name(f.repr),
-        ident_name(&f.name)
+        ident_name(name)
     ));
     ret.push_str("\n");
 
@@ -159,19 +165,19 @@ fn print_flags(ret: &mut String, f: &FlagsDatatype) {
         }
         ret.push_str(&format!(
             "#define __WASI_{}_{} ((__wasi_{}_t){})\n",
-            ident_name(&f.name).to_shouty_snake_case(),
+            ident_name(name).to_shouty_snake_case(),
             ident_name(&flag.name).to_shouty_snake_case(),
-            ident_name(&f.name),
+            ident_name(name),
             1u128 << index
         ));
         ret.push_str("\n");
     }
 }
 
-fn print_struct(ret: &mut String, s: &StructDatatype) {
+fn print_struct(ret: &mut String, name: &Id, s: &StructDatatype) {
     ret.push_str(&format!(
         "typedef struct __wasi_{}_t {{\n",
-        ident_name(&s.name)
+        ident_name(name)
     ));
 
     for member in &s.members {
@@ -184,21 +190,18 @@ fn print_struct(ret: &mut String, s: &StructDatatype) {
         }
         ret.push_str(&format!(
             "    {} {};\n",
-            datatype_ident_name(&member.type_),
+            typeref_name(&member.tref),
             ident_name(&member.name)
         ));
         ret.push_str("\n");
     }
 
-    ret.push_str(&format!("}} __wasi_{}_t;\n", ident_name(&s.name)));
+    ret.push_str(&format!("}} __wasi_{}_t;\n", ident_name(name)));
     ret.push_str("\n");
 }
 
-fn print_union(ret: &mut String, u: &UnionDatatype) {
-    ret.push_str(&format!(
-        "typedef union __wasi_{}_t {{\n",
-        ident_name(&u.name)
-    ));
+fn print_union(ret: &mut String, name: &Id, u: &UnionDatatype) {
+    ret.push_str(&format!("typedef union __wasi_{}_t {{\n", ident_name(name)));
 
     for variant in &u.variants {
         if !variant.docs.is_empty() {
@@ -210,21 +213,21 @@ fn print_union(ret: &mut String, u: &UnionDatatype) {
         }
         ret.push_str(&format!(
             "    {} {};\n",
-            datatype_ident_name(&variant.type_),
+            typeref_name(&variant.tref),
             ident_name(&variant.name)
         ));
         ret.push_str("\n");
     }
 
-    ret.push_str(&format!("}} __wasi_{}_t;\n", ident_name(&u.name)));
+    ret.push_str(&format!("}} __wasi_{}_t;\n", ident_name(name)));
     ret.push_str("\n");
 }
 
-fn print_handle(ret: &mut String, h: &HandleDatatype) {
-    ret.push_str(&format!("typedef int __wasi_{}_t;", ident_name(&h.name)));
+fn print_handle(ret: &mut String, name: &Id, _h: &HandleDatatype) {
+    ret.push_str(&format!("typedef int __wasi_{}_t;", ident_name(name)));
 }
 
-fn print_module(ret: &mut String, doc: &Document, m: &Module) {
+fn print_module(ret: &mut String, m: &Module) {
     ret.push_str("/**\n");
     ret.push_str(&format!(" * @defgroup {}\n", ident_name(&m.name),));
     for line in m.docs.lines() {
@@ -235,14 +238,14 @@ fn print_module(ret: &mut String, doc: &Document, m: &Module) {
     ret.push_str("\n");
 
     for func in m.funcs() {
-        print_func(ret, doc, &func, &m.name);
+        print_func(ret, &func, &m.name);
     }
 
     ret.push_str("/** @} */\n");
     ret.push_str("\n");
 }
 
-fn print_func(ret: &mut String, doc: &Document, func: &InterfaceFunc, module_name: &Id) {
+fn print_func(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
     if !func.docs.is_empty() {
         ret.push_str("/**\n");
         for line in func.docs.lines() {
@@ -267,7 +270,7 @@ fn print_func(ret: &mut String, doc: &Document, func: &InterfaceFunc, module_nam
         ret.push_str("void ");
     } else {
         let first_result = &func.results[0];
-        ret.push_str(&format!("{} ", datatype_ident_name(&first_result.type_)));
+        ret.push_str(&format!("{} ", typeref_name(&first_result.tref)));
     }
 
     ret.push_str(&format!("__wasi_{}(\n", ident_name(&func.name)));
@@ -283,7 +286,7 @@ fn print_func(ret: &mut String, doc: &Document, func: &InterfaceFunc, module_nam
             }
             ret.push_str("     */\n");
         }
-        add_params(ret, doc, &ident_name(&param.name), &param.type_);
+        add_params(ret, &ident_name(&param.name), &param.tref);
         ret.push_str(&format!(
             "{}\n",
             if index + 1 < func.params.len() || func.results.len() > 1 {
@@ -308,7 +311,7 @@ fn print_func(ret: &mut String, doc: &Document, func: &InterfaceFunc, module_nam
         }
         ret.push_str(&format!(
             "    {} *{}{}\n",
-            datatype_ident_name(&result.type_),
+            typeref_name(&result.tref),
             ident_name(&result.name),
             if index + 1 < func.results.len() {
                 ","
@@ -334,19 +337,9 @@ fn print_func(ret: &mut String, doc: &Document, func: &InterfaceFunc, module_nam
     ret.push_str("\n");
 }
 
-fn add_params(ret: &mut String, doc: &Document, name: &str, type_: &DatatypeIdent) {
-    match type_ {
-        DatatypeIdent::Ident(i) => match &doc.datatype(&i.name).unwrap().as_ref().variant {
-            DatatypeVariant::Alias(a) => add_resolved_params(ret, name, &a.to),
-            _ => add_resolved_params(ret, name, type_),
-        },
-        _ => add_resolved_params(ret, name, type_),
-    }
-}
-
-fn add_resolved_params(ret: &mut String, name: &str, type_: &DatatypeIdent) {
-    match type_ {
-        DatatypeIdent::Builtin(BuiltinType::String) => {
+fn add_params(ret: &mut String, name: &str, tref: &TypeRef) {
+    match &*tref.type_() {
+        Type::Builtin(BuiltinType::String) => {
             ret.push_str(&format!("    const char *{},\n", name));
             ret.push_str("\n");
             ret.push_str("    /**\n");
@@ -357,10 +350,10 @@ fn add_resolved_params(ret: &mut String, name: &str, type_: &DatatypeIdent) {
             ret.push_str("     */\n");
             ret.push_str(&format!("    size_t {}_len", name));
         }
-        DatatypeIdent::Array(element) => {
+        Type::Array(element) => {
             ret.push_str(&format!(
                 "    const {} *{},\n",
-                datatype_ident_name(&element),
+                typeref_name(&element),
                 name
             ));
             ret.push_str("\n");
@@ -373,7 +366,7 @@ fn add_resolved_params(ret: &mut String, name: &str, type_: &DatatypeIdent) {
             ret.push_str(&format!("    size_t {}_len", name));
         }
         _ => {
-            ret.push_str(&format!("    {} {}", datatype_ident_name(&type_), name));
+            ret.push_str(&format!("    {} {}", typeref_name(tref), name));
         }
     }
 }
@@ -398,13 +391,22 @@ fn builtin_type_name(b: BuiltinType) -> &'static str {
     }
 }
 
-fn datatype_ident_name(data_ty: &DatatypeIdent) -> String {
-    match data_ty {
-        DatatypeIdent::Builtin(b) => builtin_type_name(*b).to_string(),
-        DatatypeIdent::Array(_) => unreachable!("arrays should be special-cased"),
-        DatatypeIdent::Pointer(p) => format!("{} *", datatype_ident_name(&*p)),
-        DatatypeIdent::ConstPointer(p) => format!("const {} *", datatype_ident_name(&*p)),
-        DatatypeIdent::Ident(i) => format!("__wasi_{}_t", i.name.as_str()),
+fn typeref_name(tref: &TypeRef) -> String {
+    match tref {
+        TypeRef::Name(named_type) => format!("__wasi_{}_t", named_type.name.as_str()),
+        TypeRef::Value(anon_type) => match &**anon_type {
+            Type::Builtin(b) => builtin_type_name(*b).to_string(),
+            Type::Array(_) => unreachable!("arrays should be special-cased"),
+            Type::Pointer(p) => format!("{} *", typeref_name(&*p)),
+            Type::ConstPointer(p) => format!("const {} *", typeref_name(&*p)),
+            Type::Struct { .. }
+            | Type::Union { .. }
+            | Type::Enum { .. }
+            | Type::Flags { .. }
+            | Type::Handle { .. } => unreachable!(
+                "wasi should not have anonymous structs, unions, enums, flags, handles"
+            ),
+        },
     }
 }
 

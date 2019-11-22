@@ -1,17 +1,23 @@
 use heck::ShoutySnakeCase;
 use witx::*;
 
-const PROLOGUE: &str = r#"/**
- * THIS FILE IS AUTO-GENERATED!
+pub(crate) fn to_c_header(doc: &Document, inputs_str: &str) -> String {
+    let mut ret = String::new();
+
+    ret.push_str(&format!(
+        r#"/**
+ * THIS FILE IS AUTO-GENERATED from the following files:
+ *   {}
  *
  * @file
- * This file describes the WASI interface, consisting of functions, types,
+ * This file describes the [WASI] interface, consisting of functions, types,
  * and defined values (macros).
  *
  * The interface described here is greatly inspired by [CloudABI]'s clean,
  * thoughtfully-designed, cabability-oriented, POSIX-style API.
  *
  * [CloudABI]: https://github.com/NuxiNL/cloudlibc
+ * [WASI]: https://github.com/WebAssembly/WASI/
  */
 
 #ifndef __wasi_api_h
@@ -34,23 +40,14 @@ _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
 
 #ifdef __cplusplus
-extern "C" {
+extern "C" {{
 #endif
 
 // TODO: Encoding this in witx.
 #define __WASI_DIRCOOKIE_START (UINT64_C(0))
-"#;
-
-const EPILOGUE: &str = r#"#ifdef __cplusplus
-}
-#endif
-
-#endif"#;
-
-pub fn to_c_header(doc: &Document) -> String {
-    let mut ret = String::new();
-
-    ret.push_str(PROLOGUE);
+"#,
+        inputs_str,
+    ));
 
     for d in doc.datatypes() {
         print_datatype(&mut ret, &*d);
@@ -60,7 +57,14 @@ pub fn to_c_header(doc: &Document) -> String {
         print_module(&mut ret, doc, &m);
     }
 
-    ret.push_str(EPILOGUE);
+    ret.push_str(
+        r#"#ifdef __cplusplus
+}
+#endif
+
+#endif
+"#,
+    );
 
     ret
 }

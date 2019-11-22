@@ -1,14 +1,16 @@
 /**
- * THIS FILE IS AUTO-GENERATED!
+ * THIS FILE IS AUTO-GENERATED from the following files:
+ *   typenames.witx, wasi_snapshot_preview1.witx
  *
  * @file
- * This file describes the WASI interface, consisting of functions, types,
+ * This file describes the [WASI] interface, consisting of functions, types,
  * and defined values (macros).
  *
  * The interface described here is greatly inspired by [CloudABI]'s clean,
  * thoughtfully-designed, cabability-oriented, POSIX-style API.
  *
  * [CloudABI]: https://github.com/NuxiNL/cloudlibc
+ * [WASI]: https://github.com/WebAssembly/WASI/
  */
 
 #ifndef __wasi_api_h

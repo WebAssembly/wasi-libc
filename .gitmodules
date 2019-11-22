@@ -1,0 +1,3 @@
+[submodule "tools/wasi-headers/WASI"]
+	path = tools/wasi-headers/WASI
+	url = https://github.com/WebAssembly/WASI

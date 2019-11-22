@@ -10,3 +10,6 @@ publish = false
 heck = "0.3.1"
 witx = { path = "WASI/tools/witx" }
 anyhow = "1.0.22"
+
+[dev-dependencies]
+diff = "0.1.11"

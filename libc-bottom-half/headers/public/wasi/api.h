@@ -1574,7 +1574,7 @@ __wasi_errno_t __wasi_clock_time_get(
     /**
      * The maximum lag (exclusive) that the returned time value may have, compared to its actual value.
      */
-    uint64_t precision,
+    __wasi_timestamp_t precision,
 
     /**
      * The time value of the clock.
@@ -1591,17 +1591,17 @@ __wasi_errno_t __wasi_clock_time_get(
  * Note: This is similar to `posix_fadvise` in POSIX.
  */
 __wasi_errno_t __wasi_fd_advise(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The offset within the file to which the advisory applies.
      */
-    uint64_t offset,
+    __wasi_filesize_t offset,
 
     /**
      * The length of the region to which the advisory applies.
      */
-    uint64_t len,
+    __wasi_filesize_t len,
 
     /**
      * The advice.
@@ -1618,17 +1618,17 @@ __wasi_errno_t __wasi_fd_advise(
  * Note: This is similar to `posix_fallocate` in POSIX.
  */
 __wasi_errno_t __wasi_fd_allocate(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The offset at which to start the allocation.
      */
-    uint64_t offset,
+    __wasi_filesize_t offset,
 
     /**
      * The length of the area that is allocated.
      */
-    uint64_t len
+    __wasi_filesize_t len
 ) __attribute__((
     __import_module__("wasi_snapshot_preview1"),
     __import_name__("fd_allocate"),
@@ -1640,7 +1640,7 @@ __wasi_errno_t __wasi_fd_allocate(
  * Note: This is similar to `close` in POSIX.
  */
 __wasi_errno_t __wasi_fd_close(
-    uint32_t fd
+    __wasi_fd_t fd
 ) __attribute__((
     __import_module__("wasi_snapshot_preview1"),
     __import_name__("fd_close"),
@@ -1652,7 +1652,7 @@ __wasi_errno_t __wasi_fd_close(
  * Note: This is similar to `fdatasync` in POSIX.
  */
 __wasi_errno_t __wasi_fd_datasync(
-    uint32_t fd
+    __wasi_fd_t fd
 ) __attribute__((
     __import_module__("wasi_snapshot_preview1"),
     __import_name__("fd_datasync"),
@@ -1664,7 +1664,7 @@ __wasi_errno_t __wasi_fd_datasync(
  * Note: This returns similar flags to `fsync(fd, F_GETFL)` in POSIX, as well as additional fields.
  */
 __wasi_errno_t __wasi_fd_fdstat_get(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The buffer where the file descriptor's attributes are stored.
@@ -1681,7 +1681,7 @@ __wasi_errno_t __wasi_fd_fdstat_get(
  * Note: This is similar to `fcntl(fd, F_SETFL, flags)` in POSIX.
  */
 __wasi_errno_t __wasi_fd_fdstat_set_flags(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The desired values of the file descriptor flags.
@@ -1698,7 +1698,7 @@ __wasi_errno_t __wasi_fd_fdstat_set_flags(
  * This can only be used to remove rights, and returns `ENOTCAPABLE` if called in a way that would attempt to add rights
  */
 __wasi_errno_t __wasi_fd_fdstat_set_rights(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The desired rights of the file descriptor.
@@ -1716,7 +1716,7 @@ __wasi_errno_t __wasi_fd_fdstat_set_rights(
  * Return the attributes of an open file.
  */
 __wasi_errno_t __wasi_fd_filestat_get(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The buffer where the file's attributes are stored.
@@ -1733,12 +1733,12 @@ __wasi_errno_t __wasi_fd_filestat_get(
  * Note: This is similar to `ftruncate` in POSIX.
  */
 __wasi_errno_t __wasi_fd_filestat_set_size(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The desired file size.
      */
-    uint64_t size
+    __wasi_filesize_t size
 ) __attribute__((
     __import_module__("wasi_snapshot_preview1"),
     __import_name__("fd_filestat_set_size"),
@@ -1750,17 +1750,17 @@ __wasi_errno_t __wasi_fd_filestat_set_size(
  * Note: This is similar to `futimens` in POSIX.
  */
 __wasi_errno_t __wasi_fd_filestat_set_times(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The desired values of the data access timestamp.
      */
-    uint64_t atim,
+    __wasi_timestamp_t atim,
 
     /**
      * The desired values of the data modification timestamp.
      */
-    uint64_t mtim,
+    __wasi_timestamp_t mtim,
 
     /**
      * A bitmask indicating which timestamps to adjust.
@@ -1777,7 +1777,7 @@ __wasi_errno_t __wasi_fd_filestat_set_times(
  * Note: This is similar to `preadv` in POSIX.
  */
 __wasi_errno_t __wasi_fd_pread(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * List of scatter/gather vectors in which to store data.
@@ -1792,7 +1792,7 @@ __wasi_errno_t __wasi_fd_pread(
     /**
      * The offset within the file at which to read.
      */
-    uint64_t offset,
+    __wasi_filesize_t offset,
 
     /**
      * The number of bytes read.
@@ -1808,7 +1808,7 @@ __wasi_errno_t __wasi_fd_pread(
  * Return a description of the given preopened file descriptor.
  */
 __wasi_errno_t __wasi_fd_prestat_get(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The buffer where the description is stored.
@@ -1824,14 +1824,14 @@ __wasi_errno_t __wasi_fd_prestat_get(
  * Return a description of the given preopened file descriptor.
  */
 __wasi_errno_t __wasi_fd_prestat_dir_name(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * A buffer into which to write the preopened directory name.
      */
     uint8_t * path,
 
-    uint32_t path_len
+    __wasi_size_t path_len
 ) __attribute__((
     __import_module__("wasi_snapshot_preview1"),
     __import_name__("fd_prestat_dir_name"),
@@ -1843,7 +1843,7 @@ __wasi_errno_t __wasi_fd_prestat_dir_name(
  * Note: This is similar to `pwritev` in POSIX.
  */
 __wasi_errno_t __wasi_fd_pwrite(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * List of scatter/gather vectors from which to retrieve data.
@@ -1858,7 +1858,7 @@ __wasi_errno_t __wasi_fd_pwrite(
     /**
      * The offset within the file at which to write.
      */
-    uint64_t offset,
+    __wasi_filesize_t offset,
 
     /**
      * The number of bytes written.
@@ -1875,7 +1875,7 @@ __wasi_errno_t __wasi_fd_pwrite(
  * Note: This is similar to `readv` in POSIX.
  */
 __wasi_errno_t __wasi_fd_read(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * List of scatter/gather vectors to which to store data.
@@ -1909,19 +1909,19 @@ __wasi_errno_t __wasi_fd_read(
  * entry, or skip the oversized directory entry.
  */
 __wasi_errno_t __wasi_fd_readdir(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The buffer where directory entries are stored
      */
     uint8_t * buf,
 
-    uint32_t buf_len,
+    __wasi_size_t buf_len,
 
     /**
      * The location within the directory to start reading
      */
-    uint64_t cookie,
+    __wasi_dircookie_t cookie,
 
     /**
      * The number of bytes stored in the read buffer. If less than the size of the read buffer, the end of the directory has been reached.
@@ -1944,12 +1944,12 @@ __wasi_errno_t __wasi_fd_readdir(
  * would disappear if `dup2()` were to be removed entirely.
  */
 __wasi_errno_t __wasi_fd_renumber(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The file descriptor to overwrite.
      */
-    uint32_t to
+    __wasi_fd_t to
 ) __attribute__((
     __import_module__("wasi_snapshot_preview1"),
     __import_name__("fd_renumber"),
@@ -1961,12 +1961,12 @@ __wasi_errno_t __wasi_fd_renumber(
  * Note: This is similar to `lseek` in POSIX.
  */
 __wasi_errno_t __wasi_fd_seek(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The number of bytes to move.
      */
-    int64_t offset,
+    __wasi_filedelta_t offset,
 
     /**
      * The base from which the offset is relative.
@@ -1988,7 +1988,7 @@ __wasi_errno_t __wasi_fd_seek(
  * Note: This is similar to `fsync` in POSIX.
  */
 __wasi_errno_t __wasi_fd_sync(
-    uint32_t fd
+    __wasi_fd_t fd
 ) __attribute__((
     __import_module__("wasi_snapshot_preview1"),
     __import_name__("fd_sync"),
@@ -2000,7 +2000,7 @@ __wasi_errno_t __wasi_fd_sync(
  * Note: This is similar to `lseek(fd, 0, SEEK_CUR)` in POSIX.
  */
 __wasi_errno_t __wasi_fd_tell(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The current offset of the file descriptor, relative to the start of the file.
@@ -2017,7 +2017,7 @@ __wasi_errno_t __wasi_fd_tell(
  * Note: This is similar to `writev` in POSIX.
  */
 __wasi_errno_t __wasi_fd_write(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * List of scatter/gather vectors from which to retrieve data.
@@ -2044,7 +2044,7 @@ __wasi_errno_t __wasi_fd_write(
  * Note: This is similar to `mkdirat` in POSIX.
  */
 __wasi_errno_t __wasi_path_create_directory(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The path at which to create the directory.
@@ -2066,7 +2066,7 @@ __wasi_errno_t __wasi_path_create_directory(
  * Note: This is similar to `stat` in POSIX.
  */
 __wasi_errno_t __wasi_path_filestat_get(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * Flags determining the method of how the path is resolved.
@@ -2098,7 +2098,7 @@ __wasi_errno_t __wasi_path_filestat_get(
  * Note: This is similar to `utimensat` in POSIX.
  */
 __wasi_errno_t __wasi_path_filestat_set_times(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * Flags determining the method of how the path is resolved.
@@ -2118,12 +2118,12 @@ __wasi_errno_t __wasi_path_filestat_set_times(
     /**
      * The desired values of the data access timestamp.
      */
-    uint64_t atim,
+    __wasi_timestamp_t atim,
 
     /**
      * The desired values of the data modification timestamp.
      */
-    uint64_t mtim,
+    __wasi_timestamp_t mtim,
 
     /**
      * A bitmask indicating which timestamps to adjust.
@@ -2140,7 +2140,7 @@ __wasi_errno_t __wasi_path_filestat_set_times(
  * Note: This is similar to `linkat` in POSIX.
  */
 __wasi_errno_t __wasi_path_link(
-    uint32_t old_fd,
+    __wasi_fd_t old_fd,
 
     /**
      * Flags determining the method of how the path is resolved.
@@ -2160,7 +2160,7 @@ __wasi_errno_t __wasi_path_link(
     /**
      * The working directory at which the resolution of the new path starts.
      */
-    uint32_t new_fd,
+    __wasi_fd_t new_fd,
 
     /**
      * The destination path at which to create the hard link.
@@ -2187,7 +2187,7 @@ __wasi_errno_t __wasi_path_link(
  * Note: This is similar to `openat` in POSIX.
  */
 __wasi_errno_t __wasi_path_open(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * Flags determining the method of how the path is resolved.
@@ -2240,7 +2240,7 @@ __wasi_errno_t __wasi_path_open(
  * Note: This is similar to `readlinkat` in POSIX.
  */
 __wasi_errno_t __wasi_path_readlink(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The path of the symbolic link from which to read.
@@ -2257,7 +2257,7 @@ __wasi_errno_t __wasi_path_readlink(
      */
     uint8_t * buf,
 
-    uint32_t buf_len,
+    __wasi_size_t buf_len,
 
     /**
      * The number of bytes placed in the buffer.
@@ -2275,7 +2275,7 @@ __wasi_errno_t __wasi_path_readlink(
  * Note: This is similar to `unlinkat(fd, path, AT_REMOVEDIR)` in POSIX.
  */
 __wasi_errno_t __wasi_path_remove_directory(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The path to a directory to remove.
@@ -2297,7 +2297,7 @@ __wasi_errno_t __wasi_path_remove_directory(
  * Note: This is similar to `renameat` in POSIX.
  */
 __wasi_errno_t __wasi_path_rename(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The source path of the file or directory to rename.
@@ -2312,7 +2312,7 @@ __wasi_errno_t __wasi_path_rename(
     /**
      * The working directory at which the resolution of the new path starts.
      */
-    uint32_t new_fd,
+    __wasi_fd_t new_fd,
 
     /**
      * The destination path to which to rename the file or directory.
@@ -2344,7 +2344,7 @@ __wasi_errno_t __wasi_path_symlink(
      */
     size_t old_path_len,
 
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The destination path at which to create the symbolic link.
@@ -2367,7 +2367,7 @@ __wasi_errno_t __wasi_path_symlink(
  * Note: This is similar to `unlinkat(fd, path, 0)` in POSIX.
  */
 __wasi_errno_t __wasi_path_unlink_file(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * The path to a file to unlink.
@@ -2401,7 +2401,7 @@ __wasi_errno_t __wasi_poll_oneoff(
     /**
      * Both the number of subscriptions and events.
      */
-    uint32_t nsubscriptions,
+    __wasi_size_t nsubscriptions,
 
     /**
      * The number of events stored.
@@ -2422,7 +2422,7 @@ _Noreturn void __wasi_proc_exit(
     /**
      * The exit code returned by the process.
      */
-    uint32_t rval
+    __wasi_exitcode_t rval
 ) __attribute__((
     __import_module__("wasi_snapshot_preview1"),
     __import_name__("proc_exit")));
@@ -2468,7 +2468,7 @@ __wasi_errno_t __wasi_random_get(
      */
     uint8_t * buf,
 
-    uint32_t buf_len
+    __wasi_size_t buf_len
 ) __attribute__((
     __import_module__("wasi_snapshot_preview1"),
     __import_name__("random_get"),
@@ -2481,7 +2481,7 @@ __wasi_errno_t __wasi_random_get(
  * the data into multiple buffers in the manner of `readv`.
  */
 __wasi_errno_t __wasi_sock_recv(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * List of scatter/gather vectors to which to store data.
@@ -2518,7 +2518,7 @@ __wasi_errno_t __wasi_sock_recv(
  * the data from multiple buffers in the manner of `writev`.
  */
 __wasi_errno_t __wasi_sock_send(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * List of scatter/gather vectors to which to retrieve data
@@ -2533,7 +2533,7 @@ __wasi_errno_t __wasi_sock_send(
     /**
      * Message flags.
      */
-    uint16_t si_flags,
+    __wasi_siflags_t si_flags,
 
     /**
      * Number of bytes transmitted.
@@ -2550,7 +2550,7 @@ __wasi_errno_t __wasi_sock_send(
  * Note: This is similar to `shutdown` in POSIX.
  */
 __wasi_errno_t __wasi_sock_shutdown(
-    uint32_t fd,
+    __wasi_fd_t fd,
 
     /**
      * Which channels on the socket to shut down.

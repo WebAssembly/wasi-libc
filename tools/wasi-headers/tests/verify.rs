@@ -1,7 +1,7 @@
 #[test]
 fn assert_same_as_src() {
     let actual = include_str!("../../../libc-bottom-half/headers/public/wasi/api.h");
-    let expected = main::generate();
+    let expected = wasi_headers::generate().expect("header generation should succeed");
     if actual == expected {
         return;
     }

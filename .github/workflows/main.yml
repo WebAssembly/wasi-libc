@@ -10,6 +10,8 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
     - uses: actions/checkout@master
+      with:
+        submodules: true
     - name: Install Rust (rustup)
       shell: bash
       run: rustup update stable --no-self-update && rustup default stable
@@ -31,6 +33,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
+      with:
+        submodules: true
     - name: Install Rust
       run: rustup update stable && rustup default stable && rustup component add rustfmt
     - run: cargo fmt -- --check

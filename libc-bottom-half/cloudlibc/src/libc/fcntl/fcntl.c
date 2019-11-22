@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -33,14 +33,19 @@ int fcntl(int fildes, int cmd, ...) {
       if ((fds.fs_rights_base &
 #ifdef __wasilibc_unmodified_upstream
            (__WASI_RIGHT_FD_READ | __WASI_RIGHT_FILE_READDIR)) != 0) {
-#else
-           (__WASI_RIGHT_FD_READ | __WASI_RIGHT_FD_READDIR)) != 0) {
-#endif
         if ((fds.fs_rights_base & __WASI_RIGHT_FD_WRITE) != 0)
+#else
+           (__WASI_RIGHTS_FD_READ | __WASI_RIGHTS_FD_READDIR)) != 0) {
+        if ((fds.fs_rights_base & __WASI_RIGHTS_FD_WRITE) != 0)
+#endif
           oflags |= O_RDWR;
         else
           oflags |= O_RDONLY;
+#ifdef __wasilibc_unmodified_upstream
       } else if ((fds.fs_rights_base & __WASI_RIGHT_FD_WRITE) != 0) {
+#else
+      } else if ((fds.fs_rights_base & __WASI_RIGHTS_FD_WRITE) != 0) {
+#endif
         oflags |= O_WRONLY;
 #ifdef __wasilibc_unmodified_upstream
       } else if ((fds.fs_rights_base & __WASI_RIGHT_PROC_EXEC) != 0) {

@@ -5,7 +5,7 @@
 #include <common/time.h>
 
 #include <assert.h>
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <time.h>
 
 static_assert(CLOCKS_PER_SEC == NSEC_PER_SEC,
@@ -13,6 +13,10 @@ static_assert(CLOCKS_PER_SEC == NSEC_PER_SEC,
 
 clock_t clock(void) {
   __wasi_timestamp_t ts = 0;
+#ifdef __wasilibc_unmodified_upstream // generated constant names
   (void)__wasi_clock_time_get(__WASI_CLOCK_PROCESS_CPUTIME_ID, 0, &ts);
+#else
+  (void)__wasi_clock_time_get(__WASI_CLOCKID_PROCESS_CPUTIME_ID, 0, &ts);
+#endif
   return ts;
 }

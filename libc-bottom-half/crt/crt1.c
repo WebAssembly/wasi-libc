@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <sysexits.h>
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <wasi/libc.h>
 #include <wasi/libc-internal.h>
 
@@ -14,14 +14,14 @@ __wasi_errno_t __wasilibc_populate_libpreopen(void) __attribute__((weak));
 void _start(void) {
     // Record the preopened resources, if needed.
     if (&__wasilibc_populate_libpreopen != NULL &&
-        __wasilibc_populate_libpreopen() != __WASI_ESUCCESS)
+        __wasilibc_populate_libpreopen() != __WASI_ERRNO_SUCCESS)
     {
         _Exit(EX_OSERR);
     }
 
     // Fill in the environment from WASI syscalls, if needed.
     if (&__wasilibc_populate_environ != NULL &&
-        __wasilibc_populate_environ() != __WASI_ESUCCESS)
+        __wasilibc_populate_environ() != __WASI_ERRNO_SUCCESS)
     {
         _Exit(EX_OSERR);
     }

@@ -4,7 +4,7 @@
 
 #include <common/errno.h>
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 #ifdef __wasilibc_unmodified_upstream // unlink
 #else
 #include <wasi/libc.h>

@@ -4,7 +4,7 @@
 
 #include <common/errno.h>
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <dirent.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -28,7 +28,8 @@ DIR *fdopendir(int fd) {
 #ifdef __wasilibc_unmodified_upstream
       __wasi_file_readdir(fd, dirp->buffer, DIRENT_DEFAULT_BUFFER_SIZE,
 #else
-      __wasi_fd_readdir(fd, dirp->buffer, DIRENT_DEFAULT_BUFFER_SIZE,
+      // TODO: Remove the cast on `dirp->buffer` once the witx is updated with char8 support.
+      __wasi_fd_readdir(fd, (uint8_t *)dirp->buffer, DIRENT_DEFAULT_BUFFER_SIZE,
 #endif
                                 __WASI_DIRCOOKIE_START, &dirp->buffer_used);
   if (error != 0) {

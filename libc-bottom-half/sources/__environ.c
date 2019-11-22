@@ -1,6 +1,6 @@
 #include <unistd.h>
 #include <stdlib.h>
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <wasi/libc.h>
 #include <wasi/libc-internal.h>
 
@@ -19,23 +19,23 @@ __wasi_errno_t __wasilibc_populate_environ(void) {
     size_t environ_count;
     size_t environ_buf_size;
     err = __wasi_environ_sizes_get(&environ_count, &environ_buf_size);
-    if (err != __WASI_ESUCCESS) {
+    if (err != __WASI_ERRNO_SUCCESS) {
         return err;
     }
     if (environ_count == 0) {
-        return __WASI_ESUCCESS;
+        return __WASI_ERRNO_SUCCESS;
     }
 
     // Add 1 for the NULL pointer to mark the end, and check for overflow.
     size_t num_ptrs = environ_count + 1;
     if (num_ptrs == 0) {
-        return __WASI_ENOMEM;
+        return __WASI_ERRNO_NOMEM;
     }
 
     // Allocate memory for storing the environment chars.
     char *environ_buf = malloc(environ_buf_size);
     if (environ_buf == NULL) {
-        return __WASI_ENOMEM;
+        return __WASI_ERRNO_NOMEM;
     }
 
     // Allocate memory for the array of pointers. This uses `calloc` both to
@@ -43,12 +43,13 @@ __wasi_errno_t __wasilibc_populate_environ(void) {
     char **environ_ptrs = calloc(num_ptrs, sizeof(char *));
     if (environ_ptrs == NULL) {
         free(environ_buf);
-        return __WASI_ENOMEM;
+        return __WASI_ERRNO_NOMEM;
     }
 
     // Fill the environment chars, and the __environ array with pointers into those chars.
-    err = __wasi_environ_get(environ_ptrs, environ_buf);
-    if (err == __WASI_ESUCCESS) {
+    // TODO: Remove the casts on `environ_ptrs` and `environ_buf` once the witx is updated with char8 support.
+    err = __wasi_environ_get((uint8_t **)environ_ptrs, (uint8_t *)environ_buf);
+    if (err == __WASI_ERRNO_SUCCESS) {
         __environ = environ_ptrs;
     } else {
         free(environ_buf);

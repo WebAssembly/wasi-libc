@@ -6,11 +6,15 @@
 #include <common/time.h>
 
 #include <assert.h>
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <time.h>
 
+#ifdef __wasilibc_unmodified_upstream // generated constant names
 static_assert(TIMER_ABSTIME == __WASI_SUBSCRIPTION_CLOCK_ABSTIME,
+#else
+static_assert(TIMER_ABSTIME == __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME,
+#endif
               "Value mismatch");
 
 #ifdef __wasilibc_unmodified_upstream
@@ -30,7 +34,7 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
       .clock.clock_id = clock_id->id,
       .clock.flags = flags,
 #else
-      .u.clock.clock_id = clock_id->id,
+      .u.clock.id = clock_id->id,
       .u.clock.flags = flags,
 #endif
   };

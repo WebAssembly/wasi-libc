@@ -6,7 +6,7 @@
 
 #include <sys/stat.h>
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -40,7 +40,7 @@ int utimensat(int fd, const char *path, const struct timespec times[2],
 #ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
     lookup.flags |= __WASI_LOOKUP_SYMLINK_FOLLOW;
 #else
-    lookup_flags |= __WASI_LOOKUP_SYMLINK_FOLLOW;
+    lookup_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
 #endif
 
   // Perform system call.

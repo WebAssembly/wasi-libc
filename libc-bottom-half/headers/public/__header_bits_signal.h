@@ -1,7 +1,7 @@
 #ifndef __wasilibc___header_bits_signal_h
 #define __wasilibc___header_bits_signal_h
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 
 #define SIGHUP    __WASI_SIGHUP
 #define SIGINT    __WASI_SIGINT

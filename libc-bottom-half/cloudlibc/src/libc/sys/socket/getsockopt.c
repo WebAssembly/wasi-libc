@@ -4,7 +4,7 @@
 
 #include <sys/socket.h>
 
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <string.h>
 

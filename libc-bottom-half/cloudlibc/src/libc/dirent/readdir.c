@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 
 #include <assert.h>
-#include <wasi/core.h>
+#include <wasi/api.h>
 #include <dirent.h>
 #include <errno.h>
 #include <stddef.h>
@@ -94,7 +94,8 @@ struct dirent *readdir(DIR *dirp) {
 #ifdef __wasilibc_unmodified_upstream
         __wasi_file_readdir(dirp->fd, dirp->buffer, dirp->buffer_size,
 #else
-        __wasi_fd_readdir(dirp->fd, dirp->buffer, dirp->buffer_size,
+        // TODO: Remove the cast on `dirp->buffer` once the witx is updated with char8 support.
+        __wasi_fd_readdir(dirp->fd, (uint8_t *)dirp->buffer, dirp->buffer_size,
 #endif
                                   dirp->cookie, &dirp->buffer_used);
     if (error != 0) {

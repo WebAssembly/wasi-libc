@@ -1,0 +1,4 @@
+# Se publish headers and other files from the repo, and we don't want
+# them differing depending on the line-ending style of the host they
+# were checked out on.
+* text eol=lf

@@ -523,7 +523,9 @@ __wasilibc_find_relpath(
 
 /// This is referenced by weak reference from crt1.c and lives in the same source
 /// file as `__wasilibc_find_relpath` so that it's linked in when it's needed.
-__attribute__((constructor(0)))
+// Concerning the 51 -- see the comment by the constructor priority in
+// libc-bottom-half/sources/__environ.c.
+__attribute__((constructor(51)))
 static void
 __wasilibc_populate_libpreopen(void)
 {

@@ -11,7 +11,10 @@ extern __typeof(__environ) environ __attribute__((weak, alias("__environ")));
 
 // We define this function here in the same source file as __environ, so that
 // this function is called in iff environment variable support is used.
-__attribute__((constructor(0)))
+// Concerning the 50 -- levels up to 100 are reserved for the implementation,
+// so we an arbitrary number in the middle of the range to allow other
+// reserved things to go before or after.
+__attribute__((constructor(50)))
 static void __wasilibc_populate_environ(void) {
     __wasi_errno_t err;
 

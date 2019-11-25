@@ -54,6 +54,7 @@
 #include <errno.h>
 #include <dirent.h>
 #include <assert.h>
+#include <sysexits.h>
 #include <wasi/libc.h>
 #include <wasi/libc-find-relpath.h>
 
@@ -522,7 +523,8 @@ __wasilibc_find_relpath(
 
 /// This is referenced by weak reference from crt1.c and lives in the same source
 /// file as `__wasilibc_find_relpath` so that it's linked in when it's needed.
-__wasi_errno_t
+__attribute__((constructor(0)))
+static void
 __wasilibc_populate_libpreopen(void)
 {
     // Skip stdin, stdout, and stderr, and count up until we reach an invalid
@@ -533,24 +535,24 @@ __wasilibc_populate_libpreopen(void)
         if (ret == __WASI_ERRNO_BADF)
             break;
         if (ret != __WASI_ERRNO_SUCCESS)
-            return ret;
+            goto oserr;
         switch (prestat.pr_type) {
         case __WASI_PREOPENTYPE_DIR: {
             char *path = malloc(prestat.u.dir.pr_name_len + 1);
             if (path == NULL)
-                return __WASI_ERRNO_NOMEM;
+                goto software;
 
             // TODO: Remove the cast on `path` once the witx is updated with char8 support.
             ret = __wasi_fd_prestat_dir_name(fd, (uint8_t *)path, prestat.u.dir.pr_name_len);
             if (ret != __WASI_ERRNO_SUCCESS) {
                 free(path);
-                return ret;
+                goto oserr;
             }
             path[prestat.u.dir.pr_name_len] = '\0';
 
             if (internal_register_preopened_fd(fd, path) != 0) {
                 free(path);
-                return __WASI_ERRNO_NOMEM;
+                goto software;
             }
 
             break;
@@ -560,5 +562,9 @@ __wasilibc_populate_libpreopen(void)
         }
     }
 
-    return __WASI_ERRNO_SUCCESS;
+    return;
+oserr:
+    _Exit(EX_OSERR);
+software:
+    _Exit(EX_SOFTWARE);
 }

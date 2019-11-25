@@ -1,18 +1,18 @@
 #include <unistd.h>
 #include <stdlib.h>
+#include <sysexits.h>
 #include <wasi/api.h>
 #include <wasi/libc.h>
-#include <wasi/libc-internal.h>
 
 static char *empty_environ[1] = { NULL };
 char **__environ = empty_environ;
 extern __typeof(__environ) _environ __attribute__((weak, alias("__environ")));
 extern __typeof(__environ) environ __attribute__((weak, alias("__environ")));
 
-// This function is referenced by a weak symbol in crt1.c, and we define
-// it here in the same source file as __environ, so that this function is
-// linked in iff environment variable support is used.
-__wasi_errno_t __wasilibc_populate_environ(void) {
+// We define this function here in the same source file as __environ, so that
+// this function is called in iff environment variable support is used.
+__attribute__((constructor(0)))
+static void __wasilibc_populate_environ(void) {
     __wasi_errno_t err;
 
     // Get the sizes of the arrays we'll have to create to copy in the environment.
@@ -20,22 +20,22 @@ __wasi_errno_t __wasilibc_populate_environ(void) {
     size_t environ_buf_size;
     err = __wasi_environ_sizes_get(&environ_count, &environ_buf_size);
     if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+        goto oserr;
     }
     if (environ_count == 0) {
-        return __WASI_ERRNO_SUCCESS;
+        return;
     }
 
     // Add 1 for the NULL pointer to mark the end, and check for overflow.
     size_t num_ptrs = environ_count + 1;
     if (num_ptrs == 0) {
-        return __WASI_ERRNO_NOMEM;
+        goto software;
     }
 
     // Allocate memory for storing the environment chars.
     char *environ_buf = malloc(environ_buf_size);
     if (environ_buf == NULL) {
-        return __WASI_ERRNO_NOMEM;
+        goto software;
     }
 
     // Allocate memory for the array of pointers. This uses `calloc` both to
@@ -43,17 +43,21 @@ __wasi_errno_t __wasilibc_populate_environ(void) {
     char **environ_ptrs = calloc(num_ptrs, sizeof(char *));
     if (environ_ptrs == NULL) {
         free(environ_buf);
-        return __WASI_ERRNO_NOMEM;
+        goto software;
     }
 
     // Fill the environment chars, and the __environ array with pointers into those chars.
     // TODO: Remove the casts on `environ_ptrs` and `environ_buf` once the witx is updated with char8 support.
     err = __wasi_environ_get((uint8_t **)environ_ptrs, (uint8_t *)environ_buf);
-    if (err == __WASI_ERRNO_SUCCESS) {
-        __environ = environ_ptrs;
-    } else {
+    if (err != __WASI_ERRNO_SUCCESS) {
         free(environ_buf);
         free(environ_ptrs);
+        goto oserr;
     }
-    return err;
+
+    __environ = environ_ptrs;
+oserr:
+    _Exit(EX_OSERR);
+software:
+    _Exit(EX_SOFTWARE);
 }

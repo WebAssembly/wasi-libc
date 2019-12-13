@@ -59,7 +59,7 @@ typedef uint32_t __wasi_clockid_t;
  * The clock measuring real time. Time value zero corresponds with
  * 1970-01-01T00:00:00Z.
  */
-#define __WASI_CLOCKID_REALTIME ((__wasi_clockid_t)0)
+#define __WASI_CLOCKID_REALTIME (UINT32_C(0))
 
 /**
  * The store-wide monotonic clock, which is defined as a clock measuring
@@ -67,17 +67,17 @@ typedef uint32_t __wasi_clockid_t;
  * clock jumps. The epoch of this clock is undefined. The absolute time
  * value of this clock therefore has no meaning.
  */
-#define __WASI_CLOCKID_MONOTONIC ((__wasi_clockid_t)1)
+#define __WASI_CLOCKID_MONOTONIC (UINT32_C(1))
 
 /**
  * The CPU-time clock associated with the current process.
  */
-#define __WASI_CLOCKID_PROCESS_CPUTIME_ID ((__wasi_clockid_t)2)
+#define __WASI_CLOCKID_PROCESS_CPUTIME_ID (UINT32_C(2))
 
 /**
  * The CPU-time clock associated with the current thread.
  */
-#define __WASI_CLOCKID_THREAD_CPUTIME_ID ((__wasi_clockid_t)3)
+#define __WASI_CLOCKID_THREAD_CPUTIME_ID (UINT32_C(3))
 
 /**
  * Error codes returned by functions.
@@ -90,387 +90,387 @@ typedef uint16_t __wasi_errno_t;
 /**
  * No error occurred. System call completed successfully.
  */
-#define __WASI_ERRNO_SUCCESS ((__wasi_errno_t)0)
+#define __WASI_ERRNO_SUCCESS (UINT16_C(0))
 
 /**
  * Argument list too long.
  */
-#define __WASI_ERRNO_2BIG ((__wasi_errno_t)1)
+#define __WASI_ERRNO_2BIG (UINT16_C(1))
 
 /**
  * Permission denied.
  */
-#define __WASI_ERRNO_ACCES ((__wasi_errno_t)2)
+#define __WASI_ERRNO_ACCES (UINT16_C(2))
 
 /**
  * Address in use.
  */
-#define __WASI_ERRNO_ADDRINUSE ((__wasi_errno_t)3)
+#define __WASI_ERRNO_ADDRINUSE (UINT16_C(3))
 
 /**
  * Address not available.
  */
-#define __WASI_ERRNO_ADDRNOTAVAIL ((__wasi_errno_t)4)
+#define __WASI_ERRNO_ADDRNOTAVAIL (UINT16_C(4))
 
 /**
  * Address family not supported.
  */
-#define __WASI_ERRNO_AFNOSUPPORT ((__wasi_errno_t)5)
+#define __WASI_ERRNO_AFNOSUPPORT (UINT16_C(5))
 
 /**
  * Resource unavailable, or operation would block.
  */
-#define __WASI_ERRNO_AGAIN ((__wasi_errno_t)6)
+#define __WASI_ERRNO_AGAIN (UINT16_C(6))
 
 /**
  * Connection already in progress.
  */
-#define __WASI_ERRNO_ALREADY ((__wasi_errno_t)7)
+#define __WASI_ERRNO_ALREADY (UINT16_C(7))
 
 /**
  * Bad file descriptor.
  */
-#define __WASI_ERRNO_BADF ((__wasi_errno_t)8)
+#define __WASI_ERRNO_BADF (UINT16_C(8))
 
 /**
  * Bad message.
  */
-#define __WASI_ERRNO_BADMSG ((__wasi_errno_t)9)
+#define __WASI_ERRNO_BADMSG (UINT16_C(9))
 
 /**
  * Device or resource busy.
  */
-#define __WASI_ERRNO_BUSY ((__wasi_errno_t)10)
+#define __WASI_ERRNO_BUSY (UINT16_C(10))
 
 /**
  * Operation canceled.
  */
-#define __WASI_ERRNO_CANCELED ((__wasi_errno_t)11)
+#define __WASI_ERRNO_CANCELED (UINT16_C(11))
 
 /**
  * No child processes.
  */
-#define __WASI_ERRNO_CHILD ((__wasi_errno_t)12)
+#define __WASI_ERRNO_CHILD (UINT16_C(12))
 
 /**
  * Connection aborted.
  */
-#define __WASI_ERRNO_CONNABORTED ((__wasi_errno_t)13)
+#define __WASI_ERRNO_CONNABORTED (UINT16_C(13))
 
 /**
  * Connection refused.
  */
-#define __WASI_ERRNO_CONNREFUSED ((__wasi_errno_t)14)
+#define __WASI_ERRNO_CONNREFUSED (UINT16_C(14))
 
 /**
  * Connection reset.
  */
-#define __WASI_ERRNO_CONNRESET ((__wasi_errno_t)15)
+#define __WASI_ERRNO_CONNRESET (UINT16_C(15))
 
 /**
  * Resource deadlock would occur.
  */
-#define __WASI_ERRNO_DEADLK ((__wasi_errno_t)16)
+#define __WASI_ERRNO_DEADLK (UINT16_C(16))
 
 /**
  * Destination address required.
  */
-#define __WASI_ERRNO_DESTADDRREQ ((__wasi_errno_t)17)
+#define __WASI_ERRNO_DESTADDRREQ (UINT16_C(17))
 
 /**
  * Mathematics argument out of domain of function.
  */
-#define __WASI_ERRNO_DOM ((__wasi_errno_t)18)
+#define __WASI_ERRNO_DOM (UINT16_C(18))
 
 /**
  * Reserved.
  */
-#define __WASI_ERRNO_DQUOT ((__wasi_errno_t)19)
+#define __WASI_ERRNO_DQUOT (UINT16_C(19))
 
 /**
  * File exists.
  */
-#define __WASI_ERRNO_EXIST ((__wasi_errno_t)20)
+#define __WASI_ERRNO_EXIST (UINT16_C(20))
 
 /**
  * Bad address.
  */
-#define __WASI_ERRNO_FAULT ((__wasi_errno_t)21)
+#define __WASI_ERRNO_FAULT (UINT16_C(21))
 
 /**
  * File too large.
  */
-#define __WASI_ERRNO_FBIG ((__wasi_errno_t)22)
+#define __WASI_ERRNO_FBIG (UINT16_C(22))
 
 /**
  * Host is unreachable.
  */
-#define __WASI_ERRNO_HOSTUNREACH ((__wasi_errno_t)23)
+#define __WASI_ERRNO_HOSTUNREACH (UINT16_C(23))
 
 /**
  * Identifier removed.
  */
-#define __WASI_ERRNO_IDRM ((__wasi_errno_t)24)
+#define __WASI_ERRNO_IDRM (UINT16_C(24))
 
 /**
  * Illegal byte sequence.
  */
-#define __WASI_ERRNO_ILSEQ ((__wasi_errno_t)25)
+#define __WASI_ERRNO_ILSEQ (UINT16_C(25))
 
 /**
  * Operation in progress.
  */
-#define __WASI_ERRNO_INPROGRESS ((__wasi_errno_t)26)
+#define __WASI_ERRNO_INPROGRESS (UINT16_C(26))
 
 /**
  * Interrupted function.
  */
-#define __WASI_ERRNO_INTR ((__wasi_errno_t)27)
+#define __WASI_ERRNO_INTR (UINT16_C(27))
 
 /**
  * Invalid argument.
  */
-#define __WASI_ERRNO_INVAL ((__wasi_errno_t)28)
+#define __WASI_ERRNO_INVAL (UINT16_C(28))
 
 /**
  * I/O error.
  */
-#define __WASI_ERRNO_IO ((__wasi_errno_t)29)
+#define __WASI_ERRNO_IO (UINT16_C(29))
 
 /**
  * Socket is connected.
  */
-#define __WASI_ERRNO_ISCONN ((__wasi_errno_t)30)
+#define __WASI_ERRNO_ISCONN (UINT16_C(30))
 
 /**
  * Is a directory.
  */
-#define __WASI_ERRNO_ISDIR ((__wasi_errno_t)31)
+#define __WASI_ERRNO_ISDIR (UINT16_C(31))
 
 /**
  * Too many levels of symbolic links.
  */
-#define __WASI_ERRNO_LOOP ((__wasi_errno_t)32)
+#define __WASI_ERRNO_LOOP (UINT16_C(32))
 
 /**
  * File descriptor value too large.
  */
-#define __WASI_ERRNO_MFILE ((__wasi_errno_t)33)
+#define __WASI_ERRNO_MFILE (UINT16_C(33))
 
 /**
  * Too many links.
  */
-#define __WASI_ERRNO_MLINK ((__wasi_errno_t)34)
+#define __WASI_ERRNO_MLINK (UINT16_C(34))
 
 /**
  * Message too large.
  */
-#define __WASI_ERRNO_MSGSIZE ((__wasi_errno_t)35)
+#define __WASI_ERRNO_MSGSIZE (UINT16_C(35))
 
 /**
  * Reserved.
  */
-#define __WASI_ERRNO_MULTIHOP ((__wasi_errno_t)36)
+#define __WASI_ERRNO_MULTIHOP (UINT16_C(36))
 
 /**
  * Filename too long.
  */
-#define __WASI_ERRNO_NAMETOOLONG ((__wasi_errno_t)37)
+#define __WASI_ERRNO_NAMETOOLONG (UINT16_C(37))
 
 /**
  * Network is down.
  */
-#define __WASI_ERRNO_NETDOWN ((__wasi_errno_t)38)
+#define __WASI_ERRNO_NETDOWN (UINT16_C(38))
 
 /**
  * Connection aborted by network.
  */
-#define __WASI_ERRNO_NETRESET ((__wasi_errno_t)39)
+#define __WASI_ERRNO_NETRESET (UINT16_C(39))
 
 /**
  * Network unreachable.
  */
-#define __WASI_ERRNO_NETUNREACH ((__wasi_errno_t)40)
+#define __WASI_ERRNO_NETUNREACH (UINT16_C(40))
 
 /**
  * Too many files open in system.
  */
-#define __WASI_ERRNO_NFILE ((__wasi_errno_t)41)
+#define __WASI_ERRNO_NFILE (UINT16_C(41))
 
 /**
  * No buffer space available.
  */
-#define __WASI_ERRNO_NOBUFS ((__wasi_errno_t)42)
+#define __WASI_ERRNO_NOBUFS (UINT16_C(42))
 
 /**
  * No such device.
  */
-#define __WASI_ERRNO_NODEV ((__wasi_errno_t)43)
+#define __WASI_ERRNO_NODEV (UINT16_C(43))
 
 /**
  * No such file or directory.
  */
-#define __WASI_ERRNO_NOENT ((__wasi_errno_t)44)
+#define __WASI_ERRNO_NOENT (UINT16_C(44))
 
 /**
  * Executable file format error.
  */
-#define __WASI_ERRNO_NOEXEC ((__wasi_errno_t)45)
+#define __WASI_ERRNO_NOEXEC (UINT16_C(45))
 
 /**
  * No locks available.
  */
-#define __WASI_ERRNO_NOLCK ((__wasi_errno_t)46)
+#define __WASI_ERRNO_NOLCK (UINT16_C(46))
 
 /**
  * Reserved.
  */
-#define __WASI_ERRNO_NOLINK ((__wasi_errno_t)47)
+#define __WASI_ERRNO_NOLINK (UINT16_C(47))
 
 /**
  * Not enough space.
  */
-#define __WASI_ERRNO_NOMEM ((__wasi_errno_t)48)
+#define __WASI_ERRNO_NOMEM (UINT16_C(48))
 
 /**
  * No message of the desired type.
  */
-#define __WASI_ERRNO_NOMSG ((__wasi_errno_t)49)
+#define __WASI_ERRNO_NOMSG (UINT16_C(49))
 
 /**
  * Protocol not available.
  */
-#define __WASI_ERRNO_NOPROTOOPT ((__wasi_errno_t)50)
+#define __WASI_ERRNO_NOPROTOOPT (UINT16_C(50))
 
 /**
  * No space left on device.
  */
-#define __WASI_ERRNO_NOSPC ((__wasi_errno_t)51)
+#define __WASI_ERRNO_NOSPC (UINT16_C(51))
 
 /**
  * Function not supported.
  */
-#define __WASI_ERRNO_NOSYS ((__wasi_errno_t)52)
+#define __WASI_ERRNO_NOSYS (UINT16_C(52))
 
 /**
  * The socket is not connected.
  */
-#define __WASI_ERRNO_NOTCONN ((__wasi_errno_t)53)
+#define __WASI_ERRNO_NOTCONN (UINT16_C(53))
 
 /**
  * Not a directory or a symbolic link to a directory.
  */
-#define __WASI_ERRNO_NOTDIR ((__wasi_errno_t)54)
+#define __WASI_ERRNO_NOTDIR (UINT16_C(54))
 
 /**
  * Directory not empty.
  */
-#define __WASI_ERRNO_NOTEMPTY ((__wasi_errno_t)55)
+#define __WASI_ERRNO_NOTEMPTY (UINT16_C(55))
 
 /**
  * State not recoverable.
  */
-#define __WASI_ERRNO_NOTRECOVERABLE ((__wasi_errno_t)56)
+#define __WASI_ERRNO_NOTRECOVERABLE (UINT16_C(56))
 
 /**
  * Not a socket.
  */
-#define __WASI_ERRNO_NOTSOCK ((__wasi_errno_t)57)
+#define __WASI_ERRNO_NOTSOCK (UINT16_C(57))
 
 /**
  * Not supported, or operation not supported on socket.
  */
-#define __WASI_ERRNO_NOTSUP ((__wasi_errno_t)58)
+#define __WASI_ERRNO_NOTSUP (UINT16_C(58))
 
 /**
  * Inappropriate I/O control operation.
  */
-#define __WASI_ERRNO_NOTTY ((__wasi_errno_t)59)
+#define __WASI_ERRNO_NOTTY (UINT16_C(59))
 
 /**
  * No such device or address.
  */
-#define __WASI_ERRNO_NXIO ((__wasi_errno_t)60)
+#define __WASI_ERRNO_NXIO (UINT16_C(60))
 
 /**
  * Value too large to be stored in data type.
  */
-#define __WASI_ERRNO_OVERFLOW ((__wasi_errno_t)61)
+#define __WASI_ERRNO_OVERFLOW (UINT16_C(61))
 
 /**
  * Previous owner died.
  */
-#define __WASI_ERRNO_OWNERDEAD ((__wasi_errno_t)62)
+#define __WASI_ERRNO_OWNERDEAD (UINT16_C(62))
 
 /**
  * Operation not permitted.
  */
-#define __WASI_ERRNO_PERM ((__wasi_errno_t)63)
+#define __WASI_ERRNO_PERM (UINT16_C(63))
 
 /**
  * Broken pipe.
  */
-#define __WASI_ERRNO_PIPE ((__wasi_errno_t)64)
+#define __WASI_ERRNO_PIPE (UINT16_C(64))
 
 /**
  * Protocol error.
  */
-#define __WASI_ERRNO_PROTO ((__wasi_errno_t)65)
+#define __WASI_ERRNO_PROTO (UINT16_C(65))
 
 /**
  * Protocol not supported.
  */
-#define __WASI_ERRNO_PROTONOSUPPORT ((__wasi_errno_t)66)
+#define __WASI_ERRNO_PROTONOSUPPORT (UINT16_C(66))
 
 /**
  * Protocol wrong type for socket.
  */
-#define __WASI_ERRNO_PROTOTYPE ((__wasi_errno_t)67)
+#define __WASI_ERRNO_PROTOTYPE (UINT16_C(67))
 
 /**
  * Result too large.
  */
-#define __WASI_ERRNO_RANGE ((__wasi_errno_t)68)
+#define __WASI_ERRNO_RANGE (UINT16_C(68))
 
 /**
  * Read-only file system.
  */
-#define __WASI_ERRNO_ROFS ((__wasi_errno_t)69)
+#define __WASI_ERRNO_ROFS (UINT16_C(69))
 
 /**
  * Invalid seek.
  */
-#define __WASI_ERRNO_SPIPE ((__wasi_errno_t)70)
+#define __WASI_ERRNO_SPIPE (UINT16_C(70))
 
 /**
  * No such process.
  */
-#define __WASI_ERRNO_SRCH ((__wasi_errno_t)71)
+#define __WASI_ERRNO_SRCH (UINT16_C(71))
 
 /**
  * Reserved.
  */
-#define __WASI_ERRNO_STALE ((__wasi_errno_t)72)
+#define __WASI_ERRNO_STALE (UINT16_C(72))
 
 /**
  * Connection timed out.
  */
-#define __WASI_ERRNO_TIMEDOUT ((__wasi_errno_t)73)
+#define __WASI_ERRNO_TIMEDOUT (UINT16_C(73))
 
 /**
  * Text file busy.
  */
-#define __WASI_ERRNO_TXTBSY ((__wasi_errno_t)74)
+#define __WASI_ERRNO_TXTBSY (UINT16_C(74))
 
 /**
  * Cross-device link.
  */
-#define __WASI_ERRNO_XDEV ((__wasi_errno_t)75)
+#define __WASI_ERRNO_XDEV (UINT16_C(75))
 
 /**
  * Extension: Capabilities insufficient.
  */
-#define __WASI_ERRNO_NOTCAPABLE ((__wasi_errno_t)76)
+#define __WASI_ERRNO_NOTCAPABLE (UINT16_C(76))
 
 /**
  * File descriptor rights, determining which actions may be performed.
@@ -482,157 +482,157 @@ typedef uint64_t __wasi_rights_t;
  * If `path_open` is set, includes the right to invoke
  * `path_open` with `fdflag::dsync`.
  */
-#define __WASI_RIGHTS_FD_DATASYNC ((__wasi_rights_t)1)
+#define __WASI_RIGHTS_FD_DATASYNC (UINT64_C(1))
 
 /**
  * The right to invoke `fd_read` and `sock_recv`.
  * If `rights::fd_seek` is set, includes the right to invoke `fd_pread`.
  */
-#define __WASI_RIGHTS_FD_READ ((__wasi_rights_t)2)
+#define __WASI_RIGHTS_FD_READ (UINT64_C(2))
 
 /**
  * The right to invoke `fd_seek`. This flag implies `rights::fd_tell`.
  */
-#define __WASI_RIGHTS_FD_SEEK ((__wasi_rights_t)4)
+#define __WASI_RIGHTS_FD_SEEK (UINT64_C(4))
 
 /**
  * The right to invoke `fd_fdstat_set_flags`.
  */
-#define __WASI_RIGHTS_FD_FDSTAT_SET_FLAGS ((__wasi_rights_t)8)
+#define __WASI_RIGHTS_FD_FDSTAT_SET_FLAGS (UINT64_C(8))
 
 /**
  * The right to invoke `fd_sync`.
  * If `path_open` is set, includes the right to invoke
  * `path_open` with `fdflag::rsync` and `fdflag::dsync`.
  */
-#define __WASI_RIGHTS_FD_SYNC ((__wasi_rights_t)16)
+#define __WASI_RIGHTS_FD_SYNC (UINT64_C(16))
 
 /**
  * The right to invoke `fd_seek` in such a way that the file offset
  * remains unaltered (i.e., `WHENCE_CUR` with offset zero), or to
  * invoke `fd_tell`.
  */
-#define __WASI_RIGHTS_FD_TELL ((__wasi_rights_t)32)
+#define __WASI_RIGHTS_FD_TELL (UINT64_C(32))
 
 /**
  * The right to invoke `fd_write` and `sock_send`.
  * If `rights::fd_seek` is set, includes the right to invoke `fd_pwrite`.
  */
-#define __WASI_RIGHTS_FD_WRITE ((__wasi_rights_t)64)
+#define __WASI_RIGHTS_FD_WRITE (UINT64_C(64))
 
 /**
  * The right to invoke `fd_advise`.
  */
-#define __WASI_RIGHTS_FD_ADVISE ((__wasi_rights_t)128)
+#define __WASI_RIGHTS_FD_ADVISE (UINT64_C(128))
 
 /**
  * The right to invoke `fd_allocate`.
  */
-#define __WASI_RIGHTS_FD_ALLOCATE ((__wasi_rights_t)256)
+#define __WASI_RIGHTS_FD_ALLOCATE (UINT64_C(256))
 
 /**
  * The right to invoke `path_create_directory`.
  */
-#define __WASI_RIGHTS_PATH_CREATE_DIRECTORY ((__wasi_rights_t)512)
+#define __WASI_RIGHTS_PATH_CREATE_DIRECTORY (UINT64_C(512))
 
 /**
  * If `path_open` is set, the right to invoke `path_open` with `oflags::creat`.
  */
-#define __WASI_RIGHTS_PATH_CREATE_FILE ((__wasi_rights_t)1024)
+#define __WASI_RIGHTS_PATH_CREATE_FILE (UINT64_C(1024))
 
 /**
  * The right to invoke `path_link` with the file descriptor as the
  * source directory.
  */
-#define __WASI_RIGHTS_PATH_LINK_SOURCE ((__wasi_rights_t)2048)
+#define __WASI_RIGHTS_PATH_LINK_SOURCE (UINT64_C(2048))
 
 /**
  * The right to invoke `path_link` with the file descriptor as the
  * target directory.
  */
-#define __WASI_RIGHTS_PATH_LINK_TARGET ((__wasi_rights_t)4096)
+#define __WASI_RIGHTS_PATH_LINK_TARGET (UINT64_C(4096))
 
 /**
  * The right to invoke `path_open`.
  */
-#define __WASI_RIGHTS_PATH_OPEN ((__wasi_rights_t)8192)
+#define __WASI_RIGHTS_PATH_OPEN (UINT64_C(8192))
 
 /**
  * The right to invoke `fd_readdir`.
  */
-#define __WASI_RIGHTS_FD_READDIR ((__wasi_rights_t)16384)
+#define __WASI_RIGHTS_FD_READDIR (UINT64_C(16384))
 
 /**
  * The right to invoke `path_readlink`.
  */
-#define __WASI_RIGHTS_PATH_READLINK ((__wasi_rights_t)32768)
+#define __WASI_RIGHTS_PATH_READLINK (UINT64_C(32768))
 
 /**
  * The right to invoke `path_rename` with the file descriptor as the source directory.
  */
-#define __WASI_RIGHTS_PATH_RENAME_SOURCE ((__wasi_rights_t)65536)
+#define __WASI_RIGHTS_PATH_RENAME_SOURCE (UINT64_C(65536))
 
 /**
  * The right to invoke `path_rename` with the file descriptor as the target directory.
  */
-#define __WASI_RIGHTS_PATH_RENAME_TARGET ((__wasi_rights_t)131072)
+#define __WASI_RIGHTS_PATH_RENAME_TARGET (UINT64_C(131072))
 
 /**
  * The right to invoke `path_filestat_get`.
  */
-#define __WASI_RIGHTS_PATH_FILESTAT_GET ((__wasi_rights_t)262144)
+#define __WASI_RIGHTS_PATH_FILESTAT_GET (UINT64_C(262144))
 
 /**
  * The right to change a file's size (there is no `path_filestat_set_size`).
  * If `path_open` is set, includes the right to invoke `path_open` with `oflags::trunc`.
  */
-#define __WASI_RIGHTS_PATH_FILESTAT_SET_SIZE ((__wasi_rights_t)524288)
+#define __WASI_RIGHTS_PATH_FILESTAT_SET_SIZE (UINT64_C(524288))
 
 /**
  * The right to invoke `path_filestat_set_times`.
  */
-#define __WASI_RIGHTS_PATH_FILESTAT_SET_TIMES ((__wasi_rights_t)1048576)
+#define __WASI_RIGHTS_PATH_FILESTAT_SET_TIMES (UINT64_C(1048576))
 
 /**
  * The right to invoke `fd_filestat_get`.
  */
-#define __WASI_RIGHTS_FD_FILESTAT_GET ((__wasi_rights_t)2097152)
+#define __WASI_RIGHTS_FD_FILESTAT_GET (UINT64_C(2097152))
 
 /**
  * The right to invoke `fd_filestat_set_size`.
  */
-#define __WASI_RIGHTS_FD_FILESTAT_SET_SIZE ((__wasi_rights_t)4194304)
+#define __WASI_RIGHTS_FD_FILESTAT_SET_SIZE (UINT64_C(4194304))
 
 /**
  * The right to invoke `fd_filestat_set_times`.
  */
-#define __WASI_RIGHTS_FD_FILESTAT_SET_TIMES ((__wasi_rights_t)8388608)
+#define __WASI_RIGHTS_FD_FILESTAT_SET_TIMES (UINT64_C(8388608))
 
 /**
  * The right to invoke `path_symlink`.
  */
-#define __WASI_RIGHTS_PATH_SYMLINK ((__wasi_rights_t)16777216)
+#define __WASI_RIGHTS_PATH_SYMLINK (UINT64_C(16777216))
 
 /**
  * The right to invoke `path_remove_directory`.
  */
-#define __WASI_RIGHTS_PATH_REMOVE_DIRECTORY ((__wasi_rights_t)33554432)
+#define __WASI_RIGHTS_PATH_REMOVE_DIRECTORY (UINT64_C(33554432))
 
 /**
  * The right to invoke `path_unlink_file`.
  */
-#define __WASI_RIGHTS_PATH_UNLINK_FILE ((__wasi_rights_t)67108864)
+#define __WASI_RIGHTS_PATH_UNLINK_FILE (UINT64_C(67108864))
 
 /**
  * If `rights::fd_read` is set, includes the right to invoke `poll_oneoff` to subscribe to `eventtype::fd_read`.
  * If `rights::fd_write` is set, includes the right to invoke `poll_oneoff` to subscribe to `eventtype::fd_write`.
  */
-#define __WASI_RIGHTS_POLL_FD_READWRITE ((__wasi_rights_t)134217728)
+#define __WASI_RIGHTS_POLL_FD_READWRITE (UINT64_C(134217728))
 
 /**
  * The right to invoke `sock_shutdown`.
  */
-#define __WASI_RIGHTS_SOCK_SHUTDOWN ((__wasi_rights_t)268435456)
+#define __WASI_RIGHTS_SOCK_SHUTDOWN (UINT64_C(268435456))
 
 /**
  * A file descriptor index.
@@ -684,17 +684,17 @@ typedef uint8_t __wasi_whence_t;
 /**
  * Seek relative to start-of-file.
  */
-#define __WASI_WHENCE_SET ((__wasi_whence_t)0)
+#define __WASI_WHENCE_SET (UINT8_C(0))
 
 /**
  * Seek relative to current position.
  */
-#define __WASI_WHENCE_CUR ((__wasi_whence_t)1)
+#define __WASI_WHENCE_CUR (UINT8_C(1))
 
 /**
  * Seek relative to end-of-file.
  */
-#define __WASI_WHENCE_END ((__wasi_whence_t)2)
+#define __WASI_WHENCE_END (UINT8_C(2))
 
 /**
  * A reference to the offset of a directory entry.
@@ -721,42 +721,42 @@ typedef uint8_t __wasi_filetype_t;
 /**
  * The type of the file descriptor or file is unknown or is different from any of the other types specified.
  */
-#define __WASI_FILETYPE_UNKNOWN ((__wasi_filetype_t)0)
+#define __WASI_FILETYPE_UNKNOWN (UINT8_C(0))
 
 /**
  * The file descriptor or file refers to a block device inode.
  */
-#define __WASI_FILETYPE_BLOCK_DEVICE ((__wasi_filetype_t)1)
+#define __WASI_FILETYPE_BLOCK_DEVICE (UINT8_C(1))
 
 /**
  * The file descriptor or file refers to a character device inode.
  */
-#define __WASI_FILETYPE_CHARACTER_DEVICE ((__wasi_filetype_t)2)
+#define __WASI_FILETYPE_CHARACTER_DEVICE (UINT8_C(2))
 
 /**
  * The file descriptor or file refers to a directory inode.
  */
-#define __WASI_FILETYPE_DIRECTORY ((__wasi_filetype_t)3)
+#define __WASI_FILETYPE_DIRECTORY (UINT8_C(3))
 
 /**
  * The file descriptor or file refers to a regular file inode.
  */
-#define __WASI_FILETYPE_REGULAR_FILE ((__wasi_filetype_t)4)
+#define __WASI_FILETYPE_REGULAR_FILE (UINT8_C(4))
 
 /**
  * The file descriptor or file refers to a datagram socket.
  */
-#define __WASI_FILETYPE_SOCKET_DGRAM ((__wasi_filetype_t)5)
+#define __WASI_FILETYPE_SOCKET_DGRAM (UINT8_C(5))
 
 /**
  * The file descriptor or file refers to a byte-stream socket.
  */
-#define __WASI_FILETYPE_SOCKET_STREAM ((__wasi_filetype_t)6)
+#define __WASI_FILETYPE_SOCKET_STREAM (UINT8_C(6))
 
 /**
  * The file refers to a symbolic link inode.
  */
-#define __WASI_FILETYPE_SYMBOLIC_LINK ((__wasi_filetype_t)7)
+#define __WASI_FILETYPE_SYMBOLIC_LINK (UINT8_C(7))
 
 /**
  * A directory entry.
@@ -792,32 +792,32 @@ typedef uint8_t __wasi_advice_t;
 /**
  * The application has no advice to give on its behavior with respect to the specified data.
  */
-#define __WASI_ADVICE_NORMAL ((__wasi_advice_t)0)
+#define __WASI_ADVICE_NORMAL (UINT8_C(0))
 
 /**
  * The application expects to access the specified data sequentially from lower offsets to higher offsets.
  */
-#define __WASI_ADVICE_SEQUENTIAL ((__wasi_advice_t)1)
+#define __WASI_ADVICE_SEQUENTIAL (UINT8_C(1))
 
 /**
  * The application expects to access the specified data in a random order.
  */
-#define __WASI_ADVICE_RANDOM ((__wasi_advice_t)2)
+#define __WASI_ADVICE_RANDOM (UINT8_C(2))
 
 /**
  * The application expects to access the specified data in the near future.
  */
-#define __WASI_ADVICE_WILLNEED ((__wasi_advice_t)3)
+#define __WASI_ADVICE_WILLNEED (UINT8_C(3))
 
 /**
  * The application expects that it will not access the specified data in the near future.
  */
-#define __WASI_ADVICE_DONTNEED ((__wasi_advice_t)4)
+#define __WASI_ADVICE_DONTNEED (UINT8_C(4))
 
 /**
  * The application expects to access the specified data once and then not reuse it thereafter.
  */
-#define __WASI_ADVICE_NOREUSE ((__wasi_advice_t)5)
+#define __WASI_ADVICE_NOREUSE (UINT8_C(5))
 
 /**
  * File descriptor flags.
@@ -827,29 +827,29 @@ typedef uint16_t __wasi_fdflags_t;
 /**
  * Append mode: Data written to the file is always appended to the file's end.
  */
-#define __WASI_FDFLAGS_APPEND ((__wasi_fdflags_t)1)
+#define __WASI_FDFLAGS_APPEND (UINT16_C(1))
 
 /**
  * Write according to synchronized I/O data integrity completion. Only the data stored in the file is synchronized.
  */
-#define __WASI_FDFLAGS_DSYNC ((__wasi_fdflags_t)2)
+#define __WASI_FDFLAGS_DSYNC (UINT16_C(2))
 
 /**
  * Non-blocking mode.
  */
-#define __WASI_FDFLAGS_NONBLOCK ((__wasi_fdflags_t)4)
+#define __WASI_FDFLAGS_NONBLOCK (UINT16_C(4))
 
 /**
  * Synchronized read I/O operations.
  */
-#define __WASI_FDFLAGS_RSYNC ((__wasi_fdflags_t)8)
+#define __WASI_FDFLAGS_RSYNC (UINT16_C(8))
 
 /**
  * Write according to synchronized I/O file integrity completion. In
  * addition to synchronizing the data stored in the file, the implementation
  * may also synchronously update the file's metadata.
  */
-#define __WASI_FDFLAGS_SYNC ((__wasi_fdflags_t)16)
+#define __WASI_FDFLAGS_SYNC (UINT16_C(16))
 
 /**
  * File descriptor attributes.
@@ -892,22 +892,22 @@ typedef uint16_t __wasi_fstflags_t;
 /**
  * Adjust the last data access timestamp to the value stored in `filestat::st_atim`.
  */
-#define __WASI_FSTFLAGS_ATIM ((__wasi_fstflags_t)1)
+#define __WASI_FSTFLAGS_ATIM (UINT16_C(1))
 
 /**
  * Adjust the last data access timestamp to the time of clock `clock::realtime`.
  */
-#define __WASI_FSTFLAGS_ATIM_NOW ((__wasi_fstflags_t)2)
+#define __WASI_FSTFLAGS_ATIM_NOW (UINT16_C(2))
 
 /**
  * Adjust the last data modification timestamp to the value stored in `filestat::st_mtim`.
  */
-#define __WASI_FSTFLAGS_MTIM ((__wasi_fstflags_t)4)
+#define __WASI_FSTFLAGS_MTIM (UINT16_C(4))
 
 /**
  * Adjust the last data modification timestamp to the time of clock `clock::realtime`.
  */
-#define __WASI_FSTFLAGS_MTIM_NOW ((__wasi_fstflags_t)8)
+#define __WASI_FSTFLAGS_MTIM_NOW (UINT16_C(8))
 
 /**
  * Flags determining the method of how paths are resolved.
@@ -917,7 +917,7 @@ typedef uint32_t __wasi_lookupflags_t;
 /**
  * As long as the resolved path corresponds to a symbolic link, it is expanded.
  */
-#define __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW ((__wasi_lookupflags_t)1)
+#define __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW (UINT32_C(1))
 
 /**
  * Open flags used by `path_open`.
@@ -927,22 +927,22 @@ typedef uint16_t __wasi_oflags_t;
 /**
  * Create file if it does not exist.
  */
-#define __WASI_OFLAGS_CREAT ((__wasi_oflags_t)1)
+#define __WASI_OFLAGS_CREAT (UINT16_C(1))
 
 /**
  * Fail if not a directory.
  */
-#define __WASI_OFLAGS_DIRECTORY ((__wasi_oflags_t)2)
+#define __WASI_OFLAGS_DIRECTORY (UINT16_C(2))
 
 /**
  * Fail if file already exists.
  */
-#define __WASI_OFLAGS_EXCL ((__wasi_oflags_t)4)
+#define __WASI_OFLAGS_EXCL (UINT16_C(4))
 
 /**
  * Truncate file to size 0.
  */
-#define __WASI_OFLAGS_TRUNC ((__wasi_oflags_t)8)
+#define __WASI_OFLAGS_TRUNC (UINT16_C(8))
 
 /**
  * Number of hard links to an inode.
@@ -1010,19 +1010,19 @@ typedef uint8_t __wasi_eventtype_t;
  * The time value of clock `subscription::u.clock.clock_id` has
  * reached timestamp `subscription::u.clock.timeout`.
  */
-#define __WASI_EVENTTYPE_CLOCK ((__wasi_eventtype_t)0)
+#define __WASI_EVENTTYPE_CLOCK (UINT8_C(0))
 
 /**
  * File descriptor `subscription::u.fd_readwrite.fd` has data
  * available for reading. This event always triggers for regular files.
  */
-#define __WASI_EVENTTYPE_FD_READ ((__wasi_eventtype_t)1)
+#define __WASI_EVENTTYPE_FD_READ (UINT8_C(1))
 
 /**
  * File descriptor `subscription::u.fd_readwrite.fd` has capacity
  * available for writing. This event always triggers for regular files.
  */
-#define __WASI_EVENTTYPE_FD_WRITE ((__wasi_eventtype_t)2)
+#define __WASI_EVENTTYPE_FD_WRITE (UINT8_C(2))
 
 /**
  * The state of the file descriptor subscribed to with
@@ -1033,7 +1033,7 @@ typedef uint16_t __wasi_eventrwflags_t;
 /**
  * The peer of this socket has closed or disconnected.
  */
-#define __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP ((__wasi_eventrwflags_t)1)
+#define __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP (UINT16_C(1))
 
 /**
  * The contents of an $event when type is `eventtype::fd_read` or
@@ -1102,7 +1102,7 @@ typedef uint16_t __wasi_subclockflags_t;
  * provided in `subscription::u.clock.timeout` relative to the
  * current time value of clock `subscription::u.clock.clock_id.`
  */
-#define __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME ((__wasi_subclockflags_t)1)
+#define __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME (UINT16_C(1))
 
 /**
  * The contents of a $subscription when type is `eventtype::clock`.
@@ -1195,187 +1195,187 @@ typedef uint8_t __wasi_signal_t;
  * No signal. Note that POSIX has special semantics for `kill(pid, 0)`,
  * so this value is reserved.
  */
-#define __WASI_SIGNAL_NONE ((__wasi_signal_t)0)
+#define __WASI_SIGNAL_NONE (UINT8_C(0))
 
 /**
  * Hangup.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_HUP ((__wasi_signal_t)1)
+#define __WASI_SIGNAL_HUP (UINT8_C(1))
 
 /**
  * Terminate interrupt signal.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_INT ((__wasi_signal_t)2)
+#define __WASI_SIGNAL_INT (UINT8_C(2))
 
 /**
  * Terminal quit signal.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_QUIT ((__wasi_signal_t)3)
+#define __WASI_SIGNAL_QUIT (UINT8_C(3))
 
 /**
  * Illegal instruction.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_ILL ((__wasi_signal_t)4)
+#define __WASI_SIGNAL_ILL (UINT8_C(4))
 
 /**
  * Trace/breakpoint trap.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_TRAP ((__wasi_signal_t)5)
+#define __WASI_SIGNAL_TRAP (UINT8_C(5))
 
 /**
  * Process abort signal.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_ABRT ((__wasi_signal_t)6)
+#define __WASI_SIGNAL_ABRT (UINT8_C(6))
 
 /**
  * Access to an undefined portion of a memory object.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_BUS ((__wasi_signal_t)7)
+#define __WASI_SIGNAL_BUS (UINT8_C(7))
 
 /**
  * Erroneous arithmetic operation.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_FPE ((__wasi_signal_t)8)
+#define __WASI_SIGNAL_FPE (UINT8_C(8))
 
 /**
  * Kill.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_KILL ((__wasi_signal_t)9)
+#define __WASI_SIGNAL_KILL (UINT8_C(9))
 
 /**
  * User-defined signal 1.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_USR1 ((__wasi_signal_t)10)
+#define __WASI_SIGNAL_USR1 (UINT8_C(10))
 
 /**
  * Invalid memory reference.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_SEGV ((__wasi_signal_t)11)
+#define __WASI_SIGNAL_SEGV (UINT8_C(11))
 
 /**
  * User-defined signal 2.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_USR2 ((__wasi_signal_t)12)
+#define __WASI_SIGNAL_USR2 (UINT8_C(12))
 
 /**
  * Write on a pipe with no one to read it.
  * Action: Ignored.
  */
-#define __WASI_SIGNAL_PIPE ((__wasi_signal_t)13)
+#define __WASI_SIGNAL_PIPE (UINT8_C(13))
 
 /**
  * Alarm clock.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_ALRM ((__wasi_signal_t)14)
+#define __WASI_SIGNAL_ALRM (UINT8_C(14))
 
 /**
  * Termination signal.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_TERM ((__wasi_signal_t)15)
+#define __WASI_SIGNAL_TERM (UINT8_C(15))
 
 /**
  * Child process terminated, stopped, or continued.
  * Action: Ignored.
  */
-#define __WASI_SIGNAL_CHLD ((__wasi_signal_t)16)
+#define __WASI_SIGNAL_CHLD (UINT8_C(16))
 
 /**
  * Continue executing, if stopped.
  * Action: Continues executing, if stopped.
  */
-#define __WASI_SIGNAL_CONT ((__wasi_signal_t)17)
+#define __WASI_SIGNAL_CONT (UINT8_C(17))
 
 /**
  * Stop executing.
  * Action: Stops executing.
  */
-#define __WASI_SIGNAL_STOP ((__wasi_signal_t)18)
+#define __WASI_SIGNAL_STOP (UINT8_C(18))
 
 /**
  * Terminal stop signal.
  * Action: Stops executing.
  */
-#define __WASI_SIGNAL_TSTP ((__wasi_signal_t)19)
+#define __WASI_SIGNAL_TSTP (UINT8_C(19))
 
 /**
  * Background process attempting read.
  * Action: Stops executing.
  */
-#define __WASI_SIGNAL_TTIN ((__wasi_signal_t)20)
+#define __WASI_SIGNAL_TTIN (UINT8_C(20))
 
 /**
  * Background process attempting write.
  * Action: Stops executing.
  */
-#define __WASI_SIGNAL_TTOU ((__wasi_signal_t)21)
+#define __WASI_SIGNAL_TTOU (UINT8_C(21))
 
 /**
  * High bandwidth data is available at a socket.
  * Action: Ignored.
  */
-#define __WASI_SIGNAL_URG ((__wasi_signal_t)22)
+#define __WASI_SIGNAL_URG (UINT8_C(22))
 
 /**
  * CPU time limit exceeded.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_XCPU ((__wasi_signal_t)23)
+#define __WASI_SIGNAL_XCPU (UINT8_C(23))
 
 /**
  * File size limit exceeded.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_XFSZ ((__wasi_signal_t)24)
+#define __WASI_SIGNAL_XFSZ (UINT8_C(24))
 
 /**
  * Virtual timer expired.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_VTALRM ((__wasi_signal_t)25)
+#define __WASI_SIGNAL_VTALRM (UINT8_C(25))
 
 /**
  * Profiling timer expired.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_PROF ((__wasi_signal_t)26)
+#define __WASI_SIGNAL_PROF (UINT8_C(26))
 
 /**
  * Window changed.
  * Action: Ignored.
  */
-#define __WASI_SIGNAL_WINCH ((__wasi_signal_t)27)
+#define __WASI_SIGNAL_WINCH (UINT8_C(27))
 
 /**
  * I/O possible.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_POLL ((__wasi_signal_t)28)
+#define __WASI_SIGNAL_POLL (UINT8_C(28))
 
 /**
  * Power failure.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_PWR ((__wasi_signal_t)29)
+#define __WASI_SIGNAL_PWR (UINT8_C(29))
 
 /**
  * Bad system call.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_SYS ((__wasi_signal_t)30)
+#define __WASI_SIGNAL_SYS (UINT8_C(30))
 
 /**
  * Flags provided to `sock_recv`.
@@ -1385,12 +1385,12 @@ typedef uint16_t __wasi_riflags_t;
 /**
  * Returns the message without removing it from the socket's receive queue.
  */
-#define __WASI_RIFLAGS_RECV_PEEK ((__wasi_riflags_t)1)
+#define __WASI_RIFLAGS_RECV_PEEK (UINT16_C(1))
 
 /**
  * On byte-stream sockets, block until the full amount of data can be returned.
  */
-#define __WASI_RIFLAGS_RECV_WAITALL ((__wasi_riflags_t)2)
+#define __WASI_RIFLAGS_RECV_WAITALL (UINT16_C(2))
 
 /**
  * Flags returned by `sock_recv`.
@@ -1400,7 +1400,7 @@ typedef uint16_t __wasi_roflags_t;
 /**
  * Returned by `sock_recv`: Message data has been truncated.
  */
-#define __WASI_ROFLAGS_RECV_DATA_TRUNCATED ((__wasi_roflags_t)1)
+#define __WASI_ROFLAGS_RECV_DATA_TRUNCATED (UINT16_C(1))
 
 /**
  * Flags provided to `sock_send`. As there are currently no flags
@@ -1416,12 +1416,12 @@ typedef uint8_t __wasi_sdflags_t;
 /**
  * Disables further receive operations.
  */
-#define __WASI_SDFLAGS_RD ((__wasi_sdflags_t)1)
+#define __WASI_SDFLAGS_RD (UINT8_C(1))
 
 /**
  * Disables further send operations.
  */
-#define __WASI_SDFLAGS_WR ((__wasi_sdflags_t)2)
+#define __WASI_SDFLAGS_WR (UINT8_C(2))
 
 /**
  * Identifiers for preopened capabilities.
@@ -1431,7 +1431,7 @@ typedef uint8_t __wasi_preopentype_t;
 /**
  * A pre-opened directory.
  */
-#define __WASI_PREOPENTYPE_DIR ((__wasi_preopentype_t)0)
+#define __WASI_PREOPENTYPE_DIR (UINT8_C(0))
 
 /**
  * The contents of a $prestat when type is `preopentype::dir`.

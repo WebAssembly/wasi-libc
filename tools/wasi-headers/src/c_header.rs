@@ -137,10 +137,10 @@ fn print_enum(ret: &mut String, name: &Id, e: &EnumDatatype) {
             ret.push_str(" */\n");
         }
         ret.push_str(&format!(
-            "#define __WASI_{}_{} ((__wasi_{}_t){})\n",
+            "#define __WASI_{}_{} ({}({}))\n",
             ident_name(&name).to_shouty_snake_case(),
             ident_name(&variant.name).to_shouty_snake_case(),
-            ident_name(&name),
+            intrepr_const(e.repr),
             index
         ));
         ret.push_str("\n");
@@ -164,10 +164,10 @@ fn print_flags(ret: &mut String, name: &Id, f: &FlagsDatatype) {
             ret.push_str(" */\n");
         }
         ret.push_str(&format!(
-            "#define __WASI_{}_{} ((__wasi_{}_t){})\n",
+            "#define __WASI_{}_{} ({}({}))\n",
             ident_name(name).to_shouty_snake_case(),
             ident_name(&flag.name).to_shouty_snake_case(),
-            ident_name(name),
+            intrepr_const(f.repr),
             1u128 << index
         ));
         ret.push_str("\n");
@@ -416,5 +416,14 @@ fn intrepr_name(i: IntRepr) -> &'static str {
         IntRepr::U16 => "uint16_t",
         IntRepr::U32 => "uint32_t",
         IntRepr::U64 => "uint64_t",
+    }
+}
+
+fn intrepr_const(i: IntRepr) -> &'static str {
+    match i {
+        IntRepr::U8 => "UINT8_C",
+        IntRepr::U16 => "UINT16_C",
+        IntRepr::U32 => "UINT32_C",
+        IntRepr::U64 => "UINT64_C",
     }
 }

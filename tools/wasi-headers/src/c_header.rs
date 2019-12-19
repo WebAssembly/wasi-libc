@@ -1,7 +1,7 @@
 use heck::ShoutySnakeCase;
 use witx::*;
 
-pub(crate) fn to_c_header(doc: &Document, inputs_str: &str) -> String {
+pub fn to_c_header(doc: &Document, inputs_str: &str) -> String {
     let mut ret = String::new();
 
     ret.push_str(&format!(

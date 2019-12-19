@@ -27,6 +27,10 @@ pub(crate) fn to_c_header(doc: &Document, inputs_str: &str) -> String {
 #error <wasi/api.h> is only supported on WASI platforms.
 #endif
 
+#ifndef __wasm32__
+#error <wasi/api.h> only supports wasm32; doesn't yet support wasm64
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -38,8 +42,6 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-// This header is only valid for wasm32: witx currently calcualtes memory
-// layout for the wasm32 abi only.
 _Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
 
 #ifdef __cplusplus

@@ -38,6 +38,7 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
 
 #ifdef __cplusplus
 extern "C" {{
@@ -117,6 +118,17 @@ fn print_alias(ret: &mut String, name: &Id, dest: &TypeRef) {
                 ));
             }
             ret.push_str("\n");
+
+            ret.push_str(&format!(
+                "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
+                ident_name(name),
+                dest.mem_size_align().size
+            ));
+            ret.push_str(&format!(
+                "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
+                ident_name(name),
+                dest.mem_size_align().align
+            ));
         }
     }
 }
@@ -146,6 +158,17 @@ fn print_enum(ret: &mut String, name: &Id, e: &EnumDatatype) {
         ));
         ret.push_str("\n");
     }
+
+    ret.push_str(&format!(
+        "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
+        ident_name(name),
+        e.repr.mem_size()
+    ));
+    ret.push_str(&format!(
+        "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
+        ident_name(name),
+        e.repr.mem_align()
+    ));
 }
 
 fn print_int(ret: &mut String, name: &Id, i: &IntDatatype) {
@@ -213,6 +236,17 @@ fn print_flags(ret: &mut String, name: &Id, f: &FlagsDatatype) {
         ));
         ret.push_str("\n");
     }
+
+    ret.push_str(&format!(
+        "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
+        ident_name(name),
+        f.repr.mem_size(),
+    ));
+    ret.push_str(&format!(
+        "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
+        ident_name(name),
+        f.repr.mem_align(),
+    ));
 }
 
 fn print_struct(ret: &mut String, name: &Id, s: &StructDatatype) {
@@ -239,6 +273,26 @@ fn print_struct(ret: &mut String, name: &Id, s: &StructDatatype) {
 
     ret.push_str(&format!("}} __wasi_{}_t;\n", ident_name(name)));
     ret.push_str("\n");
+
+    ret.push_str(&format!(
+        "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
+        ident_name(name),
+        s.mem_size()
+    ));
+    ret.push_str(&format!(
+        "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
+        ident_name(name),
+        s.mem_align()
+    ));
+
+    for layout in s.member_layout() {
+        ret.push_str(&format!(
+            "_Static_assert(offsetof(__wasi_{}_t, {}) == {}, \"witx calculated offset\");\n",
+            ident_name(name),
+            ident_name(&layout.member.name),
+            layout.offset
+        ));
+    }
 }
 
 fn print_union(ret: &mut String, name: &Id, u: &UnionDatatype) {
@@ -262,6 +316,17 @@ fn print_union(ret: &mut String, name: &Id, u: &UnionDatatype) {
 
     ret.push_str(&format!("}} __wasi_{}_t;\n", ident_name(name)));
     ret.push_str("\n");
+
+    ret.push_str(&format!(
+        "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
+        ident_name(name),
+        u.mem_size()
+    ));
+    ret.push_str(&format!(
+        "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
+        ident_name(name),
+        u.mem_align()
+    ));
 }
 
 fn print_handle(ret: &mut String, name: &Id, _h: &HandleDatatype) {

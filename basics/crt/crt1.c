@@ -7,10 +7,9 @@ void _start(void) {
     // The linker synthesizes this to call constructors.
     __wasm_call_ctors();
 
-    // Call `__original_main` which will either be the application's
-    // zero-argument `main` function (renamed by the compiler) or a libc
-    // routine which populates `argv` and `argc` and calls the application's
-    // two-argument `main`.
+    // Call `__original_main` which will either be the application's zero-argument
+    // `__original_main` function or a libc routine which calls `__main_void`.
+    // TODO: Call `main` directly once we no longer have to support old compilers.
     int r = __original_main();
 
     // Call atexit functions, destructors, stdio cleanup, etc.

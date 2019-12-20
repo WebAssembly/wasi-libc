@@ -34,7 +34,9 @@ endif
 BASICS_DIR = $(CURDIR)/basics
 BASICS_INC = $(BASICS_DIR)/include
 BASICS_CRT_SOURCES = $(wildcard $(BASICS_DIR)/crt/*.c)
-BASICS_SOURCES = $(wildcard $(BASICS_DIR)/sources/*.c)
+BASICS_SOURCES = \
+    $(wildcard $(BASICS_DIR)/sources/*.c) \
+    $(wildcard $(BASICS_DIR)/sources/math/*.c)
 DLMALLOC_DIR = $(CURDIR)/dlmalloc
 DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
 DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/dlmalloc.c

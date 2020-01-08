@@ -272,9 +272,16 @@ add_custom_target(sysroot-headers DEPENDS ${CMAKE_BINARY_DIR}/sysroot)
 
 
 # startup files
-add_library(startup-files OBJECT
+add_library(crt1 OBJECT
   libc-bottom-half/crt/crt1.c)
-add_dependencies(startup-files sysroot-headers)
+add_dependencies(crt1 sysroot-headers)
+
+add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/sysroot/lib/crt1.o
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/sysroot/lib
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_OBJECTS:crt1> ${CMAKE_BINARY_DIR}/sysroot/lib/crt1.o)
+add_custom_target(crt1.o ALL
+  DEPENDS ${CMAKE_BINARY_DIR}/sysroot/lib/crt1.o)
+add_dependencies(crt1.o crt1)
 
 
 add_library(c-printscan-no-floating-point

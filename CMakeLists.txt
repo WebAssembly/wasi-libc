@@ -1127,12 +1127,9 @@ target_link_libraries(c PRIVATE
   libc-top-half
   dlmalloc)
 
-add_custom_command(TARGET c POST_BUILD
-  COMMAND ${CMAKE_AR} crs ${CMAKE_BINARY_DIR}/sysroot/lib/libm.a
-  COMMAND ${CMAKE_AR} crs ${CMAKE_BINARY_DIR}/sysroot/lib/librt.a
-  COMMAND ${CMAKE_AR} crs ${CMAKE_BINARY_DIR}/sysroot/lib/libpthread.a
-  COMMAND ${CMAKE_AR} crs ${CMAKE_BINARY_DIR}/sysroot/lib/libcrypt.a
-  COMMAND ${CMAKE_AR} crs ${CMAKE_BINARY_DIR}/sysroot/lib/libutil.a
-  COMMAND ${CMAKE_AR} crs ${CMAKE_BINARY_DIR}/sysroot/lib/libxnet.a
-  COMMAND ${CMAKE_AR} crs ${CMAKE_BINARY_DIR}/sysroot/lib/libresolv.a
-  COMMAND ${CMAKE_AR} crs ${CMAKE_BINARY_DIR}/sysroot/lib/libdl.a)
+foreach(stub m rt pthread crypt util xnet resolve dl)
+  add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/sysroot/lib/lib${stub}.a
+    COMMAND ${CMAKE_AR} crs ${CMAKE_BINARY_DIR}/sysroot/lib/lib${stub}.a)
+  add_custom_target(${stub} ALL
+    DEPENDS ${CMAKE_BINARY_DIR}/sysroot/lib/lib${stub}.a)
+endforeach()

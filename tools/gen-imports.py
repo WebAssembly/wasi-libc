@@ -33,7 +33,7 @@ def main(argv):
                         '--undefined-only',
                         '--extern-only',
                         '--just-symbol-name',
-                     ] + unparsed,
+                     ] + [ os.path.normpath(path) for path in unparsed ],
                     stdout = subprocess.PIPE)
     output, error = process.communicate()
 

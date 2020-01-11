@@ -33,8 +33,13 @@ add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/alltypes.h.gen
     ${PROJECT_SOURCE_DIR}/libc-top-half/musl/arch/wasm32/bits/alltypes.h.in
     ${PROJECT_SOURCE_DIR}/libc-top-half/musl/include/alltypes.h.in)
 
-add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/sysroot
-  COMMAND ${CMAKE_COMMAND} -E make_directory
+add_custom_command(
+  OUTPUT
+    ${CMAKE_BINARY_DIR}/sysroot
+    ${CMAKE_BINARY_DIR}/sysroot/share/include-all.c
+
+  COMMAND
+    ${CMAKE_COMMAND} -E make_directory
       ${CMAKE_BINARY_DIR}/sysroot/include/
       ${CMAKE_BINARY_DIR}/sysroot/include/arpa/
       ${CMAKE_BINARY_DIR}/sysroot/include/bits/
@@ -43,7 +48,8 @@ add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/sysroot
       ${CMAKE_BINARY_DIR}/sysroot/include/sys/
       ${CMAKE_BINARY_DIR}/sysroot/include/wasi/
 
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  COMMAND
+    ${CMAKE_COMMAND} -E copy_if_different
       ${PROJECT_SOURCE_DIR}/basics/include/__errno.h
       ${PROJECT_SOURCE_DIR}/basics/include/__functions_malloc.h
       ${PROJECT_SOURCE_DIR}/basics/include/__functions_memcpy.h
@@ -178,7 +184,8 @@ add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/sysroot
       $<$<BOOL:ENABLE_THREADS>:${PROJECT_SOURCE_DIR}/libc-top-half/musl/include/pthread.h>
     ${CMAKE_BINARY_DIR}/sysroot/include/
 
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  COMMAND
+    ${CMAKE_COMMAND} -E copy_if_different
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/include/arpa/ftp.h
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/include/arpa/inet.h
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/include/arpa/nameser_compat.h
@@ -187,7 +194,8 @@ add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/sysroot
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/include/arpa/tftp.h
     ${CMAKE_BINARY_DIR}/sysroot/include/arpa/
 
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  COMMAND
+    ${CMAKE_COMMAND} -E copy_if_different
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/arch/generic/bits/fenv.h
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/arch/generic/bits/hwcap.h
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/arch/generic/bits/ioctl_fix.h
@@ -210,7 +218,8 @@ add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/sysroot
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/arch/wasm32/bits/stdint.h
     ${CMAKE_BINARY_DIR}/sysroot/include/bits/
 
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  COMMAND
+    ${CMAKE_COMMAND} -E copy_if_different
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/include/netinet/icmp6.h
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/include/netinet/igmp.h
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/include/netinet/in.h
@@ -222,11 +231,13 @@ add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/sysroot
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/include/netinet/udp.h
     ${CMAKE_BINARY_DIR}/sysroot/include/netinet/
 
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  COMMAND
+    ${CMAKE_COMMAND} -E copy_if_different
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/include/netpacket/packet.h
-    ${CMAKE_BINARY_DIR}/sysroot/include/netpacket/
+      ${CMAKE_BINARY_DIR}/sysroot/include/netpacket/
 
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  COMMAND
+    ${CMAKE_COMMAND} -E copy_if_different
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/include/sys/dir.h
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/include/sys/errno.h
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/include/sys/eventfd.h
@@ -257,21 +268,32 @@ add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/sysroot
       ${PROJECT_SOURCE_DIR}/libc-top-half/musl/include/sys/utsname.h
     ${CMAKE_BINARY_DIR}/sysroot/include/sys/
 
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  COMMAND
+    ${CMAKE_COMMAND} -E copy_if_different
       ${PROJECT_SOURCE_DIR}/libc-bottom-half/headers/public/wasi/api.h
       ${PROJECT_SOURCE_DIR}/libc-bottom-half/headers/public/wasi/libc-find-relpath.h
       ${PROJECT_SOURCE_DIR}/libc-bottom-half/headers/public/wasi/libc.h
     ${CMAKE_BINARY_DIR}/sysroot/include/wasi/
 
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  COMMAND
+    ${CMAKE_COMMAND} -E copy_if_different
       ${CMAKE_BINARY_DIR}/alltypes.h.gen
       ${CMAKE_BINARY_DIR}/sysroot/include/bits/alltypes.h
 
+  COMMAND
+    ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/sysroot/share
+
+  COMMAND
+    ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tools/gen-predefined-macros.py
+      --cc ${CMAKE_C_COMPILER}
+      --output-directory ${CMAKE_BINARY_DIR}/sysroot/share
+      --sysroot ${CMAKE_BINARY_DIR}/sysroot
+      -target ${CMAKE_C_COMPILER_TARGET} -O2 -DNDEBUG
+
   DEPENDS
+    ${PROJECT_SOURCE_DIR}/tools/gen-predefined-macros.py
     ${CMAKE_BINARY_DIR}/alltypes.h.gen)
 add_custom_target(sysroot-headers DEPENDS ${CMAKE_BINARY_DIR}/sysroot)
-
-
 
 # startup files
 add_library(crt1 OBJECT

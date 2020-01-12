@@ -90,6 +90,7 @@ jobs:
         workingDirectory: $(Build.BinariesDirectory)
         cmakeArgs: --build .
       displayName: Build
+      env: { "VERBOSE": "1" }
     - publish: $(Build.BinariesDirectory)/sysroot
       artifact: wasi-libc
       condition: and(succeeded(), eq(variables['Agent.OS'], 'Darwin'))

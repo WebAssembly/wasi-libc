@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.12.1)
 
 project(wasi-libc
   LANGUAGES C)
+enable_testing()
 
 set(CMAKE_C_COMPILE_OPTIONS_TARGET "-target ")
 set(CMAKE_C_COMPILER_TARGET wasm32-unknown-wasi CACHE STRING
@@ -1170,3 +1171,8 @@ add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/sysroot/lib/libc.imports
 add_custom_target(libc.imports ALL
   DEPENDS ${CMAKE_BINARY_DIR}/sysroot/lib/libc.imports)
 add_dependencies(libc.imports c crt1.o)
+
+add_test(NAME check-metadata
+  COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${PROJECT_SOURCE_DIR}/expected/wasm32-wasi/predefined-macros.txt ${CMAKE_BINARY_DIR}/sysroot/share/predefined-macros.txt)
+add_test(NAME check-headers
+  COMMAND ${CMAKE_C_COMPILER} -target ${CMAKE_C_COMPILER_TARGET} --sysroot=${CMAKE_BINARY_DIR}/sysroot -fsyntax-only "-Wno#warnings" ${CMAKE_BINARY_DIR}/sysroot/share/include-all.c)

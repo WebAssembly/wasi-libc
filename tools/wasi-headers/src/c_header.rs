@@ -78,9 +78,10 @@ fn print_datatype(ret: &mut String, nt: &NamedType) {
         ret.push_str(" */\n");
     }
 
-    match &nt.dt {
+    match &nt.tref {
         TypeRef::Value(v) => match &**v {
             Type::Enum(e) => print_enum(ret, &nt.name, e),
+            Type::Int(i) => print_int(ret, &nt.name, i),
             Type::Flags(f) => print_flags(ret, &nt.name, f),
             Type::Struct(s) => print_struct(ret, &nt.name, s),
             Type::Union(u) => print_union(ret, &nt.name, u),
@@ -88,9 +89,9 @@ fn print_datatype(ret: &mut String, nt: &NamedType) {
             Type::Builtin { .. }
             | Type::Array { .. }
             | Type::Pointer { .. }
-            | Type::ConstPointer { .. } => print_alias(ret, &nt.name, &nt.dt),
+            | Type::ConstPointer { .. } => print_alias(ret, &nt.name, &nt.tref),
         },
-        TypeRef::Name(_) => print_alias(ret, &nt.name, &nt.dt),
+        TypeRef::Name(_) => print_alias(ret, &nt.name, &nt.tref),
     }
 }
 
@@ -145,6 +146,46 @@ fn print_enum(ret: &mut String, name: &Id, e: &EnumDatatype) {
         ));
         ret.push_str("\n");
     }
+}
+
+fn print_int(ret: &mut String, name: &Id, i: &IntDatatype) {
+    ret.push_str(&format!(
+        "typedef {} __wasi_{}_t;\n",
+        intrepr_name(i.repr),
+        ident_name(name)
+    ));
+    ret.push_str("\n");
+
+    for (index, const_) in i.consts.iter().enumerate() {
+        if !const_.docs.is_empty() {
+            ret.push_str("/**\n");
+            for line in const_.docs.lines() {
+                ret.push_str(&format!(" * {}\n", line));
+            }
+            ret.push_str(" */\n");
+        }
+        ret.push_str(&format!(
+            "#define __WASI_{}_{} ({}({}))\n",
+            ident_name(&name).to_shouty_snake_case(),
+            ident_name(&const_.name).to_shouty_snake_case(),
+            intrepr_const(i.repr),
+            index
+        ));
+        ret.push_str("\n");
+    }
+
+    ret.push_str(&format!(
+        "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
+        ident_name(name),
+        i.repr.mem_size()
+    ));
+    ret.push_str(&format!(
+        "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
+        ident_name(name),
+        i.repr.mem_align()
+    ));
+
+    ret.push_str("\n");
 }
 
 fn print_flags(ret: &mut String, name: &Id, f: &FlagsDatatype) {
@@ -377,7 +418,10 @@ fn ident_name(i: &Id) -> String {
 
 fn builtin_type_name(b: BuiltinType) -> &'static str {
     match b {
-        BuiltinType::String => "string",
+        BuiltinType::String | BuiltinType::Char8 => {
+            panic!("no type name for string or char8 builtins")
+        }
+        BuiltinType::USize => "size_t",
         BuiltinType::U8 => "uint8_t",
         BuiltinType::U16 => "uint16_t",
         BuiltinType::U32 => "uint32_t",
@@ -392,13 +436,26 @@ fn builtin_type_name(b: BuiltinType) -> &'static str {
 }
 
 fn typeref_name(tref: &TypeRef) -> String {
+    match &*tref.type_() {
+        Type::Builtin(BuiltinType::String) | Type::Builtin(BuiltinType::Char8) | Type::Array(_) => {
+            panic!("unsupported grammar: cannot construct name of string or array",)
+        }
+        _ => {}
+    }
+
     match tref {
-        TypeRef::Name(named_type) => format!("__wasi_{}_t", named_type.name.as_str()),
-        TypeRef::Value(anon_type) => match &**anon_type {
-            Type::Builtin(b) => builtin_type_name(*b).to_string(),
-            Type::Array(_) => unreachable!("arrays should be special-cased"),
+        TypeRef::Name(named_type) => match &*named_type.type_() {
             Type::Pointer(p) => format!("{} *", typeref_name(&*p)),
             Type::ConstPointer(p) => format!("const {} *", typeref_name(&*p)),
+            Type::Array(_) => unreachable!("arrays excluded above"),
+            _ => format!("__wasi_{}_t", named_type.name.as_str()),
+        },
+        TypeRef::Value(anon_type) => match &**anon_type {
+            Type::Array(_) => unreachable!("arrays excluded above"),
+            Type::Builtin(b) => builtin_type_name(*b).to_string(),
+            Type::Pointer(p) => format!("{} *", typeref_name(&*p)),
+            Type::ConstPointer(p) => format!("const {} *", typeref_name(&*p)),
+            Type::Int(i) => format!("{}", intrepr_name(i.repr)),
             Type::Struct { .. }
             | Type::Union { .. }
             | Type::Enum { .. }

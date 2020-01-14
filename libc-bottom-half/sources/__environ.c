@@ -59,6 +59,7 @@ static void __wasilibc_populate_environ(void) {
     }
 
     __environ = environ_ptrs;
+    return;
 oserr:
     _Exit(EX_OSERR);
 software:

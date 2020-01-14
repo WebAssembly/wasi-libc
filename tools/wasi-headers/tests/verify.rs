@@ -1,7 +1,11 @@
+use std::fs;
+
 #[test]
 fn assert_same_as_src() {
-    let actual = include_str!("../../../libc-bottom-half/headers/public/wasi/api.h");
-    let expected = wasi_headers::generate().expect("header generation should succeed");
+    let actual =
+        fs::read_to_string(wasi_headers::libc_wasi_api_header()).expect("read libc wasi/api.h");
+    let witx_files = wasi_headers::snapshot_witx_files().expect("parse snapshot witx files");
+    let expected = wasi_headers::generate(&witx_files).expect("header generation");
     if actual == expected {
         return;
     }
@@ -63,7 +67,9 @@ fn assert_same_as_src() {
     }
 
     eprintln!();
-    eprintln!("To regenerate the files, run `cd tools/wasi-headers && cargo run`.");
+    eprintln!(
+        "To regenerate the files, run `cd tools/wasi-headers && cargo run -- generate-libc`."
+    );
     eprintln!();
     panic!();
 }

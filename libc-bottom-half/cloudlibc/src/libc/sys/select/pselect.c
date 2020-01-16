@@ -90,7 +90,13 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
       __wasi_poll_oneoff(subscriptions, events, nevents, &nevents);
 #endif
   if (error != 0) {
-    errno = error;
+    // WASI's poll requires at least one subscription, or else it returns
+    // `EINVAL`. Since a `pselect` with nothing to wait for is valid in POSIX,
+    // return `ENOTSUP` to indicate that we don't support that case.
+    if (nevents == 0)
+      errno = ENOTSUP;
+    else
+      errno = error;
     return -1;
   }
 

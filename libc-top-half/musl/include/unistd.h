@@ -128,7 +128,9 @@ char *getcwd(char *, size_t);
 unsigned alarm(unsigned);
 #endif
 unsigned sleep(unsigned);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no pause */
 int pause(void);
+#endif
 
 #ifdef __wasilibc_unmodified_upstream /* WASI has no fork/exec */
 pid_t fork(void);

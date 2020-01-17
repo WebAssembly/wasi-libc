@@ -805,7 +805,6 @@ optind
 optopt
 optreset
 pathconf
-pause
 perror
 poll
 posix_close

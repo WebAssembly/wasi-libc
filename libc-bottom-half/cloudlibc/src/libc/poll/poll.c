@@ -21,13 +21,8 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
       __wasi_subscription_t *subscription = &subscriptions[nevents++];
       *subscription = (__wasi_subscription_t){
           .userdata = (uintptr_t)pollfd,
-          .type = __WASI_EVENTTYPE_FD_READ,
-#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
-          .fd_readwrite.fd = pollfd->fd,
-          .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
-#else
-          .u.fd_readwrite.file_descriptor = pollfd->fd,
-#endif
+          .u.tag = __WASI_EVENTTYPE_FD_READ,
+          .u.u.fd_read.file_descriptor = pollfd->fd,
       };
       created_events = true;
     }
@@ -35,13 +30,8 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
       __wasi_subscription_t *subscription = &subscriptions[nevents++];
       *subscription = (__wasi_subscription_t){
           .userdata = (uintptr_t)pollfd,
-          .type = __WASI_EVENTTYPE_FD_WRITE,
-#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
-          .fd_readwrite.fd = pollfd->fd,
-          .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
-#else
-          .u.fd_readwrite.file_descriptor = pollfd->fd,
-#endif
+          .u.tag = __WASI_EVENTTYPE_FD_WRITE,
+          .u.u.fd_write.file_descriptor = pollfd->fd,
       };
       created_events = true;
     }
@@ -59,14 +49,9 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
   if (timeout >= 0) {
     __wasi_subscription_t *subscription = &subscriptions[nevents++];
     *subscription = (__wasi_subscription_t){
-        .type = __WASI_EVENTTYPE_CLOCK,
-#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
-        .clock.clock_id = __WASI_CLOCK_REALTIME,
-        .clock.timeout = (__wasi_timestamp_t)timeout * 1000000,
-#else
-        .u.clock.id = __WASI_CLOCKID_REALTIME,
-        .u.clock.timeout = (__wasi_timestamp_t)timeout * 1000000,
-#endif
+        .u.tag = __WASI_EVENTTYPE_CLOCK,
+        .u.u.clock.id = __WASI_CLOCKID_REALTIME,
+        .u.u.clock.timeout = (__wasi_timestamp_t)timeout * 1000000,
     };
   }
 
@@ -92,8 +77,8 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
   // Set revents fields.
   for (size_t i = 0; i < nevents; ++i) {
     const __wasi_event_t *event = &events[i];
-    if (event->type == __WASI_EVENTTYPE_FD_READ ||
-        event->type == __WASI_EVENTTYPE_FD_WRITE) {
+    if (event->u.tag == __WASI_EVENTTYPE_FD_READ ||
+        event->u.tag == __WASI_EVENTTYPE_FD_WRITE) {
       struct pollfd *pollfd = (struct pollfd *)(uintptr_t)event->userdata;
 #ifdef __wasilibc_unmodified_upstream // generated constant names
       if (event->error == __WASI_EBADF) {
@@ -114,14 +99,17 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
         pollfd->revents |= POLLERR;
       } else {
         // Data can be read or written.
-        pollfd->revents |=
-            event->type == __WASI_EVENTTYPE_FD_READ ? POLLRDNORM : POLLWRNORM;
-#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
-        if (event->fd_readwrite.flags & __WASI_EVENT_FD_READWRITE_HANGUP)
-#else
-        if (event->u.fd_readwrite.flags & __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP)
-#endif
-          pollfd->revents |= POLLHUP;
+        if (event->u.tag == __WASI_EVENTTYPE_FD_READ) {
+            pollfd->revents |= POLLRDNORM;
+            if (event->u.u.fd_read.flags & __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP) {
+              pollfd->revents |= POLLHUP;
+            }
+        } else if (event->u.tag == __WASI_EVENTTYPE_FD_WRITE) {
+            pollfd->revents |= POLLWRNORM;
+            if (event->u.u.fd_write.flags & __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP) {
+              pollfd->revents |= POLLHUP;
+            }
+        }
       }
     }
   }

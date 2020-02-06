@@ -538,7 +538,7 @@ __wasilibc_populate_libpreopen(void)
             break;
         if (ret != __WASI_ERRNO_SUCCESS)
             goto oserr;
-        switch (prestat.pr_type) {
+        switch (prestat.tag) {
         case __WASI_PREOPENTYPE_DIR: {
             char *path = malloc(prestat.u.dir.pr_name_len + 1);
             if (path == NULL)

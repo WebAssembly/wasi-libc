@@ -14,21 +14,12 @@ int ioctl(int fildes, int request, ...) {
       // Poll the file descriptor to determine how many bytes can be read.
       __wasi_subscription_t subscriptions[2] = {
           {
-              .type = __WASI_EVENTTYPE_FD_READ,
-#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
-              .fd_readwrite.fd = fildes,
-              .fd_readwrite.flags = __WASI_SUBSCRIPTION_FD_READWRITE_POLL,
-#else
-              .u.fd_readwrite.file_descriptor = fildes,
-#endif
+              .u.tag = __WASI_EVENTTYPE_FD_READ,
+              .u.u.fd_read.file_descriptor = fildes,
           },
           {
-              .type = __WASI_EVENTTYPE_CLOCK,
-#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
-              .clock.clock_id = __WASI_CLOCK_MONOTONIC,
-#else
-              .u.clock.id = __WASI_CLOCKID_MONOTONIC,
-#endif
+              .u.tag = __WASI_EVENTTYPE_CLOCK,
+              .u.u.clock.id = __WASI_CLOCKID_MONOTONIC,
           },
       };
       __wasi_event_t events[__arraycount(subscriptions)];
@@ -57,12 +48,8 @@ int ioctl(int fildes, int request, ...) {
           errno = event->error;
           return -1;
         }
-        if (event->type == __WASI_EVENTTYPE_FD_READ) {
-#ifdef __wasilibc_unmodified_upstream // non-anonymous unions
-          *result = event->fd_readwrite.nbytes;
-#else
-          *result = event->u.fd_readwrite.nbytes;
-#endif
+        if (event->u.tag == __WASI_EVENTTYPE_FD_READ) {
+          *result = event->u.u.fd_read.nbytes;
           return 0;
         }
       }

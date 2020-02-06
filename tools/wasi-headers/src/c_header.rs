@@ -308,23 +308,36 @@ fn print_struct(ret: &mut String, name: &Id, s: &StructDatatype) {
 }
 
 fn print_union(ret: &mut String, name: &Id, u: &UnionDatatype) {
-    ret.push_str(&format!("typedef union __wasi_{}_t {{\n", ident_name(name)));
+    ret.push_str(&format!(
+        "typedef union __wasi_{}_u_t {{\n",
+        ident_name(name)
+    ));
 
     for variant in &u.variants {
-        if !variant.docs.is_empty() {
-            ret.push_str("    /**\n");
-            for line in variant.docs.lines() {
-                ret.push_str(&format!("     * {}\n", line));
+        if let Some(ref tref) = variant.tref {
+            if !variant.docs.is_empty() {
+                ret.push_str("    /**\n");
+                for line in variant.docs.lines() {
+                    ret.push_str(&format!("    * {}\n", line));
+                }
+                ret.push_str("    */\n");
             }
-            ret.push_str("     */\n");
+            ret.push_str(&format!(
+                "    {} {};\n",
+                typeref_name(tref),
+                ident_name(&variant.name)
+            ));
         }
-        ret.push_str(&format!(
-            "    {} {};\n",
-            typeref_name(&variant.tref),
-            ident_name(&variant.name)
-        ));
-        ret.push_str("\n");
     }
+    ret.push_str(&format!("}} __wasi_{}_u_t;\n", ident_name(name)));
+
+    ret.push_str(&format!(
+        "typedef struct __wasi_{}_t {{\n",
+        ident_name(name)
+    ));
+
+    ret.push_str(&format!("    {} tag;\n", typeref_name(&u.tag)));
+    ret.push_str(&format!("    __wasi_{}_u_t u;\n", ident_name(name)));
 
     ret.push_str(&format!("}} __wasi_{}_t;\n", ident_name(name)));
     ret.push_str("\n");
@@ -338,6 +351,23 @@ fn print_union(ret: &mut String, name: &Id, u: &UnionDatatype) {
         "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
         ident_name(name),
         u.mem_align()
+    ));
+
+    let l = u.union_layout();
+    ret.push_str(&format!(
+        "_Static_assert(offsetof(__wasi_{}_t, u) == {}, \"witx calculated union offset\");\n",
+        ident_name(name),
+        l.contents_offset,
+    ));
+    ret.push_str(&format!(
+        "_Static_assert(sizeof(__wasi_{}_u_t) == {}, \"witx calculated union size\");\n",
+        ident_name(name),
+        l.contents_size,
+    ));
+    ret.push_str(&format!(
+        "_Static_assert(_Alignof(__wasi_{}_u_t) == {}, \"witx calculated union align\");\n",
+        ident_name(name),
+        l.contents_align,
     ));
 
     ret.push_str("\n");

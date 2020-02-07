@@ -14,7 +14,7 @@ pub(crate) fn to_c_header(doc: &Document, inputs_str: &str) -> String {
  * and defined values (macros).
  *
  * The interface described here is greatly inspired by [CloudABI]'s clean,
- * thoughtfully-designed, cabability-oriented, POSIX-style API.
+ * thoughtfully-designed, capability-oriented, POSIX-style API.
  *
  * [CloudABI]: https://github.com/NuxiNL/cloudlibc
  * [WASI]: https://github.com/WebAssembly/WASI/

@@ -26,13 +26,13 @@ impl GenerateCommand {
 
 fn main() -> Result<()> {
     let matches = app_from_crate!()
-        .arg(Arg::with_name("inputs").required(true).multiple(true))
+        .arg(Arg::with_name("inputs").required(false).multiple(true))
         .arg(
             Arg::with_name("output")
                 .short("o")
                 .long("output")
                 .takes_value(true)
-                .required(true),
+                .required(false),
         )
         .subcommand(
             SubCommand::with_name("generate-libc")

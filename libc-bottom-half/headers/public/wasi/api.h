@@ -500,7 +500,7 @@ typedef uint64_t __wasi_rights_t;
 /**
  * The right to invoke `fd_datasync`.
  * If `path_open` is set, includes the right to invoke
- * `path_open` with `fdflag::dsync`.
+ * `path_open` with `fdflags::dsync`.
  */
 #define __WASI_RIGHTS_FD_DATASYNC (UINT64_C(1))
 
@@ -523,13 +523,13 @@ typedef uint64_t __wasi_rights_t;
 /**
  * The right to invoke `fd_sync`.
  * If `path_open` is set, includes the right to invoke
- * `path_open` with `fdflag::rsync` and `fdflag::dsync`.
+ * `path_open` with `fdflags::rsync` and `fdflags::dsync`.
  */
 #define __WASI_RIGHTS_FD_SYNC (UINT64_C(16))
 
 /**
  * The right to invoke `fd_seek` in such a way that the file offset
- * remains unaltered (i.e., `WHENCE_CUR` with offset zero), or to
+ * remains unaltered (i.e., `whence::cur` with offset zero), or to
  * invoke `fd_tell`.
  */
 #define __WASI_RIGHTS_FD_TELL (UINT64_C(32))
@@ -967,22 +967,22 @@ _Static_assert(_Alignof(__wasi_device_t) == 8, "witx calculated align");
 typedef uint16_t __wasi_fstflags_t;
 
 /**
- * Adjust the last data access timestamp to the value stored in `filestat::st_atim`.
+ * Adjust the last data access timestamp to the value stored in `filestat::atim`.
  */
 #define __WASI_FSTFLAGS_ATIM (UINT16_C(1))
 
 /**
- * Adjust the last data access timestamp to the time of clock `clock::realtime`.
+ * Adjust the last data access timestamp to the time of clock `clockid::realtime`.
  */
 #define __WASI_FSTFLAGS_ATIM_NOW (UINT16_C(2))
 
 /**
- * Adjust the last data modification timestamp to the value stored in `filestat::st_mtim`.
+ * Adjust the last data modification timestamp to the value stored in `filestat::mtim`.
  */
 #define __WASI_FSTFLAGS_MTIM (UINT16_C(4))
 
 /**
- * Adjust the last data modification timestamp to the time of clock `clock::realtime`.
+ * Adjust the last data modification timestamp to the time of clock `clockid::realtime`.
  */
 #define __WASI_FSTFLAGS_MTIM_NOW (UINT16_C(8))
 
@@ -1110,19 +1110,19 @@ _Static_assert(_Alignof(__wasi_userdata_t) == 8, "witx calculated align");
 typedef uint8_t __wasi_eventtype_t;
 
 /**
- * The time value of clock `subscription::u.clock.clock_id` has
- * reached timestamp `subscription::u.clock.timeout`.
+ * The time value of clock `subscription_clock::id` has
+ * reached timestamp `subscription_clock::timeout`.
  */
 #define __WASI_EVENTTYPE_CLOCK (UINT8_C(0))
 
 /**
- * File descriptor `subscription::u.fd_readwrite.fd` has data
+ * File descriptor `subscription_fd_readwrite::file_descriptor` has data
  * available for reading. This event always triggers for regular files.
  */
 #define __WASI_EVENTTYPE_FD_READ (UINT8_C(1))
 
 /**
- * File descriptor `subscription::u.fd_readwrite.fd` has capacity
+ * File descriptor `subscription_fd_readwrite::file_descriptor` has capacity
  * available for writing. This event always triggers for regular files.
  */
 #define __WASI_EVENTTYPE_FD_WRITE (UINT8_C(2))
@@ -1215,16 +1215,16 @@ _Static_assert(offsetof(__wasi_event_t, u) == 16, "witx calculated offset");
 
 /**
  * Flags determining how to interpret the timestamp provided in
- * `subscription::u.clock.timeout.`
+ * `subscription_clock::timeout`.
  */
 typedef uint16_t __wasi_subclockflags_t;
 
 /**
  * If set, treat the timestamp provided in
- * `subscription::u.clock.timeout` as an absolute timestamp of clock
- * `subscription::u.clock.clock_id.` If clear, treat the timestamp
- * provided in `subscription::u.clock.timeout` relative to the
- * current time value of clock `subscription::u.clock.clock_id.`
+ * `subscription_clock::timeout` as an absolute timestamp of clock
+ * `subscription_clock::id`. If clear, treat the timestamp
+ * provided in `subscription_clock::timeout` relative to the
+ * current time value of clock `subscription_clock::id`.
  */
 #define __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME (UINT16_C(1))
 
@@ -1658,7 +1658,7 @@ _Static_assert(offsetof(__wasi_prestat_t, u) == 4, "witx calculated offset");
 
 /**
  * Read command-line argument data.
- * The size of the array should match that returned by `wasi_args_sizes_get()`
+ * The size of the array should match that returned by `args_sizes_get`
  */
 __wasi_errno_t __wasi_args_get(
     uint8_t * * argv,
@@ -1690,7 +1690,7 @@ __wasi_errno_t __wasi_args_sizes_get(
 
 /**
  * Read environment variable data.
- * The sizes of the buffers should match that returned by `environ.sizes_get()`.
+ * The sizes of the buffers should match that returned by `environ_sizes_get`.
  */
 __wasi_errno_t __wasi_environ_get(
     uint8_t * * environ,
@@ -1722,7 +1722,8 @@ __wasi_errno_t __wasi_environ_sizes_get(
 
 /**
  * Return the resolution of a clock.
- * Implementations are required to provide a non-zero value for supported clocks. For unsupported clocks, return `WASI_EINVAL`
+ * Implementations are required to provide a non-zero value for supported clocks. For unsupported clocks,
+ * return `errno::inval`.
  * Note: This is similar to `clock_getres` in POSIX.
  */
 __wasi_errno_t __wasi_clock_res_get(
@@ -1875,7 +1876,7 @@ __wasi_errno_t __wasi_fd_fdstat_set_flags(
 
 /**
  * Adjust the rights associated with a file descriptor.
- * This can only be used to remove rights, and returns `ENOTCAPABLE` if called in a way that would attempt to add rights
+ * This can only be used to remove rights, and returns `errno::notcapable` if called in a way that would attempt to add rights
  */
 __wasi_errno_t __wasi_fd_fdstat_set_rights(
     __wasi_fd_t fd,
@@ -2376,7 +2377,7 @@ __wasi_errno_t __wasi_path_open(
 
     /**
      * The relative path of the file or directory to open, relative to the
-     * `dirfd` directory.
+     * `path_open::fd` directory.
      */
     const char *path,
 
@@ -2451,7 +2452,7 @@ __wasi_errno_t __wasi_path_readlink(
 
 /**
  * Remove a directory.
- * Return `ENOTEMPTY` if the directory is not empty.
+ * Return `errno::notempty` if the directory is not empty.
  * Note: This is similar to `unlinkat(fd, path, AT_REMOVEDIR)` in POSIX.
  */
 __wasi_errno_t __wasi_path_remove_directory(
@@ -2543,7 +2544,7 @@ __wasi_errno_t __wasi_path_symlink(
 
 /**
  * Unlink a file.
- * Return `EISDIR` if the path refers to a directory.
+ * Return `errno::isdir` if the path refers to a directory.
  * Note: This is similar to `unlinkat(fd, path, 0)` in POSIX.
  */
 __wasi_errno_t __wasi_path_unlink_file(

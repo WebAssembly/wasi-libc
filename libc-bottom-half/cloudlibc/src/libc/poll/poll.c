@@ -77,8 +77,8 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
   // Set revents fields.
   for (size_t i = 0; i < nevents; ++i) {
     const __wasi_event_t *event = &events[i];
-    if (event->u.tag == __WASI_EVENTTYPE_FD_READ ||
-        event->u.tag == __WASI_EVENTTYPE_FD_WRITE) {
+    if (event->type == __WASI_EVENTTYPE_FD_READ ||
+        event->type == __WASI_EVENTTYPE_FD_WRITE) {
       struct pollfd *pollfd = (struct pollfd *)(uintptr_t)event->userdata;
 #ifdef __wasilibc_unmodified_upstream // generated constant names
       if (event->error == __WASI_EBADF) {
@@ -99,14 +99,14 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
         pollfd->revents |= POLLERR;
       } else {
         // Data can be read or written.
-        if (event->u.tag == __WASI_EVENTTYPE_FD_READ) {
+        if (event->type == __WASI_EVENTTYPE_FD_READ) {
             pollfd->revents |= POLLRDNORM;
-            if (event->u.u.fd_read.flags & __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP) {
+            if (event->fd_readwrite.flags & __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP) {
               pollfd->revents |= POLLHUP;
             }
-        } else if (event->u.tag == __WASI_EVENTTYPE_FD_WRITE) {
+        } else if (event->type == __WASI_EVENTTYPE_FD_WRITE) {
             pollfd->revents |= POLLWRNORM;
-            if (event->u.u.fd_write.flags & __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP) {
+            if (event->fd_readwrite.flags & __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP) {
               pollfd->revents |= POLLHUP;
             }
         }

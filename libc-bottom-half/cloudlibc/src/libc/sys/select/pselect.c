@@ -97,8 +97,8 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
   // Test for EBADF.
   for (size_t i = 0; i < nevents; ++i) {
     const __wasi_event_t *event = &events[i];
-    if ((event->u.tag == __WASI_EVENTTYPE_FD_READ ||
-         event->u.tag == __WASI_EVENTTYPE_FD_WRITE) &&
+    if ((event->type == __WASI_EVENTTYPE_FD_READ ||
+         event->type == __WASI_EVENTTYPE_FD_WRITE) &&
 #ifdef __wasilibc_unmodified_upstream // generated constant names
         event->error == __WASI_EBADF) {
 #else
@@ -114,9 +114,9 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
   FD_ZERO(writefds);
   for (size_t i = 0; i < nevents; ++i) {
     const __wasi_event_t *event = &events[i];
-    if (event->u.tag == __WASI_EVENTTYPE_FD_READ) {
+    if (event->type == __WASI_EVENTTYPE_FD_READ) {
       readfds->__fds[readfds->__nfds++] = event->userdata;
-    } else if (event->u.tag == __WASI_EVENTTYPE_FD_WRITE) {
+    } else if (event->type == __WASI_EVENTTYPE_FD_WRITE) {
       writefds->__fds[writefds->__nfds++] = event->userdata;
     }
   }

@@ -48,8 +48,8 @@ int ioctl(int fildes, int request, ...) {
           errno = event->error;
           return -1;
         }
-        if (event->u.tag == __WASI_EVENTTYPE_FD_READ) {
-          *result = event->u.u.fd_read.nbytes;
+        if (event->type == __WASI_EVENTTYPE_FD_READ) {
+          *result = event->fd_readwrite.nbytes;
           return 0;
         }
       }

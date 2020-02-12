@@ -1167,24 +1167,6 @@ _Static_assert(offsetof(__wasi_event_fd_readwrite_t, nbytes) == 0, "witx calcula
 _Static_assert(offsetof(__wasi_event_fd_readwrite_t, flags) == 8, "witx calculated offset");
 
 /**
- * The contents of an $event.
- */
-typedef union __wasi_event_u_u_t {
-    __wasi_event_fd_readwrite_t fd_read;
-    __wasi_event_fd_readwrite_t fd_write;
-} __wasi_event_u_u_t;
-typedef struct __wasi_event_u_t {
-    __wasi_eventtype_t tag;
-    __wasi_event_u_u_t u;
-} __wasi_event_u_t;
-
-_Static_assert(sizeof(__wasi_event_u_t) == 24, "witx calculated size");
-_Static_assert(_Alignof(__wasi_event_u_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_event_u_t, u) == 8, "witx calculated union offset");
-_Static_assert(sizeof(__wasi_event_u_u_t) == 16, "witx calculated union size");
-_Static_assert(_Alignof(__wasi_event_u_u_t) == 8, "witx calculated union align");
-
-/**
  * An event that occurred.
  */
 typedef struct __wasi_event_t {
@@ -1199,17 +1181,24 @@ typedef struct __wasi_event_t {
     __wasi_errno_t error;
 
     /**
-     * The type of the event that occurred, and its contents.
+     * The type of event that occured
      */
-    __wasi_event_u_t u;
+    __wasi_eventtype_t type;
+
+    /**
+     * The contents of the event, if it is an `eventtype::fd_read` or
+     * `eventtype::fd_write`. `eventtype::clock` events ignore this field.
+     */
+    __wasi_event_fd_readwrite_t fd_readwrite;
 
 } __wasi_event_t;
 
-_Static_assert(sizeof(__wasi_event_t) == 40, "witx calculated size");
+_Static_assert(sizeof(__wasi_event_t) == 32, "witx calculated size");
 _Static_assert(_Alignof(__wasi_event_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_event_t, userdata) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_event_t, error) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_event_t, u) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_event_t, type) == 10, "witx calculated offset");
+_Static_assert(offsetof(__wasi_event_t, fd_readwrite) == 16, "witx calculated offset");
 
 /**
  * Flags determining how to interpret the timestamp provided in

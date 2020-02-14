@@ -547,13 +547,11 @@ __wasilibc_populate_libpreopen(void)
             // TODO: Remove the cast on `path` once the witx is updated with char8 support.
             ret = __wasi_fd_prestat_dir_name(fd, (uint8_t *)path, prestat.u.dir.pr_name_len);
             if (ret != __WASI_ERRNO_SUCCESS) {
-                free(path);
                 goto oserr;
             }
             path[prestat.u.dir.pr_name_len] = '\0';
 
             if (internal_register_preopened_fd(fd, path) != 0) {
-                free(path);
                 goto software;
             }
 

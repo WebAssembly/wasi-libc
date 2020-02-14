@@ -4,16 +4,23 @@ use anyhow::{anyhow, Result};
 pub use c_header::to_c_header;
 use std::fs;
 use std::io;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use witx::load;
 
-pub fn generate(inputs: &[PathBuf]) -> Result<String> {
+pub fn generate<P: AsRef<Path>>(inputs: &[P]) -> Result<String> {
     // TODO: drop the anyhow! part once witx switches to anyhow.
     let doc = load(&inputs).map_err(|e| anyhow!(e.to_string()))?;
 
     let inputs_str = &inputs
         .iter()
-        .map(|p| p.file_name().unwrap().to_str().unwrap().to_string())
+        .map(|p| {
+            p.as_ref()
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string()
+        })
         .collect::<Vec<_>>()
         .join(", ");
 

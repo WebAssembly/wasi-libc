@@ -5,34 +5,29 @@ use anyhow::Result;
 use clap::{Arg, SubCommand};
 use std::fs::File;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::Path;
 use wasi_headers::{generate, libc_wasi_api_header, snapshot_witx_files};
 
-struct GenerateCommand {
-    /// Input witx file
-    inputs: Vec<PathBuf>,
-    /// Output header file
-    output: PathBuf,
-}
-
-impl GenerateCommand {
-    pub fn execute(&self) -> Result<()> {
-        let c_header = generate(&self.inputs)?;
-        let mut file = File::create(&self.output)?;
-        file.write_all(c_header.as_bytes())?;
-        Ok(())
-    }
+pub fn run<P: AsRef<Path>, Q: AsRef<Path>>(inputs: &[P], output: Q) -> Result<()> {
+    let c_header = generate(inputs)?;
+    let mut file = File::create(output)?;
+    file.write_all(c_header.as_bytes())?;
+    Ok(())
 }
 
 fn main() -> Result<()> {
     let matches = app_from_crate!()
-        .arg(Arg::with_name("inputs").required(false).multiple(true))
-        .arg(
-            Arg::with_name("output")
-                .short("o")
-                .long("output")
-                .takes_value(true)
-                .required(false),
+        .setting(clap::AppSettings::SubcommandRequiredElseHelp)
+        .subcommand(
+            SubCommand::with_name("generate")
+                .arg(Arg::with_name("inputs").required(true).multiple(true))
+                .arg(
+                    Arg::with_name("output")
+                        .short("o")
+                        .long("output")
+                        .takes_value(true)
+                        .required(true),
+                ),
         )
         .subcommand(
             SubCommand::with_name("generate-libc")
@@ -40,21 +35,20 @@ fn main() -> Result<()> {
         )
         .get_matches();
 
-    let cmd = if matches.subcommand_matches("generate-libc").is_some() {
+    if matches.subcommand_matches("generate-libc").is_some() {
         let inputs = snapshot_witx_files()?;
         let output = libc_wasi_api_header();
-        GenerateCommand { inputs, output }
+        run(&inputs, &output)?;
+    } else if let Some(generate) = matches.subcommand_matches("generate") {
+        let inputs = generate
+            .values_of("inputs")
+            .expect("required inputs arg")
+            .collect::<Vec<_>>();
+        let output = generate.value_of("output").expect("required output arg");
+        run(&inputs, output)?;
     } else {
-        GenerateCommand {
-            inputs: matches
-                .values_of("inputs")
-                .expect("inputs required")
-                .map(PathBuf::from)
-                .collect(),
-            output: PathBuf::from(matches.value_of("output").expect("output required")),
-        }
+        unreachable!("a subcommand must be provided")
     };
 
-    cmd.execute()?;
     Ok(())
 }

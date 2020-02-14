@@ -336,7 +336,7 @@ fn print_union(ret: &mut String, name: &Id, u: &UnionDatatype) {
         ident_name(name)
     ));
 
-    ret.push_str(&format!("    {} tag;\n", typeref_name(&u.tag)));
+    ret.push_str(&format!("    {} tag;\n", namedtype_name(&u.tag)));
     ret.push_str(&format!("    __wasi_{}_u_t u;\n", ident_name(name)));
 
     ret.push_str(&format!("}} __wasi_{}_t;\n", ident_name(name)));
@@ -566,12 +566,7 @@ fn typeref_name(tref: &TypeRef) -> String {
     }
 
     match tref {
-        TypeRef::Name(named_type) => match &*named_type.type_() {
-            Type::Pointer(p) => format!("{} *", typeref_name(&*p)),
-            Type::ConstPointer(p) => format!("const {} *", typeref_name(&*p)),
-            Type::Array(_) => unreachable!("arrays excluded above"),
-            _ => format!("__wasi_{}_t", named_type.name.as_str()),
-        },
+        TypeRef::Name(named_type) => namedtype_name(&named_type),
         TypeRef::Value(anon_type) => match &**anon_type {
             Type::Array(_) => unreachable!("arrays excluded above"),
             Type::Builtin(b) => builtin_type_name(*b).to_string(),
@@ -586,6 +581,15 @@ fn typeref_name(tref: &TypeRef) -> String {
                 "wasi should not have anonymous structs, unions, enums, flags, handles"
             ),
         },
+    }
+}
+
+fn namedtype_name(named_type: &NamedType) -> String {
+    match &*named_type.type_() {
+        Type::Pointer(p) => format!("{} *", typeref_name(&*p)),
+        Type::ConstPointer(p) => format!("const {} *", typeref_name(&*p)),
+        Type::Array(_) => unreachable!("arrays excluded above"),
+        _ => format!("__wasi_{}_t", named_type.name.as_str()),
     }
 }
 

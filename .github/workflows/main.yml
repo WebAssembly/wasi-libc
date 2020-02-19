@@ -16,8 +16,8 @@ jobs:
     - name: Install clang (Windows)
       shell: bash
       run: |
-          curl -fsSLO https://releases.llvm.org/8.0.0/LLVM-8.0.0-win64.exe
-          7z x LLVM-8.0.0-win64.exe -y -o"llvm"
+          curl -fsSLO https://releases.llvm.org/9.0.0/LLVM-9.0.0-win64.exe
+          7z x LLVM-9.0.0-win64.exe -y -o"llvm"
           echo "::add-path::$(pwd)/llvm/bin"
           echo "::set-env name=WASM_AR::$(pwd)/llvm/bin/llvm-ar.exe"
       if: matrix.os == 'windows-latest'
@@ -34,8 +34,8 @@ jobs:
     - name: Install clang (MacOS)
       shell: bash
       run: |
-        curl -sSf http://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-apple-darwin.tar.xz | tar xJf -
-        export CLANG_DIR=`pwd`/clang+llvm-8.0.0-x86_64-apple-darwin/bin
+        curl -sSf http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-apple-darwin.tar.xz | tar xJf -
+        export CLANG_DIR=`pwd`/clang+llvm-9.0.0-x86_64-apple-darwin/bin
         echo "::add-path::$CLANG_DIR"
         echo "::set-env name=WASM_CC::$CLANG_DIR/clang"
       if: matrix.os == 'macos-latest'
@@ -43,8 +43,8 @@ jobs:
     - name: Install clang (Linux)
       shell: bash
       run: |
-        curl -sSf http://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz | tar xJf -
-        export CLANG_DIR=`pwd`/clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-16.04/bin
+        curl -sSf http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz | tar xJf -
+        export CLANG_DIR=`pwd`/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04/bin
         echo "::add-path::$CLANG_DIR"
         echo "::set-env name=WASM_CC::$CLANG_DIR/clang"
       if: matrix.os == 'ubuntu-latest'

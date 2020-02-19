@@ -34,8 +34,8 @@ jobs:
     - name: Install clang (MacOS)
       shell: bash
       run: |
-        curl -sSf http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-apple-darwin.tar.xz | tar xJf -
-        export CLANG_DIR=`pwd`/clang+llvm-9.0.0-x86_64-apple-darwin/bin
+        curl -sSf http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-darwin-apple.tar.xz | tar xJf -
+        export CLANG_DIR=`pwd`/clang+llvm-9.0.0-x86_64-darwin-apple/bin
         echo "::add-path::$CLANG_DIR"
         echo "::set-env name=WASM_CC::$CLANG_DIR/clang"
       if: matrix.os == 'macos-latest'
@@ -43,7 +43,7 @@ jobs:
     - name: Install clang (Linux)
       shell: bash
       run: |
-        curl -sSf http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz | tar xJf -
+        curl -sSf https://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz | tar xJf -
         export CLANG_DIR=`pwd`/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04/bin
         echo "::add-path::$CLANG_DIR"
         echo "::set-env name=WASM_CC::$CLANG_DIR/clang"

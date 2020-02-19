@@ -25,9 +25,7 @@ jobs:
     - name: Install llvm-nm (Windows)
       shell: bash
       run: |
-        # Add --no-self-update as a workaround for
-        # https://github.com/microsoft/azure-pipelines-image-generation/issues/1224
-        rustup update stable --no-self-update
+        rustup update stable
         rustup default stable
         rustup component add llvm-tools-preview
         echo "::set-env name=WASM_NM::$(rustc --print sysroot|sed 's|C:|/c|'|sed 's|\\|/|g')/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-nm.exe"

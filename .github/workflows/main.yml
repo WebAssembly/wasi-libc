@@ -2,8 +2,67 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  test:
-    name: Test
+  buildlibc:
+    name: Build libc
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: true
+
+    - name: Install clang (Windows)
+      shell: bash
+      run: |
+          curl -fsSLO https://releases.llvm.org/8.0.0/LLVM-8.0.0-win64.exe
+          7z x LLVM-8.0.0-win64.exe -y -o"llvm"
+          echo "::add-path::$(pwd)/llvm/bin"
+          echo "::set-env name=WASM_AR::$(pwd)/llvm/bin/llvm-ar.exe"
+      if: matrix.os == 'windows-latest'
+
+    - name: Install llvm-nm (Windows)
+      shell: bash
+      run: |
+        # Add --no-self-update as a workaround for
+        # https://github.com/microsoft/azure-pipelines-image-generation/issues/1224
+        rustup update stable --no-self-update
+        rustup default stable
+        rustup component add llvm-tools-preview
+        echo "::set-env name=WASM_NM::$(rustc --print sysroot|sed 's|C:|/c|'|sed 's|\\|/|g')/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-nm.exe"
+      if: matrix.os == 'windows-latest'
+
+    - name: Install clang (MacOS)
+      shell: bash
+      run: |
+        curl -sSf http://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-apple-darwin.tar.xz | tar xJf -
+        export CLANG_DIR=`pwd`/clang+llvm-8.0.0-x86_64-apple-darwin/bin
+        echo "::add-path::$CLANG_DIR"
+        echo "::set-env name=WASM_CC::$CLANG_DIR/clang"
+      if: matrix.os == 'macos-latest'
+
+    - name: Install clang (Linux)
+      shell: bash
+      run: |
+        curl -sSf http://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz | tar xJf -
+        export CLANG_DIR=`pwd`/clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-16.04/bin
+        echo "::add-path::$CLANG_DIR"
+        echo "::set-env name=WASM_CC::$CLANG_DIR/clang"
+      if: matrix.os == 'ubuntu-latest'
+
+    - name: Build libc
+      shell: bash
+      run: make -j4
+
+    - uses: actions/upload-artifact@v1
+      with:
+        # Upload the sysroot folder. Give it a name according to the OS it was built for.
+        name: ${{ format( 'sysroot-{0}.tgz', matrix.os) }}
+        path: sysroot
+
+  headerstest:
+    name: wasi-headers test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

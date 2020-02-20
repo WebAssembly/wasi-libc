@@ -13,7 +13,6 @@ Some major known missing areas include:
  - ipc
  - termios
  - nss
- - environment variables
  - timezones
  - non-builtin locales
  - TIOCGWINSZ (because cloudabi lacks it; affects isatty, line buffering for stdout)

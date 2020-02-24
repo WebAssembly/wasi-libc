@@ -11,11 +11,7 @@
 
 int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
             fd_set *restrict errorfds, const struct timespec *restrict timeout,
-#ifdef __wasilibc_unmodified_upstream
-            ...) {
-#else
             const sigset_t *sigmask) {
-#endif
   // Negative file descriptor upperbound.
   if (nfds < 0) {
     errno = EINVAL;
@@ -40,13 +36,13 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
   // Determine the maximum number of events.
   size_t maxevents = readfds->__nfds + writefds->__nfds + 1;
   __wasi_subscription_t subscriptions[maxevents];
-  size_t nevents = 0;
+  size_t nsubscriptions = 0;
 
   // Convert the readfds set.
   for (size_t i = 0; i < readfds->__nfds; ++i) {
     int fd = readfds->__fds[i];
     if (fd < nfds) {
-      __wasi_subscription_t *subscription = &subscriptions[nevents++];
+      __wasi_subscription_t *subscription = &subscriptions[nsubscriptions++];
       *subscription = (__wasi_subscription_t){
           .userdata = fd,
           .u.tag = __WASI_EVENTTYPE_FD_READ,
@@ -59,7 +55,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
   for (size_t i = 0; i < writefds->__nfds; ++i) {
     int fd = writefds->__fds[i];
     if (fd < nfds) {
-      __wasi_subscription_t *subscription = &subscriptions[nevents++];
+      __wasi_subscription_t *subscription = &subscriptions[nsubscriptions++];
       *subscription = (__wasi_subscription_t){
           .userdata = fd,
           .u.tag = __WASI_EVENTTYPE_FD_WRITE,
@@ -70,7 +66,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
 
   // Create extra event for the timeout.
   if (timeout != NULL) {
-    __wasi_subscription_t *subscription = &subscriptions[nevents++];
+    __wasi_subscription_t *subscription = &subscriptions[nsubscriptions++];
     *subscription = (__wasi_subscription_t){
         .u.tag = __WASI_EVENTTYPE_CLOCK,
         .u.u.clock.id = __WASI_CLOCKID_REALTIME,
@@ -82,25 +78,18 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
   }
 
   // Execute poll().
-  __wasi_event_t events[nevents];
+  size_t nevents;
+  __wasi_event_t events[nsubscriptions];
   __wasi_errno_t error =
-#ifdef __wasilibc_unmodified_upstream
-      __wasi_poll(subscriptions, events, nevents, &nevents);
-#else
-      __wasi_poll_oneoff(subscriptions, events, nevents, &nevents);
-#endif
+      __wasi_poll_oneoff(subscriptions, events, nsubscriptions, &nevents);
   if (error != 0) {
-#ifdef __wasilibc_unmodified_upstream
-    errno = error;
-#else
     // WASI's poll requires at least one subscription, or else it returns
     // `EINVAL`. Since a `pselect` with nothing to wait for is valid in POSIX,
     // return `ENOTSUP` to indicate that we don't support that case.
-    if (nevents == 0)
+    if (nsubscriptions == 0)
       errno = ENOTSUP;
     else
       errno = error;
-#endif
     return -1;
   }
 
@@ -109,11 +98,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
     const __wasi_event_t *event = &events[i];
     if ((event->type == __WASI_EVENTTYPE_FD_READ ||
          event->type == __WASI_EVENTTYPE_FD_WRITE) &&
-#ifdef __wasilibc_unmodified_upstream // generated constant names
-        event->error == __WASI_EBADF) {
-#else
         event->error == __WASI_ERRNO_BADF) {
-#endif
       errno = EBADF;
       return -1;
     }

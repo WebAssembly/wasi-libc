@@ -648,6 +648,15 @@ if test "$ARCH" = "powerpc" ; then
 trycppif "__NO_FPRS__ && !_SOFT_FLOAT" "$t" && fail \
   "$0: error: compiler's floating point configuration is unsupported"
 trycppif _SOFT_FLOAT "$t" && SUBARCH=${SUBARCH}-sf
+printf "checking whether compiler can use 'd' constraint in asm... "
+echo 'double f(double x) { __asm__ ("fabs %0, %1" : "=d"(x) : "d"(x)); return x; }' > "$tmpc"
+if $CC $CFLAGS_C99FSE $CPPFLAGS $CFLAGS -c -o /dev/null "$tmpc" >/dev/null 2>&1 ; then
+printf "yes\n"
+else
+printf "no\n"
+CFLAGS_AUTO="$CFLAGS_AUTO -DBROKEN_PPC_D_ASM"
+CFLAGS_AUTO="${CFLAGS_AUTO# }"
+fi
 fi
 
 test "$ARCH" = "microblaze" && trycppif __MICROBLAZEEL__ "$t" \

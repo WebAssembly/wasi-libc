@@ -81,7 +81,7 @@ function adjust_sp_offset(delta) {
     in_function = 0
   }
 }
-/^\.type [a-zA-Z0-9_]+,\@function/ {
+/^\.type [a-zA-Z0-9_]+,@function/ {
   functions[substr($2, 1, length($2)-10)] = 1
 }
 # not interested in assembler directives beyond this, just pass them through

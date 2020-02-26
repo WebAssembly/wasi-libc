@@ -92,7 +92,7 @@
 #define __NR_fchown			6091
 #define __NR_lchown			6092
 #define __NR_umask			6093
-#define __NR_gettimeofday		6094
+#define __NR_gettimeofday_time32		6094
 #define __NR_getrlimit			6095
 #define __NR_getrusage			6096
 #define __NR_sysinfo			6097
@@ -157,7 +157,7 @@
 #define __NR_chroot			6156
 #define __NR_sync			6157
 #define __NR_acct			6158
-#define __NR_settimeofday		6159
+#define __NR_settimeofday_time32		6159
 #define __NR_mount			6160
 #define __NR_umount2			6161
 #define __NR_swapon			6162
@@ -219,14 +219,14 @@
 #define __NR_fstatfs64			6218
 #define __NR_sendfile64			6219
 #define __NR_timer_create		6220
-#define __NR_timer_settime		6221
-#define __NR_timer_gettime		6222
+#define __NR_timer_settime32		6221
+#define __NR_timer_gettime32		6222
 #define __NR_timer_getoverrun		6223
 #define __NR_timer_delete		6224
-#define __NR_clock_settime		6225
-#define __NR_clock_gettime		6226
-#define __NR_clock_getres		6227
-#define __NR_clock_nanosleep		6228
+#define __NR_clock_settime32		6225
+#define __NR_clock_gettime32		6226
+#define __NR_clock_getres_time32		6227
+#define __NR_clock_nanosleep_time32		6228
 #define __NR_tgkill			6229
 #define __NR_utimes			6230
 #define __NR_mbind			6231
@@ -282,8 +282,8 @@
 #define __NR_eventfd			6282
 #define __NR_fallocate			6283
 #define __NR_timerfd_create		6284
-#define __NR_timerfd_gettime		6285
-#define __NR_timerfd_settime		6286
+#define __NR_timerfd_gettime32		6285
+#define __NR_timerfd_settime32		6286
 #define __NR_signalfd4			6287
 #define __NR_eventfd2			6288
 #define __NR_epoll_create1		6289
@@ -360,4 +360,6 @@
 #define __NR_fsconfig		6431
 #define __NR_fsmount		6432
 #define __NR_fspick		6433
+#define __NR_pidfd_open		6434
+#define __NR_clone3		6435
 

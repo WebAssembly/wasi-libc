@@ -285,6 +285,14 @@ void (*signal(int, void (*)(int)))(int);
 #endif
 int raise(int);
 
+#if _REDIR_TIME64
+#if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) \
+ || defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) \
+ || defined(_BSD_SOURCE)
+__REDIR(sigtimedwait, __sigtimedwait_time64);
+#endif
+#endif
+
 #ifdef __cplusplus
 }
 #endif

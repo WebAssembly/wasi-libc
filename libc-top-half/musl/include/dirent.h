@@ -19,26 +19,12 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
+#include <bits/dirent.h>
+
 #ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 typedef struct __dirstream DIR;
 #else
 #include <__typedef_DIR.h>
-#endif
-
-#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
-#define _DIRENT_HAVE_D_RECLEN
-#define _DIRENT_HAVE_D_OFF
-#define _DIRENT_HAVE_D_TYPE
-
-struct dirent {
-	ino_t d_ino;
-	off_t d_off;
-	unsigned short d_reclen;
-	unsigned char d_type;
-	char d_name[256];
-};
-#else
-#include <__struct_dirent.h>
 #endif
 
 #define d_fileno d_ino

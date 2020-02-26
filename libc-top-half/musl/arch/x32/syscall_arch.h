@@ -87,5 +87,7 @@ static __inline long __syscall6(long long n, long long a1, long long a2, long lo
 #define SYS_rt_sigtimedwait_time64 SYS_rt_sigtimedwait
 #define SYS_futex_time64 SYS_futex
 #define SYS_sched_rr_get_interval_time64 SYS_sched_rr_get_interval
+#define SYS_getrusage_time64 SYS_getrusage
+#define SYS_wait4_time64 SYS_wait4
 
 #define IPC_64 0

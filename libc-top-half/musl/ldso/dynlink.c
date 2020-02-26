@@ -107,6 +107,8 @@ struct symdef {
 	struct dso *dso;
 };
 
+typedef void (*stage3_func)(size_t *, size_t *);
+
 static struct builtin_tls {
 	char c;
 	struct pthread pt;
@@ -183,8 +185,14 @@ static void *laddr_pg(const struct dso *p, size_t v)
 	}
 	return (void *)(v - p->loadmap->segs[j].p_vaddr + p->loadmap->segs[j].addr);
 }
-#define fpaddr(p, v) ((void (*)())&(struct funcdesc){ \
-	laddr(p, v), (p)->got })
+static void (*fdbarrier(void *p))()
+{
+	void (*fd)();
+	__asm__("" : "=r"(fd) : "0"(p));
+	return fd;
+}
+#define fpaddr(p, v) fdbarrier((&(struct funcdesc){ \
+	laddr(p, v), (p)->got }))
 #else
 #define laddr(p, v) (void *)((p)->base + (v))
 #define laddr_pg(p, v) laddr(p, v)
@@ -1594,13 +1602,14 @@ static void install_new_tls(void)
 
 hidden void __dls2(unsigned char *base, size_t *sp)
 {
+	size_t *auxv;
+	for (auxv=sp+1+*sp+1; *auxv; auxv++);
+	auxv++;
 	if (DL_FDPIC) {
 		void *p1 = (void *)sp[-2];
 		void *p2 = (void *)sp[-1];
 		if (!p1) {
-			size_t *auxv, aux[AUX_CNT];
-			for (auxv=sp+1+*sp+1; *auxv; auxv++);
-			auxv++;
+			size_t aux[AUX_CNT];
 			decode_vec(auxv, aux, AUX_CNT);
 			if (aux[AT_BASE]) ldso.base = (void *)aux[AT_BASE];
 			else ldso.base = (void *)(aux[AT_PHDR] & -4096);
@@ -1646,8 +1655,8 @@ hidden void __dls2(unsigned char *base, size_t *sp)
 	 * symbolically as a barrier against moving the address
 	 * load across the above relocation processing. */
 	struct symdef dls2b_def = find_sym(&ldso, "__dls2b", 0);
-	if (DL_FDPIC) ((stage3_func)&ldso.funcdescs[dls2b_def.sym-ldso.syms])(sp);
-	else ((stage3_func)laddr(&ldso, dls2b_def.sym->st_value))(sp);
+	if (DL_FDPIC) ((stage3_func)&ldso.funcdescs[dls2b_def.sym-ldso.syms])(sp, auxv);
+	else ((stage3_func)laddr(&ldso, dls2b_def.sym->st_value))(sp, auxv);
 }
 
 /* Stage 2b sets up a valid thread pointer, which requires relocations
@@ -1656,11 +1665,13 @@ hidden void __dls2(unsigned char *base, size_t *sp)
  * so that loads of the thread pointer and &errno can be pure/const and
  * thereby hoistable. */
 
-void __dls2b(size_t *sp)
+void __dls2b(size_t *sp, size_t *auxv)
 {
 	/* Setup early thread pointer in builtin_tls for ldso/libc itself to
 	 * use during dynamic linking. If possible it will also serve as the
 	 * thread pointer at runtime. */
+	search_vec(auxv, &__hwcap, AT_HWCAP);
+	libc.auxv = auxv;
 	libc.tls_size = sizeof builtin_tls;
 	libc.tls_align = tls_align;
 	if (__init_tp(__copy_tls((void *)builtin_tls)) < 0) {
@@ -1668,8 +1679,8 @@ void __dls2b(size_t *sp)
 	}
 
 	struct symdef dls3_def = find_sym(&ldso, "__dls3", 0);
-	if (DL_FDPIC) ((stage3_func)&ldso.funcdescs[dls3_def.sym-ldso.syms])(sp);
-	else ((stage3_func)laddr(&ldso, dls3_def.sym->st_value))(sp);
+	if (DL_FDPIC) ((stage3_func)&ldso.funcdescs[dls3_def.sym-ldso.syms])(sp, auxv);
+	else ((stage3_func)laddr(&ldso, dls3_def.sym->st_value))(sp, auxv);
 }
 
 /* Stage 3 of the dynamic linker is called with the dynamic linker/libc
@@ -1677,10 +1688,10 @@ void __dls2b(size_t *sp)
  * process dependencies and relocations for the main application and
  * transfer control to its entry point. */
 
-void __dls3(size_t *sp)
+void __dls3(size_t *sp, size_t *auxv)
 {
 	static struct dso app, vdso;
-	size_t aux[AUX_CNT], *auxv;
+	size_t aux[AUX_CNT];
 	size_t i;
 	char *env_preload=0;
 	char *replace_argv0=0;
@@ -1693,10 +1704,7 @@ void __dls3(size_t *sp)
 	/* Find aux vector just past environ[] and use it to initialize
 	 * global data that may be needed before we can make syscalls. */
 	__environ = envp;
-	for (i=argc+1; argv[i]; i++);
-	libc.auxv = auxv = (void *)(argv+i+1);
 	decode_vec(auxv, aux, AUX_CNT);
-	__hwcap = aux[AT_HWCAP];
 	search_vec(auxv, &__sysinfo, AT_SYSINFO);
 	__pthread_self()->sysinfo = __sysinfo;
 	libc.page_size = aux[AT_PAGESZ];
@@ -2235,6 +2243,33 @@ hidden void *__dlsym(void *restrict p, const char *restrict s, void *restrict ra
 	res = do_dlsym(p, s, ra);
 	pthread_rwlock_unlock(&lock);
 	return res;
+}
+
+hidden void *__dlsym_redir_time64(void *restrict p, const char *restrict s, void *restrict ra)
+{
+#if _REDIR_TIME64
+	const char *suffix, *suffix2 = "";
+	char redir[36];
+
+	/* Map the symbol name to a time64 version of itself according to the
+	 * pattern used for naming the redirected time64 symbols. */
+	size_t l = strnlen(s, sizeof redir);
+	if (l<4 || l==sizeof redir) goto no_redir;
+	if (s[l-2]=='_' && s[l-1]=='r') {
+		l -= 2;
+		suffix2 = s+l;
+	}
+	if (l<4) goto no_redir;
+	if (!strcmp(s+l-4, "time")) suffix = "64";
+	else suffix = "_time64";
+
+	/* Use the presence of the remapped symbol name in libc to determine
+	 * whether it's one that requires time64 redirection; replace if so. */
+	snprintf(redir, sizeof redir, "__%.*s%s%s", (int)l, s, suffix, suffix2);
+	if (find_sym(&ldso, redir, 1).sym) s = redir;
+no_redir:
+#endif
+	return __dlsym(p, s, ra);
 }
 
 int dl_iterate_phdr(int(*callback)(struct dl_phdr_info *info, size_t size, void *data), void *data)

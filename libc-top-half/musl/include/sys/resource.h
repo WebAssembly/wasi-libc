@@ -91,7 +91,8 @@ int prlimit(pid_t, int, const struct rlimit *, struct rlimit *);
 #define RLIMIT_MSGQUEUE 12
 #define RLIMIT_NICE    13
 #define RLIMIT_RTPRIO  14
-#define RLIMIT_NLIMITS 15
+#define RLIMIT_RTTIME  15
+#define RLIMIT_NLIMITS 16
 
 #define RLIM_NLIMITS RLIMIT_NLIMITS
 
@@ -106,6 +107,10 @@ int prlimit(pid_t, int, const struct rlimit *, struct rlimit *);
 #endif
 #else
 #include <__header_sys_resource.h>
+#endif
+
+#if _REDIR_TIME64
+__REDIR(getrusage, __getrusage_time64);
 #endif
 
 #ifdef __cplusplus

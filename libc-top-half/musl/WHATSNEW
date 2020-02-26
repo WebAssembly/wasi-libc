@@ -2164,3 +2164,39 @@ arch-specific bugs fixed:
 - riscv64 atomics had broken asm constraints (missing earlyclobber flag)
 - arm clone() was broken when compiled as thumb if start function returned
 - mipsr6 setjmp/longjmp did not preserve fpu register state correctly
+
+
+
+1.2.0 release notes
+
+new features:
+- time_t is now 64-bit on all archs (not just 64-bit archs)
+- character type & case mapping data updated to Unicode 12.1.0
+- header-level support for new linux features in 5.3 and 5.4
+
+performance:
+- new O(1) wchar_t case mapping implementation
+- i386 now uses C math code for exp, faster than old asm
+- mips math asm
+
+compatibility & conformance:
+- endian.h now aims to conform to future POSIX definition
+- support older compilers that don't accept powerpc math asm constraints
+- fdpic code in ldso was incompatible with valid optimizations in gcc 9+
+- RLIMIT_RTTIME was missing from sys/resource.h
+
+bugs fixed:
+- wcwidth wrongly returned 0 for most of planes 4 and up
+- missing case mapping between U+03F3 and U+037F
+- wrong cacosh results for arguments with negative imaginary part
+- wrong catanf/catanl results for various classes of arguments
+- wrong return value for ungetc with argument outside [0,UCHAR_MAX]
+- posix_openpt with no ptys available produced wrong errno
+
+arch-specific bugs fixed:
+- sigcontext/regset definition mistakes & omissions on m68k, powerpc64
+- fesetenv(FE_DFL_ENV) crashed on riscv64
+- sh2 dynamic linker was broken since 1.1.21 (crash in stage 2b)
+- arm dynamic linker chose wrong tls/atomic variants since 1.1.21
+- some math library functions returned excess precision on i386
+- unconfirmed regression in fchmodat AT_SYMLINK_NOFOLLOW on mips*

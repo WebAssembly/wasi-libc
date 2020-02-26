@@ -27,6 +27,11 @@ struct user {
 	char u_comm[32];
 };
 
+#define ELF_NGREG 20
+typedef unsigned long elf_greg_t;
+typedef elf_greg_t elf_gregset_t[ELF_NGREG];
+typedef struct user_m68kfp_struct elf_fpregset_t;
+
 #define NBPG			4096
 #define UPAGES			1
 #define HOST_TEXT_START_ADDR	(u.start_code)

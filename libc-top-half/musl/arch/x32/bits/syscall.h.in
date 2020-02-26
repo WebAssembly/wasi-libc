@@ -296,6 +296,9 @@
 #define __NR_fsconfig		(0x40000000 + 431)
 #define __NR_fsmount		(0x40000000 + 432)
 #define __NR_fspick		(0x40000000 + 433)
+#define __NR_pidfd_open		(0x40000000 + 434)
+#define __NR_clone3		(0x40000000 + 435)
+
 
 #define __NR_rt_sigaction (0x40000000 + 512)
 #define __NR_rt_sigreturn (0x40000000 + 513)

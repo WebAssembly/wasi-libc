@@ -108,5 +108,5 @@
 #define SIOCATMARK      _IOR('s', 7, int)
 #define SIOCSPGRP       _IOW('s', 8, int)
 #define SIOCGPGRP       _IOW('s', 9, int)
-#define SIOCGSTAMP      _IOR('s', 100, char[8])
-#define SIOCGSTAMPNS    _IOR('s', 101, char[8])
+#define SIOCGSTAMP      _IOR(0x89, 6, char[16])
+#define SIOCGSTAMPNS    _IOR(0x89, 7, char[16])

@@ -75,11 +75,6 @@
 #define BLK_RESTART 0x10
 #define BREAK 243
 #define BUFSIZ 1024
-#define BUS_ADRALN 1
-#define BUS_ADRERR 2
-#define BUS_MCEERR_AO 5
-#define BUS_MCEERR_AR 4
-#define BUS_OBJERR 3
 #define BYTE_ORDER __BYTE_ORDER
 #define CANBSIZ 255
 #define CBRK CEOL
@@ -98,12 +93,6 @@
 #define CHRTYPE '3'
 #define CINTR CTRL('c')
 #define CKILL CTRL('u')
-#define CLD_CONTINUED 6
-#define CLD_DUMPED 3
-#define CLD_EXITED 1
-#define CLD_KILLED 2
-#define CLD_STOPPED 5
-#define CLD_TRAPPED 4
 #define CLNEXT CTRL('v')
 #define CLOCKS_PER_SEC ((clock_t)1000000000)
 #define CLOCK_MONOTONIC (&_CLOCK_MONOTONIC)
@@ -384,14 +373,6 @@
 #define FORM_C 3
 #define FORM_N 1
 #define FORM_T 2
-#define FPE_FLTDIV 3
-#define FPE_FLTINV 7
-#define FPE_FLTOVF 4
-#define FPE_FLTRES 6
-#define FPE_FLTSUB 8
-#define FPE_FLTUND 5
-#define FPE_INTDIV 1
-#define FPE_INTOVF 2
 #define FP_ILOGB0 FP_ILOGBNAN
 #define FP_ILOGBNAN (-1-0x7fffffff)
 #define FP_INFINITE 1
@@ -588,14 +569,6 @@
 #define IGMP_V2_MEMBERSHIP_REPORT 0x16
 #define IGMP_v1_ROUTER 1
 #define IGMP_v2_ROUTER 2
-#define ILL_BADSTK 8
-#define ILL_COPROC 7
-#define ILL_ILLADR 3
-#define ILL_ILLOPC 1
-#define ILL_ILLOPN 2
-#define ILL_ILLTRP 4
-#define ILL_PRVOPC 5
-#define ILL_PRVREG 6
 #define IN6ADDRSZ NS_IN6ADDRSZ
 #define IN6ADDR_ANY_INIT { { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } }
 #define IN6ADDR_LOOPBACK_INIT { { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 } }
@@ -1571,10 +1544,6 @@
 #define SEEK_END __WASI_WHENCE_END
 #define SEEK_SET __WASI_WHENCE_SET
 #define SEGSIZE 512
-#define SEGV_ACCERR 2
-#define SEGV_BNDERR 3
-#define SEGV_MAPERR 1
-#define SEGV_PKUERR 4
 #define SEM_FAILED ((sem_t *)0)
 #define SERVFAIL ns_r_servfail
 #define SHORTBITS (sizeof(short) * 8)
@@ -1583,59 +1552,10 @@
 #define SHUT_RD __WASI_SDFLAGS_RD
 #define SHUT_RDWR (SHUT_RD | SHUT_WR)
 #define SHUT_WR __WASI_SDFLAGS_WR
-#define SIGABRT __WASI_SIGNAL_ABRT
-#define SIGALRM __WASI_SIGNAL_ALRM
-#define SIGBUS __WASI_SIGNAL_BUS
-#define SIGCHLD __WASI_SIGNAL_CHLD
-#define SIGCONT __WASI_SIGNAL_CONT
-#define SIGEV_NONE 1
-#define SIGEV_SIGNAL 0
-#define SIGEV_THREAD 2
-#define SIGFPE __WASI_SIGNAL_FPE
-#define SIGHUP __WASI_SIGNAL_HUP
-#define SIGILL __WASI_SIGNAL_ILL
-#define SIGINT __WASI_SIGNAL_INT
-#define SIGIO SIGPOLL
-#define SIGIOT SIGABRT
-#define SIGKILL __WASI_SIGNAL_KILL
-#define SIGPIPE __WASI_SIGNAL_PIPE
-#define SIGPOLL __WASI_SIGNAL_POLL
-#define SIGPROF __WASI_SIGNAL_PROF
-#define SIGPWR __WASI_SIGNAL_PWR
-#define SIGQUIT __WASI_SIGNAL_QUIT
-#define SIGSEGV __WASI_SIGNAL_SEGV
-#define SIGSTOP __WASI_SIGNAL_STOP
-#define SIGSYS __WASI_SIGNAL_SYS
-#define SIGTERM __WASI_SIGNAL_TERM
-#define SIGTRAP __WASI_SIGNAL_TRAP
-#define SIGTSTP __WASI_SIGNAL_TSTP
-#define SIGTTIN __WASI_SIGNAL_TTIN
-#define SIGTTOU __WASI_SIGNAL_TTOU
-#define SIGUNUSED SIGSYS
-#define SIGURG __WASI_SIGNAL_URG
-#define SIGUSR1 __WASI_SIGNAL_USR1
-#define SIGUSR2 __WASI_SIGNAL_USR2
-#define SIGVTALRM __WASI_SIGNAL_VTALRM
-#define SIGWINCH __WASI_SIGNAL_WINCH
-#define SIGXCPU __WASI_SIGNAL_XCPU
-#define SIGXFSZ __WASI_SIGNAL_XFSZ
 #define SIG_ATOMIC_MAX INT32_MAX
 #define SIG_ATOMIC_MIN INT32_MIN
-#define SIG_BLOCK 0
-#define SIG_HOLD ((void (*)(int)) 2)
-#define SIG_SETMASK 2
-#define SIG_UNBLOCK 1
 #define SIZE_MAX UINT32_MAX
-#define SI_ASYNCIO (-4)
-#define SI_ASYNCNL (-60)
-#define SI_KERNEL 128
 #define SI_LOAD_SHIFT 16
-#define SI_MESGQ (-3)
-#define SI_QUEUE (-1)
-#define SI_SIGIO (-5)
-#define SI_TIMER (-2)
-#define SI_TKILL (-6)
-#define SI_USER 0
 #define SLC_ABORT 7
 #define SLC_ACK 0x80
 #define SLC_AO 4
@@ -2366,7 +2286,6 @@
 #define _SC_XOPEN_XPG4 100
 #define _SEARCH_H 
 #define _SEMAPHORE_H 
-#define _SIGNAL_H 
 #define _SIZE_T 
 #define _STDALIGN_H 
 #define _STDBOOL_H 
@@ -3105,7 +3024,6 @@
 #define __wasilibc___errno_values_h 
 #define __wasilibc___fd_set_h 
 #define __wasilibc___function___isatty_h 
-#define __wasilibc___header_bits_signal_h 
 #define __wasilibc___header_dirent_h 
 #define __wasilibc___header_fcntl_h 
 #define __wasilibc___header_netinet_in_h 
@@ -3411,32 +3329,10 @@
 #define rr_code rr_hdr.icmp6_code
 #define rr_seqnum rr_hdr.icmp6_data32[0]
 #define rr_type rr_hdr.icmp6_type
-#define sa_handler __sa_handler.sa_handler
-#define sa_sigaction __sa_handler.sa_sigaction
 #define scalbln(x,y) __tg_real_2_1(scalbln, (x), (y))
 #define scalbn(x,y) __tg_real_2_1(scalbn, (x), (y))
 #define scandir64 scandir
 #define setbit(x,i) __bitop(x,i,|=)
-#define si_addr __si_fields.__sigfault.si_addr
-#define si_addr_lsb __si_fields.__sigfault.si_addr_lsb
-#define si_arch __si_fields.__sigsys.si_arch
-#define si_band __si_fields.__sigpoll.si_band
-#define si_call_addr __si_fields.__sigsys.si_call_addr
-#define si_fd __si_fields.__sigpoll.si_fd
-#define si_int si_value.sival_int
-#define si_lower __si_fields.__sigfault.__first.__addr_bnd.si_lower
-#define si_overrun __si_fields.__si_common.__first.__timer.si_overrun
-#define si_pid __si_fields.__si_common.__first.__piduid.si_pid
-#define si_pkey __si_fields.__sigfault.__first.si_pkey
-#define si_ptr si_value.sival_ptr
-#define si_status __si_fields.__si_common.__second.__sigchld.si_status
-#define si_stime __si_fields.__si_common.__second.__sigchld.si_stime
-#define si_syscall __si_fields.__sigsys.si_syscall
-#define si_timerid __si_fields.__si_common.__first.__timer.si_timerid
-#define si_uid __si_fields.__si_common.__first.__piduid.si_uid
-#define si_upper __si_fields.__sigfault.__first.__addr_bnd.si_upper
-#define si_utime __si_fields.__si_common.__second.__sigchld.si_utime
-#define si_value __si_fields.__si_common.__second.si_value
 #define signbit(x) (__builtin_signbit(x))
 #define sin(x) __tg_real_complex(sin, (x))
 #define sinh(x) __tg_real_complex(sinh, (x))

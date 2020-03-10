@@ -1,30 +1,18 @@
 # WASI Libc
 
-This is a work in progress. It's usable for many purposes, though the APIs
-aren't stable yet.
+WASI Libc is a libc for WebAssembly programs built on top of WASI system calls.
+It provides a wide array of POSIX-compatible C APIs, including support for
+standard I/O, file I/O, filesystem manipulation, memory management, time, string,
+environment variables, program startup, and many other APIs.
 
-## What is this?
-
-It's several things.
-
-First, it's a usable libc. It builds a "libc" which can be used by
-compilers, such as Clang 8.0, using the wasm32-wasi target. It's a work in
-progress, but it is already sufficient to run basic programs.
-
-Second, it's a "reference" implementation, which means the interfaces defined
-here can be used by other tools and libraries, even if they don't use all the
-actual implementations here. For example, we don't expect everyone will want
-to use the exact `malloc` implementation provided here, but tools and
-libraries using an ABI-compatible `malloc` interface will be able to
-interoperate regardless of which actual implementation is used.
-
-Third, it's an example showing the use of the WASI API. The libc functionality
-is implemented using calls to WASI functions.
+WASI Libc is sufficiently stable and usable for many purposes, as most of the
+POSIX-compatible APIs are stable, though it is continuing to evolve to better
+align with wasm and WASI.
 
 ## Usage
 
-The easiest way to get started with this is to use one of the
-[prepackaged releases](https://github.com/CraneStation/wasmtime/blob/master/docs/WASI-intro.md#how-can-i-write-programs-that-use-wasi).
+The easiest way to get started with this is to use [wasi-sdk], which includes a
+build of WASI Libc in its sysroot.
 
 ## Building from source
 
@@ -48,3 +36,10 @@ To use the sysroot, use the `--sysroot=` option:
 ```
 
 to run the compiler using the newly built sysroot.
+
+Note that Clang packages typically don't include cross-compiled builds of
+compiler-rt, `libclang_rt.builtins-wasm32.a`, so they may not be usable without
+extra setup. This is one of the things [wasi-sdk] simplifies, as it includes
+a cross-compiled compiler-rt.
+
+[wasi-sdk]: https://github.com/WebAssembly/wasi-sdk

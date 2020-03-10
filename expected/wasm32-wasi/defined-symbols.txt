@@ -271,6 +271,7 @@ __wctype_l
 __xpg_basename
 __xpg_strerror_r
 __year_to_secs
+_activate
 _environ
 _exit
 _fini

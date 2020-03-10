@@ -13,6 +13,10 @@ int unsetenv(const char *name)
 		errno = EINVAL;
 		return -1;
 	}
+#ifdef __wasilibc_unmodified_upstream // Lazy environment variable init.
+#else
+#include "wasi/libc-environ-compat.h"
+#endif
 	if (__environ) {
 		char **e = __environ, **eo = e;
 		for (; *e; e++)

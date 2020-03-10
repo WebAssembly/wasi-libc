@@ -3,29 +3,38 @@
 #include <sysexits.h>
 #include <wasi/api.h>
 #include <wasi/libc.h>
+#include <wasi/libc-environ.h>
 
+/// If the program doesn't use `environ`, it'll get this version of
+/// `__wasilibc_environ`, which isn't initialized with a constructor function.
+/// `getenv` etc. call `__wasilibc_ensure_environ()` before accessing it.
+/// Statically-initialize it to an invalid pointer value so that we can
+/// detect if it's been explicitly initialized (we can't use `NULL` because
+/// `clearenv` sets it to NULL.
+char **__wasilibc_environ __attribute__((weak)) = (char **)-1;
+
+// See the comments in libc-environ.h.
+void __wasilibc_ensure_environ(void) {
+    if (__wasilibc_environ == (char **)-1) {
+        __wasilibc_initialize_environ();
+    }
+}
+
+/// Avoid dynamic allocation for the case where there are no environment
+/// variables, but we still need a non-NULL pointer to an (empty) array.
 static char *empty_environ[1] = { NULL };
-char **__environ = empty_environ;
-extern __typeof(__environ) _environ __attribute__((weak, alias("__environ")));
-extern __typeof(__environ) environ __attribute__((weak, alias("__environ")));
 
-// We define this function here in the same source file as __environ, so that
-// this function is called in iff environment variable support is used.
-// Concerning the 50 -- levels up to 100 are reserved for the implementation,
-// so we an arbitrary number in the middle of the range to allow other
-// reserved things to go before or after.
-__attribute__((constructor(50)))
-static void __wasilibc_populate_environ(void) {
-    __wasi_errno_t err;
-
+// See the comments in libc-environ.h.
+void __wasilibc_initialize_environ(void) {
     // Get the sizes of the arrays we'll have to create to copy in the environment.
     size_t environ_count;
     size_t environ_buf_size;
-    err = __wasi_environ_sizes_get(&environ_count, &environ_buf_size);
+    __wasi_errno_t err = __wasi_environ_sizes_get(&environ_count, &environ_buf_size);
     if (err != __WASI_ERRNO_SUCCESS) {
         goto oserr;
     }
     if (environ_count == 0) {
+        __wasilibc_environ = empty_environ;
         return;
     }
 
@@ -49,7 +58,8 @@ static void __wasilibc_populate_environ(void) {
         goto software;
     }
 
-    // Fill the environment chars, and the __environ array with pointers into those chars.
+    // Fill the environment chars, and the `__wasilibc_environ` array with
+    // pointers into those chars.
     // TODO: Remove the casts on `environ_ptrs` and `environ_buf` once the witx is updated with char8 support.
     err = __wasi_environ_get((uint8_t **)environ_ptrs, (uint8_t *)environ_buf);
     if (err != __WASI_ERRNO_SUCCESS) {
@@ -58,7 +68,7 @@ static void __wasilibc_populate_environ(void) {
         goto oserr;
     }
 
-    __environ = environ_ptrs;
+    __wasilibc_environ = environ_ptrs;
     return;
 oserr:
     _Exit(EX_OSERR);

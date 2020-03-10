@@ -7,6 +7,10 @@ weak_alias(dummy, __env_rm_add);
 
 int __putenv(char *s, size_t l, char *r)
 {
+#ifdef __wasilibc_unmodified_upstream // Lazy environment variable init.
+#else
+#include "wasi/libc-environ-compat.h"
+#endif
 	size_t i=0;
 	if (__environ) {
 		for (char **e = __environ; *e; e++, i++)

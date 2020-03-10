@@ -4,6 +4,10 @@
 
 char *getenv(const char *name)
 {
+#ifdef __wasilibc_unmodified_upstream // Lazy environment variable init.
+#else
+#include "wasi/libc-environ-compat.h"
+#endif
 	size_t l = __strchrnul(name, '=') - name;
 	if (l && !name[l] && __environ)
 		for (char **e = __environ; *e; e++)

@@ -443,11 +443,13 @@ finish: startup_files libc
 	#
 	mkdir -p "$(SYSROOT_SHARE)"
 
+	#
 	# Collect symbol information.
-	# TODO: Use llvm-nm --extern-only instead of grep. This is blocked on
-	# LLVM PR40497, which is fixed in 9.0, but not in 8.0.
-	# Ignore certain llvm builtin symbols such as those starting with __mul
-	# since these dependencies can vary between llvm versions.
+	#
+	@# TODO: Use llvm-nm --extern-only instead of grep. This is blocked on
+	@# LLVM PR40497, which is fixed in 9.0, but not in 8.0.
+	@# Ignore certain llvm builtin symbols such as those starting with __mul
+	@# since these dependencies can vary between llvm versions.
 	"$(WASM_NM)" --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_ALL=C sort > "$(SYSROOT_SHARE)/defined-symbols.txt"
 	for undef_sym in $$("$(WASM_NM)" --undefined-only "$(SYSROOT_LIB)"/*.a "$(SYSROOT_LIB)"/*.o \
@@ -457,27 +459,33 @@ finish: startup_files libc
 	grep '^_*wasi_' "$(SYSROOT_SHARE)/undefined-symbols.txt" \
 	    > "$(SYSROOT_LIB)/libc.imports"
 
+	#
 	# Generate a test file that includes all public header files.
+	#
 	cd "$(SYSROOT)" && \
 	for header in $$(find include -type f -not -name mman.h |grep -v /bits/); do \
 	    echo '#include <'$$header'>' | sed 's/include\///' ; \
 	done |LC_ALL=C sort >share/$(MULTIARCH_TRIPLE)/include-all.c ; \
 	cd - >/dev/null
 
+	#
 	# Test that it compiles.
+	#
 	"$(WASM_CC)" $(WASM_CFLAGS) -fsyntax-only "$(SYSROOT_SHARE)/include-all.c" -Wno-\#warnings
 
+	#
 	# Collect all the predefined macros, except for compiler version macros
-	# which we don't need to track here. For the __*_ATOMIC_*_LOCK_FREE
-	# macros, squash individual compiler names to attempt, toward keeping
-	# these files compiler-independent.
+	# which we don't need to track here.
 	#
-	# We have to add `-isystem $(SYSROOT_INC)` because otherwise clang puts
-	# its builtin include path first, which produces compiler-specific
-	# output.
-	#
-	# TODO: Undefine __FLOAT128__ for now since it's not in clang 8.0.
-	# TODO: Filter out __FLT16_* for now, as not all versions of clang have these.
+	@# For the __*_ATOMIC_*_LOCK_FREE macros, squash individual compiler
+	@# names to attempt, toward keeping these files compiler-independent.
+	@#
+	@# We have to add `-isystem $(SYSROOT_INC)` because otherwise clang puts
+	@# its builtin include path first, which produces compiler-specific
+	@# output.
+	@#
+	@# TODO: Undefine __FLOAT128__ for now since it's not in clang 8.0.
+	@# TODO: Filter out __FLT16_* for now, as not all versions of clang have these.
 	"$(WASM_CC)" $(WASM_CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -isystem $(SYSROOT_INC) \
 	    -E -dM -Wno-\#warnings \

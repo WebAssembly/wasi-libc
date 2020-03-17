@@ -9,13 +9,13 @@ SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
 INSTALL_DIR ?= /usr/local
 # single or posix
-THREAD_MODEL = single
+THREAD_MODEL ?= single
 # yes or no
-BUILD_DLMALLOC = yes
-BUILD_LIBC_BOTTOM_HALF = yes
-BUILD_LIBC_TOP_HALF = yes
+BUILD_DLMALLOC ?= yes
+BUILD_LIBC_BOTTOM_HALF ?= yes
+BUILD_LIBC_TOP_HALF ?= yes
 # The directory where we're store intermediate artifacts.
-OBJDIR = $(CURDIR)/build
+OBJDIR ?= $(CURDIR)/build
 
 # Check dependencies.
 ifeq ($(BUILD_LIBC_TOP_HALF),yes)

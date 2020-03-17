@@ -287,7 +287,7 @@ ifeq ($(THREAD_MODEL), single)
 override MUSL_OMIT_HEADERS += "aio.h" "pthread.h"
 endif
 
-default: check
+default: finish
 
 $(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
 
@@ -476,17 +476,16 @@ finish: startup_files libc
 	    | grep -v '^#define __FLT16_' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
 
-	#
-	# The build succeeded! The generated sysroot is in $(SYSROOT).
-	#
-
-check: finish
 	# Check that the computed metadata matches the expected metadata.
 	# This ignores whitespace because on Windows the output has CRLF line endings.
 	diff -wur "$(CURDIR)/expected/$(MULTIARCH_TRIPLE)" "$(SYSROOT_SHARE)"
+
+	#
+	# The build succeeded! The generated sysroot is in $(SYSROOT).
+	#
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"
 	cp -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"
 
-.PHONY: default startup_files libc finish check install include_dirs
+.PHONY: default startup_files libc finish install include_dirs

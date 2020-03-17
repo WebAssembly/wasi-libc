@@ -1,5 +1,5 @@
-# These variables are specifically meant to be overridable via
-# the make command-line.
+# These variables are specifically meant to be overridable via the make
+# command-line.
 WASM_CC ?= clang
 WASM_NM ?= $(patsubst %clang,%llvm-nm,$(WASM_CC))
 WASM_AR ?= $(patsubst %clang,%llvm-ar,$(WASM_CC))
@@ -29,8 +29,8 @@ $(error BUILD_LIBC_BOTTOM_HALF=yes depends on BUILD_DLMALLOC=yes)
 endif
 endif
 
-# These variables describe the locations of various files and
-# directories in the source tree.
+# These variables describe the locations of various files and directories in
+# the source tree.
 override BASICS_DIR = $(CURDIR)/basics
 override BASICS_INC = $(BASICS_DIR)/include
 override BASICS_CRT_SOURCES = $(wildcard $(BASICS_DIR)/crt/*.c)
@@ -477,8 +477,9 @@ finish: startup_files libc
 	# Collect all the predefined macros, except for compiler version macros
 	# which we don't need to track here.
 	#
-	@# For the __*_ATOMIC_*_LOCK_FREE macros, squash individual compiler
-	@# names to attempt, toward keeping these files compiler-independent.
+	@#
+	@# For the __*_ATOMIC_*_LOCK_FREE macros, squash individual compiler names
+	@# to attempt, toward keeping these files compiler-independent.
 	@#
 	@# We have to add `-isystem $(SYSROOT_INC)` because otherwise clang puts
 	@# its builtin include path first, which produces compiler-specific

@@ -433,8 +433,8 @@ finish: startup_files libc
 	# Generate a test file that includes all public header files.
 	#
 	cd "$(SYSROOT)" && \
-	for header in $$(find include -type f -not -name mman.h |grep -v /bits/); do \
-	    echo '#include <'$$header'>' | sed 's/include\///' ; \
+	  for header in $$(find include -type f -not -name mman.h |grep -v /bits/); do \
+	      echo '#include <'$$header'>' | sed 's/include\///' ; \
 	done |LC_ALL=C sort >share/$(MULTIARCH_TRIPLE)/include-all.c ; \
 	cd - >/dev/null
 

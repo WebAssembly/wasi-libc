@@ -172,6 +172,8 @@ endif
 # Set the sysroot.
 override WASM_CFLAGS += --sysroot="$(SYSROOT)"
 
+# These variables describe the locations of various files and directories in
+# the build tree.
 override objs = $(patsubst $(CURDIR)/%.c,$(OBJDIR)/%.o,$(1))
 override BASICS_OBJS = $(call objs,$(BASICS_SOURCES))
 override DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))

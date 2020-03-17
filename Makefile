@@ -60,72 +60,40 @@ override LIBC_TOP_HALF_MUSL_DIR = $(LIBC_TOP_HALF_DIR)/musl
 override LIBC_TOP_HALF_MUSL_SRC_DIR = $(LIBC_TOP_HALF_MUSL_DIR)/src
 override LIBC_TOP_HALF_MUSL_INC = $(LIBC_TOP_HALF_MUSL_DIR)/include
 override LIBC_TOP_HALF_MUSL_SOURCES = \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/a64l.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/basename.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/dirname.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/ffs.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/ffsl.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/ffsll.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/fmtmsg.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/getdomainname.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/gethostid.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/getopt.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/getopt_long.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/getsubopt.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/uname.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/nftw.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/errno/strerror.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/htonl.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/htons.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/ntohl.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/ntohs.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/inet_ntop.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/inet_pton.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/inet_aton.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/in6addr_any.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/network/in6addr_loopback.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/fenv.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/fesetround.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/feupdateenv.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/fesetexceptflag.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/fegetexceptflag.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fenv/feholdexcept.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/exit.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/atexit.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/assert.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/quick_exit.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/at_quick_exit.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/strftime.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/asctime.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/asctime_r.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/ctime.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/ctime_r.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/wcsftime.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/strptime.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/difftime.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/timegm.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/ftime.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/gmtime.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/gmtime_r.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/timespec_get.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/getdate.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/localtime.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/localtime_r.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/mktime.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/__tm_to_secs.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/__month_to_secs.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/__secs_to_tm.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/__year_to_secs.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/time/__tz.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/fcntl/creat.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/dirent/alphasort.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/dirent/versionsort.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/clearenv.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/getenv.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/putenv.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/setenv.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/unsetenv.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/unistd/posix_close.c \
+    $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
+        misc/a64l.c \
+        misc/basename.c misc/dirname.c \
+        misc/ffs.c misc/ffsl.c misc/ffsll.c \
+        misc/fmtmsg.c \
+        misc/getdomainname.c misc/gethostid.c \
+        misc/getopt.c misc/getopt_long.c \
+        misc/getsubopt.c \
+        misc/uname.c \
+        misc/nftw.c \
+        errno/strerror.c \
+        network/htonl.c network/htons.c network/ntohl.c network/ntohs.c \
+        network/inet_ntop.c network/inet_pton.c network/inet_aton.c \
+        network/in6addr_any.c network/in6addr_loopback.c \
+        fenv/fenv.c fenv/fesetround.c fenv/feupdateenv.c \
+        fenv/fesetexceptflag.c fenv/fegetexceptflag.c fenv/feholdexcept.c \
+        exit/exit.c exit/atexit.c exit/assert.c \
+        exit/quick_exit.c exit/at_quick_exit.c \
+        time/strftime.c time/asctime.c time/asctime_r.c \
+        time/ctime.c time/ctime_r.c \
+        time/wcsftime.c time/strptime.c time/difftime.c \
+        time/timegm.c time/ftime.c time/gmtime.c time/gmtime_r.c \
+        time/timespec_get.c \
+        time/getdate.c \
+        time/localtime.c time/localtime_r.c \
+        time/mktime.c \
+        time/__tm_to_secs.c time/__month_to_secs.c \
+        time/__secs_to_tm.c time/__year_to_secs.c \
+        time/__tz.c \
+        fcntl/creat.c \
+        dirent/alphasort.c dirent/versionsort.c \
+        env/clearenv.c env/getenv.c env/putenv.c env/setenv.c env/unsetenv.c \
+        unistd/posix_close.c \
+    ) \
     $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/*.c)) \
     $(filter-out %/flockfile.c %/funlockfile.c %/__lockfile.c %/ftrylockfile.c \

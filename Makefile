@@ -31,35 +31,35 @@ endif
 
 # These variables describe the locations of various files and
 # directories in the source tree.
-BASICS_DIR = $(CURDIR)/basics
-BASICS_INC = $(BASICS_DIR)/include
-BASICS_CRT_SOURCES = $(wildcard $(BASICS_DIR)/crt/*.c)
-BASICS_SOURCES = \
+override BASICS_DIR = $(CURDIR)/basics
+override BASICS_INC = $(BASICS_DIR)/include
+override BASICS_CRT_SOURCES = $(wildcard $(BASICS_DIR)/crt/*.c)
+override BASICS_SOURCES = \
     $(wildcard $(BASICS_DIR)/sources/*.c) \
     $(wildcard $(BASICS_DIR)/sources/math/*.c)
-DLMALLOC_DIR = $(CURDIR)/dlmalloc
-DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
-DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/dlmalloc.c
-DLMALLOC_INC = $(DLMALLOC_DIR)/include
-LIBC_BOTTOM_HALF_DIR = $(CURDIR)/libc-bottom-half
-LIBC_BOTTOM_HALF_CLOUDLIBC_SRC = $(LIBC_BOTTOM_HALF_DIR)/cloudlibc/src
-LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC = $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/include
-LIBC_BOTTOM_HALF_HEADERS_PUBLIC = $(LIBC_BOTTOM_HALF_DIR)/headers/public
-LIBC_BOTTOM_HALF_HEADERS_PRIVATE = $(LIBC_BOTTOM_HALF_DIR)/headers/private
-LIBC_BOTTOM_HALF_LIBPREOPEN_DIR = $(LIBC_BOTTOM_HALF_DIR)/libpreopen
-LIBC_BOTTOM_HALF_SOURCES = $(LIBC_BOTTOM_HALF_DIR)/sources
-LIBC_BOTTOM_HALF_ALL_SOURCES = \
+override DLMALLOC_DIR = $(CURDIR)/dlmalloc
+override DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
+override DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/dlmalloc.c
+override DLMALLOC_INC = $(DLMALLOC_DIR)/include
+override LIBC_BOTTOM_HALF_DIR = $(CURDIR)/libc-bottom-half
+override LIBC_BOTTOM_HALF_CLOUDLIBC_SRC = $(LIBC_BOTTOM_HALF_DIR)/cloudlibc/src
+override LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC = $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/include
+override LIBC_BOTTOM_HALF_HEADERS_PUBLIC = $(LIBC_BOTTOM_HALF_DIR)/headers/public
+override LIBC_BOTTOM_HALF_HEADERS_PRIVATE = $(LIBC_BOTTOM_HALF_DIR)/headers/private
+override LIBC_BOTTOM_HALF_LIBPREOPEN_DIR = $(LIBC_BOTTOM_HALF_DIR)/libpreopen
+override LIBC_BOTTOM_HALF_SOURCES = $(LIBC_BOTTOM_HALF_DIR)/sources
+override LIBC_BOTTOM_HALF_ALL_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
     $(LIBC_BOTTOM_HALF_LIBPREOPEN_DIR)/libpreopen.c \
     $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c)
-LIBWASI_EMULATED_MMAN_SOURCES = \
+override LIBWASI_EMULATED_MMAN_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_DIR)/mman -name \*.c)
-LIBC_BOTTOM_HALF_CRT_SOURCES = $(wildcard $(LIBC_BOTTOM_HALF_DIR)/crt/*.c)
-LIBC_TOP_HALF_DIR = $(CURDIR)/libc-top-half
-LIBC_TOP_HALF_MUSL_DIR = $(LIBC_TOP_HALF_DIR)/musl
-LIBC_TOP_HALF_MUSL_SRC_DIR = $(LIBC_TOP_HALF_MUSL_DIR)/src
-LIBC_TOP_HALF_MUSL_INC = $(LIBC_TOP_HALF_MUSL_DIR)/include
-LIBC_TOP_HALF_MUSL_SOURCES = \
+override LIBC_BOTTOM_HALF_CRT_SOURCES = $(wildcard $(LIBC_BOTTOM_HALF_DIR)/crt/*.c)
+override LIBC_TOP_HALF_DIR = $(CURDIR)/libc-top-half
+override LIBC_TOP_HALF_MUSL_DIR = $(LIBC_TOP_HALF_DIR)/musl
+override LIBC_TOP_HALF_MUSL_SRC_DIR = $(LIBC_TOP_HALF_MUSL_DIR)/src
+override LIBC_TOP_HALF_MUSL_INC = $(LIBC_TOP_HALF_MUSL_DIR)/include
+override LIBC_TOP_HALF_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/a64l.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/basename.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/dirname.c \
@@ -163,29 +163,29 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  %/cimagf.c %/cimag.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
-MUSL_PRINTSCAN_SOURCES = \
+override MUSL_PRINTSCAN_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/floatscan.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfprintf.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfwprintf.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfscanf.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/strtod.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/wcstod.c
-LIBC_TOP_HALF_HEADERS_PRIVATE = $(LIBC_TOP_HALF_DIR)/headers/private
-LIBC_TOP_HALF_SOURCES = $(LIBC_TOP_HALF_DIR)/sources
-LIBC_TOP_HALF_ALL_SOURCES = \
+override LIBC_TOP_HALF_HEADERS_PRIVATE = $(LIBC_TOP_HALF_DIR)/headers/private
+override LIBC_TOP_HALF_SOURCES = $(LIBC_TOP_HALF_DIR)/sources
+override LIBC_TOP_HALF_ALL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SOURCES) \
     $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.c)
 
 # Set the target variables. Multiarch triples notably omit the vendor
 # field, which happens to be what we do for the main target triple too.
-TARGET_TRIPLE = wasm32-wasi
-MULTIARCH_TRIPLE = wasm32-wasi
+override TARGET_TRIPLE = wasm32-wasi
+override MULTIARCH_TRIPLE = wasm32-wasi
 
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
-SYSROOT_LIB = $(SYSROOT)/lib/$(MULTIARCH_TRIPLE)
-SYSROOT_INC = $(SYSROOT)/include
-SYSROOT_SHARE = $(SYSROOT)/share/$(MULTIARCH_TRIPLE)
+override SYSROOT_LIB = $(SYSROOT)/lib/$(MULTIARCH_TRIPLE)
+override SYSROOT_INC = $(SYSROOT)/include
+override SYSROOT_SHARE = $(SYSROOT)/share/$(MULTIARCH_TRIPLE)
 
 # Set the target.
 override WASM_CFLAGS += --target=$(TARGET_TRIPLE)
@@ -204,7 +204,7 @@ endif
 # Set the sysroot.
 override WASM_CFLAGS += --sysroot="$(SYSROOT)"
 
-objs = $(patsubst $(CURDIR)/%.c,$(OBJDIR)/%.o,$(1))
+override objs = $(patsubst $(CURDIR)/%.c,$(OBJDIR)/%.o,$(1))
 override BASICS_OBJS = $(call objs,$(BASICS_SOURCES))
 override DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 override LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))

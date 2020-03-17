@@ -29,6 +29,11 @@ $(error BUILD_LIBC_BOTTOM_HALF=yes depends on BUILD_DLMALLOC=yes)
 endif
 endif
 
+# Set the target variables. Multiarch triples notably omit the vendor field,
+# which happens to be what we do for the main target triple too.
+override TARGET_TRIPLE = wasm32-wasi
+override MULTIARCH_TRIPLE = wasm32-wasi
+
 # These variables describe the locations of various files and directories in
 # the source tree.
 override BASICS_DIR = $(CURDIR)/basics
@@ -144,17 +149,6 @@ override LIBC_TOP_HALF_ALL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SOURCES) \
     $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.c)
 
-# Set the target variables. Multiarch triples notably omit the vendor
-# field, which happens to be what we do for the main target triple too.
-override TARGET_TRIPLE = wasm32-wasi
-override MULTIARCH_TRIPLE = wasm32-wasi
-
-# These variables describe the locations of various files and
-# directories in the generated sysroot tree.
-override SYSROOT_LIB = $(SYSROOT)/lib/$(MULTIARCH_TRIPLE)
-override SYSROOT_INC = $(SYSROOT)/include
-override SYSROOT_SHARE = $(SYSROOT)/share/$(MULTIARCH_TRIPLE)
-
 # Set the target.
 override WASM_CFLAGS += --target=$(TARGET_TRIPLE)
 # WebAssembly floating-point match doesn't trap.
@@ -201,6 +195,12 @@ override MUSL_PRINTSCAN_OBJS = $(call objs,$(MUSL_PRINTSCAN_SOURCES))
 override MUSL_PRINTSCAN_LONG_DOUBLE_OBJS = $(patsubst %.o,%.long-double.o,$(MUSL_PRINTSCAN_OBJS))
 override MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS = $(patsubst %.o,%.no-floating-point.o,$(MUSL_PRINTSCAN_OBJS))
 override LIBWASI_EMULATED_MMAN_OBJS = $(call objs,$(LIBWASI_EMULATED_MMAN_SOURCES))
+
+# These variables describe the locations of various files and
+# directories in the generated sysroot tree.
+override SYSROOT_LIB := $(SYSROOT)/lib/$(MULTIARCH_TRIPLE)
+override SYSROOT_INC = $(SYSROOT)/include
+override SYSROOT_SHARE = $(SYSROOT)/share/$(MULTIARCH_TRIPLE)
 
 # Files from musl's include directory that we don't want to install in the
 # sysroot's include directory.

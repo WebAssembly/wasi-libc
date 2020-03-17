@@ -38,8 +38,9 @@ To use the sysroot, use the `--sysroot=` option:
 to run the compiler using the newly built sysroot.
 
 Note that Clang packages typically don't include cross-compiled builds of
-compiler-rt, `libclang_rt.builtins-wasm32.a`, so they may not be usable without
+compiler-rt, libcxx, or libcxxabi, for `libclang_rt.builtins-wasm32.a`, libc++.a,
+or libc++abi.a, respectively, so they may not be usable without
 extra setup. This is one of the things [wasi-sdk] simplifies, as it includes
-a cross-compiled compiler-rt.
+cross-compiled builds of compiler-rt, libc++.a, and libc++abi.a.
 
 [wasi-sdk]: https://github.com/WebAssembly/wasi-sdk

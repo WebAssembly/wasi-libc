@@ -2774,7 +2774,7 @@
 #define __STDC_ISO_10646__ 201206L
 #define __STDC_UTF_16__ 1
 #define __STDC_UTF_32__ 1
-#define __STDC_VERSION__ 201112L
+#define __STDC_VERSION__ 201710L
 #define __STDC__ 1
 #define __STDDEF_H 
 #define __UAPI_DEF_IN6_ADDR 0

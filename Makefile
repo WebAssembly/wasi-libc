@@ -480,7 +480,7 @@ finish: startup_files libc
 	# TODO: Filter out __FLT16_* for now, as not all versions of clang have these.
 	"$(WASM_CC)" $(WASM_CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -isystem $(SYSROOT_INC) \
-	    -std=gnu11 \
+	    -std=gnu17 \
 	    -E -dM -Wno-\#warnings \
 	    -D_ALL_SOURCE \
 	    -U__llvm__ \

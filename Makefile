@@ -29,42 +29,45 @@ $(error BUILD_LIBC_BOTTOM_HALF=yes depends on BUILD_DLMALLOC=yes)
 endif
 endif
 
+# Variables from this point on are not meant to be overridable via the
+# make command-line.
+
 # Set the target variables. Multiarch triples notably omit the vendor field,
 # which happens to be what we do for the main target triple too.
-override TARGET_TRIPLE = wasm32-wasi
-override MULTIARCH_TRIPLE = wasm32-wasi
+TARGET_TRIPLE = wasm32-wasi
+MULTIARCH_TRIPLE = wasm32-wasi
 
 # These variables describe the locations of various files and directories in
 # the source tree.
-override BASICS_DIR = $(CURDIR)/basics
-override BASICS_INC = $(BASICS_DIR)/include
-override BASICS_CRT_SOURCES = $(wildcard $(BASICS_DIR)/crt/*.c)
-override BASICS_SOURCES = \
+BASICS_DIR = $(CURDIR)/basics
+BASICS_INC = $(BASICS_DIR)/include
+BASICS_CRT_SOURCES = $(wildcard $(BASICS_DIR)/crt/*.c)
+BASICS_SOURCES = \
     $(wildcard $(BASICS_DIR)/sources/*.c) \
     $(wildcard $(BASICS_DIR)/sources/math/*.c)
-override DLMALLOC_DIR = $(CURDIR)/dlmalloc
-override DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
-override DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/dlmalloc.c
-override DLMALLOC_INC = $(DLMALLOC_DIR)/include
-override LIBC_BOTTOM_HALF_DIR = $(CURDIR)/libc-bottom-half
-override LIBC_BOTTOM_HALF_CLOUDLIBC_SRC = $(LIBC_BOTTOM_HALF_DIR)/cloudlibc/src
-override LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC = $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/include
-override LIBC_BOTTOM_HALF_HEADERS_PUBLIC = $(LIBC_BOTTOM_HALF_DIR)/headers/public
-override LIBC_BOTTOM_HALF_HEADERS_PRIVATE = $(LIBC_BOTTOM_HALF_DIR)/headers/private
-override LIBC_BOTTOM_HALF_LIBPREOPEN_DIR = $(LIBC_BOTTOM_HALF_DIR)/libpreopen
-override LIBC_BOTTOM_HALF_SOURCES = $(LIBC_BOTTOM_HALF_DIR)/sources
-override LIBC_BOTTOM_HALF_ALL_SOURCES = \
+DLMALLOC_DIR = $(CURDIR)/dlmalloc
+DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
+DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/dlmalloc.c
+DLMALLOC_INC = $(DLMALLOC_DIR)/include
+LIBC_BOTTOM_HALF_DIR = $(CURDIR)/libc-bottom-half
+LIBC_BOTTOM_HALF_CLOUDLIBC_SRC = $(LIBC_BOTTOM_HALF_DIR)/cloudlibc/src
+LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC = $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/include
+LIBC_BOTTOM_HALF_HEADERS_PUBLIC = $(LIBC_BOTTOM_HALF_DIR)/headers/public
+LIBC_BOTTOM_HALF_HEADERS_PRIVATE = $(LIBC_BOTTOM_HALF_DIR)/headers/private
+LIBC_BOTTOM_HALF_LIBPREOPEN_DIR = $(LIBC_BOTTOM_HALF_DIR)/libpreopen
+LIBC_BOTTOM_HALF_SOURCES = $(LIBC_BOTTOM_HALF_DIR)/sources
+LIBC_BOTTOM_HALF_ALL_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
     $(LIBC_BOTTOM_HALF_LIBPREOPEN_DIR)/libpreopen.c \
     $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c)
-override LIBWASI_EMULATED_MMAN_SOURCES = \
+LIBWASI_EMULATED_MMAN_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_DIR)/mman -name \*.c)
-override LIBC_BOTTOM_HALF_CRT_SOURCES = $(wildcard $(LIBC_BOTTOM_HALF_DIR)/crt/*.c)
-override LIBC_TOP_HALF_DIR = $(CURDIR)/libc-top-half
-override LIBC_TOP_HALF_MUSL_DIR = $(LIBC_TOP_HALF_DIR)/musl
-override LIBC_TOP_HALF_MUSL_SRC_DIR = $(LIBC_TOP_HALF_MUSL_DIR)/src
-override LIBC_TOP_HALF_MUSL_INC = $(LIBC_TOP_HALF_MUSL_DIR)/include
-override LIBC_TOP_HALF_MUSL_SOURCES = \
+LIBC_BOTTOM_HALF_CRT_SOURCES = $(wildcard $(LIBC_BOTTOM_HALF_DIR)/crt/*.c)
+LIBC_TOP_HALF_DIR = $(CURDIR)/libc-top-half
+LIBC_TOP_HALF_MUSL_DIR = $(LIBC_TOP_HALF_DIR)/musl
+LIBC_TOP_HALF_MUSL_SRC_DIR = $(LIBC_TOP_HALF_MUSL_DIR)/src
+LIBC_TOP_HALF_MUSL_INC = $(LIBC_TOP_HALF_MUSL_DIR)/include
+LIBC_TOP_HALF_MUSL_SOURCES = \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
         misc/a64l.c \
         misc/basename.c misc/dirname.c \
@@ -136,93 +139,93 @@ override LIBC_TOP_HALF_MUSL_SOURCES = \
                  %/cimagf.c %/cimag.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
-override MUSL_PRINTSCAN_SOURCES = \
+MUSL_PRINTSCAN_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/floatscan.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfprintf.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfwprintf.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfscanf.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/strtod.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/wcstod.c
-override LIBC_TOP_HALF_HEADERS_PRIVATE = $(LIBC_TOP_HALF_DIR)/headers/private
-override LIBC_TOP_HALF_SOURCES = $(LIBC_TOP_HALF_DIR)/sources
-override LIBC_TOP_HALF_ALL_SOURCES = \
+LIBC_TOP_HALF_HEADERS_PRIVATE = $(LIBC_TOP_HALF_DIR)/headers/private
+LIBC_TOP_HALF_SOURCES = $(LIBC_TOP_HALF_DIR)/sources
+LIBC_TOP_HALF_ALL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SOURCES) \
     $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.c)
 
 # Set the target.
-override WASM_CFLAGS += --target=$(TARGET_TRIPLE)
+WASM_CFLAGS += --target=$(TARGET_TRIPLE)
 # WebAssembly floating-point match doesn't trap.
 # TODO: Add -fno-signaling-nans when the compiler supports it.
-override WASM_CFLAGS += -fno-trapping-math
+WASM_CFLAGS += -fno-trapping-math
 
 # Configure support for threads.
 ifeq ($(THREAD_MODEL), single)
-override WASM_CFLAGS += -mthread-model single
+WASM_CFLAGS += -mthread-model single
 endif
 ifeq ($(THREAD_MODEL), posix)
-override WASM_CFLAGS += -mthread-model posix -pthread
+WASM_CFLAGS += -mthread-model posix -pthread
 endif
 
 # Set the sysroot.
-override WASM_CFLAGS += --sysroot="$(SYSROOT)"
+WASM_CFLAGS += --sysroot="$(SYSROOT)"
 
 # These variables describe the locations of various files and directories in
 # the build tree.
-override objs = $(patsubst $(CURDIR)/%.c,$(OBJDIR)/%.o,$(1))
-override BASICS_OBJS = $(call objs,$(BASICS_SOURCES))
-override DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
-override LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
-override LIBC_TOP_HALF_ALL_OBJS = $(call objs,$(LIBC_TOP_HALF_ALL_SOURCES))
-override LIBC_OBJS := $(BASICS_OBJS)
+objs = $(patsubst $(CURDIR)/%.c,$(OBJDIR)/%.o,$(1))
+BASICS_OBJS = $(call objs,$(BASICS_SOURCES))
+DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
+LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
+LIBC_TOP_HALF_ALL_OBJS = $(call objs,$(LIBC_TOP_HALF_ALL_SOURCES))
+LIBC_OBJS := $(BASICS_OBJS)
 ifeq ($(BUILD_DLMALLOC),yes)
-override LIBC_OBJS += $(DLMALLOC_OBJS)
+LIBC_OBJS += $(DLMALLOC_OBJS)
 endif
 ifeq ($(BUILD_LIBC_BOTTOM_HALF),yes)
 # Override basics' string.o with libc-bottom-half's.
-override LIBC_OBJS := $(filter-out %/string.o,$(LIBC_OBJS))
+LIBC_OBJS := $(filter-out %/string.o,$(LIBC_OBJS))
 # Add libc-bottom-half's objects.
-override LIBC_OBJS += $(LIBC_BOTTOM_HALF_ALL_OBJS)
+LIBC_OBJS += $(LIBC_BOTTOM_HALF_ALL_OBJS)
 endif
 ifeq ($(BUILD_LIBC_TOP_HALF),yes)
 # Override libc-bottom-half's string.o with libc-top-half's.
-override LIBC_OBJS := $(filter-out %/string.o,$(LIBC_OBJS))
+LIBC_OBJS := $(filter-out %/string.o,$(LIBC_OBJS))
 # Override libc-bottom-half's qsort.o with libc-top-half's.
-override LIBC_OBJS := $(filter-out %/qsort.o,$(LIBC_OBJS))
+LIBC_OBJS := $(filter-out %/qsort.o,$(LIBC_OBJS))
 # libc-top-half is musl.
-override LIBC_OBJS += $(LIBC_TOP_HALF_ALL_OBJS)
+LIBC_OBJS += $(LIBC_TOP_HALF_ALL_OBJS)
 endif
-override MUSL_PRINTSCAN_OBJS = $(call objs,$(MUSL_PRINTSCAN_SOURCES))
-override MUSL_PRINTSCAN_LONG_DOUBLE_OBJS = $(patsubst %.o,%.long-double.o,$(MUSL_PRINTSCAN_OBJS))
-override MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS = $(patsubst %.o,%.no-floating-point.o,$(MUSL_PRINTSCAN_OBJS))
-override LIBWASI_EMULATED_MMAN_OBJS = $(call objs,$(LIBWASI_EMULATED_MMAN_SOURCES))
+MUSL_PRINTSCAN_OBJS = $(call objs,$(MUSL_PRINTSCAN_SOURCES))
+MUSL_PRINTSCAN_LONG_DOUBLE_OBJS = $(patsubst %.o,%.long-double.o,$(MUSL_PRINTSCAN_OBJS))
+MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS = $(patsubst %.o,%.no-floating-point.o,$(MUSL_PRINTSCAN_OBJS))
+LIBWASI_EMULATED_MMAN_OBJS = $(call objs,$(LIBWASI_EMULATED_MMAN_SOURCES))
 
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
-override SYSROOT_LIB := $(SYSROOT)/lib/$(MULTIARCH_TRIPLE)
-override SYSROOT_INC = $(SYSROOT)/include
-override SYSROOT_SHARE = $(SYSROOT)/share/$(MULTIARCH_TRIPLE)
+SYSROOT_LIB := $(SYSROOT)/lib/$(MULTIARCH_TRIPLE)
+SYSROOT_INC = $(SYSROOT)/include
+SYSROOT_SHARE = $(SYSROOT)/share/$(MULTIARCH_TRIPLE)
 
 # Files from musl's include directory that we don't want to install in the
 # sysroot's include directory.
-override MUSL_OMIT_HEADERS :=
+MUSL_OMIT_HEADERS :=
 
 # Remove files which aren't headers (we generate alltypes.h below).
-override MUSL_OMIT_HEADERS += \
+MUSL_OMIT_HEADERS += \
     "bits/syscall.h.in" \
     "bits/alltypes.h.in" \
     "alltypes.h.in"
 
 # Use the compiler's version of these headers.
-override MUSL_OMIT_HEADERS += \
+MUSL_OMIT_HEADERS += \
     "stdarg.h" \
     "stddef.h"
 
 # Use the WASI errno definitions.
-override MUSL_OMIT_HEADERS += \
+MUSL_OMIT_HEADERS += \
     "bits/errno.h"
 
 # Remove headers that aren't supported yet or that aren't relevant for WASI.
-override MUSL_OMIT_HEADERS += \
+MUSL_OMIT_HEADERS += \
     "sys/procfs.h" \
     "sys/user.h" \
     "sys/kd.h" "sys/vt.h" "sys/soundcard.h" "sys/sem.h" \
@@ -284,7 +287,7 @@ override MUSL_OMIT_HEADERS += \
 
 ifeq ($(THREAD_MODEL), single)
 # Remove headers not supported in single-threaded mode.
-override MUSL_OMIT_HEADERS += "aio.h" "pthread.h"
+MUSL_OMIT_HEADERS += "aio.h" "pthread.h"
 endif
 
 default: finish
@@ -308,11 +311,11 @@ $(SYSROOT_LIB)/libwasi-emulated-mman.a: $(LIBWASI_EMULATED_MMAN_OBJS)
 	# silently dropping the tail.
 	$(WASM_AR) crs $@ $(wordlist 800, 100000, $^)
 
-$(MUSL_PRINTSCAN_OBJS): override WASM_CFLAGS += \
+$(MUSL_PRINTSCAN_OBJS): WASM_CFLAGS += \
 	    -D__wasilibc_printscan_no_long_double \
 	    -D__wasilibc_printscan_full_support_option="\"add -lc-printscan-long-double to the link command\""
 
-$(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): override WASM_CFLAGS += \
+$(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): WASM_CFLAGS += \
 	    -D__wasilibc_printscan_no_floating_point \
 	    -D__wasilibc_printscan_floating_point_support_option="\"remove -lc-printscan-no-floating-point from the link command\""
 
@@ -330,15 +333,15 @@ $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
 
 -include $(shell find $(OBJDIR) -name \*.d)
 
-$(DLMALLOC_OBJS): override WASM_CFLAGS += \
+$(DLMALLOC_OBJS): WASM_CFLAGS += \
     -I$(DLMALLOC_INC)
 
-startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS): override WASM_CFLAGS += \
+startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS): WASM_CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_HEADERS_PRIVATE) \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC) \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 
-$(LIBC_TOP_HALF_ALL_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): override WASM_CFLAGS += \
+$(LIBC_TOP_HALF_ALL_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): WASM_CFLAGS += \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/include \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal \
     -I$(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm32 \
@@ -379,9 +382,9 @@ include_dirs:
 	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
 
 ifeq ($(BUILD_LIBC_BOTTOM_HALF),no)
-override CRT_SOURCES = $(BASICS_CRT_SOURCES)
+CRT_SOURCES = $(BASICS_CRT_SOURCES)
 else
-override CRT_SOURCES = $(LIBC_BOTTOM_HALF_CRT_SOURCES)
+CRT_SOURCES = $(LIBC_BOTTOM_HALF_CRT_SOURCES)
 endif
 
 startup_files: include_dirs

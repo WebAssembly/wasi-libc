@@ -86,6 +86,10 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
     // WASI's poll requires at least one subscription, or else it returns
     // `EINVAL`. Since a `pselect` with nothing to wait for is valid in POSIX,
     // return `ENOTSUP` to indicate that we don't support that case.
+    //
+    // Note that nsubscriptions can be zero even when nfds is non-zero; if there
+    // are no pollfd entries with non-negative file descriptors, and no timeout,
+    // then there are no subscriptions which could wake up a poll.
     if (nsubscriptions == 0)
       errno = ENOTSUP;
     else

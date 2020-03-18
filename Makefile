@@ -70,36 +70,70 @@ LIBC_TOP_HALF_MUSL_INC = $(LIBC_TOP_HALF_MUSL_DIR)/include
 LIBC_TOP_HALF_MUSL_SOURCES = \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
         misc/a64l.c \
-        misc/basename.c misc/dirname.c \
-        misc/ffs.c misc/ffsl.c misc/ffsll.c \
+        misc/basename.c \
+        misc/dirname.c \
+        misc/ffs.c \
+        misc/ffsl.c \
+        misc/ffsll.c \
         misc/fmtmsg.c \
-        misc/getdomainname.c misc/gethostid.c \
-        misc/getopt.c misc/getopt_long.c \
+        misc/getdomainname.c \
+        misc/gethostid.c \
+        misc/getopt.c \
+        misc/getopt_long.c \
         misc/getsubopt.c \
         misc/uname.c \
         misc/nftw.c \
         errno/strerror.c \
-        network/htonl.c network/htons.c network/ntohl.c network/ntohs.c \
-        network/inet_ntop.c network/inet_pton.c network/inet_aton.c \
-        network/in6addr_any.c network/in6addr_loopback.c \
-        fenv/fenv.c fenv/fesetround.c fenv/feupdateenv.c \
-        fenv/fesetexceptflag.c fenv/fegetexceptflag.c fenv/feholdexcept.c \
-        exit/exit.c exit/atexit.c exit/assert.c \
-        exit/quick_exit.c exit/at_quick_exit.c \
-        time/strftime.c time/asctime.c time/asctime_r.c \
-        time/ctime.c time/ctime_r.c \
-        time/wcsftime.c time/strptime.c time/difftime.c \
-        time/timegm.c time/ftime.c time/gmtime.c time/gmtime_r.c \
+        network/htonl.c \
+        network/htons.c \
+        network/ntohl.c \
+        network/ntohs.c \
+        network/inet_ntop.c \
+        network/inet_pton.c \
+        network/inet_aton.c \
+        network/in6addr_any.c \
+        network/in6addr_loopback.c \
+        fenv/fenv.c \
+        fenv/fesetround.c \
+        fenv/feupdateenv.c \
+        fenv/fesetexceptflag.c \
+        fenv/fegetexceptflag.c \
+        fenv/feholdexcept.c \
+        exit/exit.c \
+        exit/atexit.c \
+        exit/assert.c \
+        exit/quick_exit.c \
+        exit/at_quick_exit.c \
+        time/strftime.c \
+        time/asctime.c \
+        time/asctime_r.c \
+        time/ctime.c \
+        time/ctime_r.c \
+        time/wcsftime.c \
+        time/strptime.c \
+        time/difftime.c \
+        time/timegm.c \
+        time/ftime.c \
+        time/gmtime.c \
+        time/gmtime_r.c \
         time/timespec_get.c \
         time/getdate.c \
-        time/localtime.c time/localtime_r.c \
+        time/localtime.c \
+        time/localtime_r.c \
         time/mktime.c \
-        time/__tm_to_secs.c time/__month_to_secs.c \
-        time/__secs_to_tm.c time/__year_to_secs.c \
+        time/__tm_to_secs.c \
+        time/__month_to_secs.c \
+        time/__secs_to_tm.c \
+        time/__year_to_secs.c \
         time/__tz.c \
         fcntl/creat.c \
-        dirent/alphasort.c dirent/versionsort.c \
-        env/clearenv.c env/getenv.c env/putenv.c env/setenv.c env/unsetenv.c \
+        dirent/alphasort.c \
+        dirent/versionsort.c \
+        env/clearenv.c \
+        env/getenv.c \
+        env/putenv.c \
+        env/setenv.c \
+        env/unsetenv.c \
         unistd/posix_close.c \
     ) \
     $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \

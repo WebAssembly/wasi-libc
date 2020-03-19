@@ -7,6 +7,13 @@ weak_alias(dummy, __env_rm_add);
 
 int __putenv(char *s, size_t l, char *r)
 {
+#ifdef __wasilibc_unmodified_upstream // Lazy environment variable init.
+#else
+// This specialized header is included within the function body to arranges for
+// the environment variables to be lazily initialized. It redefined `__environ`,
+// so don't remove or reorder it with respect to other code.
+#include "wasi/libc-environ-compat.h"
+#endif
 	size_t i=0;
 	if (__environ) {
 		for (char **e = __environ; *e; e++, i++)

@@ -13,6 +13,13 @@ int unsetenv(const char *name)
 		errno = EINVAL;
 		return -1;
 	}
+#ifdef __wasilibc_unmodified_upstream // Lazy environment variable init.
+#else
+// This specialized header is included within the function body to arranges for
+// the environment variables to be lazily initialized. It redefined `__environ`,
+// so don't remove or reorder it with respect to other code.
+#include "wasi/libc-environ-compat.h"
+#endif
 	if (__environ) {
 		char **e = __environ, **eo = e;
 		for (; *e; e++)

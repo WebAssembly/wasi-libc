@@ -44,6 +44,7 @@
 
 #define _ALL_SOURCE
 #include <sys/stat.h>
+#include <utime.h>
 #include <fcntl.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -153,6 +154,23 @@ stat(const char *path, struct stat *st)
     }
 
     return fstatat(dirfd, relative_path, st, AT_SYMLINK_NOFOLLOW);
+}
+
+int
+utime(const char *path, const struct utimbuf *times)
+{
+    const char *relative_path;
+    int fd = __wasilibc_find_relpath(path, &relative_path);
+
+    // If we can't find a preopened directory handle to open this file with,
+    // indicate that the program lacks the capabilities.
+    if (fd == -1) {
+        errno = ENOTCAPABLE;
+        return -1;
+    }
+    return utimensat(fd, relative_path, times ? ((struct timespec [2]){
+		{ .tv_sec = times->actime }, { .tv_sec = times->modtime }})
+        : 0,  AT_SYMLINK_NOFOLLOW);
 }
 
 int

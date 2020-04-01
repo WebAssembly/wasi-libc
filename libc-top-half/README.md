@@ -1,5 +1,5 @@
 Code in the musl directory is based on musl revision
-b07d45eb01e900f0176894fdedab62285f5cb8be, which is v1.1.23, from
+040c1d16b468c50c04fc94edff521f1637708328, which is v1.2.0, from
 git://git.musl-libc.org/musl.
 
 Whole files which are unused are omitted. Changes to upstream code are wrapped

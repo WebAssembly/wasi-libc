@@ -153,7 +153,7 @@ stat(const char *path, struct stat *st)
         return -1;
     }
 
-    return fstatat(dirfd, relative_path, st, AT_SYMLINK_NOFOLLOW);
+    return fstatat(dirfd, relative_path, st, 0);
 }
 
 int
@@ -170,7 +170,7 @@ utime(const char *path, const struct utimbuf *times)
     }
     return utimensat(fd, relative_path, times ? ((struct timespec [2]){
 		{ .tv_sec = times->actime }, { .tv_sec = times->modtime }})
-        : 0,  AT_SYMLINK_NOFOLLOW);
+        : 0, 0);
 }
 
 int

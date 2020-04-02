@@ -374,7 +374,7 @@ fn print_union(ret: &mut String, name: &Id, u: &UnionDatatype) {
 }
 
 fn print_handle(ret: &mut String, name: &Id, h: &HandleDatatype) {
-    ret.push_str(&format!("typedef int __wasi_{}_t;", ident_name(name)));
+    ret.push_str(&format!("typedef int __wasi_{}_t;\n\n", ident_name(name)));
 
     ret.push_str(&format!(
         "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",

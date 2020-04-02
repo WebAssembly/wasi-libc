@@ -658,9 +658,9 @@ _Static_assert(sizeof(__wasi_rights_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_rights_t) == 8, "witx calculated align");
 
 /**
- * A file descriptor index.
+ * A file descriptor handle.
  */
-typedef uint32_t __wasi_fd_t;
+typedef int __wasi_fd_t;
 
 _Static_assert(sizeof(__wasi_fd_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_fd_t) == 4, "witx calculated align");
@@ -1219,7 +1219,7 @@ _Static_assert(sizeof(__wasi_subclockflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_subclockflags_t) == 2, "witx calculated align");
 
 /**
- * The contents of a $subscription when type is `eventtype::clock`.
+ * The contents of a `subscription` when type is `eventtype::clock`.
  */
 typedef struct __wasi_subscription_clock_t {
     /**
@@ -1253,7 +1253,7 @@ _Static_assert(offsetof(__wasi_subscription_clock_t, precision) == 16, "witx cal
 _Static_assert(offsetof(__wasi_subscription_clock_t, flags) == 24, "witx calculated offset");
 
 /**
- * The contents of a $subscription when type is type is
+ * The contents of a `subscription` when type is type is
  * `eventtype::fd_read` or `eventtype::fd_write`.
  */
 typedef struct __wasi_subscription_fd_readwrite_t {
@@ -1269,7 +1269,7 @@ _Static_assert(_Alignof(__wasi_subscription_fd_readwrite_t) == 4, "witx calculat
 _Static_assert(offsetof(__wasi_subscription_fd_readwrite_t, file_descriptor) == 0, "witx calculated offset");
 
 /**
- * The contents of a $subscription.
+ * The contents of a `subscription`.
  */
 typedef union __wasi_subscription_u_u_t {
     __wasi_subscription_clock_t clock;
@@ -1666,17 +1666,17 @@ __wasi_errno_t __wasi_environ_get(
 ));
 
 /**
- * Return command-line argument data sizes.
+ * Return environment variable data sizes.
  */
 __wasi_errno_t __wasi_environ_sizes_get(
     /**
-     * The number of arguments.
+     * The number of environment variable arguments.
      */
-    __wasi_size_t *argc,
+    __wasi_size_t *environc,
     /**
-     * The size of the argument string data.
+     * The size of the environment variable data.
      */
-    __wasi_size_t *argv_buf_size
+    __wasi_size_t *environ_buf_size
 ) __attribute__((
     __import_module__("wasi_snapshot_preview1"),
     __import_name__("environ_sizes_get"),

@@ -164,6 +164,7 @@
 #include <time.h>
 #include <uchar.h>
 #include <unistd.h>
+#include <utime.h>
 #include <values.h>
 #include <wasi/api.h>
 #include <wasi/libc-environ.h>

@@ -316,8 +316,7 @@ MUSL_OMIT_HEADERS += \
     "netinet/ether.h" \
     "sys/timerfd.h" \
     "libintl.h" \
-    "sys/sysmacros.h" \
-    "utime.h"
+    "sys/sysmacros.h"
 
 ifeq ($(THREAD_MODEL), single)
 # Remove headers not supported in single-threaded mode.

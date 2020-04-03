@@ -367,6 +367,8 @@ ceill
 cexp
 cexpf
 cexpl
+chmod
+chown
 cimag
 cimagf
 cimagl
@@ -463,6 +465,10 @@ fabs
 fabsf
 fabsl
 faccessat
+fchmod
+fchmodat
+fchown
+fchownat
 fclose
 fcntl
 fcvt
@@ -694,6 +700,7 @@ jnf
 jrand48
 l64a
 labs
+lchown
 lcong48
 ldexp
 ldexpf

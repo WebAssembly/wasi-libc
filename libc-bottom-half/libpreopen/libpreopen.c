@@ -586,3 +586,40 @@ oserr:
 software:
     _Exit(EX_SOFTWARE);
 }
+
+/* stubs that are missing in wasi-libc but needed for programs compilation */
+
+int chmod(const char *pathname, mode_t mode)
+{
+    return 0;
+}
+
+int fchmod(int fd, mode_t mode)
+{
+    return 0;
+}
+
+int fchmodat(int dirfd, const char *pathname, mode_t mode, int flags)
+{
+    return 0;
+}
+
+int chown(const char *pathname, uid_t owner, gid_t group)
+{
+    return 0;
+}
+
+int fchown(int fd, uid_t owner, gid_t group)
+{
+    return 0;
+}
+
+int lchown(const char *pathname, uid_t owner, gid_t group)
+{
+    return 0;
+}
+
+int fchownat(int dirfd, const char *pathname, uid_t owner, gid_t group, int flags)
+{
+    return 0;
+}

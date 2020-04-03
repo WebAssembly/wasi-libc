@@ -16,7 +16,7 @@ jobs:
     - name: Install clang (Windows)
       shell: bash
       run: |
-          curl -fsSLO https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/LLVM-10.0.0-win64.exe
+          curl -fsSLO https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/LLVM-10.0.0-win64.exe | tar xJF -
           7z x LLVM-10.0.0-win64.exe -y -o"llvm"
           echo "::add-path::$(pwd)/llvm/bin"
           echo "::set-env name=WASM_AR::$(pwd)/llvm/bin/llvm-ar.exe"
@@ -34,7 +34,7 @@ jobs:
     - name: Install clang (MacOS)
       shell: bash
       run: |
-        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
+        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz | tar xJF -
         export CLANG_DIR=`pwd`/clang+llvm-10.0.0-x86_64-darwin-apple/bin
         echo "::add-path::$CLANG_DIR"
         echo "::set-env name=WASM_CC::$CLANG_DIR/clang"

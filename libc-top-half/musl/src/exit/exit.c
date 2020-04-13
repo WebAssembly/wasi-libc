@@ -10,9 +10,9 @@ static void dummy()
  * as a consequence of linking either __toread.c or __towrite.c. */
 weak_alias(dummy, __funcs_on_exit);
 weak_alias(dummy, __stdio_exit);
+#ifdef __wasilibc_unmodified_upstream // fini
 weak_alias(dummy, _fini);
 
-#ifdef __wasilibc_unmodified_upstream // fini
 extern weak hidden void (*const __fini_array_start)(void), (*const __fini_array_end)(void);
 
 static void libc_exit_fini(void)

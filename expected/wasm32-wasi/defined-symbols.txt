@@ -273,7 +273,6 @@ __xpg_strerror_r
 __year_to_secs
 _environ
 _exit
-_fini
 _flushlbf
 _initialize
 _start

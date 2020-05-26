@@ -22,9 +22,10 @@ struct map {
 void *mmap(void *addr, size_t length, int prot, int flags,
            int fd, off_t offset) {
     // Check for unsupported flags.
-    if ((flags & MAP_FIXED) != 0 ||
+    if ((flags & (MAP_PRIVATE | MAP_SHARED)) == 0 ||
+        (flags & MAP_FIXED) != 0 ||
 #ifdef MAP_SHARED_VALIDATE
-        (flags & MAP_SHARED_VALIDATE) != 0 ||
+        (flags & MAP_SHARED_VALIDATE) == MAP_SHARED_VALIDATE ||
 #endif
 #ifdef MAP_NORESERVE
         (flags & MAP_NORESERVE) != 0 ||

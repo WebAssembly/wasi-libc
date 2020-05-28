@@ -90,7 +90,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
     // Wasm has no signal handling, so if none of the user-provided `pollfd`
     // elements, nor the timeout, led us to producing even one subscription
     // to wait for, there would be no way for the poll to wake up. WASI
-    // returns `EINVAL` in this case, but for users of `poll`, `ENOTSUP is
+    // returns `EINVAL` in this case, but for users of `poll`, `ENOTSUP` is
     // more likely to be understood.
     if (nsubscriptions == 0)
       errno = ENOTSUP;

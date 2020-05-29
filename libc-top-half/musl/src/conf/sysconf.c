@@ -2,7 +2,9 @@
 #include <limits.h>
 #include <errno.h>
 #include <sys/resource.h>
+#ifdef __wasilibc_unmodified_upstream // WASI has no realtime signals
 #include <signal.h>
+#endif
 #include <sys/sysinfo.h>
 #include "syscall.h"
 #include "libc.h"

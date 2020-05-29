@@ -4,7 +4,6 @@
 #include <__function___isatty.h>
 #include <__functions_malloc.h>
 #include <__functions_memcpy.h>
-#include <__header_bits_signal.h>
 #include <__header_dirent.h>
 #include <__header_fcntl.h>
 #include <__header_inttypes.h>
@@ -117,7 +116,6 @@
 #include <sched.h>
 #include <search.h>
 #include <semaphore.h>
-#include <signal.h>
 #include <stdalign.h>
 #include <stdbool.h>
 #include <stdc-predef.h>
@@ -141,7 +139,6 @@
 #include <sys/reg.h>
 #include <sys/resource.h>
 #include <sys/select.h>
-#include <sys/signal.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/stropts.h>

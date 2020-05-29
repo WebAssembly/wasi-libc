@@ -16,5 +16,4 @@ libc rather than to be a layer on top of libc.
 
 [libpreopen]: https://github.com/musec/libpreopen
 
-The WASI libc "bottom half" depends on the basics and dlmalloc components of
-wasi-libc.
+The WASI libc lower half currently depends on the dlmalloc component.

@@ -3021,9 +3021,12 @@
 #define __wasi_libc_environ_h 
 #define __wasi_libc_find_relpath_h 
 #define __wasi_libc_h 
+#define __wasilibc___errno_h 
 #define __wasilibc___errno_values_h 
 #define __wasilibc___fd_set_h 
 #define __wasilibc___function___isatty_h 
+#define __wasilibc___functions_malloc_h 
+#define __wasilibc___functions_memcpy_h 
 #define __wasilibc___header_dirent_h 
 #define __wasilibc___header_fcntl_h 
 #define __wasilibc___header_netinet_in_h 
@@ -3036,7 +3039,9 @@
 #define __wasilibc___header_sys_stat_h 
 #define __wasilibc___header_time_h 
 #define __wasilibc___header_unistd_h 
+#define __wasilibc___include_inttypes_h 
 #define __wasilibc___macro_FD_SETSIZE_h 
+#define __wasilibc___macro_PAGESIZE_h 
 #define __wasilibc___mode_t_h 
 #define __wasilibc___seek_h 
 #define __wasilibc___struct_dirent_h 
@@ -3051,42 +3056,37 @@
 #define __wasilibc___struct_sockaddr_in_h 
 #define __wasilibc___struct_sockaddr_storage_h 
 #define __wasilibc___struct_sockaddr_un_h 
+#define __wasilibc___struct_stat_h 
+#define __wasilibc___struct_timespec_h 
 #define __wasilibc___struct_timeval_h 
 #define __wasilibc___struct_tm_h 
 #define __wasilibc___struct_tms_h 
 #define __wasilibc___typedef_DIR_h 
+#define __wasilibc___typedef_blkcnt_t_h 
+#define __wasilibc___typedef_blksize_t_h 
+#define __wasilibc___typedef_clock_t_h 
 #define __wasilibc___typedef_clockid_t_h 
+#define __wasilibc___typedef_dev_t_h 
 #define __wasilibc___typedef_fd_set_h 
+#define __wasilibc___typedef_gid_t_h 
 #define __wasilibc___typedef_in_addr_t_h 
 #define __wasilibc___typedef_in_port_t_h 
+#define __wasilibc___typedef_ino_t_h 
+#define __wasilibc___typedef_mode_t_h 
 #define __wasilibc___typedef_nfds_t_h 
+#define __wasilibc___typedef_nlink_t_h 
+#define __wasilibc___typedef_off_t_h 
 #define __wasilibc___typedef_sa_family_t_h 
 #define __wasilibc___typedef_sigset_t_h 
 #define __wasilibc___typedef_socklen_t_h 
+#define __wasilibc___typedef_ssize_t_h 
+#define __wasilibc___typedef_suseconds_t_h 
+#define __wasilibc___typedef_time_t_h 
+#define __wasilibc___typedef_uid_t_h 
 #define __wasm 1
 #define __wasm32 1
 #define __wasm32__ 1
 #define __wasm__ 1
-#define __wasm_basics___errno_h 
-#define __wasm_basics___functions_malloc_h 
-#define __wasm_basics___functions_memcpy_h 
-#define __wasm_basics___include_inttypes_h 
-#define __wasm_basics___macro_PAGESIZE_h 
-#define __wasm_basics___struct_stat_h 
-#define __wasm_basics___struct_timespec_h 
-#define __wasm_basics___typedef_blkcnt_t_h 
-#define __wasm_basics___typedef_blksize_t_h 
-#define __wasm_basics___typedef_clock_t_h 
-#define __wasm_basics___typedef_dev_t_h 
-#define __wasm_basics___typedef_gid_t_h 
-#define __wasm_basics___typedef_ino_t_h 
-#define __wasm_basics___typedef_mode_t_h 
-#define __wasm_basics___typedef_nlink_t_h 
-#define __wasm_basics___typedef_off_t_h 
-#define __wasm_basics___typedef_ssize_t_h 
-#define __wasm_basics___typedef_suseconds_t_h 
-#define __wasm_basics___typedef_time_t_h 
-#define __wasm_basics___typedef_uid_t_h 
 #define _tolower(a) ((a)|0x20)
 #define _toupper(a) ((a)&0x5f)
 #define acos(x) __tg_real_complex(acos, (x))

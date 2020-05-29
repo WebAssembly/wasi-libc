@@ -3,6 +3,7 @@ extern int __original_main(void);
 extern void __prepare_for_exit(void);
 void _Exit(int) __attribute__((noreturn));
 
+__attribute__((export_name("_start")))
 void _start(void) {
     // The linker synthesizes this to call constructors.
     __wasm_call_ctors();

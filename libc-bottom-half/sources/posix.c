@@ -96,11 +96,12 @@ int utime(const char *path, const struct utimbuf *times) {
         return -1;
     }
 
-    return utimensat(fd, relative_path, times ? ((struct timespec [2]) {
-                                                    { .tv_sec = times->actime },
-                                                    { .tv_sec = times->modtime }
-                                                })
-                                              : NULL,
+    return utimensat(dirfd, relative_path,
+                     times ? ((struct timespec [2]) {
+                                 { .tv_sec = times->actime },
+                                 { .tv_sec = times->modtime }
+                             })
+                           : NULL,
                      0);
 }
 

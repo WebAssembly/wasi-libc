@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <utime.h>
 #include <sys/stat.h>
 #include <wasi/libc.h>
 #include <wasi/libc-find-relpath.h>

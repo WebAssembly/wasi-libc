@@ -12,7 +12,8 @@ extern "C" {
  *
  * Returns -1 if no directories were suitable.
  */
-int __wasilibc_find_relpath(const char *path, const char **relative_path);
+int __wasilibc_find_relpath(const char *path,
+                            const char **__restrict__ relative_path);
 
 #ifdef __cplusplus
 }

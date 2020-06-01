@@ -8,7 +8,6 @@ their own licenses:
 
 dlmalloc/                     - CC0; see the notice in malloc.c for details
 libc-bottom-half/cloudlibc/   - BSD-2-Clause; see the LICENSE file for details
-libc-bottom-half/libpreopen/  - BSD-2-Clause; see the notice in libpreopen.c for details
 libc-top-half/musl/           - MIT; see the COPYRIGHT file for details
 
 wasi-libc's changes to these files are multi-licensed under the

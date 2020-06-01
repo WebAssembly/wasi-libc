@@ -12,21 +12,13 @@ INSTALL_DIR ?= /usr/local
 THREAD_MODEL ?= single
 # yes or no
 BUILD_DLMALLOC ?= yes
-BUILD_LIBC_BOTTOM_HALF ?= yes
 BUILD_LIBC_TOP_HALF ?= yes
 # The directory where we're store intermediate artifacts.
 OBJDIR ?= $(CURDIR)/build
 
 # Check dependencies.
-ifeq ($(BUILD_LIBC_TOP_HALF),yes)
-ifneq ($(BUILD_LIBC_BOTTOM_HALF),yes)
-$(error BUILD_LIBC_TOP_HALF=yes depends on BUILD_LIBC_BOTTOM_HALF=yes)
-endif
-endif
-ifeq ($(BUILD_LIBC_BOTTOM_HALF),yes)
 ifneq ($(BUILD_DLMALLOC),yes)
-$(error BUILD_LIBC_BOTTOM_HALF=yes depends on BUILD_DLMALLOC=yes)
-endif
+$(error build currently depends on BUILD_DLMALLOC=yes)
 endif
 
 # Variables from this point on are not meant to be overridable via the
@@ -39,12 +31,6 @@ MULTIARCH_TRIPLE = wasm32-wasi
 
 # These variables describe the locations of various files and directories in
 # the source tree.
-BASICS_DIR = $(CURDIR)/basics
-BASICS_INC = $(BASICS_DIR)/include
-BASICS_CRT_SOURCES = $(wildcard $(BASICS_DIR)/crt/*.c)
-BASICS_SOURCES = \
-    $(wildcard $(BASICS_DIR)/sources/*.c) \
-    $(wildcard $(BASICS_DIR)/sources/math/*.c)
 DLMALLOC_DIR = $(CURDIR)/dlmalloc
 DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
 DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/dlmalloc.c
@@ -209,25 +195,15 @@ WASM_CFLAGS += --sysroot="$(SYSROOT)"
 # These variables describe the locations of various files and directories in
 # the build tree.
 objs = $(patsubst $(CURDIR)/%.c,$(OBJDIR)/%.o,$(1))
-BASICS_OBJS = $(call objs,$(BASICS_SOURCES))
 DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 LIBC_TOP_HALF_ALL_OBJS = $(call objs,$(LIBC_TOP_HALF_ALL_SOURCES))
-LIBC_OBJS := $(BASICS_OBJS)
 ifeq ($(BUILD_DLMALLOC),yes)
 LIBC_OBJS += $(DLMALLOC_OBJS)
 endif
-ifeq ($(BUILD_LIBC_BOTTOM_HALF),yes)
-# Override basics' string.o with libc-bottom-half's.
-LIBC_OBJS := $(filter-out %/string.o,$(LIBC_OBJS))
 # Add libc-bottom-half's objects.
 LIBC_OBJS += $(LIBC_BOTTOM_HALF_ALL_OBJS)
-endif
 ifeq ($(BUILD_LIBC_TOP_HALF),yes)
-# Override libc-bottom-half's string.o with libc-top-half's.
-LIBC_OBJS := $(filter-out %/string.o,$(LIBC_OBJS))
-# Override libc-bottom-half's qsort.o with libc-top-half's.
-LIBC_OBJS := $(filter-out %/qsort.o,$(LIBC_OBJS))
 # libc-top-half is musl.
 LIBC_OBJS += $(LIBC_TOP_HALF_ALL_OBJS)
 endif
@@ -405,7 +381,6 @@ include_dirs:
 	# Install the include files.
 	#
 	mkdir -p "$(SYSROOT_INC)"
-	cp -r "$(BASICS_INC)" "$(SYSROOT)"
 	cp -r "$(LIBC_BOTTOM_HALF_HEADERS_PUBLIC)"/* "$(SYSROOT_INC)"
 
 	# Generate musl's bits/alltypes.h header.
@@ -424,19 +399,13 @@ include_dirs:
 	# Remove selected header files.
 	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
 
-ifeq ($(BUILD_LIBC_BOTTOM_HALF),no)
-CRT_SOURCES = $(BASICS_CRT_SOURCES)
-else
-CRT_SOURCES = $(LIBC_BOTTOM_HALF_CRT_SOURCES)
-endif
-
 startup_files: include_dirs
 	#
 	# Build the startup files.
 	#
 	@mkdir -p "$(OBJDIR)"
 	cd "$(OBJDIR)" && \
-	"$(WASM_CC)" $(WASM_CFLAGS) -c $(CRT_SOURCES) -MD -MP && \
+	"$(WASM_CC)" $(WASM_CFLAGS) -c $(LIBC_BOTTOM_HALF_CRT_SOURCES) -MD -MP && \
 	mkdir -p "$(SYSROOT_LIB)" && \
 	mv *.o "$(SYSROOT_LIB)"
 

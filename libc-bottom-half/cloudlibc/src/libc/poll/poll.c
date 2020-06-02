@@ -11,14 +11,14 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
   // Construct events for poll().
   size_t maxevents = 2 * nfds + 1;
   __wasi_subscription_t subscriptions[maxevents];
-  size_t nevents = 0;
+  size_t nsubscriptions = 0;
   for (size_t i = 0; i < nfds; ++i) {
     struct pollfd *pollfd = &fds[i];
     if (pollfd->fd < 0)
       continue;
     bool created_events = false;
     if ((pollfd->events & POLLRDNORM) != 0) {
-      __wasi_subscription_t *subscription = &subscriptions[nevents++];
+      __wasi_subscription_t *subscription = &subscriptions[nsubscriptions++];
       *subscription = (__wasi_subscription_t){
           .userdata = (uintptr_t)pollfd,
           .u.tag = __WASI_EVENTTYPE_FD_READ,
@@ -27,7 +27,7 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
       created_events = true;
     }
     if ((pollfd->events & POLLWRNORM) != 0) {
-      __wasi_subscription_t *subscription = &subscriptions[nevents++];
+      __wasi_subscription_t *subscription = &subscriptions[nsubscriptions++];
       *subscription = (__wasi_subscription_t){
           .userdata = (uintptr_t)pollfd,
           .u.tag = __WASI_EVENTTYPE_FD_WRITE,
@@ -47,7 +47,7 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
 
   // Create extra event for the timeout.
   if (timeout >= 0) {
-    __wasi_subscription_t *subscription = &subscriptions[nevents++];
+    __wasi_subscription_t *subscription = &subscriptions[nsubscriptions++];
     *subscription = (__wasi_subscription_t){
         .u.tag = __WASI_EVENTTYPE_CLOCK,
         .u.u.clock.id = __WASI_CLOCKID_REALTIME,
@@ -56,15 +56,24 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
   }
 
   // Execute poll().
-  __wasi_event_t events[nevents];
+  size_t nevents;
+  __wasi_event_t events[nsubscriptions];
   __wasi_errno_t error =
-#ifdef __wasilibc_unmodified_upstream
-      __wasi_poll(subscriptions, events, nevents, &nevents);
-#else
-      __wasi_poll_oneoff(subscriptions, events, nevents, &nevents);
-#endif
+      __wasi_poll_oneoff(subscriptions, events, nsubscriptions, &nevents);
   if (error != 0) {
-    errno = error;
+    // WASI's poll requires at least one subscription, or else it returns
+    // `EINVAL`. Since a `poll` with nothing to wait for is valid in POSIX,
+    // return `ENOTSUP` to indicate that we don't support that case.
+    //
+    // Wasm has no signal handling, so if none of the user-provided `pollfd`
+    // elements, nor the timeout, led us to producing even one subscription
+    // to wait for, there would be no way for the poll to wake up. WASI
+    // returns `EINVAL` in this case, but for users of `poll`, `ENOTSUP` is
+    // more likely to be understood.
+    if (nsubscriptions == 0)
+      errno = ENOTSUP;
+    else
+      errno = error;
     return -1;
   }
 
@@ -80,18 +89,10 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
     if (event->type == __WASI_EVENTTYPE_FD_READ ||
         event->type == __WASI_EVENTTYPE_FD_WRITE) {
       struct pollfd *pollfd = (struct pollfd *)(uintptr_t)event->userdata;
-#ifdef __wasilibc_unmodified_upstream // generated constant names
-      if (event->error == __WASI_EBADF) {
-#else
       if (event->error == __WASI_ERRNO_BADF) {
-#endif
         // Invalid file descriptor.
         pollfd->revents |= POLLNVAL;
-#ifdef __wasilibc_unmodified_upstream // generated constant names
-      } else if (event->error == __WASI_EPIPE) {
-#else
       } else if (event->error == __WASI_ERRNO_PIPE) {
-#endif
         // Hangup on write side of pipe.
         pollfd->revents |= POLLHUP;
       } else if (event->error != 0) {

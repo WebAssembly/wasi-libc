@@ -172,7 +172,6 @@ __polevll
 __posix_getopt
 __pow_log_data
 __powf_log2_data
-__prepare_for_exit
 __progname
 __progname_full
 __putenv
@@ -263,6 +262,7 @@ __wasilibc_register_preopened_fd
 __wasilibc_rmdirat
 __wasilibc_tell
 __wasilibc_unlinkat
+__wasm_call_dtors
 __wcscoll_l
 __wcsftime_l
 __wcsxfrm_l

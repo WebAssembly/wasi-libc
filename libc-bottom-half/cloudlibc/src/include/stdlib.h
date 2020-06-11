@@ -139,8 +139,8 @@ void *calloc(size_t, size_t);
 div_t div(int, int) __pure2;
 double drand48(void);
 double erand48(__uint16_t *);
-_Noreturn void exit(int);
 #endif
+_Noreturn void exit(int);
 void free(void *);
 #ifdef __wasilibc_unmodified_upstream
 char *getenv(const char *);

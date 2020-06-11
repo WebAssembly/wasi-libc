@@ -89,8 +89,10 @@ hidden int __towrite(FILE *);
 hidden void __stdio_exit(void);
 hidden void __stdio_exit_needed(void);
 
+#ifdef __wasilibc_unmodified_upstream // wasm has no "protected" visibility
 #if defined(__PIC__) && (100*__GNUC__+__GNUC_MINOR__ >= 303)
 __attribute__((visibility("protected")))
+#endif
 #endif
 int __overflow(FILE *, int), __uflow(FILE *);
 

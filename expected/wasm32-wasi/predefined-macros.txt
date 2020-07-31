@@ -397,7 +397,7 @@
 #define F_GETFD (1)
 #define F_GETFL (3)
 #define F_LOCK 1
-#define F_OK 0
+#define F_OK (0)
 #define F_SETFD (2)
 #define F_SETFL (4)
 #define F_TEST 3
@@ -1464,7 +1464,7 @@
 #define RS_HIPRI 0x01
 #define RUSAGE_CHILDREN 2
 #define RUSAGE_SELF 1
-#define R_OK 1
+#define R_OK (4)
 #define SARMAG 8
 #define SB 250
 #define SCHAR_MAX 127
@@ -1940,8 +1940,8 @@
 #define WONT 252
 #define WORD_BIT 32
 #define WRQ 02
-#define W_OK 2
-#define X_OK 4
+#define W_OK (2)
+#define X_OK (1)
 #define YESEXPR 0x50000
 #define YESSTR 0x50002
 #define YXDOMAIN ns_r_yxdomain

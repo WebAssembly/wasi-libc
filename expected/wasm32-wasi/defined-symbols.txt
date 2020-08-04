@@ -250,6 +250,7 @@ __uflow
 __unlist_locked_file
 __uselocale
 __utc
+__wasilibc_cwd
 __wasilibc_ensure_environ
 __wasilibc_environ
 __wasilibc_environ
@@ -367,6 +368,7 @@ ceill
 cexp
 cexpf
 cexpl
+chdir
 cimag
 cimagf
 cimagl
@@ -578,6 +580,7 @@ getc
 getc_unlocked
 getchar
 getchar_unlocked
+getcwd
 getdate
 getdate_err
 getdelim

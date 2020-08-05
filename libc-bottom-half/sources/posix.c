@@ -5,11 +5,47 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <utime.h>
-#include <sys/stat.h>
 #include <wasi/libc.h>
 #include <wasi/libc-find-relpath.h>
+
+static int find_relpath2(
+    const char *path,
+    const char **relative,
+    char **relative_buf,
+    size_t *relative_buf_len
+) {
+    const char *abs;
+
+    while (1) {
+        *relative = *relative_buf;
+        int dirfd = __wasilibc_find_relpath(path, &abs, *relative_buf, *relative_buf_len);
+        if (dirfd != -1)
+            return dirfd;
+        if (errno != ERANGE)
+            return -1;
+        size_t new_len = *relative_buf_len == 0 ? 16 : 2 * *relative_buf_len;
+        char *tmp = realloc(*relative_buf, new_len);
+        if (tmp == NULL) {
+            errno = ENOMEM;
+            return -1;
+        }
+        *relative_buf = tmp;
+        *relative_buf_len = new_len;
+    }
+}
+
+// Helper to call `__wasilibc_find_relpath` and return an already-managed
+// pointer for the `relative` path. This function is not reentrant since the
+// `relative` pointer will point to static data that cannot be reused until
+// `relative` is no longer used.
+static int find_relpath(const char *path, const char **relative) {
+    static char *relative_buf = NULL;
+    static size_t relative_buf_len = 0;
+    return find_relpath2(path, relative, &relative_buf, &relative_buf_len);
+}
 
 int open(const char *path, int oflag, ...) {
     // WASI libc's `openat` ignores the mode argument, so call a special
@@ -19,9 +55,8 @@ int open(const char *path, int oflag, ...) {
 
 // See the documentation in libc.h
 int __wasilibc_open_nomode(const char *path, int oflag) {
-    const char *abs;
-    char *relative_path;
-    int dirfd = __wasilibc_find_relpath(path, &abs, &relative_path);
+    const char *relative_path;
+    int dirfd = find_relpath(path, &relative_path);
 
     // If we can't find a preopen for it, indicate that we lack capabilities.
     if (dirfd == -1) {
@@ -29,15 +64,12 @@ int __wasilibc_open_nomode(const char *path, int oflag) {
         return -1;
     }
 
-    int ret = __wasilibc_openat_nomode(dirfd, relative_path, oflag);
-    free(relative_path);
-    return ret;
+    return __wasilibc_openat_nomode(dirfd, relative_path, oflag);
 }
 
 int access(const char *path, int amode) {
-    const char *abs;
-    char *relative_path;
-    int dirfd = __wasilibc_find_relpath(path, &abs, &relative_path);
+    const char *relative_path;
+    int dirfd = find_relpath(path, &relative_path);
 
     // If we can't find a preopen for it, indicate that we lack capabilities.
     if (dirfd == -1) {
@@ -45,9 +77,7 @@ int access(const char *path, int amode) {
         return -1;
     }
 
-    int ret = faccessat(dirfd, relative_path, amode, 0);
-    free(relative_path);
-    return ret;
+    return faccessat(dirfd, relative_path, amode, 0);
 }
 
 ssize_t readlink(
@@ -55,9 +85,8 @@ ssize_t readlink(
     char *restrict buf,
     size_t bufsize)
 {
-    const char *abs;
-    char *relative_path;
-    int dirfd = __wasilibc_find_relpath(path, &abs, &relative_path);
+    const char *relative_path;
+    int dirfd = find_relpath(path, &relative_path);
 
     // If we can't find a preopen for it, indicate that we lack capabilities.
     if (dirfd == -1) {
@@ -65,15 +94,12 @@ ssize_t readlink(
         return -1;
     }
 
-    ssize_t ret = readlinkat(dirfd, relative_path, buf, bufsize);
-    free(relative_path);
-    return ret;
+    return readlinkat(dirfd, relative_path, buf, bufsize);
 }
 
 int stat(const char *restrict path, struct stat *restrict buf) {
-    const char *abs;
-    char *relative_path;
-    int dirfd = __wasilibc_find_relpath(path, &abs, &relative_path);
+    const char *relative_path;
+    int dirfd = find_relpath(path, &relative_path);
 
     // If we can't find a preopen for it, indicate that we lack capabilities.
     if (dirfd == -1) {
@@ -81,15 +107,12 @@ int stat(const char *restrict path, struct stat *restrict buf) {
         return -1;
     }
 
-    int ret = fstatat(dirfd, relative_path, buf, 0);
-    free(relative_path);
-    return ret;
+    return fstatat(dirfd, relative_path, buf, 0);
 }
 
 int lstat(const char *restrict path, struct stat *restrict buf) {
-    const char *abs;
-    char *relative_path;
-    int dirfd = __wasilibc_find_relpath(path, &abs, &relative_path);
+    const char *relative_path;
+    int dirfd = find_relpath(path, &relative_path);
 
     // If we can't find a preopen for it, indicate that we lack capabilities.
     if (dirfd == -1) {
@@ -97,15 +120,12 @@ int lstat(const char *restrict path, struct stat *restrict buf) {
         return -1;
     }
 
-    int ret = fstatat(dirfd, relative_path, buf, AT_SYMLINK_NOFOLLOW);
-    free(relative_path);
-    return ret;
+    return fstatat(dirfd, relative_path, buf, AT_SYMLINK_NOFOLLOW);
 }
 
 int utime(const char *path, const struct utimbuf *times) {
-    const char *abs;
-    char *relative_path;
-    int dirfd = __wasilibc_find_relpath(path, &abs, &relative_path);
+    const char *relative_path;
+    int dirfd = find_relpath(path, &relative_path);
 
     // If we can't find a preopen for it, indicate that we lack capabilities.
     if (dirfd == -1) {
@@ -113,21 +133,18 @@ int utime(const char *path, const struct utimbuf *times) {
         return -1;
     }
 
-    int ret = utimensat(dirfd, relative_path,
+    return utimensat(dirfd, relative_path,
                      times ? ((struct timespec [2]) {
                                  { .tv_sec = times->actime },
                                  { .tv_sec = times->modtime }
                              })
                            : NULL,
                      0);
-    free(relative_path);
-    return ret;
 }
 
 int unlink(const char *path) {
-    const char *abs;
-    char *relative_path;
-    int dirfd = __wasilibc_find_relpath(path, &abs, &relative_path);
+    const char *relative_path;
+    int dirfd = find_relpath(path, &relative_path);
 
     // If we can't find a preopen for it, indicate that we lack capabilities.
     if (dirfd == -1) {
@@ -138,15 +155,12 @@ int unlink(const char *path) {
     // `unlinkat` imports `__wasi_path_remove_directory` even when
     // `AT_REMOVEDIR` isn't passed. Instead, use a specialized function which
     // just imports `__wasi_path_unlink_file`.
-    int ret = __wasilibc_unlinkat(dirfd, relative_path);
-    free(relative_path);
-    return ret;
+    return __wasilibc_unlinkat(dirfd, relative_path);
 }
 
 int rmdir(const char *path) {
-    const char *abs;
-    char *relative_path;
-    int dirfd = __wasilibc_find_relpath(path, &abs, &relative_path);
+    const char *relative_path;
+    int dirfd = find_relpath(path, &relative_path);
 
     // If we can't find a preopen for it, indicate that we lack capabilities.
     if (dirfd == -1) {
@@ -154,15 +168,12 @@ int rmdir(const char *path) {
         return -1;
     }
 
-    int ret = __wasilibc_rmdirat(dirfd, relative_path);
-    free(relative_path);
-    return ret;
+    return __wasilibc_rmdirat(dirfd, relative_path);
 }
 
 int remove(const char *path) {
-    const char *abs;
-    char *relative_path;
-    int dirfd = __wasilibc_find_relpath(path, &abs, &relative_path);
+    const char *relative_path;
+    int dirfd = find_relpath(path, &relative_path);
 
     // If we can't find a preopen for it, indicate that we lack capabilities.
     if (dirfd == -1) {
@@ -180,14 +191,12 @@ int remove(const char *path) {
         if (errno == ENOTDIR)
             errno = ENOTCAPABLE;
     }
-    free(relative_path);
     return r;
 }
 
 int mkdir(const char *path, mode_t mode) {
-    const char *abs;
-    char *relative_path;
-    int dirfd = __wasilibc_find_relpath(path, &abs, &relative_path);
+    const char *relative_path;
+    int dirfd = find_relpath(path, &relative_path);
 
     // If we can't find a preopen for it, indicate that we lack capabilities.
     if (dirfd == -1) {
@@ -195,15 +204,12 @@ int mkdir(const char *path, mode_t mode) {
         return -1;
     }
 
-    int ret = mkdirat(dirfd, relative_path, mode);
-    free(relative_path);
-    return ret;
+    return mkdirat(dirfd, relative_path, mode);
 }
 
 DIR *opendir(const char *dirname) {
-    const char *abs;
-    char *relative_path;
-    int dirfd = __wasilibc_find_relpath(dirname, &abs, &relative_path);
+    const char *relative_path;
+    int dirfd = find_relpath(dirname, &relative_path);
 
     // If we can't find a preopen for it, indicate that we lack capabilities.
     if (dirfd == -1) {
@@ -211,9 +217,7 @@ DIR *opendir(const char *dirname) {
         return NULL;
     }
 
-    DIR *ret = opendirat(dirfd, relative_path);
-    free(relative_path);
-    return ret;
+    return opendirat(dirfd, relative_path);
 }
 
 int scandir(
@@ -222,9 +226,8 @@ int scandir(
     int (*filter)(const struct dirent *),
     int (*compar)(const struct dirent **, const struct dirent **)
 ) {
-    const char *abs;
-    char *relative_path;
-    int dirfd = __wasilibc_find_relpath(dir, &abs, &relative_path);
+    const char *relative_path;
+    int dirfd = find_relpath(dir, &relative_path);
 
     // If we can't find a preopen for it, indicate that we lack capabilities.
     if (dirfd == -1) {
@@ -232,15 +235,12 @@ int scandir(
         return -1;
     }
 
-    int ret = scandirat(dirfd, relative_path, namelist, filter, compar);
-    free(relative_path);
-    return ret;
+    return scandirat(dirfd, relative_path, namelist, filter, compar);
 }
 
 int symlink(const char *target, const char *linkpath) {
-    const char *abs;
-    char *relative_path;
-    int dirfd = __wasilibc_find_relpath(linkpath, &abs, &relative_path);
+    const char *relative_path;
+    int dirfd = find_relpath(linkpath, &relative_path);
 
     // If we can't find a preopen for it, indicate that we lack capabilities.
     if (dirfd == -1) {
@@ -248,55 +248,44 @@ int symlink(const char *target, const char *linkpath) {
         return -1;
     }
 
-    int ret = symlinkat(target, dirfd, relative_path);
-    free(relative_path);
-    return ret;
+    return symlinkat(target, dirfd, relative_path);
 }
 
+static char *relative_buf2 = NULL;
+static size_t relative_buf_len2 = NULL;
+
 int link(const char *old, const char *new) {
-    const char *abs;
-    char *old_relative_path;
-    char *new_relative_path;
+    const char *old_relative_path;
+    int old_dirfd = find_relpath2(old, &old_relative_path, &relative_buf2, &relative_buf_len2);
 
-    int old_dirfd = __wasilibc_find_relpath(old, &abs, &old_relative_path);
+    if (old_dirfd != -1) {
+        const char *new_relative_path;
+        int new_dirfd = find_relpath(new, &new_relative_path);
+
+        if (new_dirfd != -1)
+            return linkat(old_dirfd, old_relative_path,
+                          new_dirfd, new_relative_path, 0);
+    }
+
     // We couldn't find a preopen for it; indicate that we lack capabilities.
-    if (old_dirfd == -1) {
-        errno = ENOTCAPABLE;
-        return -1;
-    }
-    int new_dirfd = __wasilibc_find_relpath(new, &abs, &new_relative_path);
-    if (new_dirfd == -1) {
-        free(old_relative_path);
-        errno = ENOTCAPABLE;
-        return -1;
-    }
-
-    int ret = linkat(old_dirfd, old_relative_path, new_dirfd, new_relative_path, 0);
-    free(old_relative_path);
-    free(new_relative_path);
-    return ret;
+    errno = ENOTCAPABLE;
+    return -1;
 }
 
 int rename(const char *old, const char *new) {
-    const char *abs;
-    char *old_relative_path;
-    char *new_relative_path;
+    const char *old_relative_path;
+    int old_dirfd = find_relpath2(old, &old_relative_path, &relative_buf2, &relative_buf_len2);
 
-    int old_dirfd = __wasilibc_find_relpath(old, &abs, &old_relative_path);
+    if (old_dirfd != -1) {
+        const char *new_relative_path;
+        int new_dirfd = find_relpath(new, &new_relative_path);
+
+        if (new_dirfd != -1)
+            return renameat(old_dirfd, old_relative_path,
+                            new_dirfd, new_relative_path);
+    }
+
     // We couldn't find a preopen for it; indicate that we lack capabilities.
-    if (old_dirfd == -1) {
-        errno = ENOTCAPABLE;
-        return -1;
-    }
-    int new_dirfd = __wasilibc_find_relpath(new, &abs, &new_relative_path);
-    if (new_dirfd == -1) {
-        free(old_relative_path);
-        errno = ENOTCAPABLE;
-        return -1;
-    }
-
-    int ret = renameat(old_dirfd, old_relative_path, new_dirfd, new_relative_path);
-    free(old_relative_path);
-    free(new_relative_path);
-    return ret;
+    errno = ENOTCAPABLE;
+    return -1;
 }

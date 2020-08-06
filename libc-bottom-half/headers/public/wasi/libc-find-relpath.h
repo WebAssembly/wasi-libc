@@ -10,8 +10,11 @@ extern "C" {
  * map. If a suitable entry is found, then the file descriptor for that entry
  * is returned. Additionally the absolute path of the directory's file
  * descriptor is returned in `abs_prefix` and the relative portion that needs
- * to be opened is stored in `relative_path`. The size of the `relative_path`
- * buffer is provided in the `relative_path_len` argument.
+ * to be opened is stored in `*relative_path`.
+ *
+ * The `relative_path` argument must be a pointer to a buffer valid  for
+ * `relative_path_len` bytes, and this may be used as storage for the relative
+ * portion of the path being returned through `*relative_path`.
  *
  * Returns -1 on failure. Errno is set to either:
  *
@@ -21,8 +24,25 @@ extern "C" {
  */
 int __wasilibc_find_relpath(const char *path,
                             const char **__restrict__ abs_prefix,
-                            char *relative_path,
+                            char **relative_path,
                             size_t relative_path_len);
+
+/**
+ * Look up the given `path`, which is interpreted as absolute, in the preopened
+ * directory map. If a suitable entry is found, then the file descriptor for
+ * that entry is returned. Additionally the relative portion of the path to
+ * where the fd is opened is returned through `relative_path`, the absolute
+ * prefix which was matched is stored to `abs_prefix`, and `relative_path` may
+ * be an interior pointer to the `abspath` string.
+ *
+ * Returns -1 on failure. Errno is set to either:
+ *
+ *  * ENOMEM - failed to allocate memory for internal routines.
+ *  * ENOENT - the `path` could not be found relative to any preopened dir.
+ */
+int __wasilibc_find_abspath(const char *abspath,
+                            const char **__restrict__ abs_prefix,
+                            const char **__restrict__ relative_path);
 
 #ifdef __cplusplus
 }

@@ -72,47 +72,23 @@ static int resize(void) {
     return 0;
 }
 
-extern char *__wasilibc_cwd;
-
-// Note that this function is not reentrant, the returned pointer can only be
-// used until the next call of this function.
-static const char *make_absolute(const char *path) {
-    static char *make_absolute_buf = NULL;
-    static size_t make_absolute_len = 0;
-
-    // If this path is absolute, then we return it as-is.
-    if (path[0] == '/') {
-        return path;
+// Normalize an absolute path. Removes leading `/` and leading `./`, so the
+// first character is the start of a directory name. Additionally translate `.`
+// to the empty string.
+static const char *strip_prefixes(const char *path) {
+    while (1) {
+        if (path[0] == '/') {
+            path++;
+        } else if (path[0] == '.' && path[1] == '/') {
+            path += 2;
+        } else if (path[0] == '.' && path[1] == 0) {
+            path++;
+        } else {
+            break;
+        }
     }
 
-    // If the path is empty, or points to the current directory, then return
-    // the current directory.
-    if (path[0] == 0 || !strcmp(path, ".") || !strcmp(path, "./")) {
-        return __wasilibc_cwd;
-    }
-
-    // If the path starts with `./` then we won't be appending that to the cwd.
-    if (path[0] == '.' && path[1] == '/')
-        path += 2;
-
-    // Otherwise we'll take the current directory, add a `/`, and then add the
-    // input `path`. Note that this doesn't do any normalization (like removing
-    // `/./`).
-    size_t cwd_len = strlen(__wasilibc_cwd);
-    size_t path_len = strlen(path);
-    int need_slash = __wasilibc_cwd[cwd_len - 1] == '/' ? 0 : 1;
-    size_t alloc_len = cwd_len + path_len + 1 + need_slash;
-    if (alloc_len > make_absolute_len) {
-        make_absolute_buf = realloc(make_absolute_buf, alloc_len);
-        if (make_absolute_buf == NULL)
-            return NULL;
-        make_absolute_len = alloc_len;
-    }
-    strcpy(make_absolute_buf, __wasilibc_cwd);
-    if (need_slash)
-        strcpy(make_absolute_buf + cwd_len, "/");
-    strcpy(make_absolute_buf + cwd_len + need_slash, path);
-    return make_absolute_buf;
+    return path;
 }
 
 /// Register the given preopened file descriptor under the given path.
@@ -124,7 +100,7 @@ static int internal_register_preopened_fd(__wasi_fd_t fd, const char *relprefix)
     if (num_preopens == preopen_capacity && resize() != 0)
         return -1;
 
-    char *prefix = strdup(make_absolute(relprefix));
+    char *prefix = strdup(strip_prefixes(relprefix));
     if (prefix == NULL)
         return -1;
     preopens[num_preopens++] = (preopen) { prefix, fd, };
@@ -159,23 +135,35 @@ int __wasilibc_register_preopened_fd(int fd, const char *prefix) {
     return internal_register_preopened_fd((__wasi_fd_t)fd, prefix);
 }
 
-// See the documentation in libc-find-relpath.h.
-int __wasilibc_find_relpath(const char *relpath,
-                            const char **restrict abs_prefix,
-                            char *relative_path,
-                            size_t relative_path_len) {
-    assert_invariants();
-    const char *path = make_absolute(relpath);
-    if (!path) {
-        errno = ENOMEM;
-        return -1;
-    }
+int __wasilibc_find_relpath_alloc(
+    const char *path,
+    const char **abs,
+    char **relative,
+    size_t *relative_len,
+    int can_realloc
+) __attribute__((weak));
 
+// See the documentation in libc-find-relpath.h.
+int __wasilibc_find_relpath(const char *path,
+                            const char **abs_prefix,
+                            char **relative_path,
+                            size_t relative_path_len) {
+    // If `chdir` is linked, whose object file defines this symbol, then we
+    // call that. Otherwise if the program can't `chdir` then `path` is
+    // absolute (or relative to the root dir), so we delegate to `find_abspath`
+    if (__wasilibc_find_relpath_alloc)
+        return __wasilibc_find_relpath_alloc(path, abs_prefix, relative_path, &relative_path_len, 0);
+    return __wasilibc_find_abspath(path, abs_prefix, (const char**) relative_path);
+}
+
+// See the documentation in libc-find-relpath.h.
+int __wasilibc_find_abspath(const char *path,
+                            const char **abs_prefix,
+                            const char **relative_path) {
     // Search through the preopens table. Iterate in reverse so that more
     // recently added preopens take precedence over less recently addded ones.
     size_t match_len = 0;
     int fd = -1;
-    *abs_prefix = "";
     for (size_t i = num_preopens; i > 0; --i) {
         const preopen *pre = &preopens[i - 1];
         const char *prefix = pre->prefix;
@@ -209,11 +197,7 @@ int __wasilibc_find_relpath(const char *relpath,
     if (*computed == '\0')
         computed = ".";
 
-    if (strlen(computed) > relative_path_len) {
-        errno = ERANGE;
-        return -1;
-    }
-    strcpy(relative_path, computed);
+    *relative_path = computed;
     return fd;
 }
 

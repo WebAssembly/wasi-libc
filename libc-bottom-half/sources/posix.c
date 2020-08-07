@@ -42,6 +42,14 @@ static int find_relpath(const char *path, char **relative) {
     return find_relpath2(path, relative, &relative_buf_len);
 }
 
+// same as `find_relpath`, but uses another set of static variables to cache
+static int find_relpath_alt(const char *path, char **relative) {
+    static __thread char *relative_buf = NULL;
+    static __thread size_t relative_buf_len = 0;
+    *relative = relative_buf;
+    return find_relpath2(path, relative, &relative_buf_len);
+}
+
 int open(const char *path, int oflag, ...) {
     // WASI libc's `openat` ignores the mode argument, so call a special
     // entrypoint which avoids the varargs calling convention.
@@ -247,10 +255,8 @@ int symlink(const char *target, const char *linkpath) {
 }
 
 int link(const char *old, const char *new) {
-    static __thread char *old_relative_buf2 = NULL;
-    static __thread size_t old_relative_buf_len2 = 0;
     char *old_relative_path;
-    int old_dirfd = find_relpath2(old, &old_relative_path, &old_relative_buf_len2);
+    int old_dirfd = find_relpath_alt(old, &old_relative_path);
 
     if (old_dirfd != -1) {
         char *new_relative_path;
@@ -267,10 +273,8 @@ int link(const char *old, const char *new) {
 }
 
 int rename(const char *old, const char *new) {
-    static __thread char *old_relative_buf2 = NULL;
-    static __thread size_t old_relative_buf_len2 = 0;
-    char *old_relative_path = old_relative_buf2;
-    int old_dirfd = find_relpath2(old, &old_relative_path, &old_relative_buf_len2);
+    char *old_relative_path;
+    int old_dirfd = find_relpath_alt(old, &old_relative_path);
 
     if (old_dirfd != -1) {
         char *new_relative_path;

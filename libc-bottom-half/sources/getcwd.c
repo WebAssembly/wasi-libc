@@ -2,6 +2,11 @@
 #include <errno.h>
 #include <string.h>
 
+// For threads this needs to synchronize with chdir
+#ifdef _REENTRANT
+#error "getcwd doesn't yet support multiple threads"
+#endif
+
 char *__wasilibc_cwd = "/";
 
 char *getcwd(char *buf, size_t size)

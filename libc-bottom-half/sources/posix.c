@@ -36,8 +36,8 @@ static int find_relpath2(
 // `relative` pointer will point to static data that cannot be reused until
 // `relative` is no longer used.
 static int find_relpath(const char *path, char **relative) {
-    static char *relative_buf = NULL;
-    static size_t relative_buf_len = 0;
+    static __thread char *relative_buf = NULL;
+    static __thread size_t relative_buf_len = 0;
     *relative = relative_buf;
     return find_relpath2(path, relative, &relative_buf_len);
 }
@@ -247,8 +247,8 @@ int symlink(const char *target, const char *linkpath) {
 }
 
 int link(const char *old, const char *new) {
-    static char *old_relative_buf2 = NULL;
-    static size_t old_relative_buf_len2 = 0;
+    static __thread char *old_relative_buf2 = NULL;
+    static __thread size_t old_relative_buf_len2 = 0;
     char *old_relative_path;
     int old_dirfd = find_relpath2(old, &old_relative_path, &old_relative_buf_len2);
 
@@ -267,8 +267,8 @@ int link(const char *old, const char *new) {
 }
 
 int rename(const char *old, const char *new) {
-    static char *old_relative_buf2 = NULL;
-    static size_t old_relative_buf_len2 = 0;
+    static __thread char *old_relative_buf2 = NULL;
+    static __thread size_t old_relative_buf_len2 = 0;
     char *old_relative_path = old_relative_buf2;
     int old_dirfd = find_relpath2(old, &old_relative_path, &old_relative_buf_len2);
 

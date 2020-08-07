@@ -8,14 +8,15 @@
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc.h>
 
+#ifdef _REENTRANT
+#error "chdir doesn't yet support multiple threads"
+#endif
+
 extern char *__wasilibc_cwd;
 static int __wasilibc_cwd_mallocd = 0;
 
 int chdir(const char *path)
 {
-#ifdef _REENTRANT
-#error "chdir doesn't yet support multiple threads"
-#endif
     static char *relative_buf = NULL;
     static size_t relative_buf_len = 0;
 

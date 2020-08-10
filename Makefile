@@ -45,10 +45,10 @@ LIBC_BOTTOM_HALF_ALL_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
     $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c)
 
-# Move `chdir.c` to the end of libc.a since the symbols it provides are used to
-# satisfy weak references elsewhere in libc.a, and we don't want to eagerly
-# satisfy those references unless `chdir` is pulled in. Some more discussion of
-# this can be found on #214
+# FIXME(https://reviews.llvm.org/D85567) - due to a bug in LLD the weak
+# references to a function defined in `chdir.c` only work if `chdir.c` is at the
+# end of the archive, but once that LLD review lands and propagates into LLVM
+# then we don't have to do this.
 LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_SOURCES)/chdir.c,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 LIBC_BOTTOM_HALF_ALL_SOURCES := $(LIBC_BOTTOM_HALF_ALL_SOURCES) $(LIBC_BOTTOM_HALF_SOURCES)/chdir.c
 

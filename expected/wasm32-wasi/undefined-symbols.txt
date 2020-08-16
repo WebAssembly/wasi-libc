@@ -10,6 +10,7 @@ __floatsitf
 __floatunsitf
 __getf2
 __gttf2
+__heap_base
 __letf2
 __lttf2
 __netf2

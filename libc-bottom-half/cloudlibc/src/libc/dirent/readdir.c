@@ -78,6 +78,7 @@ struct dirent *readdir(DIR *dirp) {
          offsetof(struct dirent, d_name) + entry.d_namlen + 1);
     struct dirent *dirent = dirp->dirent;
     dirent->d_ino = entry.d_ino;
+    dirent->d_loc = entry.d_next;
     dirent->d_type = entry.d_type;
     memcpy(dirent->d_name, name, entry.d_namlen);
     dirent->d_name[entry.d_namlen] = '\0';

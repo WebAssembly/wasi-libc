@@ -47,11 +47,13 @@ struct dirent *readdir(DIR *dirp) {
         return NULL;
       goto read_entries;
     }
-    __wasi_dirent_t entry;
-    memcpy(&entry, dirp->buffer + dirp->buffer_processed, sizeof(entry));
 
-    size_t entry_size = sizeof(__wasi_dirent_t) + entry.d_namlen;
-    if (entry.d_namlen == 0) {
+    __wasi_dirent_t *wasi_dirent =
+        (__wasi_dirent_t *)(dirp->buffer + dirp->buffer_processed);
+    size_t d_namlen = wasi_dirent->d_namlen;
+    size_t entry_size = sizeof(__wasi_dirent_t) + d_namlen;
+
+    if (d_namlen == 0) {
       // Invalid pathname length. Skip the entry.
       dirp->buffer_processed += entry_size;
       continue;
@@ -66,8 +68,8 @@ struct dirent *readdir(DIR *dirp) {
     }
 
     // Skip entries having null bytes in the filename.
-    const char *name = dirp->buffer + dirp->buffer_processed + sizeof(entry);
-    if (memchr(name, '\0', entry.d_namlen) != NULL) {
+    const char *name = dirp->buffer + dirp->buffer_processed + sizeof(__wasi_dirent_t);
+    if (memchr(name, '\0', d_namlen) != NULL) {
       dirp->buffer_processed += entry_size;
       continue;
     }
@@ -75,14 +77,11 @@ struct dirent *readdir(DIR *dirp) {
     // Return the next directory entry. Ensure that the dirent is large
     // enough to fit the filename.
     GROW(dirp->dirent, dirp->dirent_size,
-         offsetof(struct dirent, d_name) + entry.d_namlen + 1);
+         offsetof(struct dirent, d_name) + d_namlen + 1);
     struct dirent *dirent = dirp->dirent;
-    dirent->d_ino = entry.d_ino;
-    dirent->d_loc = entry.d_next;
-    dirent->d_type = entry.d_type;
-    memcpy(dirent->d_name, name, entry.d_namlen);
-    dirent->d_name[entry.d_namlen] = '\0';
-    dirp->cookie = entry.d_next;
+    memcpy(dirent, wasi_dirent, entry_size);
+    dirent->d_name[d_namlen] = '\0';
+    dirp->cookie = wasi_dirent->d_next;
     dirp->buffer_processed += entry_size;
     return dirent;
 

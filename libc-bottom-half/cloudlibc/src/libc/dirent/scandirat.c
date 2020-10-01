@@ -58,11 +58,13 @@ int scandirat(int dirfd, const char *dir, struct dirent ***namelist,
         break;
       goto read_entries;
     }
-    __wasi_dirent_t entry;
-    memcpy(&entry, buffer + buffer_processed, sizeof(entry));
 
-    size_t entry_size = sizeof(__wasi_dirent_t) + entry.d_namlen;
-    if (entry.d_namlen == 0) {
+    __wasi_dirent_t *wasi_dirent =
+        (__wasi_dirent_t *)(buffer + buffer_processed);
+    size_t d_namlen = wasi_dirent->d_namlen;
+    size_t entry_size = sizeof(__wasi_dirent_t) + d_namlen;
+
+    if (d_namlen == 0) {
       // Invalid pathname length. Skip the entry.
       buffer_processed += entry_size;
       continue;
@@ -82,22 +84,19 @@ int scandirat(int dirfd, const char *dir, struct dirent ***namelist,
     }
 
     // Skip entries having null bytes in the filename.
-    const char *name = buffer + buffer_processed + sizeof(entry);
+    const char *name = buffer + buffer_processed + sizeof(__wasi_dirent_t);
     buffer_processed += entry_size;
-    if (memchr(name, '\0', entry.d_namlen) != NULL)
+    if (memchr(name, '\0', d_namlen) != NULL)
       continue;
 
     // Create the new directory entry.
     struct dirent *dirent =
-        malloc(offsetof(struct dirent, d_name) + entry.d_namlen + 1);
+        malloc(offsetof(struct dirent, d_name) + d_namlen + 1);
     if (dirent == NULL)
       goto bad;
-    dirent->d_ino = entry.d_ino;
-    dirent->d_loc = entry.d_next;
-    dirent->d_type = entry.d_type;
-    memcpy(dirent->d_name, name, entry.d_namlen);
-    dirent->d_name[entry.d_namlen] = '\0';
-    cookie = entry.d_next;
+    memcpy(dirent, wasi_dirent, entry_size);
+    dirent->d_name[d_namlen] = '\0';
+    cookie = wasi_dirent->d_next;
 
     if (sel(dirent)) {
       // Add the entry to the results.

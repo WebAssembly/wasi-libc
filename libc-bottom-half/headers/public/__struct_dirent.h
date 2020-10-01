@@ -20,6 +20,9 @@ struct dirent {
     /// Type of filesystem entry (file, directory, etc.).
     unsigned char d_type;
 
+    // Padding so that the layout of `dirent` matches `__wasi_dirent_t`.
+    unsigned char __padding[3];
+
     /// The name of the entry, with a trailing NUL.
     char d_name[];
 };

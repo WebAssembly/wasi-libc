@@ -10,6 +10,19 @@
 
 struct dirent;
 
+_Static_assert(sizeof(__wasi_dirent_t) == sizeof(struct dirent),
+	       "layout of `struct dirent` should match `__wasi_dirent_t`");
+_Static_assert(offsetof(__wasi_dirent_t, d_next) == offsetof(struct dirent, d_loc),
+	       "layout of `struct dirent` should match `__wasi_dirent_t`");
+_Static_assert(offsetof(__wasi_dirent_t, d_ino) == offsetof(struct dirent, d_ino),
+	       "layout of `struct dirent` should match `__wasi_dirent_t`");
+_Static_assert(offsetof(__wasi_dirent_t, d_namlen) == offsetof(struct dirent, d_namlen),
+	       "layout of `struct dirent` should match `__wasi_dirent_t`");
+_Static_assert(offsetof(__wasi_dirent_t, d_type) == offsetof(struct dirent, d_type),
+	       "layout of `struct dirent` should match `__wasi_dirent_t`");
+_Static_assert(sizeof(__wasi_dirent_t) == offsetof(struct dirent, d_name),
+	       "layout of `struct dirent` should match `__wasi_dirent_t`");
+
 #define DIRENT_DEFAULT_BUFFER_SIZE 4096
 
 struct _DIR {

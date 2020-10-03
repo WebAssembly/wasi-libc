@@ -276,6 +276,7 @@ _exit
 _flushlbf
 _initialize
 _start
+_start
 a64l
 abort
 abs

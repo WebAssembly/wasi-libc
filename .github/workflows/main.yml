@@ -18,8 +18,8 @@ jobs:
       run: |
           curl -fsSLO https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/LLVM-10.0.0-win64.exe
           7z x LLVM-10.0.0-win64.exe -y -o"llvm"
-          echo "::add-path::$(pwd)/llvm/bin"
-          echo "::set-env name=WASM_AR::$(pwd)/llvm/bin/llvm-ar.exe"
+          echo "$(pwd)/llvm/bin" >> $GITHUB_PATH
+          echo "WASM_AR=$(pwd)/llvm/bin/llvm-ar.exe" >> $GITHUB_ENV
       if: matrix.os == 'windows-latest'
 
     - name: Install llvm-nm (Windows)
@@ -36,8 +36,8 @@ jobs:
       run: |
         curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz | tar xJf -
         export CLANG_DIR=`pwd`/clang+llvm-10.0.0-x86_64-apple-darwin/bin
-        echo "::add-path::$CLANG_DIR"
-        echo "::set-env name=WASM_CC::$CLANG_DIR/clang"
+        echo "$CLANG_DIR" >> $GITHUB_PATH
+        echo "WASM_CC=$CLANG_DIR/clang" >> $GITHUB_ENV
       if: matrix.os == 'macos-latest'
 
     - name: Install clang (Linux)
@@ -45,8 +45,8 @@ jobs:
       run: |
         curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz | tar xJf -
         export CLANG_DIR=`pwd`/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/bin
-        echo "::add-path::$CLANG_DIR"
-        echo "::set-env name=WASM_CC::$CLANG_DIR/clang"
+        echo "$CLANG_DIR" >> $GITHUB_PATH
+        echo "WASM_CC=$CLANG_DIR/clang" >> $GITHUB_ENV
       if: matrix.os == 'ubuntu-latest'
 
     - name: Build libc
@@ -76,7 +76,7 @@ jobs:
     - name: Install Rust (macos)
       run: |
         curl https://sh.rustup.rs | sh -s -- -y
-        echo "##[add-path]$HOME/.cargo/bin"
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
       if: matrix.os == 'macos-latest'
     - run: cargo fetch
       working-directory: tools/wasi-headers

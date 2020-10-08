@@ -260,6 +260,7 @@ __wasilibc_open_nomode
 __wasilibc_openat_nomode
 __wasilibc_register_preopened_fd
 __wasilibc_rmdirat
+__wasilibc_seekdir
 __wasilibc_tell
 __wasilibc_unlinkat
 __wasm_call_dtors

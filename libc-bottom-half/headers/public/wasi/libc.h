@@ -2,6 +2,7 @@
 #define __wasi_libc_h
 
 #include <__typedef_off_t.h>
+#include <__typedef_DIR.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,6 +32,10 @@ int __wasilibc_openat_nomode(int fd, const char *path, int oflag);
 /// Return the current file offset. Like `lseek(fd, 0, SEEK_CUR)`, but without
 /// depending on `lseek`.
 off_t __wasilibc_tell(int fd);
+
+/// Like `seekdir`, but takes a 64-bit directory location. This should be a
+/// value from a `d_loc` field rather than a `telldir` return value.
+void __wasilibc_seekdir(DIR *dirp, unsigned long long cookie);
 
 #ifdef __cplusplus
 }

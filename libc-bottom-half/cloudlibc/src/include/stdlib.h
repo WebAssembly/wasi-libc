@@ -131,9 +131,9 @@ double atof(const char *);
 int atoi(const char *);
 long atol(const char *);
 long long atoll(const char *);
+#endif
 void *bsearch(const void *, const void *, size_t, size_t,
               int (*)(const void *, const void *));
-#endif
 void *calloc(size_t, size_t);
 #ifdef __wasilibc_unmodified_upstream
 div_t div(int, int) __pure2;
@@ -175,8 +175,8 @@ int rand(void);
 long random(void);
 #endif
 void *realloc(void *, size_t);
-#ifdef __wasilibc_unmodified_upstream
 void *reallocarray(void *, size_t, size_t);
+#ifdef __wasilibc_unmodified_upstream
 double strtod(const char *__restrict, char **__restrict);
 double strtod_l(const char *__restrict, char **__restrict, __locale_t);
 float strtof(const char *__restrict, char **__restrict);

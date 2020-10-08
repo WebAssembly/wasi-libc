@@ -26,6 +26,15 @@ struct _DIR {
   // Object returned by readdir().
   struct dirent *dirent;
   size_t dirent_size;
+
+#ifdef __wasm32__
+  // POSIX requires directory offsets to be represented as the C type `long`.
+  // That's 32 bits on wasm32. But WASI uses 64-bit cookies. So we add a
+  // layer of indirection.
+  __wasi_dircookie_t *offsets;
+  size_t offsets_len;
+  size_t offsets_allocated;
+#endif
 };
 
 #endif

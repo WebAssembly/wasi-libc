@@ -46,5 +46,10 @@ DIR *fdopendir(int fd) {
   dirp->buffer_size = DIRENT_DEFAULT_BUFFER_SIZE;
   dirp->dirent = NULL;
   dirp->dirent_size = 1;
+#ifdef __wasm32__
+  dirp->offsets = NULL;
+  dirp->offsets_len = 0;
+  dirp->offsets_allocated = 0;
+#endif
   return dirp;
 }

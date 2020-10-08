@@ -11,6 +11,9 @@ int fdclosedir(DIR *dirp) {
   int fd = dirp->fd;
   free(dirp->buffer);
   free(dirp->dirent);
+#ifdef __wasm32__
+  free(dirp->offsets);
+#endif
   free(dirp);
   return fd;
 }

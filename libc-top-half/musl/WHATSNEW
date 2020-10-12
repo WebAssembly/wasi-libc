@@ -2200,3 +2200,39 @@ arch-specific bugs fixed:
 - arm dynamic linker chose wrong tls/atomic variants since 1.1.21
 - some math library functions returned excess precision on i386
 - unconfirmed regression in fchmodat AT_SYMLINK_NOFOLLOW on mips*
+
+
+
+1.2.1 release notes
+
+major changes:
+- new malloc implementation (mallocng & overhauled bump allocator)
+
+new features:
+- DNS queries via res_* now set AD flag, report zone signedness (DNSSEC)
+- PTHREAD_NULL macro (POSIX-future)
+
+performance:
+- optimized memcpy and memset for aarch64
+- optimized memcpy for arm now supports big endian
+- optimized x86_64 remquol
+- improved strerror without linear search
+
+bugs fixed:
+- lock-skipping for processes that returned to single-threaded was wrong
+- AF_UNSPEC dns lookups mishandled single failure in paired A+AAAA
+- res_send and res_query returned wrong value on errors from nameserver
+- corrupted sysvipc timestamps on 32-bit archs with old kernels
+- incorrect parsing of timezone offsets after overly-long zone name
+- clock_adjtime was broken on 32-bit archs (time64)
+- pthread_kill as not async-signal-safe
+- pthread_cancel was not async-cancel-safe
+- large-ulp errors in various math functions in non-default rounding modes
+
+arch-specific bugs fixed:
+- arm clock_gettime was broken on some hw due to bad time64 vdso
+- m68k sqrtl lacked long double precision
+- mips* syscall mechanism regressions on older kernels
+- mips* had negated error codes for some syscalls (kernel bug)
+- mips* SIGEMT was wrongly called SIGSTKFLT
+- sh fesetround didn't work correctly on sh

@@ -135,14 +135,6 @@ int __wasilibc_register_preopened_fd(int fd, const char *prefix) {
     return internal_register_preopened_fd((__wasi_fd_t)fd, prefix);
 }
 
-int __wasilibc_find_relpath_alloc(
-    const char *path,
-    const char **abs,
-    char **relative,
-    size_t *relative_len,
-    int can_realloc
-) __attribute__((weak));
-
 // See the documentation in libc-find-relpath.h.
 int __wasilibc_find_relpath(const char *path,
                             const char **abs_prefix,

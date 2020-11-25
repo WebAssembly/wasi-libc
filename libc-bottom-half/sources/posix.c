@@ -11,14 +11,6 @@
 #include <wasi/libc.h>
 #include <wasi/libc-find-relpath.h>
 
-int __wasilibc_find_relpath_alloc(
-    const char *path,
-    const char **abs,
-    char **relative,
-    size_t *relative_len,
-    int can_realloc
-) __attribute__((weak));
-
 static int find_relpath2(
     const char *path,
     char **relative,

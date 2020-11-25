@@ -44,6 +44,24 @@ int __wasilibc_find_abspath(const char *abspath,
                             const char **__restrict__ abs_prefix,
                             const char **__restrict__ relative_path);
 
+/**
+ * Same as `__wasilibc_find_relpath`, except that this function will interpret
+ * `relative` as a malloc'd buffer that will be `realloc`'d to the appropriate
+ * size to contain the relative path.
+ *
+ * Note that this is a weak symbol and if it's not defined you can use
+ * `__wasilibc_find_relpath`. The weak-nature of this symbols means that if it's
+ * not otherwise included in the compilation then `chdir` wasn't used an there's
+ * no need for this symbol.
+ */
+int __wasilibc_find_relpath_alloc(
+    const char *path,
+    const char **abs,
+    char **relative,
+    size_t *relative_len,
+    int can_realloc
+) __attribute__((weak));
+
 #ifdef __cplusplus
 }
 #endif

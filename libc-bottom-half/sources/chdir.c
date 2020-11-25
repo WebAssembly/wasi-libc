@@ -37,8 +37,12 @@ int chdir(const char *path)
         return -1;
     }
 
-    // Copy over our new absolute path into `__wasilibc_cwd`. Only copy over
-    // the relative portion of the path if it's not equal to `.`
+    // Create a string that looks like:
+    //
+    //    __wasilibc_cwd = "/" + abs + "/" + relative_buf
+    //
+    // If `relative_buf` is equal to ".", however, we skip that and the slash
+    // before it.
     size_t len = strlen(abs) + 1;
     int copy_relative = strcmp(relative_buf, ".") != 0;
     char *new_cwd = malloc(len + (copy_relative ? strlen(relative_buf) : 0));

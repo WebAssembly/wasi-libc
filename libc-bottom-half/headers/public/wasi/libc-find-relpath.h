@@ -16,6 +16,9 @@ extern "C" {
  * `relative_path_len` bytes, and this may be used as storage for the relative
  * portion of the path being returned through `*relative_path`.
  *
+ * See documentation on `__wasilibc_find_abspath` for more info about what the
+ * paths look like.
+ *
  * Returns -1 on failure. Errno is set to either:
  *
  *  * ENOMEM - failed to allocate memory for internal routines.
@@ -35,6 +38,9 @@ int __wasilibc_find_relpath(const char *path,
  * prefix which was matched is stored to `abs_prefix`, and `relative_path` may
  * be an interior pointer to the `abspath` string.
  *
+ * The `abs_prefix` returned string will not contain a leading `/`.
+ * Additionally the returned `relative_path` will not contain a leading `/`.
+ *
  * Returns -1 on failure. Errno is set to either:
  *
  *  * ENOMEM - failed to allocate memory for internal routines.
@@ -53,6 +59,8 @@ int __wasilibc_find_abspath(const char *abspath,
  * `__wasilibc_find_relpath`. The weak-nature of this symbols means that if it's
  * not otherwise included in the compilation then `chdir` wasn't used an there's
  * no need for this symbol.
+ *
+ * See documentation on `__wasilibc_find_relpath` for more information.
  */
 int __wasilibc_find_relpath_alloc(
     const char *path,

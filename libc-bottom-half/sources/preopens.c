@@ -73,8 +73,9 @@ static int resize(void) {
 }
 
 // Normalize an absolute path. Removes leading `/` and leading `./`, so the
-// first character is the start of a directory name. Additionally translate `.`
-// to the empty string.
+// first character is the start of a directory name. This works because our
+// process always starts with a working directory of `/`. Additionally translate
+// `.` to the empty string.
 static const char *strip_prefixes(const char *path) {
     while (1) {
         if (path[0] == '/') {

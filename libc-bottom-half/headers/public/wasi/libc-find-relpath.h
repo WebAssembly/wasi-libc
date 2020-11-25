@@ -38,8 +38,10 @@ int __wasilibc_find_relpath(const char *path,
  * prefix which was matched is stored to `abs_prefix`, and `relative_path` may
  * be an interior pointer to the `abspath` string.
  *
- * The `abs_prefix` returned string will not contain a leading `/`.
- * Additionally the returned `relative_path` will not contain a leading `/`.
+ * The `abs_prefix` returned string will not contain a leading `/`. Note that
+ * this may be the empty string. Additionally the returned `relative_path` will
+ * not contain a leading `/`. The `relative_path` return will not return an
+ * empty string, it will return `"."` instead if it would otherwise do so.
  *
  * Returns -1 on failure. Errno is set to either:
  *

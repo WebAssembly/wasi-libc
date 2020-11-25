@@ -41,19 +41,22 @@ int chdir(const char *path)
     //
     //    __wasilibc_cwd = "/" + abs + "/" + relative_buf
     //
-    // If `relative_buf` is equal to ".", however, we skip that and the slash
-    // before it.
+    // If `relative_buf` is equal to "." or `abs` is equal to the empty string,
+    // however, we skip that part and the middle slash.
     size_t len = strlen(abs) + 1;
     int copy_relative = strcmp(relative_buf, ".") != 0;
-    char *new_cwd = malloc(len + (copy_relative ? strlen(relative_buf) : 0));
+    int mid = copy_relative && abs[0] != 0;
+    char *new_cwd = malloc(len + (copy_relative ? strlen(relative_buf) + mid: 0));
     if (new_cwd == NULL) {
         errno = ENOMEM;
         return -1;
     }
     new_cwd[0] = '/';
     strcpy(new_cwd + 1, abs);
+    if (mid)
+        new_cwd[strlen(abs) + 1] = '/';
     if (copy_relative)
-        strcpy(new_cwd + 1 + strlen(abs), relative_buf);
+        strcpy(new_cwd + 1 + mid + strlen(abs), relative_buf);
 
     // And set our new malloc'd buffer into the global cwd, freeing the
     // previous one if necessary.

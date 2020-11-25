@@ -153,6 +153,10 @@ int __wasilibc_find_relpath(const char *path,
 int __wasilibc_find_abspath(const char *path,
                             const char **abs_prefix,
                             const char **relative_path) {
+    // Strip leading `/` characters, the prefixes we're mataching won't have
+    // them.
+    while (*path == '/')
+        path++;
     // Search through the preopens table. Iterate in reverse so that more
     // recently added preopens take precedence over less recently addded ones.
     size_t match_len = 0;

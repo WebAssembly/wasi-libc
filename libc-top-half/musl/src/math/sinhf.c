@@ -29,7 +29,7 @@ float sinhf(float x)
 #ifdef __wasilibc_unmodified_upstream // Wasm doesn't have alternate rounding modes
 	t = __expo2f(absx, 2*h);
 #else
-	t = __expo2f(absx);
+	t = 2*h*__expo2f(absx);
 #endif
 	return t;
 }

@@ -35,6 +35,9 @@ Optional features:
   --disable-shared        inhibit building shared library [enabled]
   --disable-static        inhibit building static library [enabled]
 
+Optional packages:
+  --with-malloc=...       choose malloc implementation [mallocng]
+
 Some influential environment variables:
   CC                      C compiler command [detected]
   CFLAGS                  C compiler flags [-Os -pipe ...]
@@ -139,6 +142,7 @@ static=yes
 wrapper=auto
 gcc_wrapper=no
 clang_wrapper=no
+malloc_dir=mallocng
 
 for arg ; do
 case "$arg" in
@@ -168,6 +172,7 @@ case "$arg" in
 --disable-wrapper|--enable-wrapper=no) wrapper=no ;;
 --enable-gcc-wrapper|--enable-gcc-wrapper=yes) wrapper=yes ; gcc_wrapper=yes ;;
 --disable-gcc-wrapper|--enable-gcc-wrapper=no) wrapper=no ;;
+--with-malloc=*) malloc_dir=${arg#*=} ;;
 --enable-*|--disable-*|--with-*|--without-*|--*dir=*) ;;
 --host=*|--target=*) target=${arg#*=} ;;
 --build=*) build=${arg#*=} ;;
@@ -213,6 +218,12 @@ test "$i" -gt 50 && fail "$0: cannot create temporary file $tmpc"
 done
 set +C
 trap 'rm "$tmpc"' EXIT INT QUIT TERM HUP
+
+#
+# Check that the requested malloc implementation exists
+#
+test -d "$srcdir/src/malloc/$malloc_dir" \
+|| fail "$0: error: chosen malloc implementation '$malloc_dir' does not exist"
 
 #
 # Check whether we are cross-compiling, and set a default
@@ -497,6 +508,13 @@ fnmatch '-mtune=*|*\ -mtune=*' "$CC $CFLAGS" || tryldflag CFLAGS_AUTO -mtune=gen
 fi
 
 #
+# GCC defines -w as overriding any -W options, regardless of order, but
+# clang has a bunch of annoying warnings enabled by default and needs -w
+# to start from a clean slate. So use -w if building with clang.
+#
+test "$cc_family" = clang && tryflag CFLAGS_AUTO -w
+
+#
 # Even with -std=c99, gcc accepts some constructs which are constraint
 # violations. We want to treat these as errors regardless of whether
 # other purely stylistic warnings are enabled -- especially implicit
@@ -774,6 +792,7 @@ OPTIMIZE_GLOBS = $OPTIMIZE_GLOBS
 ALL_TOOLS = $tools
 TOOL_LIBS = $tool_libs
 ADD_CFI = $ADD_CFI
+MALLOC_DIR = $malloc_dir
 EOF
 test "x$static" = xno && echo "STATIC_LIBS ="
 test "x$shared" = xno && echo "SHARED_LIBS ="

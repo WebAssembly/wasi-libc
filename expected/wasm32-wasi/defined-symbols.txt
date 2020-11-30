@@ -218,7 +218,6 @@ __strcoll_l
 __strerror_l
 __strftime_fmt_1
 __strftime_l
-__string_read
 __strncasecmp_l
 __strtoimax_internal
 __strtol_internal

@@ -19,14 +19,15 @@ struct tls_module {
 
 struct __libc {
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-	int can_do_threads;
-	int threaded;
+	char can_do_threads;
+	char threaded;
 #endif
 #ifdef __wasilibc_unmodified_upstream // WASI doesn't currently use any code that needs "secure" mode
-	int secure;
+	char secure;
 #endif
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-	volatile int threads_minus_1;
+	volatile signed char need_locks;
+	int threads_minus_1;
 #endif
 #ifdef __wasilibc_unmodified_upstream // WASI has no auxv
 	size_t *auxv;

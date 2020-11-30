@@ -28,6 +28,10 @@ float coshf(float x)
 	}
 
 	/* |x| > log(FLT_MAX) or nan */
+#ifdef __wasilibc_unmodified_upstream // Wasm doesn't have alternate rounding modes
+	t = __expo2f(x, 1.0f);
+#else
 	t = __expo2f(x);
+#endif
 	return t;
 }

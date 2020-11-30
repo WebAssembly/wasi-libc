@@ -23,7 +23,6 @@
 #include "pthread_impl.h"
 #include "libc.h"
 #include "dynlink.h"
-#include "malloc_impl.h"
 
 static void error(const char *, ...);
 
@@ -415,8 +414,6 @@ static void do_relocs(struct dso *dso, size_t *rel, size_t rel_size, size_t stri
 		}
 
 		switch(type) {
-		case REL_NONE:
-			break;
 		case REL_OFFSET:
 			addend -= (size_t)reloc_addr;
 		case REL_SYMBOLIC:
@@ -1938,6 +1935,8 @@ void __dls3(size_t *sp, size_t *auxv)
 	 * possibility of incomplete replacement. */
 	if (find_sym(head, "malloc", 1).dso != &ldso)
 		__malloc_replaced = 1;
+	if (find_sym(head, "aligned_alloc", 1).dso != &ldso)
+		__aligned_alloc_replaced = 1;
 
 	/* Switch to runtime mode: any further failures in the dynamic
 	 * linker are a reportable failure rather than a fatal startup

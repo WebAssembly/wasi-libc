@@ -34,6 +34,10 @@ double sinh(double x)
 
 	/* |x| > log(DBL_MAX) or nan */
 	/* note: the result is stored to handle overflow */
-	t = 2*h*__expo2(absx);
+#ifdef __wasilibc_unmodified_upstream // Wasm doesn't have alternate rounding modes
+	t = __expo2(absx, 2*h);
+#else
+	t = __expo2(absx);
+#endif
 	return t;
 }

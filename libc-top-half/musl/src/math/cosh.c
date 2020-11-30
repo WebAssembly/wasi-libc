@@ -35,6 +35,10 @@ double cosh(double x)
 
 	/* |x| > log(DBL_MAX) or nan */
 	/* note: the result is stored to handle overflow */
+#ifdef __wasilibc_unmodified_upstream // Wasm doesn't have alternate rounding modes
+	t = __expo2(x, 1.0);
+#else
 	t = __expo2(x);
+#endif
 	return t;
 }

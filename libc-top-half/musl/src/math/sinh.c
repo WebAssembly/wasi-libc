@@ -37,7 +37,7 @@ double sinh(double x)
 #ifdef __wasilibc_unmodified_upstream // Wasm doesn't have alternate rounding modes
 	t = __expo2(absx, 2*h);
 #else
-	t = __expo2(absx);
+	t = 2*h*__expo2(absx);
 #endif
 	return t;
 }

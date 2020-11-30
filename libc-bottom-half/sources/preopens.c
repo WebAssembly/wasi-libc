@@ -7,14 +7,15 @@
 #endif
 
 #include <assert.h>
+#include <errno.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sysexits.h>
 #include <wasi/api.h>
-#include <wasi/libc.h>
 #include <wasi/libc-find-relpath.h>
+#include <wasi/libc.h>
 
 /// A name and file descriptor pair.
 typedef struct preopen {
@@ -71,15 +72,38 @@ static int resize(void) {
     return 0;
 }
 
+// Normalize an absolute path. Removes leading `/` and leading `./`, so the
+// first character is the start of a directory name. This works because our
+// process always starts with a working directory of `/`. Additionally translate
+// `.` to the empty string.
+static const char *strip_prefixes(const char *path) {
+    while (1) {
+        if (path[0] == '/') {
+            path++;
+        } else if (path[0] == '.' && path[1] == '/') {
+            path += 2;
+        } else if (path[0] == '.' && path[1] == 0) {
+            path++;
+        } else {
+            break;
+        }
+    }
+
+    return path;
+}
+
 /// Register the given preopened file descriptor under the given path.
 ///
 /// This function takes ownership of `prefix`.
-static int internal_register_preopened_fd(__wasi_fd_t fd, const char *prefix) {
+static int internal_register_preopened_fd(__wasi_fd_t fd, const char *relprefix) {
     assert_invariants();
 
     if (num_preopens == preopen_capacity && resize() != 0)
         return -1;
 
+    char *prefix = strdup(strip_prefixes(relprefix));
+    if (prefix == NULL)
+        return -1;
     preopens[num_preopens++] = (preopen) { prefix, fd, };
 
     assert_invariants();
@@ -109,16 +133,30 @@ static bool prefix_matches(const char *prefix, size_t prefix_len, const char *pa
 
 // See the documentation in libc.h
 int __wasilibc_register_preopened_fd(int fd, const char *prefix) {
-    prefix = strdup(prefix);
-    return prefix == NULL ? -1 :
-           internal_register_preopened_fd((__wasi_fd_t)fd, prefix);
+    return internal_register_preopened_fd((__wasi_fd_t)fd, prefix);
 }
 
 // See the documentation in libc-find-relpath.h.
 int __wasilibc_find_relpath(const char *path,
-                            const char **restrict relative_path) {
-    assert_invariants();
+                            const char **abs_prefix,
+                            char **relative_path,
+                            size_t relative_path_len) {
+    // If `chdir` is linked, whose object file defines this symbol, then we
+    // call that. Otherwise if the program can't `chdir` then `path` is
+    // absolute (or relative to the root dir), so we delegate to `find_abspath`
+    if (__wasilibc_find_relpath_alloc)
+        return __wasilibc_find_relpath_alloc(path, abs_prefix, relative_path, &relative_path_len, 0);
+    return __wasilibc_find_abspath(path, abs_prefix, (const char**) relative_path);
+}
 
+// See the documentation in libc-find-relpath.h.
+int __wasilibc_find_abspath(const char *path,
+                            const char **abs_prefix,
+                            const char **relative_path) {
+    // Strip leading `/` characters, the prefixes we're mataching won't have
+    // them.
+    while (*path == '/')
+        path++;
     // Search through the preopens table. Iterate in reverse so that more
     // recently added preopens take precedence over less recently addded ones.
     size_t match_len = 0;
@@ -128,22 +166,6 @@ int __wasilibc_find_relpath(const char *path,
         const char *prefix = pre->prefix;
         size_t len = strlen(prefix);
 
-        if (path[0] != '/' &&
-            (path[0] != '.' || (path[1] != '/' && path[1] != '\0')))
-        {
-            // We're matching a relative path that doesn't start with "./" and
-            // isn't ".".
-            if (len >= 2 && prefix[0] == '.' && prefix[1] == '/') {
-                // The preopen starts with "./", so skip that prefix.
-                prefix += 2;
-                len -= 2;
-            } else if (len == 1 && prefix[0] == '.') {
-                // The preopen is ".", so match it as an empty string.
-                prefix += 1;
-                len -= 1;
-            }
-        }
-
         // If we haven't had a match yet, or the candidate path is longer than
         // our current best match's path, and the candidate path is a prefix of
         // the requested path, take that as the new best path.
@@ -152,7 +174,13 @@ int __wasilibc_find_relpath(const char *path,
         {
             fd = pre->fd;
             match_len = len;
+            *abs_prefix = prefix;
         }
+    }
+
+    if (fd == -1) {
+        errno = ENOENT;
+        return -1;
     }
 
     // The relative path is the substring after the portion that was matched.
@@ -202,6 +230,7 @@ static void __wasilibc_populate_preopens(void) {
 
             if (internal_register_preopened_fd(fd, prefix) != 0)
                 goto software;
+            free(prefix);
 
             break;
         }

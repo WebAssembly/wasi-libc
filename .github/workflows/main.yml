@@ -28,7 +28,7 @@ jobs:
         rustup update stable
         rustup default stable
         rustup component add llvm-tools-preview
-        echo "::set-env name=WASM_NM::$(rustc --print sysroot|sed 's|C:|/c|'|sed 's|\\|/|g')/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-nm.exe"
+        echo "WASM_NM=$(rustc --print sysroot|sed 's|C:|/c|'|sed 's|\\|/|g')/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-nm.exe" >> $GITHUB_ENV
       if: matrix.os == 'windows-latest'
 
     - name: Install clang (MacOS)

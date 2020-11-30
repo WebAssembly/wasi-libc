@@ -44,6 +44,14 @@ LIBC_BOTTOM_HALF_SOURCES = $(LIBC_BOTTOM_HALF_DIR)/sources
 LIBC_BOTTOM_HALF_ALL_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
     $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c)
+
+# FIXME(https://reviews.llvm.org/D85567) - due to a bug in LLD the weak
+# references to a function defined in `chdir.c` only work if `chdir.c` is at the
+# end of the archive, but once that LLD review lands and propagates into LLVM
+# then we don't have to do this.
+LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_SOURCES)/chdir.c,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
+LIBC_BOTTOM_HALF_ALL_SOURCES := $(LIBC_BOTTOM_HALF_ALL_SOURCES) $(LIBC_BOTTOM_HALF_SOURCES)/chdir.c
+
 LIBWASI_EMULATED_MMAN_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_DIR)/mman -name \*.c)
 LIBWASI_EMULATED_SIGNAL_SOURCES = \

@@ -184,21 +184,21 @@ LIBC_TOP_HALF_ALL_SOURCES = \
     $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.c)
 
 # Set the target.
-WASM_CFLAGS += --target=$(TARGET_TRIPLE)
+CFLAGS = $(WASM_CFLAGS) --target=$(TARGET_TRIPLE)
 # WebAssembly floating-point match doesn't trap.
 # TODO: Add -fno-signaling-nans when the compiler supports it.
-WASM_CFLAGS += -fno-trapping-math
+CFLAGS += -fno-trapping-math
 
 # Configure support for threads.
 ifeq ($(THREAD_MODEL), single)
-WASM_CFLAGS += -mthread-model single
+CFLAGS += -mthread-model single
 endif
 ifeq ($(THREAD_MODEL), posix)
-WASM_CFLAGS += -mthread-model posix -pthread
+CFLAGS += -mthread-model posix -pthread
 endif
 
 # Set the sysroot.
-WASM_CFLAGS += --sysroot="$(SYSROOT)"
+CFLAGS += --sysroot="$(SYSROOT)"
 
 # These variables describe the locations of various files and directories in
 # the build tree.
@@ -335,40 +335,40 @@ $(SYSROOT_LIB)/libwasi-emulated-signal.a: $(LIBWASI_EMULATED_SIGNAL_OBJS) $(LIBW
 	# silently dropping the tail.
 	$(WASM_AR) crs $@ $(wordlist 800, 100000, $^)
 
-$(MUSL_PRINTSCAN_OBJS): WASM_CFLAGS += \
+$(MUSL_PRINTSCAN_OBJS): CFLAGS += \
 	    -D__wasilibc_printscan_no_long_double \
 	    -D__wasilibc_printscan_full_support_option="\"add -lc-printscan-long-double to the link command\""
 
-$(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): WASM_CFLAGS += \
+$(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): CFLAGS += \
 	    -D__wasilibc_printscan_no_floating_point \
 	    -D__wasilibc_printscan_floating_point_support_option="\"remove -lc-printscan-no-floating-point from the link command\""
 
-$(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS): WASM_CFLAGS += \
+$(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS): CFLAGS += \
 	    -D_WASI_EMULATED_SIGNAL
 
 $(OBJDIR)/%.long-double.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
-	"$(WASM_CC)" $(WASM_CFLAGS) -MD -MP -o $@ -c $<
+	"$(WASM_CC)" $(CFLAGS) -MD -MP -o $@ -c $<
 
 $(OBJDIR)/%.no-floating-point.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
-	"$(WASM_CC)" $(WASM_CFLAGS) -MD -MP -o $@ -c $<
+	"$(WASM_CC)" $(CFLAGS) -MD -MP -o $@ -c $<
 
 $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
-	"$(WASM_CC)" $(WASM_CFLAGS) -MD -MP -o $@ -c $<
+	"$(WASM_CC)" $(CFLAGS) -MD -MP -o $@ -c $<
 
 -include $(shell find $(OBJDIR) -name \*.d)
 
-$(DLMALLOC_OBJS): WASM_CFLAGS += \
+$(DLMALLOC_OBJS): CFLAGS += \
     -I$(DLMALLOC_INC)
 
-startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS): WASM_CFLAGS += \
+startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS): CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_HEADERS_PRIVATE) \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC) \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 
-$(LIBC_TOP_HALF_ALL_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS): WASM_CFLAGS += \
+$(LIBC_TOP_HALF_ALL_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS): CFLAGS += \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/include \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal \
     -I$(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm32 \
@@ -413,7 +413,7 @@ startup_files: include_dirs
 	#
 	@mkdir -p "$(OBJDIR)"
 	cd "$(OBJDIR)" && \
-	"$(WASM_CC)" $(WASM_CFLAGS) -c $(LIBC_BOTTOM_HALF_CRT_SOURCES) -MD -MP && \
+	"$(WASM_CC)" $(CFLAGS) -c $(LIBC_BOTTOM_HALF_CRT_SOURCES) -MD -MP && \
 	mkdir -p "$(SYSROOT_LIB)" && \
 	mv *.o "$(SYSROOT_LIB)"
 
@@ -465,7 +465,7 @@ finish: startup_files libc
 	#
 	# Test that it compiles.
 	#
-	"$(WASM_CC)" $(WASM_CFLAGS) -fsyntax-only "$(SYSROOT_SHARE)/include-all.c" -Wno-\#warnings
+	"$(WASM_CC)" $(CFLAGS) -fsyntax-only "$(SYSROOT_SHARE)/include-all.c" -Wno-\#warnings
 
 	#
 	# Collect all the predefined macros, except for compiler version macros
@@ -481,7 +481,7 @@ finish: startup_files libc
 	@#
 	@# TODO: Undefine __FLOAT128__ for now since it's not in clang 8.0.
 	@# TODO: Filter out __FLT16_* for now, as not all versions of clang have these.
-	"$(WASM_CC)" $(WASM_CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
+	"$(WASM_CC)" $(CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -isystem $(SYSROOT_INC) \
 	    -std=gnu17 \
 	    -E -dM -Wno-\#warnings \

@@ -449,7 +449,7 @@ finish: startup_files libc
 	for undef_sym in $$("$(WASM_NM)" --undefined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libc-*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$(SYSROOT_SHARE)/defined-symbols.txt" || echo $$undef_sym; \
-	done | grep -v "^__mul" > "$(SYSROOT_SHARE)/undefined-symbols.txt"
+	done | grep -v "^__mul\|^__indirect_function_table" > "$(SYSROOT_SHARE)/undefined-symbols.txt"
 	grep '^_*wasi_' "$(SYSROOT_SHARE)/undefined-symbols.txt" \
 	    > "$(SYSROOT_LIB)/libc.imports"
 

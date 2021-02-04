@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int renameat(int oldfd, const char *old, int newfd, const char *new) {
+int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char *new) {
   __wasi_errno_t error = __wasi_path_rename(oldfd, old, strlen(old),
                                             newfd, new, strlen(new));
   if (error != 0) {

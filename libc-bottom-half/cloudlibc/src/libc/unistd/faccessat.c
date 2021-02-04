@@ -10,7 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 
-int faccessat(int fd, const char *path, int amode, int flag) {
+int __wasilibc_nocwd_faccessat(int fd, const char *path, int amode, int flag) {
   // Validate function parameters.
   if ((amode & ~(F_OK | R_OK | W_OK | X_OK)) != 0 ||
       (flag & ~AT_EACCESS) != 0) {

@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <string.h>
 
-int mkdirat(int fd, const char *path, mode_t mode) {
+int __wasilibc_nocwd_mkdirat_nomode(int fd, const char *path) {
   __wasi_errno_t error = __wasi_path_create_directory(
       fd, path, strlen(path));
   if (error != 0) {

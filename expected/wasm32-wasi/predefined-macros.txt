@@ -46,6 +46,7 @@
 #define ARG_MAX 131072
 #define ARMAG "!<arch>\n"
 #define AT_EACCESS (0x0)
+#define AT_FDCWD (-2)
 #define AT_REMOVEDIR (0x4)
 #define AT_SYMLINK_FOLLOW (0x2)
 #define AT_SYMLINK_NOFOLLOW (0x1)
@@ -3021,6 +3022,7 @@
 #define __wasi_libc_environ_h 
 #define __wasi_libc_find_relpath_h 
 #define __wasi_libc_h 
+#define __wasi_libc_nocwd_h 
 #define __wasilibc___errno_h 
 #define __wasilibc___errno_values_h 
 #define __wasilibc___fd_set_h 

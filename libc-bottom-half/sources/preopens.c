@@ -8,6 +8,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -96,7 +97,11 @@ static const char *strip_prefixes(const char *path) {
 ///
 /// This function takes ownership of `prefix`.
 static int internal_register_preopened_fd(__wasi_fd_t fd, const char *relprefix) {
+    // Check preconditions.
     assert_invariants();
+    assert(fd != AT_FDCWD);
+    assert(fd != -1);
+    assert(relprefix != NULL);
 
     if (num_preopens == preopen_capacity && resize() != 0)
         return -1;

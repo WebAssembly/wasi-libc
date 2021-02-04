@@ -9,8 +9,8 @@
 #include <string.h>
 #include <unistd.h>
 
-ssize_t readlinkat(int fd, const char *restrict path, char *restrict buf,
-                   size_t bufsize) {
+ssize_t __wasilibc_nocwd_readlinkat(int fd, const char *restrict path, char *restrict buf,
+                                    size_t bufsize) {
   size_t bufused;
   // TODO: Remove the cast on `buf` once the witx is updated with char8 support.
   __wasi_errno_t error = __wasi_path_readlink(fd, path, strlen(path),

@@ -22,19 +22,14 @@ static_assert(O_DIRECTORY >> 12 == __WASI_OFLAGS_DIRECTORY, "Value mismatch");
 static_assert(O_EXCL >> 12 == __WASI_OFLAGS_EXCL, "Value mismatch");
 static_assert(O_TRUNC >> 12 == __WASI_OFLAGS_TRUNC, "Value mismatch");
 
-int openat(int fd, const char *path, int oflag, ...) {
-    return __wasilibc_openat_nomode(fd, path, oflag);
-}
-
-int __wasilibc_openat_nomode(int fd, const char *path, int oflag) {
+int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
   // Compute rights corresponding with the access modes provided.
   // Attempt to obtain all rights, except the ones that contradict the
   // access mode provided to openat().
   __wasi_rights_t max =
       ~(__WASI_RIGHTS_FD_DATASYNC | __WASI_RIGHTS_FD_READ |
         __WASI_RIGHTS_FD_WRITE | __WASI_RIGHTS_FD_ALLOCATE |
-        __WASI_RIGHTS_FD_READDIR | __WASI_RIGHTS_FD_FILESTAT_SET_SIZE |
-        0);
+        __WASI_RIGHTS_FD_READDIR | __WASI_RIGHTS_FD_FILESTAT_SET_SIZE);
   switch (oflag & O_ACCMODE) {
     case O_RDONLY:
     case O_RDWR:

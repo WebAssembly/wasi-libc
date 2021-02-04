@@ -10,7 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 
-int linkat(int fd1, const char *path1, int fd2, const char *path2, int flag) {
+int __wasilibc_nocwd_linkat(int fd1, const char *path1, int fd2, const char *path2, int flag) {
   // Create lookup properties.
   __wasi_lookupflags_t lookup1_flags = 0;
   if ((flag & AT_SYMLINK_FOLLOW) != 0)

@@ -3120,6 +3120,8 @@
 #define cbrt(x) __tg_real(cbrt, (x))
 #define ceil(x) __tg_real(ceil, (x))
 #define cimag(x) __tg_complex_retreal(cimag, (x))
+#define cimagf(x) (__builtin_cimagf(x))
+#define cimagl(x) (__builtin_cimagl(x))
 #define clrbit(x,i) __bitop(x,i,&=~)
 #define compl ~
 #define complex _Complex
@@ -3129,6 +3131,8 @@
 #define cosh(x) __tg_real_complex(cosh, (x))
 #define cproj(x) __tg_complex(cproj, (x))
 #define creal(x) __tg_complex_retreal(creal, (x))
+#define crealf(x) (__builtin_crealf(x))
+#define creall(x) (__builtin_creall(x))
 #define creat64 creat
 #define d_fileno d_ino
 #define direct dirent

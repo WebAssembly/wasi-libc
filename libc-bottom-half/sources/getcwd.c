@@ -19,7 +19,7 @@ char *getcwd(char *buf, size_t size)
         }
     } else {
         size_t len = strlen(__wasilibc_cwd);
-        if (size < strlen(__wasilibc_cwd) + 1) {
+        if (size < len + 1) {
             errno = ERANGE;
             return NULL;
         }

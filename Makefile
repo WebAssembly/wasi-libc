@@ -191,7 +191,8 @@ CFLAGS += -fno-trapping-math
 # Add all warnings, but disable a few which occur in third-party code.
 CFLAGS += -Wall -Wextra -Werror \
   -Wno-null-pointer-arithmetic \
-  -Wno-unused-parameter
+  -Wno-unused-parameter \
+  -Wno-sign-compare
 
 # Configure support for threads.
 ifeq ($(THREAD_MODEL), single)

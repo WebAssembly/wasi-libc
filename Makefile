@@ -193,7 +193,8 @@ CFLAGS += -Wall -Wextra -Werror \
   -Wno-null-pointer-arithmetic \
   -Wno-unused-parameter \
   -Wno-sign-compare \
-  -Wno-unused-variable
+  -Wno-unused-variable \
+  -Wno-unused-function
 
 # Configure support for threads.
 ifeq ($(THREAD_MODEL), single)

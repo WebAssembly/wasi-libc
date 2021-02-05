@@ -12,14 +12,9 @@
 ssize_t readlinkat(int fd, const char *restrict path, char *restrict buf,
                    size_t bufsize) {
   size_t bufused;
-#ifdef __wasilibc_unmodified_upstream
-  __wasi_errno_t error = __wasi_file_readlink(fd, path, strlen(path),
-                                                      buf, bufsize, &bufused);
-#else
   // TODO: Remove the cast on `buf` once the witx is updated with char8 support.
   __wasi_errno_t error = __wasi_path_readlink(fd, path, strlen(path),
                                                       (uint8_t*)buf, bufsize, &bufused);
-#endif
   if (error != 0) {
     errno = errno_fixup_directory(fd, error);
     return -1;

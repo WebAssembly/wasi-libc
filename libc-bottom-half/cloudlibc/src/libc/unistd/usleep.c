@@ -9,11 +9,7 @@
 int usleep(useconds_t useconds) {
   struct timespec ts = {.tv_sec = useconds / 1000000,
                         .tv_nsec = useconds % 1000000 * 1000};
-#ifdef __wasilibc_unmodified_upstream
-  int error = clock_nanosleep(CLOCK_REALTIME, 0, &ts);
-#else
   int error = clock_nanosleep(CLOCK_REALTIME, 0, &ts, NULL);
-#endif
   if (error != 0) {
     errno = error;
     return -1;

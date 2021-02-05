@@ -195,7 +195,8 @@ CFLAGS += -Wall -Wextra -Werror \
   -Wno-sign-compare \
   -Wno-unused-variable \
   -Wno-unused-function \
-  -Wno-ignored-attributes
+  -Wno-ignored-attributes \
+  -Wno-missing-braces
 
 # Configure support for threads.
 ifeq ($(THREAD_MODEL), single)

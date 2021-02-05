@@ -10,11 +10,7 @@
 
 DIR *opendirat(int dir, const char *dirname) {
   // Open directory.
-#ifdef __wasilibc_unmodified_upstream // avoid making a varargs call
-  int fd = openat(dir, dirname, O_RDONLY | O_NONBLOCK | O_DIRECTORY);
-#else
   int fd = __wasilibc_openat_nomode(dir, dirname, O_RDONLY | O_NONBLOCK | O_DIRECTORY);
-#endif
   if (fd == -1)
     return NULL;
 

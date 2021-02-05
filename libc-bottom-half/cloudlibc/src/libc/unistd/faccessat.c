@@ -19,21 +19,10 @@ int faccessat(int fd, const char *path, int amode, int flag) {
   }
 
   // Check for target file existence and obtain the file type.
-#ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
-  __wasi_lookup_t lookup = {
-      .fd = fd,
-      .flags = __WASI_LOOKUP_SYMLINK_FOLLOW,
-  };
-#else
   __wasi_lookupflags_t lookup_flags = __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
-#endif
   __wasi_filestat_t file;
   __wasi_errno_t error =
-#ifdef __wasilibc_unmodified_upstream // split out __wasi_lookup_t
-      __wasi_file_stat_get(lookup, path, strlen(path), &file);
-#else
       __wasi_path_filestat_get(fd, lookup_flags, path, strlen(path), &file);
-#endif
   if (error != 0) {
     errno = errno_fixup_directory(fd, error);
     return -1;
@@ -43,11 +32,7 @@ int faccessat(int fd, const char *path, int amode, int flag) {
   // directory file descriptor.
   if (amode != 0) {
     __wasi_fdstat_t directory;
-#ifdef __wasilibc_unmodified_upstream
-    error = __wasi_fd_stat_get(fd, &directory);
-#else
     error = __wasi_fd_fdstat_get(fd, &directory);
-#endif
     if (error != 0) {
       errno = error;
       return -1;
@@ -55,25 +40,11 @@ int faccessat(int fd, const char *path, int amode, int flag) {
 
     __wasi_rights_t min = 0;
     if ((amode & R_OK) != 0)
-#ifdef __wasilibc_unmodified_upstream
-      min |= file.st_filetype == __WASI_FILETYPE_DIRECTORY
-                 ? __WASI_RIGHT_FILE_READDIR
-                 : __WASI_RIGHT_FD_READ;
-#else
       min |= file.filetype == __WASI_FILETYPE_DIRECTORY
                  ? __WASI_RIGHTS_FD_READDIR
                  : __WASI_RIGHTS_FD_READ;
-#endif
     if ((amode & W_OK) != 0)
-#ifdef __wasilibc_unmodified_upstream // generated constant names
-      min |= __WASI_RIGHT_FD_WRITE;
-#else
       min |= __WASI_RIGHTS_FD_WRITE;
-#endif
-#ifdef __wasilibc_unmodified_upstream // RIGHT_PROC_EXEC
-    if ((amode & X_OK) != 0 && file.st_filetype != __WASI_FILETYPE_DIRECTORY)
-      min |= __WASI_RIGHT_PROC_EXEC;
-#endif
 
     if ((min & directory.fs_rights_inheriting) != min) {
       errno = EACCES;

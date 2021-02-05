@@ -8,9 +8,5 @@
 #include <time.h>
 
 const struct __clockid _CLOCK_REALTIME = {
-#ifdef __wasilibc_unmodified_upstream // generated constant names
-    .id = __WASI_CLOCK_REALTIME,
-#else
     .id = __WASI_CLOCKID_REALTIME,
-#endif
 };

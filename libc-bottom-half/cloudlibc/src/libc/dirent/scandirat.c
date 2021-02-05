@@ -25,11 +25,7 @@ int scandirat(int dirfd, const char *dir, struct dirent ***namelist,
     sel = sel_true;
 
   // Open the directory.
-#ifdef __wasilibc_unmodified_upstream // avoid making a varargs call
-  int fd = openat(dirfd, dir, O_RDONLY | O_NONBLOCK | O_DIRECTORY);
-#else
   int fd = __wasilibc_openat_nomode(dirfd, dir, O_RDONLY | O_NONBLOCK | O_DIRECTORY);
-#endif
   if (fd == -1)
     return -1;
 
@@ -119,12 +115,8 @@ int scandirat(int dirfd, const char *dir, struct dirent ***namelist,
 
   read_entries:;
     // Load more directory entries and continue.
-#ifdef __wasilibc_unmodified_upstream
-    __wasi_errno_t error = __wasi_file_readdir(fd, buffer, buffer_size,
-#else
     // TODO: Remove the cast on `buffer` once the witx is updated with char8 support.
     __wasi_errno_t error = __wasi_fd_readdir(fd, (uint8_t *)buffer, buffer_size,
-#endif
                                                        cookie, &buffer_used);
     if (error != 0) {
       errno = error;

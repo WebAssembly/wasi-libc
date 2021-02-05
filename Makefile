@@ -188,6 +188,8 @@ CFLAGS = $(WASM_CFLAGS) --target=$(TARGET_TRIPLE)
 # WebAssembly floating-point match doesn't trap.
 # TODO: Add -fno-signaling-nans when the compiler supports it.
 CFLAGS += -fno-trapping-math
+# We should have proper declarations for everything.
+CFLAGS += -Wall -Wextra -Werror
 
 # Configure support for threads.
 ifeq ($(THREAD_MODEL), single)

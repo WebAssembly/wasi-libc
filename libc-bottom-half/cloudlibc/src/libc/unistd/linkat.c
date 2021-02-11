@@ -17,8 +17,7 @@ int __wasilibc_nocwd_linkat(int fd1, const char *path1, int fd2, const char *pat
     lookup1_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
 
   // Perform system call.
-  __wasi_errno_t error = __wasi_path_link(fd1, lookup1_flags, path1, strlen(path1),
-                                          fd2, path2, strlen(path2));
+  __wasi_errno_t error = __wasi_path_link(fd1, lookup1_flags, path1, fd2, path2);
   if (error != 0) {
     errno = errno_fixup_directory(fd1, errno_fixup_directory(fd2, error));
     return -1;

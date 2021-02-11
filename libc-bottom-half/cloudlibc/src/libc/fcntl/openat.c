@@ -70,7 +70,7 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
   __wasi_rights_t fs_rights_base = max & fsb_cur.fs_rights_inheriting;
   __wasi_rights_t fs_rights_inheriting = fsb_cur.fs_rights_inheriting;
   __wasi_fd_t newfd;
-  error = __wasi_path_open(fd, lookup_flags, path, strlen(path),
+  error = __wasi_path_open(fd, lookup_flags, path,
                                  (oflag >> 12) & 0xfff,
                                  fs_rights_base, fs_rights_inheriting, fs_flags,
                                  &newfd);

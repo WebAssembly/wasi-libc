@@ -11,8 +11,7 @@
 #include <string.h>
 
 int __wasilibc_nocwd_mkdirat_nomode(int fd, const char *path) {
-  __wasi_errno_t error = __wasi_path_create_directory(
-      fd, path, strlen(path));
+  __wasi_errno_t error = __wasi_path_create_directory(fd, path);
   if (error != 0) {
     errno = errno_fixup_directory(fd, error);
     return -1;

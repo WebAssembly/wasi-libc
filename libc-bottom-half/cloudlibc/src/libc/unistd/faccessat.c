@@ -22,7 +22,7 @@ int __wasilibc_nocwd_faccessat(int fd, const char *path, int amode, int flag) {
   __wasi_lookupflags_t lookup_flags = __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
   __wasi_filestat_t file;
   __wasi_errno_t error =
-      __wasi_path_filestat_get(fd, lookup_flags, path, strlen(path), &file);
+      __wasi_path_filestat_get(fd, lookup_flags, path, &file);
   if (error != 0) {
     errno = errno_fixup_directory(fd, error);
     return -1;

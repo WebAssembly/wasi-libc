@@ -2,6 +2,13 @@
  * THIS FILE IS AUTO-GENERATED from the following files:
  *   wasi_snapshot_preview1.witx
  *
+ * To regenerate this file execute:
+ *
+ *     cargo run --manifest-path tools/wasi-headers/Cargo.toml generate-libc
+ *
+ * Modifications to this file will cause CI to fail, the code generator tool
+ * must be modified to change this file.
+ *
  * @file
  * This file describes the [WASI] interface, consisting of functions, types,
  * and defined values (macros).

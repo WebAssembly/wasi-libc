@@ -492,7 +492,9 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
         _ => unimplemented!(),
     }
 
-    ret.push_str("__wasi_real_");
+    ret.push_str("__imported_");
+    ret.push_str(&ident_name(module_name));
+    ret.push_str("_");
     ret.push_str(&ident_name(&func.name));
     ret.push_str("(");
     for (i, param) in params.iter().enumerate() {
@@ -688,7 +690,7 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
                 Instruction::EnumLower { .. } => top_as("int32_t"),
 
                 Instruction::CallWasm {
-                    module: _,
+                    module,
                     name,
                     params: _,
                     results: func_results,
@@ -700,7 +702,9 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
                         self.src.push_str(" ret = ");
                         results.push("ret".to_string());
                     }
-                    self.src.push_str("__wasi_real_");
+                    self.src.push_str("__imported_");
+                    self.src.push_str(module);
+                    self.src.push_str("_");
                     self.src.push_str(name);
                     self.src.push_str("(");
                     self.src.push_str(&operands.join(", "));

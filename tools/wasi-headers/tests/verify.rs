@@ -1,17 +1,37 @@
 use std::fs;
+use std::path::Path;
 
 #[test]
 fn assert_same_as_src() {
-    let actual =
+    let actual_header =
         fs::read_to_string(wasi_headers::libc_wasi_api_header()).expect("read libc wasi/api.h");
+    let actual_source =
+        fs::read_to_string(wasi_headers::libc_wasi_api_source()).expect("read libc wasi/api.h");
     let witx_files = wasi_headers::snapshot_witx_files().expect("parse snapshot witx files");
     let expected = wasi_headers::generate(&witx_files).expect("header generation");
-    if actual == expected {
+    if actual_header == expected.header && actual_source == expected.source {
         return;
     }
 
-    eprintln!("The following diff was found between the generated <wasi/api.h> and the");
-    eprintln!("source <wasi/api.h> in the tree:");
+    if actual_header != expected.header {
+        diff(
+            &wasi_headers::libc_wasi_api_header(),
+            &actual_header,
+            &expected.header,
+        );
+    }
+    if actual_header != expected.header {
+        diff(
+            &wasi_headers::libc_wasi_api_source(),
+            &actual_header,
+            &expected.header,
+        );
+    }
+}
+
+fn diff(path: &Path, actual: &str, expected: &str) {
+    eprintln!("The following diff was found between the generated copy and the");
+    eprintln!("source copy of {:?} in the tree:", path);
     eprintln!();
 
     let mut expected_line = 1;

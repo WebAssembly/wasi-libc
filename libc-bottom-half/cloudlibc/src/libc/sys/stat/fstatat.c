@@ -23,7 +23,7 @@ int __wasilibc_nocwd_fstatat(int fd, const char *restrict path, struct stat *res
   // Perform system call.
   __wasi_filestat_t internal_stat;
   __wasi_errno_t error =
-      __wasi_path_filestat_get(fd, lookup_flags, path, strlen(path), &internal_stat);
+      __wasi_path_filestat_get(fd, lookup_flags, path, &internal_stat);
   if (error != 0) {
     errno = errno_fixup_directory(fd, error);
     return -1;

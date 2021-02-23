@@ -460,7 +460,7 @@ finish: startup_files libc
 	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$(SYSROOT_SHARE)/defined-symbols.txt" || echo $$undef_sym; \
 	done | grep -v "^__mul" > "$(SYSROOT_SHARE)/undefined-symbols.txt"
-	grep '^_*wasi_' "$(SYSROOT_SHARE)/undefined-symbols.txt" \
+	grep '^_*imported_wasi_' "$(SYSROOT_SHARE)/undefined-symbols.txt" \
 	    > "$(SYSROOT_LIB)/libc.imports"
 
 	#

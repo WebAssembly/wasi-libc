@@ -43,8 +43,8 @@ or libc++abi.a, respectively, so they may not be usable without
 extra setup. This is one of the things [wasi-sdk] simplifies, as it includes
 cross-compiled builds of compiler-rt, libc++.a, and libc++abi.a.
 
-## AUR package
-For Archlinux users, there's an AUR package tracking this git repo that can be installed under the name [wasi-libc-git].
+## Arch Linux AUR package
+For Arch Linux users, there's an unofficial AUR package tracking this git repo that can be installed under the name [wasi-libc-git].
 
 [wasi-sdk]: https://github.com/WebAssembly/wasi-sdk
 [wasi-libc-git]: https://aur.archlinux.org/packages/wasi-libc-git/

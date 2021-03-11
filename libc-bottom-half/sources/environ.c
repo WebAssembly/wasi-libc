@@ -24,3 +24,10 @@ __attribute__((constructor(50)))
 static void __wasilibc_initialize_environ_eagerly(void) {
     __wasilibc_initialize_environ();
 }
+
+// See the comments in libc-environ.h.
+void __wasilibc_maybe_reinitialize_environ_eagerly(void) {
+    // This translation unit is linked in if `environ` is used, meaning we need
+    // to eagerly reinitialize the environment variables.
+    __wasilibc_initialize_environ();
+}

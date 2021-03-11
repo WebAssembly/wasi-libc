@@ -75,3 +75,20 @@ oserr:
 software:
     _Exit(EX_SOFTWARE);
 }
+
+// See the comments in libc-environ.h.
+void __wasilibc_deinitialize_environ(void) {
+    if (__wasilibc_environ != (char **)-1) {
+        // Let libc-top-half clear the old environment-variable strings.
+        clearenv();
+        // Set the pointer to the special init value.
+        __wasilibc_environ = (char **)-1;
+    }
+}
+
+// See the comments in libc-environ.h.
+__attribute__((weak))
+void __wasilibc_maybe_reinitialize_environ_eagerly(void) {
+    // This version does nothing. It may be overridden by a version which does
+    // something if `environ` is used.
+}

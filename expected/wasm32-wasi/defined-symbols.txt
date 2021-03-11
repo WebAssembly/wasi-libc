@@ -296,6 +296,7 @@ __wasi_sock_send
 __wasi_sock_shutdown
 __wasilibc_access
 __wasilibc_cwd
+__wasilibc_deinitialize_environ
 __wasilibc_ensure_environ
 __wasilibc_environ
 __wasilibc_environ
@@ -307,6 +308,8 @@ __wasilibc_initialize_environ
 __wasilibc_link
 __wasilibc_link_newat
 __wasilibc_link_oldat
+__wasilibc_maybe_reinitialize_environ_eagerly
+__wasilibc_maybe_reinitialize_environ_eagerly
 __wasilibc_nocwd___wasilibc_rmdirat
 __wasilibc_nocwd___wasilibc_unlinkat
 __wasilibc_nocwd_faccessat

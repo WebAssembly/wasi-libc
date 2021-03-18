@@ -298,6 +298,10 @@
 #define __NR_fspick		(0x40000000 + 433)
 #define __NR_pidfd_open		(0x40000000 + 434)
 #define __NR_clone3		(0x40000000 + 435)
+#define __NR_close_range	(0x40000000 + 436)
+#define __NR_openat2		(0x40000000 + 437)
+#define __NR_pidfd_getfd	(0x40000000 + 438)
+#define __NR_faccessat2		(0x40000000 + 439)
 
 
 #define __NR_rt_sigaction (0x40000000 + 512)

@@ -132,6 +132,9 @@ __lgamma_r
 __lgammaf_r
 __lgammal_r
 __libc
+__libc_calloc
+__libc_free
+__libc_malloc
 __loc_is_allocated
 __localtime_r
 __log2_data
@@ -145,6 +148,7 @@ __math_divzero
 __math_divzerof
 __math_invalid
 __math_invalidf
+__math_invalidl
 __math_oflow
 __math_oflowf
 __math_uflow
@@ -181,6 +185,7 @@ __rem_pio2
 __rem_pio2_large
 __rem_pio2f
 __rem_pio2l
+__rsqrt_tab
 __secs_to_tm
 __secs_to_zone
 __seed48

@@ -6,7 +6,9 @@
 #include <signal.h>
 #endif
 #include <sys/sysinfo.h>
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#endif
 #include "libc.h"
 
 #define JT(x) (-256|(x))

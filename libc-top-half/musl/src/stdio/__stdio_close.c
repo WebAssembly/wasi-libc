@@ -3,6 +3,7 @@
 #include <unistd.h>
 #endif
 #include "stdio_impl.h"
+#include "aio_impl.h"
 
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 static int dummy(int fd)

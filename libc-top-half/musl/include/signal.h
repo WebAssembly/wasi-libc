@@ -187,14 +187,24 @@ struct sigevent {
 	union sigval sigev_value;
 	int sigev_signo;
 	int sigev_notify;
-	void (*sigev_notify_function)(union sigval);
-	pthread_attr_t *sigev_notify_attributes;
-	char __pad[56-3*sizeof(long)];
+	union {
+		char __pad[64 - 2*sizeof(int) - sizeof(union sigval)];
+		pid_t sigev_notify_thread_id;
+		struct {
+			void (*sigev_notify_function)(union sigval);
+			pthread_attr_t *sigev_notify_attributes;
+		} __sev_thread;
+	} __sev_fields;
 };
+
+#define sigev_notify_thread_id __sev_fields.sigev_notify_thread_id
+#define sigev_notify_function __sev_fields.__sev_thread.sigev_notify_function
+#define sigev_notify_attributes __sev_fields.__sev_thread.sigev_notify_attributes
 
 #define SIGEV_SIGNAL 0
 #define SIGEV_NONE 1
 #define SIGEV_THREAD 2
+#define SIGEV_THREAD_ID 4
 #endif
 
 #ifdef __wasilibc_unmodified_upstream /* WASI has no realtime signals */

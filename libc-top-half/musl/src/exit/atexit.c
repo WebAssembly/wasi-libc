@@ -2,6 +2,12 @@
 #include <stdint.h>
 #include "libc.h"
 #include "lock.h"
+#include "fork_impl.h"
+
+#define malloc __libc_malloc
+#define calloc __libc_calloc
+#define realloc undef
+#define free undef
 
 /* Ensure that at least 32 atexit handlers can be registered without malloc */
 #define COUNT 32
@@ -14,7 +20,11 @@ static struct fl
 } builtin, *head;
 
 static int slot;
+
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 static volatile int lock[1];
+volatile int *const __atexit_lockptr = lock;
+#endif
 
 void __funcs_on_exit()
 {

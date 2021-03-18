@@ -91,3 +91,8 @@ void* aligned_alloc(size_t alignment, size_t bytes) {
 size_t malloc_usable_size(void *ptr) {
     return dlmalloc_usable_size(ptr);
 }
+
+// Define these to satisfy musl references.
+void *__libc_malloc(size_t) __attribute__((alias("malloc")));
+void __libc_free(void *) __attribute__((alias("free")));
+void *__libc_calloc(size_t nmemb, size_t size) __attribute__((alias("calloc")));

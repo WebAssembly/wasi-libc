@@ -8,8 +8,8 @@ hidden void __unlock(volatile int *);
 #define UNLOCK(x) __unlock(x)
 #else
 // No locking needed.
-#define LOCK(x) ((void)(x))
-#define UNLOCK(x) ((void)(x))
+#define LOCK(x) ((void)0)
+#define UNLOCK(x) ((void)0)
 #endif
 
 #endif

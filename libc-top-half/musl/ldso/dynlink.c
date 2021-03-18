@@ -1,6 +1,5 @@
 #define _GNU_SOURCE
 #define SYSCALL_NO_TLS 1
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stddef.h>
@@ -21,8 +20,14 @@
 #include <semaphore.h>
 #include <sys/membarrier.h>
 #include "pthread_impl.h"
+#include "fork_impl.h"
 #include "libc.h"
 #include "dynlink.h"
+
+#define malloc __libc_malloc
+#define calloc __libc_calloc
+#define realloc __libc_realloc
+#define free __libc_free
 
 static void error(const char *, ...);
 
@@ -78,7 +83,7 @@ struct dso {
 	struct dso **deps, *needed_by;
 	size_t ndeps_direct;
 	size_t next_dep;
-	int ctor_visitor;
+	pthread_t ctor_visitor;
 	char *rpath_orig, *rpath;
 	struct tls_module tls;
 	size_t tls_id;
@@ -554,6 +559,20 @@ static void reclaim_gaps(struct dso *dso)
 		reclaim(dso, ph->p_vaddr+ph->p_memsz,
 			ph->p_vaddr+ph->p_memsz+PAGE_SIZE-1 & -PAGE_SIZE);
 	}
+}
+
+static ssize_t read_loop(int fd, void *p, size_t n)
+{
+	for (size_t i=0; i<n; ) {
+		ssize_t l = read(fd, (char *)p+i, n-i);
+		if (l<0) {
+			if (errno==EINTR) continue;
+			else return -1;
+		}
+		if (l==0) return i;
+		i += l;
+	}
+	return n;
 }
 
 static void *mmap_fixed(void *p, size_t n, int prot, int flags, int fd, off_t off)
@@ -1060,13 +1079,17 @@ static struct dso *load_library(const char *name, struct dso *needed_by)
 				snprintf(etc_ldso_path, sizeof etc_ldso_path,
 					"%.*s/etc/ld-musl-" LDSO_ARCH ".path",
 					(int)prefix_len, prefix);
-				FILE *f = fopen(etc_ldso_path, "rbe");
-				if (f) {
-					if (getdelim(&sys_path, (size_t[1]){0}, 0, f) <= 0) {
+				fd = open(etc_ldso_path, O_RDONLY|O_CLOEXEC);
+				if (fd>=0) {
+					size_t n = 0;
+					if (!fstat(fd, &st)) n = st.st_size;
+					if ((sys_path = malloc(n+1)))
+						sys_path[n] = 0;
+					if (!sys_path || read_loop(fd, sys_path, n)<0) {
 						free(sys_path);
 						sys_path = "";
 					}
-					fclose(f);
+					close(fd);
 				} else if (errno != ENOENT) {
 					sys_path = "";
 				}
@@ -1378,7 +1401,7 @@ void __libc_exit_fini()
 {
 	struct dso *p;
 	size_t dyn[DYN_CNT];
-	int self = __pthread_self()->tid;
+	pthread_t self = __pthread_self();
 
 	/* Take both locks before setting shutting_down, so that
 	 * either lock is sufficient to read its value. The lock
@@ -1401,6 +1424,17 @@ void __libc_exit_fini()
 		if ((dyn[0] & (1<<DT_FINI)) && dyn[DT_FINI])
 			fpaddr(p, dyn[DT_FINI])();
 #endif
+	}
+}
+
+void __ldso_atfork(int who)
+{
+	if (who<0) {
+		pthread_rwlock_wrlock(&lock);
+		pthread_mutex_lock(&init_fini_lock);
+	} else {
+		pthread_mutex_unlock(&init_fini_lock);
+		pthread_rwlock_unlock(&lock);
 	}
 }
 
@@ -1462,6 +1496,13 @@ static struct dso **queue_ctors(struct dso *dso)
 	}
 	queue[qpos] = 0;
 	for (i=0; i<qpos; i++) queue[i]->mark = 0;
+	for (i=0; i<qpos; i++)
+		if (queue[i]->ctor_visitor && queue[i]->ctor_visitor->tid < 0) {
+			error("State of %s is inconsistent due to multithreaded fork\n",
+				queue[i]->name);
+			free(queue);
+			if (runtime) longjmp(*rtld_fail, 1);
+		}
 
 	return queue;
 }
@@ -1470,7 +1511,7 @@ static void do_init_fini(struct dso **queue)
 {
 	struct dso *p;
 	size_t dyn[DYN_CNT], i;
-	int self = __pthread_self()->tid;
+	pthread_t self = __pthread_self();
 
 	pthread_mutex_lock(&init_fini_lock);
 	for (i=0; (p=queue[i]); i++) {
@@ -1579,7 +1620,7 @@ static void install_new_tls(void)
 
 	/* Install new dtv for each thread. */
 	for (j=0, td=self; !j || td!=self; j++, td=td->next) {
-		td->dtv = td->dtv_copy = newdtv[j];
+		td->dtv = newdtv[j];
 	}
 
 	__tl_unlock();
@@ -1947,7 +1988,7 @@ void __dls3(size_t *sp, size_t *auxv)
 	debug.bp = dl_debug_state;
 	debug.head = head;
 	debug.base = ldso.base;
-	debug.state = 0;
+	debug.state = RT_CONSISTENT;
 	_dl_debug_state();
 
 	if (replace_argv0) argv[0] = replace_argv0;
@@ -1995,6 +2036,9 @@ void *dlopen(const char *file, int mode)
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
 	pthread_rwlock_wrlock(&lock);
 	__inhibit_ptc();
+
+	debug.state = RT_ADD;
+	_dl_debug_state();
 
 	p = 0;
 	if (shutting_down) {
@@ -2055,8 +2099,9 @@ void *dlopen(const char *file, int mode)
 	load_deps(p);
 	extend_bfs_deps(p);
 	pthread_mutex_lock(&init_fini_lock);
-	if (!p->constructed) ctor_queue = queue_ctors(p);
+	int constructed = p->constructed;
 	pthread_mutex_unlock(&init_fini_lock);
+	if (!constructed) ctor_queue = queue_ctors(p);
 	if (!p->relocated && (mode & RTLD_LAZY)) {
 		prepare_lazy(p);
 		for (i=0; p->deps[i]; i++)
@@ -2088,9 +2133,10 @@ void *dlopen(const char *file, int mode)
 	update_tls_size();
 	if (tls_cnt != orig_tls_cnt)
 		install_new_tls();
-	_dl_debug_state();
 	orig_tail = tail;
 end:
+	debug.state = RT_CONSISTENT;
+	_dl_debug_state();
 	__release_ptc();
 	if (p) gencnt++;
 	pthread_rwlock_unlock(&lock);

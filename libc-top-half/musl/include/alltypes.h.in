@@ -100,6 +100,8 @@ STRUCT iovec { void *iov_base; size_t iov_len; };
 #include <__struct_iovec.h>
 #endif
 
+STRUCT winsize { unsigned short ws_row, ws_col, ws_xpixel, ws_ypixel; };
+
 TYPEDEF unsigned socklen_t;
 TYPEDEF unsigned short sa_family_t;
 

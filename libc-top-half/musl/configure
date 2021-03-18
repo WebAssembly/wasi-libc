@@ -30,7 +30,7 @@ System types:
 Optional features:
   --enable-optimize=...   optimize listed components for speed over size [auto]
   --enable-debug          build with debugging information [disabled]
-  --enable-warnings       build with recommended warnings flags [disabled]
+  --disable-warnings      build with recommended warnings flags [enabled]
   --enable-wrapper=...    build given musl toolchain wrapper [auto]
   --disable-shared        inhibit building shared library [enabled]
   --disable-static        inhibit building static library [enabled]
@@ -136,7 +136,7 @@ build=
 target=
 optimize=auto
 debug=no
-warnings=no
+warnings=yes
 shared=auto
 static=yes
 wrapper=auto
@@ -204,7 +204,7 @@ fi
 abs_builddir="$(pwd)" || fail "$0: cannot determine working directory"
 abs_srcdir="$(cd $srcdir && pwd)" || fail "$0: invalid source directory $srcdir"
 test "$abs_srcdir" = "$abs_builddir" && srcdir=.
-test "$srcdir" != "." -a -f Makefile -a ! -h Makefile && fail "$0: Makefile already exists in the working directory"
+test "$srcdir" != "." && test -f Makefile && test ! -h Makefile && fail "$0: Makefile already exists in the working directory"
 
 #
 # Get a temp filename we can use
@@ -279,7 +279,7 @@ echo "$cc_family"
 #
 # Figure out toolchain wrapper to build
 #
-if test "$wrapper" = auto -o "$wrapper" = detect ; then
+if test "$wrapper" = auto || test "$wrapper" = detect ; then
 echo "#include <stdlib.h>" > "$tmpc"
 echo "#if ! __GLIBC__" >> "$tmpc"
 echo "#error no" >> "$tmpc"
@@ -470,7 +470,7 @@ tryflag CFLAGS_AUTO -pipe
 # pointer is no longer needed for debugging.
 #
 if fnmatch '-g*|*\ -g*' "$CFLAGS_AUTO $CFLAGS" ; then :
-else 
+else
 tryflag CFLAGS_AUTO -fomit-frame-pointer
 fi
 
@@ -510,9 +510,12 @@ fi
 #
 # GCC defines -w as overriding any -W options, regardless of order, but
 # clang has a bunch of annoying warnings enabled by default and needs -w
-# to start from a clean slate. So use -w if building with clang.
+# to start from a clean slate. So use -w if building with clang. Also
+# turn off a common on-by-default cast warning regardless of compiler.
 #
 test "$cc_family" = clang && tryflag CFLAGS_AUTO -w
+
+tryflag CFLAGS_AUTO -Wno-pointer-to-int-cast
 
 #
 # Even with -std=c99, gcc accepts some constructs which are constraint
@@ -524,6 +527,10 @@ tryflag CFLAGS_AUTO -Werror=implicit-function-declaration
 tryflag CFLAGS_AUTO -Werror=implicit-int
 tryflag CFLAGS_AUTO -Werror=pointer-sign
 tryflag CFLAGS_AUTO -Werror=pointer-arith
+tryflag CFLAGS_AUTO -Werror=int-conversion
+tryflag CFLAGS_AUTO -Werror=incompatible-pointer-types
+tryflag CFLAGS_AUTO -Werror=discarded-qualifiers
+tryflag CFLAGS_AUTO -Werror=discarded-array-qualifiers
 
 #
 # GCC ignores unused arguements by default, but Clang needs this extra
@@ -533,14 +540,17 @@ tryflag CFLAGS_AUTO -Werror=pointer-arith
 test "$cc_family" = clang && tryflag CFLAGS_AUTO -Qunused-arguments
 
 if test "x$warnings" = xyes ; then
-tryflag CFLAGS_AUTO -Wall
-tryflag CFLAGS_AUTO -Wno-parentheses
-tryflag CFLAGS_AUTO -Wno-uninitialized
-tryflag CFLAGS_AUTO -Wno-missing-braces
-tryflag CFLAGS_AUTO -Wno-unused-value
-tryflag CFLAGS_AUTO -Wno-unused-but-set-variable
-tryflag CFLAGS_AUTO -Wno-unknown-pragmas
-tryflag CFLAGS_AUTO -Wno-pointer-to-int-cast
+tryflag CFLAGS_AUTO -Waddress
+tryflag CFLAGS_AUTO -Warray-bounds
+tryflag CFLAGS_AUTO -Wchar-subscripts
+tryflag CFLAGS_AUTO -Wduplicate-decl-specifier
+tryflag CFLAGS_AUTO -Winit-self
+tryflag CFLAGS_AUTO -Wreturn-type
+tryflag CFLAGS_AUTO -Wsequence-point
+tryflag CFLAGS_AUTO -Wstrict-aliasing
+tryflag CFLAGS_AUTO -Wunused-function
+tryflag CFLAGS_AUTO -Wunused-label
+tryflag CFLAGS_AUTO -Wunused-variable
 fi
 
 # Determine if the compiler produces position-independent code (PIC)

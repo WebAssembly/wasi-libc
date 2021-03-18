@@ -17,6 +17,10 @@ struct __locale_map {
 	const struct __locale_map *next;
 };
 
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
+extern hidden volatile int __locale_lock[1];
+#endif
+
 extern hidden const struct __locale_map __c_dot_utf8;
 extern hidden const struct __locale_struct __c_locale;
 extern hidden const struct __locale_struct __c_dot_utf8_locale;

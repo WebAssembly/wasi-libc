@@ -9,6 +9,11 @@
 #include "atomic.h"
 #include "pthread_impl.h"
 #include "malloc_impl.h"
+#include "fork_impl.h"
+
+#define malloc __libc_malloc
+#define realloc __libc_realloc
+#define free __libc_free
 
 #if defined(__GNUC__) && defined(__PIC__)
 #define inline inline __attribute__((always_inline))
@@ -526,4 +531,22 @@ void __malloc_donate(char *start, char *end)
 	c->psize = n->csize = C_INUSE;
 	c->csize = n->psize = C_INUSE | (end-start);
 	__bin_chunk(c);
+}
+
+void __malloc_atfork(int who)
+{
+	if (who<0) {
+		lock(mal.split_merge_lock);
+		for (int i=0; i<64; i++)
+			lock(mal.bins[i].lock);
+	} else if (!who) {
+		for (int i=0; i<64; i++)
+			unlock(mal.bins[i].lock);
+		unlock(mal.split_merge_lock);
+	} else {
+		for (int i=0; i<64; i++)
+			mal.bins[i].lock[0] = mal.bins[i].lock[1] = 0;
+		mal.split_merge_lock[1] = 0;
+		mal.split_merge_lock[0] = 0;
+	}
 }

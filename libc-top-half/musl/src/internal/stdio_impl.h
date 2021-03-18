@@ -2,7 +2,9 @@
 #define _STDIO_IMPL_H
 
 #include <stdio.h>
+#if defined(__wasilibc_unmodified_upstream)
 #include "syscall.h"
+#endif
 
 #define UNGET 8
 

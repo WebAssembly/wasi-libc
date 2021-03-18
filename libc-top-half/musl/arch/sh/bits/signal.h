@@ -9,7 +9,16 @@
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 typedef int greg_t, gregset_t[16];
 typedef int freg_t, fpregset_t[16];
-typedef struct sigcontext {
+typedef struct {
+	unsigned long oldmask;
+	unsigned long gregs[16];
+	unsigned long pc, pr, sr;
+	unsigned long gbr, mach, macl;
+	unsigned long fpregs[16];
+	unsigned long xfpregs[16];
+	unsigned int fpscr, fpul, ownedfp;
+} mcontext_t;
+struct sigcontext {
 	unsigned long oldmask;
 	unsigned long sc_regs[16];
 	unsigned long sc_pc, sc_pr, sc_sr;
@@ -17,7 +26,7 @@ typedef struct sigcontext {
 	unsigned long sc_fpregs[16];
 	unsigned long sc_xfpregs[16];
 	unsigned int sc_fpscr, sc_fpul, sc_ownedfp;
-} mcontext_t;
+};
 #else
 typedef struct {
 	unsigned long __regs[58];

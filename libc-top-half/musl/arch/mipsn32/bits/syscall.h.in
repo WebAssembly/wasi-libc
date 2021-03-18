@@ -362,4 +362,8 @@
 #define __NR_fspick		6433
 #define __NR_pidfd_open		6434
 #define __NR_clone3		6435
+#define __NR_close_range	6436
+#define __NR_openat2		6437
+#define __NR_pidfd_getfd	6438
+#define __NR_faccessat2		6439
 

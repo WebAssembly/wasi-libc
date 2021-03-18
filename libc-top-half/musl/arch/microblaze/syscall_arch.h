@@ -95,3 +95,5 @@ static inline long __syscall6(long n, long a, long b, long c, long d, long e, lo
 }
 
 #define SYSCALL_IPC_BROKEN_MODE
+
+#undef SYS_socketcall

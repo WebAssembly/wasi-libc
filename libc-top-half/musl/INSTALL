@@ -86,7 +86,7 @@ and ABI combinations:
 
 * SuperH (SH)
     * Standard ELF ABI or FDPIC ABI (shared-text without MMU)
-    * Little-endian by default; big-engian variant also supported
+    * Little-endian by default; big-endian variant also supported
     * Full FPU ABI or soft-float ABI is supported, but the
       single-precision-only FPU ABI is not
 

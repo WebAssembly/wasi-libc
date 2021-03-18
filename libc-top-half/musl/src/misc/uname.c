@@ -1,6 +1,6 @@
 #include <sys/utsname.h>
-#include "syscall.h"
 #ifdef __wasilibc_unmodified_upstream // Implement uname with placeholders
+#include "syscall.h"
 #else
 #include <string.h>
 #endif

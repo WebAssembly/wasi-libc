@@ -134,6 +134,7 @@ int pause(void);
 
 #ifdef __wasilibc_unmodified_upstream /* WASI has no fork/exec */
 pid_t fork(void);
+pid_t _Fork(void);
 int execve(const char *, char *const [], char *const []);
 int execv(const char *, char *const []);
 int execle(const char *, const char *, ...);
@@ -268,6 +269,7 @@ int syncfs(int);
 int euidaccess(const char *, int);
 int eaccess(const char *, int);
 ssize_t copy_file_range(int, off_t *, int, off_t *, size_t, unsigned);
+pid_t gettid(void);
 #endif
 #endif
 

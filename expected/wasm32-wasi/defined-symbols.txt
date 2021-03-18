@@ -304,6 +304,7 @@ __wasilibc_fd_renumber
 __wasilibc_find_abspath
 __wasilibc_find_relpath
 __wasilibc_find_relpath_alloc
+__wasilibc_get_environ
 __wasilibc_initialize_environ
 __wasilibc_link
 __wasilibc_link_newat

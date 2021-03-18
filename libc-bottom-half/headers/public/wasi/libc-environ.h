@@ -24,6 +24,11 @@ void __wasilibc_deinitialize_environ(void);
 /// referenced in the program.
 void __wasilibc_maybe_reinitialize_environ_eagerly(void);
 
+/// Return the value of the `environ` variable. Using `environ` directly
+/// requires eager initialization of the environment variables. Using this
+/// function instead of `environ` allows initialization to happen lazily.
+char **__wasilibc_get_environ(void);
+
 #ifdef __cplusplus
 }
 #endif

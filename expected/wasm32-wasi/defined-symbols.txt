@@ -11,11 +11,14 @@ _IO_putc
 _IO_putc_unlocked
 __EINVAL
 __ENOMEM
+__SIG_ERR
+__SIG_IGN
 __asctime_r
 __assert_fail
 __c_dot_utf8
 __c_dot_utf8_locale
 __c_locale
+__clock
 __clock_gettime
 __cos
 __cosdf
@@ -227,6 +230,7 @@ __strtoull_internal
 __strtoumax_internal
 __strxfrm_l
 __sysinfo
+__sysv_signal
 __tan
 __tandf
 __tanl
@@ -387,6 +391,7 @@ atoll
 basename
 bcmp
 bcopy
+bsd_signal
 bsearch
 btowc
 bzero
@@ -442,6 +447,7 @@ cimagl
 clearenv
 clearerr
 clearerr_unlocked
+clock
 clock_getres
 clock_gettime
 clock_nanosleep
@@ -658,6 +664,7 @@ getline
 getopt
 getopt_long
 getopt_long_only
+getrusage
 getsockopt
 getsubopt
 gettimeofday
@@ -836,10 +843,12 @@ memset
 mkdir
 mkdirat
 mktime
+mmap
 modf
 modff
 modfl
 mrand48
+munmap
 nan
 nanf
 nanl
@@ -891,6 +900,7 @@ printf
 program_invocation_name
 program_invocation_short_name
 pselect
+psignal
 putc
 putc_unlocked
 putchar
@@ -906,6 +916,7 @@ pwrite
 pwritev
 qsort
 quick_exit
+raise
 rand
 rand_r
 random
@@ -967,6 +978,7 @@ setlocale
 setstate
 setvbuf
 shutdown
+signal
 signgam
 significand
 significandf
@@ -1028,6 +1040,7 @@ strpbrk
 strptime
 strrchr
 strsep
+strsignal
 strspn
 strstr
 strtod
@@ -1068,6 +1081,7 @@ tgammaf
 tgammal
 time
 timegm
+times
 timespec_get
 toascii
 tolower

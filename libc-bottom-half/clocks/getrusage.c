@@ -5,6 +5,8 @@
 #include <wasi/api.h>
 #include <common/time.h>
 
+// `clock` is a weak symbol so that application code can override it.
+// We want to use the function in libc, so use the libc-internal name.
 clock_t __clock(void);
 
 int getrusage(int who, struct rusage *r_usage) {

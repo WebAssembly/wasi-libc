@@ -54,6 +54,8 @@ LIBC_BOTTOM_HALF_ALL_SOURCES := $(LIBC_BOTTOM_HALF_ALL_SOURCES) $(LIBC_BOTTOM_HA
 
 LIBWASI_EMULATED_MMAN_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_DIR)/mman -name \*.c)
+LIBWASI_EMULATED_PROCESS_CLOCKS_SOURCES = \
+    $(shell find $(LIBC_BOTTOM_HALF_DIR)/clocks -name \*.c)
 LIBWASI_EMULATED_SIGNAL_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_DIR)/signal -name \*.c)
 LIBWASI_EMULATED_SIGNAL_MUSL_SOURCES = \
@@ -229,6 +231,7 @@ MUSL_PRINTSCAN_OBJS = $(call objs,$(MUSL_PRINTSCAN_SOURCES))
 MUSL_PRINTSCAN_LONG_DOUBLE_OBJS = $(patsubst %.o,%.long-double.o,$(MUSL_PRINTSCAN_OBJS))
 MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS = $(patsubst %.o,%.no-floating-point.o,$(MUSL_PRINTSCAN_OBJS))
 LIBWASI_EMULATED_MMAN_OBJS = $(call objs,$(LIBWASI_EMULATED_MMAN_SOURCES))
+LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS = $(call objs,$(LIBWASI_EMULATED_PROCESS_CLOCKS_SOURCES))
 LIBWASI_EMULATED_SIGNAL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_SOURCES))
 LIBWASI_EMULATED_SIGNAL_MUSL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_MUSL_SOURCES))
 
@@ -332,6 +335,8 @@ $(SYSROOT_LIB)/libc-printscan-no-floating-point.a: $(MUSL_PRINTSCAN_NO_FLOATING_
 
 $(SYSROOT_LIB)/libwasi-emulated-mman.a: $(LIBWASI_EMULATED_MMAN_OBJS)
 
+$(SYSROOT_LIB)/libwasi-emulated-process-clocks.a: $(LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS)
+
 $(SYSROOT_LIB)/libwasi-emulated-signal.a: $(LIBWASI_EMULATED_SIGNAL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS)
 
 %.a:
@@ -392,6 +397,9 @@ $(LIBC_TOP_HALF_ALL_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO
     -Wno-dangling-else \
     -Wno-unknown-pragmas
 
+$(LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS): CFLAGS += \
+    -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
+
 include_dirs:
 	$(RM) -r "$(SYSROOT)"
 
@@ -432,6 +440,7 @@ libc: include_dirs \
     $(SYSROOT_LIB)/libc-printscan-long-double.a \
     $(SYSROOT_LIB)/libc-printscan-no-floating-point.a \
     $(SYSROOT_LIB)/libwasi-emulated-mman.a \
+    $(SYSROOT_LIB)/libwasi-emulated-process-clocks.a \
     $(SYSROOT_LIB)/libwasi-emulated-signal.a
 
 finish: startup_files libc
@@ -467,7 +476,7 @@ finish: startup_files libc
 	# Generate a test file that includes all public header files.
 	#
 	cd "$(SYSROOT)" && \
-	  for header in $$(find include -type f -not -name mman.h -not -name signal.h |grep -v /bits/); do \
+	  for header in $$(find include -type f -not -name mman.h -not -name signal.h -not -name times.h -not -name resource.h |grep -v /bits/); do \
 	      echo '#include <'$$header'>' | sed 's/include\///' ; \
 	done |LC_ALL=C sort >share/$(MULTIARCH_TRIPLE)/include-all.c ; \
 	cd - >/dev/null

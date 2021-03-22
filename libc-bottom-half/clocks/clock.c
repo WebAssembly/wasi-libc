@@ -18,6 +18,8 @@ static void init(void) {
     (void)__wasi_clock_time_get(__WASI_CLOCKID_MONOTONIC, 0, &start);
 }
 
+// Define the libc symbol as `__clock` so that we can reliably call it
+// from elsewhere in libc.
 clock_t __clock(void) {
     // Use `MONOTONIC` instead of `PROCESS_CPUTIME_ID` since WASI doesn't have
     // an inherent concept of a process. Note that this means we'll incorrectly
@@ -28,5 +30,6 @@ clock_t __clock(void) {
     return now - start;
 }
 
+// Define a user-visible alias as a weak symbol.
 __attribute__((__weak__, __alias__("__clock")))
 clock_t clock(void);

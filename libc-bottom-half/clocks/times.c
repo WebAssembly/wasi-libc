@@ -9,6 +9,8 @@ _Static_assert(
     "This implementation assumes that `clock` is in nanoseconds"
 );
 
+// `clock` is a weak symbol so that application code can override it.
+// We want to use the function in libc, so use the libc-internal name.
 clock_t __clock(void);
 
 clock_t times(struct tms *buffer) {

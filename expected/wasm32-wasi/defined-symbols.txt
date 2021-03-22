@@ -447,7 +447,6 @@ cimagl
 clearenv
 clearerr
 clearerr_unlocked
-clock
 clock_getres
 clock_gettime
 clock_nanosleep
@@ -664,7 +663,6 @@ getline
 getopt
 getopt_long
 getopt_long_only
-getrusage
 getsockopt
 getsubopt
 gettimeofday
@@ -1075,7 +1073,6 @@ tgammaf
 tgammal
 time
 timegm
-times
 timespec_get
 toascii
 tolower

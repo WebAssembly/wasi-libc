@@ -145,8 +145,17 @@ int fexecve(int, char *const [], char *const []);
 #endif
 _Noreturn void _exit(int);
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no getpid etc. */
+#if defined(__wasilibc_unmodified_upstream) || defined(_WASI_EMULATED_GETPID)
 pid_t getpid(void);
+#else
+__attribute__((__deprecated__(
+"WASI lacks process identifiers; to enable emulation of the `getpid` function using "
+"a placeholder value, which doesn't reflect the host PID of the program, "
+"compile with -D_WASI_EMULATED_GETPID and link with -lwasi-emulated-getpid"
+)))
+pid_t getpid(void);
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no getpid etc. */
 pid_t getppid(void);
 pid_t getpgrp(void);
 pid_t getpgid(pid_t);

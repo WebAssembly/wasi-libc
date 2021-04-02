@@ -669,6 +669,7 @@ getline
 getopt
 getopt_long
 getopt_long_only
+getpid
 getrusage
 getsockopt
 getsubopt

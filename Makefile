@@ -56,6 +56,8 @@ LIBWASI_EMULATED_MMAN_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_DIR)/mman -name \*.c)
 LIBWASI_EMULATED_PROCESS_CLOCKS_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_DIR)/clocks -name \*.c)
+LIBWASI_EMULATED_GETPID_SOURCES = \
+    $(shell find $(LIBC_BOTTOM_HALF_DIR)/getpid -name \*.c)
 LIBWASI_EMULATED_SIGNAL_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_DIR)/signal -name \*.c)
 LIBWASI_EMULATED_SIGNAL_MUSL_SOURCES = \
@@ -232,6 +234,7 @@ MUSL_PRINTSCAN_LONG_DOUBLE_OBJS = $(patsubst %.o,%.long-double.o,$(MUSL_PRINTSCA
 MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS = $(patsubst %.o,%.no-floating-point.o,$(MUSL_PRINTSCAN_OBJS))
 LIBWASI_EMULATED_MMAN_OBJS = $(call objs,$(LIBWASI_EMULATED_MMAN_SOURCES))
 LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS = $(call objs,$(LIBWASI_EMULATED_PROCESS_CLOCKS_SOURCES))
+LIBWASI_EMULATED_GETPID_OBJS = $(call objs,$(LIBWASI_EMULATED_GETPID_SOURCES))
 LIBWASI_EMULATED_SIGNAL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_SOURCES))
 LIBWASI_EMULATED_SIGNAL_MUSL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_MUSL_SOURCES))
 
@@ -337,6 +340,8 @@ $(SYSROOT_LIB)/libwasi-emulated-mman.a: $(LIBWASI_EMULATED_MMAN_OBJS)
 
 $(SYSROOT_LIB)/libwasi-emulated-process-clocks.a: $(LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS)
 
+$(SYSROOT_LIB)/libwasi-emulated-getpid.a: $(LIBWASI_EMULATED_GETPID_OBJS)
+
 $(SYSROOT_LIB)/libwasi-emulated-signal.a: $(LIBWASI_EMULATED_SIGNAL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS)
 
 %.a:
@@ -441,6 +446,7 @@ libc: include_dirs \
     $(SYSROOT_LIB)/libc-printscan-no-floating-point.a \
     $(SYSROOT_LIB)/libwasi-emulated-mman.a \
     $(SYSROOT_LIB)/libwasi-emulated-process-clocks.a \
+    $(SYSROOT_LIB)/libwasi-emulated-getpid.a \
     $(SYSROOT_LIB)/libwasi-emulated-signal.a
 
 finish: startup_files libc

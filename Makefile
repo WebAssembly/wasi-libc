@@ -38,8 +38,8 @@ LIBC_BOTTOM_HALF_HEADERS_PUBLIC = $(LIBC_BOTTOM_HALF_DIR)/headers/public
 LIBC_BOTTOM_HALF_HEADERS_PRIVATE = $(LIBC_BOTTOM_HALF_DIR)/headers/private
 LIBC_BOTTOM_HALF_SOURCES = $(LIBC_BOTTOM_HALF_DIR)/sources
 LIBC_BOTTOM_HALF_ALL_SOURCES = \
-    $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
-    $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c)
+    $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c | LC_ALL=C sort) \
+    $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c | LC_ALL=C sort)
 
 # FIXME(https://reviews.llvm.org/D85567) - due to a bug in LLD the weak
 # references to a function defined in `chdir.c` only work if `chdir.c` is at the
@@ -49,13 +49,13 @@ LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_SOURCES)/chdir.c
 LIBC_BOTTOM_HALF_ALL_SOURCES := $(LIBC_BOTTOM_HALF_ALL_SOURCES) $(LIBC_BOTTOM_HALF_SOURCES)/chdir.c
 
 LIBWASI_EMULATED_MMAN_SOURCES = \
-    $(shell find $(LIBC_BOTTOM_HALF_DIR)/mman -name \*.c)
+    $(shell find $(LIBC_BOTTOM_HALF_DIR)/mman -name \*.c | LC_ALL=C sort)
 LIBWASI_EMULATED_PROCESS_CLOCKS_SOURCES = \
-    $(shell find $(LIBC_BOTTOM_HALF_DIR)/clocks -name \*.c)
+    $(shell find $(LIBC_BOTTOM_HALF_DIR)/clocks -name \*.c | LC_ALL=C sort)
 LIBWASI_EMULATED_GETPID_SOURCES = \
-    $(shell find $(LIBC_BOTTOM_HALF_DIR)/getpid -name \*.c)
+    $(shell find $(LIBC_BOTTOM_HALF_DIR)/getpid -name \*.c | LC_ALL=C sort)
 LIBWASI_EMULATED_SIGNAL_SOURCES = \
-    $(shell find $(LIBC_BOTTOM_HALF_DIR)/signal -name \*.c)
+    $(shell find $(LIBC_BOTTOM_HALF_DIR)/signal -name \*.c | LC_ALL=C sort)
 LIBWASI_EMULATED_SIGNAL_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/signal/psignal.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/string/strsignal.c
@@ -181,7 +181,7 @@ LIBC_TOP_HALF_HEADERS_PRIVATE = $(LIBC_TOP_HALF_DIR)/headers/private
 LIBC_TOP_HALF_SOURCES = $(LIBC_TOP_HALF_DIR)/sources
 LIBC_TOP_HALF_ALL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SOURCES) \
-    $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.c)
+    $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.c | LC_ALL=C sort)
 
 # Set the target.
 CFLAGS = $(WASM_CFLAGS) --target=$(TARGET_TRIPLE)
@@ -380,7 +380,7 @@ $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
 	"$(WASM_CC)" $(CFLAGS) -MD -MP -o $@ -c $<
 
--include $(shell find $(OBJDIR) -name \*.d)
+-include $(shell find $(OBJDIR) -name \*.d | LC_ALL=C sort)
 
 $(DLMALLOC_OBJS): CFLAGS += \
     -I$(DLMALLOC_INC)

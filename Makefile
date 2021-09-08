@@ -346,14 +346,15 @@ $(SYSROOT_LIB)/libwasi-emulated-signal.a: $(LIBWASI_EMULATED_SIGNAL_OBJS) $(LIBW
 
 %.a:
 	@mkdir -p "$(@D)"
-	# On Windows, the commandline for the ar invocation got too long, so it needs to be split up.
-	$(WASM_AR) crs $@ $(wordlist 1, 199, $^)
-	$(WASM_AR) crs $@ $(wordlist 200, 399, $^)
-	$(WASM_AR) crs $@ $(wordlist 400, 599, $^)
-	$(WASM_AR) crs $@ $(wordlist 600, 799, $^)
-	# This might eventually overflow again, but at least it'll do so in a loud way instead of
-	# silently dropping the tail.
-	$(WASM_AR) crs $@ $(wordlist 800, 100000, $^)
+	@echo AR crs $@
+	@# On Windows, the commandline for the ar invocation got too long, so it needs to be split up.
+	@$(WASM_AR) crs $@ $(wordlist 1, 199, $^)
+	@$(WASM_AR) crs $@ $(wordlist 200, 399, $^)
+	@$(WASM_AR) crs $@ $(wordlist 400, 599, $^)
+	@$(WASM_AR) crs $@ $(wordlist 600, 799, $^)
+	@# This might eventually overflow again, but at least it'll do so in a loud way instead of
+	@# silently dropping the tail.
+	@$(WASM_AR) crs $@ $(wordlist 800, 100000, $^)
 
 $(MUSL_PRINTSCAN_OBJS): CFLAGS += \
 	    -D__wasilibc_printscan_no_long_double \
@@ -366,17 +367,20 @@ $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): CFLAGS += \
 $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS): CFLAGS += \
 	    -D_WASI_EMULATED_SIGNAL
 
+define CC
+@mkdir -p "$(@D)"
+@echo CC $(subst $(CURDIR)/,,$<)
+@"$(WASM_CC)" $(CFLAGS) -MD -MP -o $@ -c $<
+endef
+
 $(OBJDIR)/%.long-double.o: $(CURDIR)/%.c include_dirs
-	@mkdir -p "$(@D)"
-	"$(WASM_CC)" $(CFLAGS) -MD -MP -o $@ -c $<
+	$(call CC)
 
 $(OBJDIR)/%.no-floating-point.o: $(CURDIR)/%.c include_dirs
-	@mkdir -p "$(@D)"
-	"$(WASM_CC)" $(CFLAGS) -MD -MP -o $@ -c $<
+	$(call CC)
 
 $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
-	@mkdir -p "$(@D)"
-	"$(WASM_CC)" $(CFLAGS) -MD -MP -o $@ -c $<
+	$(call CC)
 
 -include $(shell find $(OBJDIR) -name \*.d)
 
@@ -428,7 +432,8 @@ include_dirs:
 	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/wasm32/bits/* "$(SYSROOT_INC)/bits"
 
 	# Remove selected header files.
-	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
+	@echo RM MUSL_OMIT_HEADERS
+	@$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
 
 startup_files: include_dirs
 	#

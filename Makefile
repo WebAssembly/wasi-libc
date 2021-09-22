@@ -531,6 +531,8 @@ check-symbols: startup_files libc
 	    -U__clang_minor__ \
 	    -U__clang_patchlevel__ \
 	    -U__clang_version__ \
+	    -U__clang_literal_encoding__ \
+	    -U__clang_wide_literal_encoding__ \
 	    -U__GNUC__ \
 	    -U__GNUC_MINOR__ \
 	    -U__GNUC_PATCHLEVEL__ \

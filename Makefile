@@ -3,7 +3,7 @@
 CC ?= clang
 NM ?= $(patsubst %clang,%llvm-nm,$(filter-out ccache sccache,$(CC)))
 AR ?= $(patsubst %clang,%llvm-ar,$(filter-out ccache sccache,$(CC)))
-EXTRA_CFLAGS ?= -O2 -DNDEBUG
+EXTRA_CFLAGS ?= -mbulk-memory -O2 -DNDEBUG
 # The directory where we build the sysroot.
 SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
@@ -206,7 +206,7 @@ CFLAGS += -Wall -Wextra -Werror \
 
 # Configure support for threads.
 ifeq ($(THREAD_MODEL), single)
-CFLAGS += -mthread-model single
+CFLAGS += -mthread-model single -ftls-model=local-exec
 endif
 ifeq ($(THREAD_MODEL), posix)
 CFLAGS += -mthread-model posix -pthread

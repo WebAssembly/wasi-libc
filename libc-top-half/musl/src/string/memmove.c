@@ -8,6 +8,9 @@ typedef __attribute__((__may_alias__)) size_t WT;
 
 void *memmove(void *dest, const void *src, size_t n)
 {
+#if defined(__wasm_bulk_memory__)
+	return __builtin_memmove(dest, src, n);
+#else
 	char *d = dest;
 	const char *s = src;
 
@@ -39,4 +42,5 @@ void *memmove(void *dest, const void *src, size_t n)
 	}
 
 	return dest;
+#endif // __wasm_bulk_memory__
 }

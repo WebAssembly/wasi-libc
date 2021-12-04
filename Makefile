@@ -183,6 +183,10 @@ MUSL_PRINTSCAN_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfscanf.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/strtod.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/wcstod.c
+BULK_MEMORY_SOURCES = \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/string/memcpy.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/string/memmove.c \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/string/memset.c
 LIBC_TOP_HALF_HEADERS_PRIVATE = $(LIBC_TOP_HALF_DIR)/headers/private
 LIBC_TOP_HALF_SOURCES = $(LIBC_TOP_HALF_DIR)/sources
 LIBC_TOP_HALF_ALL_SOURCES = \
@@ -211,7 +215,7 @@ CFLAGS += -Wall -Wextra -Werror \
 
 # Configure support for threads.
 ifeq ($(THREAD_MODEL), single)
-CFLAGS += -mthread-model single -ftls-model=local-exec
+CFLAGS += -mthread-model single
 endif
 ifeq ($(THREAD_MODEL), posix)
 CFLAGS += -mthread-model posix -pthread
@@ -253,6 +257,7 @@ endif
 MUSL_PRINTSCAN_OBJS = $(call objs,$(MUSL_PRINTSCAN_SOURCES))
 MUSL_PRINTSCAN_LONG_DOUBLE_OBJS = $(patsubst %.o,%.long-double.o,$(MUSL_PRINTSCAN_OBJS))
 MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS = $(patsubst %.o,%.no-floating-point.o,$(MUSL_PRINTSCAN_OBJS))
+BULK_MEMORY_OBJS = $(call objs,$(BULK_MEMORY_SOURCES))
 LIBWASI_EMULATED_MMAN_OBJS = $(call objs,$(LIBWASI_EMULATED_MMAN_SOURCES))
 LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS = $(call objs,$(LIBWASI_EMULATED_PROCESS_CLOCKS_SOURCES))
 LIBWASI_EMULATED_GETPID_OBJS = $(call objs,$(LIBWASI_EMULATED_GETPID_SOURCES))
@@ -383,6 +388,9 @@ $(MUSL_PRINTSCAN_OBJS): CFLAGS += \
 $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): CFLAGS += \
 	    -D__wasilibc_printscan_no_floating_point \
 	    -D__wasilibc_printscan_floating_point_support_option="\"remove -lc-printscan-no-floating-point from the link command\""
+
+$(BULK_MEMORY_OBJS): CFLAGS += \
+        -mbulk-memory
 
 $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS): CFLAGS += \
 	    -D_WASI_EMULATED_SIGNAL

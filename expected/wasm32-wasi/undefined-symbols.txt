@@ -60,6 +60,7 @@ __lttf2
 __netf2
 __stack_pointer
 __subtf3
+__tls_base
 __trunctfdf2
 __trunctfsf2
 __unordtf2

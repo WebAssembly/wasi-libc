@@ -211,7 +211,7 @@ CFLAGS += -Wall -Wextra -Werror \
 
 # Configure support for threads.
 ifeq ($(THREAD_MODEL), single)
-CFLAGS += -mthread-model single
+CFLAGS += -mthread-model single -ftls-model=local-exec
 endif
 ifeq ($(THREAD_MODEL), posix)
 CFLAGS += -mthread-model posix -pthread

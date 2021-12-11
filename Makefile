@@ -384,6 +384,8 @@ $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): CFLAGS += \
 	    -D__wasilibc_printscan_no_floating_point \
 	    -D__wasilibc_printscan_floating_point_support_option="\"remove -lc-printscan-no-floating-point from the link command\""
 
+# TODO: apply -mbulk-memory globally, once
+# https://github.com/llvm/llvm-project/issues/52618 is resolved
 $(BULK_MEMORY_OBJS): CFLAGS += \
         -mbulk-memory
 

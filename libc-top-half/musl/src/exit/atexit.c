@@ -37,6 +37,9 @@ void __funcs_on_exit()
 		func(arg);
 		LOCK(lock);
 	}
+	/* reset */
+	head = &builtin;
+	slot = 0;
 }
 
 void __cxa_finalize(void *dso)

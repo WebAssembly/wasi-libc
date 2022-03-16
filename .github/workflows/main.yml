@@ -21,7 +21,7 @@ jobs:
         echo "$(pwd)/llvm/bin" >> $GITHUB_PATH
         echo "CC=$(pwd)/llvm/bin/clang.exe" >> $GITHUB_ENV
         echo "AR=$(pwd)/llvm/bin/llvm-ar.exe" >> $GITHUB_ENV
-        echo "WASM_NM=$(pwd)/llvm/bin/llvm-nm.exe" >> $GITHUB_ENV
+        echo "NM=$(pwd)/llvm/bin/llvm-nm.exe" >> $GITHUB_ENV
       if: matrix.os == 'windows-latest'
 
     - name: Override llvm-nm with one from rustup (Windows)
@@ -29,7 +29,7 @@ jobs:
         rustup update stable
         rustup default stable
         rustup component add llvm-tools-preview
-        echo "WASM_NM=$(rustc --print sysroot|sed 's|C:|/c|'|sed 's|\\|/|g')/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-nm.exe" >> $GITHUB_ENV
+        echo "NM=$(rustc --print sysroot|sed 's|C:|/c|'|sed 's|\\|/|g')/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-nm.exe" >> $GITHUB_ENV
       if: matrix.os == 'windows-latest'
 
     - name: Install LLVM tools (MacOS)
@@ -40,7 +40,7 @@ jobs:
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
-        echo "WASM_NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
+        echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
       if: matrix.os == 'macos-latest'
 
     - name: Install LLVM tools (Linux)
@@ -51,7 +51,7 @@ jobs:
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
-        echo "WASM_NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
+        echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
       if: matrix.os == 'ubuntu-latest'
 
     - name: Build libc

@@ -22,7 +22,7 @@ and then run:
 
 ```sh
 make CC=/path/to/clang/with/wasm/support \
-     WASM_AR=/path/to/llvm-ar \
+     AR=/path/to/llvm-ar \
      WASM_NM=/path/to/llvm-nm
 ```
 

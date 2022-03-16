@@ -3,7 +3,7 @@
 CC ?= clang
 WASM_NM ?= $(patsubst %clang,%llvm-nm,$(filter-out ccache sccache,$(WASM_CC)))
 WASM_AR ?= $(patsubst %clang,%llvm-ar,$(filter-out ccache sccache,$(WASM_CC)))
-WASM_CFLAGS ?= -O2 -DNDEBUG
+EXTRA_CFLAGS ?= -O2 -DNDEBUG
 # The directory where we build the sysroot.
 SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
@@ -184,8 +184,10 @@ LIBC_TOP_HALF_ALL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SOURCES) \
     $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.c)
 
+# Add any extra flags
+CFLAGS = $(EXTRA_CFLAGS)
 # Set the target.
-CFLAGS = $(WASM_CFLAGS) --target=$(TARGET_TRIPLE)
+CFLAGS += --target=$(TARGET_TRIPLE)
 # WebAssembly floating-point match doesn't trap.
 # TODO: Add -fno-signaling-nans when the compiler supports it.
 CFLAGS += -fno-trapping-math

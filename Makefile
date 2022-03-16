@@ -1,9 +1,9 @@
 # These variables are specifically meant to be overridable via the make
 # command-line.
-WASM_CC ?= clang
-WASM_NM ?= $(patsubst %clang,%llvm-nm,$(filter-out ccache sccache,$(WASM_CC)))
-WASM_AR ?= $(patsubst %clang,%llvm-ar,$(filter-out ccache sccache,$(WASM_CC)))
-WASM_CFLAGS ?= -O2 -DNDEBUG
+CC ?= clang
+NM ?= $(patsubst %clang,%llvm-nm,$(filter-out ccache sccache,$(CC)))
+AR ?= $(patsubst %clang,%llvm-ar,$(filter-out ccache sccache,$(CC)))
+EXTRA_CFLAGS ?= -O2 -DNDEBUG
 # These variables describe the locations of various files and
 # directories to install.
 #
@@ -194,8 +194,10 @@ LIBC_TOP_HALF_ALL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SOURCES) \
     $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.c)
 
+# Add any extra flags
+CFLAGS = $(EXTRA_CFLAGS)
 # Set the target.
-CFLAGS = $(WASM_CFLAGS) --target=$(TARGET_TRIPLE)
+CFLAGS += --target=$(TARGET_TRIPLE)
 # WebAssembly floating-point match doesn't trap.
 # TODO: Add -fno-signaling-nans when the compiler supports it.
 CFLAGS += -fno-trapping-math
@@ -365,13 +367,13 @@ $(SYSROOT_LIB)/libwasi-emulated-signal.a: $(LIBWASI_EMULATED_SIGNAL_OBJS) $(LIBW
 %.a:
 	@mkdir -p "$(@D)"
 	# On Windows, the commandline for the ar invocation got too long, so it needs to be split up.
-	$(WASM_AR) crs $@ $(wordlist 1, 199, $^)
-	$(WASM_AR) crs $@ $(wordlist 200, 399, $^)
-	$(WASM_AR) crs $@ $(wordlist 400, 599, $^)
-	$(WASM_AR) crs $@ $(wordlist 600, 799, $^)
+	$(AR) crs $@ $(wordlist 1, 199, $^)
+	$(AR) crs $@ $(wordlist 200, 399, $^)
+	$(AR) crs $@ $(wordlist 400, 599, $^)
+	$(AR) crs $@ $(wordlist 600, 799, $^)
 	# This might eventually overflow again, but at least it'll do so in a loud way instead of
 	# silently dropping the tail.
-	$(WASM_AR) crs $@ $(wordlist 800, 100000, $^)
+	$(AR) crs $@ $(wordlist 800, 100000, $^)
 
 $(MUSL_PRINTSCAN_OBJS): CFLAGS += \
 	    -D__wasilibc_printscan_no_long_double \
@@ -386,15 +388,15 @@ $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS): CFLAGS += \
 
 $(OBJDIR)/%.long-double.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
-	$(WASM_CC) $(CFLAGS) -MD -MP -o $@ -c $<
+	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
 $(OBJDIR)/%.no-floating-point.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
-	$(WASM_CC) $(CFLAGS) -MD -MP -o $@ -c $<
+	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
 $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
-	$(WASM_CC) $(CFLAGS) -MD -MP -o $@ -c $<
+	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
 -include $(shell find $(OBJDIR) -name \*.d)
 
@@ -454,7 +456,7 @@ startup_files: include_dirs
 	#
 	@mkdir -p "$(OBJDIR)"
 	cd "$(OBJDIR)" && \
-	$(WASM_CC) $(CFLAGS) -c $(LIBC_BOTTOM_HALF_CRT_SOURCES) -MD -MP && \
+	$(CC) $(CFLAGS) -c $(LIBC_BOTTOM_HALF_CRT_SOURCES) -MD -MP && \
 	mkdir -p "$(SYSROOT_LIB)" && \
 	mv *.o "$(SYSROOT_LIB)"
 
@@ -472,7 +474,7 @@ finish: startup_files libc
 	# Create empty placeholder libraries.
 	#
 	for name in m rt pthread crypt util xnet resolv dl; do \
-	    $(WASM_AR) crs "$(SYSROOT_LIB)/lib$${name}.a"; \
+	    $(AR) crs "$(SYSROOT_LIB)/lib$${name}.a"; \
 	done
 
 	#
@@ -503,9 +505,9 @@ check-symbols: startup_files libc
 	@# LLVM PR40497, which is fixed in 9.0, but not in 8.0.
 	@# Ignore certain llvm builtin symbols such as those starting with __mul
 	@# since these dependencies can vary between llvm versions.
-	"$(WASM_NM)" --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libwasi-emulated-*.a "$(SYSROOT_LIB)"/*.o \
+	"$(NM)" --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libwasi-emulated-*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_ALL=C sort > "$(SYSROOT_SHARE)/defined-symbols.txt"
-	for undef_sym in $$("$(WASM_NM)" --undefined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libc-*.a "$(SYSROOT_LIB)"/*.o \
+	for undef_sym in $$("$(NM)" --undefined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libc-*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$(SYSROOT_SHARE)/defined-symbols.txt" || echo $$undef_sym; \
 	done | grep -v "^__mul" > "$(SYSROOT_SHARE)/undefined-symbols.txt"
@@ -524,7 +526,7 @@ check-symbols: startup_files libc
 	#
 	# Test that it compiles.
 	#
-	$(WASM_CC) $(CFLAGS) -fsyntax-only "$(SYSROOT_SHARE)/include-all.c" -Wno-\#warnings
+	$(CC) $(CFLAGS) -fsyntax-only "$(SYSROOT_SHARE)/include-all.c" -Wno-\#warnings
 
 	#
 	# Collect all the predefined macros, except for compiler version macros
@@ -540,7 +542,7 @@ check-symbols: startup_files libc
 	@#
 	@# TODO: Undefine __FLOAT128__ for now since it's not in clang 8.0.
 	@# TODO: Filter out __FLT16_* for now, as not all versions of clang have these.
-	$(WASM_CC) $(CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
+	$(CC) $(CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -isystem $(SYSROOT_INC) \
 	    -std=gnu17 \
 	    -E -dM -Wno-\#warnings \

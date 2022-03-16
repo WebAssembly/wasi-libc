@@ -2,7 +2,7 @@
 # command-line.
 CC ?= clang
 WASM_NM ?= $(patsubst %clang,%llvm-nm,$(filter-out ccache sccache,$(WASM_CC)))
-WASM_AR ?= $(patsubst %clang,%llvm-ar,$(filter-out ccache sccache,$(WASM_CC)))
+AR ?= $(patsubst %clang,%llvm-ar,$(filter-out ccache sccache,$(CC)))
 EXTRA_CFLAGS ?= -O2 -DNDEBUG
 # The directory where we build the sysroot.
 SYSROOT ?= $(CURDIR)/sysroot
@@ -363,13 +363,13 @@ $(SYSROOT_LIB)/libwasi-emulated-signal.a: $(LIBWASI_EMULATED_SIGNAL_OBJS) $(LIBW
 %.a:
 	@mkdir -p "$(@D)"
 	# On Windows, the commandline for the ar invocation got too long, so it needs to be split up.
-	$(WASM_AR) crs $@ $(wordlist 1, 199, $^)
-	$(WASM_AR) crs $@ $(wordlist 200, 399, $^)
-	$(WASM_AR) crs $@ $(wordlist 400, 599, $^)
-	$(WASM_AR) crs $@ $(wordlist 600, 799, $^)
+	$(AR) crs $@ $(wordlist 1, 199, $^)
+	$(AR) crs $@ $(wordlist 200, 399, $^)
+	$(AR) crs $@ $(wordlist 400, 599, $^)
+	$(AR) crs $@ $(wordlist 600, 799, $^)
 	# This might eventually overflow again, but at least it'll do so in a loud way instead of
 	# silently dropping the tail.
-	$(WASM_AR) crs $@ $(wordlist 800, 100000, $^)
+	$(AR) crs $@ $(wordlist 800, 100000, $^)
 
 $(MUSL_PRINTSCAN_OBJS): CFLAGS += \
 	    -D__wasilibc_printscan_no_long_double \
@@ -468,7 +468,7 @@ finish: startup_files libc
 	# Create empty placeholder libraries.
 	#
 	for name in m rt pthread crypt util xnet resolv dl; do \
-	    $(WASM_AR) crs "$(SYSROOT_LIB)/lib$${name}.a"; \
+	    $(AR) crs "$(SYSROOT_LIB)/lib$${name}.a"; \
 	done
 
 	#

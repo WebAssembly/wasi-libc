@@ -1,7 +1,7 @@
 # These variables are specifically meant to be overridable via the make
 # command-line.
 CC ?= clang
-WASM_NM ?= $(patsubst %clang,%llvm-nm,$(filter-out ccache sccache,$(WASM_CC)))
+NM ?= $(patsubst %clang,%llvm-nm,$(filter-out ccache sccache,$(CC)))
 AR ?= $(patsubst %clang,%llvm-ar,$(filter-out ccache sccache,$(CC)))
 EXTRA_CFLAGS ?= -O2 -DNDEBUG
 # The directory where we build the sysroot.
@@ -498,9 +498,9 @@ check-symbols: startup_files libc
 	@# LLVM PR40497, which is fixed in 9.0, but not in 8.0.
 	@# Ignore certain llvm builtin symbols such as those starting with __mul
 	@# since these dependencies can vary between llvm versions.
-	"$(WASM_NM)" --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libwasi-emulated-*.a "$(SYSROOT_LIB)"/*.o \
+	"$(NM)" --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libwasi-emulated-*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_ALL=C sort > "$(DEFINED_SYMBOLS)"
-	for undef_sym in $$("$(WASM_NM)" --undefined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libc-*.a "$(SYSROOT_LIB)"/*.o \
+	for undef_sym in $$("$(NM)" --undefined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libc-*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$(DEFINED_SYMBOLS)" || echo $$undef_sym; \
 	done | grep -v "^__mul" > "$(UNDEFINED_SYMBOLS)"

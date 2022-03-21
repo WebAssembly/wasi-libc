@@ -210,8 +210,19 @@ ifeq ($(THREAD_MODEL), posix)
 CFLAGS += -mthread-model posix -pthread
 endif
 
-# Set the sysroot.
-CFLAGS += --sysroot="$(SYSROOT)"
+# Expose the public headers to the implementation. We use `-isystem` for
+# purpose for two reasons:
+#
+# 1. It only does `<...>` not `"...."` lookup. We are making a libc,
+#    which is a system library, so all public headers should be
+#    accessible via `<...>` and never also need `"..."`. `-isystem` main
+#    purpose is to only effect `<...>` lookup.
+#
+# 2. The `-I` for private headers added for specific C files below
+#    should come earlier in the search path, so they can "override"
+#    and/or `#include_next` the public headers. `-isystem` (like
+#    `-idirafter`) comes later in the search path than `-I`.
+CFLAGS += -isystem "$(SYSROOT_INC)"
 
 # These variables describe the locations of various files and directories in
 # the build tree.

@@ -1,6 +1,6 @@
 # These variables are specifically meant to be overridable via the make
 # command-line.
-WASM_CC ?= clang
+CC ?= clang
 WASM_NM ?= $(patsubst %clang,%llvm-nm,$(filter-out ccache sccache,$(WASM_CC)))
 WASM_AR ?= $(patsubst %clang,%llvm-ar,$(filter-out ccache sccache,$(WASM_CC)))
 WASM_CFLAGS ?= -O2 -DNDEBUG
@@ -382,15 +382,15 @@ $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS): CFLAGS += \
 
 $(OBJDIR)/%.long-double.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
-	$(WASM_CC) $(CFLAGS) -MD -MP -o $@ -c $<
+	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
 $(OBJDIR)/%.no-floating-point.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
-	$(WASM_CC) $(CFLAGS) -MD -MP -o $@ -c $<
+	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
 $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
-	$(WASM_CC) $(CFLAGS) -MD -MP -o $@ -c $<
+	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
 -include $(shell find $(OBJDIR) -name \*.d)
 
@@ -448,7 +448,7 @@ startup_files: include_dirs
 	#
 	@mkdir -p "$(OBJDIR)"
 	cd "$(OBJDIR)" && \
-	$(WASM_CC) $(CFLAGS) -c $(LIBC_BOTTOM_HALF_CRT_SOURCES) -MD -MP && \
+	$(CC) $(CFLAGS) -c $(LIBC_BOTTOM_HALF_CRT_SOURCES) -MD -MP && \
 	mkdir -p "$(SYSROOT_LIB)" && \
 	mv *.o "$(SYSROOT_LIB)"
 
@@ -517,7 +517,7 @@ check-symbols: startup_files libc
 	#
 	# Test that it compiles.
 	#
-	$(WASM_CC) $(CFLAGS) -fsyntax-only "$(SYSROOT_SHARE)/include-all.c" -Wno-\#warnings
+	$(CC) $(CFLAGS) -fsyntax-only "$(SYSROOT_SHARE)/include-all.c" -Wno-\#warnings
 
 	#
 	# Collect all the predefined macros, except for compiler version macros
@@ -533,7 +533,7 @@ check-symbols: startup_files libc
 	@#
 	@# TODO: Undefine __FLOAT128__ for now since it's not in clang 8.0.
 	@# TODO: Filter out __FLT16_* for now, as not all versions of clang have these.
-	$(WASM_CC) $(CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
+	$(CC) $(CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -isystem $(SYSROOT_INC) \
 	    -std=gnu17 \
 	    -E -dM -Wno-\#warnings \

@@ -13,44 +13,45 @@ jobs:
       with:
         submodules: true
 
-    - name: Install clang (Windows)
+    - name: Install LLVM tools (Windows)
       shell: bash
       run: |
-          curl -fsSLO https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/LLVM-10.0.0-win64.exe
-          7z x LLVM-10.0.0-win64.exe -y -o"llvm"
-          echo "$(pwd)/llvm/bin" >> $GITHUB_PATH
-          echo "WASM_AR=$(pwd)/llvm/bin/llvm-ar.exe" >> $GITHUB_ENV
+        curl -fsSLO https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/LLVM-10.0.0-win64.exe
+        7z x LLVM-10.0.0-win64.exe -y -o"llvm"
+        echo "$(pwd)/llvm/bin" >> $GITHUB_PATH
+        echo "WASM_CC=$(pwd)/llvm/bin/clang.exe" >> $GITHUB_ENV
+        echo "WASM_AR=$(pwd)/llvm/bin/llvm-ar.exe" >> $GITHUB_ENV
+        echo "WASM_NM=$(pwd)/llvm/bin/llvm-nm.exe" >> $GITHUB_ENV
       if: matrix.os == 'windows-latest'
 
-    - name: Install llvm-nm (Windows)
+    - name: Override llvm-nm with one from rustup (Windows)
       run: |
         rustup update stable
         rustup default stable
         rustup component add llvm-tools-preview
-      if: matrix.os == 'windows-latest'
-
-    - name: Register llvm-nm in environment (Windows)
-      shell: bash
-      run: |
         echo "WASM_NM=$(rustc --print sysroot|sed 's|C:|/c|'|sed 's|\\|/|g')/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-nm.exe" >> $GITHUB_ENV
       if: matrix.os == 'windows-latest'
 
-    - name: Install clang (MacOS)
+    - name: Install LLVM tools (MacOS)
       shell: bash
       run: |
         curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz | tar xJf -
         export CLANG_DIR=`pwd`/clang+llvm-10.0.0-x86_64-apple-darwin/bin
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "WASM_CC=$CLANG_DIR/clang" >> $GITHUB_ENV
+        echo "WASM_AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
+        echo "WASM_NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
       if: matrix.os == 'macos-latest'
 
-    - name: Install clang (Linux)
+    - name: Install LLVM tools (Linux)
       shell: bash
       run: |
         curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz | tar xJf -
         export CLANG_DIR=`pwd`/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/bin
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "WASM_CC=$CLANG_DIR/clang" >> $GITHUB_ENV
+        echo "WASM_AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
+        echo "WASM_NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
       if: matrix.os == 'ubuntu-latest'
 
     - name: Build libc

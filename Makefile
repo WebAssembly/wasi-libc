@@ -505,10 +505,10 @@ check-symbols: startup_files libc
 	#
 	# Generate a test file that includes all public header files.
 	#
-	cd "$(SYSROOT)" && \
-	  for header in $$(find include -type f -not -name mman.h -not -name signal.h -not -name times.h -not -name resource.h |grep -v /bits/); do \
-	      echo '#include <'$$header'>' | sed 's/include\///' ; \
-	done |LC_ALL=C sort >share/$(MULTIARCH_TRIPLE)/include-all.c ; \
+	cd "$(SYSROOT_INC)" && \
+	  for header in $$(find . -type f -not -name mman.h -not -name signal.h -not -name times.h -not -name resource.h |grep -v /bits/); do \
+	      echo '#include <'$$header'>' | sed 's/\.\///' ; \
+	done |LC_ALL=C sort >$(SYSROOT_SHARE)/include-all.c ; \
 	cd - >/dev/null
 
 	#

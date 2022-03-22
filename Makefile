@@ -420,8 +420,6 @@ $(LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS): CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 
 include_dirs:
-	$(RM) -r "$(SYSROOT)"
-
 	#
 	# Install the include files.
 	#
@@ -562,4 +560,8 @@ install: finish
 	mkdir -p "$(INSTALL_DIR)"
 	cp -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"
 
-.PHONY: default startup_files libc finish install include_dirs
+clean:
+	$(RM) -r "$(OBJDIR)"
+	$(RM) -r "$(SYSROOT)"
+
+.PHONY: default startup_files libc finish install include_dirs clean

@@ -480,6 +480,9 @@ ifneq ($(MALLOC_IMPL),none)
 finish: check-symbols
 endif
 
+DEFINED_SYMBOLS = $(SYSROOT_SHARE)/defined-symbols.txt
+UNDEFINED_SYMBOLS = $(SYSROOT_SHARE)/undefined-symbols.txt
+
 check-symbols: startup_files libc
 	#
 	# Collect metadata on the sysroot and perform sanity checks.
@@ -494,12 +497,12 @@ check-symbols: startup_files libc
 	@# Ignore certain llvm builtin symbols such as those starting with __mul
 	@# since these dependencies can vary between llvm versions.
 	"$(WASM_NM)" --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libwasi-emulated-*.a "$(SYSROOT_LIB)"/*.o \
-	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_ALL=C sort > "$(SYSROOT_SHARE)/defined-symbols.txt"
+	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_ALL=C sort > "$(DEFINED_SYMBOLS)"
 	for undef_sym in $$("$(WASM_NM)" --undefined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libc-*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
-	    grep -q '\<'$$undef_sym'\>' "$(SYSROOT_SHARE)/defined-symbols.txt" || echo $$undef_sym; \
-	done | grep -v "^__mul" > "$(SYSROOT_SHARE)/undefined-symbols.txt"
-	grep '^_*imported_wasi_' "$(SYSROOT_SHARE)/undefined-symbols.txt" \
+	    grep -q '\<'$$undef_sym'\>' "$(DEFINED_SYMBOLS)" || echo $$undef_sym; \
+	done | grep -v "^__mul" > "$(UNDEFINED_SYMBOLS)"
+	grep '^_*imported_wasi_' "$(UNDEFINED_SYMBOLS)" \
 	    > "$(SYSROOT_LIB)/libc.imports"
 
 	#

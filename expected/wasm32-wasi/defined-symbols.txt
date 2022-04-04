@@ -300,6 +300,7 @@ __wasi_poll_oneoff
 __wasi_proc_exit
 __wasi_random_get
 __wasi_sched_yield
+__wasi_sock_accept
 __wasi_sock_recv
 __wasi_sock_send
 __wasi_sock_shutdown

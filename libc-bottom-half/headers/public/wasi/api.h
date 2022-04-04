@@ -658,6 +658,11 @@ typedef uint64_t __wasi_rights_t;
 #define __WASI_RIGHTS_SOCK_SHUTDOWN ((__wasi_rights_t)(1 << 28))
 
 /**
+ * The right to invoke `sock_accept`.
+ */
+#define __WASI_RIGHTS_SOCK_ACCEPT ((__wasi_rights_t)(1 << 29))
+
+/**
  * A file descriptor handle.
  */
 typedef int __wasi_fd_t;
@@ -1394,7 +1399,8 @@ _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
 
 /**
  * Read command-line argument data.
- * The size of the array should match that returned by `args_sizes_get`
+ * The size of the array should match that returned by `args_sizes_get`.
+ * Each argument is expected to be `\0` terminated.
  */
 __wasi_errno_t __wasi_args_get(
     uint8_t * * argv,
@@ -1413,6 +1419,7 @@ __wasi_errno_t __wasi_args_sizes_get(
 /**
  * Read environment variable data.
  * The sizes of the buffers should match that returned by `environ_sizes_get`.
+ * Key/value pairs are expected to be joined with `=`s, and terminated with `\0`s.
  */
 __wasi_errno_t __wasi_environ_get(
     uint8_t * * environ,
@@ -2004,6 +2011,23 @@ __wasi_errno_t __wasi_random_get(
      */
     uint8_t * buf,
     __wasi_size_t buf_len
+) __attribute__((__warn_unused_result__));
+/**
+ * Accept a new incoming connection.
+ * Note: This is similar to `accept` in POSIX.
+ * @return
+ * New socket connection
+ */
+__wasi_errno_t __wasi_sock_accept(
+    /**
+     * The listening socket.
+     */
+    __wasi_fd_t fd,
+    /**
+     * The desired values of the file descriptor flags.
+     */
+    __wasi_fdflags_t flags,
+    __wasi_fd_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Receive a message from a socket.

@@ -535,6 +535,7 @@ check-symbols: startup_files libc
 	@#
 	@# TODO: Undefine __FLOAT128__ for now since it's not in clang 8.0.
 	@# TODO: Filter out __FLT16_* for now, as not all versions of clang have these.
+	@# TODO: Filter out __NO_MATH_ERRNO_ and a few __*WIDTH__ that are new to clang 14.
 	$(CC) $(CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -isystem $(SYSROOT_INC) \
 	    -std=gnu17 \
@@ -553,8 +554,11 @@ check-symbols: startup_files libc
 	    -U__GNUC_PATCHLEVEL__ \
 	    -U__VERSION__ \
 	    -U__FLOAT128__ \
+	    -U__NO_MATH_ERRNO__ \
+	    -U__BITINT_MAXWIDTH__ \
 	    | sed -e 's/__[[:upper:][:digit:]]*_ATOMIC_\([[:upper:][:digit:]_]*\)_LOCK_FREE/__compiler_ATOMIC_\1_LOCK_FREE/' \
 	    | grep -v '^#define __FLT16_' \
+	    | grep -v '^#define __\(BOOL\|INT_\(LEAST\|FAST\)\(8\|16\|32\|64\)\|INT\|LONG\|LLONG\|SHRT\)_WIDTH__' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
 
 	# Check that the computed metadata matches the expected metadata.

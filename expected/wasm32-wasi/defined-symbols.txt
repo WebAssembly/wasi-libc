@@ -363,6 +363,8 @@ _start
 a64l
 abort
 abs
+accept
+accept4
 access
 acos
 acosf

@@ -34,6 +34,9 @@
 extern "C" {
 #endif
 
+int accept(int socket, struct sockaddr *restrict addr, socklen_t *restrict addrlen);
+int accept4(int socket, struct sockaddr *restrict addr, socklen_t *restrict addrlen, int flags);
+
 #ifdef __cplusplus
 }
 #endif

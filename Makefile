@@ -1,8 +1,13 @@
 # These variables are specifically meant to be overridable via the make
 # command-line.
-CC ?= clang
+# ?= doesn't work for CC and AR because make has a default value for them.
+ifeq ($(origin CC), default)
+CC := clang
+endif
 NM ?= $(patsubst %clang,%llvm-nm,$(filter-out ccache sccache,$(CC)))
-AR ?= $(patsubst %clang,%llvm-ar,$(filter-out ccache sccache,$(CC)))
+ifeq ($(origin AR), default)
+AR = $(patsubst %clang,%llvm-ar,$(filter-out ccache sccache,$(CC)))
+endif
 EXTRA_CFLAGS ?= -O2 -DNDEBUG
 # The directory where we build the sysroot.
 SYSROOT ?= $(CURDIR)/sysroot

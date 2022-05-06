@@ -513,10 +513,10 @@ check-symbols: startup_files libc
 	    > "$(SYSROOT_LIB)/libc.imports"
 
 	#
-	# Generate a test file that includes all public header files.
+	# Generate a test file that includes all public C header files.
 	#
 	cd "$(SYSROOT_INC)" && \
-	  for header in $$(find . -type f -not -name mman.h -not -name signal.h -not -name times.h -not -name resource.h |grep -v /bits/); do \
+	  for header in $$(find . -type f -not -name mman.h -not -name signal.h -not -name times.h -not -name resource.h |grep -v /bits/ |grep -v /c++/); do \
 	      echo '#include <'$$header'>' | sed 's/\.\///' ; \
 	done |LC_ALL=C sort >$(SYSROOT_SHARE)/include-all.c ; \
 	cd - >/dev/null

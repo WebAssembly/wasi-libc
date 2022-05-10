@@ -31,16 +31,20 @@ static int find_relpath2(
 static int find_relpath(const char *path, char **relative) {
     static __thread char *relative_buf = NULL;
     static __thread size_t relative_buf_len = 0;
+    int fd = find_relpath2(path, &relative_buf, &relative_buf_len);
+    // find_relpath2 can update relative_buf, so assign it after the call
     *relative = relative_buf;
-    return find_relpath2(path, relative, &relative_buf_len);
+    return fd;
 }
 
 // same as `find_relpath`, but uses another set of static variables to cache
 static int find_relpath_alt(const char *path, char **relative) {
     static __thread char *relative_buf = NULL;
     static __thread size_t relative_buf_len = 0;
+    int fd = find_relpath2(path, &relative_buf, &relative_buf_len);
+    // find_relpath2 can update relative_buf, so assign it after the call
     *relative = relative_buf;
-    return find_relpath2(path, relative, &relative_buf_len);
+    return fd;
 }
 
 int open(const char *path, int oflag, ...) {

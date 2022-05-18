@@ -5,8 +5,9 @@
 void *memcpy(void *restrict dest, const void *restrict src, size_t n)
 {
 #if defined(__wasm_bulk_memory__)
-	return __builtin_memcpy(dest, src, n);
-#else
+	if (n > BULK_MEMORY_THRESHOLD)
+	  return __builtin_memcpy(dest, src, n);
+#endif
 	unsigned char *d = dest;
 	const unsigned char *s = src;
 
@@ -124,5 +125,4 @@ void *memcpy(void *restrict dest, const void *restrict src, size_t n)
 
 	for (; n; n--) *d++ = *s++;
 	return dest;
-#endif // __wasm_bulk_memory__
 }

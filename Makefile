@@ -22,6 +22,13 @@ BUILD_LIBC_TOP_HALF ?= yes
 # The directory where we're store intermediate artifacts.
 OBJDIR ?= $(CURDIR)/build
 
+# When the length is no larger than this threshold, we consider the
+# overhead of bulk memory opcodes to outweigh the performance benefit,
+# and fall back to the original musl implementation. See
+# https://github.com/WebAssembly/wasi-libc/pull/263 for relevant
+# discussion
+BULK_MEMORY_THRESHOLD ?= 32
+
 # Variables from this point on are not meant to be overridable via the
 # make command-line.
 
@@ -393,6 +400,9 @@ $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): CFLAGS += \
 # https://github.com/llvm/llvm-project/issues/52618 is resolved
 $(BULK_MEMORY_OBJS): CFLAGS += \
         -mbulk-memory
+
+$(BULK_MEMORY_OBJS): CFLAGS += \
+        -DBULK_MEMORY_THRESHOLD=$(BULK_MEMORY_THRESHOLD)
 
 $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS): CFLAGS += \
 	    -D_WASI_EMULATED_SIGNAL

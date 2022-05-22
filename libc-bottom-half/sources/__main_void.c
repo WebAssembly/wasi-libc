@@ -1,4 +1,4 @@
-#include <wasi/api.h>
+#include <wasix/api.h>
 #include <stdlib.h>
 #include <sysexits.h>
 

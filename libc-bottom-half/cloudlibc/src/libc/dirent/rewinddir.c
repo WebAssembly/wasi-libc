@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <wasi/api.h>
+#include <wasix/api.h>
 #include <dirent.h>
 
 #include "dirent_impl.h"

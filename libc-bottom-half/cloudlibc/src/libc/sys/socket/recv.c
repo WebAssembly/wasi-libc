@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 
 #include <assert.h>
-#include <wasi/api.h>
+#include <wasix/api.h>
 #include <errno.h>
 #include <stdint.h>
 
@@ -28,7 +28,7 @@ ssize_t recv(int socket, void *restrict buffer, size_t length, int flags) {
   __wasi_riflags_t ri_flags = flags;
 
   // Perform system call.
-  size_t ro_datalen;
+  uint64_t ro_datalen;
   __wasi_roflags_t ro_flags;
   __wasi_errno_t error = __wasi_sock_recv(socket,
                                           ri_data, ri_data_len, ri_flags,

@@ -64,12 +64,12 @@ jobs:
         name: ${{ format( 'sysroot-{0}.tgz', matrix.os) }}
         path: sysroot
 
-  # Disable the headerstest job for now, while WASI transitions from the
+  # Disable the headerstest job for now, while WASIX transitions from the
   # witx snapshots to wit proposals, and we have a few manual edits to the
   # generated header to make life easier for folks.
   headerstest:
     if: ${{ false }}  # Disable the headers test for now.
-    name: wasi-headers test
+    name: wasix-headers test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -88,11 +88,11 @@ jobs:
         echo "$HOME/.cargo/bin" >> $GITHUB_PATH
       if: matrix.os == 'macos-latest'
     - run: cargo fetch
-      working-directory: tools/wasi-headers
+      working-directory: tools/wasix-headers
     - run: cargo build
-      working-directory: tools/wasi-headers
+      working-directory: tools/wasix-headers
     - run: cargo test
-      working-directory: tools/wasi-headers
+      working-directory: tools/wasix-headers
 
   rustfmt:
     name: Rustfmt
@@ -104,4 +104,4 @@ jobs:
     - name: Install Rust
       run: rustup update stable && rustup default stable && rustup component add rustfmt
     - run: cargo fmt -- --check
-      working-directory: tools/wasi-headers
+      working-directory: tools/wasix-headers

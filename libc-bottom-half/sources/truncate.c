@@ -1,7 +1,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <wasi/libc.h>
+#include <wasix/libc.h>
 
 int truncate(const char *path, off_t length)
 {

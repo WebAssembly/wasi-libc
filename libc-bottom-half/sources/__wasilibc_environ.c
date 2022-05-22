@@ -1,4 +1,4 @@
-#include <wasi/libc-environ.h>
+#include <wasix/libc-environ.h>
 
 extern char **__wasilibc_environ;
 

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <wasi/api.h>
+#include <wasix/api.h>
 #include <errno.h>
 #include <poll.h>
 #include <stdbool.h>
@@ -56,7 +56,7 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
   }
 
   // Execute poll().
-  size_t nevents;
+  uint32_t nevents;
   __wasi_event_t events[nsubscriptions];
   __wasi_errno_t error =
       __wasi_poll_oneoff(subscriptions, events, nsubscriptions, &nevents);

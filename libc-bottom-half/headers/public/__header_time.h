@@ -10,7 +10,7 @@
 #include <__struct_tm.h>
 #include <__typedef_clockid_t.h>
 
-#include <wasi/api.h>
+#include <wasix/api.h>
 
 #define TIMER_ABSTIME __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME
 

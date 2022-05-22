@@ -1,6 +1,6 @@
 #include <common/errno.h>
-#include <wasi/api.h>
-#include <wasi/libc.h>
+#include <wasix/api.h>
+#include <wasix/libc.h>
 #include <errno.h>
 
 int __wasilibc_nocwd___wasilibc_rmdirat(int fd, const char *path) {

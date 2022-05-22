@@ -1,6 +1,6 @@
 #define _WASI_EMULATED_PROCESS_CLOCKS
 #include <time.h>
-#include <wasi/api.h>
+#include <wasix/api.h>
 #include <common/time.h>
 
 _Static_assert(

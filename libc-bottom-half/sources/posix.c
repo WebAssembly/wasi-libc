@@ -8,9 +8,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <utime.h>
-#include <wasi/libc.h>
-#include <wasi/libc-find-relpath.h>
-#include <wasi/libc-nocwd.h>
+#include <wasix/libc.h>
+#include <wasix/libc-find-relpath.h>
+#include <wasix/libc-nocwd.h>
 
 static int find_relpath2(
     const char *path,

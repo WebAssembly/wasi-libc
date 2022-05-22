@@ -34,8 +34,8 @@ BULK_MEMORY_THRESHOLD ?= 32
 
 # Set the target variables. Multiarch triples notably omit the vendor field,
 # which happens to be what we do for the main target triple too.
-TARGET_TRIPLE = wasm32-wasi
-MULTIARCH_TRIPLE = wasm32-wasi
+TARGET_TRIPLE = wasm64-wasi
+MULTIARCH_TRIPLE = wasm64-wasi
 
 # These variables describe the locations of various files and directories in
 # the source tree.
@@ -292,11 +292,11 @@ MUSL_OMIT_HEADERS += \
     "stdarg.h" \
     "stddef.h"
 
-# Use the WASI errno definitions.
+# Use the WASIX errno definitions.
 MUSL_OMIT_HEADERS += \
     "bits/errno.h"
 
-# Remove headers that aren't supported yet or that aren't relevant for WASI.
+# Remove headers that aren't supported yet or that aren't relevant for WASIX.
 MUSL_OMIT_HEADERS += \
     "sys/procfs.h" \
     "sys/user.h" \

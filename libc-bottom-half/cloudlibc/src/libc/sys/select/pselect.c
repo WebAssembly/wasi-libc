@@ -6,7 +6,7 @@
 
 #include <sys/select.h>
 
-#include <wasi/api.h>
+#include <wasix/api.h>
 #include <errno.h>
 
 int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
@@ -78,7 +78,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
   }
 
   // Execute poll().
-  size_t nevents;
+  uint32_t nevents;
   __wasi_event_t events[nsubscriptions];
   __wasi_errno_t error =
       __wasi_poll_oneoff(subscriptions, events, nsubscriptions, &nevents);

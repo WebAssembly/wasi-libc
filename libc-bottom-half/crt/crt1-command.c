@@ -1,4 +1,4 @@
-#include <wasi/api.h>
+#include <wasix/api.h>
 #include <stdlib.h>
 extern void __wasm_call_ctors(void);
 extern int __original_main(void);

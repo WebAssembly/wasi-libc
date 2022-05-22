@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <wasi/api.h>
-#include <wasi/libc.h>
-#include <wasi/libc-nocwd.h>
+#include <wasix/api.h>
+#include <wasix/libc.h>
+#include <wasix/libc-nocwd.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -38,7 +38,7 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***name
     return -1;
   }
   size_t buffer_processed = buffer_size;
-  size_t buffer_used = buffer_size;
+  uint64_t buffer_used = buffer_size;
 
   // Space for the array to return to the caller.
   struct dirent **dirents = NULL;

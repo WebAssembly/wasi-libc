@@ -1,9 +1,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sysexits.h>
-#include <wasi/api.h>
-#include <wasi/libc.h>
-#include <wasi/libc-environ.h>
+#include <wasix/api.h>
+#include <wasix/libc.h>
+#include <wasix/libc-environ.h>
 
 /// If the program doesn't use `environ`, it'll get this version of
 /// `__wasilibc_environ`, which isn't initialized with a constructor function.

@@ -14,9 +14,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sysexits.h>
-#include <wasi/api.h>
-#include <wasi/libc-find-relpath.h>
-#include <wasi/libc.h>
+#include <wasix/api.h>
+#include <wasix/libc-find-relpath.h>
+#include <wasix/libc.h>
 
 /// A name and file descriptor pair.
 typedef struct preopen {

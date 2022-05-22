@@ -236,7 +236,7 @@ __wasi_errno_t __wasi_fd_pread(
     const __wasi_iovec_t *iovs,
     size_t iovs_len,
     __wasi_filesize_t offset,
-    __wasi_filesize_t *retptr0
+    __wasi_size_t *retptr0
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_fd_pread((int32_t) fd, (int64_t) iovs, (int64_t) iovs_len, (int64_t) offset, (int64_t) retptr0);
     return (uint16_t) ret;
@@ -279,7 +279,7 @@ __wasi_errno_t __wasi_fd_pwrite(
     const __wasi_ciovec_t *iovs,
     size_t iovs_len,
     __wasi_filesize_t offset,
-    __wasi_filesize_t *retptr0
+    __wasi_size_t *retptr0
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_fd_pwrite((int32_t) fd, (int64_t) iovs, (int64_t) iovs_len, (int64_t) offset, (int64_t) retptr0);
     return (uint16_t) ret;
@@ -391,7 +391,7 @@ __wasi_errno_t __wasi_fd_write(
     __wasi_fd_t fd,
     const __wasi_ciovec_t *iovs,
     size_t iovs_len,
-    __wasi_filesize_t *retptr0
+    __wasi_size_t *retptr0
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_fd_write((int32_t) fd, (int64_t) iovs, (int64_t) iovs_len, (int64_t) retptr0);
     return (uint16_t) ret;
@@ -506,7 +506,7 @@ __wasi_errno_t __wasi_path_readlink(
     const char *path,
     uint8_t * buf,
     __wasi_pointersize_t buf_len,
-    __wasi_filesize_t *retptr0
+    __wasi_size_t *retptr0
 ){
     size_t path_len = strlen(path);
     int32_t ret = __imported_wasix_snapshot_preview1_path_readlink((int32_t) fd, (int64_t) path, (int64_t) path_len, (int64_t) buf, (int64_t) buf_len, (int64_t) retptr0);
@@ -845,7 +845,7 @@ int32_t __imported_wasix_snapshot_preview1_bus_invoke(int32_t arg0, int64_t arg1
 
 __wasi_bus_error_t __wasi_bus_invoke(
     __wasi_bid_t bid,
-    __wasi_option_cid_t parent,
+    const __wasi_option_cid_t * parent,
     __wasi_bool_t keep_alive,
     const char *topic,
     __wasi_bus_data_format_t format,
@@ -921,7 +921,7 @@ int32_t __imported_wasix_snapshot_preview1_bus_listen(int64_t arg0, int64_t arg1
 ));
 
 __wasi_bus_error_t __wasi_bus_listen(
-    __wasi_option_cid_t parent,
+    const __wasi_option_cid_t * parent,
     const char *topic
 ){
     size_t topic_len = strlen(topic);
@@ -935,7 +935,7 @@ int32_t __imported_wasix_snapshot_preview1_bus_poll(int64_t arg0, int64_t arg1, 
 ));
 
 __wasi_bus_error_t __wasi_bus_poll(
-    __wasi_option_bid_t bid,
+    const __wasi_option_bid_t * bid,
     __wasi_timestamp_t timeout,
     __wasi_bus_event_t * events,
     __wasi_size_t nevents,
@@ -951,7 +951,7 @@ int32_t __imported_wasix_snapshot_preview1_bus_poll_data(int64_t arg0, int64_t a
 ));
 
 __wasi_bus_error_t __wasi_bus_poll_data(
-    __wasi_option_bid_t bid,
+    const __wasi_option_bid_t * bid,
     __wasi_timestamp_t timeout,
     uint8_t * topic,
     __wasi_pointersize_t topic_len,
@@ -1059,7 +1059,7 @@ int32_t __imported_wasix_snapshot_preview1_port_ip_add(int64_t arg0) __attribute
 ));
 
 __wasi_errno_t __wasi_port_ip_add(
-    __wasi_addr_cidr_t ip
+    const __wasi_addr_cidr_t * ip
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_port_ip_add((int64_t) ip);
     return (uint16_t) ret;
@@ -1071,7 +1071,7 @@ int32_t __imported_wasix_snapshot_preview1_port_ip_remove(int64_t arg0) __attrib
 ));
 
 __wasi_errno_t __wasi_port_ip_remove(
-    __wasi_addr_ip_t ip
+    const __wasi_addr_ip_t * ip
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_port_ip_remove((int64_t) ip);
     return (uint16_t) ret;
@@ -1120,7 +1120,7 @@ int32_t __imported_wasix_snapshot_preview1_port_gateway_set(int64_t arg0) __attr
 ));
 
 __wasi_errno_t __wasi_port_gateway_set(
-    __wasi_addr_ip_t ip
+    const __wasi_addr_ip_t * ip
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_port_gateway_set((int64_t) ip);
     return (uint16_t) ret;
@@ -1132,10 +1132,10 @@ int32_t __imported_wasix_snapshot_preview1_port_route_add(int64_t arg0, int64_t 
 ));
 
 __wasi_errno_t __wasi_port_route_add(
-    __wasi_addr_cidr_t cidr,
-    __wasi_addr_ip_t via_router,
-    __wasi_option_timestamp_t preferred_until,
-    __wasi_option_timestamp_t expires_at
+    const __wasi_addr_cidr_t * cidr,
+    const __wasi_addr_ip_t * via_router,
+    const __wasi_option_timestamp_t * preferred_until,
+    const __wasi_option_timestamp_t * expires_at
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_port_route_add((int64_t) cidr, (int64_t) via_router, (int64_t) preferred_until, (int64_t) expires_at);
     return (uint16_t) ret;
@@ -1147,7 +1147,7 @@ int32_t __imported_wasix_snapshot_preview1_port_route_remove(int64_t arg0) __att
 ));
 
 __wasi_errno_t __wasi_port_route_remove(
-    __wasi_addr_ip_t cidr
+    const __wasi_addr_ip_t * cidr
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_port_route_remove((int64_t) cidr);
     return (uint16_t) ret;
@@ -1279,7 +1279,7 @@ int32_t __imported_wasix_snapshot_preview1_sock_set_linger(int32_t arg0, int64_t
 
 __wasi_errno_t __wasi_sock_set_linger(
     __wasi_fd_t fd,
-    __wasi_option_timestamp_t linger
+    const __wasi_option_timestamp_t * linger
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_sock_set_linger((int32_t) fd, (int64_t) linger);
     return (uint16_t) ret;
@@ -1385,8 +1385,8 @@ int32_t __imported_wasix_snapshot_preview1_sock_join_multicast_v4(int32_t arg0, 
 
 __wasi_errno_t __wasi_sock_join_multicast_v4(
     __wasi_fd_t fd,
-    __wasi_addr_ip4_t multiaddr,
-    __wasi_addr_ip4_t interface
+    const __wasi_addr_ip4_t * multiaddr,
+    const __wasi_addr_ip4_t * interface
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_sock_join_multicast_v4((int32_t) fd, (int64_t) multiaddr, (int64_t) interface);
     return (uint16_t) ret;
@@ -1399,8 +1399,8 @@ int32_t __imported_wasix_snapshot_preview1_sock_leave_multicast_v4(int32_t arg0,
 
 __wasi_errno_t __wasi_sock_leave_multicast_v4(
     __wasi_fd_t fd,
-    __wasi_addr_ip4_t multiaddr,
-    __wasi_addr_ip4_t interface
+    const __wasi_addr_ip4_t * multiaddr,
+    const __wasi_addr_ip4_t * interface
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_sock_leave_multicast_v4((int32_t) fd, (int64_t) multiaddr, (int64_t) interface);
     return (uint16_t) ret;
@@ -1413,7 +1413,7 @@ int32_t __imported_wasix_snapshot_preview1_sock_join_multicast_v6(int32_t arg0, 
 
 __wasi_errno_t __wasi_sock_join_multicast_v6(
     __wasi_fd_t fd,
-    __wasi_addr_ip6_t multiaddr,
+    const __wasi_addr_ip6_t * multiaddr,
     uint32_t interface
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_sock_join_multicast_v6((int32_t) fd, (int64_t) multiaddr, (int32_t) interface);
@@ -1427,7 +1427,7 @@ int32_t __imported_wasix_snapshot_preview1_sock_leave_multicast_v6(int32_t arg0,
 
 __wasi_errno_t __wasi_sock_leave_multicast_v6(
     __wasi_fd_t fd,
-    __wasi_addr_ip6_t multiaddr,
+    const __wasi_addr_ip6_t * multiaddr,
     uint32_t interface
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_sock_leave_multicast_v6((int32_t) fd, (int64_t) multiaddr, (int32_t) interface);
@@ -1493,7 +1493,7 @@ int32_t __imported_wasix_snapshot_preview1_sock_bind(int32_t arg0, int64_t arg1)
 
 __wasi_errno_t __wasi_sock_bind(
     __wasi_fd_t fd,
-    __wasi_addr_port_t addr
+    const __wasi_addr_port_t * addr
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_sock_bind((int32_t) fd, (int64_t) addr);
     return (uint16_t) ret;
@@ -1534,7 +1534,7 @@ int32_t __imported_wasix_snapshot_preview1_sock_connect(int32_t arg0, int64_t ar
 
 __wasi_errno_t __wasi_sock_connect(
     __wasi_fd_t fd,
-    __wasi_addr_port_t addr
+    const __wasi_addr_port_t * addr
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_sock_connect((int32_t) fd, (int64_t) addr);
     return (uint16_t) ret;
@@ -1601,7 +1601,7 @@ __wasi_errno_t __wasi_sock_send_to(
     const __wasi_ciovec_t *si_data,
     size_t si_data_len,
     __wasi_siflags_t si_flags,
-    __wasi_addr_port_t addr,
+    const __wasi_addr_port_t * addr,
     __wasi_filesize_t *retptr0
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_sock_send_to((int32_t) fd, (int64_t) si_data, (int64_t) si_data_len, (int32_t) si_flags, (int64_t) addr, (int64_t) retptr0);

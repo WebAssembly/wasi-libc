@@ -5,7 +5,7 @@
 #include <sys/uio.h>
 
 #include <assert.h>
-#include <wasix/api.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <stddef.h>
 
@@ -29,7 +29,7 @@ ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
     errno = EINVAL;
     return -1;
   }
-  uint64_t bytes_written;
+  uint32_t bytes_written;
   __wasi_errno_t error = __wasi_fd_write(
       fildes, (const __wasi_ciovec_t *)iov, iovcnt, &bytes_written);
   if (error != 0) {

@@ -6,7 +6,7 @@
 #include <common/time.h>
 
 #include <assert.h>
-#include <wasix/api.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <time.h>
 

@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <wasix/libc.h>
-#include <wasix/libc-nocwd.h>
+#include <wasi/libc.h>
+#include <wasi/libc-nocwd.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <stddef.h>

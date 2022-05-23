@@ -5,7 +5,7 @@
 #ifndef DIRENT_DIRENT_IMPL_H
 #define DIRENT_DIRENT_IMPL_H
 
-#include <wasix/api.h>
+#include <wasi/api.h>
 #include <stddef.h>
 
 struct dirent;

@@ -5,7 +5,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <wasix/libc.h>
+#include <wasi/libc.h>
 
 int chdir(const char *path)
 {

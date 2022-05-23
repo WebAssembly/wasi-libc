@@ -1,5 +1,5 @@
-#include <wasix/api.h>
-#include <wasix/libc.h>
+#include <wasi/api.h>
+#include <wasi/libc.h>
 #include <errno.h>
 #include <unistd.h>
 

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <wasix/api.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <unistd.h>
 
@@ -12,7 +12,7 @@ ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
     return -1;
   }
   __wasi_ciovec_t iov = {.buf = buf, .buf_len = nbyte};
-  uint64_t bytes_written;
+  uint32_t bytes_written;
   __wasi_errno_t error =
       __wasi_fd_pwrite(fildes, &iov, 1, offset, &bytes_written);
   if (error != 0) {

@@ -1,4 +1,4 @@
-#include <wasix/api.h>
+#include <wasi/api.h>
 #include <errno.h>
 
 off_t __wasilibc_tell(int fildes) {

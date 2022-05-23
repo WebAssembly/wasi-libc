@@ -4,7 +4,7 @@
 
 #include <common/errno.h>
 
-#include <wasix/api.h>
+#include <wasi/api.h>
 #include <dirent.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -24,7 +24,7 @@ DIR *fdopendir(int fd) {
 
   // Ensure that this is really a directory by already loading the first
   // chunk of data.
-  uint64_t buffer_used = dirp->buffer_used;
+  uint32_t buffer_used = dirp->buffer_used;
   __wasi_errno_t error =
       // TODO: Remove the cast on `dirp->buffer` once the witx is updated with char8 support.
       __wasi_fd_readdir(fd, (uint8_t *)dirp->buffer, DIRENT_DEFAULT_BUFFER_SIZE,

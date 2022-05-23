@@ -2,7 +2,7 @@
 #include <sys/resource.h>
 #include <errno.h>
 #include <time.h>
-#include <wasix/api.h>
+#include <wasi/api.h>
 #include <common/time.h>
 
 // `clock` is a weak symbol so that application code can override it.

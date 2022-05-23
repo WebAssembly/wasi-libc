@@ -1,7 +1,7 @@
 #ifdef __wasilibc_unmodified_upstream // WASI has no syscall, dup
 #include "stdio_impl.h"
 #else
-#include <wasix/libc.h>
+#include <wasi/libc.h>
 #endif
 #include <fcntl.h>
 #include <unistd.h>

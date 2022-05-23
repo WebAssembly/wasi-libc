@@ -6,7 +6,7 @@
 
 #include <sys/time.h>
 
-#include <wasix/api.h>
+#include <wasi/api.h>
 
 int gettimeofday(struct timeval *restrict tp, void *tz) {
   __wasi_timestamp_t ts = 0;

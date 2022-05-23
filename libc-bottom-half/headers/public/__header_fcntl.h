@@ -1,7 +1,7 @@
 #ifndef __wasilibc___header_fcntl_h
 #define __wasilibc___header_fcntl_h
 
-#include <wasix/api.h>
+#include <wasi/api.h>
 #include <__seek.h>
 #include <__mode_t.h>
 

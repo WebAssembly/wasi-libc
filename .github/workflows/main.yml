@@ -69,7 +69,7 @@ jobs:
   # generated header to make life easier for folks.
   headerstest:
     if: ${{ false }}  # Disable the headers test for now.
-    name: wasix-headers test
+    name: wasi-headers test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -88,11 +88,11 @@ jobs:
         echo "$HOME/.cargo/bin" >> $GITHUB_PATH
       if: matrix.os == 'macos-latest'
     - run: cargo fetch
-      working-directory: tools/wasix-headers
+      working-directory: tools/wasi-headers
     - run: cargo build
-      working-directory: tools/wasix-headers
+      working-directory: tools/wasi-headers
     - run: cargo test
-      working-directory: tools/wasix-headers
+      working-directory: tools/wasi-headers
 
   rustfmt:
     name: Rustfmt
@@ -104,4 +104,4 @@ jobs:
     - name: Install Rust
       run: rustup update stable && rustup default stable && rustup component add rustfmt
     - run: cargo fmt -- --check
-      working-directory: tools/wasix-headers
+      working-directory: tools/wasi-headers

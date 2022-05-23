@@ -10,7 +10,7 @@
  * must be modified to change this file.
  */
 
-#include <wasix/api.h>
+#include <wasi/api.h>
 #include <string.h>
 
 int32_t __imported_wasix_snapshot_preview1_args_get(int64_t arg0, int64_t arg1) __attribute__((
@@ -294,7 +294,7 @@ __wasi_errno_t __wasi_fd_read(
     __wasi_fd_t fd,
     const __wasi_iovec_t *iovs,
     size_t iovs_len,
-    __wasi_filesize_t *retptr0
+    __wasi_size_t *retptr0
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_fd_read((int32_t) fd, (int64_t) iovs, (int64_t) iovs_len, (int64_t) retptr0);
     return (uint16_t) ret;
@@ -310,7 +310,7 @@ __wasi_errno_t __wasi_fd_readdir(
     uint8_t * buf,
     __wasi_pointersize_t buf_len,
     __wasi_dircookie_t cookie,
-    __wasi_filesize_t *retptr0
+    __wasi_size_t *retptr0
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_fd_readdir((int32_t) fd, (int64_t) buf, (int64_t) buf_len, (int64_t) cookie, (int64_t) retptr0);
     return (uint16_t) ret;

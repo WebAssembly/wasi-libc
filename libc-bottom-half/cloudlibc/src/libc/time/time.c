@@ -4,7 +4,7 @@
 
 #include <common/time.h>
 
-#include <wasix/api.h>
+#include <wasi/api.h>
 #include <time.h>
 
 time_t time(time_t *tloc) {

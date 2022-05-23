@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 
 #include <assert.h>
-#include <wasix/api.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <stdint.h>
 

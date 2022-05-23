@@ -5,7 +5,7 @@
 #ifndef COMMON_ERRNO_H
 #define COMMON_ERRNO_H
 
-#include <wasix/api.h>
+#include <wasi/api.h>
 
 // WASI syscalls should just return ENOTDIR if that's what the problem is.
 static inline __wasi_errno_t errno_fixup_directory(__wasi_fd_t fd,

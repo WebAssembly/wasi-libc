@@ -4,7 +4,7 @@
 
 #include <common/errno.h>
 
-#include <wasix/api.h>
+#include <wasi/api.h>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>

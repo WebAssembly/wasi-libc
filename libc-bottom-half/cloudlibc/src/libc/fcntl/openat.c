@@ -5,8 +5,8 @@
 #include <common/errno.h>
 
 #include <assert.h>
-#include <wasix/api.h>
-#include <wasix/libc.h>
+#include <wasi/api.h>
+#include <wasi/libc.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>

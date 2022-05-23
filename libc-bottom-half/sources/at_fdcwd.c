@@ -12,8 +12,8 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <wasix/libc.h>
-#include <wasix/libc-nocwd.h>
+#include <wasi/libc.h>
+#include <wasi/libc-nocwd.h>
 
 // If the platform doesn't define O_TMPFILE, we don't need to worry about it.
 #ifndef O_TMPFILE

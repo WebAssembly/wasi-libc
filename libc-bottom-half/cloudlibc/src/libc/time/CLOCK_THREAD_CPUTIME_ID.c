@@ -4,7 +4,7 @@
 
 #include <common/clock.h>
 
-#include <wasix/api.h>
+#include <wasi/api.h>
 #include <time.h>
 
 const struct __clockid _CLOCK_THREAD_CPUTIME_ID = {

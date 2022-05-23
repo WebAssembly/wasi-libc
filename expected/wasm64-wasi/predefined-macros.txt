@@ -610,7 +610,7 @@
 #define INT32_C(c) c
 #define INT32_MAX (0x7fffffff)
 #define INT32_MIN (-1-0x7fffffff)
-#define INT64_C(c) c ## LL
+#define INT64_C(c) c ## L
 #define INT64_MAX (0x7fffffffffffffff)
 #define INT64_MIN (-1-0x7fffffffffffffff)
 #define INT8SZ NS_INT8SZ
@@ -618,11 +618,11 @@
 #define INT8_MAX (0x7f)
 #define INT8_MIN (-1-0x7f)
 #define INTBITS (sizeof(int) * 8)
-#define INTMAX_C(c) c ## LL
+#define INTMAX_C(c) c ## L
 #define INTMAX_MAX INT64_MAX
 #define INTMAX_MIN INT64_MIN
-#define INTPTR_MAX INT32_MAX
-#define INTPTR_MIN INT32_MIN
+#define INTPTR_MAX INT64_MAX
+#define INTPTR_MIN INT64_MIN
 #define INT_FAST16_MAX INT16_MAX
 #define INT_FAST16_MIN INT16_MIN
 #define INT_FAST32_MAX INT32_MAX
@@ -984,7 +984,7 @@
 #define LOCK_SH 1
 #define LOCK_UN 8
 #define LONGBITS (sizeof(long) * 8)
-#define LONG_BIT 32
+#define LONG_BIT 64
 #define LONG_MAX __LONG_MAX
 #define LONG_MIN (-LONG_MAX-1)
 #define L_INCR 1
@@ -1418,8 +1418,8 @@
 #define PRIxMAX __UINTMAX_FMTx__
 #define PRIxPTR __UINTPTR_FMTx__
 #define PTRBITS (sizeof(char *) * 8)
-#define PTRDIFF_MAX INT32_MAX
-#define PTRDIFF_MIN INT32_MIN
+#define PTRDIFF_MAX INT64_MAX
+#define PTRDIFF_MIN INT64_MIN
 #define PUTLONG NS_PUT32
 #define PUTSHORT NS_PUT16
 #define QFIXEDSZ NS_QFIXEDSZ
@@ -1558,7 +1558,7 @@
 #define SHUT_WR __WASI_SDFLAGS_WR
 #define SIG_ATOMIC_MAX INT32_MAX
 #define SIG_ATOMIC_MIN INT32_MIN
-#define SIZE_MAX UINT32_MAX
+#define SIZE_MAX UINT64_MAX
 #define SI_LOAD_SHIFT 16
 #define SLC_ABORT 7
 #define SLC_ACK 0x80
@@ -1915,13 +1915,13 @@
 #define UINT16_MAX (0xffff)
 #define UINT32_C(c) c ## U
 #define UINT32_MAX (0xffffffffu)
-#define UINT64_C(c) c ## ULL
+#define UINT64_C(c) c ## UL
 #define UINT64_MAX (0xffffffffffffffffu)
 #define UINT8_C(c) c
 #define UINT8_MAX (0xff)
-#define UINTMAX_C(c) c ## ULL
+#define UINTMAX_C(c) c ## UL
 #define UINTMAX_MAX UINT64_MAX
-#define UINTPTR_MAX UINT32_MAX
+#define UINTPTR_MAX UINT64_MAX
 #define UINT_FAST16_MAX UINT16_MAX
 #define UINT_FAST32_MAX UINT32_MAX
 #define UINT_FAST64_MAX UINT64_MAX
@@ -2023,7 +2023,6 @@
 #define _GNU_SOURCE 1
 #define _ICONV_H 
 #define _IFADDRS_H 
-#define _ILP32 1
 #define _INTTYPES_H 
 #define _IOFBF 0
 #define _IOLBF 1
@@ -2033,6 +2032,7 @@
 #define _LIBGEN_H 
 #define _LIMITS_H 
 #define _LOCALE_H 
+#define _LP64 1
 #define _MALLOC_H 
 #define _MATH_H 
 #define _MONETARY_H 
@@ -2484,7 +2484,6 @@
 #define __GNUC_STDC_INLINE__ 1
 #define __GNUC_VA_LIST 1
 #define __GXX_ABI_VERSION 1002
-#define __ILP32__ 1
 #define __INT16_C_SUFFIX__ 
 #define __INT16_FMTd__ "hd"
 #define __INT16_FMTi__ "hi"
@@ -2513,9 +2512,9 @@
 #define __INTMAX_WIDTH__ 64
 #define __INTPTR_FMTd__ "ld"
 #define __INTPTR_FMTi__ "li"
-#define __INTPTR_MAX__ 2147483647L
+#define __INTPTR_MAX__ 9223372036854775807L
 #define __INTPTR_TYPE__ long int
-#define __INTPTR_WIDTH__ 32
+#define __INTPTR_WIDTH__ 64
 #define __INT_FAST16_FMTd__ "hd"
 #define __INT_FAST16_FMTi__ "hi"
 #define __INT_FAST16_MAX__ 32767
@@ -2572,7 +2571,8 @@
 #define __LITTLE_ENDIAN__ 1
 #define __LONG_LONG_MAX__ 9223372036854775807LL
 #define __LONG_MAX __LONG_MAX__
-#define __LONG_MAX__ 2147483647L
+#define __LONG_MAX__ 9223372036854775807L
+#define __LP64__ 1
 #define __NAMESER 19991006
 #define __NEED_FILE 
 #define __NEED___isoc_va_list 
@@ -2653,13 +2653,13 @@
 #define __ORDER_LITTLE_ENDIAN__ 1234
 #define __ORDER_PDP_ENDIAN__ 3412
 #define __PDP_ENDIAN 3412
-#define __POINTER_WIDTH__ 32
+#define __POINTER_WIDTH__ 64
 #define __PRAGMA_REDEFINE_EXTNAME 1
 #define __PTRDIFF_FMTd__ "ld"
 #define __PTRDIFF_FMTi__ "li"
-#define __PTRDIFF_MAX__ 2147483647L
+#define __PTRDIFF_MAX__ 9223372036854775807L
 #define __PTRDIFF_TYPE__ long int
-#define __PTRDIFF_WIDTH__ 32
+#define __PTRDIFF_WIDTH__ 64
 #define __REDIR(x,y) __typeof__(x) x __asm__(#y)
 #define __RETCAST(x) 
 #define __RETCAST_2(x,y) 
@@ -2669,28 +2669,28 @@
 #define __SCHAR_MAX__ 127
 #define __SHRT_MAX__ 32767
 #define __SID ('S' << 8)
-#define __SIG_ATOMIC_MAX__ 2147483647L
-#define __SIG_ATOMIC_WIDTH__ 32
+#define __SIG_ATOMIC_MAX__ 9223372036854775807L
+#define __SIG_ATOMIC_WIDTH__ 64
 #define __SIZEOF_DOUBLE__ 8
 #define __SIZEOF_FLOAT__ 4
 #define __SIZEOF_INT128__ 16
 #define __SIZEOF_INT__ 4
 #define __SIZEOF_LONG_DOUBLE__ 16
 #define __SIZEOF_LONG_LONG__ 8
-#define __SIZEOF_LONG__ 4
-#define __SIZEOF_POINTER__ 4
-#define __SIZEOF_PTRDIFF_T__ 4
+#define __SIZEOF_LONG__ 8
+#define __SIZEOF_POINTER__ 8
+#define __SIZEOF_PTRDIFF_T__ 8
 #define __SIZEOF_SHORT__ 2
-#define __SIZEOF_SIZE_T__ 4
+#define __SIZEOF_SIZE_T__ 8
 #define __SIZEOF_WCHAR_T__ 4
 #define __SIZEOF_WINT_T__ 4
 #define __SIZE_FMTX__ "lX"
 #define __SIZE_FMTo__ "lo"
 #define __SIZE_FMTu__ "lu"
 #define __SIZE_FMTx__ "lx"
-#define __SIZE_MAX__ 4294967295UL
+#define __SIZE_MAX__ 18446744073709551615UL
 #define __SIZE_TYPE__ long unsigned int
-#define __SIZE_WIDTH__ 32
+#define __SIZE_WIDTH__ 64
 #define __STDARG_H 
 #define __STDC_HOSTED__ 1
 #define __STDC_IEC_559__ 1
@@ -2755,9 +2755,9 @@
 #define __UINTPTR_FMTo__ "lo"
 #define __UINTPTR_FMTu__ "lu"
 #define __UINTPTR_FMTx__ "lx"
-#define __UINTPTR_MAX__ 4294967295UL
+#define __UINTPTR_MAX__ 18446744073709551615UL
 #define __UINTPTR_TYPE__ long unsigned int
-#define __UINTPTR_WIDTH__ 32
+#define __UINTPTR_WIDTH__ 64
 #define __UINT_FAST16_FMTX__ "hX"
 #define __UINT_FAST16_FMTo__ "ho"
 #define __UINT_FAST16_FMTu__ "hu"
@@ -2808,12 +2808,48 @@
 #define __UINT_LEAST8_TYPE__ unsigned char
 #define __USER_LABEL_PREFIX__ 
 #define __USE_TIME_BITS64 1
+#define __WASI_ADDRESS_FAMILY_INET4 (UINT8_C(0))
+#define __WASI_ADDRESS_FAMILY_INET6 (UINT8_C(1))
 #define __WASI_ADVICE_DONTNEED (UINT8_C(4))
 #define __WASI_ADVICE_NOREUSE (UINT8_C(5))
 #define __WASI_ADVICE_NORMAL (UINT8_C(0))
 #define __WASI_ADVICE_RANDOM (UINT8_C(2))
 #define __WASI_ADVICE_SEQUENTIAL (UINT8_C(1))
 #define __WASI_ADVICE_WILLNEED (UINT8_C(3))
+#define __WASI_BOOL_FALSE (UINT8_C(0))
+#define __WASI_BOOL_TRUE (UINT8_C(1))
+#define __WASI_BUS_DATA_FORMAT_BINCODE (UINT8_C(1))
+#define __WASI_BUS_DATA_FORMAT_JSON (UINT8_C(3))
+#define __WASI_BUS_DATA_FORMAT_MESSAGE_PACK (UINT8_C(2))
+#define __WASI_BUS_DATA_FORMAT_RAW (UINT8_C(0))
+#define __WASI_BUS_DATA_FORMAT_XML (UINT8_C(5))
+#define __WASI_BUS_DATA_FORMAT_YAML (UINT8_C(4))
+#define __WASI_BUS_DATA_TYPE_CALL (UINT8_C(0))
+#define __WASI_BUS_DATA_TYPE_CALLBACK (UINT8_C(1))
+#define __WASI_BUS_DATA_TYPE_REPLY (UINT8_C(2))
+#define __WASI_BUS_ERROR_ABORTED (UINT32_C(7))
+#define __WASI_BUS_ERROR_ACCESS_DENIED (UINT32_C(13))
+#define __WASI_BUS_ERROR_ALREADY_CONSUMED (UINT32_C(17))
+#define __WASI_BUS_ERROR_BAD_REQUEST (UINT32_C(12))
+#define __WASI_BUS_ERROR_BUS_INVOCATION_FAILED (UINT32_C(16))
+#define __WASI_BUS_ERROR_COMPILE_ERROR (UINT32_C(5))
+#define __WASI_BUS_ERROR_DESERIALIZATION (UINT32_C(2))
+#define __WASI_BUS_ERROR_FETCH_WAPM (UINT32_C(4))
+#define __WASI_BUS_ERROR_INTERNAL_FAILURE (UINT32_C(14))
+#define __WASI_BUS_ERROR_INVALID_ABI (UINT32_C(6))
+#define __WASI_BUS_ERROR_INVALID_HANDLE (UINT32_C(8))
+#define __WASI_BUS_ERROR_INVALID_TOPIC (UINT32_C(9))
+#define __WASI_BUS_ERROR_INVALID_WAPM (UINT32_C(3))
+#define __WASI_BUS_ERROR_MEMORY_ACCESS_VIOLATION (UINT32_C(18))
+#define __WASI_BUS_ERROR_MEMORY_ALLOCATION_FAILED (UINT32_C(15))
+#define __WASI_BUS_ERROR_MISSING_CALLBACK (UINT32_C(10))
+#define __WASI_BUS_ERROR_SERIALIZATION (UINT32_C(1))
+#define __WASI_BUS_ERROR_SUCCESS (UINT32_C(0))
+#define __WASI_BUS_ERROR_UNKNOWN_ERROR (UINT32_C(19))
+#define __WASI_BUS_ERROR_UNSUPPORTED (UINT32_C(11))
+#define __WASI_BUS_EVENT_TYPE_DATA (UINT8_C(1))
+#define __WASI_BUS_EVENT_TYPE_EXIT (UINT8_C(0))
+#define __WASI_BUS_EVENT_TYPE_FAULT (UINT8_C(2))
 #define __WASI_CLOCKID_MONOTONIC (UINT32_C(1))
 #define __WASI_CLOCKID_PROCESS_CPUTIME_ID (UINT32_C(2))
 #define __WASI_CLOCKID_REALTIME (UINT32_C(0))
@@ -2922,6 +2958,8 @@
 #define __WASI_OFLAGS_DIRECTORY ((__wasi_oflags_t)(1 << 1))
 #define __WASI_OFLAGS_EXCL ((__wasi_oflags_t)(1 << 2))
 #define __WASI_OFLAGS_TRUNC ((__wasi_oflags_t)(1 << 3))
+#define __WASI_OPTION_NONE (UINT8_C(0))
+#define __WASI_OPTION_SOME (UINT8_C(1))
 #define __WASI_PREOPENTYPE_DIR (UINT8_C(0))
 #define __WASI_RIFLAGS_RECV_PEEK ((__wasi_riflags_t)(1 << 0))
 #define __WASI_RIFLAGS_RECV_WAITALL ((__wasi_riflags_t)(1 << 1))
@@ -2954,11 +2992,77 @@
 #define __WASI_RIGHTS_PATH_UNLINK_FILE ((__wasi_rights_t)(1 << 26))
 #define __WASI_RIGHTS_POLL_FD_READWRITE ((__wasi_rights_t)(1 << 27))
 #define __WASI_RIGHTS_SOCK_ACCEPT ((__wasi_rights_t)(1 << 29))
+#define __WASI_RIGHTS_SOCK_ADDR_LOCAL ((__wasi_rights_t)(1 << 35))
+#define __WASI_RIGHTS_SOCK_ADDR_REMOTE ((__wasi_rights_t)(1 << 36))
+#define __WASI_RIGHTS_SOCK_BIND ((__wasi_rights_t)(1 << 32))
+#define __WASI_RIGHTS_SOCK_CONNECT ((__wasi_rights_t)(1 << 30))
+#define __WASI_RIGHTS_SOCK_LISTEN ((__wasi_rights_t)(1 << 31))
+#define __WASI_RIGHTS_SOCK_RECV ((__wasi_rights_t)(1 << 33))
+#define __WASI_RIGHTS_SOCK_RECV_FROM ((__wasi_rights_t)(1 << 37))
+#define __WASI_RIGHTS_SOCK_SEND ((__wasi_rights_t)(1 << 34))
+#define __WASI_RIGHTS_SOCK_SEND_TO ((__wasi_rights_t)(1 << 38))
 #define __WASI_RIGHTS_SOCK_SHUTDOWN ((__wasi_rights_t)(1 << 28))
 #define __WASI_ROFLAGS_RECV_DATA_TRUNCATED ((__wasi_roflags_t)(1 << 0))
 #define __WASI_SDFLAGS_RD ((__wasi_sdflags_t)(1 << 0))
 #define __WASI_SDFLAGS_WR ((__wasi_sdflags_t)(1 << 1))
+#define __WASI_SIGNAL_ABRT (UINT8_C(6))
+#define __WASI_SIGNAL_ALRM (UINT8_C(14))
+#define __WASI_SIGNAL_BUS (UINT8_C(7))
+#define __WASI_SIGNAL_CHLD (UINT8_C(16))
+#define __WASI_SIGNAL_CONT (UINT8_C(17))
+#define __WASI_SIGNAL_FPE (UINT8_C(8))
+#define __WASI_SIGNAL_HUP (UINT8_C(1))
+#define __WASI_SIGNAL_ILL (UINT8_C(4))
+#define __WASI_SIGNAL_INT (UINT8_C(2))
+#define __WASI_SIGNAL_KILL (UINT8_C(9))
+#define __WASI_SIGNAL_NONE (UINT8_C(0))
+#define __WASI_SIGNAL_PIPE (UINT8_C(13))
+#define __WASI_SIGNAL_POLL (UINT8_C(28))
+#define __WASI_SIGNAL_PROF (UINT8_C(26))
+#define __WASI_SIGNAL_PWR (UINT8_C(29))
+#define __WASI_SIGNAL_QUIT (UINT8_C(3))
+#define __WASI_SIGNAL_SEGV (UINT8_C(11))
+#define __WASI_SIGNAL_STOP (UINT8_C(18))
+#define __WASI_SIGNAL_SYS (UINT8_C(30))
+#define __WASI_SIGNAL_TERM (UINT8_C(15))
+#define __WASI_SIGNAL_TRAP (UINT8_C(5))
+#define __WASI_SIGNAL_TSTP (UINT8_C(19))
+#define __WASI_SIGNAL_TTIN (UINT8_C(20))
+#define __WASI_SIGNAL_TTOU (UINT8_C(21))
+#define __WASI_SIGNAL_URG (UINT8_C(22))
+#define __WASI_SIGNAL_USR1 (UINT8_C(10))
+#define __WASI_SIGNAL_USR2 (UINT8_C(12))
+#define __WASI_SIGNAL_VTALRM (UINT8_C(25))
+#define __WASI_SIGNAL_WINCH (UINT8_C(27))
+#define __WASI_SIGNAL_XCPU (UINT8_C(23))
+#define __WASI_SIGNAL_XFSZ (UINT8_C(24))
+#define __WASI_SOCK_OPTION_BROADCAST (UINT8_C(4))
+#define __WASI_SOCK_OPTION_MULTICAST_LOOP_V4 (UINT8_C(5))
+#define __WASI_SOCK_OPTION_MULTICAST_LOOP_V6 (UINT8_C(6))
+#define __WASI_SOCK_OPTION_NODELAY (UINT8_C(2))
+#define __WASI_SOCK_OPTION_ONLY_V6 (UINT8_C(3))
+#define __WASI_SOCK_OPTION_PROMISCUOUS (UINT8_C(7))
+#define __WASI_SOCK_OPTION_REUSE_ADDR (UINT8_C(1))
+#define __WASI_SOCK_OPTION_REUSE_PORT (UINT8_C(0))
+#define __WASI_SOCK_STATUS_CLOSED (UINT8_C(2))
+#define __WASI_SOCK_STATUS_FAILED (UINT8_C(3))
+#define __WASI_SOCK_STATUS_OPENED (UINT8_C(1))
+#define __WASI_SOCK_STATUS_OPENING (UINT8_C(0))
+#define __WASI_SOCK_TYPE_SOCKET_DGRAM (UINT8_C(0))
+#define __WASI_SOCK_TYPE_SOCKET_STREAM (UINT8_C(1))
+#define __WASI_STDIO_MODE_INHERIT (UINT8_C(1))
+#define __WASI_STDIO_MODE_LOG (UINT8_C(3))
+#define __WASI_STDIO_MODE_NULL (UINT8_C(2))
+#define __WASI_STDIO_MODE_PIPED (UINT8_C(0))
+#define __WASI_STREAM_SECURITY_ANY_ENCRYPTION ((__wasi_stream_security_t)(1 << 1))
+#define __WASI_STREAM_SECURITY_CLASSIC_ENCRYPTION ((__wasi_stream_security_t)(1 << 2))
+#define __WASI_STREAM_SECURITY_DOUBLE_ENCRYPTION ((__wasi_stream_security_t)(1 << 3))
+#define __WASI_STREAM_SECURITY_UNENCRYPTED ((__wasi_stream_security_t)(1 << 0))
 #define __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME ((__wasi_subclockflags_t)(1 << 0))
+#define __WASI_TIMEOUT_TYPE_ACCEPT ((__wasi_timeout_type_t)(1 << 3))
+#define __WASI_TIMEOUT_TYPE_CONNECT ((__wasi_timeout_type_t)(1 << 2))
+#define __WASI_TIMEOUT_TYPE_READ ((__wasi_timeout_type_t)(1 << 0))
+#define __WASI_TIMEOUT_TYPE_WRITE ((__wasi_timeout_type_t)(1 << 1))
 #define __WASI_WHENCE_CUR (UINT8_C(1))
 #define __WASI_WHENCE_END (UINT8_C(2))
 #define __WASI_WHENCE_SET (UINT8_C(0))
@@ -2989,7 +3093,7 @@
 #define __tm_gmtoff tm_gmtoff
 #define __tm_zone tm_zone
 #define __va_copy(d,s) __builtin_va_copy(d,s)
-#define __wasix__ 1
+#define __wasi__ 1
 #define __wasi_api_h 
 #define __wasi_libc_environ_h 
 #define __wasi_libc_find_relpath_h 
@@ -3057,9 +3161,10 @@
 #define __wasilibc___typedef_suseconds_t_h 
 #define __wasilibc___typedef_time_t_h 
 #define __wasilibc___typedef_uid_t_h 
+#define __wasix__ 1
 #define __wasm 1
-#define __wasm32 1
-#define __wasm32__ 1
+#define __wasm64 1
+#define __wasm64__ 1
 #define __wasm__ 1
 #define _tolower(a) ((a)|0x20)
 #define _toupper(a) ((a)&0x5f)

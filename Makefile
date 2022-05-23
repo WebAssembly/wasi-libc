@@ -529,7 +529,7 @@ check-symbols: startup_files libc
 	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$(DEFINED_SYMBOLS)" || echo $$undef_sym; \
 	done | grep -v "^__mul" > "$(UNDEFINED_SYMBOLS)"
-	grep '^_*imported_wasi_' "$(UNDEFINED_SYMBOLS)" \
+	grep '^_*imported_wasix_' "$(UNDEFINED_SYMBOLS)" \
 	    > "$(SYSROOT_LIB)/libc.imports"
 
 	#

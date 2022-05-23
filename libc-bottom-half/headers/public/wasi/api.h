@@ -7,6 +7,14 @@
  *     cargo run --manifest-path tools/wasi-headers/Cargo.toml generate-libc
  */
 
+#ifndef __wasi__
+#define __wasi__ 1
+#endif
+
+#ifndef __wasix__
+#define __wasix__ 1
+#endif
+
 #ifndef __wasi_api_h
 #define __wasi_api_h
 
@@ -652,24 +660,24 @@ typedef uint64_t __wasi_rights_t;
 #define __WASI_RIGHTS_SOCK_SHUTDOWN ((__wasi_rights_t)(1 << 28))
 
 /**
+ * Accept incoming connection
+ */
+#define __WASI_RIGHTS_SOCK_ACCEPT ((__wasi_rights_t)(1 << 29))
+
+/**
  * Connect to an address
  */
-#define __WASI_RIGHTS_SOCK_CONNECT ((__wasi_rights_t)(1 << 29))
+#define __WASI_RIGHTS_SOCK_CONNECT ((__wasi_rights_t)(1 << 30))
 
 /**
  * Listen for incoming connection on an address
  */
-#define __WASI_RIGHTS_SOCK_LISTEN ((__wasi_rights_t)(1 << 30))
+#define __WASI_RIGHTS_SOCK_LISTEN ((__wasi_rights_t)(1 << 31))
 
 /**
  * Bind an address to a socket
  */
-#define __WASI_RIGHTS_SOCK_BIND ((__wasi_rights_t)(1 << 31))
-
-/**
- * Accept incoming connection
- */
-#define __WASI_RIGHTS_SOCK_ACCEPT ((__wasi_rights_t)(1 << 32))
+#define __WASI_RIGHTS_SOCK_BIND ((__wasi_rights_t)(1 << 32))
 
 /**
  * Receive data on a socket

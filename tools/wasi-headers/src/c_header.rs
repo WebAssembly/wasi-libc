@@ -21,6 +21,10 @@ pub fn to_c(doc: &Document, inputs_str: &str) -> Generated {
  *     cargo run --manifest-path tools/wasi-headers/Cargo.toml generate-libc
  */
 
+#ifndef __wasi__
+#define __wasi__ 1
+#endif
+
 #ifndef __wasi_api_h
 #define __wasi_api_h
 

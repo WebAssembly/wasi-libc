@@ -594,6 +594,7 @@
 #define INADDR_ALLSNOOPERS_GROUP ((in_addr_t) 0xe000006a)
 #define INADDR_ANY ((in_addr_t) 0x00000000)
 #define INADDR_BROADCAST ((in_addr_t) 0xffffffff)
+#define INADDR_DUMMY ((in_addr_t) 0xc0000008)
 #define INADDR_LOOPBACK ((in_addr_t) 0x7f000001)
 #define INADDR_MAX_LOCAL_GROUP ((in_addr_t) 0xe00000ff)
 #define INADDR_NONE ((in_addr_t) 0xffffffff)
@@ -1735,6 +1736,7 @@
 #define TCP_NOTSENT_LOWAT 25
 #define TCP_QUEUE_SEQ 21
 #define TCP_QUICKACK 12
+#define TCP_RECEIVE_ZEROCOPY_FLAG_TLB_CLEAN_HINT 0x1
 #define TCP_REPAIR 19
 #define TCP_REPAIR_OFF 0
 #define TCP_REPAIR_OFF_NO_WP -1

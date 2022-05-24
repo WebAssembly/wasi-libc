@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <threads.h>
 #include <time.h>
+#include <_/cdefs.h>
 
 int nanosleep(const struct timespec *rqtp, struct timespec *rem) {
   int error = clock_nanosleep(CLOCK_REALTIME, 0, rqtp, rem);

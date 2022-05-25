@@ -166,10 +166,5 @@
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc-nocwd.h>
 #include <wasi/libc.h>
-#include <wasix/api.h>
-#include <wasix/libc-environ.h>
-#include <wasix/libc-find-relpath.h>
-#include <wasix/libc-nocwd.h>
-#include <wasix/libc.h>
 #include <wchar.h>
 #include <wctype.h>

@@ -183,6 +183,7 @@ __powf_log2_data
 __progname
 __progname_full
 __putenv
+__qsort_r
 __rand48_step
 __reallocarray
 __rem_pio2
@@ -228,8 +229,11 @@ __strerror_l
 __strftime_fmt_1
 __strftime_l
 __strncasecmp_l
+__strtod_l
+__strtof_l
 __strtoimax_internal
 __strtol_internal
+__strtold_l
 __strtoll_internal
 __strtoul_internal
 __strtoull_internal
@@ -931,6 +935,7 @@ putwchar_unlocked
 pwrite
 pwritev
 qsort
+qsort_r
 quick_exit
 raise
 rand

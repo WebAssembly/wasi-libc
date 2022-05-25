@@ -302,6 +302,12 @@
 #define __NR_openat2		(0x40000000 + 437)
 #define __NR_pidfd_getfd	(0x40000000 + 438)
 #define __NR_faccessat2		(0x40000000 + 439)
+#define __NR_process_madvise	(0x40000000 + 440)
+#define __NR_epoll_pwait2	(0x40000000 + 441)
+#define __NR_mount_setattr	(0x40000000 + 442)
+#define __NR_landlock_create_ruleset	(0x40000000 + 444)
+#define __NR_landlock_add_rule	(0x40000000 + 445)
+#define __NR_landlock_restrict_self	(0x40000000 + 446)
 
 
 #define __NR_rt_sigaction (0x40000000 + 512)

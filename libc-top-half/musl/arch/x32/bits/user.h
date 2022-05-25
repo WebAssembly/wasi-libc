@@ -1,5 +1,5 @@
 #undef __WORDSIZE
-#define __WORDSIZE 64
+#define __WORDSIZE 32
 
 typedef struct user_fpregs_struct {
 	uint16_t cwd, swd, ftw, fop;

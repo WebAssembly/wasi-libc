@@ -1,0 +1,16 @@
+[package]
+name = "wasix-headers"
+version = "0.0.1"
+authors = ["Dan Gohman <sunfish@mozilla.com>", "Pat Hickey <phickey@fastly.com>", "John Sharratt <johnathan.sharratt@gmail.com>"]
+license = "Apache-2.0"
+edition = "2018"
+publish = false
+
+[dependencies]
+heck = "0.3.1"
+witx = { path = "WASI/tools/witx" }
+anyhow = "1.0.22"
+clap = "2.23"
+
+[dev-dependencies]
+diff = "0.1.11"

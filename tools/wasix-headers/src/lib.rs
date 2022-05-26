@@ -5,8 +5,8 @@ pub use c_header::{to_c, Generated};
 use std::path::{Path, PathBuf};
 use witx::load;
 
-pub fn generate<P: AsRef<Path>>(inputs: &[P]) -> Result<Generated> {
-    let doc = load(&inputs)?;
+pub fn generate<P: AsRef<Path>>(inputs: &[P], is64bit: bool) -> Result<Generated> {
+    let doc = load(&inputs, is64bit)?;
 
     let inputs_str = &inputs
         .iter()
@@ -21,7 +21,7 @@ pub fn generate<P: AsRef<Path>>(inputs: &[P]) -> Result<Generated> {
         .collect::<Vec<_>>()
         .join(", ");
 
-    Ok(to_c(&doc, &inputs_str))
+    Ok(to_c(&doc, &inputs_str, is64bit))
 }
 
 pub fn snapshot_witx_files() -> Result<Vec<PathBuf>> {

@@ -8,7 +8,7 @@ pub struct Generated {
     pub source: String,
 }
 
-pub fn to_c(doc: &Document, inputs_str: &str) -> Generated {
+pub fn to_c(doc: &Document, inputs_str: &str, is64bit: bool) -> Generated {
     let mut header = String::new();
 
     header.push_str(&format!(
@@ -39,17 +39,40 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == 8, "non-wasi data layout");
+"#, 
+        inputs_str,
+    ));
 
-#ifdef __cplusplus
+    if is64bit {
+        header.push_str(&format!(
+        r#"_Static_assert(_Alignof(intptr_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(uintptr_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == 8, "non-wasi data layout");
+typedef int64_t __wasi_int_t;
+typedef uint64_t __wasi_uint_t;
+_Static_assert(_Alignof(__wasi_int_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(__wasi_uint_t) == 8, "non-wasi data layout");
+"#));
+    } else {
+        header.push_str(&format!(
+            r#"_Static_assert(_Alignof(intptr_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(uintptr_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
+typedef int32_t __wasi_int_t;
+typedef uint32_t __wasi_uint_t;
+_Static_assert(_Alignof(__wasi_int_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(__wasi_uint_t) == 4, "non-wasi data layout");
+"#));
+    }
+
+    header.push_str(&format!(
+        r#"#ifdef __cplusplus
 extern "C" {{
 #endif
 
 // TODO: Encoding this in witx.
 #define __WASI_DIRCOOKIE_START (UINT64_C(0))
-"#,
-        inputs_str,
-    ));
+"#));
 
     let mut source = String::new();
     source.push_str(&format!(
@@ -600,7 +623,10 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
                 | Instruction::I32FromChar8
                 | Instruction::I32FromU16
                 | Instruction::I32FromS16
-                | Instruction::I32FromU32 => top_as("int32_t"),
+                | Instruction::I32FromU32
+                | Instruction::I32FromPointer
+                | Instruction::I32FromConstPointer
+                | Instruction::I32FromUsize => top_as("int32_t"),
 
                 Instruction::I32FromBitflags { .. } | Instruction::I64FromBitflags { .. } => {
                     // Rely on C's casting for this
@@ -617,15 +643,15 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
 
                 Instruction::ListPointerLength => {
                     let list = operands.pop().unwrap();
-                    results.push(format!("(int64_t) {}", list));
-                    results.push(format!("(int64_t) {}_len", list));
+                    results.push(format!("(intptr_t) {}", list));
+                    results.push(format!("(intptr_t) {}_len", list));
                 }
                 Instruction::ReturnPointerGet { n } => {
                     // We currently match the wasi ABI with the actual
                     // function's API signature in C, this means when a return
                     // pointer is asked for we can simply forward our parameter
                     // that's a return pointer.
-                    results.push(format!("(int64_t) retptr{}", n));
+                    results.push(format!("(intptr_t) retptr{}", n));
                 }
 
                 Instruction::Load { .. } => {
@@ -788,7 +814,13 @@ fn builtin_type_name(b: BuiltinType) -> &'static str {
         BuiltinType::U64 {
             lang_ptr_size: false,
         } => "uint64_t",
-        BuiltinType::U32 => "uint32_t",
+        BuiltinType::U32 {
+            lang_ptr_size: true,
+        } => "size_t",
+        BuiltinType::U32 {
+            lang_ptr_size: false,
+        } => "uint32_t",
+        BuiltinType::Usize => "__wasi_uint_t",
         BuiltinType::S8 => "int8_t",
         BuiltinType::S16 => "int16_t",
         BuiltinType::S32 => "int32_t",

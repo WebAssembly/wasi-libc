@@ -19,14 +19,31 @@ pub fn to_c(doc: &Document, inputs_str: &str) -> Generated {
  * To regenerate this file execute:
  *
  *     cargo run --manifest-path tools/wasi-headers/Cargo.toml generate-libc
+ *
+ * Modifications to this file will cause CI to fail, the code generator tool
+ * must be modified to change this file.
+ *
+ * @file
+ * This file describes the [WASI] interface, consisting of functions, types,
+ * and defined values (macros).
+ *
+ * The interface described here is greatly inspired by [CloudABI]'s clean,
+ * thoughtfully-designed, capability-oriented, POSIX-style API.
+ *
+ * [CloudABI]: https://github.com/NuxiNL/cloudlibc
+ * [WASI]: https://github.com/WebAssembly/WASI/
  */
-
-#ifndef __wasi__
-#define __wasi__ 1
-#endif
 
 #ifndef __wasi_api_h
 #define __wasi_api_h
+
+#ifndef __wasi__
+#error <wasi/api.h> is only supported on WASI platforms.
+#endif
+
+#ifndef __wasm32__
+#error <wasi/api.h> only supports wasm32; doesn't yet support wasm64
+#endif
 
 #include <stddef.h>
 #include <stdint.h>
@@ -39,7 +56,7 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
 
 #ifdef __cplusplus
 extern "C" {{
@@ -135,9 +152,9 @@ fn print_alias(ret: &mut String, name: &Id, dest: &TypeRef) {
         }
         _ => {
             if name.as_str() == "size" {
-                // Special-case "size" as "uint32_t" -- TODO: Encode this in witx.
+                // Special-case "size" as "__SIZE_TYPE__" -- TODO: Encode this in witx.
                 ret.push_str(&format!(
-                    "typedef uint32_t __wasi_{}_t;\n",
+                    "typedef __SIZE_TYPE__ __wasi_{}_t;\n",
                     ident_name(name)
                 ));
             } else {
@@ -586,14 +603,13 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
                 // For the C bindings right now any parameter which needs its
                 // address taken is already taken as a pointer, so we can just
                 // forward the operand to the result.
-                Instruction::AddrOf => results.push(format!("{}", operands.pop().unwrap())),
+                Instruction::AddrOf => results.push(operands.pop().unwrap()),
 
-                Instruction::I64FromU64
-                | Instruction::I64FromPointer
-                | Instruction::I64FromConstPointer
-                | Instruction::I64FromUsize => top_as("int64_t"),
-
+                Instruction::I64FromU64 => top_as("int64_t"),
+                Instruction::I32FromPointer
+                | Instruction::I32FromConstPointer
                 | Instruction::I32FromHandle { .. }
+                | Instruction::I32FromUsize
                 | Instruction::I32FromChar
                 | Instruction::I32FromU8
                 | Instruction::I32FromS8
@@ -617,15 +633,15 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
 
                 Instruction::ListPointerLength => {
                     let list = operands.pop().unwrap();
-                    results.push(format!("(int64_t) {}", list));
-                    results.push(format!("(int64_t) {}_len", list));
+                    results.push(format!("(int32_t) {}", list));
+                    results.push(format!("(int32_t) {}_len", list));
                 }
                 Instruction::ReturnPointerGet { n } => {
                     // We currently match the wasi ABI with the actual
                     // function's API signature in C, this means when a return
                     // pointer is asked for we can simply forward our parameter
                     // that's a return pointer.
-                    results.push(format!("(int64_t) retptr{}", n));
+                    results.push(format!("(int32_t) retptr{}", n));
                 }
 
                 Instruction::Load { .. } => {
@@ -782,13 +798,13 @@ fn builtin_type_name(b: BuiltinType) -> &'static str {
         }
         BuiltinType::U8 { lang_c_char: false } => "uint8_t",
         BuiltinType::U16 => "uint16_t",
-        BuiltinType::U64 {
+        BuiltinType::U32 {
             lang_ptr_size: true,
         } => "size_t",
-        BuiltinType::U64 {
+        BuiltinType::U32 {
             lang_ptr_size: false,
-        } => "uint64_t",
-        BuiltinType::U32 => "uint32_t",
+        } => "uint32_t",
+        BuiltinType::U64 => "uint64_t",
         BuiltinType::S8 => "int8_t",
         BuiltinType::S16 => "int16_t",
         BuiltinType::S32 => "int32_t",

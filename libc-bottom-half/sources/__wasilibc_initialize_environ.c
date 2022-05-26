@@ -27,8 +27,8 @@ static char *empty_environ[1] = { NULL };
 // See the comments in libc-environ.h.
 void __wasilibc_initialize_environ(void) {
     // Get the sizes of the arrays we'll have to create to copy in the environment.
-    uint32_t environ_count;
-    uint64_t environ_buf_size;
+    __wasi_size_t environ_count;
+    __wasi_size_t environ_buf_size;
     __wasi_errno_t err = __wasi_environ_sizes_get(&environ_count, &environ_buf_size);
     if (err != __WASI_ERRNO_SUCCESS) {
         goto oserr;

@@ -29,7 +29,7 @@ ssize_t readv(int fildes, const struct iovec *iov, int iovcnt) {
     errno = EINVAL;
     return -1;
   }
-  uint32_t bytes_read;
+  __wasi_size_t bytes_read;
   __wasi_errno_t error = __wasi_fd_read(
       fildes, (const __wasi_iovec_t *)iov, iovcnt, &bytes_read);
   if (error != 0) {

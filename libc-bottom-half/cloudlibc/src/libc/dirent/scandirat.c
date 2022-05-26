@@ -38,7 +38,7 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***name
     return -1;
   }
   size_t buffer_processed = buffer_size;
-  uint32_t buffer_used = buffer_size;
+  __wasi_size_t buffer_used = buffer_size;
 
   // Space for the array to return to the caller.
   struct dirent **dirents = NULL;

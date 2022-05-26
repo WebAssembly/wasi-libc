@@ -13,7 +13,7 @@ ssize_t preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
     errno = EINVAL;
     return -1;
   }
-  uint32_t bytes_read;
+  __wasi_size_t bytes_read;
   __wasi_errno_t error = __wasi_fd_pread(
       fildes, (const __wasi_iovec_t *)iov, iovcnt, offset, &bytes_read);
   if (error != 0) {

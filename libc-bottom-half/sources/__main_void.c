@@ -13,8 +13,8 @@ int __main_void(void) {
     __wasi_errno_t err;
 
     // Get the sizes of the arrays we'll have to create to copy in the args.
-    uint64_t argv_buf_size;
-    uint32_t argc;
+    __wasi_size_t argv_buf_size;
+    __wasi_size_t argc;
     err = __wasi_args_sizes_get(&argc, &argv_buf_size);
     if (err != __WASI_ERRNO_SUCCESS) {
         _Exit(EX_OSERR);

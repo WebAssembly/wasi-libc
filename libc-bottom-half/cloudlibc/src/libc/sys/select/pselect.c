@@ -78,7 +78,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
   }
 
   // Execute poll().
-  uint32_t nevents;
+  __wasi_size_t nevents;
   __wasi_event_t events[nsubscriptions];
   __wasi_errno_t error =
       __wasi_poll_oneoff(subscriptions, events, nsubscriptions, &nevents);

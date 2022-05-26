@@ -374,6 +374,7 @@ __wasi_tty_get
 __wasi_tty_set
 __wasi_ws_connect
 __wasilibc_access
+__wasilibc_cwd
 __wasilibc_deinitialize_environ
 __wasilibc_dttoif
 __wasilibc_ensure_environ

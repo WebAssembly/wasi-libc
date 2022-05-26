@@ -90,7 +90,7 @@ struct dirent *readdir(DIR *dirp) {
     dirp->buffer_used = dirp->buffer_processed = dirp->buffer_size;
 
     // Load more directory entries and continue.
-    uint32_t buffer_used = dirp->buffer_used;
+    __wasi_size_t buffer_used = dirp->buffer_used;
     __wasi_errno_t error =
         // TODO: Remove the cast on `dirp->buffer` once the witx is updated with char8 support.
         __wasi_fd_readdir(dirp->fd, (uint8_t *)dirp->buffer, dirp->buffer_size,

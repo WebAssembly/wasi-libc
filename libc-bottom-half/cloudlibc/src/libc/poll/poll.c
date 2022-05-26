@@ -56,7 +56,7 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
   }
 
   // Execute poll().
-  uint32_t nevents;
+  __wasi_size_t nevents;
   __wasi_event_t events[nsubscriptions];
   __wasi_errno_t error =
       __wasi_poll_oneoff(subscriptions, events, nsubscriptions, &nevents);

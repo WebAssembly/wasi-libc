@@ -1,4 +1,4 @@
-wasix-libc as a whole is multi-licensed under the
+wasi-libc as a whole is multi-licensed under the
 Apache License v2.0 with LLVM Exceptions, the Apache License v2.0, and
 the MIT License. See the LICENSE-APACHE-LLVM, LICENSE-APACHE and LICENSE-MIT
 files, respectively, for details.
@@ -10,6 +10,6 @@ dlmalloc/                     - CC0; see the notice in malloc.c for details
 libc-bottom-half/cloudlibc/   - BSD-2-Clause; see the LICENSE file for details
 libc-top-half/musl/           - MIT; see the COPYRIGHT file for details
 
-wasix-libc changes to these files are multi-licensed under the
+wasi-libc changes to these files are multi-licensed under the
 Apache License v2.0 with LLVM Exceptions, the Apache License v2.0,
 the MIT License, and the original licenses of the third-party works.

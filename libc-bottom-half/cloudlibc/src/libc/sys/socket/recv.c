@@ -28,7 +28,7 @@ ssize_t recv(int socket, void *restrict buffer, size_t length, int flags) {
   __wasi_riflags_t ri_flags = flags;
 
   // Perform system call.
-  uint64_t ro_datalen;
+  __wasi_size_t ro_datalen;
   __wasi_roflags_t ro_flags;
   __wasi_errno_t error = __wasi_sock_recv(socket,
                                           ri_data, ri_data_len, ri_flags,

@@ -3161,7 +3161,6 @@
 #define __wasilibc___typedef_suseconds_t_h 
 #define __wasilibc___typedef_time_t_h 
 #define __wasilibc___typedef_uid_t_h 
-#define __wasix__ 1
 #define __wasm 1
 #define __wasm64 1
 #define __wasm64__ 1

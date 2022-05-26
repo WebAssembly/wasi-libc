@@ -34,8 +34,9 @@ BULK_MEMORY_THRESHOLD ?= 32
 
 # Set the target variables. Multiarch triples notably omit the vendor field,
 # which happens to be what we do for the main target triple too.
-TARGET_TRIPLE = wasm64-wasi
-MULTIARCH_TRIPLE = wasm64-wasi
+#TARGET_ARCH = wasm32
+TARGET_TRIPLE = $(TARGET_ARCH)-wasi
+MULTIARCH_TRIPLE = $(TARGET_ARCH)-wasi
 
 # These variables describe the locations of various files and directories in
 # the source tree.
@@ -292,11 +293,11 @@ MUSL_OMIT_HEADERS += \
     "stdarg.h" \
     "stddef.h"
 
-# Use the WASIX errno definitions.
+# Use the WASI errno definitions.
 MUSL_OMIT_HEADERS += \
     "bits/errno.h"
 
-# Remove headers that aren't supported yet or that aren't relevant for WASIX.
+# Remove headers that aren't supported yet or that aren't relevant for WASI.
 MUSL_OMIT_HEADERS += \
     "sys/procfs.h" \
     "sys/user.h" \
@@ -412,7 +413,7 @@ $(OBJDIR)/%.long-double.o: $(CURDIR)/%.c include_dirs
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
 $(OBJDIR)/%.no-floating-point.o: $(CURDIR)/%.c include_dirs
-	@mkdir -p "$(@D)"
+	@mkdir -p "$(@D)"	
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
 $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
@@ -432,7 +433,7 @@ startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS): CFLAGS += \
 $(LIBC_TOP_HALF_ALL_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS): CFLAGS += \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/include \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal \
-    -I$(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm64 \
+    -I$(LIBC_TOP_HALF_MUSL_DIR)/arch/$(TARGET_ARCH) \
     -I$(LIBC_TOP_HALF_MUSL_DIR)/arch/generic \
     -I$(LIBC_TOP_HALF_HEADERS_PRIVATE) \
     -Wno-parentheses \
@@ -456,7 +457,7 @@ include_dirs:
 	# Generate musl's bits/alltypes.h header.
 	mkdir -p "$(SYSROOT_INC)/bits"
 	sed -f $(LIBC_TOP_HALF_MUSL_DIR)/tools/mkalltypes.sed \
-	    $(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm64/bits/alltypes.h.in \
+	    $(LIBC_TOP_HALF_MUSL_DIR)/arch/$(TARGET_ARCH)/bits/alltypes.h.in \
 	    $(LIBC_TOP_HALF_MUSL_DIR)/include/alltypes.h.in \
 	    > "$(SYSROOT_INC)/bits/alltypes.h"
 
@@ -464,7 +465,7 @@ include_dirs:
 	cp -r "$(LIBC_TOP_HALF_MUSL_INC)"/* "$(SYSROOT_INC)"
 	# Copy in the musl's "bits" header files.
 	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/generic/bits/* "$(SYSROOT_INC)/bits"
-	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/wasm64/bits/* "$(SYSROOT_INC)/bits"
+	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/$(TARGET_ARCH)/bits/* "$(SYSROOT_INC)/bits"
 
 	# Remove selected header files.
 	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
@@ -529,7 +530,7 @@ check-symbols: startup_files libc
 	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$(DEFINED_SYMBOLS)" || echo $$undef_sym; \
 	done | grep -v "^__mul" > "$(UNDEFINED_SYMBOLS)"
-	grep '^_*imported_wasix_' "$(UNDEFINED_SYMBOLS)" \
+	grep '^_*imported_$(TARGET_OS)_' "$(UNDEFINED_SYMBOLS)" \
 	    > "$(SYSROOT_LIB)/libc.imports"
 
 	#

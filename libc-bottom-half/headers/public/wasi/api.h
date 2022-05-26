@@ -1,22 +1,35 @@
 /**
  * THIS FILE IS AUTO-GENERATED from the following files:
- *   wasix_snapshot_preview1.witx
+ *   wasi_snapshot_preview1.witx
  *
  * To regenerate this file execute:
  *
  *     cargo run --manifest-path tools/wasi-headers/Cargo.toml generate-libc
+ *
+ * Modifications to this file will cause CI to fail, the code generator tool
+ * must be modified to change this file.
+ *
+ * @file
+ * This file describes the [WASI] interface, consisting of functions, types,
+ * and defined values (macros).
+ *
+ * The interface described here is greatly inspired by [CloudABI]'s clean,
+ * thoughtfully-designed, capability-oriented, POSIX-style API.
+ *
+ * [CloudABI]: https://github.com/NuxiNL/cloudlibc
+ * [WASI]: https://github.com/WebAssembly/WASI/
  */
-
-#ifndef __wasi__
-#define __wasi__ 1
-#endif
-
-#ifndef __wasix__
-#define __wasix__ 1
-#endif
 
 #ifndef __wasi_api_h
 #define __wasi_api_h
+
+#ifndef __wasi__
+#error <wasi/api.h> is only supported on WASI platforms.
+#endif
+
+#ifndef __wasm32__
+#error <wasi/api.h> only supports wasm32; doesn't yet support wasm64
+#endif
 
 #include <stddef.h>
 #include <stdint.h>
@@ -29,7 +42,7 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,18 +50,7 @@ extern "C" {
 
 // TODO: Encoding this in witx.
 #define __WASI_DIRCOOKIE_START (UINT64_C(0))
-/**
- * Represents the length of a piece of data referenced by a pointer
- */
-typedef uint64_t __wasi_pointersize_t;
-
-_Static_assert(sizeof(__wasi_pointersize_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_pointersize_t) == 8, "witx calculated align");
-
-/**
- * Represents a number of items
- */
-typedef uint32_t __wasi_size_t;
+typedef __SIZE_TYPE__ __wasi_size_t;
 
 _Static_assert(sizeof(__wasi_size_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_size_t) == 4, "witx calculated align");
@@ -660,81 +662,9 @@ typedef uint64_t __wasi_rights_t;
 #define __WASI_RIGHTS_SOCK_SHUTDOWN ((__wasi_rights_t)(1 << 28))
 
 /**
- * Accept incoming connection
+ * The right to invoke `sock_accept`.
  */
 #define __WASI_RIGHTS_SOCK_ACCEPT ((__wasi_rights_t)(1 << 29))
-
-/**
- * Connect to an address
- */
-#define __WASI_RIGHTS_SOCK_CONNECT ((__wasi_rights_t)(1 << 30))
-
-/**
- * Listen for incoming connection on an address
- */
-#define __WASI_RIGHTS_SOCK_LISTEN ((__wasi_rights_t)(1 << 31))
-
-/**
- * Bind an address to a socket
- */
-#define __WASI_RIGHTS_SOCK_BIND ((__wasi_rights_t)(1 << 32))
-
-/**
- * Receive data on a socket
- */
-#define __WASI_RIGHTS_SOCK_RECV ((__wasi_rights_t)(1 << 33))
-
-/**
- * Send data on a socket
- */
-#define __WASI_RIGHTS_SOCK_SEND ((__wasi_rights_t)(1 << 34))
-
-/**
- * Retrieve locally bound address on a socket
- */
-#define __WASI_RIGHTS_SOCK_ADDR_LOCAL ((__wasi_rights_t)(1 << 35))
-
-/**
- * Retrieve remote address on a socket
- */
-#define __WASI_RIGHTS_SOCK_ADDR_REMOTE ((__wasi_rights_t)(1 << 36))
-
-/**
- * Receive datagram on a socket
- */
-#define __WASI_RIGHTS_SOCK_RECV_FROM ((__wasi_rights_t)(1 << 37))
-
-/**
- * Send datagram on a socket
- */
-#define __WASI_RIGHTS_SOCK_SEND_TO ((__wasi_rights_t)(1 << 38))
-
-/**
- * Option type
- */
-typedef uint8_t __wasi_option_t;
-
-#define __WASI_OPTION_NONE (UINT8_C(0))
-
-#define __WASI_OPTION_SOME (UINT8_C(1))
-
-_Static_assert(sizeof(__wasi_option_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_option_t) == 1, "witx calculated align");
-
-/**
- * Represents an optional timestamp
- */
-typedef union __wasi_option_timestamp_u_t {
-    uint8_t none;
-    __wasi_timestamp_t some;
-} __wasi_option_timestamp_u_t;
-typedef struct __wasi_option_timestamp_t {
-    uint8_t tag;
-    __wasi_option_timestamp_u_t u;
-} __wasi_option_timestamp_t;
-
-_Static_assert(sizeof(__wasi_option_timestamp_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_option_timestamp_t) == 8, "witx calculated align");
 
 /**
  * A file descriptor handle.
@@ -743,80 +673,6 @@ typedef int __wasi_fd_t;
 
 _Static_assert(sizeof(__wasi_fd_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_fd_t) == 4, "witx calculated align");
-
-/**
- * A process descriptor handle.
- */
-typedef int __wasi_pid_t;
-
-_Static_assert(sizeof(__wasi_pid_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_pid_t) == 4, "witx calculated align");
-
-/**
- * A thread handle
- */
-typedef int __wasi_tid_t;
-
-_Static_assert(sizeof(__wasi_tid_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_tid_t) == 4, "witx calculated align");
-
-/**
- * A bus process handle
- */
-typedef int __wasi_bid_t;
-
-_Static_assert(sizeof(__wasi_bid_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bid_t) == 4, "witx calculated align");
-
-/**
- * Represents an optional bus process
- */
-typedef union __wasi_option_bid_u_t {
-    uint8_t none;
-    __wasi_bid_t some;
-} __wasi_option_bid_u_t;
-typedef struct __wasi_option_bid_t {
-    uint8_t tag;
-    __wasi_option_bid_u_t u;
-} __wasi_option_bid_t;
-
-_Static_assert(sizeof(__wasi_option_bid_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_option_bid_t) == 4, "witx calculated align");
-
-/**
- * A bus call handle
- */
-typedef int __wasi_cid_t;
-
-_Static_assert(sizeof(__wasi_cid_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_cid_t) == 4, "witx calculated align");
-
-/**
- * Represents an optional call handle
- */
-typedef union __wasi_option_cid_u_t {
-    uint8_t none;
-    __wasi_cid_t some;
-} __wasi_option_cid_u_t;
-typedef struct __wasi_option_cid_t {
-    uint8_t tag;
-    __wasi_option_cid_u_t u;
-} __wasi_option_cid_t;
-
-_Static_assert(sizeof(__wasi_option_cid_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_option_cid_t) == 4, "witx calculated align");
-
-/**
- * Bool type
- */
-typedef uint8_t __wasi_bool_t;
-
-#define __WASI_BOOL_FALSE (UINT8_C(0))
-
-#define __WASI_BOOL_TRUE (UINT8_C(1))
-
-_Static_assert(sizeof(__wasi_bool_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bool_t) == 1, "witx calculated align");
 
 /**
  * A region of memory for scatter/gather reads.
@@ -830,14 +686,14 @@ typedef struct __wasi_iovec_t {
     /**
      * The length of the buffer to be filled.
      */
-    __wasi_pointersize_t buf_len;
+    __wasi_size_t buf_len;
 
 } __wasi_iovec_t;
 
-_Static_assert(sizeof(__wasi_iovec_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_iovec_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_iovec_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_iovec_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_iovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 4, "witx calculated offset");
 
 /**
  * A region of memory for scatter/gather writes.
@@ -851,14 +707,14 @@ typedef struct __wasi_ciovec_t {
     /**
      * The length of the buffer to be written.
      */
-    __wasi_pointersize_t buf_len;
+    __wasi_size_t buf_len;
 
 } __wasi_ciovec_t;
 
-_Static_assert(sizeof(__wasi_ciovec_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_ciovec_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_ciovec_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_ciovec_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_ciovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 4, "witx calculated offset");
 
 /**
  * Relative offset within a file.
@@ -1450,410 +1306,6 @@ _Static_assert(sizeof(__wasi_exitcode_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_exitcode_t) == 4, "witx calculated align");
 
 /**
- * Rect that represents the TTY.
- */
-typedef struct __wasi_tty_t {
-    /**
-     * Number of columns
-     */
-    uint32_t cols;
-
-    /**
-     * Number of rows
-     */
-    uint32_t rows;
-
-    /**
-     * Width of the screen in pixels
-     */
-    uint32_t width;
-
-    /**
-     * Height of the screen in pixels
-     */
-    uint32_t height;
-
-    /**
-     * Indicates if stdin is a TTY
-     */
-    __wasi_bool_t stdin_tty;
-
-    /**
-     * Indicates if stdout is a TTY
-     */
-    __wasi_bool_t stdout_tty;
-
-    /**
-     * Indicates if stderr is a TTY
-     */
-    __wasi_bool_t stderr_tty;
-
-    /**
-     * When enabled the TTY will echo input to console
-     */
-    __wasi_bool_t echo;
-
-    /**
-     * When enabled buffers the input until the return key is pressed
-     */
-    __wasi_bool_t line_buffered;
-
-} __wasi_tty_t;
-
-_Static_assert(sizeof(__wasi_tty_t) == 24, "witx calculated size");
-_Static_assert(_Alignof(__wasi_tty_t) == 4, "witx calculated align");
-_Static_assert(offsetof(__wasi_tty_t, cols) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_tty_t, rows) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_tty_t, width) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_tty_t, height) == 12, "witx calculated offset");
-_Static_assert(offsetof(__wasi_tty_t, stdin_tty) == 16, "witx calculated offset");
-_Static_assert(offsetof(__wasi_tty_t, stdout_tty) == 17, "witx calculated offset");
-_Static_assert(offsetof(__wasi_tty_t, stderr_tty) == 18, "witx calculated offset");
-_Static_assert(offsetof(__wasi_tty_t, echo) == 19, "witx calculated offset");
-_Static_assert(offsetof(__wasi_tty_t, line_buffered) == 20, "witx calculated offset");
-
-/**
- * Fault codes that can be raised on a bus session.
- */
-typedef uint32_t __wasi_bus_error_t;
-
-/**
- * operation successful
- */
-#define __WASI_BUS_ERROR_SUCCESS (UINT32_C(0))
-
-/**
- * there was an error while serializing the request or response.
- */
-#define __WASI_BUS_ERROR_SERIALIZATION (UINT32_C(1))
-
-/**
- * there was an error while deserializing the request or response.
- */
-#define __WASI_BUS_ERROR_DESERIALIZATION (UINT32_C(2))
-
-/**
- * the specified WAPM module does not exist.
- */
-#define __WASI_BUS_ERROR_INVALID_WAPM (UINT32_C(3))
-
-/**
- * failed to fetch the WAPM module.
- */
-#define __WASI_BUS_ERROR_FETCH_WAPM (UINT32_C(4))
-
-/**
- * failed to compile the WAPM module.
- */
-#define __WASI_BUS_ERROR_COMPILE_ERROR (UINT32_C(5))
-
-/**
- * the ABI is invalid for cross module calls.
- */
-#define __WASI_BUS_ERROR_INVALID_ABI (UINT32_C(6))
-
-/**
- * the request has been aborted.
- */
-#define __WASI_BUS_ERROR_ABORTED (UINT32_C(7))
-
-/**
- * the handle is not valid.
- */
-#define __WASI_BUS_ERROR_INVALID_HANDLE (UINT32_C(8))
-
-#define __WASI_BUS_ERROR_INVALID_TOPIC (UINT32_C(9))
-
-/**
- * some mandatory callbacks were not registered.
- */
-#define __WASI_BUS_ERROR_MISSING_CALLBACK (UINT32_C(10))
-
-/**
- * this operation is not supported on this platform.
- */
-#define __WASI_BUS_ERROR_UNSUPPORTED (UINT32_C(11))
-
-/**
- * invalid input was supplied in the call resulting in a bad request.
- */
-#define __WASI_BUS_ERROR_BAD_REQUEST (UINT32_C(12))
-
-/**
- * access denied
- */
-#define __WASI_BUS_ERROR_ACCESS_DENIED (UINT32_C(13))
-
-/**
- * an internal failure has occured
- */
-#define __WASI_BUS_ERROR_INTERNAL_FAILURE (UINT32_C(14))
-
-/**
- * memory allocation has failed
- */
-#define __WASI_BUS_ERROR_MEMORY_ALLOCATION_FAILED (UINT32_C(15))
-
-/**
- * bus invocation has failed
- */
-#define __WASI_BUS_ERROR_BUS_INVOCATION_FAILED (UINT32_C(16))
-
-/**
- * result already consumed
- */
-#define __WASI_BUS_ERROR_ALREADY_CONSUMED (UINT32_C(17))
-
-/**
- * memory access violation
- */
-#define __WASI_BUS_ERROR_MEMORY_ACCESS_VIOLATION (UINT32_C(18))
-
-/**
- * unknown error
- */
-#define __WASI_BUS_ERROR_UNKNOWN_ERROR (UINT32_C(19))
-
-_Static_assert(sizeof(__wasi_bus_error_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_error_t) == 4, "witx calculated align");
-
-/**
- * Type of stdio mode to run for the sub process
- */
-typedef uint8_t __wasi_stdio_mode_t;
-
-/**
- * The stdio will be piped
- */
-#define __WASI_STDIO_MODE_PIPED (UINT8_C(0))
-
-/**
- * The stdio will inherit from its parent
- */
-#define __WASI_STDIO_MODE_INHERIT (UINT8_C(1))
-
-/**
- * The stdio will be dumped to null
- */
-#define __WASI_STDIO_MODE_NULL (UINT8_C(2))
-
-/**
- * The stdio will be written to the log file
- */
-#define __WASI_STDIO_MODE_LOG (UINT8_C(3))
-
-_Static_assert(sizeof(__wasi_stdio_mode_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_stdio_mode_t) == 1, "witx calculated align");
-
-/**
- * Bus process handles.
- */
-typedef struct __wasi_bus_handles_t {
-    /**
-     * Handle of the bus process
-     */
-    __wasi_bid_t handle;
-
-    /**
-     * File handle for STDIN
-     */
-    __wasi_fd_t stdin;
-
-    /**
-     * File handle for STDOUT
-     */
-    __wasi_fd_t stdout;
-
-    /**
-     * File handle for STDERR
-     */
-    __wasi_fd_t stderr;
-
-} __wasi_bus_handles_t;
-
-_Static_assert(sizeof(__wasi_bus_handles_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_handles_t) == 4, "witx calculated align");
-_Static_assert(offsetof(__wasi_bus_handles_t, handle) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_handles_t, stdin) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_handles_t, stdout) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_handles_t, stderr) == 12, "witx calculated offset");
-
-/**
- * Bus process event.
- */
-typedef struct __wasi_bus_event_exit_t {
-    /**
-     * Exit code of the bus process that has exited
-     */
-    __wasi_exitcode_t rval;
-
-} __wasi_bus_event_exit_t;
-
-_Static_assert(sizeof(__wasi_bus_event_exit_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_event_exit_t) == 4, "witx calculated align");
-_Static_assert(offsetof(__wasi_bus_event_exit_t, rval) == 0, "witx calculated offset");
-
-/**
- * Type of a subscription to an event or its occurrence.
- */
-typedef uint8_t __wasi_bus_data_type_t;
-
-/**
- * The bus process has been invoked by a caller
- */
-#define __WASI_BUS_DATA_TYPE_CALL (UINT8_C(0))
-
-/**
- * Callback with some out-of-band data to the caller
- */
-#define __WASI_BUS_DATA_TYPE_CALLBACK (UINT8_C(1))
-
-/**
- * Call within the bus process has returned
- */
-#define __WASI_BUS_DATA_TYPE_REPLY (UINT8_C(2))
-
-_Static_assert(sizeof(__wasi_bus_data_type_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_data_type_t) == 1, "witx calculated align");
-
-/**
- * Serialization format of data on the bus
- */
-typedef uint8_t __wasi_bus_data_format_t;
-
-/**
- * Raw binary data
- */
-#define __WASI_BUS_DATA_FORMAT_RAW (UINT8_C(0))
-
-/**
- * Uses the bincode serializer
- */
-#define __WASI_BUS_DATA_FORMAT_BINCODE (UINT8_C(1))
-
-/**
- * Uses the message pack serializer
- */
-#define __WASI_BUS_DATA_FORMAT_MESSAGE_PACK (UINT8_C(2))
-
-/**
- * JSON
- */
-#define __WASI_BUS_DATA_FORMAT_JSON (UINT8_C(3))
-
-/**
- * YAML
- */
-#define __WASI_BUS_DATA_FORMAT_YAML (UINT8_C(4))
-
-/**
- * XML
- */
-#define __WASI_BUS_DATA_FORMAT_XML (UINT8_C(5))
-
-_Static_assert(sizeof(__wasi_bus_data_format_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_data_format_t) == 1, "witx calculated align");
-
-/**
- * Bus data for a callback, call or reply event.
- */
-typedef struct __wasi_bus_event_data_t {
-    /**
-     * Type of event data that is held here
-     */
-    __wasi_bus_data_type_t ty;
-
-    /**
-     * Format of the data on the bus
-     */
-    __wasi_bus_data_format_t format;
-
-    /**
-     * Handle of the call that has made a callback
-     */
-    __wasi_cid_t cid;
-
-    /**
-     * The topic that describes the event that happened
-     */
-    __wasi_pointersize_t topic_len;
-
-    /**
-     * The buffer where event data is stored
-     */
-    __wasi_pointersize_t buf_len;
-
-} __wasi_bus_event_data_t;
-
-_Static_assert(sizeof(__wasi_bus_event_data_t) == 24, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_event_data_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_bus_event_data_t, ty) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_data_t, format) == 1, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_data_t, cid) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_data_t, topic_len) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_data_t, buf_len) == 16, "witx calculated offset");
-
-/**
- * Bus process reply event.
- */
-typedef struct __wasi_bus_event_fault_t {
-    /**
-     * Handle of the call where this event occurs for
-     */
-    __wasi_cid_t cid;
-
-    /**
-     * Fault that was raised against this call
-     */
-    __wasi_bus_error_t fault;
-
-} __wasi_bus_event_fault_t;
-
-_Static_assert(sizeof(__wasi_bus_event_fault_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_event_fault_t) == 4, "witx calculated align");
-_Static_assert(offsetof(__wasi_bus_event_fault_t, cid) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_fault_t, fault) == 4, "witx calculated offset");
-
-/**
- * Type of a subscription to an event or its occurrence.
- */
-typedef uint8_t __wasi_bus_event_type_t;
-
-/**
- * The bus process has exited
- */
-#define __WASI_BUS_EVENT_TYPE_EXIT (UINT8_C(0))
-
-/**
- * The bus data recevied for a specific event
- */
-#define __WASI_BUS_EVENT_TYPE_DATA (UINT8_C(1))
-
-/**
- * Fault has occured on one of the calls
- */
-#define __WASI_BUS_EVENT_TYPE_FAULT (UINT8_C(2))
-
-_Static_assert(sizeof(__wasi_bus_event_type_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_event_type_t) == 1, "witx calculated align");
-
-/**
- * The contents of a `subscription`.
- */
-typedef union __wasi_bus_event_u_t {
-    __wasi_bus_event_exit_t exit;
-    __wasi_bus_event_data_t data;
-    __wasi_bus_event_fault_t fault;
-} __wasi_bus_event_u_t;
-typedef struct __wasi_bus_event_t {
-    uint8_t tag;
-    __wasi_bus_event_u_t u;
-} __wasi_bus_event_t;
-
-_Static_assert(sizeof(__wasi_bus_event_t) == 32, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_event_t) == 8, "witx calculated align");
-
-/**
  * Signal condition.
  */
 typedef uint8_t __wasi_signal_t;
@@ -2073,410 +1525,6 @@ typedef uint16_t __wasi_roflags_t;
 #define __WASI_ROFLAGS_RECV_DATA_TRUNCATED ((__wasi_roflags_t)(1 << 0))
 
 /**
- * Socket type
- */
-typedef uint8_t __wasi_sock_type_t;
-
-/**
- * The file descriptor or file refers to a datagram socket.
- */
-#define __WASI_SOCK_TYPE_SOCKET_DGRAM (UINT8_C(0))
-
-/**
- * The file descriptor or file refers to a byte-stream socket.
- */
-#define __WASI_SOCK_TYPE_SOCKET_STREAM (UINT8_C(1))
-
-_Static_assert(sizeof(__wasi_sock_type_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_sock_type_t) == 1, "witx calculated align");
-
-/**
- * Socket status
- */
-typedef uint8_t __wasi_sock_status_t;
-
-/**
- * The socket is still opening
- */
-#define __WASI_SOCK_STATUS_OPENING (UINT8_C(0))
-
-/**
- * The socket has fully opened
- */
-#define __WASI_SOCK_STATUS_OPENED (UINT8_C(1))
-
-/**
- * The socket has closed
- */
-#define __WASI_SOCK_STATUS_CLOSED (UINT8_C(2))
-
-/**
- * The socket has failed
- */
-#define __WASI_SOCK_STATUS_FAILED (UINT8_C(3))
-
-_Static_assert(sizeof(__wasi_sock_status_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_sock_status_t) == 1, "witx calculated align");
-
-/**
- * Socket option
- */
-typedef uint8_t __wasi_sock_option_t;
-
-/**
- * Reuse Port
- */
-#define __WASI_SOCK_OPTION_REUSE_PORT (UINT8_C(0))
-
-/**
- * Reuse Address
- */
-#define __WASI_SOCK_OPTION_REUSE_ADDR (UINT8_C(1))
-
-/**
- * No delay
- */
-#define __WASI_SOCK_OPTION_NODELAY (UINT8_C(2))
-
-/**
- * Only accept IPv6
- */
-#define __WASI_SOCK_OPTION_ONLY_V6 (UINT8_C(3))
-
-/**
- * Broadcast
- */
-#define __WASI_SOCK_OPTION_BROADCAST (UINT8_C(4))
-
-/**
- * Multicast Loop IPv4
- */
-#define __WASI_SOCK_OPTION_MULTICAST_LOOP_V4 (UINT8_C(5))
-
-/**
- * Multicast Loop IPv6
- */
-#define __WASI_SOCK_OPTION_MULTICAST_LOOP_V6 (UINT8_C(6))
-
-/**
- * Promiscuous
- */
-#define __WASI_SOCK_OPTION_PROMISCUOUS (UINT8_C(7))
-
-_Static_assert(sizeof(__wasi_sock_option_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_sock_option_t) == 1, "witx calculated align");
-
-/**
- * Level of security to allow to the streaming connection
- */
-typedef uint8_t __wasi_stream_security_t;
-
-/**
- * Unencrypted
- */
-#define __WASI_STREAM_SECURITY_UNENCRYPTED ((__wasi_stream_security_t)(1 << 0))
-
-/**
- * Any encryption
- */
-#define __WASI_STREAM_SECURITY_ANY_ENCRYPTION ((__wasi_stream_security_t)(1 << 1))
-
-/**
- * Classic encryption
- */
-#define __WASI_STREAM_SECURITY_CLASSIC_ENCRYPTION ((__wasi_stream_security_t)(1 << 2))
-
-/**
- * Double encryption
- */
-#define __WASI_STREAM_SECURITY_DOUBLE_ENCRYPTION ((__wasi_stream_security_t)(1 << 3))
-
-/**
- * Hardware address (MAC)
- */
-typedef struct __wasi_hardware_address_t {
-    uint8_t n0;
-
-    uint8_t n1;
-
-    uint8_t n2;
-
-    uint8_t h0;
-
-    uint8_t h1;
-
-    uint8_t h2;
-
-} __wasi_hardware_address_t;
-
-_Static_assert(sizeof(__wasi_hardware_address_t) == 6, "witx calculated size");
-_Static_assert(_Alignof(__wasi_hardware_address_t) == 1, "witx calculated align");
-_Static_assert(offsetof(__wasi_hardware_address_t, n0) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_hardware_address_t, n1) == 1, "witx calculated offset");
-_Static_assert(offsetof(__wasi_hardware_address_t, n2) == 2, "witx calculated offset");
-_Static_assert(offsetof(__wasi_hardware_address_t, h0) == 3, "witx calculated offset");
-_Static_assert(offsetof(__wasi_hardware_address_t, h1) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_hardware_address_t, h2) == 5, "witx calculated offset");
-
-/**
- * IP port number
- */
-typedef uint16_t __wasi_ip_port_t;
-
-_Static_assert(sizeof(__wasi_ip_port_t) == 2, "witx calculated size");
-_Static_assert(_Alignof(__wasi_ip_port_t) == 2, "witx calculated align");
-
-/**
- * Address family
- */
-typedef uint8_t __wasi_address_family_t;
-
-/**
- * IP v4
- */
-#define __WASI_ADDRESS_FAMILY_INET4 (UINT8_C(0))
-
-/**
- * IP v6
- */
-#define __WASI_ADDRESS_FAMILY_INET6 (UINT8_C(1))
-
-_Static_assert(sizeof(__wasi_address_family_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_address_family_t) == 1, "witx calculated align");
-
-/**
- * An IPv4 address is a 32-bit number that uniquely identifies a network interface on a machine.
- */
-typedef struct __wasi_addr_ip4_t {
-    uint8_t n0;
-
-    uint8_t n1;
-
-    uint8_t h0;
-
-    uint8_t h1;
-
-} __wasi_addr_ip4_t;
-
-_Static_assert(sizeof(__wasi_addr_ip4_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_ip4_t) == 1, "witx calculated align");
-_Static_assert(offsetof(__wasi_addr_ip4_t, n0) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip4_t, n1) == 1, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip4_t, h0) == 2, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip4_t, h1) == 3, "witx calculated offset");
-
-/**
- * An IPv4 address with a port number
- */
-typedef struct __wasi_addr_ip4_port_t {
-    __wasi_addr_ip4_t addr;
-
-    __wasi_ip_port_t port;
-
-} __wasi_addr_ip4_port_t;
-
-_Static_assert(sizeof(__wasi_addr_ip4_port_t) == 6, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_ip4_port_t) == 2, "witx calculated align");
-_Static_assert(offsetof(__wasi_addr_ip4_port_t, addr) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip4_port_t, port) == 4, "witx calculated offset");
-
-/**
- * An IPv4 address CIDR
- */
-typedef struct __wasi_addr_ip4_cidr_t {
-    __wasi_addr_ip4_t addr;
-
-    uint8_t prefix;
-
-} __wasi_addr_ip4_cidr_t;
-
-_Static_assert(sizeof(__wasi_addr_ip4_cidr_t) == 5, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_ip4_cidr_t) == 1, "witx calculated align");
-_Static_assert(offsetof(__wasi_addr_ip4_cidr_t, addr) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip4_cidr_t, prefix) == 4, "witx calculated offset");
-
-/**
- * An IPv6 address is a 128-bit number that uniquely identifies a network interface on a machine.
- */
-typedef struct __wasi_addr_ip6_t {
-    uint16_t n0;
-
-    uint16_t n1;
-
-    uint16_t n2;
-
-    uint16_t n3;
-
-    uint16_t h0;
-
-    uint16_t h1;
-
-    uint16_t h2;
-
-    uint16_t h3;
-
-} __wasi_addr_ip6_t;
-
-_Static_assert(sizeof(__wasi_addr_ip6_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_ip6_t) == 2, "witx calculated align");
-_Static_assert(offsetof(__wasi_addr_ip6_t, n0) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip6_t, n1) == 2, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip6_t, n2) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip6_t, n3) == 6, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip6_t, h0) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip6_t, h1) == 10, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip6_t, h2) == 12, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip6_t, h3) == 14, "witx calculated offset");
-
-/**
- * An IPv6 address with a port number
- */
-typedef struct __wasi_addr_ip6_port_t {
-    __wasi_addr_ip6_t addr;
-
-    __wasi_ip_port_t port;
-
-} __wasi_addr_ip6_port_t;
-
-_Static_assert(sizeof(__wasi_addr_ip6_port_t) == 18, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_ip6_port_t) == 2, "witx calculated align");
-_Static_assert(offsetof(__wasi_addr_ip6_port_t, addr) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip6_port_t, port) == 16, "witx calculated offset");
-
-/**
- * An IPv6 address CIDR
- */
-typedef struct __wasi_addr_ip6_cidr_t {
-    __wasi_addr_ip6_t addr;
-
-    uint8_t prefix;
-
-} __wasi_addr_ip6_cidr_t;
-
-_Static_assert(sizeof(__wasi_addr_ip6_cidr_t) == 18, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_ip6_cidr_t) == 2, "witx calculated align");
-_Static_assert(offsetof(__wasi_addr_ip6_cidr_t, addr) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip6_cidr_t, prefix) == 16, "witx calculated offset");
-
-/**
- * Union of all possible addresses type
- */
-typedef union __wasi_addr_ip_u_t {
-    __wasi_addr_ip4_t inet4;
-    __wasi_addr_ip6_t inet6;
-} __wasi_addr_ip_u_t;
-typedef struct __wasi_addr_ip_t {
-    uint8_t tag;
-    __wasi_addr_ip_u_t u;
-} __wasi_addr_ip_t;
-
-_Static_assert(sizeof(__wasi_addr_ip_t) == 18, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_ip_t) == 2, "witx calculated align");
-
-/**
- * Union that makes a generic IP address and port
- */
-typedef union __wasi_addr_port_u_t {
-    __wasi_addr_ip4_port_t inet4;
-    __wasi_addr_ip6_port_t inet6;
-} __wasi_addr_port_u_t;
-typedef struct __wasi_addr_port_t {
-    uint8_t tag;
-    __wasi_addr_port_u_t u;
-} __wasi_addr_port_t;
-
-_Static_assert(sizeof(__wasi_addr_port_t) == 20, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_port_t) == 2, "witx calculated align");
-
-/**
- * Union that makes a generic IP address and prefix. a.k.a. CIDR
- */
-typedef union __wasi_addr_cidr_u_t {
-    __wasi_addr_ip4_cidr_t inet4;
-    __wasi_addr_ip6_cidr_t inet6;
-} __wasi_addr_cidr_u_t;
-typedef struct __wasi_addr_cidr_t {
-    uint8_t tag;
-    __wasi_addr_cidr_u_t u;
-} __wasi_addr_cidr_t;
-
-_Static_assert(sizeof(__wasi_addr_cidr_t) == 20, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_cidr_t) == 2, "witx calculated align");
-
-typedef struct __wasi_route_t {
-    __wasi_addr_cidr_t cidr;
-
-    __wasi_addr_ip_t via_router;
-
-    __wasi_option_timestamp_t preferred_until;
-
-    __wasi_option_timestamp_t expires_at;
-
-} __wasi_route_t;
-
-_Static_assert(sizeof(__wasi_route_t) == 72, "witx calculated size");
-_Static_assert(_Alignof(__wasi_route_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_route_t, cidr) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_route_t, via_router) == 20, "witx calculated offset");
-_Static_assert(offsetof(__wasi_route_t, preferred_until) == 40, "witx calculated offset");
-_Static_assert(offsetof(__wasi_route_t, expires_at) == 56, "witx calculated offset");
-
-/**
- * HTTP request handles used to send and receive data to the server
- */
-typedef struct __wasi_http_handles_t {
-    /**
-     * File handle used to write the request data
-     */
-    __wasi_fd_t request;
-
-    /**
-     * File handle used to receive the response data
-     */
-    __wasi_fd_t response;
-
-    /**
-     * File handle used to read the response headers
-     * (entries are separated by line feeds)
-     */
-    __wasi_fd_t headers;
-
-} __wasi_http_handles_t;
-
-_Static_assert(sizeof(__wasi_http_handles_t) == 12, "witx calculated size");
-_Static_assert(_Alignof(__wasi_http_handles_t) == 4, "witx calculated align");
-_Static_assert(offsetof(__wasi_http_handles_t, request) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_http_handles_t, response) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_http_handles_t, headers) == 8, "witx calculated offset");
-
-/**
- * HTTP response status
- */
-typedef struct __wasi_http_status_t {
-    __wasi_bool_t ok;
-
-    __wasi_bool_t redirected;
-
-    /**
-     * Size of the response
-     */
-    __wasi_filesize_t size;
-
-    /**
-     * HTTP status code for this response
-     */
-    uint16_t status;
-
-} __wasi_http_status_t;
-
-_Static_assert(sizeof(__wasi_http_status_t) == 24, "witx calculated size");
-_Static_assert(_Alignof(__wasi_http_status_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_http_status_t, ok) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_http_status_t, redirected) == 1, "witx calculated offset");
-_Static_assert(offsetof(__wasi_http_status_t, size) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_http_status_t, status) == 16, "witx calculated offset");
-
-/**
  * Flags provided to `sock_send`. As there are currently no flags
  * defined, it must be set to zero.
  */
@@ -2501,31 +1549,6 @@ typedef uint8_t __wasi_sdflags_t;
 #define __WASI_SDFLAGS_WR ((__wasi_sdflags_t)(1 << 1))
 
 /**
- * Describes the type of timeout what will be changed
- */
-typedef uint8_t __wasi_timeout_type_t;
-
-/**
- * Read operation timeout
- */
-#define __WASI_TIMEOUT_TYPE_READ ((__wasi_timeout_type_t)(1 << 0))
-
-/**
- * Write operation timeout
- */
-#define __WASI_TIMEOUT_TYPE_WRITE ((__wasi_timeout_type_t)(1 << 1))
-
-/**
- * Connections to other sockets
- */
-#define __WASI_TIMEOUT_TYPE_CONNECT ((__wasi_timeout_type_t)(1 << 2))
-
-/**
- * Accept connection timeout
- */
-#define __WASI_TIMEOUT_TYPE_ACCEPT ((__wasi_timeout_type_t)(1 << 3))
-
-/**
  * Identifiers for preopened capabilities.
  */
 typedef uint8_t __wasi_preopentype_t;
@@ -2545,7 +1568,7 @@ typedef struct __wasi_prestat_dir_t {
     /**
      * The length of the directory name for use with `fd_prestat_dir_name`.
      */
-    uint32_t pr_name_len;
+    __wasi_size_t pr_name_len;
 
 } __wasi_prestat_dir_t;
 
@@ -2568,7 +1591,7 @@ _Static_assert(sizeof(__wasi_prestat_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
 
 /**
- * @defgroup wasix_snapshot_preview1
+ * @defgroup wasi_snapshot_preview1
  * @{
  */
 
@@ -2589,7 +1612,7 @@ __wasi_errno_t __wasi_args_get(
  */
 __wasi_errno_t __wasi_args_sizes_get(
     __wasi_size_t *retptr0,
-    __wasi_pointersize_t *retptr1
+    __wasi_size_t *retptr1
 ) __attribute__((__warn_unused_result__));
 /**
  * Read environment variable data.
@@ -2608,7 +1631,7 @@ __wasi_errno_t __wasi_environ_get(
  */
 __wasi_errno_t __wasi_environ_sizes_get(
     __wasi_size_t *retptr0,
-    __wasi_pointersize_t *retptr1
+    __wasi_size_t *retptr1
 ) __attribute__((__warn_unused_result__));
 /**
  * Return the resolution of a clock.
@@ -2802,7 +1825,7 @@ __wasi_errno_t __wasi_fd_prestat_dir_name(
      * A buffer into which to write the preopened directory name.
      */
     uint8_t * path,
-    __wasi_pointersize_t path_len
+    __wasi_size_t path_len
 ) __attribute__((__warn_unused_result__));
 /**
  * Write to a file descriptor, without using and updating the file descriptor's offset.
@@ -2863,7 +1886,7 @@ __wasi_errno_t __wasi_fd_readdir(
      * The buffer where directory entries are stored
      */
     uint8_t * buf,
-    __wasi_pointersize_t buf_len,
+    __wasi_size_t buf_len,
     /**
      * The location within the directory to start reading
      */
@@ -2886,13 +1909,6 @@ __wasi_errno_t __wasi_fd_renumber(
      * The file descriptor to overwrite.
      */
     __wasi_fd_t to
-) __attribute__((__warn_unused_result__));
-/**
- * Atomically duplicate a file handle.
- */
-__wasi_errno_t __wasi_fd_dup(
-    __wasi_fd_t fd,
-    __wasi_fd_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Move the offset of a file descriptor.
@@ -2944,15 +1960,6 @@ __wasi_errno_t __wasi_fd_write(
      */
     size_t iovs_len,
     __wasi_size_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Opens a pipe with two file handles
- * 
- * Pipes are bidirectional
- */
-__wasi_errno_t __wasi_pipe(
-    __wasi_fd_t *retptr0,
-    __wasi_fd_t *retptr1
 ) __attribute__((__warn_unused_result__));
 /**
  * Create a directory.
@@ -3089,7 +2096,7 @@ __wasi_errno_t __wasi_path_readlink(
      * The buffer to which to write the contents of the symbolic link.
      */
     uint8_t * buf,
-    __wasi_pointersize_t buf_len,
+    __wasi_size_t buf_len,
     __wasi_size_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
@@ -3211,938 +2218,7 @@ __wasi_errno_t __wasi_random_get(
      * The buffer to fill with random data.
      */
     uint8_t * buf,
-    __wasi_pointersize_t buf_len
-) __attribute__((__warn_unused_result__));
-/**
- * Retrieves the current state of the TTY
- */
-__wasi_errno_t __wasi_tty_get(
-    __wasi_tty_t * state
-) __attribute__((__warn_unused_result__));
-/**
- * Updates the properties of the rect
- */
-__wasi_errno_t __wasi_tty_set(
-    __wasi_tty_t * state
-) __attribute__((__warn_unused_result__));
-/**
- * Returns the current working directory
- * If the path exceeds the size of the buffer then this function
- * will fill the path_len with the needed size and return EOVERFLOW
- */
-__wasi_errno_t __wasi_getcwd(
-    /**
-     * The buffer where current directory is stored
-     */
-    uint8_t * path,
-    __wasi_pointersize_t * path_len
-) __attribute__((__warn_unused_result__));
-/**
- * Sets the current working directory
- */
-__wasi_errno_t __wasi_chdir(
-    /**
-     * Path to change the current working directory to
-     */
-    const char *path
-) __attribute__((__warn_unused_result__));
-/**
- * Creates a new thread by spawning that shares the same
- * memory address space, file handles and main event loops.
- * The function referenced by the fork call must be
- * exported by the web assembly process.
- * @return
- * Returns the thread index of the newly created thread
- * (indices always start from zero)
- */
-__wasi_errno_t __wasi_thread_spawn(
-    /**
-     * Name of the function that will be invoked as a new thread
-     */
-    const char *name,
-    /**
-     * User data that will be supplied to the function when its called
-     */
-    uint64_t user_data,
-    /**
-     * Indicates if the function will operate as a reactor or
-     * as a normal thread. Reactors will be repeatable called
-     * whenever IO work is available to be processed.
-     */
-    __wasi_bool_t reactor,
-    __wasi_tid_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Sends the current thread to sleep for a period of time
- */
-__wasi_errno_t __wasi_thread_sleep(
-    /**
-     * Amount of time that the thread should sleep
-     */
-    __wasi_timestamp_t duration
-) __attribute__((__warn_unused_result__));
-/**
- * Returns the index of the current thread
- * (threads indices are sequencial from zero)
- */
-__wasi_errno_t __wasi_thread_id(
-    __wasi_tid_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Joins this thread with another thread, blocking this
- * one until the other finishes
- */
-__wasi_errno_t __wasi_thread_join(
-    /**
-     * Handle of the thread to wait on
-     */
-    __wasi_tid_t tid
-) __attribute__((__warn_unused_result__));
-/**
- * Returns the available parallelism which is normally the
- * number of available cores that can run concurrently
- */
-__wasi_errno_t __wasi_thread_parallelism(
-    __wasi_size_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Returns the handle of the current process
- */
-__wasi_errno_t __wasi_getpid(
-    __wasi_pid_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Terminates the current running thread, if this is the last thread then
- * the process will also exit with the specified exit code. An exit code
- * of 0 indicates successful termination of the thread. The meanings of
- * other values is dependent on the environment.
- */
-_Noreturn void __wasi_thread_exit(
-    /**
-     * The exit code returned by the process.
-     */
-    __wasi_exitcode_t rval
-);
-/**
- * Spawns a new bus process for a particular web WebAssembly
- * binary that is referenced by its process name.
- * @return
- * Returns a bus process id that can be used to invoke calls
- */
-__wasi_bus_error_t __wasi_bus_spawn_local(
-    /**
-     * Name of the process to be spawned
-     */
-    const char *name,
-    /**
-     * Indicates if the process will chroot or not
-     */
-    __wasi_bool_t chroot,
-    /**
-     * List of the arguments to pass the process
-     * (entries are separated by line feeds)
-     */
-    const char *args,
-    /**
-     * List of the preopens for this process
-     * (entries are separated by line feeds)
-     */
-    const char *preopen,
-    /**
-     * How will stdin be handled
-     */
-    __wasi_stdio_mode_t stdin,
-    /**
-     * How will stdout be handled
-     */
-    __wasi_stdio_mode_t stdout,
-    /**
-     * How will stderr be handled
-     */
-    __wasi_stdio_mode_t stderr,
-    /**
-     * Working directory where this process should run
-     * (passing '.' will use the current directory)
-     */
-    const char *working_dir,
-    __wasi_bus_handles_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Spawns a new bus process for a particular web WebAssembly
- * binary that is referenced by its process name on a remote instance
- * @return
- * Returns a bus process id that can be used to invoke calls
- */
-__wasi_bus_error_t __wasi_bus_spawn_remote(
-    /**
-     * Name of the process to be spawned
-     */
-    const char *name,
-    /**
-     * Indicates if the process will chroot or not
-     */
-    __wasi_bool_t chroot,
-    /**
-     * List of the arguments to pass the process
-     * (entries are separated by line feeds)
-     */
-    const char *args,
-    /**
-     * List of the preopens for this process
-     * (entries are separated by line feeds)
-     */
-    const char *preopen,
-    /**
-     * Working directory where this process should run
-     * (passing '.' will use the current directory)
-     */
-    const char *working_dir,
-    /**
-     * How will stdin be handled
-     */
-    __wasi_stdio_mode_t stdin,
-    /**
-     * How will stdout be handled
-     */
-    __wasi_stdio_mode_t stdout,
-    /**
-     * How will stderr be handled
-     */
-    __wasi_stdio_mode_t stderr,
-    /**
-     * Instance identifier where this process will be spawned
-     */
-    const char *instance,
-    /**
-     * Acceess token used to authenticate with the instance
-     */
-    const char *token,
-    __wasi_bus_handles_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Closes a bus process and releases all associated resources
- */
-__wasi_bus_error_t __wasi_bus_close(
-    /**
-     * Handle of the bus process handle to be closed
-     */
-    __wasi_bid_t bid
-) __attribute__((__warn_unused_result__));
-/**
- * Invokes a call within a running bus process.
- */
-__wasi_bus_error_t __wasi_bus_invoke(
-    /**
-     * Handle of the bus process to invoke the call within
-     */
-    __wasi_bid_t bid,
-    /**
-     * Optional parent bus call that this is related to
-     */
-    const __wasi_option_cid_t * parent,
-    /**
-     * Causes the call handle to remain open even when A
-     * reply is received. It is then the  callers responsibility
-     * to invoke 'bus_drop' when they are finished with the call
-     */
-    __wasi_bool_t keep_alive,
-    /**
-     * Topic that describes the type of call to made
-     */
-    const char *topic,
-    /**
-     * Format of the data pushed onto the bus
-     */
-    __wasi_bus_data_format_t format,
-    /**
-     * The buffer where data to be transmitted is stored
-     */
-    const uint8_t *buf,
-    /**
-     * The length of the array pointed to by `buf`.
-     */
-    size_t buf_len,
-    __wasi_cid_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Causes a fault on a particular call that was made
- * to this process from another process; where 'bid'
- * is the callering process context.
- */
-__wasi_bus_error_t __wasi_bus_fault(
-    /**
-     * Handle of the call to raise a fault on
-     */
-    __wasi_cid_t cid,
-    /**
-     * Fault to be raised on the bus
-     */
-    __wasi_bus_error_t fault
-) __attribute__((__warn_unused_result__));
-/**
- * Closes a bus call based on its bus call handle
- */
-__wasi_bus_error_t __wasi_bus_drop(
-    /**
-     * Handle of the bus call handle to be dropped
-     */
-    __wasi_cid_t cid
-) __attribute__((__warn_unused_result__));
-/**
- * Replies to a call that was made to this process
- * from another process; where 'cid' is the call context.
- * This will may also drop the handle and release any
- * associated resources (if keepalive is not set)
- */
-__wasi_bus_error_t __wasi_bus_reply(
-    /**
-     * Handle of the call to send a reply on
-     */
-    __wasi_cid_t cid,
-    /**
-     * Format of the data pushed onto the bus
-     */
-    __wasi_bus_data_format_t format,
-    /**
-     * The buffer where data to be transmitted is stored
-     */
-    const uint8_t *buf,
-    /**
-     * The length of the array pointed to by `buf`.
-     */
-    size_t buf_len
-) __attribute__((__warn_unused_result__));
-/**
- * Invokes a callback within the calling process against
- * a particular bus call represented by 'cid'.
- */
-__wasi_bus_error_t __wasi_bus_callback(
-    /**
-     * Handle of the call where a callback will be send
-     */
-    __wasi_cid_t cid,
-    /**
-     * Topic that describes the type of callback
-     */
-    const char *topic,
-    /**
-     * Format of the data pushed onto the bus
-     */
-    __wasi_bus_data_format_t format,
-    /**
-     * The buffer where data to be transmitted is stored
-     */
-    const uint8_t *buf,
-    /**
-     * The length of the array pointed to by `buf`.
-     */
-    size_t buf_len
-) __attribute__((__warn_unused_result__));
-/**
- * Tells the operating system that this process is
- * now listening for bus calls on a particular topic
- */
-__wasi_bus_error_t __wasi_bus_listen(
-    /**
-     * Optional parent bus call that this is related to
-     */
-    const __wasi_option_cid_t * parent,
-    /**
-     * Topic that describes the process will listen forcalls on
-     */
-    const char *topic
-) __attribute__((__warn_unused_result__));
-/**
- * Polls for any outstanding events from a particular
- * bus process by its handle
- * @return
- * Returns the number of events that have occured
- */
-__wasi_bus_error_t __wasi_bus_poll(
-    /**
-     * Handle of the bus process to poll for new events
-     * (if no process is supplied then it polls for the current process)
-     */
-    const __wasi_option_bid_t * bid,
-    /**
-     * Timeout before the poll returns, if one passed 0
-     * as the timeout then this call is non blocking.
-     */
-    __wasi_timestamp_t timeout,
-    /**
-     * An events buffer that will hold any received bus events
-     */
-    __wasi_bus_event_t * events,
-    __wasi_size_t nevents,
-    __wasi_size_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Receives the next event data from the bus
- * @return
- * Returns the number of events that have occured
- */
-__wasi_bus_error_t __wasi_bus_poll_data(
-    /**
-     * Handle of the bus process to poll for new events
-     * (if no process is supplied then it polls for the current process)
-     */
-    const __wasi_option_bid_t * bid,
-    /**
-     * Timeout before the poll returns, if one passed 0
-     * as the timeout then this call is non blocking.
-     */
-    __wasi_timestamp_t timeout,
-    /**
-     * The topic that describes the event that happened
-     */
-    uint8_t * topic,
-    __wasi_pointersize_t topic_len,
-    /**
-     * The buffer where event data is stored
-     */
-    uint8_t * buf,
-    __wasi_pointersize_t buf_len,
-    __wasi_bus_event_data_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Connects to a websocket at a particular network URL
- * @return
- * Returns a socket handle which is used to send and receive data
- */
-__wasi_errno_t __wasi_ws_connect(
-    /**
-     * URL of the web socket destination to connect to
-     */
-    const char *url,
-    __wasi_fd_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Makes a HTTP request to a remote web resource and
- * returns a socket handles that are used to send and receive data
- * @return
- * The body of the response can be streamed from the returned
- * file handle
- */
-__wasi_errno_t __wasi_http_request(
-    /**
-     * URL of the HTTP resource to connect to
-     */
-    const char *url,
-    /**
-     * HTTP method to be invoked
-     */
-    const char *method,
-    /**
-     * HTTP headers to attach to the request
-     * (headers seperated by lines)
-     */
-    const char *headers,
-    /**
-     * Should the request body be compressed
-     */
-    __wasi_bool_t gzip,
-    __wasi_http_handles_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Retrieves the status of a HTTP request
- */
-__wasi_errno_t __wasi_http_status(
-    /**
-     * Handle of the HTTP request
-     */
-    __wasi_fd_t fd,
-    /**
-     * Pointer to a buffer that will be filled with the current
-     * status of this HTTP request
-     */
-    __wasi_http_status_t * status,
-    /**
-     * Buffer that will hold the status text
-     */
-    uint8_t * status_text,
-    /**
-     * This field will also be filled with the number of bytes returned in the status text
-     */
-    __wasi_pointersize_t * status_text_len,
-    /**
-     * Buffer that will hold the response headers
-     */
-    uint8_t * headers,
-    /**
-     * This field will also be filled with the number of bytes returned in the response headers
-     */
-    __wasi_pointersize_t * headers_len
-) __attribute__((__warn_unused_result__));
-/**
- * Securely connects to a particular remote network
- */
-__wasi_errno_t __wasi_port_bridge(
-    /**
-     * Fully qualified identifier for the network
-     */
-    const char *network,
-    /**
-     * Access token used to authenticate with the network
-     */
-    const char *token,
-    /**
-     * Level of encryption to encapsulate the network connection with
-     */
-    __wasi_stream_security_t security
-) __attribute__((__warn_unused_result__));
-/**
- * Disconnects from a remote network
- */
-__wasi_errno_t __wasi_port_unbridge(
-    void
-) __attribute__((__warn_unused_result__));
-/**
- * Acquires a set of IP addresses using DHCP
- */
-__wasi_errno_t __wasi_port_dhcp_acquire(
-    void
-) __attribute__((__warn_unused_result__));
-/**
- * Adds another static IP address to the local port
- */
-__wasi_errno_t __wasi_port_ip_add(
-    /**
-     * IP address to be added
-     */
-    const __wasi_addr_cidr_t * ip
-) __attribute__((__warn_unused_result__));
-/**
- * Removes an IP address from the local port
- */
-__wasi_errno_t __wasi_port_ip_remove(
-    /**
-     * IP address to be removed
-     */
-    const __wasi_addr_ip_t * ip
-) __attribute__((__warn_unused_result__));
-/**
- * Clears all the IP addresses on the local port
- */
-__wasi_errno_t __wasi_port_ip_clear(
-    void
-) __attribute__((__warn_unused_result__));
-/**
- * Returns the MAC address of the local port
- */
-__wasi_errno_t __wasi_port_mac(
-    __wasi_hardware_address_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Returns a list of all the IP addresses owned by the local port
- * This function fills the output buffer as much as possible.
- * If the buffer is not big enough then the nips address will be
- * filled with the buffer size needed and the EOVERFLOW will be returned
- * @return
- * The number of IP addresses returned.
- */
-__wasi_errno_t __wasi_port_ip_list(
-    /**
-     * The buffer where IP addresses will be stored
-     */
-    __wasi_addr_cidr_t * ips,
-    __wasi_size_t * nips
-) __attribute__((__warn_unused_result__));
-/**
- * Adds a default gateway to the port
- */
-__wasi_errno_t __wasi_port_gateway_set(
-    /**
-     * IP address of the default gateway
-     */
-    const __wasi_addr_ip_t * ip
-) __attribute__((__warn_unused_result__));
-/**
- * Adds a new route to the local port
- */
-__wasi_errno_t __wasi_port_route_add(
-    const __wasi_addr_cidr_t * cidr,
-    const __wasi_addr_ip_t * via_router,
-    const __wasi_option_timestamp_t * preferred_until,
-    const __wasi_option_timestamp_t * expires_at
-) __attribute__((__warn_unused_result__));
-/**
- * Removes an existing route from the local port
- */
-__wasi_errno_t __wasi_port_route_remove(
-    const __wasi_addr_ip_t * cidr
-) __attribute__((__warn_unused_result__));
-/**
- * Clears all the routes in the local port
- */
-__wasi_errno_t __wasi_port_route_clear(
-    void
-) __attribute__((__warn_unused_result__));
-/**
- * Returns a list of all the routes owned by the local port
- * This function fills the output buffer as much as possible.
- * If the buffer is too small this will return EOVERFLOW and
- * fill nroutes with the size of the buffer needed.
- */
-__wasi_errno_t __wasi_port_route_list(
-    /**
-     * The buffer where routes will be stored
-     */
-    __wasi_route_t * routes,
-    __wasi_size_t * nroutes
-) __attribute__((__warn_unused_result__));
-/**
- * Shut down socket send and receive channels.
- * Note: This is similar to `shutdown` in POSIX.
- */
-__wasi_errno_t __wasi_sock_shutdown(
-    __wasi_fd_t fd,
-    /**
-     * Which channels on the socket to shut down.
-     */
-    __wasi_sdflags_t how
-) __attribute__((__warn_unused_result__));
-/**
- * Returns the current status of a socket
- */
-__wasi_errno_t __wasi_sock_status(
-    __wasi_fd_t fd,
-    __wasi_sock_status_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Returns the local address to which the socket is bound.
- * 
- * Note: This is similar to `getsockname` in POSIX
- * 
- * When successful, the contents of the output buffer consist of an IP address,
- * either IP4 or IP6.
- */
-__wasi_errno_t __wasi_sock_addr_local(
-    /**
-     * Socket that the address is bound to
-     */
-    __wasi_fd_t fd,
-    __wasi_addr_port_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Returns the remote address to which the socket is connected to.
- * 
- * Note: This is similar to `getpeername` in POSIX
- * 
- * When successful, the contents of the output buffer consist of an IP address,
- * either IP4 or IP6.
- */
-__wasi_errno_t __wasi_sock_addr_peer(
-    /**
-     * Socket that the address is bound to
-     */
-    __wasi_fd_t fd,
-    __wasi_addr_port_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Create an endpoint for communication.
- * 
- * creates an endpoint for communication and returns a file descriptor
- * tor that refers to that endpoint. The file descriptor returned by a successful
- * call will be the lowest-numbered file descriptor not currently open
- * for the process.
- * 
- * Note: This is similar to `socket` in POSIX using PF_INET
- * @return
- * The file descriptor of the socket that has been opened.
- */
-__wasi_errno_t __wasi_sock_open(
-    /**
-     * Address family
-     */
-    __wasi_address_family_t af,
-    /**
-     * Socket type, either datagram or stream
-     */
-    __wasi_sock_type_t socktype,
-    __wasi_fd_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Sets a particular socket setting
- * Note: This is similar to `setsockopt` in POSIX for SO_REUSEADDR
- */
-__wasi_errno_t __wasi_sock_set_opt(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Socket option to be set
-     */
-    __wasi_sock_option_t sockopt,
-    /**
-     * Value to set the option to
-     */
-    __wasi_bool_t flag
-) __attribute__((__warn_unused_result__));
-/**
- * Retrieve status of particular socket seting
- * Note: This is similar to `getsockopt` in POSIX for SO_REUSEADDR
- */
-__wasi_errno_t __wasi_sock_get_opt(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Socket option to be retrieved
-     */
-    __wasi_sock_option_t sockopt,
-    __wasi_bool_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Sets how long the socket will linger
- */
-__wasi_errno_t __wasi_sock_set_linger(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Value to set the linger to
-     */
-    const __wasi_option_timestamp_t * linger
-) __attribute__((__warn_unused_result__));
-/**
- * Retrieve how long the socket will linger for
- */
-__wasi_errno_t __wasi_sock_get_linger(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    __wasi_option_timestamp_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Sets one of the timeouts on the socket
- */
-__wasi_errno_t __wasi_sock_set_timeout(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Type of timeout to be changed
-     */
-    __wasi_timeout_type_t ty,
-    /**
-     * Value to set the timeout to
-     */
-    __wasi_timestamp_t timeout
-) __attribute__((__warn_unused_result__));
-/**
- * Retrieve one of the timeouts on the socket
- */
-__wasi_errno_t __wasi_sock_get_timeout(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Type of timeout to be retrieved
-     */
-    __wasi_timeout_type_t ty,
-    __wasi_timestamp_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Set TTL for this socket
- */
-__wasi_errno_t __wasi_sock_set_ttl(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Time to live
-     */
-    __wasi_size_t ttl
-) __attribute__((__warn_unused_result__));
-/**
- * Retrieve the TTL for this socket
- */
-__wasi_errno_t __wasi_sock_get_ttl(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    __wasi_size_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Set TTL for IPv4 multicast for this socket
- */
-__wasi_errno_t __wasi_sock_set_multicast_ttl_v4(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Time to live
-     */
-    __wasi_size_t ttl
-) __attribute__((__warn_unused_result__));
-/**
- * Retrieve the TTL for IPv4 multicast for this socket
- */
-__wasi_errno_t __wasi_sock_get_multicast_ttl_v4(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    __wasi_size_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Joins a particular multicast IPv4 group
- */
-__wasi_errno_t __wasi_sock_join_multicast_v4(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Multicast group to joined
-     */
-    const __wasi_addr_ip4_t * multiaddr,
-    /**
-     * Interface that will join
-     */
-    const __wasi_addr_ip4_t * interface
-) __attribute__((__warn_unused_result__));
-/**
- * Leaves a particular multicast IPv4 group
- */
-__wasi_errno_t __wasi_sock_leave_multicast_v4(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Multicast group to leave
-     */
-    const __wasi_addr_ip4_t * multiaddr,
-    /**
-     * Interface that will left
-     */
-    const __wasi_addr_ip4_t * interface
-) __attribute__((__warn_unused_result__));
-/**
- * Joins a particular multicast IPv6 group
- */
-__wasi_errno_t __wasi_sock_join_multicast_v6(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Multicast group to joined
-     */
-    const __wasi_addr_ip6_t * multiaddr,
-    /**
-     * Interface that will join
-     */
-    uint32_t interface
-) __attribute__((__warn_unused_result__));
-/**
- * Leaves a particular multicast IPv6 group
- */
-__wasi_errno_t __wasi_sock_leave_multicast_v6(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Multicast group to leave
-     */
-    const __wasi_addr_ip6_t * multiaddr,
-    /**
-     * Interface that will left
-     */
-    uint32_t interface
-) __attribute__((__warn_unused_result__));
-/**
- * Set size of receive buffer
- * Note: This is similar to `setsockopt` in POSIX for SO_RCVBUF
- */
-__wasi_errno_t __wasi_sock_set_recv_buf_size(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Buffer size
-     */
-    __wasi_filesize_t size
-) __attribute__((__warn_unused_result__));
-/**
- * Retrieve the size of the receive buffer
- * Note: This is similar to `getsockopt` in POSIX for SO_RCVBUF
- */
-__wasi_errno_t __wasi_sock_get_recv_buf_size(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    __wasi_filesize_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Set size of send buffer
- * Note: This is similar to `setsockopt` in POSIX for SO_SNDBUF
- */
-__wasi_errno_t __wasi_sock_set_send_buf_size(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Buffer size
-     */
-    __wasi_filesize_t size
-) __attribute__((__warn_unused_result__));
-/**
- * Retrieve the size of the send buffer
- * Note: This is similar to `getsockopt` in POSIX for SO_SNDBUF
- */
-__wasi_errno_t __wasi_sock_get_send_buf_size(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    __wasi_filesize_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Bind a socket
- * Note: This is similar to `bind` in POSIX using PF_INET
- */
-__wasi_errno_t __wasi_sock_bind(
-    /**
-     * File descriptor of the socket to be bind
-     */
-    __wasi_fd_t fd,
-    /**
-     * Address to bind the socket to
-     */
-    const __wasi_addr_port_t * addr
-) __attribute__((__warn_unused_result__));
-/**
- * Listen for connections on a socket
- * 
- * Polling the socket handle will wait until a connection
- * attempt is made
- * 
- * Note: This is similar to `listen`
- */
-__wasi_errno_t __wasi_sock_listen(
-    /**
-     * File descriptor of the socket to be bind
-     */
-    __wasi_fd_t fd,
-    /**
-     * Maximum size of the queue for pending connections
-     */
-    __wasi_size_t backlog
+    __wasi_size_t buf_len
 ) __attribute__((__warn_unused_result__));
 /**
  * Accept a new incoming connection.
@@ -4159,26 +2235,7 @@ __wasi_errno_t __wasi_sock_accept(
      * The desired values of the file descriptor flags.
      */
     __wasi_fdflags_t flags,
-    __wasi_fd_t *retptr0,
-    __wasi_addr_port_t *retptr1
-) __attribute__((__warn_unused_result__));
-/**
- * Initiate a connection on a socket to the specified address
- * 
- * Polling the socket handle will wait for data to arrive or for
- * the socket status to change which can be queried via 'sock_status'
- * 
- * Note: This is similar to `connect` in POSIX
- */
-__wasi_errno_t __wasi_sock_connect(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Address of the socket to connect to
-     */
-    const __wasi_addr_port_t * addr
+    __wasi_fd_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Receive a message from a socket.
@@ -4201,33 +2258,8 @@ __wasi_errno_t __wasi_sock_recv(
      * Message flags.
      */
     __wasi_riflags_t ri_flags,
-    __wasi_filesize_t *retptr0,
+    __wasi_size_t *retptr0,
     __wasi_roflags_t *retptr1
-) __attribute__((__warn_unused_result__));
-/**
- * Receive a message and its peer address from a socket.
- * Note: This is similar to `recvfrom` in POSIX, though it also supports reading
- * the data into multiple buffers in the manner of `readv`.
- * @return
- * Number of bytes stored in ri_data and message flags.
- */
-__wasi_errno_t __wasi_sock_recv_from(
-    __wasi_fd_t fd,
-    /**
-     * List of scatter/gather vectors to which to store data.
-     */
-    const __wasi_iovec_t *ri_data,
-    /**
-     * The length of the array pointed to by `ri_data`.
-     */
-    size_t ri_data_len,
-    /**
-     * Message flags.
-     */
-    __wasi_riflags_t ri_flags,
-    __wasi_filesize_t *retptr0,
-    __wasi_roflags_t *retptr1,
-    __wasi_addr_port_t *retptr2
 ) __attribute__((__warn_unused_result__));
 /**
  * Send a message on a socket.
@@ -4250,61 +2282,18 @@ __wasi_errno_t __wasi_sock_send(
      * Message flags.
      */
     __wasi_siflags_t si_flags,
-    __wasi_filesize_t *retptr0
+    __wasi_size_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
- * Send a message on a socket to a specific address.
- * Note: This is similar to `sendto` in POSIX, though it also supports writing
- * the data from multiple buffers in the manner of `writev`.
- * @return
- * Number of bytes transmitted.
+ * Shut down socket send and receive channels.
+ * Note: This is similar to `shutdown` in POSIX.
  */
-__wasi_errno_t __wasi_sock_send_to(
+__wasi_errno_t __wasi_sock_shutdown(
     __wasi_fd_t fd,
     /**
-     * List of scatter/gather vectors to which to retrieve data
+     * Which channels on the socket to shut down.
      */
-    const __wasi_ciovec_t *si_data,
-    /**
-     * The length of the array pointed to by `si_data`.
-     */
-    size_t si_data_len,
-    /**
-     * Message flags.
-     */
-    __wasi_siflags_t si_flags,
-    /**
-     * Address of the socket to send message to
-     */
-    const __wasi_addr_port_t * addr,
-    __wasi_filesize_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Resolves a hostname and a port to one or more IP addresses.
- * 
- * Note: This is similar to `getaddrinfo` in POSIX
- * 
- * When successful, the contents of the output buffer consist of a sequence of
- * IPv4 and/or IPv6 addresses. Each address entry consists of a addr_t object.
- * This function fills the output buffer as much as possible.
- * @return
- * The number of IP addresses returned during the DNS resolution.
- */
-__wasi_errno_t __wasi_resolve(
-    /**
-     * Host to resolve
-     */
-    const char *host,
-    /**
-     * Port hint (zero if no hint is supplied)
-     */
-    uint16_t port,
-    /**
-     * The buffer where IP addresses will be stored
-     */
-    __wasi_addr_ip_t * ips,
-    __wasi_size_t nips,
-    __wasi_size_t *retptr0
+    __wasi_sdflags_t how
 ) __attribute__((__warn_unused_result__));
 /** @} */
 

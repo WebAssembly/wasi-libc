@@ -10,8 +10,12 @@
 int accept(int socket, struct sockaddr *restrict addr, socklen_t *restrict addrlen) {
   int ret = -1;
 
+#if LONG_MAX > INT_MAX
   __wasi_addr_port_t peer_addr;
   __wasi_errno_t error = __wasi_sock_accept(socket, 0, &ret, &peer_addr);
+#else
+  __wasi_errno_t error = __wasi_sock_accept(socket, 0, &ret);
+#endif
 
   if (error != 0) {
     errno = error;
@@ -35,8 +39,12 @@ int accept4(int socket, struct sockaddr *restrict addr, socklen_t *restrict addr
     return -1;
   }
 
+#if LONG_MAX > INT_MAX
   __wasi_addr_port_t peer_addr;
   __wasi_errno_t error = __wasi_sock_accept(socket, (flags & SOCK_NONBLOCK) ? __WASI_FDFLAGS_NONBLOCK : 0, &ret, &peer_addr);
+#else
+  __wasi_errno_t error = __wasi_sock_accept(socket, (flags & SOCK_NONBLOCK) ? __WASI_FDFLAGS_NONBLOCK : 0, &ret);
+#endif
 
   if (error != 0) {
     errno = error;

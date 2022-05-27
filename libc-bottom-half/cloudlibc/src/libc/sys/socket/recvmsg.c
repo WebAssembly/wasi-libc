@@ -10,15 +10,13 @@
 #include <string.h>
 
 ssize_t recvmsg(int socket, struct msghdr *restrict msg, int flags) {
-  // Validate flags.
-  if ((flags & ~(MSG_PEEK | MSG_WAITALL)) != 0) {
-    errno = EOPNOTSUPP;
-    return -1;
-  }
-
   __wasi_iovec_t *ri_data = (__wasi_iovec_t *)msg->msg_iov;
   size_t ri_data_len = msg->msg_iovlen;
-  __wasi_riflags_t ri_flags = flags;
+  __wasi_riflags_t ri_flags = 0;
+
+  if ((flags & MSG_PEEK) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_PEEK; }
+  if ((flags & MSG_WAITALL) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_WAITALL; }
+  if ((flags & MSG_TRUNC) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_TRUNC; }
 
   __wasi_size_t ro_datalen;
   __wasi_roflags_t ro_flags;

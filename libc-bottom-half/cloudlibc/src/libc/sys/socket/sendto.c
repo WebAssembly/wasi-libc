@@ -15,6 +15,11 @@ ssize_t sendto(int socket, const void *restrict buffer, size_t length, int flags
     return -1;
   }
 
+  if (buffer == NULL || addr == NULL) {
+	errno = EINVAL;
+	return -1;
+  }
+
   // Prepare input parameters.
   __wasi_ciovec_t iov = {.buf = buffer, .buf_len = length};
   __wasi_ciovec_t *si_data = &iov;

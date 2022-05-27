@@ -1,4 +1,8 @@
+#include <common/errno.h>
+#include <common/net.h>
+
 #include <sys/socket.h>
+#include <__struct_msghdr.h>
 
 #include <assert.h>
 #include <wasi/api.h>
@@ -6,6 +10,45 @@
 #include <string.h>
 
 ssize_t recvmsg(int socket, struct msghdr *restrict msg, int flags) {
-	errno = EOPNOTSUPP;
-  	return -1;
+  // Validate flags.
+  if ((flags & ~(MSG_PEEK | MSG_WAITALL)) != 0) {
+    errno = EOPNOTSUPP;
+    return -1;
+  }
+
+  __wasi_iovec_t *ri_data = (__wasi_iovec_t *)msg->msg_iov;
+  size_t ri_data_len = msg->msg_iovlen;
+  __wasi_riflags_t ri_flags = flags;
+
+  __wasi_size_t ro_datalen;
+  __wasi_roflags_t ro_flags;
+  __wasi_errno_t error;
+  if (msg->msg_name == NULL) {
+    error = __wasi_sock_recv(socket,
+								ri_data, ri_data_len, ri_flags,
+								&ro_datalen,
+								&ro_flags);
+  } else {
+	__wasi_addr_port_t peer_addr;
+    error = __wasi_sock_recv_from(socket,
+								ri_data, ri_data_len, ri_flags,
+								&ro_datalen,
+								&ro_flags,
+								&peer_addr);
+	if (error != 0) {
+      errno = errno_fixup_socket(socket, error);
+      return -1;
+    }
+	
+	struct sockaddr *addr = (struct sockaddr *)msg->msg_name;
+	socklen_t *addrlen = &msg->msg_namelen;
+	error = wasi_to_sockaddr(&peer_addr, addr, addrlen);
+  }
+  msg->msg_flags = ro_flags;
+  
+  if (error != 0) {
+    errno = errno_fixup_socket(socket, error);
+    return -1;
+  }
+  return ro_datalen;
 }

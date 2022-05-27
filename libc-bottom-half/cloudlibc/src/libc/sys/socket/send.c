@@ -17,6 +17,11 @@ ssize_t send(int socket, const void *buffer, size_t length, int flags) {
     return -1;
   }
 
+  if (buffer == NULL) {
+	  errno = EINVAL;
+	  return -1;
+  }
+
   // Prepare input parameters.
   __wasi_ciovec_t iov = {.buf = buffer, .buf_len = length};
   __wasi_ciovec_t *si_data = &iov;

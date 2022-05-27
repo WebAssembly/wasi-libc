@@ -16,6 +16,11 @@ ssize_t sendmsg(int socket, const struct msghdr* msg, int flags) {
     return -1;
   }
 
+  if (msg->msg_iov == NULL) {
+	errno = EINVAL;
+	return -1;
+  }
+
   __wasi_ciovec_t *si_data = (__wasi_ciovec_t *)msg->msg_iov;
   size_t si_data_len = msg->msg_iovlen;
 

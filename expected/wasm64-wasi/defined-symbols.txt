@@ -473,6 +473,7 @@ atoll
 basename
 bcmp
 bcopy
+bind
 bsd_signal
 bsearch
 btowc
@@ -542,6 +543,7 @@ confstr
 conj
 conjf
 conjl
+connect
 copysign
 copysignf
 copysignl
@@ -747,8 +749,10 @@ getline
 getopt
 getopt_long
 getopt_long_only
+getpeername
 getpid
 getrusage
+getsockname
 getsockopt
 getsubopt
 gettimeofday
@@ -867,6 +871,7 @@ lgammal
 lgammal_r
 link
 linkat
+listen
 llabs
 lldiv
 llrint
@@ -1012,6 +1017,8 @@ readv
 realloc
 reallocarray
 recv
+recvfrom
+recvmsg
 regcomp
 regerror
 regexec
@@ -1053,12 +1060,15 @@ seed48
 seekdir
 select
 send
+sendmsg
+sendto
 setbuf
 setbuffer
 setenv
 setkey
 setlinebuf
 setlocale
+setsockopt
 setstate
 setvbuf
 shutdown
@@ -1077,6 +1087,8 @@ sinhl
 sinl
 sleep
 snprintf
+socket
+socketpair
 sprintf
 sqrt
 sqrtf

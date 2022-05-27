@@ -1308,7 +1308,7 @@ __wasi_errno_t __wasi_sock_set_timeout(
     __wasi_timeout_type_t ty,
     const __wasi_option_timestamp_t * timeout
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_timeout((int32_t) fd, ty, (int32_t) timeout);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_timeout((int32_t) fd, (int32_t) ty, (int32_t) timeout);
     return (uint16_t) ret;
 }
 
@@ -1322,7 +1322,7 @@ __wasi_errno_t __wasi_sock_get_timeout(
     __wasi_timeout_type_t ty,
     __wasi_option_timestamp_t *retptr0
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_get_timeout((int32_t) fd, ty, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_get_timeout((int32_t) fd, (int32_t) ty, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 

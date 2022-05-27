@@ -22,7 +22,7 @@ ssize_t recv(int socket, void *restrict buffer, size_t length, int flags) {
 
   if ((flags & MSG_PEEK) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_PEEK; }
   if ((flags & MSG_WAITALL) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_WAITALL; }
-  if ((flags & MSG_TRUNC) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_TRUNC; }
+  if ((flags & MSG_TRUNC) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_DATA_TRUNCATED; }
 
   // Perform system call.
   __wasi_size_t ro_datalen;

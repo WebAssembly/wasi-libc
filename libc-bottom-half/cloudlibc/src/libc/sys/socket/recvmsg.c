@@ -16,7 +16,7 @@ ssize_t recvmsg(int socket, struct msghdr *restrict msg, int flags) {
 
   if ((flags & MSG_PEEK) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_PEEK; }
   if ((flags & MSG_WAITALL) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_WAITALL; }
-  if ((flags & MSG_TRUNC) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_TRUNC; }
+  if ((flags & MSG_TRUNC) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_DATA_TRUNCATED; }
 
   __wasi_size_t ro_datalen;
   __wasi_roflags_t ro_flags;

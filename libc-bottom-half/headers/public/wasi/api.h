@@ -2066,7 +2066,7 @@ typedef uint16_t __wasi_riflags_t;
 /**
  * Indicates if the packet should be truncated to the buffer size
  */
-#define __WASI_RIFLAGS_RECV_TRUNC ((__wasi_riflags_t)(1 << 2))
+#define __WASI_RIFLAGS_RECV_DATA_TRUNCATED ((__wasi_riflags_t)(1 << 2))
 
 /**
  * Flags returned by `sock_recv`.

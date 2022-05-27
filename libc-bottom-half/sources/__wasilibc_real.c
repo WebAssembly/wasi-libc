@@ -13,7 +13,7 @@
 #include <wasi/api.h>
 #include <string.h>
 
-int32_t __imported_wasix_snapshot_preview1_args_get(int32_t arg0, int32_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_args_get(int64_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("args_get")
 ));
@@ -22,11 +22,11 @@ __wasi_errno_t __wasi_args_get(
     uint8_t * * argv,
     uint8_t * argv_buf
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_args_get((int32_t) argv, (int32_t) argv_buf);
+    int32_t ret = __imported_wasix_snapshot_preview1_args_get((int64_t) argv, (int64_t) argv_buf);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_args_sizes_get(int32_t arg0, int32_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_args_sizes_get(int64_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("args_sizes_get")
 ));
@@ -39,7 +39,7 @@ __wasi_errno_t __wasi_args_sizes_get(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_environ_get(int32_t arg0, int32_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_environ_get(int64_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("environ_get")
 ));
@@ -48,11 +48,11 @@ __wasi_errno_t __wasi_environ_get(
     uint8_t * * environ,
     uint8_t * environ_buf
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_environ_get((int32_t) environ, (int32_t) environ_buf);
+    int32_t ret = __imported_wasix_snapshot_preview1_environ_get((int64_t) environ, (int64_t) environ_buf);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_environ_sizes_get(int32_t arg0, int32_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_environ_sizes_get(int64_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("environ_sizes_get")
 ));
@@ -226,7 +226,7 @@ __wasi_errno_t __wasi_fd_filestat_set_times(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_fd_pread(int32_t arg0, int32_t arg1, int32_t arg2, int64_t arg3, int64_t arg4) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_fd_pread(int32_t arg0, int64_t arg1, int64_t arg2, int64_t arg3, int64_t arg4) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("fd_pread")
 ));
@@ -255,7 +255,7 @@ __wasi_errno_t __wasi_fd_prestat_get(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_fd_prestat_dir_name(int32_t arg0, int32_t arg1, int32_t arg2) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_fd_prestat_dir_name(int32_t arg0, int64_t arg1, int64_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("fd_prestat_dir_name")
 ));
@@ -265,11 +265,11 @@ __wasi_errno_t __wasi_fd_prestat_dir_name(
     uint8_t * path,
     __wasi_pointersize_t path_len
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_fd_prestat_dir_name((int32_t) fd, (int32_t) path, (int32_t) path_len);
+    int32_t ret = __imported_wasix_snapshot_preview1_fd_prestat_dir_name((int32_t) fd, (int64_t) path, (int64_t) path_len);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_fd_pwrite(int32_t arg0, int32_t arg1, int32_t arg2, int64_t arg3, int64_t arg4) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_fd_pwrite(int32_t arg0, int64_t arg1, int64_t arg2, int64_t arg3, int64_t arg4) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("fd_pwrite")
 ));
@@ -285,7 +285,7 @@ __wasi_errno_t __wasi_fd_pwrite(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_fd_read(int32_t arg0, int32_t arg1, int32_t arg2, int64_t arg3) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_fd_read(int32_t arg0, int64_t arg1, int64_t arg2, int64_t arg3) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("fd_read")
 ));
@@ -300,7 +300,7 @@ __wasi_errno_t __wasi_fd_read(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_fd_readdir(int32_t arg0, int32_t arg1, int32_t arg2, int64_t arg3, int64_t arg4) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_fd_readdir(int32_t arg0, int64_t arg1, int64_t arg2, int64_t arg3, int64_t arg4) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("fd_readdir")
 ));
@@ -312,7 +312,7 @@ __wasi_errno_t __wasi_fd_readdir(
     __wasi_dircookie_t cookie,
     __wasi_size_t *retptr0
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_fd_readdir((int32_t) fd, (int32_t) buf, (int32_t) buf_len, (int64_t) cookie, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_snapshot_preview1_fd_readdir((int32_t) fd, (int64_t) buf, (int64_t) buf_len, (int64_t) cookie, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 
@@ -382,7 +382,7 @@ __wasi_errno_t __wasi_fd_tell(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_fd_write(int32_t arg0, int32_t arg1, int32_t arg2, int64_t arg3) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_fd_write(int32_t arg0, int64_t arg1, int64_t arg2, int64_t arg3) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("fd_write")
 ));
@@ -397,7 +397,7 @@ __wasi_errno_t __wasi_fd_write(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_pipe(int32_t arg0, int32_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_pipe(int64_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("pipe")
 ));
@@ -410,7 +410,7 @@ __wasi_errno_t __wasi_pipe(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_path_create_directory(int32_t arg0, int32_t arg1, int32_t arg2) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_path_create_directory(int32_t arg0, int64_t arg1, int64_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("path_create_directory")
 ));
@@ -424,7 +424,7 @@ __wasi_errno_t __wasi_path_create_directory(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_path_filestat_get(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int64_t arg4) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_path_filestat_get(int32_t arg0, int32_t arg1, int64_t arg2, int64_t arg3, int64_t arg4) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("path_filestat_get")
 ));
@@ -440,7 +440,7 @@ __wasi_errno_t __wasi_path_filestat_get(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_path_filestat_set_times(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int64_t arg4, int64_t arg5, int32_t arg6) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_path_filestat_set_times(int32_t arg0, int32_t arg1, int64_t arg2, int64_t arg3, int64_t arg4, int64_t arg5, int32_t arg6) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("path_filestat_set_times")
 ));
@@ -458,7 +458,7 @@ __wasi_errno_t __wasi_path_filestat_set_times(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_path_link(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5, int32_t arg6) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_path_link(int32_t arg0, int32_t arg1, int64_t arg2, int64_t arg3, int32_t arg4, int64_t arg5, int64_t arg6) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("path_link")
 ));
@@ -476,7 +476,7 @@ __wasi_errno_t __wasi_path_link(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_path_open(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int64_t arg5, int64_t arg6, int32_t arg7, int64_t arg8) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_path_open(int32_t arg0, int32_t arg1, int64_t arg2, int64_t arg3, int32_t arg4, int64_t arg5, int64_t arg6, int32_t arg7, int64_t arg8) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("path_open")
 ));
@@ -496,7 +496,7 @@ __wasi_errno_t __wasi_path_open(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_path_readlink(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int64_t arg5) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_path_readlink(int32_t arg0, int64_t arg1, int64_t arg2, int64_t arg3, int64_t arg4, int64_t arg5) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("path_readlink")
 ));
@@ -509,11 +509,11 @@ __wasi_errno_t __wasi_path_readlink(
     __wasi_size_t *retptr0
 ){
     size_t path_len = strlen(path);
-    int32_t ret = __imported_wasix_snapshot_preview1_path_readlink((int32_t) fd, (intptr_t) path, (intptr_t) path_len, (int32_t) buf, (int32_t) buf_len, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_snapshot_preview1_path_readlink((int32_t) fd, (intptr_t) path, (intptr_t) path_len, (int64_t) buf, (int64_t) buf_len, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_path_remove_directory(int32_t arg0, int32_t arg1, int32_t arg2) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_path_remove_directory(int32_t arg0, int64_t arg1, int64_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("path_remove_directory")
 ));
@@ -527,7 +527,7 @@ __wasi_errno_t __wasi_path_remove_directory(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_path_rename(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_path_rename(int32_t arg0, int64_t arg1, int64_t arg2, int32_t arg3, int64_t arg4, int64_t arg5) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("path_rename")
 ));
@@ -544,7 +544,7 @@ __wasi_errno_t __wasi_path_rename(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_path_symlink(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_path_symlink(int64_t arg0, int64_t arg1, int32_t arg2, int64_t arg3, int64_t arg4) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("path_symlink")
 ));
@@ -560,7 +560,7 @@ __wasi_errno_t __wasi_path_symlink(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_path_unlink_file(int32_t arg0, int32_t arg1, int32_t arg2) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_path_unlink_file(int32_t arg0, int64_t arg1, int64_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("path_unlink_file")
 ));
@@ -574,7 +574,7 @@ __wasi_errno_t __wasi_path_unlink_file(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_poll_oneoff(int32_t arg0, int32_t arg1, int32_t arg2, int64_t arg3) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_poll_oneoff(int64_t arg0, int64_t arg1, int32_t arg2, int64_t arg3) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("poll_oneoff")
 ));
@@ -585,7 +585,7 @@ __wasi_errno_t __wasi_poll_oneoff(
     __wasi_size_t nsubscriptions,
     __wasi_size_t *retptr0
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_poll_oneoff((int32_t) in, (int32_t) out, (int32_t) nsubscriptions, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_snapshot_preview1_poll_oneoff((int64_t) in, (int64_t) out, (int32_t) nsubscriptions, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 
@@ -624,7 +624,7 @@ __wasi_errno_t __wasi_sched_yield(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_random_get(int32_t arg0, int32_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_random_get(int64_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("random_get")
 ));
@@ -633,11 +633,11 @@ __wasi_errno_t __wasi_random_get(
     uint8_t * buf,
     __wasi_pointersize_t buf_len
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_random_get((int32_t) buf, (int32_t) buf_len);
+    int32_t ret = __imported_wasix_snapshot_preview1_random_get((int64_t) buf, (int64_t) buf_len);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_tty_get(int32_t arg0) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_tty_get(int64_t arg0) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("tty_get")
 ));
@@ -645,11 +645,11 @@ int32_t __imported_wasix_snapshot_preview1_tty_get(int32_t arg0) __attribute__((
 __wasi_errno_t __wasi_tty_get(
     __wasi_tty_t * state
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_tty_get((int32_t) state);
+    int32_t ret = __imported_wasix_snapshot_preview1_tty_get((int64_t) state);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_tty_set(int32_t arg0) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_tty_set(int64_t arg0) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("tty_set")
 ));
@@ -657,11 +657,11 @@ int32_t __imported_wasix_snapshot_preview1_tty_set(int32_t arg0) __attribute__((
 __wasi_errno_t __wasi_tty_set(
     __wasi_tty_t * state
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_tty_set((int32_t) state);
+    int32_t ret = __imported_wasix_snapshot_preview1_tty_set((int64_t) state);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_getcwd(int32_t arg0, int32_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_getcwd(int64_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("getcwd")
 ));
@@ -670,11 +670,11 @@ __wasi_errno_t __wasi_getcwd(
     uint8_t * path,
     __wasi_pointersize_t * path_len
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_getcwd((int32_t) path, (int32_t) path_len);
+    int32_t ret = __imported_wasix_snapshot_preview1_getcwd((int64_t) path, (int64_t) path_len);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_chdir(int32_t arg0, int32_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_chdir(int64_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("chdir")
 ));
@@ -687,7 +687,7 @@ __wasi_errno_t __wasi_chdir(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_thread_spawn(int32_t arg0, int32_t arg1, int64_t arg2, int32_t arg3, int64_t arg4) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_thread_spawn(int64_t arg0, int64_t arg1, int64_t arg2, int32_t arg3, int64_t arg4) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("thread_spawn")
 ));
@@ -774,7 +774,7 @@ _Noreturn void __wasi_thread_exit(
     __imported_wasix_snapshot_preview1_thread_exit((int32_t) rval);
 }
 
-int32_t __imported_wasix_snapshot_preview1_bus_spawn_local(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5, int32_t arg6, int32_t arg7, int32_t arg8, int32_t arg9, int32_t arg10, int32_t arg11, int64_t arg12) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_bus_spawn_local(int64_t arg0, int64_t arg1, int32_t arg2, int64_t arg3, int64_t arg4, int64_t arg5, int64_t arg6, int32_t arg7, int32_t arg8, int32_t arg9, int64_t arg10, int64_t arg11, int64_t arg12) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("bus_spawn_local")
 ));
@@ -798,7 +798,7 @@ __wasi_bus_error_t __wasi_bus_spawn_local(
     return (uint32_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_bus_spawn_remote(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5, int32_t arg6, int32_t arg7, int32_t arg8, int32_t arg9, int32_t arg10, int32_t arg11, int32_t arg12, int32_t arg13, int32_t arg14, int32_t arg15, int64_t arg16) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_bus_spawn_remote(int64_t arg0, int64_t arg1, int32_t arg2, int64_t arg3, int64_t arg4, int64_t arg5, int64_t arg6, int64_t arg7, int64_t arg8, int32_t arg9, int32_t arg10, int32_t arg11, int64_t arg12, int64_t arg13, int64_t arg14, int64_t arg15, int64_t arg16) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("bus_spawn_remote")
 ));
@@ -838,7 +838,7 @@ __wasi_bus_error_t __wasi_bus_close(
     return (uint32_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_bus_invoke(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5, int32_t arg6, int32_t arg7, int64_t arg8) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_bus_invoke(int32_t arg0, int64_t arg1, int32_t arg2, int64_t arg3, int64_t arg4, int32_t arg5, int64_t arg6, int64_t arg7, int64_t arg8) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("bus_invoke")
 ));
@@ -854,7 +854,7 @@ __wasi_bus_error_t __wasi_bus_invoke(
     __wasi_cid_t *retptr0
 ){
     size_t topic_len = strlen(topic);
-    int32_t ret = __imported_wasix_snapshot_preview1_bus_invoke((int32_t) bid, (int32_t) parent, (int32_t) keep_alive, (intptr_t) topic, (intptr_t) topic_len, (int32_t) format, (intptr_t) buf, (intptr_t) buf_len, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_snapshot_preview1_bus_invoke((int32_t) bid, (int64_t) parent, (int32_t) keep_alive, (intptr_t) topic, (intptr_t) topic_len, (int32_t) format, (intptr_t) buf, (intptr_t) buf_len, (intptr_t) retptr0);
     return (uint32_t) ret;
 }
 
@@ -883,7 +883,7 @@ __wasi_bus_error_t __wasi_bus_drop(
     return (uint32_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_bus_reply(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_bus_reply(int32_t arg0, int32_t arg1, int64_t arg2, int64_t arg3) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("bus_reply")
 ));
@@ -898,7 +898,7 @@ __wasi_bus_error_t __wasi_bus_reply(
     return (uint32_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_bus_callback(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_bus_callback(int32_t arg0, int64_t arg1, int64_t arg2, int32_t arg3, int64_t arg4, int64_t arg5) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("bus_callback")
 ));
@@ -915,7 +915,7 @@ __wasi_bus_error_t __wasi_bus_callback(
     return (uint32_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_bus_listen(int32_t arg0, int32_t arg1, int32_t arg2) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_bus_listen(int64_t arg0, int64_t arg1, int64_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("bus_listen")
 ));
@@ -925,11 +925,11 @@ __wasi_bus_error_t __wasi_bus_listen(
     const char *topic
 ){
     size_t topic_len = strlen(topic);
-    int32_t ret = __imported_wasix_snapshot_preview1_bus_listen((int32_t) parent, (intptr_t) topic, (intptr_t) topic_len);
+    int32_t ret = __imported_wasix_snapshot_preview1_bus_listen((int64_t) parent, (intptr_t) topic, (intptr_t) topic_len);
     return (uint32_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_bus_poll(int32_t arg0, int64_t arg1, int32_t arg2, int32_t arg3, int64_t arg4) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_bus_poll(int64_t arg0, int64_t arg1, int64_t arg2, int32_t arg3, int64_t arg4) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("bus_poll")
 ));
@@ -941,11 +941,11 @@ __wasi_bus_error_t __wasi_bus_poll(
     __wasi_size_t nevents,
     __wasi_size_t *retptr0
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_bus_poll((int32_t) bid, (int64_t) timeout, (int32_t) events, (int32_t) nevents, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_snapshot_preview1_bus_poll((int64_t) bid, (int64_t) timeout, (int64_t) events, (int32_t) nevents, (intptr_t) retptr0);
     return (uint32_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_bus_poll_data(int32_t arg0, int64_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5, int64_t arg6) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_bus_poll_data(int64_t arg0, int64_t arg1, int64_t arg2, int64_t arg3, int64_t arg4, int64_t arg5, int64_t arg6) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("bus_poll_data")
 ));
@@ -959,11 +959,11 @@ __wasi_bus_error_t __wasi_bus_poll_data(
     __wasi_pointersize_t buf_len,
     __wasi_bus_event_data_t *retptr0
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_bus_poll_data((int32_t) bid, (int64_t) timeout, (int32_t) topic, (int32_t) topic_len, (int32_t) buf, (int32_t) buf_len, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_snapshot_preview1_bus_poll_data((int64_t) bid, (int64_t) timeout, (int64_t) topic, (int64_t) topic_len, (int64_t) buf, (int64_t) buf_len, (intptr_t) retptr0);
     return (uint32_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_ws_connect(int32_t arg0, int32_t arg1, int64_t arg2) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_ws_connect(int64_t arg0, int64_t arg1, int64_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("ws_connect")
 ));
@@ -977,7 +977,7 @@ __wasi_errno_t __wasi_ws_connect(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_http_request(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5, int32_t arg6, int64_t arg7) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_http_request(int64_t arg0, int64_t arg1, int64_t arg2, int64_t arg3, int64_t arg4, int64_t arg5, int32_t arg6, int64_t arg7) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("http_request")
 ));
@@ -996,7 +996,7 @@ __wasi_errno_t __wasi_http_request(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_http_status(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_http_status(int32_t arg0, int64_t arg1, int64_t arg2, int64_t arg3, int64_t arg4, int64_t arg5) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("http_status")
 ));
@@ -1009,11 +1009,11 @@ __wasi_errno_t __wasi_http_status(
     uint8_t * headers,
     __wasi_pointersize_t * headers_len
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_http_status((int32_t) fd, (int32_t) status, (int32_t) status_text, (int32_t) status_text_len, (int32_t) headers, (int32_t) headers_len);
+    int32_t ret = __imported_wasix_snapshot_preview1_http_status((int32_t) fd, (int64_t) status, (int64_t) status_text, (int64_t) status_text_len, (int64_t) headers, (int64_t) headers_len);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_port_bridge(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_port_bridge(int64_t arg0, int64_t arg1, int64_t arg2, int64_t arg3, int32_t arg4) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("port_bridge")
 ));
@@ -1053,7 +1053,7 @@ __wasi_errno_t __wasi_port_dhcp_acquire(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_port_ip_add(int32_t arg0) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_port_ip_add(int64_t arg0) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("port_ip_add")
 ));
@@ -1061,11 +1061,11 @@ int32_t __imported_wasix_snapshot_preview1_port_ip_add(int32_t arg0) __attribute
 __wasi_errno_t __wasi_port_ip_add(
     const __wasi_addr_cidr_t * ip
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_port_ip_add((int32_t) ip);
+    int32_t ret = __imported_wasix_snapshot_preview1_port_ip_add((int64_t) ip);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_port_ip_remove(int32_t arg0) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_port_ip_remove(int64_t arg0) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("port_ip_remove")
 ));
@@ -1073,7 +1073,7 @@ int32_t __imported_wasix_snapshot_preview1_port_ip_remove(int32_t arg0) __attrib
 __wasi_errno_t __wasi_port_ip_remove(
     const __wasi_addr_ip_t * ip
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_port_ip_remove((int32_t) ip);
+    int32_t ret = __imported_wasix_snapshot_preview1_port_ip_remove((int64_t) ip);
     return (uint16_t) ret;
 }
 
@@ -1101,7 +1101,7 @@ __wasi_errno_t __wasi_port_mac(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_port_ip_list(int32_t arg0, int32_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_port_ip_list(int64_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("port_ip_list")
 ));
@@ -1110,11 +1110,11 @@ __wasi_errno_t __wasi_port_ip_list(
     __wasi_addr_cidr_t * ips,
     __wasi_size_t * nips
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_port_ip_list((int32_t) ips, (int32_t) nips);
+    int32_t ret = __imported_wasix_snapshot_preview1_port_ip_list((int64_t) ips, (int64_t) nips);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_port_gateway_set(int32_t arg0) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_port_gateway_set(int64_t arg0) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("port_gateway_set")
 ));
@@ -1122,11 +1122,11 @@ int32_t __imported_wasix_snapshot_preview1_port_gateway_set(int32_t arg0) __attr
 __wasi_errno_t __wasi_port_gateway_set(
     const __wasi_addr_ip_t * ip
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_port_gateway_set((int32_t) ip);
+    int32_t ret = __imported_wasix_snapshot_preview1_port_gateway_set((int64_t) ip);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_port_route_add(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_port_route_add(int64_t arg0, int64_t arg1, int64_t arg2, int64_t arg3) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("port_route_add")
 ));
@@ -1137,11 +1137,11 @@ __wasi_errno_t __wasi_port_route_add(
     const __wasi_option_timestamp_t * preferred_until,
     const __wasi_option_timestamp_t * expires_at
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_port_route_add((int32_t) cidr, (int32_t) via_router, (int32_t) preferred_until, (int32_t) expires_at);
+    int32_t ret = __imported_wasix_snapshot_preview1_port_route_add((int64_t) cidr, (int64_t) via_router, (int64_t) preferred_until, (int64_t) expires_at);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_port_route_remove(int32_t arg0) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_port_route_remove(int64_t arg0) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("port_route_remove")
 ));
@@ -1149,7 +1149,7 @@ int32_t __imported_wasix_snapshot_preview1_port_route_remove(int32_t arg0) __att
 __wasi_errno_t __wasi_port_route_remove(
     const __wasi_addr_ip_t * cidr
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_port_route_remove((int32_t) cidr);
+    int32_t ret = __imported_wasix_snapshot_preview1_port_route_remove((int64_t) cidr);
     return (uint16_t) ret;
 }
 
@@ -1165,7 +1165,7 @@ __wasi_errno_t __wasi_port_route_clear(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_port_route_list(int32_t arg0, int32_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_port_route_list(int64_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("port_route_list")
 ));
@@ -1174,7 +1174,7 @@ __wasi_errno_t __wasi_port_route_list(
     __wasi_route_t * routes,
     __wasi_size_t * nroutes
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_port_route_list((int32_t) routes, (int32_t) nroutes);
+    int32_t ret = __imported_wasix_snapshot_preview1_port_route_list((int64_t) routes, (int64_t) nroutes);
     return (uint16_t) ret;
 }
 
@@ -1272,7 +1272,7 @@ __wasi_errno_t __wasi_sock_get_opt(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_set_linger(int32_t arg0, int32_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_set_linger(int32_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("sock_set_linger")
 ));
@@ -1281,7 +1281,7 @@ __wasi_errno_t __wasi_sock_set_linger(
     __wasi_fd_t fd,
     const __wasi_option_timestamp_t * linger
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_linger((int32_t) fd, (int32_t) linger);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_linger((int32_t) fd, (int64_t) linger);
     return (uint16_t) ret;
 }
 
@@ -1298,7 +1298,7 @@ __wasi_errno_t __wasi_sock_get_linger(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_set_timeout(int32_t arg0, int32_t arg1, int32_t arg2) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_set_timeout(int32_t arg0, int32_t arg1, int64_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("sock_set_timeout")
 ));
@@ -1308,7 +1308,7 @@ __wasi_errno_t __wasi_sock_set_timeout(
     __wasi_timeout_type_t ty,
     const __wasi_option_timestamp_t * timeout
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_timeout((int32_t) fd, (int32_t) ty, (int32_t) timeout);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_timeout((int32_t) fd, (int32_t) ty, (int64_t) timeout);
     return (uint16_t) ret;
 }
 
@@ -1378,7 +1378,7 @@ __wasi_errno_t __wasi_sock_get_multicast_ttl_v4(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_join_multicast_v4(int32_t arg0, int32_t arg1, int32_t arg2) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_join_multicast_v4(int32_t arg0, int64_t arg1, int64_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("sock_join_multicast_v4")
 ));
@@ -1388,11 +1388,11 @@ __wasi_errno_t __wasi_sock_join_multicast_v4(
     const __wasi_addr_ip4_t * multiaddr,
     const __wasi_addr_ip4_t * interface
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_join_multicast_v4((int32_t) fd, (int32_t) multiaddr, (int32_t) interface);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_join_multicast_v4((int32_t) fd, (int64_t) multiaddr, (int64_t) interface);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_leave_multicast_v4(int32_t arg0, int32_t arg1, int32_t arg2) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_leave_multicast_v4(int32_t arg0, int64_t arg1, int64_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("sock_leave_multicast_v4")
 ));
@@ -1402,11 +1402,11 @@ __wasi_errno_t __wasi_sock_leave_multicast_v4(
     const __wasi_addr_ip4_t * multiaddr,
     const __wasi_addr_ip4_t * interface
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_leave_multicast_v4((int32_t) fd, (int32_t) multiaddr, (int32_t) interface);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_leave_multicast_v4((int32_t) fd, (int64_t) multiaddr, (int64_t) interface);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_join_multicast_v6(int32_t arg0, int32_t arg1, int32_t arg2) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_join_multicast_v6(int32_t arg0, int64_t arg1, int32_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("sock_join_multicast_v6")
 ));
@@ -1416,11 +1416,11 @@ __wasi_errno_t __wasi_sock_join_multicast_v6(
     const __wasi_addr_ip6_t * multiaddr,
     uint32_t interface
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_join_multicast_v6((int32_t) fd, (int32_t) multiaddr, (int32_t) interface);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_join_multicast_v6((int32_t) fd, (int64_t) multiaddr, (int32_t) interface);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_leave_multicast_v6(int32_t arg0, int32_t arg1, int32_t arg2) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_leave_multicast_v6(int32_t arg0, int64_t arg1, int32_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("sock_leave_multicast_v6")
 ));
@@ -1430,7 +1430,7 @@ __wasi_errno_t __wasi_sock_leave_multicast_v6(
     const __wasi_addr_ip6_t * multiaddr,
     uint32_t interface
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_leave_multicast_v6((int32_t) fd, (int32_t) multiaddr, (int32_t) interface);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_leave_multicast_v6((int32_t) fd, (int64_t) multiaddr, (int32_t) interface);
     return (uint16_t) ret;
 }
 
@@ -1486,7 +1486,7 @@ __wasi_errno_t __wasi_sock_get_send_buf_size(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_bind(int32_t arg0, int32_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_bind(int32_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("sock_bind")
 ));
@@ -1495,7 +1495,7 @@ __wasi_errno_t __wasi_sock_bind(
     __wasi_fd_t fd,
     const __wasi_addr_port_t * addr
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_bind((int32_t) fd, (int32_t) addr);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_bind((int32_t) fd, (int64_t) addr);
     return (uint16_t) ret;
 }
 
@@ -1512,7 +1512,7 @@ __wasi_errno_t __wasi_sock_listen(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_accept(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_accept(int32_t arg0, int32_t arg1, int64_t arg2, int64_t arg3) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("sock_accept")
 ));
@@ -1527,7 +1527,7 @@ __wasi_errno_t __wasi_sock_accept(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_connect(int32_t arg0, int32_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_connect(int32_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("sock_connect")
 ));
@@ -1536,11 +1536,11 @@ __wasi_errno_t __wasi_sock_connect(
     __wasi_fd_t fd,
     const __wasi_addr_port_t * addr
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_connect((int32_t) fd, (int32_t) addr);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_connect((int32_t) fd, (int64_t) addr);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_recv(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_recv(int32_t arg0, int64_t arg1, int64_t arg2, int32_t arg3, int64_t arg4, int64_t arg5) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("sock_recv")
 ));
@@ -1557,7 +1557,7 @@ __wasi_errno_t __wasi_sock_recv(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_recv_from(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5, int32_t arg6) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_recv_from(int32_t arg0, int64_t arg1, int64_t arg2, int32_t arg3, int64_t arg4, int64_t arg5, int64_t arg6) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("sock_recv_from")
 ));
@@ -1575,7 +1575,7 @@ __wasi_errno_t __wasi_sock_recv_from(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_send(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int64_t arg4) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_send(int32_t arg0, int64_t arg1, int64_t arg2, int32_t arg3, int64_t arg4) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("sock_send")
 ));
@@ -1591,7 +1591,7 @@ __wasi_errno_t __wasi_sock_send(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_send_to(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int64_t arg5) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_send_to(int32_t arg0, int64_t arg1, int64_t arg2, int32_t arg3, int64_t arg4, int64_t arg5) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("sock_send_to")
 ));
@@ -1604,11 +1604,11 @@ __wasi_errno_t __wasi_sock_send_to(
     const __wasi_addr_port_t * addr,
     __wasi_size_t *retptr0
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_send_to((int32_t) fd, (intptr_t) si_data, (intptr_t) si_data_len, (int32_t) si_flags, (int32_t) addr, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_send_to((int32_t) fd, (intptr_t) si_data, (intptr_t) si_data_len, (int32_t) si_flags, (int64_t) addr, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_resolve(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int64_t arg5) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_resolve(int64_t arg0, int64_t arg1, int32_t arg2, int64_t arg3, int32_t arg4, int64_t arg5) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("resolve")
 ));
@@ -1621,7 +1621,7 @@ __wasi_errno_t __wasi_resolve(
     __wasi_size_t *retptr0
 ){
     size_t host_len = strlen(host);
-    int32_t ret = __imported_wasix_snapshot_preview1_resolve((intptr_t) host, (intptr_t) host_len, (int32_t) port, (int32_t) ips, (int32_t) nips, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_snapshot_preview1_resolve((intptr_t) host, (intptr_t) host_len, (int32_t) port, (int64_t) ips, (int32_t) nips, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 

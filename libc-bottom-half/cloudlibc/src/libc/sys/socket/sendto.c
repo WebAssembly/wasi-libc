@@ -29,6 +29,7 @@ ssize_t sendto(int socket, const void *restrict buffer, size_t length, int flags
   __wasi_addr_port_t peer_addr;
   __wasi_errno_t error = sockaddr_to_wasi(addr, addrlen, &peer_addr);
   if (error != 0) {
+    errno = error;
     return -1;
   }
 

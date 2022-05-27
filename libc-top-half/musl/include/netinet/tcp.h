@@ -95,7 +95,7 @@ enum {
 #define TCPOLEN_MAXSEG          4
 #define TCPOLEN_TIMESTAMP       10
 
-#define SOL_TCP 6
+#define SOL_TCP __WASI_SOCK_PROTO_TCP
 
 #include <sys/types.h>
 #include <sys/socket.h>

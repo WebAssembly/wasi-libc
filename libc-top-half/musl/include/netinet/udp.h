@@ -37,7 +37,7 @@ struct udphdr {
 #define UDP_ENCAP_RXRPC		6
 #define TCP_ENCAP_ESPINTCP	7
 
-#define SOL_UDP            17
+#define SOL_UDP __WASI_SOCK_PROTO_UDP
 
 #ifdef __cplusplus
 }

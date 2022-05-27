@@ -1230,7 +1230,7 @@ __wasi_errno_t __wasi_sock_addr_peer(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_open(int32_t arg0, int32_t arg1, int64_t arg2) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_open(int32_t arg0, int32_t arg1, int32_t arg2, int64_t arg3) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("sock_open")
 ));
@@ -1238,9 +1238,10 @@ int32_t __imported_wasix_snapshot_preview1_sock_open(int32_t arg0, int32_t arg1,
 __wasi_errno_t __wasi_sock_open(
     __wasi_address_family_t af,
     __wasi_sock_type_t socktype,
+    __wasi_sock_proto_t sock_proto,
     __wasi_fd_t *retptr0
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_open((int32_t) af, (int32_t) socktype, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_open((int32_t) af, (int32_t) socktype, (int32_t) sock_proto, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 

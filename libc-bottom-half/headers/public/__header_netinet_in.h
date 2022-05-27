@@ -6,12 +6,12 @@
 #include <__struct_sockaddr_in.h>
 #include <__struct_sockaddr_in6.h>
 
-#define IPPROTO_IP 0
-#define IPPROTO_ICMP 1
-#define IPPROTO_TCP 6
-#define IPPROTO_UDP 17
-#define IPPROTO_IPV6 41
-#define IPPROTO_RAW 255
+#define IPPROTO_IP __WASI_IP_PROTO_IPPROTO_IP
+#define IPPROTO_ICMP __WASI_IP_PROTO_IPPROTO_ICMP
+#define IPPROTO_TCP __WASI_IP_PROTO_IPPROTO_TCP
+#define IPPROTO_UDP __WASI_IP_PROTO_IPPROTO_UDP
+#define IPPROTO_IPV6 __WASI_IP_PROTO_IPPROTO_IPV6
+#define IPPROTO_RAW __WASI_IP_PROTO_IPPROTO_RAW
 
 #define IN6ADDR_ANY_INIT { { \
     0x00, 0x00, 0x00, 0x00, \

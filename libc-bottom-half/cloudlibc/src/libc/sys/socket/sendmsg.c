@@ -35,6 +35,7 @@ ssize_t sendmsg(int socket, const struct msghdr* msg, int flags) {
 	__wasi_addr_port_t peer_addr;
     error = sockaddr_to_wasi(addr, addrlen, &peer_addr);
     if (error != 0) {
+      errno = error;
       return -1;
     }
     error = __wasi_sock_send_to(socket, si_data, si_data_len, si_flags, &peer_addr, &so_datalen);

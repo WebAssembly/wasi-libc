@@ -2102,540 +2102,540 @@ _Static_assert(sizeof(__wasi_sock_type_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_sock_type_t) == 1, "witx calculated align");
 
 /**
- * IP protocol type
+ * Socket protocol type
  */
-typedef uint16_t __wasi_ip_proto_t;
+typedef uint16_t __wasi_sock_proto_t;
 
-#define __WASI_IP_PROTO_IPPROTO_IP (UINT16_C(0))
+#define __WASI_SOCK_PROTO_IP (UINT16_C(0))
 
-#define __WASI_IP_PROTO_IPPROTO_ICMP (UINT16_C(1))
+#define __WASI_SOCK_PROTO_ICMP (UINT16_C(1))
 
-#define __WASI_IP_PROTO_IPPROTO_IGMP (UINT16_C(2))
+#define __WASI_SOCK_PROTO_IGMP (UINT16_C(2))
 
-#define __WASI_IP_PROTO_IPPROTO_3 (UINT16_C(3))
+#define __WASI_SOCK_PROTO_PROTO_3 (UINT16_C(3))
 
-#define __WASI_IP_PROTO_IPPROTO_IPIP (UINT16_C(4))
+#define __WASI_SOCK_PROTO_IPIP (UINT16_C(4))
 
-#define __WASI_IP_PROTO_IPPROTO_5 (UINT16_C(5))
+#define __WASI_SOCK_PROTO_PROTO_5 (UINT16_C(5))
 
-#define __WASI_IP_PROTO_IPPROTO_TCP (UINT16_C(6))
+#define __WASI_SOCK_PROTO_TCP (UINT16_C(6))
 
-#define __WASI_IP_PROTO_IPPROTO_7 (UINT16_C(7))
+#define __WASI_SOCK_PROTO_PROTO_7 (UINT16_C(7))
 
-#define __WASI_IP_PROTO_IPPROTO_EGP (UINT16_C(8))
+#define __WASI_SOCK_PROTO_EGP (UINT16_C(8))
 
-#define __WASI_IP_PROTO_IPPROTO_9 (UINT16_C(9))
+#define __WASI_SOCK_PROTO_PROTO_9 (UINT16_C(9))
 
-#define __WASI_IP_PROTO_IPPROTO_10 (UINT16_C(10))
+#define __WASI_SOCK_PROTO_PROTO_10 (UINT16_C(10))
 
-#define __WASI_IP_PROTO_IPPROTO_11 (UINT16_C(11))
+#define __WASI_SOCK_PROTO_PROTO_11 (UINT16_C(11))
 
-#define __WASI_IP_PROTO_IPPROTO_PUP (UINT16_C(12))
+#define __WASI_SOCK_PROTO_PUP (UINT16_C(12))
 
-#define __WASI_IP_PROTO_IPPROTO_13 (UINT16_C(13))
+#define __WASI_SOCK_PROTO_PROTO_13 (UINT16_C(13))
 
-#define __WASI_IP_PROTO_IPPROTO_14 (UINT16_C(14))
+#define __WASI_SOCK_PROTO_PROTO_14 (UINT16_C(14))
 
-#define __WASI_IP_PROTO_IPPROTO_15 (UINT16_C(15))
+#define __WASI_SOCK_PROTO_PROTO_15 (UINT16_C(15))
 
-#define __WASI_IP_PROTO_IPPROTO_16 (UINT16_C(16))
+#define __WASI_SOCK_PROTO_PROTO_16 (UINT16_C(16))
 
-#define __WASI_IP_PROTO_IPPROTO_UDP (UINT16_C(17))
+#define __WASI_SOCK_PROTO_UDP (UINT16_C(17))
 
-#define __WASI_IP_PROTO_IPPROTO_18 (UINT16_C(18))
+#define __WASI_SOCK_PROTO_PROTO_18 (UINT16_C(18))
 
-#define __WASI_IP_PROTO_IPPROTO_19 (UINT16_C(19))
+#define __WASI_SOCK_PROTO_PROTO_19 (UINT16_C(19))
 
-#define __WASI_IP_PROTO_IPPROTO_20 (UINT16_C(20))
+#define __WASI_SOCK_PROTO_PROTO_20 (UINT16_C(20))
 
-#define __WASI_IP_PROTO_IPPROTO_21 (UINT16_C(21))
+#define __WASI_SOCK_PROTO_PROTO_21 (UINT16_C(21))
 
-#define __WASI_IP_PROTO_IPPROTO_IDP (UINT16_C(22))
+#define __WASI_SOCK_PROTO_IDP (UINT16_C(22))
 
-#define __WASI_IP_PROTO_IPPROTO_23 (UINT16_C(23))
+#define __WASI_SOCK_PROTO_PROTO_23 (UINT16_C(23))
 
-#define __WASI_IP_PROTO_IPPROTO_24 (UINT16_C(24))
+#define __WASI_SOCK_PROTO_PROTO_24 (UINT16_C(24))
 
-#define __WASI_IP_PROTO_IPPROTO_25 (UINT16_C(25))
+#define __WASI_SOCK_PROTO_PROTO_25 (UINT16_C(25))
 
-#define __WASI_IP_PROTO_IPPROTO_26 (UINT16_C(26))
+#define __WASI_SOCK_PROTO_PROTO_26 (UINT16_C(26))
 
-#define __WASI_IP_PROTO_IPPROTO_27 (UINT16_C(27))
+#define __WASI_SOCK_PROTO_PROTO_27 (UINT16_C(27))
 
-#define __WASI_IP_PROTO_IPPROTO_28 (UINT16_C(28))
+#define __WASI_SOCK_PROTO_PROTO_28 (UINT16_C(28))
 
-#define __WASI_IP_PROTO_IPPROTO_TP (UINT16_C(29))
+#define __WASI_SOCK_PROTO_PROTO_TP (UINT16_C(29))
 
-#define __WASI_IP_PROTO_IPPROTO_30 (UINT16_C(30))
+#define __WASI_SOCK_PROTO_PROTO_30 (UINT16_C(30))
 
-#define __WASI_IP_PROTO_IPPROTO_31 (UINT16_C(31))
+#define __WASI_SOCK_PROTO_PROTO_31 (UINT16_C(31))
 
-#define __WASI_IP_PROTO_IPPROTO_32 (UINT16_C(32))
+#define __WASI_SOCK_PROTO_PROTO_32 (UINT16_C(32))
 
-#define __WASI_IP_PROTO_IPPROTO_DCCP (UINT16_C(33))
+#define __WASI_SOCK_PROTO_DCCP (UINT16_C(33))
 
-#define __WASI_IP_PROTO_IPPROTO_34 (UINT16_C(34))
+#define __WASI_SOCK_PROTO_PROTO_34 (UINT16_C(34))
 
-#define __WASI_IP_PROTO_IPPROTO_35 (UINT16_C(35))
+#define __WASI_SOCK_PROTO_PROTO_35 (UINT16_C(35))
 
-#define __WASI_IP_PROTO_IPPROTO_36 (UINT16_C(36))
+#define __WASI_SOCK_PROTO_PROTO_36 (UINT16_C(36))
 
-#define __WASI_IP_PROTO_IPPROTO_37 (UINT16_C(37))
+#define __WASI_SOCK_PROTO_PROTO_37 (UINT16_C(37))
 
-#define __WASI_IP_PROTO_IPPROTO_38 (UINT16_C(38))
+#define __WASI_SOCK_PROTO_PROTO_38 (UINT16_C(38))
 
-#define __WASI_IP_PROTO_IPPROTO_39 (UINT16_C(39))
+#define __WASI_SOCK_PROTO_PROTO_39 (UINT16_C(39))
 
-#define __WASI_IP_PROTO_IPPROTO_40 (UINT16_C(40))
+#define __WASI_SOCK_PROTO_PROTO_40 (UINT16_C(40))
 
-#define __WASI_IP_PROTO_IPPROTO_IPV6 (UINT16_C(41))
+#define __WASI_SOCK_PROTO_IPV6 (UINT16_C(41))
 
-#define __WASI_IP_PROTO_IPPROTO_42 (UINT16_C(42))
+#define __WASI_SOCK_PROTO_PROTO_42 (UINT16_C(42))
 
-#define __WASI_IP_PROTO_IPPROTO_ROUTING (UINT16_C(43))
+#define __WASI_SOCK_PROTO_ROUTING (UINT16_C(43))
 
-#define __WASI_IP_PROTO_IPPROTO_FRAGMENT (UINT16_C(44))
+#define __WASI_SOCK_PROTO_FRAGMENT (UINT16_C(44))
 
-#define __WASI_IP_PROTO_IPPROTO_45 (UINT16_C(45))
+#define __WASI_SOCK_PROTO_PROTO_45 (UINT16_C(45))
 
-#define __WASI_IP_PROTO_IPPROTO_RSVP (UINT16_C(46))
+#define __WASI_SOCK_PROTO_RSVP (UINT16_C(46))
 
-#define __WASI_IP_PROTO_IPPROTO_GRE (UINT16_C(47))
+#define __WASI_SOCK_PROTO_GRE (UINT16_C(47))
 
-#define __WASI_IP_PROTO_IPPROTO_48 (UINT16_C(48))
+#define __WASI_SOCK_PROTO_PROTO_48 (UINT16_C(48))
 
-#define __WASI_IP_PROTO_IPPROTO_49 (UINT16_C(49))
+#define __WASI_SOCK_PROTO_PROTO_49 (UINT16_C(49))
 
-#define __WASI_IP_PROTO_IPPROTO_ESP (UINT16_C(50))
+#define __WASI_SOCK_PROTO_ESP (UINT16_C(50))
 
-#define __WASI_IP_PROTO_IPPROTO_AH (UINT16_C(51))
+#define __WASI_SOCK_PROTO_AH (UINT16_C(51))
 
-#define __WASI_IP_PROTO_IPPROTO_52 (UINT16_C(52))
+#define __WASI_SOCK_PROTO_PROTO_52 (UINT16_C(52))
 
-#define __WASI_IP_PROTO_IPPROTO_53 (UINT16_C(53))
+#define __WASI_SOCK_PROTO_PROTO_53 (UINT16_C(53))
 
-#define __WASI_IP_PROTO_IPPROTO_54 (UINT16_C(54))
+#define __WASI_SOCK_PROTO_PROTO_54 (UINT16_C(54))
 
-#define __WASI_IP_PROTO_IPPROTO_55 (UINT16_C(55))
+#define __WASI_SOCK_PROTO_PROTO_55 (UINT16_C(55))
 
-#define __WASI_IP_PROTO_IPPROTO_56 (UINT16_C(56))
+#define __WASI_SOCK_PROTO_PROTO_56 (UINT16_C(56))
 
-#define __WASI_IP_PROTO_IPPROTO_57 (UINT16_C(57))
+#define __WASI_SOCK_PROTO_PROTO_57 (UINT16_C(57))
 
-#define __WASI_IP_PROTO_IPPROTO_ICMPV6 (UINT16_C(58))
+#define __WASI_SOCK_PROTO_ICMPV6 (UINT16_C(58))
 
-#define __WASI_IP_PROTO_IPPROTO_NONE (UINT16_C(59))
+#define __WASI_SOCK_PROTO_NONE (UINT16_C(59))
 
-#define __WASI_IP_PROTO_IPPROTO_DSTOPTS (UINT16_C(60))
+#define __WASI_SOCK_PROTO_DSTOPTS (UINT16_C(60))
 
-#define __WASI_IP_PROTO_IPPROTO_61 (UINT16_C(61))
+#define __WASI_SOCK_PROTO_PROTO_61 (UINT16_C(61))
 
-#define __WASI_IP_PROTO_IPPROTO_62 (UINT16_C(62))
+#define __WASI_SOCK_PROTO_PROTO_62 (UINT16_C(62))
 
-#define __WASI_IP_PROTO_IPPROTO_63 (UINT16_C(63))
+#define __WASI_SOCK_PROTO_PROTO_63 (UINT16_C(63))
 
-#define __WASI_IP_PROTO_IPPROTO_64 (UINT16_C(64))
+#define __WASI_SOCK_PROTO_PROTO_64 (UINT16_C(64))
 
-#define __WASI_IP_PROTO_IPPROTO_65 (UINT16_C(65))
+#define __WASI_SOCK_PROTO_PROTO_65 (UINT16_C(65))
 
-#define __WASI_IP_PROTO_IPPROTO_66 (UINT16_C(66))
+#define __WASI_SOCK_PROTO_PROTO_66 (UINT16_C(66))
 
-#define __WASI_IP_PROTO_IPPROTO_67 (UINT16_C(67))
+#define __WASI_SOCK_PROTO_PROTO_67 (UINT16_C(67))
 
-#define __WASI_IP_PROTO_IPPROTO_68 (UINT16_C(68))
+#define __WASI_SOCK_PROTO_PROTO_68 (UINT16_C(68))
 
-#define __WASI_IP_PROTO_IPPROTO_69 (UINT16_C(69))
+#define __WASI_SOCK_PROTO_PROTO_69 (UINT16_C(69))
 
-#define __WASI_IP_PROTO_IPPROTO_70 (UINT16_C(70))
+#define __WASI_SOCK_PROTO_PROTO_70 (UINT16_C(70))
 
-#define __WASI_IP_PROTO_IPPROTO_71 (UINT16_C(71))
+#define __WASI_SOCK_PROTO_PROTO_71 (UINT16_C(71))
 
-#define __WASI_IP_PROTO_IPPROTO_72 (UINT16_C(72))
+#define __WASI_SOCK_PROTO_PROTO_72 (UINT16_C(72))
 
-#define __WASI_IP_PROTO_IPPROTO_73 (UINT16_C(73))
+#define __WASI_SOCK_PROTO_PROTO_73 (UINT16_C(73))
 
-#define __WASI_IP_PROTO_IPPROTO_74 (UINT16_C(74))
+#define __WASI_SOCK_PROTO_PROTO_74 (UINT16_C(74))
 
-#define __WASI_IP_PROTO_IPPROTO_75 (UINT16_C(75))
+#define __WASI_SOCK_PROTO_PROTO_75 (UINT16_C(75))
 
-#define __WASI_IP_PROTO_IPPROTO_76 (UINT16_C(76))
+#define __WASI_SOCK_PROTO_PROTO_76 (UINT16_C(76))
 
-#define __WASI_IP_PROTO_IPPROTO_77 (UINT16_C(77))
+#define __WASI_SOCK_PROTO_PROTO_77 (UINT16_C(77))
 
-#define __WASI_IP_PROTO_IPPROTO_78 (UINT16_C(78))
+#define __WASI_SOCK_PROTO_PROTO_78 (UINT16_C(78))
 
-#define __WASI_IP_PROTO_IPPROTO_79 (UINT16_C(79))
+#define __WASI_SOCK_PROTO_PROTO_79 (UINT16_C(79))
 
-#define __WASI_IP_PROTO_IPPROTO_80 (UINT16_C(80))
+#define __WASI_SOCK_PROTO_PROTO_80 (UINT16_C(80))
 
-#define __WASI_IP_PROTO_IPPROTO_81 (UINT16_C(81))
+#define __WASI_SOCK_PROTO_PROTO_81 (UINT16_C(81))
 
-#define __WASI_IP_PROTO_IPPROTO_82 (UINT16_C(82))
+#define __WASI_SOCK_PROTO_PROTO_82 (UINT16_C(82))
 
-#define __WASI_IP_PROTO_IPPROTO_83 (UINT16_C(83))
+#define __WASI_SOCK_PROTO_PROTO_83 (UINT16_C(83))
 
-#define __WASI_IP_PROTO_IPPROTO_84 (UINT16_C(84))
+#define __WASI_SOCK_PROTO_PROTO_84 (UINT16_C(84))
 
-#define __WASI_IP_PROTO_IPPROTO_85 (UINT16_C(85))
+#define __WASI_SOCK_PROTO_PROTO_85 (UINT16_C(85))
 
-#define __WASI_IP_PROTO_IPPROTO_86 (UINT16_C(86))
+#define __WASI_SOCK_PROTO_PROTO_86 (UINT16_C(86))
 
-#define __WASI_IP_PROTO_IPPROTO_87 (UINT16_C(87))
+#define __WASI_SOCK_PROTO_PROTO_87 (UINT16_C(87))
 
-#define __WASI_IP_PROTO_IPPROTO_88 (UINT16_C(88))
+#define __WASI_SOCK_PROTO_PROTO_88 (UINT16_C(88))
 
-#define __WASI_IP_PROTO_IPPROTO_89 (UINT16_C(89))
+#define __WASI_SOCK_PROTO_PROTO_89 (UINT16_C(89))
 
-#define __WASI_IP_PROTO_IPPROTO_90 (UINT16_C(90))
+#define __WASI_SOCK_PROTO_PROTO_90 (UINT16_C(90))
 
-#define __WASI_IP_PROTO_IPPROTO_91 (UINT16_C(91))
+#define __WASI_SOCK_PROTO_PROTO_91 (UINT16_C(91))
 
-#define __WASI_IP_PROTO_IPPROTO_MTP (UINT16_C(92))
+#define __WASI_SOCK_PROTO_MTP (UINT16_C(92))
 
-#define __WASI_IP_PROTO_IPPROTO_93 (UINT16_C(93))
+#define __WASI_SOCK_PROTO_PROTO_93 (UINT16_C(93))
 
-#define __WASI_IP_PROTO_IPPROTO_BEETPH (UINT16_C(94))
+#define __WASI_SOCK_PROTO_BEETPH (UINT16_C(94))
 
-#define __WASI_IP_PROTO_IPPROTO_95 (UINT16_C(95))
+#define __WASI_SOCK_PROTO_PROTO_95 (UINT16_C(95))
 
-#define __WASI_IP_PROTO_IPPROTO_96 (UINT16_C(96))
+#define __WASI_SOCK_PROTO_PROTO_96 (UINT16_C(96))
 
-#define __WASI_IP_PROTO_IPPROTO_97 (UINT16_C(97))
+#define __WASI_SOCK_PROTO_PROTO_97 (UINT16_C(97))
 
-#define __WASI_IP_PROTO_IPPROTO_ENCAP (UINT16_C(98))
+#define __WASI_SOCK_PROTO_ENCAP (UINT16_C(98))
 
-#define __WASI_IP_PROTO_IPPROTO_99 (UINT16_C(99))
+#define __WASI_SOCK_PROTO_PROTO_99 (UINT16_C(99))
 
-#define __WASI_IP_PROTO_IPPROTO_100 (UINT16_C(100))
+#define __WASI_SOCK_PROTO_PROTO_100 (UINT16_C(100))
 
-#define __WASI_IP_PROTO_IPPROTO_101 (UINT16_C(101))
+#define __WASI_SOCK_PROTO_PROTO_101 (UINT16_C(101))
 
-#define __WASI_IP_PROTO_IPPROTO_102 (UINT16_C(102))
+#define __WASI_SOCK_PROTO_PROTO_102 (UINT16_C(102))
 
-#define __WASI_IP_PROTO_IPPROTO_PIM (UINT16_C(103))
+#define __WASI_SOCK_PROTO_PIM (UINT16_C(103))
 
-#define __WASI_IP_PROTO_IPPROTO_104 (UINT16_C(104))
+#define __WASI_SOCK_PROTO_PROTO_104 (UINT16_C(104))
 
-#define __WASI_IP_PROTO_IPPROTO_105 (UINT16_C(105))
+#define __WASI_SOCK_PROTO_PROTO_105 (UINT16_C(105))
 
-#define __WASI_IP_PROTO_IPPROTO_106 (UINT16_C(106))
+#define __WASI_SOCK_PROTO_PROTO_106 (UINT16_C(106))
 
-#define __WASI_IP_PROTO_IPPROTO_107 (UINT16_C(107))
+#define __WASI_SOCK_PROTO_PROTO_107 (UINT16_C(107))
 
-#define __WASI_IP_PROTO_IPPROTO_COMP (UINT16_C(108))
+#define __WASI_SOCK_PROTO_COMP (UINT16_C(108))
 
-#define __WASI_IP_PROTO_IPPROTO_109 (UINT16_C(109))
+#define __WASI_SOCK_PROTO_PROTO_109 (UINT16_C(109))
 
-#define __WASI_IP_PROTO_IPPROTO_110 (UINT16_C(110))
+#define __WASI_SOCK_PROTO_PROTO_110 (UINT16_C(110))
 
-#define __WASI_IP_PROTO_IPPROTO_111 (UINT16_C(111))
+#define __WASI_SOCK_PROTO_PROTO_111 (UINT16_C(111))
 
-#define __WASI_IP_PROTO_IPPROTO_112 (UINT16_C(112))
+#define __WASI_SOCK_PROTO_PROTO_112 (UINT16_C(112))
 
-#define __WASI_IP_PROTO_IPPROTO_113 (UINT16_C(113))
+#define __WASI_SOCK_PROTO_PROTO_113 (UINT16_C(113))
 
-#define __WASI_IP_PROTO_IPPROTO_114 (UINT16_C(114))
+#define __WASI_SOCK_PROTO_PROTO_114 (UINT16_C(114))
 
-#define __WASI_IP_PROTO_IPPROTO_115 (UINT16_C(115))
+#define __WASI_SOCK_PROTO_PROTO_115 (UINT16_C(115))
 
-#define __WASI_IP_PROTO_IPPROTO_116 (UINT16_C(116))
+#define __WASI_SOCK_PROTO_PROTO_116 (UINT16_C(116))
 
-#define __WASI_IP_PROTO_IPPROTO_117 (UINT16_C(117))
+#define __WASI_SOCK_PROTO_PROTO_117 (UINT16_C(117))
 
-#define __WASI_IP_PROTO_IPPROTO_118 (UINT16_C(118))
+#define __WASI_SOCK_PROTO_PROTO_118 (UINT16_C(118))
 
-#define __WASI_IP_PROTO_IPPROTO_119 (UINT16_C(119))
+#define __WASI_SOCK_PROTO_PROTO_119 (UINT16_C(119))
 
-#define __WASI_IP_PROTO_IPPROTO_120 (UINT16_C(120))
+#define __WASI_SOCK_PROTO_PROTO_120 (UINT16_C(120))
 
-#define __WASI_IP_PROTO_IPPROTO_121 (UINT16_C(121))
+#define __WASI_SOCK_PROTO_PROTO_121 (UINT16_C(121))
 
-#define __WASI_IP_PROTO_IPPROTO_122 (UINT16_C(122))
+#define __WASI_SOCK_PROTO_PROTO_122 (UINT16_C(122))
 
-#define __WASI_IP_PROTO_IPPROTO_123 (UINT16_C(123))
+#define __WASI_SOCK_PROTO_PROTO_123 (UINT16_C(123))
 
-#define __WASI_IP_PROTO_IPPROTO_124 (UINT16_C(124))
+#define __WASI_SOCK_PROTO_PROTO_124 (UINT16_C(124))
 
-#define __WASI_IP_PROTO_IPPROTO_125 (UINT16_C(125))
+#define __WASI_SOCK_PROTO_PROTO_125 (UINT16_C(125))
 
-#define __WASI_IP_PROTO_IPPROTO_126 (UINT16_C(126))
+#define __WASI_SOCK_PROTO_PROTO_126 (UINT16_C(126))
 
-#define __WASI_IP_PROTO_IPPROTO_127 (UINT16_C(127))
+#define __WASI_SOCK_PROTO_PROTO_127 (UINT16_C(127))
 
-#define __WASI_IP_PROTO_IPPROTO_128 (UINT16_C(128))
+#define __WASI_SOCK_PROTO_PROTO_128 (UINT16_C(128))
 
-#define __WASI_IP_PROTO_IPPROTO_129 (UINT16_C(129))
+#define __WASI_SOCK_PROTO_PROTO_129 (UINT16_C(129))
 
-#define __WASI_IP_PROTO_IPPROTO_130 (UINT16_C(130))
+#define __WASI_SOCK_PROTO_PROTO_130 (UINT16_C(130))
 
-#define __WASI_IP_PROTO_IPPROTO_131 (UINT16_C(131))
+#define __WASI_SOCK_PROTO_PROTO_131 (UINT16_C(131))
 
-#define __WASI_IP_PROTO_IPPROTO_SCTP (UINT16_C(132))
+#define __WASI_SOCK_PROTO_SCTP (UINT16_C(132))
 
-#define __WASI_IP_PROTO_IPPROTO_133 (UINT16_C(133))
+#define __WASI_SOCK_PROTO_PROTO_133 (UINT16_C(133))
 
-#define __WASI_IP_PROTO_IPPROTO_134 (UINT16_C(134))
+#define __WASI_SOCK_PROTO_PROTO_134 (UINT16_C(134))
 
-#define __WASI_IP_PROTO_IPPROTO_MH (UINT16_C(135))
+#define __WASI_SOCK_PROTO_MH (UINT16_C(135))
 
-#define __WASI_IP_PROTO_IPPROTO_UDPLITE (UINT16_C(136))
+#define __WASI_SOCK_PROTO_UDPLITE (UINT16_C(136))
 
-#define __WASI_IP_PROTO_IPPROTO_MPLS (UINT16_C(137))
+#define __WASI_SOCK_PROTO_MPLS (UINT16_C(137))
 
-#define __WASI_IP_PROTO_IPPROTO_138 (UINT16_C(138))
+#define __WASI_SOCK_PROTO_PROTO_138 (UINT16_C(138))
 
-#define __WASI_IP_PROTO_IPPROTO_139 (UINT16_C(139))
+#define __WASI_SOCK_PROTO_PROTO_139 (UINT16_C(139))
 
-#define __WASI_IP_PROTO_IPPROTO_140 (UINT16_C(140))
+#define __WASI_SOCK_PROTO_PROTO_140 (UINT16_C(140))
 
-#define __WASI_IP_PROTO_IPPROTO_141 (UINT16_C(141))
+#define __WASI_SOCK_PROTO_PROTO_141 (UINT16_C(141))
 
-#define __WASI_IP_PROTO_IPPROTO_142 (UINT16_C(142))
+#define __WASI_SOCK_PROTO_PROTO_142 (UINT16_C(142))
 
-#define __WASI_IP_PROTO_IPPROTO_ETHERNET (UINT16_C(143))
+#define __WASI_SOCK_PROTO_ETHERNET (UINT16_C(143))
 
-#define __WASI_IP_PROTO_IPPROTO_144 (UINT16_C(144))
+#define __WASI_SOCK_PROTO_PROTO_144 (UINT16_C(144))
 
-#define __WASI_IP_PROTO_IPPROTO_145 (UINT16_C(145))
+#define __WASI_SOCK_PROTO_PROTO_145 (UINT16_C(145))
 
-#define __WASI_IP_PROTO_IPPROTO_146 (UINT16_C(146))
+#define __WASI_SOCK_PROTO_PROTO_146 (UINT16_C(146))
 
-#define __WASI_IP_PROTO_IPPROTO_147 (UINT16_C(147))
+#define __WASI_SOCK_PROTO_PROTO_147 (UINT16_C(147))
 
-#define __WASI_IP_PROTO_IPPROTO_148 (UINT16_C(148))
+#define __WASI_SOCK_PROTO_PROTO_148 (UINT16_C(148))
 
-#define __WASI_IP_PROTO_IPPROTO_149 (UINT16_C(149))
+#define __WASI_SOCK_PROTO_PROTO_149 (UINT16_C(149))
 
-#define __WASI_IP_PROTO_IPPROTO_150 (UINT16_C(150))
+#define __WASI_SOCK_PROTO_PROTO_150 (UINT16_C(150))
 
-#define __WASI_IP_PROTO_IPPROTO_151 (UINT16_C(151))
+#define __WASI_SOCK_PROTO_PROTO_151 (UINT16_C(151))
 
-#define __WASI_IP_PROTO_IPPROTO_152 (UINT16_C(152))
+#define __WASI_SOCK_PROTO_PROTO_152 (UINT16_C(152))
 
-#define __WASI_IP_PROTO_IPPROTO_153 (UINT16_C(153))
+#define __WASI_SOCK_PROTO_PROTO_153 (UINT16_C(153))
 
-#define __WASI_IP_PROTO_IPPROTO_154 (UINT16_C(154))
+#define __WASI_SOCK_PROTO_PROTO_154 (UINT16_C(154))
 
-#define __WASI_IP_PROTO_IPPROTO_155 (UINT16_C(155))
+#define __WASI_SOCK_PROTO_PROTO_155 (UINT16_C(155))
 
-#define __WASI_IP_PROTO_IPPROTO_156 (UINT16_C(156))
+#define __WASI_SOCK_PROTO_PROTO_156 (UINT16_C(156))
 
-#define __WASI_IP_PROTO_IPPROTO_157 (UINT16_C(157))
+#define __WASI_SOCK_PROTO_PROTO_157 (UINT16_C(157))
 
-#define __WASI_IP_PROTO_IPPROTO_158 (UINT16_C(158))
+#define __WASI_SOCK_PROTO_PROTO_158 (UINT16_C(158))
 
-#define __WASI_IP_PROTO_IPPROTO_159 (UINT16_C(159))
+#define __WASI_SOCK_PROTO_PROTO_159 (UINT16_C(159))
 
-#define __WASI_IP_PROTO_IPPROTO_160 (UINT16_C(160))
+#define __WASI_SOCK_PROTO_PROTO_160 (UINT16_C(160))
 
-#define __WASI_IP_PROTO_IPPROTO_161 (UINT16_C(161))
+#define __WASI_SOCK_PROTO_PROTO_161 (UINT16_C(161))
 
-#define __WASI_IP_PROTO_IPPROTO_162 (UINT16_C(162))
+#define __WASI_SOCK_PROTO_PROTO_162 (UINT16_C(162))
 
-#define __WASI_IP_PROTO_IPPROTO_163 (UINT16_C(163))
+#define __WASI_SOCK_PROTO_PROTO_163 (UINT16_C(163))
 
-#define __WASI_IP_PROTO_IPPROTO_164 (UINT16_C(164))
+#define __WASI_SOCK_PROTO_PROTO_164 (UINT16_C(164))
 
-#define __WASI_IP_PROTO_IPPROTO_165 (UINT16_C(165))
+#define __WASI_SOCK_PROTO_PROTO_165 (UINT16_C(165))
 
-#define __WASI_IP_PROTO_IPPROTO_166 (UINT16_C(166))
+#define __WASI_SOCK_PROTO_PROTO_166 (UINT16_C(166))
 
-#define __WASI_IP_PROTO_IPPROTO_167 (UINT16_C(167))
+#define __WASI_SOCK_PROTO_PROTO_167 (UINT16_C(167))
 
-#define __WASI_IP_PROTO_IPPROTO_168 (UINT16_C(168))
+#define __WASI_SOCK_PROTO_PROTO_168 (UINT16_C(168))
 
-#define __WASI_IP_PROTO_IPPROTO_169 (UINT16_C(169))
+#define __WASI_SOCK_PROTO_PROTO_169 (UINT16_C(169))
 
-#define __WASI_IP_PROTO_IPPROTO_170 (UINT16_C(170))
+#define __WASI_SOCK_PROTO_PROTO_170 (UINT16_C(170))
 
-#define __WASI_IP_PROTO_IPPROTO_171 (UINT16_C(171))
+#define __WASI_SOCK_PROTO_PROTO_171 (UINT16_C(171))
 
-#define __WASI_IP_PROTO_IPPROTO_172 (UINT16_C(172))
+#define __WASI_SOCK_PROTO_PROTO_172 (UINT16_C(172))
 
-#define __WASI_IP_PROTO_IPPROTO_173 (UINT16_C(173))
+#define __WASI_SOCK_PROTO_PROTO_173 (UINT16_C(173))
 
-#define __WASI_IP_PROTO_IPPROTO_174 (UINT16_C(174))
+#define __WASI_SOCK_PROTO_PROTO_174 (UINT16_C(174))
 
-#define __WASI_IP_PROTO_IPPROTO_175 (UINT16_C(175))
+#define __WASI_SOCK_PROTO_PROTO_175 (UINT16_C(175))
 
-#define __WASI_IP_PROTO_IPPROTO_176 (UINT16_C(176))
+#define __WASI_SOCK_PROTO_PROTO_176 (UINT16_C(176))
 
-#define __WASI_IP_PROTO_IPPROTO_177 (UINT16_C(177))
+#define __WASI_SOCK_PROTO_PROTO_177 (UINT16_C(177))
 
-#define __WASI_IP_PROTO_IPPROTO_178 (UINT16_C(178))
+#define __WASI_SOCK_PROTO_PROTO_178 (UINT16_C(178))
 
-#define __WASI_IP_PROTO_IPPROTO_179 (UINT16_C(179))
+#define __WASI_SOCK_PROTO_PROTO_179 (UINT16_C(179))
 
-#define __WASI_IP_PROTO_IPPROTO_180 (UINT16_C(180))
+#define __WASI_SOCK_PROTO_PROTO_180 (UINT16_C(180))
 
-#define __WASI_IP_PROTO_IPPROTO_181 (UINT16_C(181))
+#define __WASI_SOCK_PROTO_PROTO_181 (UINT16_C(181))
 
-#define __WASI_IP_PROTO_IPPROTO_182 (UINT16_C(182))
+#define __WASI_SOCK_PROTO_PROTO_182 (UINT16_C(182))
 
-#define __WASI_IP_PROTO_IPPROTO_183 (UINT16_C(183))
+#define __WASI_SOCK_PROTO_PROTO_183 (UINT16_C(183))
 
-#define __WASI_IP_PROTO_IPPROTO_184 (UINT16_C(184))
+#define __WASI_SOCK_PROTO_PROTO_184 (UINT16_C(184))
 
-#define __WASI_IP_PROTO_IPPROTO_185 (UINT16_C(185))
+#define __WASI_SOCK_PROTO_PROTO_185 (UINT16_C(185))
 
-#define __WASI_IP_PROTO_IPPROTO_186 (UINT16_C(186))
+#define __WASI_SOCK_PROTO_PROTO_186 (UINT16_C(186))
 
-#define __WASI_IP_PROTO_IPPROTO_187 (UINT16_C(187))
+#define __WASI_SOCK_PROTO_PROTO_187 (UINT16_C(187))
 
-#define __WASI_IP_PROTO_IPPROTO_188 (UINT16_C(188))
+#define __WASI_SOCK_PROTO_PROTO_188 (UINT16_C(188))
 
-#define __WASI_IP_PROTO_IPPROTO_189 (UINT16_C(189))
+#define __WASI_SOCK_PROTO_PROTO_189 (UINT16_C(189))
 
-#define __WASI_IP_PROTO_IPPROTO_190 (UINT16_C(190))
+#define __WASI_SOCK_PROTO_PROTO_190 (UINT16_C(190))
 
-#define __WASI_IP_PROTO_IPPROTO_191 (UINT16_C(191))
+#define __WASI_SOCK_PROTO_PROTO_191 (UINT16_C(191))
 
-#define __WASI_IP_PROTO_IPPROTO_192 (UINT16_C(192))
+#define __WASI_SOCK_PROTO_PROTO_192 (UINT16_C(192))
 
-#define __WASI_IP_PROTO_IPPROTO_193 (UINT16_C(193))
+#define __WASI_SOCK_PROTO_PROTO_193 (UINT16_C(193))
 
-#define __WASI_IP_PROTO_IPPROTO_194 (UINT16_C(194))
+#define __WASI_SOCK_PROTO_PROTO_194 (UINT16_C(194))
 
-#define __WASI_IP_PROTO_IPPROTO_195 (UINT16_C(195))
+#define __WASI_SOCK_PROTO_PROTO_195 (UINT16_C(195))
 
-#define __WASI_IP_PROTO_IPPROTO_196 (UINT16_C(196))
+#define __WASI_SOCK_PROTO_PROTO_196 (UINT16_C(196))
 
-#define __WASI_IP_PROTO_IPPROTO_197 (UINT16_C(197))
+#define __WASI_SOCK_PROTO_PROTO_197 (UINT16_C(197))
 
-#define __WASI_IP_PROTO_IPPROTO_198 (UINT16_C(198))
+#define __WASI_SOCK_PROTO_PROTO_198 (UINT16_C(198))
 
-#define __WASI_IP_PROTO_IPPROTO_199 (UINT16_C(199))
+#define __WASI_SOCK_PROTO_PROTO_199 (UINT16_C(199))
 
-#define __WASI_IP_PROTO_IPPROTO_200 (UINT16_C(200))
+#define __WASI_SOCK_PROTO_PROTO_200 (UINT16_C(200))
 
-#define __WASI_IP_PROTO_IPPROTO_201 (UINT16_C(201))
+#define __WASI_SOCK_PROTO_PROTO_201 (UINT16_C(201))
 
-#define __WASI_IP_PROTO_IPPROTO_202 (UINT16_C(202))
+#define __WASI_SOCK_PROTO_PROTO_202 (UINT16_C(202))
 
-#define __WASI_IP_PROTO_IPPROTO_203 (UINT16_C(203))
+#define __WASI_SOCK_PROTO_PROTO_203 (UINT16_C(203))
 
-#define __WASI_IP_PROTO_IPPROTO_204 (UINT16_C(204))
+#define __WASI_SOCK_PROTO_PROTO_204 (UINT16_C(204))
 
-#define __WASI_IP_PROTO_IPPROTO_205 (UINT16_C(205))
+#define __WASI_SOCK_PROTO_PROTO_205 (UINT16_C(205))
 
-#define __WASI_IP_PROTO_IPPROTO_206 (UINT16_C(206))
+#define __WASI_SOCK_PROTO_PROTO_206 (UINT16_C(206))
 
-#define __WASI_IP_PROTO_IPPROTO_207 (UINT16_C(207))
+#define __WASI_SOCK_PROTO_PROTO_207 (UINT16_C(207))
 
-#define __WASI_IP_PROTO_IPPROTO_208 (UINT16_C(208))
+#define __WASI_SOCK_PROTO_PROTO_208 (UINT16_C(208))
 
-#define __WASI_IP_PROTO_IPPROTO_209 (UINT16_C(209))
+#define __WASI_SOCK_PROTO_PROTO_209 (UINT16_C(209))
 
-#define __WASI_IP_PROTO_IPPROTO_210 (UINT16_C(210))
+#define __WASI_SOCK_PROTO_PROTO_210 (UINT16_C(210))
 
-#define __WASI_IP_PROTO_IPPROTO_211 (UINT16_C(211))
+#define __WASI_SOCK_PROTO_PROTO_211 (UINT16_C(211))
 
-#define __WASI_IP_PROTO_IPPROTO_212 (UINT16_C(212))
+#define __WASI_SOCK_PROTO_PROTO_212 (UINT16_C(212))
 
-#define __WASI_IP_PROTO_IPPROTO_213 (UINT16_C(213))
+#define __WASI_SOCK_PROTO_PROTO_213 (UINT16_C(213))
 
-#define __WASI_IP_PROTO_IPPROTO_214 (UINT16_C(214))
+#define __WASI_SOCK_PROTO_PROTO_214 (UINT16_C(214))
 
-#define __WASI_IP_PROTO_IPPROTO_215 (UINT16_C(215))
+#define __WASI_SOCK_PROTO_PROTO_215 (UINT16_C(215))
 
-#define __WASI_IP_PROTO_IPPROTO_216 (UINT16_C(216))
+#define __WASI_SOCK_PROTO_PROTO_216 (UINT16_C(216))
 
-#define __WASI_IP_PROTO_IPPROTO_217 (UINT16_C(217))
+#define __WASI_SOCK_PROTO_PROTO_217 (UINT16_C(217))
 
-#define __WASI_IP_PROTO_IPPROTO_218 (UINT16_C(218))
+#define __WASI_SOCK_PROTO_PROTO_218 (UINT16_C(218))
 
-#define __WASI_IP_PROTO_IPPROTO_219 (UINT16_C(219))
+#define __WASI_SOCK_PROTO_PROTO_219 (UINT16_C(219))
 
-#define __WASI_IP_PROTO_IPPROTO_220 (UINT16_C(220))
+#define __WASI_SOCK_PROTO_PROTO_220 (UINT16_C(220))
 
-#define __WASI_IP_PROTO_IPPROTO_221 (UINT16_C(221))
+#define __WASI_SOCK_PROTO_PROTO_221 (UINT16_C(221))
 
-#define __WASI_IP_PROTO_IPPROTO_222 (UINT16_C(222))
+#define __WASI_SOCK_PROTO_PROTO_222 (UINT16_C(222))
 
-#define __WASI_IP_PROTO_IPPROTO_223 (UINT16_C(223))
+#define __WASI_SOCK_PROTO_PROTO_223 (UINT16_C(223))
 
-#define __WASI_IP_PROTO_IPPROTO_224 (UINT16_C(224))
+#define __WASI_SOCK_PROTO_PROTO_224 (UINT16_C(224))
 
-#define __WASI_IP_PROTO_IPPROTO_225 (UINT16_C(225))
+#define __WASI_SOCK_PROTO_PROTO_225 (UINT16_C(225))
 
-#define __WASI_IP_PROTO_IPPROTO_226 (UINT16_C(226))
+#define __WASI_SOCK_PROTO_PROTO_226 (UINT16_C(226))
 
-#define __WASI_IP_PROTO_IPPROTO_227 (UINT16_C(227))
+#define __WASI_SOCK_PROTO_PROTO_227 (UINT16_C(227))
 
-#define __WASI_IP_PROTO_IPPROTO_228 (UINT16_C(228))
+#define __WASI_SOCK_PROTO_PROTO_228 (UINT16_C(228))
 
-#define __WASI_IP_PROTO_IPPROTO_229 (UINT16_C(229))
+#define __WASI_SOCK_PROTO_PROTO_229 (UINT16_C(229))
 
-#define __WASI_IP_PROTO_IPPROTO_230 (UINT16_C(230))
+#define __WASI_SOCK_PROTO_PROTO_230 (UINT16_C(230))
 
-#define __WASI_IP_PROTO_IPPROTO_231 (UINT16_C(231))
+#define __WASI_SOCK_PROTO_PROTO_231 (UINT16_C(231))
 
-#define __WASI_IP_PROTO_IPPROTO_232 (UINT16_C(232))
+#define __WASI_SOCK_PROTO_PROTO_232 (UINT16_C(232))
 
-#define __WASI_IP_PROTO_IPPROTO_233 (UINT16_C(233))
+#define __WASI_SOCK_PROTO_PROTO_233 (UINT16_C(233))
 
-#define __WASI_IP_PROTO_IPPROTO_234 (UINT16_C(234))
+#define __WASI_SOCK_PROTO_PROTO_234 (UINT16_C(234))
 
-#define __WASI_IP_PROTO_IPPROTO_235 (UINT16_C(235))
+#define __WASI_SOCK_PROTO_PROTO_235 (UINT16_C(235))
 
-#define __WASI_IP_PROTO_IPPROTO_236 (UINT16_C(236))
+#define __WASI_SOCK_PROTO_PROTO_236 (UINT16_C(236))
 
-#define __WASI_IP_PROTO_IPPROTO_237 (UINT16_C(237))
+#define __WASI_SOCK_PROTO_PROTO_237 (UINT16_C(237))
 
-#define __WASI_IP_PROTO_IPPROTO_238 (UINT16_C(238))
+#define __WASI_SOCK_PROTO_PROTO_238 (UINT16_C(238))
 
-#define __WASI_IP_PROTO_IPPROTO_239 (UINT16_C(239))
+#define __WASI_SOCK_PROTO_PROTO_239 (UINT16_C(239))
 
-#define __WASI_IP_PROTO_IPPROTO_240 (UINT16_C(240))
+#define __WASI_SOCK_PROTO_PROTO_240 (UINT16_C(240))
 
-#define __WASI_IP_PROTO_IPPROTO_241 (UINT16_C(241))
+#define __WASI_SOCK_PROTO_PROTO_241 (UINT16_C(241))
 
-#define __WASI_IP_PROTO_IPPROTO_242 (UINT16_C(242))
+#define __WASI_SOCK_PROTO_PROTO_242 (UINT16_C(242))
 
-#define __WASI_IP_PROTO_IPPROTO_243 (UINT16_C(243))
+#define __WASI_SOCK_PROTO_PROTO_243 (UINT16_C(243))
 
-#define __WASI_IP_PROTO_IPPROTO_244 (UINT16_C(244))
+#define __WASI_SOCK_PROTO_PROTO_244 (UINT16_C(244))
 
-#define __WASI_IP_PROTO_IPPROTO_245 (UINT16_C(245))
+#define __WASI_SOCK_PROTO_PROTO_245 (UINT16_C(245))
 
-#define __WASI_IP_PROTO_IPPROTO_246 (UINT16_C(246))
+#define __WASI_SOCK_PROTO_PROTO_246 (UINT16_C(246))
 
-#define __WASI_IP_PROTO_IPPROTO_247 (UINT16_C(247))
+#define __WASI_SOCK_PROTO_PROTO_247 (UINT16_C(247))
 
-#define __WASI_IP_PROTO_IPPROTO_248 (UINT16_C(248))
+#define __WASI_SOCK_PROTO_PROTO_248 (UINT16_C(248))
 
-#define __WASI_IP_PROTO_IPPROTO_249 (UINT16_C(249))
+#define __WASI_SOCK_PROTO_PROTO_249 (UINT16_C(249))
 
-#define __WASI_IP_PROTO_IPPROTO_250 (UINT16_C(250))
+#define __WASI_SOCK_PROTO_PROTO_250 (UINT16_C(250))
 
-#define __WASI_IP_PROTO_IPPROTO_251 (UINT16_C(251))
+#define __WASI_SOCK_PROTO_PROTO_251 (UINT16_C(251))
 
-#define __WASI_IP_PROTO_IPPROTO_252 (UINT16_C(252))
+#define __WASI_SOCK_PROTO_PROTO_252 (UINT16_C(252))
 
-#define __WASI_IP_PROTO_IPPROTO_253 (UINT16_C(253))
+#define __WASI_SOCK_PROTO_PROTO_253 (UINT16_C(253))
 
-#define __WASI_IP_PROTO_IPPROTO_254 (UINT16_C(254))
+#define __WASI_SOCK_PROTO_PROTO_254 (UINT16_C(254))
 
-#define __WASI_IP_PROTO_IPPROTO_RAW (UINT16_C(255))
+#define __WASI_SOCK_PROTO_PROTO_RAW (UINT16_C(255))
 
-#define __WASI_IP_PROTO_IPPROTO_256 (UINT16_C(256))
+#define __WASI_SOCK_PROTO_PROTO_256 (UINT16_C(256))
 
-#define __WASI_IP_PROTO_IPPROTO_257 (UINT16_C(257))
+#define __WASI_SOCK_PROTO_PROTO_257 (UINT16_C(257))
 
-#define __WASI_IP_PROTO_IPPROTO_258 (UINT16_C(258))
+#define __WASI_SOCK_PROTO_PROTO_258 (UINT16_C(258))
 
-#define __WASI_IP_PROTO_IPPROTO_259 (UINT16_C(259))
+#define __WASI_SOCK_PROTO_PROTO_259 (UINT16_C(259))
 
-#define __WASI_IP_PROTO_IPPROTO_260 (UINT16_C(260))
+#define __WASI_SOCK_PROTO_PROTO_260 (UINT16_C(260))
 
-#define __WASI_IP_PROTO_IPPROTO_261 (UINT16_C(261))
+#define __WASI_SOCK_PROTO_PROTO_261 (UINT16_C(261))
 
-#define __WASI_IP_PROTO_IPPROTO_MPTCP (UINT16_C(262))
+#define __WASI_SOCK_PROTO_MPTCP (UINT16_C(262))
 
-#define __WASI_IP_PROTO_IPPROTO_MAX (UINT16_C(263))
+#define __WASI_SOCK_PROTO_MAX (UINT16_C(263))
 
-_Static_assert(sizeof(__wasi_ip_proto_t) == 2, "witx calculated size");
-_Static_assert(_Alignof(__wasi_ip_proto_t) == 2, "witx calculated align");
+_Static_assert(sizeof(__wasi_sock_proto_t) == 2, "witx calculated size");
+_Static_assert(_Alignof(__wasi_sock_proto_t) == 2, "witx calculated align");
 
 /**
  * Socket status
@@ -2683,32 +2683,107 @@ typedef uint8_t __wasi_sock_option_t;
 /**
  * No delay
  */
-#define __WASI_SOCK_OPTION_NODELAY (UINT8_C(2))
+#define __WASI_SOCK_OPTION_NO_DELAY (UINT8_C(2))
+
+/**
+ * Dont route
+ */
+#define __WASI_SOCK_OPTION_DONT_ROUTE (UINT8_C(3))
 
 /**
  * Only accept IPv6
  */
-#define __WASI_SOCK_OPTION_ONLY_V6 (UINT8_C(3))
+#define __WASI_SOCK_OPTION_ONLY_V6 (UINT8_C(4))
 
 /**
  * Broadcast
  */
-#define __WASI_SOCK_OPTION_BROADCAST (UINT8_C(4))
+#define __WASI_SOCK_OPTION_BROADCAST (UINT8_C(5))
 
 /**
  * Multicast Loop IPv4
  */
-#define __WASI_SOCK_OPTION_MULTICAST_LOOP_V4 (UINT8_C(5))
+#define __WASI_SOCK_OPTION_MULTICAST_LOOP_V4 (UINT8_C(6))
 
 /**
  * Multicast Loop IPv6
  */
-#define __WASI_SOCK_OPTION_MULTICAST_LOOP_V6 (UINT8_C(6))
+#define __WASI_SOCK_OPTION_MULTICAST_LOOP_V6 (UINT8_C(7))
 
 /**
  * Promiscuous
  */
-#define __WASI_SOCK_OPTION_PROMISCUOUS (UINT8_C(7))
+#define __WASI_SOCK_OPTION_PROMISCUOUS (UINT8_C(8))
+
+/**
+ * Socket is listening
+ */
+#define __WASI_SOCK_OPTION_LISTENING (UINT8_C(9))
+
+/**
+ * Last error
+ */
+#define __WASI_SOCK_OPTION_LAST_ERROR (UINT8_C(10))
+
+/**
+ * Keep alive
+ */
+#define __WASI_SOCK_OPTION_KEEP_ALIVE (UINT8_C(11))
+
+/**
+ * Linger
+ */
+#define __WASI_SOCK_OPTION_LINGER (UINT8_C(12))
+
+/**
+ * Out-of-band inline
+ */
+#define __WASI_SOCK_OPTION_OOB_INLINE (UINT8_C(13))
+
+/**
+ * Receive buffer size
+ */
+#define __WASI_SOCK_OPTION_RECV_BUF_SIZE (UINT8_C(14))
+
+/**
+ * Send buffer size
+ */
+#define __WASI_SOCK_OPTION_SEND_BUF_SIZE (UINT8_C(15))
+
+/**
+ * Receive lowat
+ */
+#define __WASI_SOCK_OPTION_RECV_LOWAT (UINT8_C(16))
+
+/**
+ * Send lowat
+ */
+#define __WASI_SOCK_OPTION_SEND_LOWAT (UINT8_C(17))
+
+/**
+ * Receive timeout
+ */
+#define __WASI_SOCK_OPTION_RECV_TIMEOUT (UINT8_C(18))
+
+/**
+ * Send timeout
+ */
+#define __WASI_SOCK_OPTION_SEND_TIMEOUT (UINT8_C(19))
+
+/**
+ * Connect timeout
+ */
+#define __WASI_SOCK_OPTION_CONNECT_TIMEOUT (UINT8_C(20))
+
+/**
+ * Accept timeout
+ */
+#define __WASI_SOCK_OPTION_ACCEPT_TIMEOUT (UINT8_C(21))
+
+/**
+ * Type of socket
+ */
+#define __WASI_SOCK_OPTION_TYPE (UINT8_C(22))
 
 _Static_assert(sizeof(__wasi_sock_option_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_sock_option_t) == 1, "witx calculated align");
@@ -2779,17 +2854,69 @@ _Static_assert(_Alignof(__wasi_ip_port_t) == 2, "witx calculated align");
 typedef uint8_t __wasi_address_family_t;
 
 /**
+ * Unspecified
+ */
+#define __WASI_ADDRESS_FAMILY_UNSPEC (UINT8_C(0))
+
+/**
  * IP v4
  */
-#define __WASI_ADDRESS_FAMILY_INET4 (UINT8_C(0))
+#define __WASI_ADDRESS_FAMILY_INET4 (UINT8_C(1))
 
 /**
  * IP v6
  */
-#define __WASI_ADDRESS_FAMILY_INET6 (UINT8_C(1))
+#define __WASI_ADDRESS_FAMILY_INET6 (UINT8_C(2))
+
+/**
+ * Unix
+ */
+#define __WASI_ADDRESS_FAMILY_UNIX (UINT8_C(3))
 
 _Static_assert(sizeof(__wasi_address_family_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_address_family_t) == 1, "witx calculated align");
+
+/**
+ * Represents an unspecified address
+ */
+typedef struct __wasi_addr_unspec_t {
+    uint8_t n0;
+
+} __wasi_addr_unspec_t;
+
+_Static_assert(sizeof(__wasi_addr_unspec_t) == 1, "witx calculated size");
+_Static_assert(_Alignof(__wasi_addr_unspec_t) == 1, "witx calculated align");
+_Static_assert(offsetof(__wasi_addr_unspec_t, n0) == 0, "witx calculated offset");
+
+/**
+ * An unspecified address with a port
+ */
+typedef struct __wasi_addr_unspec_port_t {
+    __wasi_ip_port_t port;
+
+    __wasi_addr_unspec_t addr;
+
+} __wasi_addr_unspec_port_t;
+
+_Static_assert(sizeof(__wasi_addr_unspec_port_t) == 4, "witx calculated size");
+_Static_assert(_Alignof(__wasi_addr_unspec_port_t) == 2, "witx calculated align");
+_Static_assert(offsetof(__wasi_addr_unspec_port_t, port) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unspec_port_t, addr) == 2, "witx calculated offset");
+
+/**
+ * An unspecified address with a cidr
+ */
+typedef struct __wasi_addr_unspec_cidr_t {
+    __wasi_addr_unspec_t addr;
+
+    uint8_t prefix;
+
+} __wasi_addr_unspec_cidr_t;
+
+_Static_assert(sizeof(__wasi_addr_unspec_cidr_t) == 2, "witx calculated size");
+_Static_assert(_Alignof(__wasi_addr_unspec_cidr_t) == 1, "witx calculated align");
+_Static_assert(offsetof(__wasi_addr_unspec_cidr_t, addr) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unspec_cidr_t, prefix) == 1, "witx calculated offset");
 
 /**
  * An IPv4 address is a 32-bit number that uniquely identifies a network interface on a machine.
@@ -2876,6 +3003,93 @@ _Static_assert(offsetof(__wasi_addr_ip6_t, h2) == 12, "witx calculated offset");
 _Static_assert(offsetof(__wasi_addr_ip6_t, h3) == 14, "witx calculated offset");
 
 /**
+ * Unix socket that is bound to no more than 15 bytes
+ */
+typedef struct __wasi_addr_unix_t {
+    uint8_t b0;
+
+    uint8_t b1;
+
+    uint8_t b2;
+
+    uint8_t b3;
+
+    uint8_t b4;
+
+    uint8_t b5;
+
+    uint8_t b6;
+
+    uint8_t b7;
+
+    uint8_t b8;
+
+    uint8_t b9;
+
+    uint8_t b10;
+
+    uint8_t b11;
+
+    uint8_t b12;
+
+    uint8_t b13;
+
+    uint8_t b14;
+
+    uint8_t b15;
+
+} __wasi_addr_unix_t;
+
+_Static_assert(sizeof(__wasi_addr_unix_t) == 16, "witx calculated size");
+_Static_assert(_Alignof(__wasi_addr_unix_t) == 1, "witx calculated align");
+_Static_assert(offsetof(__wasi_addr_unix_t, b0) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_t, b1) == 1, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_t, b2) == 2, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_t, b3) == 3, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_t, b4) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_t, b5) == 5, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_t, b6) == 6, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_t, b7) == 7, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_t, b8) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_t, b9) == 9, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_t, b10) == 10, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_t, b11) == 11, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_t, b12) == 12, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_t, b13) == 13, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_t, b14) == 14, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_t, b15) == 15, "witx calculated offset");
+
+/**
+ * A unix socket with a port
+ */
+typedef struct __wasi_addr_unix_port_t {
+    __wasi_ip_port_t port;
+
+    __wasi_addr_unix_t addr;
+
+} __wasi_addr_unix_port_t;
+
+_Static_assert(sizeof(__wasi_addr_unix_port_t) == 18, "witx calculated size");
+_Static_assert(_Alignof(__wasi_addr_unix_port_t) == 2, "witx calculated align");
+_Static_assert(offsetof(__wasi_addr_unix_port_t, port) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_port_t, addr) == 2, "witx calculated offset");
+
+/**
+ * A unix socket with a cidr
+ */
+typedef struct __wasi_addr_unix_cidr_t {
+    __wasi_addr_unix_t addr;
+
+    uint8_t prefix;
+
+} __wasi_addr_unix_cidr_t;
+
+_Static_assert(sizeof(__wasi_addr_unix_cidr_t) == 17, "witx calculated size");
+_Static_assert(_Alignof(__wasi_addr_unix_cidr_t) == 1, "witx calculated align");
+_Static_assert(offsetof(__wasi_addr_unix_cidr_t, addr) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_unix_cidr_t, prefix) == 16, "witx calculated offset");
+
+/**
  * An IPv6 address with a port number
  */
 typedef struct __wasi_addr_ip6_port_t {
@@ -2909,8 +3123,10 @@ _Static_assert(offsetof(__wasi_addr_ip6_cidr_t, prefix) == 16, "witx calculated 
  * Union of all possible addresses type
  */
 typedef union __wasi_addr_ip_u_t {
+    __wasi_addr_unspec_t unspec;
     __wasi_addr_ip4_t inet4;
     __wasi_addr_ip6_t inet6;
+    __wasi_addr_unix_t unix;
 } __wasi_addr_ip_u_t;
 typedef struct __wasi_addr_ip_t {
     uint8_t tag;
@@ -2924,8 +3140,10 @@ _Static_assert(_Alignof(__wasi_addr_ip_t) == 2, "witx calculated align");
  * Union that makes a generic IP address and port
  */
 typedef union __wasi_addr_port_u_t {
+    __wasi_addr_unspec_port_t unspec;
     __wasi_addr_ip4_port_t inet4;
     __wasi_addr_ip6_port_t inet6;
+    __wasi_addr_unix_port_t unix;
 } __wasi_addr_port_u_t;
 typedef struct __wasi_addr_port_t {
     uint8_t tag;
@@ -2939,8 +3157,10 @@ _Static_assert(_Alignof(__wasi_addr_port_t) == 2, "witx calculated align");
  * Union that makes a generic IP address and prefix. a.k.a. CIDR
  */
 typedef union __wasi_addr_cidr_u_t {
+    __wasi_addr_unspec_cidr_t unspec;
     __wasi_addr_ip4_cidr_t inet4;
     __wasi_addr_ip6_cidr_t inet6;
+    __wasi_addr_unix_cidr_t unix;
 } __wasi_addr_cidr_u_t;
 typedef struct __wasi_addr_cidr_t {
     uint8_t tag;
@@ -4409,6 +4629,10 @@ __wasi_errno_t __wasi_sock_open(
      * Socket type, either datagram or stream
      */
     __wasi_sock_type_t socktype,
+    /**
+     * Socket protocol
+     */
+    __wasi_sock_proto_t sock_proto,
     __wasi_fd_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**

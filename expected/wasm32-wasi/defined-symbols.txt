@@ -702,6 +702,7 @@ fputws_unlocked
 fread
 fread_unlocked
 free
+freeif_addrs
 freelocale
 freopen
 freopen64
@@ -746,6 +747,7 @@ getdomainname
 getentropy
 getenv
 gethostid
+getif_addrs
 getline
 getopt
 getopt_long

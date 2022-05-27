@@ -2,6 +2,7 @@
 #define __wasilibc___header_sys_socket_h
 
 #include <__struct_msghdr.h>
+#include <__struct_if_addrs.h>
 #include <__struct_sockaddr.h>
 #include <__struct_sockaddr_storage.h>
 

@@ -22,6 +22,7 @@
 #include <__mode_t.h>
 #include <__seek.h>
 #include <__struct_dirent.h>
+#include <__struct_if_addrs.h>
 #include <__struct_in6_addr.h>
 #include <__struct_in_addr.h>
 #include <__struct_iovec.h>

@@ -374,6 +374,8 @@ struct linger {
 #define SCM_CREDENTIALS 0x02
 #endif
 
+#include <__struct_if_addrs.h>
+
 #ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 struct sockaddr {
 	sa_family_t sa_family;

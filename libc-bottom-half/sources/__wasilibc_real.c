@@ -1507,6 +1507,22 @@ __wasi_errno_t __wasi_sock_send_to(
     return (uint16_t) ret;
 }
 
+int32_t __imported_wasix_snapshot_preview1_sock_send_file(int32_t arg0, int32_t arg1, int64_t arg2, int64_t arg3, int64_t arg4) __attribute__((
+    __import_module__("wasix_snapshot_preview1"),
+    __import_name__("sock_send_file")
+));
+
+__wasi_errno_t __wasi_sock_send_file(
+    __wasi_fd_t out_fd,
+    __wasi_fd_t in_fd,
+    __wasi_filesize_t offset,
+    __wasi_filesize_t count,
+    __wasi_filesize_t *retptr0
+){
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_send_file((int32_t) out_fd, (int32_t) in_fd, (int64_t) offset, (int64_t) count, (intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
 int32_t __imported_wasix_snapshot_preview1_resolve(int64_t arg0, int64_t arg1, int32_t arg2, int64_t arg3, int32_t arg4, int64_t arg5) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
     __import_name__("resolve")

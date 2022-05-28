@@ -963,6 +963,11 @@ typedef uint8_t __wasi_filetype_t;
  */
 #define __WASI_FILETYPE_SYMBOLIC_LINK (UINT8_C(7))
 
+/**
+ * The file descriptor or file refers to a raw socket.
+ */
+#define __WASI_FILETYPE_SOCKET_RAW (UINT8_C(8))
+
 _Static_assert(sizeof(__wasi_filetype_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_filetype_t) == 1, "witx calculated align");
 
@@ -4948,6 +4953,27 @@ __wasi_errno_t __wasi_sock_send_to(
      */
     const __wasi_addr_port_t * addr,
     __wasi_size_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Sends the entire contents of a file down a socket
+ * @return
+ * Number of bytes transmitted.
+ */
+__wasi_errno_t __wasi_sock_send_file(
+    __wasi_fd_t out_fd,
+    /**
+     * Open file that has the data to be transmitted
+     */
+    __wasi_fd_t in_fd,
+    /**
+     * Offset into the file to start reading at
+     */
+    __wasi_filesize_t offset,
+    /**
+     * Number of bytes to be sent
+     */
+    __wasi_filesize_t count,
+    __wasi_filesize_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Resolves a hostname and a port to one or more IP addresses.

@@ -350,6 +350,7 @@ __wasi_sock_open
 __wasi_sock_recv
 __wasi_sock_recv_from
 __wasi_sock_send
+__wasi_sock_send_file
 __wasi_sock_send_to
 __wasi_sock_set_opt_flag
 __wasi_sock_set_opt_size
@@ -1054,6 +1055,7 @@ seed48
 seekdir
 select
 send
+sendfile
 sendmsg
 sendto
 setbuf

@@ -16,8 +16,8 @@ ssize_t sendto(int socket, const void *restrict buffer, size_t length, int flags
   }
 
   if (buffer == NULL || addr == NULL) {
-	errno = EINVAL;
-	return -1;
+	  errno = EINVAL;
+	  return -1;
   }
 
   // Prepare input parameters.

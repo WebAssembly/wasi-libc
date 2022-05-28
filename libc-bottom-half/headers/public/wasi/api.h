@@ -2676,134 +2676,139 @@ _Static_assert(_Alignof(__wasi_sock_status_t) == 1, "witx calculated align");
 typedef uint8_t __wasi_sock_option_t;
 
 /**
+ * Socket option that does nothing
+ */
+#define __WASI_SOCK_OPTION_NOOP (UINT8_C(0))
+
+/**
  * Reuse Port
  */
-#define __WASI_SOCK_OPTION_REUSE_PORT (UINT8_C(0))
+#define __WASI_SOCK_OPTION_REUSE_PORT (UINT8_C(1))
 
 /**
  * Reuse Address
  */
-#define __WASI_SOCK_OPTION_REUSE_ADDR (UINT8_C(1))
+#define __WASI_SOCK_OPTION_REUSE_ADDR (UINT8_C(2))
 
 /**
  * No delay
  */
-#define __WASI_SOCK_OPTION_NO_DELAY (UINT8_C(2))
+#define __WASI_SOCK_OPTION_NO_DELAY (UINT8_C(3))
 
 /**
  * Dont route
  */
-#define __WASI_SOCK_OPTION_DONT_ROUTE (UINT8_C(3))
+#define __WASI_SOCK_OPTION_DONT_ROUTE (UINT8_C(4))
 
 /**
  * Only accept IPv6
  */
-#define __WASI_SOCK_OPTION_ONLY_V6 (UINT8_C(4))
+#define __WASI_SOCK_OPTION_ONLY_V6 (UINT8_C(5))
 
 /**
  * Broadcast
  */
-#define __WASI_SOCK_OPTION_BROADCAST (UINT8_C(5))
+#define __WASI_SOCK_OPTION_BROADCAST (UINT8_C(6))
 
 /**
  * Multicast Loop IPv4
  */
-#define __WASI_SOCK_OPTION_MULTICAST_LOOP_V4 (UINT8_C(6))
+#define __WASI_SOCK_OPTION_MULTICAST_LOOP_V4 (UINT8_C(7))
 
 /**
  * Multicast Loop IPv6
  */
-#define __WASI_SOCK_OPTION_MULTICAST_LOOP_V6 (UINT8_C(7))
+#define __WASI_SOCK_OPTION_MULTICAST_LOOP_V6 (UINT8_C(8))
 
 /**
  * Promiscuous
  */
-#define __WASI_SOCK_OPTION_PROMISCUOUS (UINT8_C(8))
+#define __WASI_SOCK_OPTION_PROMISCUOUS (UINT8_C(9))
 
 /**
  * Socket is listening
  */
-#define __WASI_SOCK_OPTION_LISTENING (UINT8_C(9))
+#define __WASI_SOCK_OPTION_LISTENING (UINT8_C(10))
 
 /**
  * Last error
  */
-#define __WASI_SOCK_OPTION_LAST_ERROR (UINT8_C(10))
+#define __WASI_SOCK_OPTION_LAST_ERROR (UINT8_C(11))
 
 /**
  * Keep alive
  */
-#define __WASI_SOCK_OPTION_KEEP_ALIVE (UINT8_C(11))
+#define __WASI_SOCK_OPTION_KEEP_ALIVE (UINT8_C(12))
 
 /**
  * Linger time
  */
-#define __WASI_SOCK_OPTION_LINGER (UINT8_C(12))
+#define __WASI_SOCK_OPTION_LINGER (UINT8_C(13))
 
 /**
  * Out-of-band inline
  */
-#define __WASI_SOCK_OPTION_OOB_INLINE (UINT8_C(13))
+#define __WASI_SOCK_OPTION_OOB_INLINE (UINT8_C(14))
 
 /**
  * Receive buffer size
  */
-#define __WASI_SOCK_OPTION_RECV_BUF_SIZE (UINT8_C(14))
+#define __WASI_SOCK_OPTION_RECV_BUF_SIZE (UINT8_C(15))
 
 /**
  * Send buffer size
  */
-#define __WASI_SOCK_OPTION_SEND_BUF_SIZE (UINT8_C(15))
+#define __WASI_SOCK_OPTION_SEND_BUF_SIZE (UINT8_C(16))
 
 /**
  * Receive lowat
  */
-#define __WASI_SOCK_OPTION_RECV_LOWAT (UINT8_C(16))
+#define __WASI_SOCK_OPTION_RECV_LOWAT (UINT8_C(17))
 
 /**
  * Send lowat
  */
-#define __WASI_SOCK_OPTION_SEND_LOWAT (UINT8_C(17))
+#define __WASI_SOCK_OPTION_SEND_LOWAT (UINT8_C(18))
 
 /**
  * Receive timeout
  */
-#define __WASI_SOCK_OPTION_RECV_TIMEOUT (UINT8_C(18))
+#define __WASI_SOCK_OPTION_RECV_TIMEOUT (UINT8_C(19))
 
 /**
  * Send timeout
  */
-#define __WASI_SOCK_OPTION_SEND_TIMEOUT (UINT8_C(19))
+#define __WASI_SOCK_OPTION_SEND_TIMEOUT (UINT8_C(20))
 
 /**
  * Connect timeout
  */
-#define __WASI_SOCK_OPTION_CONNECT_TIMEOUT (UINT8_C(20))
+#define __WASI_SOCK_OPTION_CONNECT_TIMEOUT (UINT8_C(21))
 
 /**
  * Accept timeout
  */
-#define __WASI_SOCK_OPTION_ACCEPT_TIMEOUT (UINT8_C(21))
+#define __WASI_SOCK_OPTION_ACCEPT_TIMEOUT (UINT8_C(22))
 
 /**
  * TTL of packets
  */
-#define __WASI_SOCK_OPTION_TTL (UINT8_C(22))
+#define __WASI_SOCK_OPTION_TTL (UINT8_C(23))
 
 /**
  * Multicast TTL for IPv4
  */
-#define __WASI_SOCK_OPTION_MULTICAST_TTL_V4 (UINT8_C(23))
+#define __WASI_SOCK_OPTION_MULTICAST_TTL_V4 (UINT8_C(24))
 
 /**
  * Type of socket
  */
-#define __WASI_SOCK_OPTION_TYPE (UINT8_C(24))
+#define __WASI_SOCK_OPTION_TYPE (UINT8_C(25))
 
 /**
  * Protocol of the socket
  */
-#define __WASI_SOCK_OPTION_PROTO (UINT8_C(25))
+#define __WASI_SOCK_OPTION_PROTO (UINT8_C(26))
 
 _Static_assert(sizeof(__wasi_sock_option_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_sock_option_t) == 1, "witx calculated align");

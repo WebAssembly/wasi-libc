@@ -1,4 +1,5 @@
 #include <sys/socket.h>
+#include <__header_netinet_in.h>
 
 #include <assert.h>
 #include <wasi/api.h>
@@ -6,9 +7,9 @@
 #include <string.h>
 
 int setsockopt(int socket, int level, int option_name, const void *restrict option_value, socklen_t option_len) {
-  if (level != SOL_SOCKET) {
-    errno = ENOPROTOOPT;
-    return -1;
+  if (level == IPPROTO_IPV6 && option_name == IPV6_V6ONLY) {
+    level = SOL_SOCKET;
+    option_name = SO_ONLYV6;
   }
 
   switch (option_name) {

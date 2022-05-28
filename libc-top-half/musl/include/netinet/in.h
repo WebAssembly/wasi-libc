@@ -51,11 +51,6 @@ struct sockaddr_in6 {
 };
 #endif
 
-struct ipv6_mreq {
-	struct in6_addr ipv6mr_multiaddr;
-	unsigned        ipv6mr_interface;
-};
-
 #define INADDR_ANY        ((in_addr_t) 0x00000000)
 #define INADDR_BROADCAST  ((in_addr_t) 0xffffffff)
 #define INADDR_NONE       ((in_addr_t) 0xffffffff)
@@ -245,11 +240,6 @@ uint16_t ntohs(uint16_t);
 #define IP_DEFAULT_MULTICAST_LOOP       1
 #define IP_MAX_MEMBERSHIPS              20
 
-struct ip_opts {
-	struct in_addr ip_dst;
-	char ip_opts[40];
-};
-
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 
 #define MCAST_JOIN_GROUP   42
@@ -263,71 +253,14 @@ struct ip_opts {
 #define MCAST_EXCLUDE 0
 #define MCAST_INCLUDE 1
 
-struct ip_mreq {
-	struct in_addr imr_multiaddr;
-	struct in_addr imr_interface;
-};
-
-struct ip_mreqn {
-	struct in_addr imr_multiaddr;
-	struct in_addr imr_address;
-	int imr_ifindex;
-};
-
-struct ip_mreq_source {
-	struct in_addr imr_multiaddr;
-	struct in_addr imr_interface;
-	struct in_addr imr_sourceaddr;
-};
-
-struct ip_msfilter {
-	struct in_addr imsf_multiaddr;
-	struct in_addr imsf_interface;
-	uint32_t imsf_fmode;
-	uint32_t imsf_numsrc;
-	struct in_addr imsf_slist[1];
-};
 #define IP_MSFILTER_SIZE(numsrc) \
 	(sizeof(struct ip_msfilter) - sizeof(struct in_addr) \
 	+ (numsrc) * sizeof(struct in_addr))
 
-struct group_req {
-	uint32_t gr_interface;
-	struct sockaddr_storage gr_group;
-};
-
-struct group_source_req {
-	uint32_t gsr_interface;
-	struct sockaddr_storage gsr_group;
-	struct sockaddr_storage gsr_source;
-};
-
-struct group_filter {
-	uint32_t gf_interface;
-	struct sockaddr_storage gf_group;
-	uint32_t gf_fmode;
-	uint32_t gf_numsrc;
-	struct sockaddr_storage gf_slist[1];
-};
 #define GROUP_FILTER_SIZE(numsrc) \
 	(sizeof(struct group_filter) - sizeof(struct sockaddr_storage) \
 	+ (numsrc) * sizeof(struct sockaddr_storage))
 
-struct in_pktinfo {
-	int ipi_ifindex;
-	struct in_addr ipi_spec_dst;
-	struct in_addr ipi_addr;
-};
-
-struct in6_pktinfo {
-	struct in6_addr ipi6_addr;
-	unsigned ipi6_ifindex;
-};
-
-struct ip6_mtuinfo {
-	struct sockaddr_in6 ip6m_addr;
-	uint32_t ip6m_mtu;
-};
 #endif
 
 #define IPV6_ADDRFORM           1

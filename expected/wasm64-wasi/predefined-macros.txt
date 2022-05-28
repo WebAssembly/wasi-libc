@@ -723,12 +723,12 @@
 #define IPOPT_TS_TSANDADDR 1
 #define IPOPT_TS_TSONLY 0
 #define IPPORT_RESERVED 1024
-#define IPPROTO_ICMP __WASI_IP_PROTO_IPPROTO_ICMP
-#define IPPROTO_IP __WASI_IP_PROTO_IPPROTO_IP
-#define IPPROTO_IPV6 __WASI_IP_PROTO_IPPROTO_IPV6
-#define IPPROTO_RAW __WASI_IP_PROTO_IPPROTO_RAW
-#define IPPROTO_TCP __WASI_IP_PROTO_IPPROTO_TCP
-#define IPPROTO_UDP __WASI_IP_PROTO_IPPROTO_UDP
+#define IPPROTO_ICMP __WASI_SOCK_PROTO_ICMP
+#define IPPROTO_IP __WASI_SOCK_PROTO_IP
+#define IPPROTO_IPV6 __WASI_SOCK_PROTO_IPV6
+#define IPPROTO_RAW __WASI_SOCK_PROTO_RAW
+#define IPPROTO_TCP __WASI_SOCK_PROTO_TCP
+#define IPPROTO_UDP __WASI_SOCK_PROTO_UDP
 #define IPTOS_CLASS(x) ((x) & IPTOS_CLASS_MASK)
 #define IPTOS_CLASS_CS0 0x00
 #define IPTOS_CLASS_CS1 0x20
@@ -3428,12 +3428,24 @@
 #define __wasilibc___macro_PAGESIZE_h 
 #define __wasilibc___mode_t_h 
 #define __wasilibc___seek_h 
-#define __wasilibc___struct_dirent_h 
+#define __wasilibc___struct_dirent_h
+#define __wasilibc___struct_group_filter_h
+#define __wasilibc___struct_group_req_h
+#define __wasilibc___struct_group_source_req_h
 #define __wasilibc___struct_if_addrs_h
-#define __wasilibc___struct_in6_addr_h 
-#define __wasilibc___struct_in_addr_h 
-#define __wasilibc___struct_iovec_h 
-#define __wasilibc___struct_msghdr_h 
+#define __wasilibc___struct_in6_addr_h
+#define __wasilibc___struct_in6_mtuinfo_h
+#define __wasilibc___struct_in6_pktinfo_h
+#define __wasilibc___struct_in_addr_h
+#define __wasilibc___struct_in_pktinfo_h
+#define __wasilibc___struct_iovec_h
+#define __wasilibc___struct_ip_mreq_h
+#define __wasilibc___struct_ip_mreq_source_h
+#define __wasilibc___struct_ip_mreqn_h
+#define __wasilibc___struct_ip_msfilter_h
+#define __wasilibc___struct_ip_opts_h
+#define __wasilibc___struct_ipv6_mreq_h
+#define __wasilibc___struct_msghdr_h
 #define __wasilibc___struct_pollfd_h 
 #define __wasilibc___struct_rusage_h 
 #define __wasilibc___struct_sockaddr_h 

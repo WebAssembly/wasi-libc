@@ -10,9 +10,6 @@
 #include <errno.h>
 #include <stdint.h>
 
-static_assert(MSG_PEEK == __WASI_RIFLAGS_RECV_PEEK, "Value mismatch");
-static_assert(MSG_WAITALL == __WASI_RIFLAGS_RECV_WAITALL, "Value mismatch");
-
 ssize_t recv(int socket, void *restrict buffer, size_t length, int flags) {
   // Prepare input parameters.
   __wasi_iovec_t iov = {.buf = buffer, .buf_len = length};

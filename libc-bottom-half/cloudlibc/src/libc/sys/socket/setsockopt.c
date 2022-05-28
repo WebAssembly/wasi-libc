@@ -31,7 +31,7 @@ int setsockopt(int socket, int level, int option_name, const void *restrict opti
     	return -1;
 	  }
 
-      __wasi_errno_t error = __wasi_sock_set_opt(socket, option_name, on);
+      __wasi_errno_t error = __wasi_sock_set_opt_flag(socket, option_name, on);
       if (error != 0) {
         errno = error;
         return -1;
@@ -48,7 +48,7 @@ int setsockopt(int socket, int level, int option_name, const void *restrict opti
 		errno = EINVAL;
     	return -1;
 	  }
-      __wasi_errno_t error = __wasi_sock_set_linger(socket, &tm);
+      __wasi_errno_t error = __wasi_sock_set_opt_time(socket, option_name, &tm);
       if (error != 0) {
         errno = error;
         return -1;
@@ -69,22 +69,17 @@ int setsockopt(int socket, int level, int option_name, const void *restrict opti
     	return -1;
 	  }
 
-	  __wasi_timeout_type_t ty = 0;
-      switch (option_name) {
-        case SO_RCVTIMEO: { ty = __WASI_TIMEOUT_TYPE_READ; }
-        case SO_SNDTIMEO: { ty = __WASI_TIMEOUT_TYPE_WRITE; }
-        case SO_CONNTIMEO: { ty = __WASI_TIMEOUT_TYPE_CONNECT; }
-        case SO_ACCPTIMEO: { ty = __WASI_TIMEOUT_TYPE_ACCEPT; }
-      }
-
-      __wasi_errno_t error = __wasi_sock_set_timeout(socket, ty, &tm);
+	  __wasi_errno_t error = __wasi_sock_set_opt_time(socket, option_name, &tm);
       if (error != 0) {
         errno = error;
         return -1;
       }
       return 0;
     }
-    case SO_RCVBUF: {
+    case SO_RCVBUF:
+	case SO_SNDBUF:
+	case SO_TTL:
+	case SO_MCASTTTLV4: {
 	  __wasi_filesize_t fs;
 	  if (option_len >= sizeof(socklen_t)) {
 		socklen_t *len = (socklen_t *)option_value;
@@ -94,24 +89,7 @@ int setsockopt(int socket, int level, int option_name, const void *restrict opti
     	return -1;
 	  }
       
-      __wasi_errno_t error = __wasi_sock_set_recv_buf_size(socket, fs);
-      if (error != 0) {
-        errno = error;
-        return -1;
-      }
-      return 0;
-    }
-    case SO_SNDBUF: {
-      __wasi_filesize_t fs;
-	  if (option_len >= sizeof(socklen_t)) {
-		socklen_t *len = (socklen_t *)option_value;
-		fs = *len;
-	  } else {
-		errno = EINVAL;
-    	return -1;
-	  }
-      
-      __wasi_errno_t error = __wasi_sock_set_send_buf_size(socket, fs);
+      __wasi_errno_t error = __wasi_sock_set_opt_size(socket, option_name, fs);
       if (error != 0) {
         errno = error;
         return -1;

@@ -2731,7 +2731,7 @@ typedef uint8_t __wasi_sock_option_t;
 #define __WASI_SOCK_OPTION_KEEP_ALIVE (UINT8_C(11))
 
 /**
- * Linger
+ * Linger time
  */
 #define __WASI_SOCK_OPTION_LINGER (UINT8_C(12))
 
@@ -2781,9 +2781,19 @@ typedef uint8_t __wasi_sock_option_t;
 #define __WASI_SOCK_OPTION_ACCEPT_TIMEOUT (UINT8_C(21))
 
 /**
+ * TTL of packets
+ */
+#define __WASI_SOCK_OPTION_TTL (UINT8_C(22))
+
+/**
+ * Multicast TTL for IPv4
+ */
+#define __WASI_SOCK_OPTION_MULTICAST_TTL_V4 (UINT8_C(23))
+
+/**
  * Type of socket
  */
-#define __WASI_SOCK_OPTION_TYPE (UINT8_C(22))
+#define __WASI_SOCK_OPTION_TYPE (UINT8_C(24))
 
 _Static_assert(sizeof(__wasi_sock_option_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_sock_option_t) == 1, "witx calculated align");
@@ -3266,34 +3276,6 @@ typedef uint8_t __wasi_sdflags_t;
  * Disables further send operations.
  */
 #define __WASI_SDFLAGS_WR ((__wasi_sdflags_t)(1 << 1))
-
-/**
- * Describes the type of timeout what will be changed
- */
-typedef uint8_t __wasi_timeout_type_t;
-
-/**
- * Read operation timeout
- */
-#define __WASI_TIMEOUT_TYPE_READ (UINT8_C(0))
-
-/**
- * Write operation timeout
- */
-#define __WASI_TIMEOUT_TYPE_WRITE (UINT8_C(1))
-
-/**
- * Connections to other sockets
- */
-#define __WASI_TIMEOUT_TYPE_CONNECT (UINT8_C(2))
-
-/**
- * Accept connection timeout
- */
-#define __WASI_TIMEOUT_TYPE_ACCEPT (UINT8_C(3))
-
-_Static_assert(sizeof(__wasi_timeout_type_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_timeout_type_t) == 1, "witx calculated align");
 
 /**
  * Identifiers for preopened capabilities.
@@ -4639,7 +4621,7 @@ __wasi_errno_t __wasi_sock_open(
  * Sets a particular socket setting
  * Note: This is similar to `setsockopt` in POSIX for SO_REUSEADDR
  */
-__wasi_errno_t __wasi_sock_set_opt(
+__wasi_errno_t __wasi_sock_set_opt_flag(
     /**
      * Socket descriptor
      */
@@ -4657,7 +4639,7 @@ __wasi_errno_t __wasi_sock_set_opt(
  * Retrieve status of particular socket seting
  * Note: This is similar to `getsockopt` in POSIX for SO_REUSEADDR
  */
-__wasi_errno_t __wasi_sock_get_opt(
+__wasi_errno_t __wasi_sock_get_opt_flag(
     /**
      * Socket descriptor
      */
@@ -4669,104 +4651,68 @@ __wasi_errno_t __wasi_sock_get_opt(
     __wasi_bool_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
- * Sets how long the socket will linger
+ * Sets one of the times the socket
  */
-__wasi_errno_t __wasi_sock_set_linger(
+__wasi_errno_t __wasi_sock_set_opt_time(
     /**
      * Socket descriptor
      */
     __wasi_fd_t fd,
     /**
-     * Value to set the linger to
+     * Socket option to be set
      */
-    const __wasi_option_timestamp_t * linger
-) __attribute__((__warn_unused_result__));
-/**
- * Retrieve how long the socket will linger for
- */
-__wasi_errno_t __wasi_sock_get_linger(
+    __wasi_sock_option_t sockopt,
     /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    __wasi_option_timestamp_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Sets one of the timeouts on the socket
- */
-__wasi_errno_t __wasi_sock_set_timeout(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Type of timeout to be changed
-     */
-    __wasi_timeout_type_t ty,
-    /**
-     * Value to set the timeout to
+     * Value to set the time to
      */
     const __wasi_option_timestamp_t * timeout
 ) __attribute__((__warn_unused_result__));
 /**
- * Retrieve one of the timeouts on the socket
+ * Retrieve one of the times on the socket
  */
-__wasi_errno_t __wasi_sock_get_timeout(
+__wasi_errno_t __wasi_sock_get_opt_time(
     /**
      * Socket descriptor
      */
     __wasi_fd_t fd,
     /**
-     * Type of timeout to be retrieved
+     * Socket option to be retrieved
      */
-    __wasi_timeout_type_t ty,
+    __wasi_sock_option_t sockopt,
     __wasi_option_timestamp_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
- * Set TTL for this socket
+ * Set size of particular option for this socket
+ * Note: This is similar to `setsockopt` in POSIX for SO_RCVBUF
  */
-__wasi_errno_t __wasi_sock_set_ttl(
+__wasi_errno_t __wasi_sock_set_opt_size(
     /**
      * Socket descriptor
      */
     __wasi_fd_t fd,
     /**
-     * Time to live
+     * Socket option to be set
      */
-    __wasi_size_t ttl
+    __wasi_sock_option_t sockopt,
+    /**
+     * Buffer size
+     */
+    __wasi_filesize_t size
 ) __attribute__((__warn_unused_result__));
 /**
- * Retrieve the TTL for this socket
+ * Retrieve the size of particular option for this socket
+ * Note: This is similar to `getsockopt` in POSIX for SO_RCVBUF
  */
-__wasi_errno_t __wasi_sock_get_ttl(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    __wasi_size_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Set TTL for IPv4 multicast for this socket
- */
-__wasi_errno_t __wasi_sock_set_multicast_ttl_v4(
+__wasi_errno_t __wasi_sock_get_opt_size(
     /**
      * Socket descriptor
      */
     __wasi_fd_t fd,
     /**
-     * Time to live
+     * Socket option to be retrieved
      */
-    __wasi_size_t ttl
-) __attribute__((__warn_unused_result__));
-/**
- * Retrieve the TTL for IPv4 multicast for this socket
- */
-__wasi_errno_t __wasi_sock_get_multicast_ttl_v4(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    __wasi_size_t *retptr0
+    __wasi_sock_option_t sockopt,
+    __wasi_filesize_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Joins a particular multicast IPv4 group
@@ -4835,56 +4781,6 @@ __wasi_errno_t __wasi_sock_leave_multicast_v6(
      * Interface that will left
      */
     uint32_t interface
-) __attribute__((__warn_unused_result__));
-/**
- * Set size of receive buffer
- * Note: This is similar to `setsockopt` in POSIX for SO_RCVBUF
- */
-__wasi_errno_t __wasi_sock_set_recv_buf_size(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Buffer size
-     */
-    __wasi_filesize_t size
-) __attribute__((__warn_unused_result__));
-/**
- * Retrieve the size of the receive buffer
- * Note: This is similar to `getsockopt` in POSIX for SO_RCVBUF
- */
-__wasi_errno_t __wasi_sock_get_recv_buf_size(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    __wasi_filesize_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Set size of send buffer
- * Note: This is similar to `setsockopt` in POSIX for SO_SNDBUF
- */
-__wasi_errno_t __wasi_sock_set_send_buf_size(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    /**
-     * Buffer size
-     */
-    __wasi_filesize_t size
-) __attribute__((__warn_unused_result__));
-/**
- * Retrieve the size of the send buffer
- * Note: This is similar to `getsockopt` in POSIX for SO_SNDBUF
- */
-__wasi_errno_t __wasi_sock_get_send_buf_size(
-    /**
-     * Socket descriptor
-     */
-    __wasi_fd_t fd,
-    __wasi_filesize_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Bind a socket

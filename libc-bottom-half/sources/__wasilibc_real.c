@@ -1245,137 +1245,87 @@ __wasi_errno_t __wasi_sock_open(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_set_opt(int32_t arg0, int32_t arg1, int32_t arg2) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_set_opt_flag(int32_t arg0, int32_t arg1, int32_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
-    __import_name__("sock_set_opt")
+    __import_name__("sock_set_opt_flag")
 ));
 
-__wasi_errno_t __wasi_sock_set_opt(
+__wasi_errno_t __wasi_sock_set_opt_flag(
     __wasi_fd_t fd,
     __wasi_sock_option_t sockopt,
     __wasi_bool_t flag
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_opt((int32_t) fd, (int32_t) sockopt, (int32_t) flag);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_opt_flag((int32_t) fd, (int32_t) sockopt, (int32_t) flag);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_get_opt(int32_t arg0, int32_t arg1, int64_t arg2) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_get_opt_flag(int32_t arg0, int32_t arg1, int64_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
-    __import_name__("sock_get_opt")
+    __import_name__("sock_get_opt_flag")
 ));
 
-__wasi_errno_t __wasi_sock_get_opt(
+__wasi_errno_t __wasi_sock_get_opt_flag(
     __wasi_fd_t fd,
     __wasi_sock_option_t sockopt,
     __wasi_bool_t *retptr0
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_get_opt((int32_t) fd, (int32_t) sockopt, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_get_opt_flag((int32_t) fd, (int32_t) sockopt, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_set_linger(int32_t arg0, int64_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_set_opt_time(int32_t arg0, int32_t arg1, int64_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
-    __import_name__("sock_set_linger")
+    __import_name__("sock_set_opt_time")
 ));
 
-__wasi_errno_t __wasi_sock_set_linger(
+__wasi_errno_t __wasi_sock_set_opt_time(
     __wasi_fd_t fd,
-    const __wasi_option_timestamp_t * linger
-){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_linger((int32_t) fd, (int64_t) linger);
-    return (uint16_t) ret;
-}
-
-int32_t __imported_wasix_snapshot_preview1_sock_get_linger(int32_t arg0, int64_t arg1) __attribute__((
-    __import_module__("wasix_snapshot_preview1"),
-    __import_name__("sock_get_linger")
-));
-
-__wasi_errno_t __wasi_sock_get_linger(
-    __wasi_fd_t fd,
-    __wasi_option_timestamp_t *retptr0
-){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_get_linger((int32_t) fd, (intptr_t) retptr0);
-    return (uint16_t) ret;
-}
-
-int32_t __imported_wasix_snapshot_preview1_sock_set_timeout(int32_t arg0, int32_t arg1, int64_t arg2) __attribute__((
-    __import_module__("wasix_snapshot_preview1"),
-    __import_name__("sock_set_timeout")
-));
-
-__wasi_errno_t __wasi_sock_set_timeout(
-    __wasi_fd_t fd,
-    __wasi_timeout_type_t ty,
+    __wasi_sock_option_t sockopt,
     const __wasi_option_timestamp_t * timeout
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_timeout((int32_t) fd, (int32_t) ty, (int64_t) timeout);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_opt_time((int32_t) fd, (int32_t) sockopt, (int64_t) timeout);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_get_timeout(int32_t arg0, int32_t arg1, int64_t arg2) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_get_opt_time(int32_t arg0, int32_t arg1, int64_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
-    __import_name__("sock_get_timeout")
+    __import_name__("sock_get_opt_time")
 ));
 
-__wasi_errno_t __wasi_sock_get_timeout(
+__wasi_errno_t __wasi_sock_get_opt_time(
     __wasi_fd_t fd,
-    __wasi_timeout_type_t ty,
+    __wasi_sock_option_t sockopt,
     __wasi_option_timestamp_t *retptr0
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_get_timeout((int32_t) fd, (int32_t) ty, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_get_opt_time((int32_t) fd, (int32_t) sockopt, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_set_ttl(int32_t arg0, int32_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_set_opt_size(int32_t arg0, int32_t arg1, int64_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
-    __import_name__("sock_set_ttl")
+    __import_name__("sock_set_opt_size")
 ));
 
-__wasi_errno_t __wasi_sock_set_ttl(
+__wasi_errno_t __wasi_sock_set_opt_size(
     __wasi_fd_t fd,
-    __wasi_size_t ttl
+    __wasi_sock_option_t sockopt,
+    __wasi_filesize_t size
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_ttl((int32_t) fd, (int32_t) ttl);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_opt_size((int32_t) fd, (int32_t) sockopt, (int64_t) size);
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_snapshot_preview1_sock_get_ttl(int32_t arg0, int64_t arg1) __attribute__((
+int32_t __imported_wasix_snapshot_preview1_sock_get_opt_size(int32_t arg0, int32_t arg1, int64_t arg2) __attribute__((
     __import_module__("wasix_snapshot_preview1"),
-    __import_name__("sock_get_ttl")
+    __import_name__("sock_get_opt_size")
 ));
 
-__wasi_errno_t __wasi_sock_get_ttl(
+__wasi_errno_t __wasi_sock_get_opt_size(
     __wasi_fd_t fd,
-    __wasi_size_t *retptr0
+    __wasi_sock_option_t sockopt,
+    __wasi_filesize_t *retptr0
 ){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_get_ttl((int32_t) fd, (intptr_t) retptr0);
-    return (uint16_t) ret;
-}
-
-int32_t __imported_wasix_snapshot_preview1_sock_set_multicast_ttl_v4(int32_t arg0, int32_t arg1) __attribute__((
-    __import_module__("wasix_snapshot_preview1"),
-    __import_name__("sock_set_multicast_ttl_v4")
-));
-
-__wasi_errno_t __wasi_sock_set_multicast_ttl_v4(
-    __wasi_fd_t fd,
-    __wasi_size_t ttl
-){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_multicast_ttl_v4((int32_t) fd, (int32_t) ttl);
-    return (uint16_t) ret;
-}
-
-int32_t __imported_wasix_snapshot_preview1_sock_get_multicast_ttl_v4(int32_t arg0, int64_t arg1) __attribute__((
-    __import_module__("wasix_snapshot_preview1"),
-    __import_name__("sock_get_multicast_ttl_v4")
-));
-
-__wasi_errno_t __wasi_sock_get_multicast_ttl_v4(
-    __wasi_fd_t fd,
-    __wasi_size_t *retptr0
-){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_get_multicast_ttl_v4((int32_t) fd, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_snapshot_preview1_sock_get_opt_size((int32_t) fd, (int32_t) sockopt, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 
@@ -1432,58 +1382,6 @@ __wasi_errno_t __wasi_sock_leave_multicast_v6(
     uint32_t interface
 ){
     int32_t ret = __imported_wasix_snapshot_preview1_sock_leave_multicast_v6((int32_t) fd, (int64_t) multiaddr, (int32_t) interface);
-    return (uint16_t) ret;
-}
-
-int32_t __imported_wasix_snapshot_preview1_sock_set_recv_buf_size(int32_t arg0, int64_t arg1) __attribute__((
-    __import_module__("wasix_snapshot_preview1"),
-    __import_name__("sock_set_recv_buf_size")
-));
-
-__wasi_errno_t __wasi_sock_set_recv_buf_size(
-    __wasi_fd_t fd,
-    __wasi_filesize_t size
-){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_recv_buf_size((int32_t) fd, (int64_t) size);
-    return (uint16_t) ret;
-}
-
-int32_t __imported_wasix_snapshot_preview1_sock_get_recv_buf_size(int32_t arg0, int64_t arg1) __attribute__((
-    __import_module__("wasix_snapshot_preview1"),
-    __import_name__("sock_get_recv_buf_size")
-));
-
-__wasi_errno_t __wasi_sock_get_recv_buf_size(
-    __wasi_fd_t fd,
-    __wasi_filesize_t *retptr0
-){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_get_recv_buf_size((int32_t) fd, (intptr_t) retptr0);
-    return (uint16_t) ret;
-}
-
-int32_t __imported_wasix_snapshot_preview1_sock_set_send_buf_size(int32_t arg0, int64_t arg1) __attribute__((
-    __import_module__("wasix_snapshot_preview1"),
-    __import_name__("sock_set_send_buf_size")
-));
-
-__wasi_errno_t __wasi_sock_set_send_buf_size(
-    __wasi_fd_t fd,
-    __wasi_filesize_t size
-){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_set_send_buf_size((int32_t) fd, (int64_t) size);
-    return (uint16_t) ret;
-}
-
-int32_t __imported_wasix_snapshot_preview1_sock_get_send_buf_size(int32_t arg0, int64_t arg1) __attribute__((
-    __import_module__("wasix_snapshot_preview1"),
-    __import_name__("sock_get_send_buf_size")
-));
-
-__wasi_errno_t __wasi_sock_get_send_buf_size(
-    __wasi_fd_t fd,
-    __wasi_filesize_t *retptr0
-){
-    int32_t ret = __imported_wasix_snapshot_preview1_sock_get_send_buf_size((int32_t) fd, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 

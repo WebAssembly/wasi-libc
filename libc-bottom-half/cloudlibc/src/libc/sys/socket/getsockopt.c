@@ -24,7 +24,7 @@ int getsockopt(int socket, int level, int option_name,
     case SO_MCASTLOOPV6:
     case SO_KEEPALIVE: {
       __wasi_bool_t on = 0;
-      __wasi_errno_t error = __wasi_sock_get_opt(socket, option_name, &on);
+      __wasi_errno_t error = __wasi_sock_get_opt_flag(socket, option_name, &on);
       if (error != 0) {
         errno = error;
         return -1;
@@ -43,7 +43,7 @@ int getsockopt(int socket, int level, int option_name,
     }
     case SO_LINGER: {
       __wasi_option_timestamp_t tm;
-      __wasi_errno_t error = __wasi_sock_get_linger(socket, &tm);
+      __wasi_errno_t error = __wasi_sock_get_opt_time(socket, option_name, &tm);
       if (error != 0) {
         errno = error;
         return -1;
@@ -60,16 +60,8 @@ int getsockopt(int socket, int level, int option_name,
     case SO_SNDTIMEO:
     case SO_CONNTIMEO:
     case SO_ACCPTIMEO: {
-      __wasi_timeout_type_t ty = 0;
-      switch (option_name) {
-        case SO_RCVTIMEO: { ty = __WASI_TIMEOUT_TYPE_READ; }
-        case SO_SNDTIMEO: { ty = __WASI_TIMEOUT_TYPE_WRITE; }
-        case SO_CONNTIMEO: { ty = __WASI_TIMEOUT_TYPE_CONNECT; }
-        case SO_ACCPTIMEO: { ty = __WASI_TIMEOUT_TYPE_ACCEPT; }
-      }
-
       __wasi_option_timestamp_t tm;
-      __wasi_errno_t error = __wasi_sock_get_timeout(socket, ty, &tm);
+      __wasi_errno_t error = __wasi_sock_get_opt_time(socket, option_name, &tm);
       if (error != 0) {
         errno = error;
         return -1;
@@ -85,21 +77,12 @@ int getsockopt(int socket, int level, int option_name,
       *option_len = sizeof(struct timeval);
       return 0;
     }
-    case SO_RCVBUF: {
+    case SO_RCVBUF:
+    case SO_SNDBUF:
+    case SO_TTL:
+    case SO_MCASTTTLV4: {
       __wasi_filesize_t fs;
-      __wasi_errno_t error = __wasi_sock_get_recv_buf_size(socket, &fs);
-      if (error != 0) {
-        errno = error;
-        return -1;
-      }
-      socklen_t len = fs;
-      memcpy(option_value, &len, *option_len < sizeof(socklen_t ) ? *option_len : sizeof(socklen_t ));
-      *option_len = sizeof(socklen_t );
-      return 0;
-    }
-    case SO_SNDBUF: {
-      __wasi_filesize_t fs;
-      __wasi_errno_t error = __wasi_sock_get_send_buf_size(socket, &fs);
+      __wasi_errno_t error = __wasi_sock_get_opt_size(socket, option_name, &fs);
       if (error != 0) {
         errno = error;
         return -1;

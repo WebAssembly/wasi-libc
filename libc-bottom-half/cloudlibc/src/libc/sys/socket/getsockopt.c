@@ -11,6 +11,10 @@ int getsockopt(int socket, int level, int option_name,
     level = SOL_SOCKET;
     option_name = SO_ONLYV6;
   }
+  if (level == IPPROTO_TCP && option_name == TCP_NODELAY) {
+    level = SOL_SOCKET;
+    option_name = SO_NODELAY;
+  }
 
   if (level != SOL_SOCKET) {
     errno = ENOPROTOOPT;

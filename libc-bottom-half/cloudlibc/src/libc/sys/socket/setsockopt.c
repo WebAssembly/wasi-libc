@@ -11,6 +11,10 @@ int setsockopt(int socket, int level, int option_name, const void *restrict opti
     level = SOL_SOCKET;
     option_name = SO_ONLYV6;
   }
+  if (level == IPPROTO_TCP && option_name == TCP_NODELAY) {
+    level = SOL_SOCKET;
+    option_name = SO_NODELAY;
+  }
 
   switch (option_name) {
     case SO_ACCEPTCONN:

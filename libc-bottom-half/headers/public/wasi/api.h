@@ -2800,6 +2800,11 @@ typedef uint8_t __wasi_sock_option_t;
  */
 #define __WASI_SOCK_OPTION_TYPE (UINT8_C(24))
 
+/**
+ * Protocol of the socket
+ */
+#define __WASI_SOCK_OPTION_PROTO (UINT8_C(25))
+
 _Static_assert(sizeof(__wasi_sock_option_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_sock_option_t) == 1, "witx calculated align");
 

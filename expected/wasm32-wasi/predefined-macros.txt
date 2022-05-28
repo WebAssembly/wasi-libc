@@ -397,6 +397,7 @@
 #define FTW_SL 5
 #define FTW_SLN 7
 #define F_DUPFD (5)
+#define F_DUPFD_CLOEXEC (6)
 #define F_GETFD (1)
 #define F_GETFL (3)
 #define F_LOCK 1

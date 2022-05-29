@@ -968,6 +968,11 @@ typedef uint8_t __wasi_filetype_t;
  */
 #define __WASI_FILETYPE_SOCKET_RAW (UINT8_C(8))
 
+/**
+ * The file descriptor or file refers to a sequential packet socket.
+ */
+#define __WASI_FILETYPE_SOCKET_SEQPACKET (UINT8_C(9))
+
 _Static_assert(sizeof(__wasi_filetype_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_filetype_t) == 1, "witx calculated align");
 
@@ -2102,6 +2107,11 @@ typedef uint8_t __wasi_sock_type_t;
  * The file descriptor or file refers to a raw socket.
  */
 #define __WASI_SOCK_TYPE_SOCKET_RAW (UINT8_C(2))
+
+/**
+ * The file descriptor or file refers to a sequential packet socket.
+ */
+#define __WASI_SOCK_TYPE_SOCKET_SEQPACKET (UINT8_C(3))
 
 _Static_assert(sizeof(__wasi_sock_type_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_sock_type_t) == 1, "witx calculated align");

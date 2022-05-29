@@ -60,6 +60,8 @@ static inline void to_public_stat(const __wasi_filestat_t *in,
       break;
     case __WASI_FILETYPE_SOCKET_DGRAM:
     case __WASI_FILETYPE_SOCKET_STREAM:
+    case __WASI_FILETYPE_SOCKET_SEQPACKET:
+    case __WASI_FILETYPE_SOCKET_RAW:
       out->st_mode |= S_IFSOCK;
       break;
     case __WASI_FILETYPE_SYMBOLIC_LINK:

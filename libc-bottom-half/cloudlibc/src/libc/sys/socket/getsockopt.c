@@ -121,7 +121,9 @@ int getsockopt(int socket, int level, int option_name,
         return -1;
       }
       if (fsb.fs_filetype != __WASI_FILETYPE_SOCKET_DGRAM &&
-          fsb.fs_filetype != __WASI_FILETYPE_SOCKET_STREAM) {
+          fsb.fs_filetype != __WASI_FILETYPE_SOCKET_STREAM &&
+          fsb.fs_filetype != __WASI_FILETYPE_SOCKET_SEQPACKET &&
+          fsb.fs_filetype != __WASI_FILETYPE_SOCKET_RAW) {
         errno = ENOTSOCK;
         return -1;
       }

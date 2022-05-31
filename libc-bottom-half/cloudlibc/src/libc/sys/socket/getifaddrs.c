@@ -20,7 +20,7 @@ int getif_addrs(struct if_addrs **restrict ifap) {
   }
   memset(ips_heap, 0, sizeof(struct __wasi_addr_cidr_t) * nips);
   
-  __wasi_errno_t error = __wasi_port_ip_list(ips_heap, &nips);
+  __wasi_errno_t error = __wasi_port_addr_list(ips_heap, &nips);
   if (error == EOVERFLOW) {
     free(ips_heap);
     ips_heap = malloc(sizeof(struct __wasi_addr_cidr_t) * nips);
@@ -31,7 +31,7 @@ int getif_addrs(struct if_addrs **restrict ifap) {
     memset(ips_heap, 0, sizeof(struct __wasi_addr_cidr_t) * nips);
 
     // try again but with a bigger buffer (returned in nips)
-    error = __wasi_port_ip_list(ips_heap, &nips);
+    error = __wasi_port_addr_list(ips_heap, &nips);
   }
   if (error != 0) {
     free(ips_heap);

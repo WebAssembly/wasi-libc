@@ -1,3 +1,5 @@
 sysroot
+sysroot32
+sysroot64
 build
 .vscode

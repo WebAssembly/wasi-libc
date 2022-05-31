@@ -123,6 +123,15 @@ extern "C" {{
 "#,
     );
 
+    // Replace the module names
+    if is64bit {
+        header = header.replace("wasix_module_name", "wasix_64v1");
+        source = source.replace("wasix_module_name", "wasix_64v1");
+    } else {
+        header = header.replace("wasix_module_name", "wasix_32v1");
+        source = source.replace("wasix_module_name", "wasix_32v1");
+    }
+
     Generated { header, source }
 }
 

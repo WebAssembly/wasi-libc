@@ -315,13 +315,13 @@ __wasi_path_symlink
 __wasi_path_unlink_file
 __wasi_pipe
 __wasi_poll_oneoff
+__wasi_port_addr_add
+__wasi_port_addr_clear
+__wasi_port_addr_list
+__wasi_port_addr_remove
 __wasi_port_bridge
 __wasi_port_dhcp_acquire
 __wasi_port_gateway_set
-__wasi_port_ip_add
-__wasi_port_ip_clear
-__wasi_port_ip_list
-__wasi_port_ip_remove
 __wasi_port_mac
 __wasi_port_route_add
 __wasi_port_route_clear

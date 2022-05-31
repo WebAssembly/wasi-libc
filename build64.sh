@@ -6,3 +6,4 @@ git pull
 cd ../../..
 cargo run --manifest-path tools/wasix-headers/Cargo.toml generate-libc --64bit
 make -j 14
+rsync -rtvu --delete ./sysroot/ ./sysroot64/

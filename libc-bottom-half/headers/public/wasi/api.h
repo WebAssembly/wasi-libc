@@ -1,6 +1,6 @@
 /**
  * THIS FILE IS AUTO-GENERATED from the following files:
- *   wasix_snapshot_preview1.witx
+ *   wasix_v1.witx
  *
  * To regenerate this file execute:
  *
@@ -3157,19 +3157,19 @@ _Static_assert(offsetof(__wasi_addr_ip6_cidr_t, prefix) == 16, "witx calculated 
 /**
  * Union of all possible addresses type
  */
-typedef union __wasi_addr_ip_u_t {
+typedef union __wasi_addr_u_t {
     __wasi_addr_unspec_t unspec;
     __wasi_addr_ip4_t inet4;
     __wasi_addr_ip6_t inet6;
     __wasi_addr_unix_t unix;
-} __wasi_addr_ip_u_t;
-typedef struct __wasi_addr_ip_t {
+} __wasi_addr_u_t;
+typedef struct __wasi_addr_t {
     uint8_t tag;
-    __wasi_addr_ip_u_t u;
-} __wasi_addr_ip_t;
+    __wasi_addr_u_t u;
+} __wasi_addr_t;
 
-_Static_assert(sizeof(__wasi_addr_ip_t) == 18, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_ip_t) == 2, "witx calculated align");
+_Static_assert(sizeof(__wasi_addr_t) == 18, "witx calculated size");
+_Static_assert(_Alignof(__wasi_addr_t) == 2, "witx calculated align");
 
 /**
  * Union that makes a generic IP address and port
@@ -3208,7 +3208,7 @@ _Static_assert(_Alignof(__wasi_addr_cidr_t) == 2, "witx calculated align");
 typedef struct __wasi_route_t {
     __wasi_addr_cidr_t cidr;
 
-    __wasi_addr_ip_t via_router;
+    __wasi_addr_t via_router;
 
     __wasi_option_timestamp_t preferred_until;
 
@@ -3345,7 +3345,7 @@ _Static_assert(sizeof(__wasi_prestat_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
 
 /**
- * @defgroup wasix_snapshot_preview1
+ * @defgroup wasix_64v1
  * @{
  */
 
@@ -4423,7 +4423,7 @@ __wasi_errno_t __wasi_http_request(
 /**
  * Retrieves the status of a HTTP request
  */
-__wasi_errno_t __wasi_http_status(
+void __wasi_http_status(
     /**
      * Handle of the HTTP request
      */
@@ -4432,24 +4432,8 @@ __wasi_errno_t __wasi_http_status(
      * Pointer to a buffer that will be filled with the current
      * status of this HTTP request
      */
-    __wasi_http_status_t * status,
-    /**
-     * Buffer that will hold the status text
-     */
-    uint8_t * status_text,
-    /**
-     * This field will also be filled with the number of bytes returned in the status text
-     */
-    __wasi_pointersize_t * status_text_len,
-    /**
-     * Buffer that will hold the response headers
-     */
-    uint8_t * headers,
-    /**
-     * This field will also be filled with the number of bytes returned in the response headers
-     */
-    __wasi_pointersize_t * headers_len
-) __attribute__((__warn_unused_result__));
+    __wasi_http_status_t * status
+);
 /**
  * Securely connects to a particular remote network
  */
@@ -4474,33 +4458,33 @@ __wasi_errno_t __wasi_port_unbridge(
     void
 ) __attribute__((__warn_unused_result__));
 /**
- * Acquires a set of IP addresses using DHCP
+ * Acquires a set of addresses using DHCP
  */
 __wasi_errno_t __wasi_port_dhcp_acquire(
     void
 ) __attribute__((__warn_unused_result__));
 /**
- * Adds another static IP address to the local port
+ * Adds another static address to the local port
  */
-__wasi_errno_t __wasi_port_ip_add(
+__wasi_errno_t __wasi_port_addr_add(
     /**
-     * IP address to be added
+     * Address to be added
      */
-    const __wasi_addr_cidr_t * ip
+    const __wasi_addr_cidr_t * addr
 ) __attribute__((__warn_unused_result__));
 /**
- * Removes an IP address from the local port
+ * Removes an address from the local port
  */
-__wasi_errno_t __wasi_port_ip_remove(
+__wasi_errno_t __wasi_port_addr_remove(
     /**
-     * IP address to be removed
+     * Address to be removed
      */
-    const __wasi_addr_ip_t * ip
+    const __wasi_addr_t * addr
 ) __attribute__((__warn_unused_result__));
 /**
- * Clears all the IP addresses on the local port
+ * Clears all the addresses on the local port
  */
-__wasi_errno_t __wasi_port_ip_clear(
+__wasi_errno_t __wasi_port_addr_clear(
     void
 ) __attribute__((__warn_unused_result__));
 /**
@@ -4510,35 +4494,35 @@ __wasi_errno_t __wasi_port_mac(
     __wasi_hardware_address_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
- * Returns a list of all the IP addresses owned by the local port
+ * Returns a list of all the addresses owned by the local port
  * This function fills the output buffer as much as possible.
- * If the buffer is not big enough then the nips address will be
+ * If the buffer is not big enough then the naddrs address will be
  * filled with the buffer size needed and the EOVERFLOW will be returned
  * @return
- * The number of IP addresses returned.
+ * The number of addresses returned.
  */
-__wasi_errno_t __wasi_port_ip_list(
+__wasi_errno_t __wasi_port_addr_list(
     /**
-     * The buffer where IP addresses will be stored
+     * The buffer where addresses will be stored
      */
-    __wasi_addr_cidr_t * ips,
-    __wasi_size_t * nips
+    __wasi_addr_cidr_t * addrs,
+    __wasi_size_t * naddrs
 ) __attribute__((__warn_unused_result__));
 /**
  * Adds a default gateway to the port
  */
 __wasi_errno_t __wasi_port_gateway_set(
     /**
-     * IP address of the default gateway
+     * Address of the default gateway
      */
-    const __wasi_addr_ip_t * ip
+    const __wasi_addr_t * addr
 ) __attribute__((__warn_unused_result__));
 /**
  * Adds a new route to the local port
  */
 __wasi_errno_t __wasi_port_route_add(
     const __wasi_addr_cidr_t * cidr,
-    const __wasi_addr_ip_t * via_router,
+    const __wasi_addr_t * via_router,
     const __wasi_option_timestamp_t * preferred_until,
     const __wasi_option_timestamp_t * expires_at
 ) __attribute__((__warn_unused_result__));
@@ -4546,7 +4530,7 @@ __wasi_errno_t __wasi_port_route_add(
  * Removes an existing route from the local port
  */
 __wasi_errno_t __wasi_port_route_remove(
-    const __wasi_addr_ip_t * cidr
+    const __wasi_addr_t * cidr
 ) __attribute__((__warn_unused_result__));
 /**
  * Clears all the routes in the local port
@@ -5016,10 +5000,10 @@ __wasi_errno_t __wasi_resolve(
      */
     uint16_t port,
     /**
-     * The buffer where IP addresses will be stored
+     * The buffer where addresses will be stored
      */
-    __wasi_addr_ip_t * ips,
-    __wasi_size_t nips,
+    __wasi_addr_t * addrs,
+    __wasi_size_t naddrs,
     __wasi_size_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /** @} */

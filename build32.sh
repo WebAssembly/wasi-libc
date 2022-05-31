@@ -7,3 +7,4 @@ cd ../../..
 #cargo run --manifest-path tools/wasi-headers/Cargo.toml generate-libc
 cargo run --manifest-path tools/wasix-headers/Cargo.toml generate-libc
 make -j 14
+rsync -rtvu --delete ./sysroot/ ./sysroot32/

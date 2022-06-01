@@ -146,7 +146,6 @@ __log2f_data
 __log_data
 __logf_data
 __lseek
-__main_argc_argv
 __main_void
 __math_divzero
 __math_divzerof
@@ -170,7 +169,6 @@ __ofl_lock
 __ofl_unlock
 __optpos
 __optreset
-__original_main
 __overflow
 __p1evll
 __pio2_hi

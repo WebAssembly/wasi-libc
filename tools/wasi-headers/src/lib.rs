@@ -33,7 +33,6 @@ pub fn libc_wasi_api_header() -> PathBuf {
         .join("../../libc-bottom-half/headers/public/wasi/api.h")
 }
 
-pub fn libc_wasi_api_source() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../libc-bottom-half/sources/__wasilibc_real.c")
+pub fn libc_wasi_api_source_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../libc-bottom-half/sources/__wasilibc_real")
 }

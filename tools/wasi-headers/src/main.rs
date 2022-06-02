@@ -4,17 +4,20 @@ extern crate clap;
 use anyhow::Result;
 use clap::{Arg, SubCommand};
 use std::fs;
-use std::path::Path;
-use wasi_headers::{generate, libc_wasi_api_header, libc_wasi_api_source, snapshot_witx_files};
+use std::path::{Path, PathBuf};
+use wasi_headers::{generate, libc_wasi_api_header, libc_wasi_api_source_dir, snapshot_witx_files};
 
 pub fn run(
     inputs: &[impl AsRef<Path>],
     header_output: impl AsRef<Path>,
-    source_output: impl AsRef<Path>,
+    source_output_dir: PathBuf,
 ) -> Result<()> {
     let c_header = generate(inputs)?;
     fs::write(header_output, c_header.header)?;
-    fs::write(source_output, c_header.source)?;
+    for source in c_header.sources {
+        let source_output = source_output_dir.join(format!("{}.c", source.name));
+        fs::write(source_output, source.content)?;
+    }
     Ok(())
 }
 
@@ -40,7 +43,7 @@ fn main() -> Result<()> {
 
     if matches.subcommand_matches("generate-libc").is_some() {
         let inputs = snapshot_witx_files()?;
-        run(&inputs, libc_wasi_api_header(), libc_wasi_api_source())?;
+        run(&inputs, libc_wasi_api_header(), libc_wasi_api_source_dir())?;
     } else if let Some(generate) = matches.subcommand_matches("generate") {
         let inputs = generate
             .values_of("inputs")

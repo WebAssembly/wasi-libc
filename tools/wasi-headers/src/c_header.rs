@@ -3,9 +3,14 @@ use std::collections::HashMap;
 use std::mem;
 use witx::*;
 
+pub struct Source {
+    pub name: String,
+    pub content: String,
+}
+
 pub struct Generated {
     pub header: String,
-    pub source: String,
+    pub sources: Vec<Source>,
 }
 
 pub fn to_c(doc: &Document, inputs_str: &str) -> Generated {
@@ -68,26 +73,7 @@ extern "C" {{
         inputs_str,
     ));
 
-    let mut source = String::new();
-    source.push_str(&format!(
-        r#"/**
- * THIS FILE IS AUTO-GENERATED from the following files:
- *   {}
- *
- * To regenerate this file execute:
- *
- *     cargo run --manifest-path tools/wasi-headers/Cargo.toml generate-libc
- *
- * Modifications to this file will cause CI to fail, the code generator tool
- * must be modified to change this file.
- */
-
-#include <wasi/api.h>
-#include <string.h>
-
-"#,
-        inputs_str,
-    ));
+    let mut sources = vec![];
 
     let mut type_constants = HashMap::new();
     for c in doc.constants() {
@@ -105,7 +91,35 @@ extern "C" {{
     }
 
     for m in doc.modules() {
-        print_module(&mut header, &mut source, &m);
+        print_module_header(&mut header, &m);
+
+        for func in m.funcs() {
+            let mut source = String::new();
+            source.push_str(&format!(
+                r#"/**
+ * THIS FILE IS AUTO-GENERATED from the following files:
+ *   {}
+ *
+ * To regenerate this file execute:
+ *
+ *     cargo run --manifest-path tools/wasi-headers/Cargo.toml generate-libc
+ *
+ * Modifications to this file will cause CI to fail, the code generator tool
+ * must be modified to change this file.
+ */
+
+#include <wasi/api.h>
+#include <string.h>
+
+"#,
+                inputs_str,
+            ));
+            print_func_source(&mut source, &func, &m.name);
+            sources.push(Source {
+                name: func.name.as_str().to_string(),
+                content: source,
+            });
+        }
     }
 
     header.push_str(
@@ -117,7 +131,7 @@ extern "C" {{
 "#,
     );
 
-    Generated { header, source }
+    Generated { header, sources }
 }
 
 fn print_datatype(ret: &mut String, nt: &NamedType) {
@@ -382,7 +396,7 @@ fn print_handle(ret: &mut String, name: &Id, h: &HandleDatatype) {
     ret.push_str("\n");
 }
 
-fn print_module(header: &mut String, source: &mut String, m: &Module) {
+fn print_module_header(header: &mut String, m: &Module) {
     header.push_str("/**\n");
     header.push_str(&format!(" * @defgroup {}\n", ident_name(&m.name),));
     for line in m.docs.lines() {
@@ -394,7 +408,6 @@ fn print_module(header: &mut String, source: &mut String, m: &Module) {
 
     for func in m.funcs() {
         print_func_header(header, &func);
-        print_func_source(source, &func, &m.name);
     }
 
     header.push_str("/** @} */\n");

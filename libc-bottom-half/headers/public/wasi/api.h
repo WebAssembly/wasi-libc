@@ -25,13 +25,13 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(intptr_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(uintptr_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == 8, "non-wasi data layout");
-typedef int64_t __wasi_int_t;
-typedef uint64_t __wasi_uint_t;
-_Static_assert(_Alignof(__wasi_int_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(__wasi_uint_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(intptr_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(uintptr_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
+typedef int32_t __wasi_int_t;
+typedef uint32_t __wasi_uint_t;
+_Static_assert(_Alignof(__wasi_int_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(__wasi_uint_t) == 4, "non-wasi data layout");
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -43,8 +43,8 @@ extern "C" {
  */
 typedef __wasi_uint_t __wasi_pointersize_t;
 
-_Static_assert(sizeof(__wasi_pointersize_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_pointersize_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_pointersize_t) == 4, "witx calculated size");
+_Static_assert(_Alignof(__wasi_pointersize_t) == 4, "witx calculated align");
 
 /**
  * Represents a number of items
@@ -835,10 +835,10 @@ typedef struct __wasi_iovec_t {
 
 } __wasi_iovec_t;
 
-_Static_assert(sizeof(__wasi_iovec_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_iovec_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_iovec_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_iovec_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_iovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 4, "witx calculated offset");
 
 /**
  * A region of memory for scatter/gather writes.
@@ -856,10 +856,10 @@ typedef struct __wasi_ciovec_t {
 
 } __wasi_ciovec_t;
 
-_Static_assert(sizeof(__wasi_ciovec_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_ciovec_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_ciovec_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_ciovec_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_ciovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 4, "witx calculated offset");
 
 /**
  * Relative offset within a file.
@@ -1292,6 +1292,16 @@ typedef uint16_t __wasi_eventrwflags_t;
  * The peer of this socket has closed or disconnected.
  */
 #define __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP ((__wasi_eventrwflags_t)(1 << 0))
+
+/**
+ * Flags for the 'fd_event' call
+ */
+typedef uint16_t __wasi_eventfdflags_t;
+
+/**
+ * Indicates if this event file description will run as a semaphore
+ */
+#define __WASI_EVENTFDFLAGS_SEMAPHORE ((__wasi_eventfdflags_t)(1 << 0))
 
 /**
  * The contents of an `event` when type is `eventtype::fd_read` or
@@ -1796,13 +1806,13 @@ typedef struct __wasi_bus_event_data_t {
 
 } __wasi_bus_event_data_t;
 
-_Static_assert(sizeof(__wasi_bus_event_data_t) == 24, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_event_data_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_bus_event_data_t) == 16, "witx calculated size");
+_Static_assert(_Alignof(__wasi_bus_event_data_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_bus_event_data_t, ty) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_bus_event_data_t, format) == 1, "witx calculated offset");
 _Static_assert(offsetof(__wasi_bus_event_data_t, cid) == 4, "witx calculated offset");
 _Static_assert(offsetof(__wasi_bus_event_data_t, topic_len) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_data_t, buf_len) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_data_t, buf_len) == 12, "witx calculated offset");
 
 /**
  * Bus process reply event.
@@ -1861,8 +1871,8 @@ typedef struct __wasi_bus_event_t {
     __wasi_bus_event_u_t u;
 } __wasi_bus_event_t;
 
-_Static_assert(sizeof(__wasi_bus_event_t) == 32, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_event_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_bus_event_t) == 20, "witx calculated size");
+_Static_assert(_Alignof(__wasi_bus_event_t) == 4, "witx calculated align");
 
 /**
  * Signal condition.
@@ -3345,7 +3355,7 @@ _Static_assert(sizeof(__wasi_prestat_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
 
 /**
- * @defgroup wasix_64v1
+ * @defgroup wasix_32v1
  * @{
  */
 
@@ -3669,6 +3679,15 @@ __wasi_errno_t __wasi_fd_renumber(
  */
 __wasi_errno_t __wasi_fd_dup(
     __wasi_fd_t fd,
+    __wasi_fd_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Creates a file handle for event notifications
+ * 
+ */
+__wasi_errno_t __wasi_fd_event(
+    uint64_t initial_val,
+    __wasi_eventfdflags_t flags,
     __wasi_fd_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**

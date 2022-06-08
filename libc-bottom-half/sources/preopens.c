@@ -158,7 +158,7 @@ int __wasilibc_find_relpath(const char *path,
 int __wasilibc_find_abspath(const char *path,
                             const char **abs_prefix,
                             const char **relative_path) {
-    // Strip leading `/` characters, the prefixes we're mataching won't have
+    // Strip leading `/` characters, the prefixes we're matching won't have
     // them.
     while (*path == '/')
         path++;
@@ -190,10 +190,6 @@ int __wasilibc_find_abspath(const char *path,
 
     // The relative path is the substring after the portion that was matched.
     const char *computed = path + match_len;
-
-    // Omit leading slashes in the relative path.
-    while (*computed == '/')
-        ++computed;
 
     // *at syscalls don't accept empty relative paths, so use "." instead.
     if (*computed == '\0')

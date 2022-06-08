@@ -282,6 +282,7 @@ __wasi_fd_allocate
 __wasi_fd_close
 __wasi_fd_datasync
 __wasi_fd_dup
+__wasi_fd_event
 __wasi_fd_fdstat_get
 __wasi_fd_fdstat_set_flags
 __wasi_fd_fdstat_set_rights

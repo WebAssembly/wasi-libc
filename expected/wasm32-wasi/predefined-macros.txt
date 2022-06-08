@@ -3017,6 +3017,7 @@
 #define __WASI_ERRNO_TIMEDOUT (UINT16_C(73))
 #define __WASI_ERRNO_TXTBSY (UINT16_C(74))
 #define __WASI_ERRNO_XDEV (UINT16_C(75))
+#define __WASI_EVENTFDFLAGS_SEMAPHORE ((__wasi_eventfdflags_t)(1 << 0))
 #define __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP ((__wasi_eventrwflags_t)(1 << 0))
 #define __WASI_EVENTTYPE_CLOCK (UINT8_C(0))
 #define __WASI_EVENTTYPE_FD_READ (UINT8_C(1))

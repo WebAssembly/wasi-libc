@@ -25,13 +25,13 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(intptr_t) == 4, "non-wasi data layout");
-_Static_assert(_Alignof(uintptr_t) == 4, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
-typedef int32_t __wasi_int_t;
-typedef uint32_t __wasi_uint_t;
-_Static_assert(_Alignof(__wasi_int_t) == 4, "non-wasi data layout");
-_Static_assert(_Alignof(__wasi_uint_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(intptr_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(uintptr_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == 8, "non-wasi data layout");
+typedef int64_t __wasi_int_t;
+typedef uint64_t __wasi_uint_t;
+_Static_assert(_Alignof(__wasi_int_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(__wasi_uint_t) == 8, "non-wasi data layout");
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -43,8 +43,8 @@ extern "C" {
  */
 typedef __wasi_uint_t __wasi_pointersize_t;
 
-_Static_assert(sizeof(__wasi_pointersize_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_pointersize_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_pointersize_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_pointersize_t) == 8, "witx calculated align");
 
 /**
  * Represents a number of items
@@ -835,10 +835,10 @@ typedef struct __wasi_iovec_t {
 
 } __wasi_iovec_t;
 
-_Static_assert(sizeof(__wasi_iovec_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_iovec_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_iovec_t) == 16, "witx calculated size");
+_Static_assert(_Alignof(__wasi_iovec_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_iovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 8, "witx calculated offset");
 
 /**
  * A region of memory for scatter/gather writes.
@@ -856,10 +856,10 @@ typedef struct __wasi_ciovec_t {
 
 } __wasi_ciovec_t;
 
-_Static_assert(sizeof(__wasi_ciovec_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_ciovec_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_ciovec_t) == 16, "witx calculated size");
+_Static_assert(_Alignof(__wasi_ciovec_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_ciovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 8, "witx calculated offset");
 
 /**
  * Relative offset within a file.
@@ -1667,14 +1667,9 @@ _Static_assert(sizeof(__wasi_stdio_mode_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_stdio_mode_t) == 1, "witx calculated align");
 
 /**
- * Bus process handles.
+ * Process handles.
  */
-typedef struct __wasi_bus_handles_t {
-    /**
-     * Handle of the bus process
-     */
-    __wasi_bid_t handle;
-
+typedef struct __wasi_process_handles_t {
     /**
      * File handle for STDIN
      */
@@ -1690,19 +1685,23 @@ typedef struct __wasi_bus_handles_t {
      */
     __wasi_fd_t stderr;
 
-} __wasi_bus_handles_t;
+} __wasi_process_handles_t;
 
-_Static_assert(sizeof(__wasi_bus_handles_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_handles_t) == 4, "witx calculated align");
-_Static_assert(offsetof(__wasi_bus_handles_t, handle) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_handles_t, stdin) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_handles_t, stdout) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_handles_t, stderr) == 12, "witx calculated offset");
+_Static_assert(sizeof(__wasi_process_handles_t) == 12, "witx calculated size");
+_Static_assert(_Alignof(__wasi_process_handles_t) == 4, "witx calculated align");
+_Static_assert(offsetof(__wasi_process_handles_t, stdin) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_process_handles_t, stdout) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_process_handles_t, stderr) == 8, "witx calculated offset");
 
 /**
  * Bus process event.
  */
 typedef struct __wasi_bus_event_exit_t {
+    /**
+     * Handle of the bus process that has exited
+     */
+    __wasi_bid_t bid;
+
     /**
      * Exit code of the bus process that has exited
      */
@@ -1710,32 +1709,10 @@ typedef struct __wasi_bus_event_exit_t {
 
 } __wasi_bus_event_exit_t;
 
-_Static_assert(sizeof(__wasi_bus_event_exit_t) == 4, "witx calculated size");
+_Static_assert(sizeof(__wasi_bus_event_exit_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_bus_event_exit_t) == 4, "witx calculated align");
-_Static_assert(offsetof(__wasi_bus_event_exit_t, rval) == 0, "witx calculated offset");
-
-/**
- * Type of a subscription to an event or its occurrence.
- */
-typedef uint8_t __wasi_bus_data_type_t;
-
-/**
- * The bus process has been invoked by a caller
- */
-#define __WASI_BUS_DATA_TYPE_CALL (UINT8_C(0))
-
-/**
- * Callback with some out-of-band data to the caller
- */
-#define __WASI_BUS_DATA_TYPE_CALLBACK (UINT8_C(1))
-
-/**
- * Call within the bus process has returned
- */
-#define __WASI_BUS_DATA_TYPE_REPLY (UINT8_C(2))
-
-_Static_assert(sizeof(__wasi_bus_data_type_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_data_type_t) == 1, "witx calculated align");
+_Static_assert(offsetof(__wasi_bus_event_exit_t, bid) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_exit_t, rval) == 4, "witx calculated offset");
 
 /**
  * Serialization format of data on the bus
@@ -1776,13 +1753,18 @@ _Static_assert(sizeof(__wasi_bus_data_format_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_bus_data_format_t) == 1, "witx calculated align");
 
 /**
- * Bus data for a callback, call or reply event.
+ * Represents an invocation from a caller
  */
-typedef struct __wasi_bus_event_data_t {
+typedef struct __wasi_bus_event_call_t {
     /**
-     * Type of event data that is held here
+     * Parent handle if this is a part of a call stack
      */
-    __wasi_bus_data_type_t ty;
+    __wasi_option_cid_t parent;
+
+    /**
+     * Handle of the call
+     */
+    __wasi_cid_t cid;
 
     /**
      * Format of the data on the bus
@@ -1790,32 +1772,75 @@ typedef struct __wasi_bus_event_data_t {
     __wasi_bus_data_format_t format;
 
     /**
-     * Handle of the call that has made a callback
+     * The topic that describes the event that happened
+     * (note: this buffer must NOT be freed - it will be reused on subsequent calls)
      */
-    __wasi_cid_t cid;
+    uint8_t * topic;
 
     /**
-     * The topic that describes the event that happened
+     * The size of the topic name
      */
     __wasi_pointersize_t topic_len;
 
     /**
      * The buffer where event data is stored
+     * (note: this buffer must be freed by the receiver)
+     */
+    uint8_t * buf;
+
+    /**
+     * The amount of data held in the buffer
      */
     __wasi_pointersize_t buf_len;
 
-} __wasi_bus_event_data_t;
+} __wasi_bus_event_call_t;
 
-_Static_assert(sizeof(__wasi_bus_event_data_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_event_data_t) == 4, "witx calculated align");
-_Static_assert(offsetof(__wasi_bus_event_data_t, ty) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_data_t, format) == 1, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_data_t, cid) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_data_t, topic_len) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_data_t, buf_len) == 12, "witx calculated offset");
+_Static_assert(sizeof(__wasi_bus_event_call_t) == 48, "witx calculated size");
+_Static_assert(_Alignof(__wasi_bus_event_call_t) == 8, "witx calculated align");
+_Static_assert(offsetof(__wasi_bus_event_call_t, parent) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_call_t, cid) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_call_t, format) == 12, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_call_t, topic) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_call_t, topic_len) == 24, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_call_t, buf) == 32, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_call_t, buf_len) == 40, "witx calculated offset");
 
 /**
- * Bus process reply event.
+ * Represents the completion of an invocation from a caller
+ */
+typedef struct __wasi_bus_event_result_t {
+    /**
+     * Format of the data on the bus
+     */
+    __wasi_bus_data_format_t format;
+
+    /**
+     * Handle of the call
+     */
+    __wasi_cid_t cid;
+
+    /**
+     * The buffer where event data is stored
+     * (note: this buffer must be freed by the receiver)
+     */
+    uint8_t * buf;
+
+    /**
+     * The amount of data held in the buffer
+     */
+    __wasi_pointersize_t buf_len;
+
+} __wasi_bus_event_result_t;
+
+_Static_assert(sizeof(__wasi_bus_event_result_t) == 24, "witx calculated size");
+_Static_assert(_Alignof(__wasi_bus_event_result_t) == 8, "witx calculated align");
+_Static_assert(offsetof(__wasi_bus_event_result_t, format) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_result_t, cid) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_result_t, buf) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_result_t, buf_len) == 16, "witx calculated offset");
+
+/**
+ * Bus event when an error occurs on a call.
  */
 typedef struct __wasi_bus_event_fault_t {
     /**
@@ -1836,24 +1861,54 @@ _Static_assert(offsetof(__wasi_bus_event_fault_t, cid) == 0, "witx calculated of
 _Static_assert(offsetof(__wasi_bus_event_fault_t, fault) == 4, "witx calculated offset");
 
 /**
+ * Frees all the resources associated with a call.
+ */
+typedef struct __wasi_bus_event_close_t {
+    /**
+     * Handle of the call to release resources
+     */
+    __wasi_cid_t cid;
+
+} __wasi_bus_event_close_t;
+
+_Static_assert(sizeof(__wasi_bus_event_close_t) == 4, "witx calculated size");
+_Static_assert(_Alignof(__wasi_bus_event_close_t) == 4, "witx calculated align");
+_Static_assert(offsetof(__wasi_bus_event_close_t, cid) == 0, "witx calculated offset");
+
+/**
  * Type of a subscription to an event or its occurrence.
  */
 typedef uint8_t __wasi_bus_event_type_t;
 
 /**
- * The bus process has exited
+ * Nothing has happened
  */
-#define __WASI_BUS_EVENT_TYPE_EXIT (UINT8_C(0))
+#define __WASI_BUS_EVENT_TYPE_NOOP (UINT8_C(0))
 
 /**
- * The bus data recevied for a specific event
+ * The bus process has exited
  */
-#define __WASI_BUS_EVENT_TYPE_DATA (UINT8_C(1))
+#define __WASI_BUS_EVENT_TYPE_EXIT (UINT8_C(1))
+
+/**
+ * Someone has invoked something
+ */
+#define __WASI_BUS_EVENT_TYPE_CALL (UINT8_C(2))
+
+/**
+ * An invocation has completed and this is the result
+ */
+#define __WASI_BUS_EVENT_TYPE_RESULT (UINT8_C(3))
 
 /**
  * Fault has occured on one of the calls
  */
-#define __WASI_BUS_EVENT_TYPE_FAULT (UINT8_C(2))
+#define __WASI_BUS_EVENT_TYPE_FAULT (UINT8_C(4))
+
+/**
+ * Frees all the resources on a call
+ */
+#define __WASI_BUS_EVENT_TYPE_CLOSE (UINT8_C(5))
 
 _Static_assert(sizeof(__wasi_bus_event_type_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_bus_event_type_t) == 1, "witx calculated align");
@@ -1862,17 +1917,20 @@ _Static_assert(_Alignof(__wasi_bus_event_type_t) == 1, "witx calculated align");
  * The contents of a `subscription`.
  */
 typedef union __wasi_bus_event_u_t {
+    uint8_t noop;
     __wasi_bus_event_exit_t exit;
-    __wasi_bus_event_data_t data;
+    __wasi_bus_event_call_t call;
+    __wasi_bus_event_result_t result;
     __wasi_bus_event_fault_t fault;
+    __wasi_bus_event_close_t close;
 } __wasi_bus_event_u_t;
 typedef struct __wasi_bus_event_t {
     uint8_t tag;
     __wasi_bus_event_u_t u;
 } __wasi_bus_event_t;
 
-_Static_assert(sizeof(__wasi_bus_event_t) == 20, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_event_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_bus_event_t) == 56, "witx calculated size");
+_Static_assert(_Alignof(__wasi_bus_event_t) == 8, "witx calculated align");
 
 /**
  * Signal condition.
@@ -3355,7 +3413,7 @@ _Static_assert(sizeof(__wasi_prestat_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
 
 /**
- * @defgroup wasix_32v1
+ * @defgroup wasix_64v1
  * @{
  */
 
@@ -4053,7 +4111,9 @@ __wasi_errno_t __wasi_chdir(
  */
 __wasi_errno_t __wasi_thread_spawn(
     /**
-     * Name of the function that will be invoked as a new thread
+     * Name of the function that will be invoked as a new thread which
+     * will receive the user_data supplied
+     * Function signature fn(u64)
      */
     const char *name,
     /**
@@ -4120,91 +4180,82 @@ _Noreturn void __wasi_thread_exit(
     __wasi_exitcode_t rval
 );
 /**
+ * Spawns a new process within the context of this machine
+ * @return
+ * Returns a bus process id that can be used to invoke calls
+ */
+__wasi_bus_error_t __wasi_process_spawn(
+    /**
+     * Name of the process to be spawned
+     */
+    const char *name,
+    /**
+     * Indicates if the process will chroot or not
+     */
+    __wasi_bool_t chroot,
+    /**
+     * List of the arguments to pass the process
+     * (entries are separated by line feeds)
+     */
+    const char *args,
+    /**
+     * List of the preopens for this process
+     * (entries are separated by line feeds)
+     */
+    const char *preopen,
+    /**
+     * How will stdin be handled
+     */
+    __wasi_stdio_mode_t stdin,
+    /**
+     * How will stdout be handled
+     */
+    __wasi_stdio_mode_t stdout,
+    /**
+     * How will stderr be handled
+     */
+    __wasi_stdio_mode_t stderr,
+    /**
+     * Working directory where this process should run
+     * (passing '.' will use the current directory)
+     */
+    const char *working_dir,
+    __wasi_process_handles_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
  * Spawns a new bus process for a particular web WebAssembly
  * binary that is referenced by its process name.
  * @return
  * Returns a bus process id that can be used to invoke calls
  */
-__wasi_bus_error_t __wasi_bus_spawn_local(
+__wasi_bus_error_t __wasi_bus_open_local(
     /**
      * Name of the process to be spawned
      */
     const char *name,
     /**
-     * Indicates if the process will chroot or not
+     * Indicates if the existing processes should be reused
+     * if they are already running
      */
-    __wasi_bool_t chroot,
-    /**
-     * List of the arguments to pass the process
-     * (entries are separated by line feeds)
-     */
-    const char *args,
-    /**
-     * List of the preopens for this process
-     * (entries are separated by line feeds)
-     */
-    const char *preopen,
-    /**
-     * How will stdin be handled
-     */
-    __wasi_stdio_mode_t stdin,
-    /**
-     * How will stdout be handled
-     */
-    __wasi_stdio_mode_t stdout,
-    /**
-     * How will stderr be handled
-     */
-    __wasi_stdio_mode_t stderr,
-    /**
-     * Working directory where this process should run
-     * (passing '.' will use the current directory)
-     */
-    const char *working_dir,
-    __wasi_bus_handles_t *retptr0
+    __wasi_bool_t reuse,
+    __wasi_bid_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Spawns a new bus process for a particular web WebAssembly
- * binary that is referenced by its process name on a remote instance
+ * binary that is referenced by its process name on a remote instance.
  * @return
  * Returns a bus process id that can be used to invoke calls
  */
-__wasi_bus_error_t __wasi_bus_spawn_remote(
+__wasi_bus_error_t __wasi_bus_open_remote(
     /**
      * Name of the process to be spawned
      */
     const char *name,
     /**
-     * Indicates if the process will chroot or not
+     * Indicates if the existing processes should be reused
+     * if they are already running
      */
-    __wasi_bool_t chroot,
-    /**
-     * List of the arguments to pass the process
-     * (entries are separated by line feeds)
-     */
-    const char *args,
-    /**
-     * List of the preopens for this process
-     * (entries are separated by line feeds)
-     */
-    const char *preopen,
-    /**
-     * Working directory where this process should run
-     * (passing '.' will use the current directory)
-     */
-    const char *working_dir,
-    /**
-     * How will stdin be handled
-     */
-    __wasi_stdio_mode_t stdin,
-    /**
-     * How will stdout be handled
-     */
-    __wasi_stdio_mode_t stdout,
-    /**
-     * How will stderr be handled
-     */
-    __wasi_stdio_mode_t stderr,
+    __wasi_bool_t reuse,
     /**
      * Instance identifier where this process will be spawned
      */
@@ -4213,7 +4264,7 @@ __wasi_bus_error_t __wasi_bus_spawn_remote(
      * Acceess token used to authenticate with the instance
      */
     const char *token,
-    __wasi_bus_handles_t *retptr0
+    __wasi_bid_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Closes a bus process and releases all associated resources
@@ -4227,15 +4278,11 @@ __wasi_bus_error_t __wasi_bus_close(
 /**
  * Invokes a call within a running bus process.
  */
-__wasi_bus_error_t __wasi_bus_invoke(
+__wasi_bus_error_t __wasi_bus_call(
     /**
      * Handle of the bus process to invoke the call within
      */
     __wasi_bid_t bid,
-    /**
-     * Optional parent bus call that this is related to
-     */
-    const __wasi_option_cid_t * parent,
     /**
      * Causes the call handle to remain open even when A
      * reply is received. It is then the  callers responsibility
@@ -4261,28 +4308,60 @@ __wasi_bus_error_t __wasi_bus_invoke(
     __wasi_cid_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
- * Causes a fault on a particular call that was made
- * to this process from another process; where 'bid'
- * is the callering process context.
+ * Invokes a call within the context of another call
  */
-__wasi_bus_error_t __wasi_bus_fault(
+__wasi_bus_error_t __wasi_bus_subcall(
     /**
-     * Handle of the call to raise a fault on
+     * Parent bus call that this is related to
      */
-    __wasi_cid_t cid,
+    __wasi_cid_t parent,
     /**
-     * Fault to be raised on the bus
+     * Causes the call handle to remain open even when A
+     * reply is received. It is then the  callers responsibility
+     * to invoke 'bus_drop' when they are finished with the call
      */
-    __wasi_bus_error_t fault
+    __wasi_bool_t keep_alive,
+    /**
+     * Topic that describes the type of call to made
+     */
+    const char *topic,
+    /**
+     * Format of the data pushed onto the bus
+     */
+    __wasi_bus_data_format_t format,
+    /**
+     * The buffer where data to be transmitted is stored
+     */
+    const uint8_t *buf,
+    /**
+     * The length of the array pointed to by `buf`.
+     */
+    size_t buf_len,
+    __wasi_cid_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
- * Closes a bus call based on its bus call handle
+ * Polls for any outstanding events from a particular
+ * bus process by its handle
+ * @return
+ * Returns the number of events that have occured
  */
-__wasi_bus_error_t __wasi_bus_drop(
+__wasi_bus_error_t __wasi_bus_poll(
     /**
-     * Handle of the bus call handle to be dropped
+     * Timeout before the poll returns, if one passed 0
+     * as the timeout then this call is non blocking.
      */
-    __wasi_cid_t cid
+    __wasi_timestamp_t timeout,
+    /**
+     * An events buffer that will hold any received bus events
+     */
+    __wasi_bus_event_t * events,
+    __wasi_size_t nevents,
+    /**
+     * Name of the function that will be invoked to allocate memory
+     * Function signature fn(u64) -> u64
+     */
+    const char *malloc,
+    __wasi_size_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Replies to a call that was made to this process
@@ -4290,7 +4369,7 @@ __wasi_bus_error_t __wasi_bus_drop(
  * This will may also drop the handle and release any
  * associated resources (if keepalive is not set)
  */
-__wasi_bus_error_t __wasi_bus_reply(
+__wasi_bus_error_t __wasi_call_reply(
     /**
      * Handle of the call to send a reply on
      */
@@ -4309,97 +4388,29 @@ __wasi_bus_error_t __wasi_bus_reply(
     size_t buf_len
 ) __attribute__((__warn_unused_result__));
 /**
- * Invokes a callback within the calling process against
- * a particular bus call represented by 'cid'.
+ * Causes a fault on a particular call that was made
+ * to this process from another process; where 'bid'
+ * is the callering process context.
  */
-__wasi_bus_error_t __wasi_bus_callback(
+void __wasi_call_fault(
     /**
-     * Handle of the call where a callback will be send
+     * Handle of the call to raise a fault on
      */
     __wasi_cid_t cid,
     /**
-     * Topic that describes the type of callback
+     * Fault to be raised on the bus
      */
-    const char *topic,
-    /**
-     * Format of the data pushed onto the bus
-     */
-    __wasi_bus_data_format_t format,
-    /**
-     * The buffer where data to be transmitted is stored
-     */
-    const uint8_t *buf,
-    /**
-     * The length of the array pointed to by `buf`.
-     */
-    size_t buf_len
-) __attribute__((__warn_unused_result__));
+    __wasi_bus_error_t fault
+);
 /**
- * Tells the operating system that this process is
- * now listening for bus calls on a particular topic
+ * Closes a bus call based on its bus call handle
  */
-__wasi_bus_error_t __wasi_bus_listen(
+void __wasi_call_close(
     /**
-     * Optional parent bus call that this is related to
+     * Handle of the bus call handle to be dropped
      */
-    const __wasi_option_cid_t * parent,
-    /**
-     * Topic that describes the process will listen forcalls on
-     */
-    const char *topic
-) __attribute__((__warn_unused_result__));
-/**
- * Polls for any outstanding events from a particular
- * bus process by its handle
- * @return
- * Returns the number of events that have occured
- */
-__wasi_bus_error_t __wasi_bus_poll(
-    /**
-     * Handle of the bus process to poll for new events
-     * (if no process is supplied then it polls for the current process)
-     */
-    const __wasi_option_bid_t * bid,
-    /**
-     * Timeout before the poll returns, if one passed 0
-     * as the timeout then this call is non blocking.
-     */
-    __wasi_timestamp_t timeout,
-    /**
-     * An events buffer that will hold any received bus events
-     */
-    __wasi_bus_event_t * events,
-    __wasi_size_t nevents,
-    __wasi_size_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Receives the next event data from the bus
- * @return
- * Returns the number of events that have occured
- */
-__wasi_bus_error_t __wasi_bus_poll_data(
-    /**
-     * Handle of the bus process to poll for new events
-     * (if no process is supplied then it polls for the current process)
-     */
-    const __wasi_option_bid_t * bid,
-    /**
-     * Timeout before the poll returns, if one passed 0
-     * as the timeout then this call is non blocking.
-     */
-    __wasi_timestamp_t timeout,
-    /**
-     * The topic that describes the event that happened
-     */
-    uint8_t * topic,
-    __wasi_pointersize_t topic_len,
-    /**
-     * The buffer where event data is stored
-     */
-    uint8_t * buf,
-    __wasi_pointersize_t buf_len,
-    __wasi_bus_event_data_t *retptr0
-) __attribute__((__warn_unused_result__));
+    __wasi_cid_t cid
+);
 /**
  * Connects to a websocket at a particular network URL
  * @return

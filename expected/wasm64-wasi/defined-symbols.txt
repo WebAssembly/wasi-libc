@@ -298,6 +298,9 @@ __wasi_fd_seek
 __wasi_fd_sync
 __wasi_fd_tell
 __wasi_fd_write
+__wasi_futex_wait
+__wasi_futex_wake
+__wasi_futex_wake_all
 __wasi_getcwd
 __wasi_getpid
 __wasi_http_request

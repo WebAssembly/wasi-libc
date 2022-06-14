@@ -765,6 +765,47 @@ __wasi_errno_t __wasi_thread_parallelism(
     return (uint16_t) ret;
 }
 
+int32_t __imported_wasix_64v1_futex_wait(int64_t arg0, int32_t arg1, int64_t arg2, int64_t arg3) __attribute__((
+    __import_module__("wasix_64v1"),
+    __import_name__("futex_wait")
+));
+
+__wasi_errno_t __wasi_futex_wait(
+    uint32_t * futex,
+    uint32_t expected,
+    const __wasi_option_timestamp_t * timeout,
+    __wasi_bool_t *retptr0
+){
+    int32_t ret = __imported_wasix_64v1_futex_wait((int64_t) futex, (int32_t) expected, (int64_t) timeout, (intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
+int32_t __imported_wasix_64v1_futex_wake(int64_t arg0, int64_t arg1) __attribute__((
+    __import_module__("wasix_64v1"),
+    __import_name__("futex_wake")
+));
+
+__wasi_errno_t __wasi_futex_wake(
+    uint32_t * futex,
+    __wasi_bool_t *retptr0
+){
+    int32_t ret = __imported_wasix_64v1_futex_wake((int64_t) futex, (intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
+int32_t __imported_wasix_64v1_futex_wake_all(int64_t arg0, int64_t arg1) __attribute__((
+    __import_module__("wasix_64v1"),
+    __import_name__("futex_wake_all")
+));
+
+__wasi_errno_t __wasi_futex_wake_all(
+    uint32_t * futex,
+    __wasi_bool_t *retptr0
+){
+    int32_t ret = __imported_wasix_64v1_futex_wake_all((int64_t) futex, (intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
 int32_t __imported_wasix_64v1_getpid(int64_t arg0) __attribute__((
     __import_module__("wasix_64v1"),
     __import_name__("getpid")

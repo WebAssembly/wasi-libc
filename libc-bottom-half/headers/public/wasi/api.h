@@ -808,6 +808,21 @@ _Static_assert(sizeof(__wasi_option_cid_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_option_cid_t) == 4, "witx calculated align");
 
 /**
+ * Represents an optional file descriptior
+ */
+typedef union __wasi_option_fd_u_t {
+    uint8_t none;
+    __wasi_fd_t some;
+} __wasi_option_fd_u_t;
+typedef struct __wasi_option_fd_t {
+    uint8_t tag;
+    __wasi_option_fd_u_t u;
+} __wasi_option_fd_t;
+
+_Static_assert(sizeof(__wasi_option_fd_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_option_fd_t) == 4, "witx calculated align");
+
+/**
  * Bool type
  */
 typedef uint8_t __wasi_bool_t;
@@ -1671,27 +1686,33 @@ _Static_assert(_Alignof(__wasi_stdio_mode_t) == 1, "witx calculated align");
  */
 typedef struct __wasi_process_handles_t {
     /**
+     * Handle that represents the process
+     */
+    __wasi_bid_t bid;
+
+    /**
      * File handle for STDIN
      */
-    __wasi_fd_t stdin;
+    __wasi_option_fd_t stdin;
 
     /**
      * File handle for STDOUT
      */
-    __wasi_fd_t stdout;
+    __wasi_option_fd_t stdout;
 
     /**
      * File handle for STDERR
      */
-    __wasi_fd_t stderr;
+    __wasi_option_fd_t stderr;
 
 } __wasi_process_handles_t;
 
-_Static_assert(sizeof(__wasi_process_handles_t) == 12, "witx calculated size");
+_Static_assert(sizeof(__wasi_process_handles_t) == 28, "witx calculated size");
 _Static_assert(_Alignof(__wasi_process_handles_t) == 4, "witx calculated align");
-_Static_assert(offsetof(__wasi_process_handles_t, stdin) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_process_handles_t, stdout) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_process_handles_t, stderr) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_process_handles_t, bid) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_process_handles_t, stdin) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_process_handles_t, stdout) == 12, "witx calculated offset");
+_Static_assert(offsetof(__wasi_process_handles_t, stderr) == 20, "witx calculated offset");
 
 /**
  * Bus process event.
@@ -1748,6 +1769,11 @@ typedef uint8_t __wasi_bus_data_format_t;
  * XML
  */
 #define __WASI_BUS_DATA_FORMAT_XML (UINT8_C(5))
+
+/**
+ * RKYV
+ */
+#define __WASI_BUS_DATA_FORMAT_RKYV (UINT8_C(6))
 
 _Static_assert(sizeof(__wasi_bus_data_format_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_bus_data_format_t) == 1, "witx calculated align");
@@ -4160,6 +4186,48 @@ __wasi_errno_t __wasi_thread_join(
  */
 __wasi_errno_t __wasi_thread_parallelism(
     __wasi_size_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Wait for a futex_wake operation to wake us.
+ * Returns with EINVAL if the futex doesn't hold the expected value.
+ * Returns false on timeout, and true in all other cases.
+ */
+__wasi_errno_t __wasi_futex_wait(
+    /**
+     * Memory location that holds the value that will be checked
+     */
+    uint32_t * futex,
+    /**
+     * Expected value that should be currently held at the memory location
+     */
+    uint32_t expected,
+    /**
+     * Timeout should the futex not be triggered in the allocated time
+     */
+    const __wasi_option_timestamp_t * timeout,
+    __wasi_bool_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Wake up one thread that's blocked on futex_wait on this futex.
+ * Returns true if this actually woke up such a thread,
+ * or false if no thread was waiting on this futex.
+ */
+__wasi_errno_t __wasi_futex_wake(
+    /**
+     * Memory location that holds a futex that others may be waiting on
+     */
+    uint32_t * futex,
+    __wasi_bool_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Wake up all threads that are waiting on futex_wait on this futex.
+ */
+__wasi_errno_t __wasi_futex_wake_all(
+    /**
+     * Memory location that holds a futex that others may be waiting on
+     */
+    uint32_t * futex,
+    __wasi_bool_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Returns the handle of the current process

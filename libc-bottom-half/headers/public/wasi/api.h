@@ -4143,6 +4143,12 @@ __wasi_errno_t __wasi_thread_spawn(
      */
     const char *name,
     /**
+     * Name of the function memory allocation function that allocates the
+     * stack frame
+     * Function signature fn(u64) -> u64
+     */
+    const char *malloc,
+    /**
      * User data that will be supplied to the function when its called
      */
     uint64_t user_data,

@@ -701,21 +701,19 @@ __wasi_errno_t __wasi_chdir(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_64v1_thread_spawn(int64_t arg0, int64_t arg1, int64_t arg2, int64_t arg3, int64_t arg4, int32_t arg5, int64_t arg6) __attribute__((
+int32_t __imported_wasix_64v1_thread_spawn(int64_t arg0, int64_t arg1, int64_t arg2, int32_t arg3, int64_t arg4) __attribute__((
     __import_module__("wasix_64v1"),
     __import_name__("thread_spawn")
 ));
 
 __wasi_errno_t __wasi_thread_spawn(
     const char *name,
-    const char *malloc,
     uint64_t user_data,
     __wasi_bool_t reactor,
     __wasi_tid_t *retptr0
 ){
     size_t name_len = strlen(name);
-    size_t malloc_len = strlen(malloc);
-    int32_t ret = __imported_wasix_64v1_thread_spawn((intptr_t) name, (intptr_t) name_len, (intptr_t) malloc, (intptr_t) malloc_len, (int64_t) user_data, (int32_t) reactor, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_64v1_thread_spawn((intptr_t) name, (intptr_t) name_len, (int64_t) user_data, (int32_t) reactor, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 

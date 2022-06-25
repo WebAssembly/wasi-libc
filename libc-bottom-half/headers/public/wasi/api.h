@@ -787,10 +787,10 @@ _Static_assert(_Alignof(__wasi_option_bid_t) == 4, "witx calculated align");
 /**
  * A bus call handle
  */
-typedef int __wasi_cid_t;
+typedef uint64_t __wasi_cid_t;
 
-_Static_assert(sizeof(__wasi_cid_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_cid_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_cid_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_cid_t) == 8, "witx calculated align");
 
 /**
  * Represents an optional call handle
@@ -804,8 +804,8 @@ typedef struct __wasi_option_cid_t {
     __wasi_option_cid_u_t u;
 } __wasi_option_cid_t;
 
-_Static_assert(sizeof(__wasi_option_cid_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_option_cid_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_option_cid_t) == 16, "witx calculated size");
+_Static_assert(_Alignof(__wasi_option_cid_t) == 8, "witx calculated align");
 
 /**
  * Represents an optional file descriptior
@@ -1821,15 +1821,15 @@ typedef struct __wasi_bus_event_call_t {
 
 } __wasi_bus_event_call_t;
 
-_Static_assert(sizeof(__wasi_bus_event_call_t) == 48, "witx calculated size");
+_Static_assert(sizeof(__wasi_bus_event_call_t) == 64, "witx calculated size");
 _Static_assert(_Alignof(__wasi_bus_event_call_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_bus_event_call_t, parent) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_call_t, cid) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_call_t, format) == 12, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_call_t, topic) == 16, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_call_t, topic_len) == 24, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_call_t, buf) == 32, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_call_t, buf_len) == 40, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_call_t, cid) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_call_t, format) == 24, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_call_t, topic) == 32, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_call_t, topic_len) == 40, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_call_t, buf) == 48, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_call_t, buf_len) == 56, "witx calculated offset");
 
 /**
  * Represents the completion of an invocation from a caller
@@ -1858,12 +1858,12 @@ typedef struct __wasi_bus_event_result_t {
 
 } __wasi_bus_event_result_t;
 
-_Static_assert(sizeof(__wasi_bus_event_result_t) == 24, "witx calculated size");
+_Static_assert(sizeof(__wasi_bus_event_result_t) == 32, "witx calculated size");
 _Static_assert(_Alignof(__wasi_bus_event_result_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_bus_event_result_t, format) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_result_t, cid) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_result_t, buf) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_result_t, buf_len) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_result_t, cid) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_result_t, buf) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_result_t, buf_len) == 24, "witx calculated offset");
 
 /**
  * Bus event when an error occurs on a call.
@@ -1881,10 +1881,10 @@ typedef struct __wasi_bus_event_fault_t {
 
 } __wasi_bus_event_fault_t;
 
-_Static_assert(sizeof(__wasi_bus_event_fault_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_event_fault_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_bus_event_fault_t) == 16, "witx calculated size");
+_Static_assert(_Alignof(__wasi_bus_event_fault_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_bus_event_fault_t, cid) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_bus_event_fault_t, fault) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_bus_event_fault_t, fault) == 8, "witx calculated offset");
 
 /**
  * Frees all the resources associated with a call.
@@ -1897,8 +1897,8 @@ typedef struct __wasi_bus_event_close_t {
 
 } __wasi_bus_event_close_t;
 
-_Static_assert(sizeof(__wasi_bus_event_close_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_bus_event_close_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_bus_event_close_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_bus_event_close_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_bus_event_close_t, cid) == 0, "witx calculated offset");
 
 /**
@@ -1955,7 +1955,7 @@ typedef struct __wasi_bus_event_t {
     __wasi_bus_event_u_t u;
 } __wasi_bus_event_t;
 
-_Static_assert(sizeof(__wasi_bus_event_t) == 56, "witx calculated size");
+_Static_assert(sizeof(__wasi_bus_event_t) == 72, "witx calculated size");
 _Static_assert(_Alignof(__wasi_bus_event_t) == 8, "witx calculated align");
 
 /**
@@ -4137,12 +4137,6 @@ __wasi_errno_t __wasi_chdir(
  */
 __wasi_errno_t __wasi_thread_spawn(
     /**
-     * Name of the function that will be invoked as a new thread which
-     * will receive the user_data supplied
-     * Function signature fn(u64)
-     */
-    const char *name,
-    /**
      * User data that will be supplied to the function when its called
      */
     uint64_t user_data,
@@ -4424,11 +4418,6 @@ __wasi_bus_error_t __wasi_bus_poll(
      */
     __wasi_bus_event_t * events,
     __wasi_size_t nevents,
-    /**
-     * Name of the function that will be invoked to allocate memory
-     * Function signature fn(u64) -> u64
-     */
-    const char *malloc,
     __wasi_size_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**

@@ -701,19 +701,17 @@ __wasi_errno_t __wasi_chdir(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_64v1_thread_spawn(int64_t arg0, int64_t arg1, int64_t arg2, int32_t arg3, int64_t arg4) __attribute__((
+int32_t __imported_wasix_64v1_thread_spawn(int64_t arg0, int32_t arg1, int64_t arg2) __attribute__((
     __import_module__("wasix_64v1"),
     __import_name__("thread_spawn")
 ));
 
 __wasi_errno_t __wasi_thread_spawn(
-    const char *name,
     uint64_t user_data,
     __wasi_bool_t reactor,
     __wasi_tid_t *retptr0
 ){
-    size_t name_len = strlen(name);
-    int32_t ret = __imported_wasix_64v1_thread_spawn((intptr_t) name, (intptr_t) name_len, (int64_t) user_data, (int32_t) reactor, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_64v1_thread_spawn((int64_t) user_data, (int32_t) reactor, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 
@@ -918,7 +916,7 @@ __wasi_bus_error_t __wasi_bus_call(
     return (uint32_t) ret;
 }
 
-int32_t __imported_wasix_64v1_bus_subcall(int32_t arg0, int32_t arg1, int64_t arg2, int64_t arg3, int32_t arg4, int64_t arg5, int64_t arg6, int64_t arg7) __attribute__((
+int32_t __imported_wasix_64v1_bus_subcall(int64_t arg0, int32_t arg1, int64_t arg2, int64_t arg3, int32_t arg4, int64_t arg5, int64_t arg6, int64_t arg7) __attribute__((
     __import_module__("wasix_64v1"),
     __import_name__("bus_subcall")
 ));
@@ -933,11 +931,11 @@ __wasi_bus_error_t __wasi_bus_subcall(
     __wasi_cid_t *retptr0
 ){
     size_t topic_len = strlen(topic);
-    int32_t ret = __imported_wasix_64v1_bus_subcall((int32_t) parent, (int32_t) keep_alive, (intptr_t) topic, (intptr_t) topic_len, (int32_t) format, (intptr_t) buf, (intptr_t) buf_len, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_64v1_bus_subcall((int64_t) parent, (int32_t) keep_alive, (intptr_t) topic, (intptr_t) topic_len, (int32_t) format, (intptr_t) buf, (intptr_t) buf_len, (intptr_t) retptr0);
     return (uint32_t) ret;
 }
 
-int32_t __imported_wasix_64v1_bus_poll(int64_t arg0, int64_t arg1, int32_t arg2, int64_t arg3, int64_t arg4, int64_t arg5) __attribute__((
+int32_t __imported_wasix_64v1_bus_poll(int64_t arg0, int64_t arg1, int32_t arg2, int64_t arg3) __attribute__((
     __import_module__("wasix_64v1"),
     __import_name__("bus_poll")
 ));
@@ -946,15 +944,13 @@ __wasi_bus_error_t __wasi_bus_poll(
     __wasi_timestamp_t timeout,
     __wasi_bus_event_t * events,
     __wasi_size_t nevents,
-    const char *malloc,
     __wasi_size_t *retptr0
 ){
-    size_t malloc_len = strlen(malloc);
-    int32_t ret = __imported_wasix_64v1_bus_poll((int64_t) timeout, (int64_t) events, (int32_t) nevents, (intptr_t) malloc, (intptr_t) malloc_len, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_64v1_bus_poll((int64_t) timeout, (int64_t) events, (int32_t) nevents, (intptr_t) retptr0);
     return (uint32_t) ret;
 }
 
-int32_t __imported_wasix_64v1_call_reply(int32_t arg0, int32_t arg1, int64_t arg2, int64_t arg3) __attribute__((
+int32_t __imported_wasix_64v1_call_reply(int64_t arg0, int32_t arg1, int64_t arg2, int64_t arg3) __attribute__((
     __import_module__("wasix_64v1"),
     __import_name__("call_reply")
 ));
@@ -965,11 +961,11 @@ __wasi_bus_error_t __wasi_call_reply(
     const uint8_t *buf,
     size_t buf_len
 ){
-    int32_t ret = __imported_wasix_64v1_call_reply((int32_t) cid, (int32_t) format, (intptr_t) buf, (intptr_t) buf_len);
+    int32_t ret = __imported_wasix_64v1_call_reply((int64_t) cid, (int32_t) format, (intptr_t) buf, (intptr_t) buf_len);
     return (uint32_t) ret;
 }
 
-void __imported_wasix_64v1_call_fault(int32_t arg0, int32_t arg1) __attribute__((
+void __imported_wasix_64v1_call_fault(int64_t arg0, int32_t arg1) __attribute__((
     __import_module__("wasix_64v1"),
     __import_name__("call_fault")
 ));
@@ -978,10 +974,10 @@ void __wasi_call_fault(
     __wasi_cid_t cid,
     __wasi_bus_error_t fault
 ){
-    __imported_wasix_64v1_call_fault((int32_t) cid, (int32_t) fault);
+    __imported_wasix_64v1_call_fault((int64_t) cid, (int32_t) fault);
 }
 
-void __imported_wasix_64v1_call_close(int32_t arg0) __attribute__((
+void __imported_wasix_64v1_call_close(int64_t arg0) __attribute__((
     __import_module__("wasix_64v1"),
     __import_name__("call_close")
 ));
@@ -989,7 +985,7 @@ void __imported_wasix_64v1_call_close(int32_t arg0) __attribute__((
 void __wasi_call_close(
     __wasi_cid_t cid
 ){
-    __imported_wasix_64v1_call_close((int32_t) cid);
+    __imported_wasix_64v1_call_close((int64_t) cid);
 }
 
 int32_t __imported_wasix_64v1_ws_connect(int64_t arg0, int64_t arg1, int64_t arg2) __attribute__((

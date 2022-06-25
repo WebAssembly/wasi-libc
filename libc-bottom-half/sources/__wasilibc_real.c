@@ -897,7 +897,7 @@ __wasi_bus_error_t __wasi_bus_close(
     return (uint32_t) ret;
 }
 
-int32_t __imported_wasix_64v1_bus_call(int32_t arg0, int32_t arg1, int64_t arg2, int64_t arg3, int32_t arg4, int64_t arg5, int64_t arg6, int64_t arg7) __attribute__((
+int32_t __imported_wasix_64v1_bus_call(int32_t arg0, int32_t arg1, int64_t arg2, int32_t arg3, int64_t arg4, int64_t arg5, int64_t arg6) __attribute__((
     __import_module__("wasix_64v1"),
     __import_name__("bus_call")
 ));
@@ -905,18 +905,17 @@ int32_t __imported_wasix_64v1_bus_call(int32_t arg0, int32_t arg1, int64_t arg2,
 __wasi_bus_error_t __wasi_bus_call(
     __wasi_bid_t bid,
     __wasi_bool_t keep_alive,
-    const char *topic,
+    const __wasi_hash_t * topic_hash,
     __wasi_bus_data_format_t format,
     const uint8_t *buf,
     size_t buf_len,
     __wasi_cid_t *retptr0
 ){
-    size_t topic_len = strlen(topic);
-    int32_t ret = __imported_wasix_64v1_bus_call((int32_t) bid, (int32_t) keep_alive, (intptr_t) topic, (intptr_t) topic_len, (int32_t) format, (intptr_t) buf, (intptr_t) buf_len, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_64v1_bus_call((int32_t) bid, (int32_t) keep_alive, (int64_t) topic_hash, (int32_t) format, (intptr_t) buf, (intptr_t) buf_len, (intptr_t) retptr0);
     return (uint32_t) ret;
 }
 
-int32_t __imported_wasix_64v1_bus_subcall(int64_t arg0, int32_t arg1, int64_t arg2, int64_t arg3, int32_t arg4, int64_t arg5, int64_t arg6, int64_t arg7) __attribute__((
+int32_t __imported_wasix_64v1_bus_subcall(int64_t arg0, int32_t arg1, int64_t arg2, int32_t arg3, int64_t arg4, int64_t arg5, int64_t arg6) __attribute__((
     __import_module__("wasix_64v1"),
     __import_name__("bus_subcall")
 ));
@@ -924,14 +923,13 @@ int32_t __imported_wasix_64v1_bus_subcall(int64_t arg0, int32_t arg1, int64_t ar
 __wasi_bus_error_t __wasi_bus_subcall(
     __wasi_cid_t parent,
     __wasi_bool_t keep_alive,
-    const char *topic,
+    const __wasi_hash_t * topic_hash,
     __wasi_bus_data_format_t format,
     const uint8_t *buf,
     size_t buf_len,
     __wasi_cid_t *retptr0
 ){
-    size_t topic_len = strlen(topic);
-    int32_t ret = __imported_wasix_64v1_bus_subcall((int64_t) parent, (int32_t) keep_alive, (intptr_t) topic, (intptr_t) topic_len, (int32_t) format, (intptr_t) buf, (intptr_t) buf_len, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_64v1_bus_subcall((int64_t) parent, (int32_t) keep_alive, (int64_t) topic_hash, (int32_t) format, (intptr_t) buf, (intptr_t) buf_len, (intptr_t) retptr0);
     return (uint32_t) ret;
 }
 

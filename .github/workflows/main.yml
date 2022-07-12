@@ -8,6 +8,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        # oldest and newest supported LLVM version
+        clang_version: [10.0.0, 14.0.0]
     steps:
     - uses: actions/checkout@v1
       with:
@@ -16,8 +18,8 @@ jobs:
     - name: Install LLVM tools (Windows)
       shell: bash
       run: |
-        curl -fsSLO https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/LLVM-14.0.0-win64.exe
-        7z x LLVM-14.0.0-win64.exe -y -o"llvm"
+        curl -fsSLO https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/LLVM-${{ matrix.clang_version }}-win64.exe
+        7z x LLVM-${{ matrix.clang_version }}-win64.exe -y -o"llvm"
         echo "$(pwd)/llvm/bin" >> $GITHUB_PATH
         echo "CC=$(pwd)/llvm/bin/clang.exe" >> $GITHUB_ENV
         echo "AR=$(pwd)/llvm/bin/llvm-ar.exe" >> $GITHUB_ENV
@@ -35,8 +37,8 @@ jobs:
     - name: Install LLVM tools (MacOS)
       shell: bash
       run: |
-        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang+llvm-14.0.0-x86_64-apple-darwin.tar.xz | tar xJf -
-        export CLANG_DIR=`pwd`/clang+llvm-14.0.0-x86_64-apple-darwin/bin
+        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/clang+llvm-${{ matrix.clang_version }}-x86_64-apple-darwin.tar.xz | tar xJf -
+        export CLANG_DIR=`pwd`/clang+llvm-${{ matrix.clang_version }}-x86_64-apple-darwin/bin
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
@@ -46,8 +48,8 @@ jobs:
     - name: Install LLVM tools (Linux)
       shell: bash
       run: |
-        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz | tar xJf -
-        export CLANG_DIR=`pwd`/clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04/bin
+        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/clang+llvm-${{ matrix.clang_version }}-x86_64-linux-gnu-ubuntu-18.04.tar.xz | tar xJf -
+        export CLANG_DIR=`pwd`/clang+llvm-${{ matrix.clang_version }}-x86_64-linux-gnu-ubuntu-18.04/bin
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV

@@ -17,7 +17,7 @@ build of WASI Libc in its sysroot.
 ## Building from source
 
 To build a WASI sysroot from source, obtain a WebAssembly-supporting C compiler
-(currently this is only clang 8+, though we'd like to support other compilers as well),
+(currently this is only clang 10+, though we'd like to support other compilers as well),
 and then run:
 
 ```sh

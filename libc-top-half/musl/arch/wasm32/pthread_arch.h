@@ -1,12 +1,11 @@
-#ifdef _REENTRANT
-#error "multiple threads not supported in musl yet"
+uintptr_t __get_tp(void) {
+#if _REENTRANT
+  int val;
+  __asm__(".globaltype g_needs_dynamic_alloc, i32\n"
+          "global.get __wasi_libc_pthread_self\n"
+          "local.set %0" : "=r" (val));
+  return val;
+#else
+  return 0;
 #endif
-
-static inline struct pthread *__pthread_self(void)
-{
-  return (struct pthread *)-1;
 }
-
-#define TP_ADJ(p) (p)
-
-#define tls_mod_off_t unsigned long long

@@ -66,6 +66,10 @@ jobs:
         name: ${{ format( 'sysroot-{0}.tgz', matrix.os) }}
         path: sysroot
 
+    - name: Build libc + threads
+      shell: bash
+      run: make -j4 THREAD_MODEL=posix
+
   # Disable the headerstest job for now, while WASI transitions from the
   # witx snapshots to wit proposals, and we have a few manual edits to the
   # generated header to make life easier for folks.

@@ -1,18 +1,18 @@
 #include <wasi/api.h>
+#include <pthread.h>
 #include <errno.h>
 #include <unistd.h>
 
-#ifdef _REENTRANT
-#error With threads support, getentropy is not intended to be a cancellation point.
-#endif
-
 int __getentropy(void *buffer, size_t len) {
+    int cs;
     if (len > 256) {
         errno = EIO;
         return -1;
     }
 
+    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
     int r = __wasi_random_get(buffer, len);
+    pthread_setcancelstate(cs, 0);
 
     if (r != 0) {
         errno = r;

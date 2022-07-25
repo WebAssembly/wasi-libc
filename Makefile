@@ -202,7 +202,7 @@ LIBC_TOP_HALF_ALL_SOURCES = \
     $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.c)
 
 # Add any extra flags
-CFLAGS = $(EXTRA_CFLAGS)
+CFLAGS = $(EXTRA_CFLAGS) -ftls-model=local-exec
 # Set the target.
 CFLAGS += --target=$(TARGET_TRIPLE)
 # WebAssembly floating-point match doesn't trap.

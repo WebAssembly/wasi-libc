@@ -21,4 +21,4 @@ int __getentropy(void *buffer, size_t len) {
 
     return 0;
 }
-extern __typeof(__getentropy) getentropy __attribute__((weak, alias("__getentropy")));
+weak_alias(__getentropy, getentropy);

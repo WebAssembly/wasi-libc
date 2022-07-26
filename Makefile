@@ -355,11 +355,12 @@ MUSL_OMIT_HEADERS += \
     "netinet/ether.h" \
     "sys/timerfd.h" \
     "libintl.h" \
-    "sys/sysmacros.h"
+    "sys/sysmacros.h" \
+    "aio.h"
 
 ifeq ($(THREAD_MODEL), single)
 # Remove headers not supported in single-threaded mode.
-MUSL_OMIT_HEADERS += "aio.h" "pthread.h"
+MUSL_OMIT_HEADERS += "pthread.h"
 endif
 
 default: finish

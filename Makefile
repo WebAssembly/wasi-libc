@@ -226,7 +226,9 @@ ifeq ($(THREAD_MODEL), single)
 CFLAGS += -mthread-model single
 endif
 ifeq ($(THREAD_MODEL), posix)
-CFLAGS += -mthread-model posix -pthread
+# Specify the tls-model until LLVM 15 is released (which should contain
+# https://reviews.llvm.org/D130053).
+CFLAGS += -mthread-model posix -pthread -ftls-model=local-exec
 endif
 
 # Expose the public headers to the implementation. We use `-isystem` for

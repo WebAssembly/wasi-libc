@@ -146,6 +146,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         unistd/posix_close.c \
         stat/futimesat.c \
         legacy/getpagesize.c \
+        thread/thrd_sleep.c \
     ) \
     $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/*.c)) \

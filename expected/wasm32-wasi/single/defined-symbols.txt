@@ -1099,6 +1099,7 @@ tfind
 tgamma
 tgammaf
 tgammal
+thrd_sleep
 time
 timegm
 times

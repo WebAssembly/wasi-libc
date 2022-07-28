@@ -70,6 +70,6 @@ __trunctfsf2
 __unlock
 __unlockfile
 __unordtf2
-__wasi_libc_pthread_self
+__wasilibc_pthread_self
 __wasm_call_ctors
 pthread_setcancelstate

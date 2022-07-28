@@ -67,6 +67,10 @@ jobs:
         path: sysroot
 
     - name: Build libc + threads
+      # Only build the thread-capable wasi-libc in the latest supported Clang
+      # version; the earliest version does not have all necessary builtins
+      # (e.g., `__builtin_wasm_memory_atomic_notify`).
+      if: matrix.clang_version != '10.0.0'
       shell: bash
       run: make -j4 THREAD_MODEL=posix
 

@@ -2,10 +2,12 @@
 
 int __pthread_setcancelstate(int new, int *old)
 {
+	#ifdef _REENTRANT
 	if (new > 2U) return EINVAL;
 	struct pthread *self = __pthread_self();
 	if (old) *old = self->canceldisable;
 	self->canceldisable = new;
+	#endif
 	return 0;
 }
 

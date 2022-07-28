@@ -1952,18 +1952,18 @@
 #define YESSTR 0x50002
 #define YXDOMAIN ns_r_yxdomain
 #define YXRRSET ns_r_yxrrset
-#define _ALLOCA_H
+#define _ALLOCA_H 
 #define _ALL_SOURCE 1
-#define _ARPA_FTP_H
-#define _ARPA_INET_H
-#define _ARPA_NAMESER_H
-#define _ARPA_TELNET_H
-#define _ARPA_TFTP_H
-#define _AR_H
-#define _BYTESWAP_H
-#define _COMPLEX_H
-#define _CPIO_H
-#define _CRYPT_H
+#define _ARPA_FTP_H 
+#define _ARPA_INET_H 
+#define _ARPA_NAMESER_H 
+#define _ARPA_TELNET_H 
+#define _ARPA_TFTP_H 
+#define _AR_H 
+#define _BYTESWAP_H 
+#define _COMPLEX_H 
+#define _CPIO_H 
+#define _CRYPT_H 
 #define _CS_GNU_LIBC_VERSION 2
 #define _CS_GNU_LIBPTHREAD_VERSION 3
 #define _CS_PATH 0
@@ -2004,51 +2004,51 @@
 #define _CS_POSIX_V7_WIDTH_RESTRICTED_ENVS 5
 #define _CS_V6_ENV 1148
 #define _CS_V7_ENV 1149
-#define _CTYPE_H
+#define _CTYPE_H 
 #define _Complex_I (0.0f+1.0fi)
-#define _DIRENT_H
-#define _DIRENT_HAVE_D_TYPE
-#define _ENDIAN_H
-#define _ERRNO_H
-#define _ERR_H
-#define _FCNTL_H
-#define _FEATURES_H
-#define _FENV_H
-#define _FLOAT_H
-#define _FMTMSG_H
-#define _FNMATCH_H
-#define _FTW_H
-#define _GETOPT_H
-#define _GLOB_H
+#define _DIRENT_H 
+#define _DIRENT_HAVE_D_TYPE 
+#define _ENDIAN_H 
+#define _ERRNO_H 
+#define _ERR_H 
+#define _FCNTL_H 
+#define _FEATURES_H 
+#define _FENV_H 
+#define _FLOAT_H 
+#define _FMTMSG_H 
+#define _FNMATCH_H 
+#define _FTW_H 
+#define _GETOPT_H 
+#define _GLOB_H 
 #define _GNU_SOURCE 1
-#define _ICONV_H
-#define _IFADDRS_H
+#define _ICONV_H 
+#define _IFADDRS_H 
 #define _ILP32 1
-#define _INTTYPES_H
+#define _INTTYPES_H 
 #define _IOFBF 0
 #define _IOLBF 1
 #define _IONBF 2
-#define _ISO646_H
-#define _LANGINFO_H
-#define _LIBGEN_H
-#define _LIMITS_H
-#define _LOCALE_H
-#define _MALLOC_H
-#define _MATH_H
-#define _MONETARY_H
-#define _MQUEUE_H
-#define _NETINET_ICMP6_H
-#define _NETINET_IGMP_H
-#define _NETINET_IN_H
-#define _NETINET_IN_SYSTM_H
-#define _NETINET_IP6_H
-#define _NETINET_IP_H
-#define _NETINET_IP_ICMP_H
-#define _NETINET_TCP_H
-#define _NETINET_UDP_H
-#define _NETPACKET_PACKET_H
+#define _ISO646_H 
+#define _LANGINFO_H 
+#define _LIBGEN_H 
+#define _LIMITS_H 
+#define _LOCALE_H 
+#define _MALLOC_H 
+#define _MATH_H 
+#define _MONETARY_H 
+#define _MQUEUE_H 
+#define _NETINET_ICMP6_H 
+#define _NETINET_IGMP_H 
+#define _NETINET_IN_H 
+#define _NETINET_IN_SYSTM_H 
+#define _NETINET_IP6_H 
+#define _NETINET_IP_H 
+#define _NETINET_IP_ICMP_H 
+#define _NETINET_TCP_H 
+#define _NETINET_UDP_H 
+#define _NETPACKET_PACKET_H 
 #define _NL_LOCALE_NAME(cat) (((cat)<<16) | 0xffff)
-#define _NL_TYPES_H
+#define _NL_TYPES_H 
 #define _PC_2_SYMLINKS 20
 #define _PC_ALLOC_SIZE_MIN 18
 #define _PC_ASYNC_IO 10
@@ -2070,7 +2070,7 @@
 #define _PC_SYMLINK_MAX 19
 #define _PC_SYNC_IO 9
 #define _PC_VDISABLE 8
-#define _POLL_H
+#define _POLL_H 
 #define _POSIX2_BC_BASE_MAX 99
 #define _POSIX2_BC_DIM_MAX 2048
 #define _POSIX2_BC_SCALE_MAX 99
@@ -2146,9 +2146,9 @@
 #define _POSIX_V7_ILP32_OFFBIG (1)
 #define _POSIX_VDISABLE 0
 #define _POSIX_VERSION 200809L
-#define _PTRDIFF_T
-#define _REGEX_H
-#define _SCHED_H
+#define _PTRDIFF_T 
+#define _REGEX_H 
+#define _SCHED_H 
 #define _SC_2_CHAR_TERM 95
 #define _SC_2_C_BIND 47
 #define _SC_2_C_DEV 48
@@ -2290,53 +2290,53 @@
 #define _SC_XOPEN_XPG2 98
 #define _SC_XOPEN_XPG3 99
 #define _SC_XOPEN_XPG4 100
-#define _SEARCH_H
-#define _SEMAPHORE_H
-#define _SIZE_T
-#define _STDALIGN_H
-#define _STDBOOL_H
-#define _STDC_PREDEF_H
-#define _STDINT_H
-#define _STDIO_EXT_H
-#define _STDIO_H
-#define _STDLIB_H
-#define _STDNORETURN_H
-#define _STRINGS_H
-#define _STRING_H
-#define _STROPTS_H
-#define _SYSEXITS_H
-#define _SYS_EVENTFD_H
-#define _SYS_FILE_H
-#define _SYS_IOCTL_H
-#define _SYS_PARAM_H
-#define _SYS_RANDOM_H
-#define _SYS_REG_H
-#define _SYS_SELECT_H
-#define _SYS_SOCKET_H
-#define _SYS_STAT_H
-#define _SYS_SYSCALL_H
-#define _SYS_SYSINFO_H
-#define _SYS_TIMEB_H
-#define _SYS_TIMEX_H
-#define _SYS_TIME_H
-#define _SYS_TTYDEFAULTS_H
-#define _SYS_TYPES_H
-#define _SYS_UIO_H
-#define _SYS_UN_H
-#define _SYS_UTSNAME_H
-#define _TAR_H
-#define _TGMATH_H
-#define _THREADS_H
-#define _TIME_H
-#define _UCHAR_H
-#define _UNISTD_H
-#define _UTIME_H
-#define _VALUES_H
-#define _VA_LIST
-#define _WCHAR_H
-#define _WCHAR_T
-#define _WCTYPE_H
-#define _WINT_T
+#define _SEARCH_H 
+#define _SEMAPHORE_H 
+#define _SIZE_T 
+#define _STDALIGN_H 
+#define _STDBOOL_H 
+#define _STDC_PREDEF_H 
+#define _STDINT_H 
+#define _STDIO_EXT_H 
+#define _STDIO_H 
+#define _STDLIB_H 
+#define _STDNORETURN_H 
+#define _STRINGS_H 
+#define _STRING_H 
+#define _STROPTS_H 
+#define _SYSEXITS_H 
+#define _SYS_EVENTFD_H 
+#define _SYS_FILE_H 
+#define _SYS_IOCTL_H 
+#define _SYS_PARAM_H 
+#define _SYS_RANDOM_H 
+#define _SYS_REG_H 
+#define _SYS_SELECT_H 
+#define _SYS_SOCKET_H 
+#define _SYS_STAT_H 
+#define _SYS_SYSCALL_H 
+#define _SYS_SYSINFO_H 
+#define _SYS_TIMEB_H 
+#define _SYS_TIMEX_H 
+#define _SYS_TIME_H 
+#define _SYS_TTYDEFAULTS_H 
+#define _SYS_TYPES_H 
+#define _SYS_UIO_H 
+#define _SYS_UN_H 
+#define _SYS_UTSNAME_H 
+#define _TAR_H 
+#define _TGMATH_H 
+#define _THREADS_H 
+#define _TIME_H 
+#define _UCHAR_H 
+#define _UNISTD_H 
+#define _UTIME_H 
+#define _VALUES_H 
+#define _VA_LIST 
+#define _WCHAR_H 
+#define _WCHAR_T 
+#define _WCTYPE_H 
+#define _WINT_T 
 #define _XOPEN_ENH_I18N 1
 #define _XOPEN_IOV_MAX 16
 #define _XOPEN_NAME_MAX 255
@@ -2368,7 +2368,7 @@
 #define __compiler_ATOMIC_POINTER_LOCK_FREE 2
 #define __compiler_ATOMIC_SHORT_LOCK_FREE 2
 #define __compiler_ATOMIC_WCHAR_T_LOCK_FREE 2
-#define __CLANG_MAX_ALIGN_T_DEFINED
+#define __CLANG_MAX_ALIGN_T_DEFINED 
 #define __CMPLX(x,y,t) (__builtin_complex((t)(x), (t)(y)))
 #define __CONSTANT_CFSTRINGS__ 1
 #define __DBLCX(x) (__IS_CX(x) && sizeof(x) == sizeof(double complex))
@@ -2387,71 +2387,71 @@
 #define __DBL_MIN_EXP__ (-1021)
 #define __DBL_MIN__ 2.2250738585072014e-308
 #define __DECIMAL_DIG__ __LDBL_DECIMAL_DIG__
-#define __DEFINED_FILE
-#define __DEFINED___isoc_va_list
-#define __DEFINED_blkcnt_t
-#define __DEFINED_blksize_t
-#define __DEFINED_clock_t
-#define __DEFINED_clockid_t
-#define __DEFINED_cnd_t
-#define __DEFINED_dev_t
-#define __DEFINED_double_t
-#define __DEFINED_float_t
-#define __DEFINED_fsblkcnt_t
-#define __DEFINED_fsfilcnt_t
-#define __DEFINED_gid_t
-#define __DEFINED_id_t
-#define __DEFINED_ino_t
-#define __DEFINED_int16_t
-#define __DEFINED_int32_t
-#define __DEFINED_int64_t
-#define __DEFINED_int8_t
-#define __DEFINED_intmax_t
-#define __DEFINED_intptr_t
-#define __DEFINED_key_t
-#define __DEFINED_locale_t
-#define __DEFINED_mbstate_t
-#define __DEFINED_mode_t
-#define __DEFINED_mtx_t
-#define __DEFINED_nlink_t
-#define __DEFINED_off_t
-#define __DEFINED_pid_t
-#define __DEFINED_pthread_attr_t
-#define __DEFINED_pthread_barrier_t
-#define __DEFINED_pthread_barrierattr_t
-#define __DEFINED_pthread_cond_t
-#define __DEFINED_pthread_condattr_t
-#define __DEFINED_pthread_key_t
-#define __DEFINED_pthread_mutex_t
-#define __DEFINED_pthread_mutexattr_t
-#define __DEFINED_pthread_once_t
-#define __DEFINED_pthread_rwlock_t
-#define __DEFINED_pthread_rwlockattr_t
-#define __DEFINED_pthread_spinlock_t
-#define __DEFINED_pthread_t
-#define __DEFINED_register_t
-#define __DEFINED_regoff_t
-#define __DEFINED_sa_family_t
-#define __DEFINED_sigset_t
-#define __DEFINED_size_t
-#define __DEFINED_socklen_t
-#define __DEFINED_ssize_t
-#define __DEFINED_suseconds_t
-#define __DEFINED_time_t
-#define __DEFINED_timer_t
-#define __DEFINED_u_int64_t
-#define __DEFINED_uid_t
-#define __DEFINED_uint16_t
-#define __DEFINED_uint32_t
-#define __DEFINED_uint64_t
-#define __DEFINED_uint8_t
-#define __DEFINED_uintmax_t
-#define __DEFINED_uintptr_t
-#define __DEFINED_useconds_t
-#define __DEFINED_va_list
-#define __DEFINED_wchar_t
-#define __DEFINED_wctype_t
-#define __DEFINED_wint_t
+#define __DEFINED_FILE 
+#define __DEFINED___isoc_va_list 
+#define __DEFINED_blkcnt_t 
+#define __DEFINED_blksize_t 
+#define __DEFINED_clock_t 
+#define __DEFINED_clockid_t 
+#define __DEFINED_cnd_t 
+#define __DEFINED_dev_t 
+#define __DEFINED_double_t 
+#define __DEFINED_float_t 
+#define __DEFINED_fsblkcnt_t 
+#define __DEFINED_fsfilcnt_t 
+#define __DEFINED_gid_t 
+#define __DEFINED_id_t 
+#define __DEFINED_ino_t 
+#define __DEFINED_int16_t 
+#define __DEFINED_int32_t 
+#define __DEFINED_int64_t 
+#define __DEFINED_int8_t 
+#define __DEFINED_intmax_t 
+#define __DEFINED_intptr_t 
+#define __DEFINED_key_t 
+#define __DEFINED_locale_t 
+#define __DEFINED_mbstate_t 
+#define __DEFINED_mode_t 
+#define __DEFINED_mtx_t 
+#define __DEFINED_nlink_t 
+#define __DEFINED_off_t 
+#define __DEFINED_pid_t 
+#define __DEFINED_pthread_attr_t 
+#define __DEFINED_pthread_barrier_t 
+#define __DEFINED_pthread_barrierattr_t 
+#define __DEFINED_pthread_cond_t 
+#define __DEFINED_pthread_condattr_t 
+#define __DEFINED_pthread_key_t 
+#define __DEFINED_pthread_mutex_t 
+#define __DEFINED_pthread_mutexattr_t 
+#define __DEFINED_pthread_once_t 
+#define __DEFINED_pthread_rwlock_t 
+#define __DEFINED_pthread_rwlockattr_t 
+#define __DEFINED_pthread_spinlock_t 
+#define __DEFINED_pthread_t 
+#define __DEFINED_register_t 
+#define __DEFINED_regoff_t 
+#define __DEFINED_sa_family_t 
+#define __DEFINED_sigset_t 
+#define __DEFINED_size_t 
+#define __DEFINED_socklen_t 
+#define __DEFINED_ssize_t 
+#define __DEFINED_suseconds_t 
+#define __DEFINED_time_t 
+#define __DEFINED_timer_t 
+#define __DEFINED_u_int64_t 
+#define __DEFINED_uid_t 
+#define __DEFINED_uint16_t 
+#define __DEFINED_uint32_t 
+#define __DEFINED_uint64_t 
+#define __DEFINED_uint8_t 
+#define __DEFINED_uintmax_t 
+#define __DEFINED_uintptr_t 
+#define __DEFINED_useconds_t 
+#define __DEFINED_va_list 
+#define __DEFINED_wchar_t 
+#define __DEFINED_wctype_t 
+#define __DEFINED_wint_t 
 #define __FINITE_MATH_ONLY__ 0
 #define __FLT(x) (__IS_REAL(x) && sizeof(x) == sizeof(float))
 #define __FLTCX(x) (__IS_CX(x) && sizeof(x) == sizeof(float complex))
@@ -2485,12 +2485,12 @@
 #define __GNUC_VA_LIST 1
 #define __GXX_ABI_VERSION 1002
 #define __ILP32__ 1
-#define __INT16_C_SUFFIX__
+#define __INT16_C_SUFFIX__ 
 #define __INT16_FMTd__ "hd"
 #define __INT16_FMTi__ "hi"
 #define __INT16_MAX__ 32767
 #define __INT16_TYPE__ short
-#define __INT32_C_SUFFIX__
+#define __INT32_C_SUFFIX__ 
 #define __INT32_FMTd__ "d"
 #define __INT32_FMTi__ "i"
 #define __INT32_MAX__ 2147483647
@@ -2500,7 +2500,7 @@
 #define __INT64_FMTi__ "lli"
 #define __INT64_MAX__ 9223372036854775807LL
 #define __INT64_TYPE__ long long int
-#define __INT8_C_SUFFIX__
+#define __INT8_C_SUFFIX__ 
 #define __INT8_FMTd__ "hhd"
 #define __INT8_FMTi__ "hhi"
 #define __INT8_MAX__ 127
@@ -2574,74 +2574,74 @@
 #define __LONG_MAX __LONG_MAX__
 #define __LONG_MAX__ 2147483647L
 #define __NAMESER 19991006
-#define __NEED_FILE
-#define __NEED___isoc_va_list
-#define __NEED_blkcnt_t
-#define __NEED_blksize_t
-#define __NEED_clock_t
-#define __NEED_clockid_t
-#define __NEED_cnd_t
-#define __NEED_dev_t
-#define __NEED_double_t
-#define __NEED_float_t
-#define __NEED_fsblkcnt_t
-#define __NEED_fsfilcnt_t
-#define __NEED_gid_t
-#define __NEED_id_t
-#define __NEED_ino_t
-#define __NEED_int16_t
-#define __NEED_int32_t
-#define __NEED_int64_t
-#define __NEED_int8_t
-#define __NEED_intmax_t
-#define __NEED_intptr_t
-#define __NEED_key_t
-#define __NEED_locale_t
-#define __NEED_mbstate_t
-#define __NEED_mode_t
-#define __NEED_mtx_t
-#define __NEED_nlink_t
-#define __NEED_off_t
-#define __NEED_pid_t
-#define __NEED_pthread_attr_t
-#define __NEED_pthread_barrier_t
-#define __NEED_pthread_barrierattr_t
-#define __NEED_pthread_cond_t
-#define __NEED_pthread_condattr_t
-#define __NEED_pthread_key_t
-#define __NEED_pthread_mutex_t
-#define __NEED_pthread_mutexattr_t
-#define __NEED_pthread_once_t
-#define __NEED_pthread_rwlock_t
-#define __NEED_pthread_rwlockattr_t
-#define __NEED_pthread_spinlock_t
-#define __NEED_pthread_t
-#define __NEED_register_t
-#define __NEED_regoff_t
-#define __NEED_sa_family_t
-#define __NEED_sigset_t
-#define __NEED_size_t
-#define __NEED_socklen_t
-#define __NEED_ssize_t
-#define __NEED_struct_iovec
-#define __NEED_struct_timespec
-#define __NEED_struct_timeval
-#define __NEED_suseconds_t
-#define __NEED_time_t
-#define __NEED_timer_t
-#define __NEED_u_int64_t
-#define __NEED_uid_t
-#define __NEED_uint16_t
-#define __NEED_uint32_t
-#define __NEED_uint64_t
-#define __NEED_uint8_t
-#define __NEED_uintmax_t
-#define __NEED_uintptr_t
-#define __NEED_useconds_t
-#define __NEED_va_list
-#define __NEED_wchar_t
-#define __NEED_wctype_t
-#define __NEED_wint_t
+#define __NEED_FILE 
+#define __NEED___isoc_va_list 
+#define __NEED_blkcnt_t 
+#define __NEED_blksize_t 
+#define __NEED_clock_t 
+#define __NEED_clockid_t 
+#define __NEED_cnd_t 
+#define __NEED_dev_t 
+#define __NEED_double_t 
+#define __NEED_float_t 
+#define __NEED_fsblkcnt_t 
+#define __NEED_fsfilcnt_t 
+#define __NEED_gid_t 
+#define __NEED_id_t 
+#define __NEED_ino_t 
+#define __NEED_int16_t 
+#define __NEED_int32_t 
+#define __NEED_int64_t 
+#define __NEED_int8_t 
+#define __NEED_intmax_t 
+#define __NEED_intptr_t 
+#define __NEED_key_t 
+#define __NEED_locale_t 
+#define __NEED_mbstate_t 
+#define __NEED_mode_t 
+#define __NEED_mtx_t 
+#define __NEED_nlink_t 
+#define __NEED_off_t 
+#define __NEED_pid_t 
+#define __NEED_pthread_attr_t 
+#define __NEED_pthread_barrier_t 
+#define __NEED_pthread_barrierattr_t 
+#define __NEED_pthread_cond_t 
+#define __NEED_pthread_condattr_t 
+#define __NEED_pthread_key_t 
+#define __NEED_pthread_mutex_t 
+#define __NEED_pthread_mutexattr_t 
+#define __NEED_pthread_once_t 
+#define __NEED_pthread_rwlock_t 
+#define __NEED_pthread_rwlockattr_t 
+#define __NEED_pthread_spinlock_t 
+#define __NEED_pthread_t 
+#define __NEED_register_t 
+#define __NEED_regoff_t 
+#define __NEED_sa_family_t 
+#define __NEED_sigset_t 
+#define __NEED_size_t 
+#define __NEED_socklen_t 
+#define __NEED_ssize_t 
+#define __NEED_struct_iovec 
+#define __NEED_struct_timespec 
+#define __NEED_struct_timeval 
+#define __NEED_suseconds_t 
+#define __NEED_time_t 
+#define __NEED_timer_t 
+#define __NEED_u_int64_t 
+#define __NEED_uid_t 
+#define __NEED_uint16_t 
+#define __NEED_uint32_t 
+#define __NEED_uint64_t 
+#define __NEED_uint8_t 
+#define __NEED_uintmax_t 
+#define __NEED_uintptr_t 
+#define __NEED_useconds_t 
+#define __NEED_va_list 
+#define __NEED_wchar_t 
+#define __NEED_wctype_t 
+#define __NEED_wint_t 
 #define __OBJC_BOOL_IS_BOOL 0
 #define __OPENCL_MEMORY_SCOPE_ALL_SVM_DEVICES 3
 #define __OPENCL_MEMORY_SCOPE_DEVICE 2
@@ -2661,11 +2661,11 @@
 #define __PTRDIFF_TYPE__ long int
 #define __PTRDIFF_WIDTH__ 32
 #define __REDIR(x,y) __typeof__(x) x __asm__(#y)
-#define __RETCAST(x)
-#define __RETCAST_2(x,y)
-#define __RETCAST_3(x,y,z)
-#define __RETCAST_CX(x)
-#define __RETCAST_REAL(x)
+#define __RETCAST(x) 
+#define __RETCAST_2(x,y) 
+#define __RETCAST_3(x,y,z) 
+#define __RETCAST_CX(x) 
+#define __RETCAST_REAL(x) 
 #define __SCHAR_MAX__ 127
 #define __SHRT_MAX__ 32767
 #define __SID ('S' << 8)
@@ -2691,7 +2691,7 @@
 #define __SIZE_MAX__ 4294967295UL
 #define __SIZE_TYPE__ long unsigned int
 #define __SIZE_WIDTH__ 32
-#define __STDARG_H
+#define __STDARG_H 
 #define __STDC_HOSTED__ 1
 #define __STDC_IEC_559__ 1
 #define __STDC_ISO_10646__ 201206L
@@ -2699,7 +2699,7 @@
 #define __STDC_UTF_32__ 1
 #define __STDC_VERSION__ 201710L
 #define __STDC__ 1
-#define __STDDEF_H
+#define __STDDEF_H 
 #define __UAPI_DEF_IN6_ADDR 0
 #define __UAPI_DEF_IN6_ADDR_ALT 0
 #define __UAPI_DEF_IN6_PKTINFO 0
@@ -2715,7 +2715,7 @@
 #define __UAPI_DEF_IP_MREQ 0
 #define __UAPI_DEF_SOCKADDR_IN 0
 #define __UAPI_DEF_SOCKADDR_IN6 0
-#define __UINT16_C_SUFFIX__
+#define __UINT16_C_SUFFIX__ 
 #define __UINT16_FMTX__ "hX"
 #define __UINT16_FMTo__ "ho"
 #define __UINT16_FMTu__ "hu"
@@ -2736,7 +2736,7 @@
 #define __UINT64_FMTx__ "llx"
 #define __UINT64_MAX__ 18446744073709551615ULL
 #define __UINT64_TYPE__ long long unsigned int
-#define __UINT8_C_SUFFIX__
+#define __UINT8_C_SUFFIX__ 
 #define __UINT8_FMTX__ "hhX"
 #define __UINT8_FMTo__ "hho"
 #define __UINT8_FMTu__ "hhu"
@@ -2806,7 +2806,7 @@
 #define __UINT_LEAST8_FMTx__ "hhx"
 #define __UINT_LEAST8_MAX__ 255
 #define __UINT_LEAST8_TYPE__ unsigned char
-#define __USER_LABEL_PREFIX__
+#define __USER_LABEL_PREFIX__ 
 #define __USE_TIME_BITS64 1
 #define __WASI_ADVICE_DONTNEED (UINT8_C(4))
 #define __WASI_ADVICE_NOREUSE (UINT8_C(5))
@@ -2990,73 +2990,73 @@
 #define __tm_zone tm_zone
 #define __va_copy(d,s) __builtin_va_copy(d,s)
 #define __wasi__ 1
-#define __wasi_api_h
-#define __wasi_libc_environ_h
-#define __wasi_libc_find_relpath_h
-#define __wasi_libc_h
-#define __wasi_libc_nocwd_h
-#define __wasilibc___errno_h
-#define __wasilibc___errno_values_h
-#define __wasilibc___fd_set_h
-#define __wasilibc___function___isatty_h
-#define __wasilibc___functions_malloc_h
-#define __wasilibc___functions_memcpy_h
-#define __wasilibc___header_dirent_h
-#define __wasilibc___header_fcntl_h
-#define __wasilibc___header_netinet_in_h
-#define __wasilibc___header_poll_h
-#define __wasilibc___header_stdlib_h
-#define __wasilibc___header_string_h
-#define __wasilibc___header_sys_ioctl_h
-#define __wasilibc___header_sys_resource_h
-#define __wasilibc___header_sys_socket_h
-#define __wasilibc___header_sys_stat_h
-#define __wasilibc___header_time_h
-#define __wasilibc___header_unistd_h
-#define __wasilibc___include_inttypes_h
-#define __wasilibc___macro_FD_SETSIZE_h
-#define __wasilibc___macro_PAGESIZE_h
-#define __wasilibc___mode_t_h
-#define __wasilibc___seek_h
-#define __wasilibc___struct_dirent_h
-#define __wasilibc___struct_in6_addr_h
-#define __wasilibc___struct_in_addr_h
-#define __wasilibc___struct_iovec_h
-#define __wasilibc___struct_msghdr_h
-#define __wasilibc___struct_pollfd_h
-#define __wasilibc___struct_rusage_h
-#define __wasilibc___struct_sockaddr_h
-#define __wasilibc___struct_sockaddr_in6_h
-#define __wasilibc___struct_sockaddr_in_h
-#define __wasilibc___struct_sockaddr_storage_h
-#define __wasilibc___struct_sockaddr_un_h
-#define __wasilibc___struct_stat_h
-#define __wasilibc___struct_timespec_h
-#define __wasilibc___struct_timeval_h
-#define __wasilibc___struct_tm_h
-#define __wasilibc___struct_tms_h
-#define __wasilibc___typedef_DIR_h
-#define __wasilibc___typedef_blkcnt_t_h
-#define __wasilibc___typedef_blksize_t_h
-#define __wasilibc___typedef_clock_t_h
-#define __wasilibc___typedef_clockid_t_h
-#define __wasilibc___typedef_dev_t_h
-#define __wasilibc___typedef_fd_set_h
-#define __wasilibc___typedef_gid_t_h
-#define __wasilibc___typedef_in_addr_t_h
-#define __wasilibc___typedef_in_port_t_h
-#define __wasilibc___typedef_ino_t_h
-#define __wasilibc___typedef_mode_t_h
-#define __wasilibc___typedef_nfds_t_h
-#define __wasilibc___typedef_nlink_t_h
-#define __wasilibc___typedef_off_t_h
-#define __wasilibc___typedef_sa_family_t_h
-#define __wasilibc___typedef_sigset_t_h
-#define __wasilibc___typedef_socklen_t_h
-#define __wasilibc___typedef_ssize_t_h
-#define __wasilibc___typedef_suseconds_t_h
-#define __wasilibc___typedef_time_t_h
-#define __wasilibc___typedef_uid_t_h
+#define __wasi_api_h 
+#define __wasi_libc_environ_h 
+#define __wasi_libc_find_relpath_h 
+#define __wasi_libc_h 
+#define __wasi_libc_nocwd_h 
+#define __wasilibc___errno_h 
+#define __wasilibc___errno_values_h 
+#define __wasilibc___fd_set_h 
+#define __wasilibc___function___isatty_h 
+#define __wasilibc___functions_malloc_h 
+#define __wasilibc___functions_memcpy_h 
+#define __wasilibc___header_dirent_h 
+#define __wasilibc___header_fcntl_h 
+#define __wasilibc___header_netinet_in_h 
+#define __wasilibc___header_poll_h 
+#define __wasilibc___header_stdlib_h 
+#define __wasilibc___header_string_h 
+#define __wasilibc___header_sys_ioctl_h 
+#define __wasilibc___header_sys_resource_h 
+#define __wasilibc___header_sys_socket_h 
+#define __wasilibc___header_sys_stat_h 
+#define __wasilibc___header_time_h 
+#define __wasilibc___header_unistd_h 
+#define __wasilibc___include_inttypes_h 
+#define __wasilibc___macro_FD_SETSIZE_h 
+#define __wasilibc___macro_PAGESIZE_h 
+#define __wasilibc___mode_t_h 
+#define __wasilibc___seek_h 
+#define __wasilibc___struct_dirent_h 
+#define __wasilibc___struct_in6_addr_h 
+#define __wasilibc___struct_in_addr_h 
+#define __wasilibc___struct_iovec_h 
+#define __wasilibc___struct_msghdr_h 
+#define __wasilibc___struct_pollfd_h 
+#define __wasilibc___struct_rusage_h 
+#define __wasilibc___struct_sockaddr_h 
+#define __wasilibc___struct_sockaddr_in6_h 
+#define __wasilibc___struct_sockaddr_in_h 
+#define __wasilibc___struct_sockaddr_storage_h 
+#define __wasilibc___struct_sockaddr_un_h 
+#define __wasilibc___struct_stat_h 
+#define __wasilibc___struct_timespec_h 
+#define __wasilibc___struct_timeval_h 
+#define __wasilibc___struct_tm_h 
+#define __wasilibc___struct_tms_h 
+#define __wasilibc___typedef_DIR_h 
+#define __wasilibc___typedef_blkcnt_t_h 
+#define __wasilibc___typedef_blksize_t_h 
+#define __wasilibc___typedef_clock_t_h 
+#define __wasilibc___typedef_clockid_t_h 
+#define __wasilibc___typedef_dev_t_h 
+#define __wasilibc___typedef_fd_set_h 
+#define __wasilibc___typedef_gid_t_h 
+#define __wasilibc___typedef_in_addr_t_h 
+#define __wasilibc___typedef_in_port_t_h 
+#define __wasilibc___typedef_ino_t_h 
+#define __wasilibc___typedef_mode_t_h 
+#define __wasilibc___typedef_nfds_t_h 
+#define __wasilibc___typedef_nlink_t_h 
+#define __wasilibc___typedef_off_t_h 
+#define __wasilibc___typedef_sa_family_t_h 
+#define __wasilibc___typedef_sigset_t_h 
+#define __wasilibc___typedef_socklen_t_h 
+#define __wasilibc___typedef_ssize_t_h 
+#define __wasilibc___typedef_suseconds_t_h 
+#define __wasilibc___typedef_time_t_h 
+#define __wasilibc___typedef_uid_t_h 
 #define __wasm 1
 #define __wasm32 1
 #define __wasm32__ 1

@@ -37,9 +37,6 @@ __des_setkey
 __do_des
 __duplocale
 __env_rm_add
-__env_rm_add
-__env_rm_add
-__env_rm_add
 __exp2f_data
 __exp_data
 __expo2
@@ -70,8 +67,6 @@ __fsmu8
 __ftello
 __ftello_unlocked
 __funcs_on_exit
-__funcs_on_exit
-__funcs_on_quick_exit
 __funcs_on_quick_exit
 __futimesat
 __fwritable
@@ -126,7 +121,6 @@ __iswxdigit_l
 __isxdigit_l
 __lctrans
 __lctrans_cur
-__lctrans_impl
 __lctrans_impl
 __ldexp_cexp
 __ldexp_cexpf
@@ -199,21 +193,15 @@ __sinl
 __small_printf
 __stderr_FILE
 __stderr_used
-__stderr_used
-__stderr_used
 __stdin_FILE
 __stdin_used
-__stdin_used
 __stdio_close
-__stdio_exit
 __stdio_exit
 __stdio_exit_needed
 __stdio_read
 __stdio_seek
 __stdio_write
 __stdout_FILE
-__stdout_used
-__stdout_used
 __stdout_used
 __stdout_write
 __stpcpy
@@ -312,7 +300,6 @@ __wasilibc_deinitialize_environ
 __wasilibc_dttoif
 __wasilibc_ensure_environ
 __wasilibc_environ
-__wasilibc_environ
 __wasilibc_fd_renumber
 __wasilibc_find_abspath
 __wasilibc_find_relpath
@@ -323,7 +310,6 @@ __wasilibc_initialize_environ
 __wasilibc_link
 __wasilibc_link_newat
 __wasilibc_link_oldat
-__wasilibc_maybe_reinitialize_environ_eagerly
 __wasilibc_maybe_reinitialize_environ_eagerly
 __wasilibc_nocwd___wasilibc_rmdirat
 __wasilibc_nocwd___wasilibc_unlinkat
@@ -360,7 +346,6 @@ _environ
 _exit
 _flushlbf
 _initialize
-_start
 _start
 a64l
 abort

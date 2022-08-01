@@ -83,9 +83,14 @@ int pthread_barrier_wait(pthread_barrier_t *b)
 		while (spins-- && !inst->finished)
 			a_spin();
 		a_inc(&inst->finished);
-		while (inst->finished == 1)
-			__syscall(SYS_futex,&inst->finished,FUTEX_WAIT|FUTEX_PRIVATE,1,0) != -ENOSYS
-			|| __syscall(SYS_futex,&inst->finished,FUTEX_WAIT,1,0);
+		while (inst->finished == 1) {
+#ifdef __wasilibc_unmodified_upstream
+			__syscall(SYS_futex, &inst->finished, FUTEX_WAIT|FUTEX_PRIVATE, 1, 0) != -ENOSYS
+			|| __syscall(SYS_futex, &inst->finished, FUTEX_WAIT, 1, 0);
+#else
+			__builtin_wasm_memory_atomic_wait32((int*)addr, val);
+#endif
+		}
 		return PTHREAD_BARRIER_SERIAL_THREAD;
 	}
 

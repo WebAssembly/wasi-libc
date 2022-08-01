@@ -739,6 +739,57 @@ __wasi_errno_t __wasi_thread_id(
     return (uint16_t) ret;
 }
 
+int32_t __imported_wasix_64v1_thread_local_create(int64_t arg0, int64_t arg1) __attribute__((
+    __import_module__("wasix_64v1"),
+    __import_name__("thread_local_create")
+));
+
+__wasi_errno_t __wasi_thread_local_create(
+    uint64_t user_data,
+    __wasi_tl_key_t *retptr0
+){
+    int32_t ret = __imported_wasix_64v1_thread_local_create((int64_t) user_data, (intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
+int32_t __imported_wasix_64v1_thread_local_destroy(int32_t arg0) __attribute__((
+    __import_module__("wasix_64v1"),
+    __import_name__("thread_local_destroy")
+));
+
+__wasi_errno_t __wasi_thread_local_destroy(
+    __wasi_tl_key_t key
+){
+    int32_t ret = __imported_wasix_64v1_thread_local_destroy((int32_t) key);
+    return (uint16_t) ret;
+}
+
+int32_t __imported_wasix_64v1_thread_local_set(int32_t arg0, int64_t arg1) __attribute__((
+    __import_module__("wasix_64v1"),
+    __import_name__("thread_local_set")
+));
+
+__wasi_errno_t __wasi_thread_local_set(
+    __wasi_tl_key_t key,
+    __wasi_tl_val_t val
+){
+    int32_t ret = __imported_wasix_64v1_thread_local_set((int32_t) key, (int64_t) val);
+    return (uint16_t) ret;
+}
+
+int32_t __imported_wasix_64v1_thread_local_get(int32_t arg0, int64_t arg1) __attribute__((
+    __import_module__("wasix_64v1"),
+    __import_name__("thread_local_get")
+));
+
+__wasi_errno_t __wasi_thread_local_get(
+    __wasi_tl_key_t key,
+    __wasi_tl_val_t *retptr0
+){
+    int32_t ret = __imported_wasix_64v1_thread_local_get((int32_t) key, (intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
 int32_t __imported_wasix_64v1_thread_join(int32_t arg0) __attribute__((
     __import_module__("wasix_64v1"),
     __import_name__("thread_join")

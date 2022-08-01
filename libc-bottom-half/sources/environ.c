@@ -10,9 +10,12 @@
 // that it's initialized whenever user code might want to access it.
 char **__wasilibc_environ;
 extern __typeof(__wasilibc_environ) _environ
-    __attribute__((weak, alias("__wasilibc_environ")));
+    __attribute__((__weak__, alias("__wasilibc_environ")));
 extern __typeof(__wasilibc_environ) environ
-    __attribute__((weak, alias("__wasilibc_environ")));
+    __attribute__((__weak__, alias("__wasilibc_environ")));
+
+// WebAssembly memory starts zeroed - thus we need this check
+volatile int __wasilibc_environ_init __attribute__((__weak__)) = (int)0;
 
 // We define this function here in the same source file as
 // `__wasilibc_environ`, so that this function is called in iff environment
@@ -22,7 +25,12 @@ extern __typeof(__wasilibc_environ) environ
 // reserved things to go before or after.
 __attribute__((constructor(50)))
 static void __wasilibc_initialize_environ_eagerly(void) {
-    __wasilibc_initialize_environ();
+    if (__wasilibc_environ_init == 0) {
+        __wasilibc_environ_init = 1;
+        __wasilibc_initialize_environ();
+    } else {
+        __wasilibc_ensure_environ();
+    }
 }
 
 // See the comments in libc-environ.h.

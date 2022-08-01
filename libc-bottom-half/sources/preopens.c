@@ -2,10 +2,6 @@
 //! environment, with associated path prefixes, which can be used to map
 //! absolute paths to capabilities with relative paths.
 
-#ifdef _REENTRANT
-#error "__wasilibc_register_preopened_fd doesn't yet support multiple threads"
-#endif
-
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>

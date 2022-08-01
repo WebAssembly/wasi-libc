@@ -10,8 +10,12 @@ void __wait(volatile int *addr, volatile int *waiters, int val, int priv)
 	}
 	if (waiters) a_inc(waiters);
 	while (*addr==val) {
+#ifdef __wasilibc_unmodified_upstream
 		__syscall(SYS_futex, addr, FUTEX_WAIT|priv, val, 0) != -ENOSYS
 		|| __syscall(SYS_futex, addr, FUTEX_WAIT, val, 0);
+#else
+		__builtin_wasm_memory_atomic_wait32((int*)addr, val);
+#endif
 	}
 	if (waiters) a_dec(waiters);
 }

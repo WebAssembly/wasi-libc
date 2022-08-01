@@ -2,12 +2,18 @@
 #define _PTHREAD_IMPL_H
 
 #include <pthread.h>
+#ifdef __wasilibc_unmodified_upstream
 #include <signal.h>
+#endif
 #include <errno.h>
 #include <limits.h>
+#ifdef __wasilibc_unmodified_upstream
 #include <sys/mman.h>
+#endif
 #include "libc.h"
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#endif
 #include "atomic.h"
 #include "futex.h"
 
@@ -159,7 +165,9 @@ extern hidden volatile int __eintr_valid_flag;
 
 hidden int __clone(int (*)(void *), void *, int, void *, ...);
 hidden int __set_thread_area(void *);
+#ifdef __wasilibc_unmodified_upstream
 hidden int __libc_sigaction(int, const struct sigaction *, struct sigaction *);
+#endif
 hidden void __unmapself(void *, size_t);
 
 hidden int __timedwait(volatile int *, int, clockid_t, const struct timespec *, int);
@@ -169,14 +177,22 @@ static inline void __wake(volatile void *addr, int cnt, int priv)
 {
 	if (priv) priv = FUTEX_PRIVATE;
 	if (cnt<0) cnt = INT_MAX;
+#ifdef __wasilibc_unmodified_upstream
 	__syscall(SYS_futex, addr, FUTEX_WAKE|priv, cnt) != -ENOSYS ||
 	__syscall(SYS_futex, addr, FUTEX_WAKE, cnt);
+#else
+	__builtin_wasm_memory_atomic_notify((int*)addr, cnt);
+#endif
 }
 static inline void __futexwait(volatile void *addr, int val, int priv)
 {
+#ifdef __wasilibc_unmodified_upstream
 	if (priv) priv = FUTEX_PRIVATE;
 	__syscall(SYS_futex, addr, FUTEX_WAIT|priv, val, 0) != -ENOSYS ||
 	__syscall(SYS_futex, addr, FUTEX_WAIT, val, 0);
+#else
+	__wait(addr, NULL, val, priv);
+#endif
 }
 
 hidden void __acquire_ptc(void);

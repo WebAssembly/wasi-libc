@@ -79,7 +79,7 @@ typedef Elf64_Phdr Phdr;
 
 extern weak hidden const size_t _DYNAMIC[];
 
-static void static_init_tls(size_t *aux)
+void __init_tls(size_t *aux)
 {
 	unsigned char *p;
 	size_t n;
@@ -149,5 +149,3 @@ static void static_init_tls(size_t *aux)
 	if (__init_tp(__copy_tls(mem)) < 0)
 		a_crash();
 }
-
-weak_alias(static_init_tls, __init_tls);

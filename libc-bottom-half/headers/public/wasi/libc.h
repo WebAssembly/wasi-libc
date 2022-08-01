@@ -35,6 +35,18 @@ int __wasilibc_open_nomode(const char *path, int oflag);
 /// Like `openat`, but without the varargs in the signature.
 int __wasilibc_openat_nomode(int fd, const char *path, int oflag);
 
+// Initialize the library environ
+void __wasilibc_initialize_environ(void);
+
+/// Used for accessing the stack pointers
+void* __wasilibc_get_stack_pointer(void);
+void __wasilibc_set_stack_pointer(void *val);
+void __wasilibc_init_tls(void *val);
+unsigned long long __wasilibc_tls_size(void);
+unsigned long long __wasilibc_tls_align(void);
+void* __wasilibc_get_tls_base(void);
+void __wasilibc_set_tls_base(void *val);
+
 /// Return the current file offset. Like `lseek(fd, 0, SEEK_CUR)`, but without
 /// depending on `lseek`.
 off_t __wasilibc_tell(int fd)

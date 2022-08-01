@@ -71,6 +71,22 @@ _Static_assert(sizeof(__wasi_timestamp_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_timestamp_t) == 8, "witx calculated align");
 
 /**
+ * Key for a thread local variable.
+ */
+typedef uint32_t __wasi_tl_key_t;
+
+_Static_assert(sizeof(__wasi_tl_key_t) == 4, "witx calculated size");
+_Static_assert(_Alignof(__wasi_tl_key_t) == 4, "witx calculated align");
+
+/**
+ * Value of a thread local variable.
+ */
+typedef uint64_t __wasi_tl_val_t;
+
+_Static_assert(sizeof(__wasi_tl_val_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_tl_val_t) == 8, "witx calculated align");
+
+/**
  * Represents the first 128 bits of a SHA256 hash
  */
 typedef struct __wasi_hash_t {
@@ -4129,8 +4145,7 @@ __wasi_errno_t __wasi_chdir(
 /**
  * Creates a new thread by spawning that shares the same
  * memory address space, file handles and main event loops.
- * The function referenced by the fork call must be
- * exported by the web assembly process.
+ * The web assembly process must export function named '_start_thread'
  * @return
  * Returns the thread index of the newly created thread
  * (indices always start from zero)
@@ -4163,6 +4178,51 @@ __wasi_errno_t __wasi_thread_sleep(
  */
 __wasi_errno_t __wasi_thread_id(
     __wasi_tid_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Create a thread local variable
+ * If The web assembly process exports function named '_thread_local_destroy'
+ * then it will be invoked when the thread goes out of scope and dies.
+ */
+__wasi_errno_t __wasi_thread_local_create(
+    /**
+     * User data that will be passed to the destructor
+     * when the thread variable goes out of scope
+     */
+    uint64_t user_data,
+    __wasi_tl_key_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Destroys a thread local variable
+ */
+__wasi_errno_t __wasi_thread_local_destroy(
+    /**
+     * Thread key that was previously created
+     */
+    __wasi_tl_key_t key
+) __attribute__((__warn_unused_result__));
+/**
+ * Sets the value of a thread local variable
+ */
+__wasi_errno_t __wasi_thread_local_set(
+    /**
+     * Thread key that this local variable will be associated with
+     */
+    __wasi_tl_key_t key,
+    /**
+     * Value to be set for the thread local variable
+     */
+    __wasi_tl_val_t val
+) __attribute__((__warn_unused_result__));
+/**
+ * Gets the value of a thread local variable
+ */
+__wasi_errno_t __wasi_thread_local_get(
+    /**
+     * Thread key that this local variable that was previous set
+     */
+    __wasi_tl_key_t key,
+    __wasi_tl_val_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Joins this thread with another thread, blocking this

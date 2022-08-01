@@ -1,12 +1,7 @@
-#ifdef _REENTRANT
-#error "multiple threads not supported in musl yet"
-#endif
-
-static inline struct pthread *__pthread_self(void)
-{
-  return (struct pthread *)-1;
+static inline uintptr_t __get_tp(void) {
+  uintptr_t val;
+  __asm__(".globaltype __tls_base, i32\n"
+          "global.get __tls_base\n"
+          "local.set %0" : "=r" (val));
+  return val + 64;
 }
-
-#define TP_ADJ(p) (p)
-
-#define tls_mod_off_t unsigned long long

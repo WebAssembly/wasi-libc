@@ -8,13 +8,13 @@ NM ?= $(patsubst %clang,%llvm-nm,$(filter-out ccache sccache,$(CC)))
 ifeq ($(origin AR), default)
 AR = $(patsubst %clang,%llvm-ar,$(filter-out ccache sccache,$(CC)))
 endif
-EXTRA_CFLAGS ?= -O2 -DNDEBUG
+EXTRA_CFLAGS ?= -O2 -DNDEBUG -ftls-model=local-exec
 # The directory where we build the sysroot.
 SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
 INSTALL_DIR ?= /usr/local
 # single or posix
-THREAD_MODEL ?= single
+THREAD_MODEL ?= posix
 # dlmalloc or none
 MALLOC_IMPL ?= dlmalloc
 # yes or no
@@ -428,7 +428,9 @@ $(DLMALLOC_OBJS): CFLAGS += \
 startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS): CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_HEADERS_PRIVATE) \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC) \
-    -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
+    -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) \
+    -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/include \
+    -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal
 
 $(LIBC_TOP_HALF_ALL_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS): CFLAGS += \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/include \
@@ -601,5 +603,7 @@ install: finish
 clean:
 	$(RM) -r "$(OBJDIR)"
 	$(RM) -r "$(SYSROOT)"
+	$(RM) -r "$(SYSROOT)32"
+	$(RM) -r "$(SYSROOT)64"
 
 .PHONY: default startup_files libc finish install include_dirs clean

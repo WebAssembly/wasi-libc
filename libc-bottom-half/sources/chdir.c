@@ -8,8 +8,13 @@
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc.h>
 
+#ifdef _REENTRANT
 void __wasilibc_cwd_lock(void);
 void __wasilibc_cwd_unlock(void);
+#else
+#define __wasilibc_cwd_lock() (void)0
+#define __wasilibc_cwd_unlock() (void)0
+#endif
 extern char *__wasilibc_cwd;
 static int __wasilibc_cwd_mallocd = 0;
 

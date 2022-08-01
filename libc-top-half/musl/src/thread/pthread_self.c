@@ -1,7 +1,8 @@
 #include "pthread_impl.h"
 #include <threads.h>
 
-#if defined(_REENTRANT)
+#if !defined(__wasilibc_unmodified_upstream) && defined(__wasm__) &&           \
+    defined(_REENTRANT)
 // We need some place to store the thread ID. This WebAssembly global fits the
 // bill and is used by `__get_tp` elsewhere.
 __asm__(".globaltype __wasilibc_pthread_self, i32\n");

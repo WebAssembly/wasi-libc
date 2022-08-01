@@ -13,7 +13,7 @@ EXTRA_CFLAGS ?= -O2 -DNDEBUG
 SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
 INSTALL_DIR ?= /usr/local
-# single or posix
+# single or posix; note that pthread support is still a work-in-progress.
 THREAD_MODEL ?= single
 # dlmalloc or none
 MALLOC_IMPL ?= dlmalloc

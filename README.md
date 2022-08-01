@@ -7,7 +7,8 @@ environment variables, program startup, and many other APIs.
 
 WASI Libc is sufficiently stable and usable for many purposes, as most of the
 POSIX-compatible APIs are stable, though it is continuing to evolve to better
-align with wasm and WASI.
+align with wasm and WASI. For example, pthread support is still a work in
+progress.
 
 ## Usage
 

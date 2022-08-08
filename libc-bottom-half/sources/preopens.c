@@ -31,7 +31,9 @@ static size_t preopen_capacity;
 
 /// Access to the the above preopen must be protected in the presence of
 /// threads.
+#ifdef _REENTRANT
 static volatile int lock[1];
+#endif
 
 #ifdef NDEBUG
 #define assert_invariants() // assertions disabled

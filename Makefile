@@ -186,13 +186,6 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
 
-# Add some additional sources when threads are enabled.
-ifeq ($(THREAD_MODEL), posix)
-LIBC_TOP_HALF_MUSL_SOURCES += $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
-    thread/pthread_setcancelstate.c \
-)
-endif
-
 MUSL_PRINTSCAN_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/floatscan.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfprintf.c \

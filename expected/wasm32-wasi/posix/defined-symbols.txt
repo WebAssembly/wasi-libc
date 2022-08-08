@@ -178,7 +178,6 @@ __pow_log_data
 __powf_log2_data
 __progname
 __progname_full
-__pthread_setcancelstate
 __putenv
 __qsort_r
 __rand48_step
@@ -914,7 +913,6 @@ program_invocation_name
 program_invocation_short_name
 pselect
 psignal
-pthread_setcancelstate
 putc
 putc_unlocked
 putchar

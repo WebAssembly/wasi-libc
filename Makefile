@@ -13,7 +13,7 @@ EXTRA_CFLAGS ?= -O2 -DNDEBUG
 SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
 INSTALL_DIR ?= /usr/local
-# single or posix
+# single or posix; note that pthread support is still a work-in-progress.
 THREAD_MODEL ?= single
 # dlmalloc or none
 MALLOC_IMPL ?= dlmalloc
@@ -147,6 +147,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         unistd/posix_close.c \
         stat/futimesat.c \
         legacy/getpagesize.c \
+        thread/thrd_sleep.c \
     ) \
     $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/*.c)) \
@@ -185,6 +186,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  %/cimagf.c %/cimag.c %cimagl.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
+
 MUSL_PRINTSCAN_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/floatscan.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfprintf.c \
@@ -227,7 +229,9 @@ ifeq ($(THREAD_MODEL), single)
 CFLAGS += -mthread-model single
 endif
 ifeq ($(THREAD_MODEL), posix)
-CFLAGS += -mthread-model posix -pthread
+# Specify the tls-model until LLVM 15 is released (which should contain
+# https://reviews.llvm.org/D130053).
+CFLAGS += -mthread-model posix -pthread -ftls-model=local-exec
 endif
 
 # Expose the public headers to the implementation. We use `-isystem` for
@@ -356,11 +360,12 @@ MUSL_OMIT_HEADERS += \
     "netinet/ether.h" \
     "sys/timerfd.h" \
     "libintl.h" \
-    "sys/sysmacros.h"
+    "sys/sysmacros.h" \
+    "aio.h"
 
 ifeq ($(THREAD_MODEL), single)
 # Remove headers not supported in single-threaded mode.
-MUSL_OMIT_HEADERS += "aio.h" "pthread.h"
+MUSL_OMIT_HEADERS += "pthread.h"
 endif
 
 default: finish
@@ -595,7 +600,7 @@ check-symbols: startup_files libc
 
 	# Check that the computed metadata matches the expected metadata.
 	# This ignores whitespace because on Windows the output has CRLF line endings.
-	diff -wur "$(CURDIR)/expected/$(MULTIARCH_TRIPLE)" "$(SYSROOT_SHARE)"
+	diff -wur "$(CURDIR)/expected/$(MULTIARCH_TRIPLE)/$(THREAD_MODEL)" "$(SYSROOT_SHARE)"
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"

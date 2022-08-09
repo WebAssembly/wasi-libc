@@ -1,7 +1,9 @@
 #include <threads.h>
 #include <time.h>
 #include <errno.h>
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#endif
 
 int thrd_sleep(const struct timespec *req, struct timespec *rem)
 {

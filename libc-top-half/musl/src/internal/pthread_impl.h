@@ -166,7 +166,7 @@ extern hidden volatile int __eintr_valid_flag;
 
 hidden int __clone(int (*)(void *), void *, int, void *, ...);
 hidden int __set_thread_area(void *);
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no sigaction */
 hidden int __libc_sigaction(int, const struct sigaction *, struct sigaction *);
 #endif
 hidden void __unmapself(void *, size_t);

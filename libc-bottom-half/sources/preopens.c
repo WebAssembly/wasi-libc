@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <lock.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,6 +28,12 @@ typedef struct preopen {
 static preopen *preopens;
 static size_t num_preopens;
 static size_t preopen_capacity;
+
+/// Access to the the above preopen must be protected in the presence of
+/// threads.
+#ifdef _REENTRANT
+static volatile int lock[1];
+#endif
 
 #ifdef NDEBUG
 #define assert_invariants() // assertions disabled
@@ -51,6 +58,7 @@ static void assert_invariants(void) {
 
 /// Allocate space for more preopens. Returns 0 on success and -1 on failure.
 static int resize(void) {
+    LOCK(lock);
     size_t start_capacity = 4;
     size_t old_capacity = preopen_capacity;
     size_t new_capacity = old_capacity == 0 ? start_capacity : old_capacity * 2;
@@ -58,6 +66,7 @@ static int resize(void) {
     preopen *old_preopens = preopens;
     preopen *new_preopens = calloc(sizeof(preopen), new_capacity);
     if (new_preopens == NULL)
+        UNLOCK(lock);
         return -1;
 
     memcpy(new_preopens, old_preopens, num_preopens * sizeof(preopen));
@@ -66,6 +75,7 @@ static int resize(void) {
     free(old_preopens);
 
     assert_invariants();
+    UNLOCK(lock);
     return 0;
 }
 
@@ -93,6 +103,8 @@ static const char *strip_prefixes(const char *path) {
 ///
 /// This function takes ownership of `prefix`.
 static int internal_register_preopened_fd(__wasi_fd_t fd, const char *relprefix) {
+    LOCK(lock);
+
     // Check preconditions.
     assert_invariants();
     assert(fd != AT_FDCWD);
@@ -100,14 +112,17 @@ static int internal_register_preopened_fd(__wasi_fd_t fd, const char *relprefix)
     assert(relprefix != NULL);
 
     if (num_preopens == preopen_capacity && resize() != 0)
+        UNLOCK(lock);
         return -1;
 
     char *prefix = strdup(strip_prefixes(relprefix));
     if (prefix == NULL)
+        UNLOCK(lock);
         return -1;
     preopens[num_preopens++] = (preopen) { prefix, fd, };
 
     assert_invariants();
+    UNLOCK(lock);
     return 0;
 }
 
@@ -163,6 +178,7 @@ int __wasilibc_find_abspath(const char *path,
     // recently added preopens take precedence over less recently addded ones.
     size_t match_len = 0;
     int fd = -1;
+    LOCK(lock);
     for (size_t i = num_preopens; i > 0; --i) {
         const preopen *pre = &preopens[i - 1];
         const char *prefix = pre->prefix;
@@ -179,6 +195,7 @@ int __wasilibc_find_abspath(const char *path,
             *abs_prefix = prefix;
         }
     }
+    UNLOCK(lock);
 
     if (fd == -1) {
         errno = ENOENT;

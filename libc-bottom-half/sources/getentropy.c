@@ -3,7 +3,6 @@
 #include <wasi/api.h>
 
 int __getentropy(void *buffer, size_t len) {
-    int cs;
     if (len > 256) {
         errno = EIO;
         return -1;

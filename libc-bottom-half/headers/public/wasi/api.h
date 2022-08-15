@@ -4406,12 +4406,6 @@ __wasi_bus_error_t __wasi_bus_call(
      */
     __wasi_bid_t bid,
     /**
-     * Causes the call handle to remain open even when A
-     * reply is received. It is then the  callers responsibility
-     * to invoke 'bus_drop' when they are finished with the call
-     */
-    __wasi_bool_t keep_alive,
-    /**
      * Topic hash that describes the type of call to made
      */
     const __wasi_hash_t * topic_hash,
@@ -4437,12 +4431,6 @@ __wasi_bus_error_t __wasi_bus_subcall(
      * Parent bus call that this is related to
      */
     __wasi_cid_t parent,
-    /**
-     * Causes the call handle to remain open even when A
-     * reply is received. It is then the  callers responsibility
-     * to invoke 'bus_drop' when they are finished with the call
-     */
-    __wasi_bool_t keep_alive,
     /**
      * Topic hash that describes the type of call to made
      */

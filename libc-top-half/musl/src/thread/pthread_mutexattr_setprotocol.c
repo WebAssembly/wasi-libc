@@ -1,7 +1,5 @@
 #include "pthread_impl.h"
-#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
-#endif
 
 static volatile int check_pi_result = -1;
 

@@ -2,9 +2,7 @@
 #include <time.h>
 #include <errno.h>
 #include "futex.h"
-#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
-#endif
 #include "pthread_impl.h"
 
 #ifdef __wasilibc_unmodified_upstream

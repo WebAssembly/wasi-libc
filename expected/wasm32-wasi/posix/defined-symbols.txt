@@ -40,7 +40,6 @@ __cxa_finalize
 __des_setkey
 __do_des
 __duplocale
-__eintr_valid_flag
 __env_rm_add
 __exp2f_data
 __exp_data

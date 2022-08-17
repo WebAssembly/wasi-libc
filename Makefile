@@ -207,7 +207,6 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_mutexattr_setrobust.c \
         thread/pthread_mutexattr_settype.c \
         thread/pthread_setcancelstate.c \
-        thread/vmlock.c \
     )
 endif
 

@@ -9,9 +9,6 @@
 #include <limits.h>
 #ifdef __wasilibc_unmodified_upstream
 #include <sys/mman.h>
-#else
-hidden void __vm_lock(void);
-hidden void __vm_unlock(void);
 #endif
 #include "libc.h"
 #ifdef __wasilibc_unmodified_upstream

@@ -265,10 +265,6 @@ __uflow
 __unlist_locked_file
 __uselocale
 __utc
-__vm_lock
-__vm_unlock
-__vm_wait
-__vmlock_lockptr
 __wait
 __wasi_args_get
 __wasi_args_sizes_get

@@ -22,7 +22,9 @@ int __pthread_mutex_unlock(pthread_mutex_t *m)
 			new = 0x7fffffff;
 		if (!priv) {
 			self->robust_list.pending = &m->_m_next;
+#ifdef __wasilibc_unmodified_upstream
 			__vm_lock();
+#endif
 		}
 		volatile void *prev = m->_m_prev;
 		volatile void *next = m->_m_next;
@@ -46,7 +48,9 @@ int __pthread_mutex_unlock(pthread_mutex_t *m)
 #endif
 	if (type != PTHREAD_MUTEX_NORMAL && !priv) {
 		self->robust_list.pending = 0;
+#ifdef __wasilibc_unmodified_upstream
 		__vm_unlock();
+#endif
 	}
 	if (waiters || cont<0)
 		__wake(&m->_m_lock, 1, priv);

@@ -72,4 +72,3 @@ __unlockfile
 __unordtf2
 __wasilibc_pthread_self
 __wasm_call_ctors
-pthread_setcancelstate

@@ -187,6 +187,30 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
 
+ifeq ($(THREAD_MODEL), posix)
+LIBC_TOP_HALF_MUSL_SOURCES += \
+    $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
+        thread/__wait.c \
+        thread/__timedwait.c \
+        thread/pthread_mutex_consistent.c \
+        thread/pthread_mutex_destroy.c \
+        thread/pthread_mutex_init.c \
+        thread/pthread_mutex_getprioceiling.c \
+        thread/pthread_mutex_lock.c \
+        thread/pthread_mutex_timedlock.c \
+        thread/pthread_mutex_trylock.c \
+        thread/pthread_mutex_unlock.c \
+        thread/pthread_mutexattr_destroy.c \
+        thread/pthread_mutexattr_init.c \
+        thread/pthread_mutexattr_setprotocol.c \
+        thread/pthread_mutexattr_setpshared.c \
+        thread/pthread_mutexattr_setrobust.c \
+        thread/pthread_mutexattr_settype.c \
+        thread/pthread_setcancelstate.c \
+        thread/vmlock.c \
+    )
+endif
+
 MUSL_PRINTSCAN_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/floatscan.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfprintf.c \

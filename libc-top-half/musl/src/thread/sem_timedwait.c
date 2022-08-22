@@ -8,7 +8,9 @@ static void cleanup(void *p)
 
 int sem_timedwait(sem_t *restrict sem, const struct timespec *restrict at)
 {
+#ifdef __wasilibc_unmodified_upstream
 	pthread_testcancel();
+#endif	
 
 	if (!sem_trywait(sem)) return 0;
 

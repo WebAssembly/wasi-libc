@@ -38,6 +38,8 @@ __ctype_toupper_loc
 __cxa_atexit
 __cxa_finalize
 __des_setkey
+__do_cleanup_pop
+__do_cleanup_push
 __do_des
 __duplocale
 __env_rm_add
@@ -365,6 +367,8 @@ _environ
 _exit
 _flushlbf
 _initialize
+_pthread_cleanup_pop
+_pthread_cleanup_push
 _start
 a64l
 abort
@@ -1007,6 +1011,13 @@ sched_yield
 seed48
 seekdir
 select
+sem_destroy
+sem_getvalue
+sem_init
+sem_post
+sem_timedwait
+sem_trywait
+sem_wait
 send
 setbuf
 setbuffer

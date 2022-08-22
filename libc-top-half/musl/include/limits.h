@@ -70,8 +70,10 @@
 #define PTHREAD_STACK_MIN 2048
 #define PTHREAD_DESTRUCTOR_ITERATIONS 4
 #endif
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #define SEM_VALUE_MAX 0x7fffffff
 #define SEM_NSEMS_MAX 256
+#endif
 #define DELAYTIMER_MAX 0x7fffffff
 #ifdef __wasilibc_unmodified_upstream /* WASI has no mq */
 #define MQ_PRIO_MAX 32768

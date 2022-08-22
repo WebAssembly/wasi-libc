@@ -220,6 +220,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
         thread/__wait.c \
         thread/__timedwait.c \
+        thread/pthread_cleanup_push.c \
         thread/pthread_mutex_consistent.c \
         thread/pthread_mutex_destroy.c \
         thread/pthread_mutex_init.c \
@@ -234,6 +235,14 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_mutexattr_setpshared.c \
         thread/pthread_mutexattr_setrobust.c \
         thread/pthread_mutexattr_settype.c \
+        thread/pthread_testcancel.c \
+        thread/sem_destroy.c \
+        thread/sem_getvalue.c \
+        thread/sem_init.c \
+        thread/sem_post.c \
+        thread/sem_timedwait.c \
+        thread/sem_trywait.c \
+        thread/sem_wait.c \
         thread/pthread_setcancelstate.c \
     )
 endif

@@ -103,7 +103,7 @@ __fwritable
 __fwritex
 __fwriting
 __get_handler_set
-__get_locale
+__get_locale    
 __getdelim
 __getentropy
 __getgr_a
@@ -1318,10 +1318,6 @@ pthread_mutex_timedlock
 pthread_mutex_trylock
 pthread_mutex_unlock
 pthread_mutexattr_destroy
-pthread_mutexattr_getprotocol
-pthread_mutexattr_getpshared
-pthread_mutexattr_getrobust
-pthread_mutexattr_gettype
 pthread_mutexattr_init
 pthread_mutexattr_setprotocol
 pthread_mutexattr_setpshared

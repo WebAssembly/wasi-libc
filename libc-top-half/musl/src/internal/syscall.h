@@ -1,3 +1,4 @@
+#ifdef __wasilibc_unmodified_upstream
 #ifndef _INTERNAL_SYSCALL_H
 #define _INTERNAL_SYSCALL_H
 
@@ -399,5 +400,6 @@ hidden void *__vdsosym(const char *, const char *);
 
 #else
 hidden long __syscall_ret(unsigned long);
+#endif
 #endif
 #endif

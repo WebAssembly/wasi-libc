@@ -171,6 +171,9 @@ hidden int __libc_sigaction(int, const struct sigaction *, struct sigaction *);
 #endif
 hidden void __unmapself(void *, size_t);
 
+#ifndef __wasilibc_unmodified_upstream
+hidden int __wasilibc_futex_wait(volatile void *, int, int, int64_t);
+#endif
 hidden int __timedwait(volatile int *, int, clockid_t, const struct timespec *, int);
 hidden int __timedwait_cp(volatile int *, int, clockid_t, const struct timespec *, int);
 hidden void __wait(volatile int *, volatile int *, int, int);

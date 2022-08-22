@@ -38,6 +38,8 @@ __ctype_toupper_loc
 __cxa_atexit
 __cxa_finalize
 __des_setkey
+__do_cleanup_pop
+__do_cleanup_push
 __do_des
 __duplocale
 __env_rm_add
@@ -185,6 +187,7 @@ __pthread_mutex_trylock
 __pthread_mutex_trylock_owner
 __pthread_mutex_unlock
 __pthread_setcancelstate
+__pthread_testcancel
 __putenv
 __qsort_r
 __rand48_step
@@ -243,6 +246,7 @@ __sysv_signal
 __tan
 __tandf
 __tanl
+__testcancel
 __timedwait
 __timedwait_cp
 __tm_to_secs
@@ -365,6 +369,8 @@ _environ
 _exit
 _flushlbf
 _initialize
+_pthread_cleanup_pop
+_pthread_cleanup_push
 _start
 a64l
 abort
@@ -939,6 +945,7 @@ pthread_mutexattr_setpshared
 pthread_mutexattr_setrobust
 pthread_mutexattr_settype
 pthread_setcancelstate
+pthread_testcancel
 putc
 putc_unlocked
 putchar
@@ -1007,6 +1014,13 @@ sched_yield
 seed48
 seekdir
 select
+sem_destroy
+sem_getvalue
+sem_init
+sem_post
+sem_timedwait
+sem_trywait
+sem_wait
 send
 setbuf
 setbuffer

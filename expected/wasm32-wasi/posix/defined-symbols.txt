@@ -187,6 +187,7 @@ __pthread_mutex_trylock
 __pthread_mutex_trylock_owner
 __pthread_mutex_unlock
 __pthread_setcancelstate
+__pthread_testcancel
 __putenv
 __qsort_r
 __rand48_step
@@ -245,6 +246,7 @@ __sysv_signal
 __tan
 __tandf
 __tanl
+__testcancel
 __timedwait
 __timedwait_cp
 __tm_to_secs
@@ -943,6 +945,7 @@ pthread_mutexattr_setpshared
 pthread_mutexattr_setrobust
 pthread_mutexattr_settype
 pthread_setcancelstate
+pthread_testcancel
 putc
 putc_unlocked
 putchar

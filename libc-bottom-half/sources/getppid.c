@@ -2,7 +2,7 @@
 #include <errno.h>
 #include <string.h>
 
-pid_t getpid(void)
+pid_t getppid(void)
 {
     __wasi_pid_t pid = 0;
     __wasi_errno_t error = __wasi_getpid(&pid);
@@ -10,5 +10,13 @@ pid_t getpid(void)
       errno = error;
       return -1;
     }
-    return pid;
+
+    __wasi_pid_t parent = 0;
+    error = __wasi_getppid(pid, &parent);
+    if (error != 0) {
+      errno = error;
+      return -1;
+    }
+
+    return parent;
 }

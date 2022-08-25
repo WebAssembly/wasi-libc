@@ -9,7 +9,6 @@
 
 int chdir(const char *path)
 {
-    // Perform system call.
     __wasi_errno_t error = __wasi_chdir(path);
     if (error != 0) {
       errno = error;

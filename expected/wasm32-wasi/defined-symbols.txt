@@ -23,6 +23,7 @@ __c_dot_utf8_locale
 __c_locale
 __clock
 __clock_gettime
+__clock_settime
 __cos
 __cosdf
 __cosl
@@ -280,6 +281,7 @@ __wasi_call_reply
 __wasi_chdir
 __wasi_clock_res_get
 __wasi_clock_time_get
+__wasi_clock_time_set
 __wasi_environ_get
 __wasi_environ_sizes_get
 __wasi_fd_advise
@@ -310,6 +312,7 @@ __wasi_futex_wake
 __wasi_futex_wake_all
 __wasi_getcwd
 __wasi_getpid
+__wasi_getppid
 __wasi_http_request
 __wasi_http_status
 __wasi_path_create_directory
@@ -539,6 +542,7 @@ cexp
 cexpf
 cexpl
 chdir
+chmod
 cimag
 cimagf
 cimagl
@@ -549,6 +553,7 @@ clock
 clock_getres
 clock_gettime
 clock_nanosleep
+clock_settime
 clog
 clogf
 clogl
@@ -606,6 +611,9 @@ dprintf
 drand48
 drem
 dremf
+dup
+dup2
+dup3
 duplocale
 ecvt
 encrypt
@@ -636,6 +644,8 @@ fabs
 fabsf
 fabsl
 faccessat
+fchmod
+fchmodat
 fclose
 fcntl
 fcvt
@@ -758,8 +768,11 @@ getdate
 getdate_err
 getdelim
 getdomainname
+getegid
 getentropy
 getenv
+geteuid
+getgid
 gethostid
 getif_addrs
 getline
@@ -768,11 +781,14 @@ getopt_long
 getopt_long_only
 getpeername
 getpid
+getppid
+getrandom
 getrusage
 getsockname
 getsockopt
 getsubopt
 gettimeofday
+getuid
 getw
 getwc
 getwc_unlocked
@@ -989,6 +1005,8 @@ optopt
 optreset
 pathconf
 perror
+pipe
+pipe2
 poll
 posix_close
 posix_fadvise
@@ -1082,12 +1100,16 @@ sendmsg
 sendto
 setbuf
 setbuffer
+setegid
 setenv
+seteuid
+setgid
 setkey
 setlinebuf
 setlocale
 setsockopt
 setstate
+setuid
 setvbuf
 shutdown
 signal
@@ -1215,6 +1237,7 @@ truncf
 truncl
 tsearch
 twalk
+umask
 uname
 ungetc
 ungetwc

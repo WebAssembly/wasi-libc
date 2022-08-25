@@ -25,13 +25,13 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(intptr_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(uintptr_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == 8, "non-wasi data layout");
-typedef int64_t __wasi_int_t;
-typedef uint64_t __wasi_uint_t;
-_Static_assert(_Alignof(__wasi_int_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(__wasi_uint_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(intptr_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(uintptr_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
+typedef int32_t __wasi_int_t;
+typedef uint32_t __wasi_uint_t;
+_Static_assert(_Alignof(__wasi_int_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(__wasi_uint_t) == 4, "non-wasi data layout");
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -43,8 +43,8 @@ extern "C" {
  */
 typedef __wasi_uint_t __wasi_pointersize_t;
 
-_Static_assert(sizeof(__wasi_pointersize_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_pointersize_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_pointersize_t) == 4, "witx calculated size");
+_Static_assert(_Alignof(__wasi_pointersize_t) == 4, "witx calculated align");
 
 /**
  * Represents a number of items
@@ -532,6 +532,11 @@ typedef uint16_t __wasi_errno_t;
  */
 #define __WASI_ERRNO_NOTCAPABLE (UINT16_C(76))
 
+/**
+ * The socket has already been shutdown.
+ */
+#define __WASI_ERRNO_SHUTDOWN (UINT16_C(77))
+
 _Static_assert(sizeof(__wasi_errno_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_errno_t) == 2, "witx calculated align");
 
@@ -887,10 +892,10 @@ typedef struct __wasi_iovec_t {
 
 } __wasi_iovec_t;
 
-_Static_assert(sizeof(__wasi_iovec_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_iovec_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_iovec_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_iovec_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_iovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 4, "witx calculated offset");
 
 /**
  * A region of memory for scatter/gather writes.
@@ -908,10 +913,10 @@ typedef struct __wasi_ciovec_t {
 
 } __wasi_ciovec_t;
 
-_Static_assert(sizeof(__wasi_ciovec_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_ciovec_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_ciovec_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_ciovec_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_ciovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 4, "witx calculated offset");
 
 /**
  * Relative offset within a file.
@@ -3455,7 +3460,7 @@ _Static_assert(sizeof(__wasi_prestat_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
 
 /**
- * @defgroup wasix_64v1
+ * @defgroup wasix_32v1
  * @{
  */
 
@@ -3528,6 +3533,22 @@ __wasi_errno_t __wasi_clock_time_get(
      */
     __wasi_timestamp_t precision,
     __wasi_timestamp_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Sets the time value of a clock.
+ * Note: This is similar to `clock_settime` in POSIX.
+ * @return
+ * The time value of the clock.
+ */
+__wasi_errno_t __wasi_clock_time_set(
+    /**
+     * The clock for which to set the time.
+     */
+    __wasi_clockid_t id,
+    /**
+     * The value of the time to be set.
+     */
+    __wasi_timestamp_t timestamp
 ) __attribute__((__warn_unused_result__));
 /**
  * Provide file advisory information on a file descriptor.
@@ -4287,6 +4308,16 @@ __wasi_errno_t __wasi_futex_wake_all(
  * Returns the handle of the current process
  */
 __wasi_errno_t __wasi_getpid(
+    __wasi_pid_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Returns the parent handle of a particular process
+ */
+__wasi_errno_t __wasi_getppid(
+    /**
+     * Handle of the process to get the parent handle for
+     */
+    __wasi_pid_t pid,
     __wasi_pid_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**

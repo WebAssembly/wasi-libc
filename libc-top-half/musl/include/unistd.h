@@ -41,17 +41,17 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no pipe */
 int pipe(int [2]);
 int pipe2(int [2], int);
-#endif
 int close(int);
 int posix_close(int, int);
-#ifdef __wasilibc_unmodified_upstream /* WASI has no dup */
+
+#define BADEXIT -1
+
 int dup(int);
 int dup2(int, int);
 int dup3(int, int, int);
-#endif
+
 off_t lseek(int, off_t, int);
 #ifdef __wasilibc_unmodified_upstream /* Optimize the readonly case of lseek */
 #else
@@ -124,9 +124,7 @@ int fchdir(int);
 int chdir(const char *);
 char *getcwd(char *, size_t);
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no signals */
 unsigned alarm(unsigned);
-#endif
 unsigned sleep(unsigned);
 #ifdef __wasilibc_unmodified_upstream /* WASI has no pause */
 int pause(void);
@@ -145,18 +143,9 @@ int fexecve(int, char *const [], char *const []);
 #endif
 _Noreturn void _exit(int);
 
-#if defined(__wasilibc_unmodified_upstream) || defined(_WASI_EMULATED_GETPID)
 pid_t getpid(void);
-#else
-__attribute__((__deprecated__(
-"WASI lacks process identifiers; to enable emulation of the `getpid` function using "
-"a placeholder value, which doesn't reflect the host PID of the program, "
-"compile with -D_WASI_EMULATED_GETPID and link with -lwasi-emulated-getpid"
-)))
-pid_t getpid(void);
-#endif
-#ifdef __wasilibc_unmodified_upstream /* WASI has no getpid etc. */
 pid_t getppid(void);
+#ifdef __wasilibc_unmodified_upstream
 pid_t getpgrp(void);
 pid_t getpgid(pid_t);
 int setpgid(pid_t, pid_t);
@@ -174,16 +163,17 @@ int tcsetpgrp(int, pid_t);
 #endif
 
 #ifdef __wasilibc_unmodified_upstream /* WASI has no getuid etc. */
+int getgroups(int, gid_t []);
+#endif
+
 uid_t getuid(void);
 uid_t geteuid(void);
 gid_t getgid(void);
 gid_t getegid(void);
-int getgroups(int, gid_t []);
 int setuid(uid_t);
 int seteuid(uid_t);
 int setgid(gid_t);
 int setegid(gid_t);
-#endif
 
 char *getlogin(void);
 int getlogin_r(char *, size_t);
@@ -240,7 +230,6 @@ void *sbrk(intptr_t);
 pid_t vfork(void);
 int vhangup(void);
 int chroot(const char *);
-int getpagesize(void);
 int getdtablesize(void);
 int sethostname(const char *, size_t);
 int getdomainname(char *, size_t);
@@ -259,6 +248,7 @@ int issetugid(void);
 int getentropy(void *, size_t);
 extern int optreset;
 #endif
+int getpagesize(void);
 
 #ifdef _GNU_SOURCE
 extern char **environ;

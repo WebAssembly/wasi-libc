@@ -109,9 +109,7 @@ E(ECONNABORTED, "Connection aborted")
 E(ENOBUFS,      "No buffer space available")
 E(EISCONN,      "Socket is connected")
 E(ENOTCONN,     "Socket not connected")
-#ifdef __wasilibc_unmodified_upstream // errno value not in WASI
 E(ESHUTDOWN,    "Cannot send after socket shutdown")
-#endif
 E(EALREADY,     "Operation already in progress")
 E(EINPROGRESS,  "Operation in progress")
 E(ESTALE,       "Stale file handle")

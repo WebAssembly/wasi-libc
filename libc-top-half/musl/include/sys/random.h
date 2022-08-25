@@ -4,7 +4,6 @@
 extern "C" {
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no getrandom, but it does have getentropy */
 #define __NEED_size_t
 #define __NEED_ssize_t
 #include <bits/alltypes.h>
@@ -14,12 +13,7 @@ extern "C" {
 #define GRND_INSECURE	0x0004
 
 ssize_t getrandom(void *, size_t, unsigned);
-#else
-#define __NEED_size_t
-#include <bits/alltypes.h>
-
 int getentropy(void *, size_t);
-#endif
 
 #ifdef __cplusplus
 }

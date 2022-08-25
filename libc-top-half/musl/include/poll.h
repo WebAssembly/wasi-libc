@@ -28,6 +28,10 @@ extern "C" {
 #endif
 #else
 #include <__header_poll.h>
+// Poll fulfill. Since there are no important polls
+// we identify all Important as normals
+#define POLLPRI POLLIN
+#define EPOLLPRI EPOLLIN
 #endif
 
 #ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */

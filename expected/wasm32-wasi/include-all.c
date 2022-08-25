@@ -126,6 +126,7 @@
 #include <netpacket/packet.h>
 #include <nl_types.h>
 #include <poll.h>
+#include <preamble.h>
 #include <pthread.h>
 #include <regex.h>
 #include <sched.h>

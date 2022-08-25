@@ -230,6 +230,26 @@ int mkdir(const char *path, mode_t mode) {
     return __wasilibc_nocwd_mkdirat_nomode(dirfd, relative_path);
 }
 
+mode_t umask(mode_t mode) {
+    // WASI does not have the concept of umask
+    return mode;
+}
+
+int chmod(const char *path, mode_t mode) {
+    // WASI does not have the concept of mode/umask
+    return 0;
+}
+
+int fchmod(int fd, mode_t mode) {
+    // WASI does not have the concept of mode/umask
+    return 0;
+}
+
+int fchmodat(int fd, const char *path, mode_t mode, int flag) {
+    // WASI does not have the concept of mode/umask
+    return 0;
+}
+
 DIR *opendir(const char *dirname) {
     char *relative_path;
     int dirfd = find_relpath(dirname, &relative_path);

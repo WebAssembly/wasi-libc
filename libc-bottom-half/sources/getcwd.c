@@ -4,7 +4,6 @@
 
 char *getcwd(char *buf, size_t size)
 {
-    // Perform system call.
     __wasi_pointersize_t bufsize = size;
     __wasi_errno_t error = __wasi_getcwd((uint8_t *)buf, &bufsize);
     size = (size_t)bufsize;

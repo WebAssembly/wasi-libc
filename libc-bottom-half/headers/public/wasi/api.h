@@ -25,13 +25,13 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(intptr_t) == 4, "non-wasi data layout");
-_Static_assert(_Alignof(uintptr_t) == 4, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
-typedef int32_t __wasi_int_t;
-typedef uint32_t __wasi_uint_t;
-_Static_assert(_Alignof(__wasi_int_t) == 4, "non-wasi data layout");
-_Static_assert(_Alignof(__wasi_uint_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(intptr_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(uintptr_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == 8, "non-wasi data layout");
+typedef int64_t __wasi_int_t;
+typedef uint64_t __wasi_uint_t;
+_Static_assert(_Alignof(__wasi_int_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(__wasi_uint_t) == 8, "non-wasi data layout");
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -43,8 +43,8 @@ extern "C" {
  */
 typedef __wasi_uint_t __wasi_pointersize_t;
 
-_Static_assert(sizeof(__wasi_pointersize_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_pointersize_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_pointersize_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_pointersize_t) == 8, "witx calculated align");
 
 /**
  * Represents a number of items
@@ -533,7 +533,7 @@ typedef uint16_t __wasi_errno_t;
 #define __WASI_ERRNO_NOTCAPABLE (UINT16_C(76))
 
 /**
- * The socket has already been shutdown.
+ * Cannot send after socket shutdown.
  */
 #define __WASI_ERRNO_SHUTDOWN (UINT16_C(77))
 
@@ -780,6 +780,21 @@ _Static_assert(sizeof(__wasi_option_timestamp_t) == 16, "witx calculated size");
 _Static_assert(_Alignof(__wasi_option_timestamp_t) == 8, "witx calculated align");
 
 /**
+ * Represents an optional hash
+ */
+typedef union __wasi_option_hash_u_t {
+    uint8_t none;
+    __wasi_hash_t some;
+} __wasi_option_hash_u_t;
+typedef struct __wasi_option_hash_t {
+    uint8_t tag;
+    __wasi_option_hash_u_t u;
+} __wasi_option_hash_t;
+
+_Static_assert(sizeof(__wasi_option_hash_t) == 24, "witx calculated size");
+_Static_assert(_Alignof(__wasi_option_hash_t) == 8, "witx calculated align");
+
+/**
  * A file descriptor handle.
  */
 typedef int __wasi_fd_t;
@@ -892,10 +907,10 @@ typedef struct __wasi_iovec_t {
 
 } __wasi_iovec_t;
 
-_Static_assert(sizeof(__wasi_iovec_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_iovec_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_iovec_t) == 16, "witx calculated size");
+_Static_assert(_Alignof(__wasi_iovec_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_iovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 8, "witx calculated offset");
 
 /**
  * A region of memory for scatter/gather writes.
@@ -913,10 +928,10 @@ typedef struct __wasi_ciovec_t {
 
 } __wasi_ciovec_t;
 
-_Static_assert(sizeof(__wasi_ciovec_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_ciovec_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_ciovec_t) == 16, "witx calculated size");
+_Static_assert(_Alignof(__wasi_ciovec_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_ciovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 8, "witx calculated offset");
 
 /**
  * Relative offset within a file.
@@ -3460,7 +3475,7 @@ _Static_assert(sizeof(__wasi_prestat_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
 
 /**
- * @defgroup wasix_32v1
+ * @defgroup wasix_64v1
  * @{
  */
 
@@ -4177,6 +4192,10 @@ __wasi_errno_t __wasi_thread_spawn(
      */
     uint64_t user_data,
     /**
+     * The base address of the stack allocated for this thread
+     */
+    uint64_t stack_base,
+    /**
      * Indicates if the function will operate as a reactor or
      * as a normal thread. Reactors will be repeatable called
      * whenever IO work is available to be processed.
@@ -4332,6 +4351,51 @@ _Noreturn void __wasi_thread_exit(
      */
     __wasi_exitcode_t rval
 );
+/**
+ * Creates a snapshot of the current stack which allows it to be restored
+ * later using its stack hash.
+ * This function signature must exactly match the `stack_restore` function
+ * in order for the trampoline to work properly.
+ * This function will manipulate the __stackpointer
+ */
+void __wasi_stack_save(
+    /**
+     * Hash of the stack that the current thread will be restored to
+     */
+    __wasi_option_hash_t * hash
+);
+/**
+ * Restores the current stack to a previous stack described by its
+ * stack hash.
+ * This function signature must exactly match the `stack_save` function
+ * in order for the trampoline to work properly.
+ * This function will manipulate the __stackpointer
+ */
+void __wasi_stack_restore(
+    /**
+     * Hash of the stack we will be jumping too - or none if we do not jump.
+     */
+    __wasi_option_hash_t * hash
+);
+/**
+ * Destroys a stack snapshot that was previously made using the `stack_save`
+ * system call - stack hashes are reference countered thus if the same snapshot
+ * is taken the memory remains consistent.
+ */
+void __wasi_stack_forget(
+    /**
+     * Hash of the stack that the current thread will be forgetten
+     */
+    const __wasi_hash_t * hash
+);
+/**
+ * Forks the current process into a new subprocess. If the function
+ * returns a zero then its the new subprocess. If it returns a positive
+ * number then its the current process and the $pid represents the child.
+ */
+__wasi_errno_t __wasi_fork(
+    __wasi_pid_t *retptr0
+) __attribute__((__warn_unused_result__));
 /**
  * Spawns a new process within the context of this machine
  * @return

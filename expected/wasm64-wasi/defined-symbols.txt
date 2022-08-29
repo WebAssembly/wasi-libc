@@ -307,6 +307,7 @@ __wasi_fd_seek
 __wasi_fd_sync
 __wasi_fd_tell
 __wasi_fd_write
+__wasi_fork
 __wasi_futex_wait
 __wasi_futex_wake
 __wasi_futex_wake_all
@@ -370,6 +371,9 @@ __wasi_sock_set_opt_size
 __wasi_sock_set_opt_time
 __wasi_sock_shutdown
 __wasi_sock_status
+__wasi_stack_forget
+__wasi_stack_restore
+__wasi_stack_save
 __wasi_thread_exit
 __wasi_thread_id
 __wasi_thread_join

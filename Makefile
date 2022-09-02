@@ -192,6 +192,10 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
         thread/__wait.c \
         thread/__timedwait.c \
+        thread/pthread_condattr_destroy.c \
+        thread/pthread_condattr_init.c \
+        thread/pthread_condattr_setclock.c \
+        thread/pthread_condattr_setpshared.c \
         thread/pthread_cleanup_push.c \
         thread/pthread_mutex_consistent.c \
         thread/pthread_mutex_destroy.c \
@@ -264,6 +268,9 @@ ifeq ($(THREAD_MODEL), posix)
 # Specify the tls-model until LLVM 15 is released (which should contain
 # https://reviews.llvm.org/D130053).
 CFLAGS += -mthread-model posix -pthread -ftls-model=local-exec
+
+# Include cloudlib's directory to access the structure definition of clockid_t
+CFLAGS += -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 endif
 
 # Expose the public headers to the implementation. We use `-isystem` for

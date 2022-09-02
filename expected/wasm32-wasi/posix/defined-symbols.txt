@@ -930,6 +930,10 @@ program_invocation_name
 program_invocation_short_name
 pselect
 psignal
+pthread_condattr_destroy
+pthread_condattr_init
+pthread_condattr_setclock
+pthread_condattr_setpshared
 pthread_mutex_consistent
 pthread_mutex_destroy
 pthread_mutex_getprioceiling

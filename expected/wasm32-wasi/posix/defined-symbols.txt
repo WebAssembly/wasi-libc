@@ -11,6 +11,7 @@ __EINVAL
 __ENOMEM
 __SIG_ERR
 __SIG_IGN
+__acquire_ptc
 __aio_close
 __asctime_r
 __assert_fail
@@ -38,9 +39,11 @@ __ctype_toupper_loc
 __cxa_atexit
 __cxa_finalize
 __des_setkey
+__dl_thread_cleanup
 __do_cleanup_pop
 __do_cleanup_push
 __do_des
+__do_orphaned_stdio_locks
 __duplocale
 __env_rm_add
 __exp2f_data
@@ -159,6 +162,7 @@ __math_uflow
 __math_uflowf
 __math_xflow
 __math_xflowf
+__membarrier_init
 __memrchr
 __mo_lookup
 __month_to_secs
@@ -183,6 +187,8 @@ __private_cond_signal
 __progname
 __progname_full
 __pthread_cond_timedwait
+__pthread_create
+__pthread_exit
 __pthread_mutex_lock
 __pthread_mutex_timedlock
 __pthread_mutex_trylock
@@ -197,11 +203,15 @@ __pthread_rwlock_unlock
 __pthread_rwlock_wrlock
 __pthread_setcancelstate
 __pthread_testcancel
+__pthread_tsd_main
+__pthread_tsd_run_dtors
+__pthread_tsd_size
 __putenv
 __qsort_r
 __rand48_step
 __random_lockptr
 __reallocarray
+__release_ptc
 __rem_pio2
 __rem_pio2_large
 __rem_pio2f
@@ -258,6 +268,9 @@ __tanl
 __testcancel
 __timedwait
 __timedwait_cp
+__tl_lock
+__tl_sync
+__tl_unlock
 __tm_to_secs
 __tm_to_tzname
 __tolower_l
@@ -949,6 +962,8 @@ pthread_condattr_destroy
 pthread_condattr_init
 pthread_condattr_setclock
 pthread_condattr_setpshared
+pthread_create
+pthread_exit
 pthread_mutex_consistent
 pthread_mutex_destroy
 pthread_mutex_getprioceiling
@@ -1213,6 +1228,7 @@ vswprintf
 vswscanf
 vwprintf
 vwscanf
+wasi_thread_start
 wcpcpy
 wcpncpy
 wcrtomb

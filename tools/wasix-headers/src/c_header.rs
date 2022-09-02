@@ -777,7 +777,7 @@ fn push_return_type(ret: &mut String, params: &mut Vec<(Option<String>, String)>
                 }
             }
         }
-        _ => panic!("unsupported type as a return value"),
+        _ => panic!("unsupported type as a return value ({})", typeref_name(tref)),
     }
 }
 

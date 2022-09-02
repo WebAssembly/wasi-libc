@@ -55,6 +55,14 @@ _Static_assert(sizeof(__wasi_size_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_size_t) == 4, "witx calculated align");
 
 /**
+ * Represents a large number of items
+ */
+typedef uint64_t __wasi_longsize_t;
+
+_Static_assert(sizeof(__wasi_longsize_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_longsize_t) == 8, "witx calculated align");
+
+/**
  * Non-negative file size or length of a region within a file.
  */
 typedef uint64_t __wasi_filesize_t;
@@ -87,6 +95,68 @@ _Static_assert(sizeof(__wasi_tl_val_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_tl_val_t) == 8, "witx calculated align");
 
 /**
+ * Value of a short hash
+ */
+typedef uint64_t __wasi_short_hash_t;
+
+_Static_assert(sizeof(__wasi_short_hash_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_short_hash_t) == 8, "witx calculated align");
+
+/**
+ * Represents a 128bit number
+ */
+typedef struct __wasi_hugesize_t {
+    /**
+     * First set of 64 bits
+     */
+    uint64_t b0;
+
+    /**
+     * second set of 64 bits
+     */
+    uint64_t b1;
+
+} __wasi_hugesize_t;
+
+_Static_assert(sizeof(__wasi_hugesize_t) == 16, "witx calculated size");
+_Static_assert(_Alignof(__wasi_hugesize_t) == 8, "witx calculated align");
+_Static_assert(offsetof(__wasi_hugesize_t, b0) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_hugesize_t, b1) == 8, "witx calculated offset");
+
+/**
+ * Represents a part of the stack (128 bytes)
+ */
+typedef struct __wasi_stack_part_t {
+    __wasi_hugesize_t a1;
+
+    __wasi_hugesize_t a2;
+
+    __wasi_hugesize_t a3;
+
+    __wasi_hugesize_t a4;
+
+    __wasi_hugesize_t a5;
+
+    __wasi_hugesize_t a6;
+
+    __wasi_hugesize_t a7;
+
+    __wasi_hugesize_t a8;
+
+} __wasi_stack_part_t;
+
+_Static_assert(sizeof(__wasi_stack_part_t) == 128, "witx calculated size");
+_Static_assert(_Alignof(__wasi_stack_part_t) == 8, "witx calculated align");
+_Static_assert(offsetof(__wasi_stack_part_t, a1) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_part_t, a2) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_part_t, a3) == 32, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_part_t, a4) == 48, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_part_t, a5) == 64, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_part_t, a6) == 80, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_part_t, a7) == 96, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_part_t, a8) == 112, "witx calculated offset");
+
+/**
  * Represents the first 128 bits of a SHA256 hash
  */
 typedef struct __wasi_hash_t {
@@ -106,6 +176,60 @@ _Static_assert(sizeof(__wasi_hash_t) == 16, "witx calculated size");
 _Static_assert(_Alignof(__wasi_hash_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_hash_t, b0) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_hash_t, b1) == 8, "witx calculated offset");
+
+/**
+ * Represents a snapshot of a point in time of the stack that can be restored later
+ */
+typedef struct __wasi_stack_snapshot_t {
+    /**
+     * Offset into the execution memory stack
+     */
+    uint32_t memory_offset;
+
+    /**
+     * Offset into the execution host stack
+     */
+    uint32_t host_offset;
+
+    /**
+     * Top part of the stack that is saved for later restoration
+     */
+    __wasi_stack_part_t stack1;
+
+    __wasi_stack_part_t stack2;
+
+    __wasi_stack_part_t stack3;
+
+    __wasi_stack_part_t stack4;
+
+    __wasi_stack_part_t stack5;
+
+    __wasi_stack_part_t stack6;
+
+    __wasi_stack_part_t stack7;
+
+    __wasi_stack_part_t stack8;
+
+    /**
+     * Hash thats used as an integrity checked
+     */
+    __wasi_hash_t hash;
+
+} __wasi_stack_snapshot_t;
+
+_Static_assert(sizeof(__wasi_stack_snapshot_t) == 1048, "witx calculated size");
+_Static_assert(_Alignof(__wasi_stack_snapshot_t) == 8, "witx calculated align");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, memory_offset) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, host_offset) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, stack1) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, stack2) == 136, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, stack3) == 264, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, stack4) == 392, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, stack5) == 520, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, stack6) == 648, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, stack7) == 776, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, stack8) == 904, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, hash) == 1032, "witx calculated offset");
 
 /**
  * Identifiers for clocks.
@@ -4352,41 +4476,36 @@ _Noreturn void __wasi_thread_exit(
     __wasi_exitcode_t rval
 );
 /**
- * Creates a snapshot of the current stack which allows it to be restored
- * later using its stack hash.
- * This function signature must exactly match the `stack_restore` function
- * in order for the trampoline to work properly.
- * This function will manipulate the __stackpointer
+ * Creates a checkpoint of the current stack which allows it to be restored
+ * later using its stack hash. The value supplied will be returned upon
+ * restoration (and hence must be none zero) - zero will be returned when
+ * the stack is first recorded.
+ * This function will read the __stack_pointer global
+ * @return
+ * Returns zero upon registration and the value when restored
  */
-void __wasi_stack_save(
+__wasi_errno_t __wasi_stack_checkpoint(
     /**
-     * Hash of the stack that the current thread will be restored to
+     * Reference to the stack snapshot that will be filled
      */
-    __wasi_option_hash_t * hash
-);
+    __wasi_stack_snapshot_t * snapshot,
+    __wasi_longsize_t *retptr0
+) __attribute__((__warn_unused_result__));
 /**
- * Restores the current stack to a previous stack described by its
- * stack hash.
- * This function signature must exactly match the `stack_save` function
- * in order for the trampoline to work properly.
- * This function will manipulate the __stackpointer
+ * Restores the current stack to a previous stack described by a supplied
+ * stack snapshot.
+ * This function will manipulate the __stack_pointer global
  */
-void __wasi_stack_restore(
+_Noreturn void __wasi_stack_restore(
     /**
-     * Hash of the stack we will be jumping too - or none if we do not jump.
+     * Reference to the stack snapshot that will be restored
      */
-    __wasi_option_hash_t * hash
-);
-/**
- * Destroys a stack snapshot that was previously made using the `stack_save`
- * system call - stack hashes are reference countered thus if the same snapshot
- * is taken the memory remains consistent.
- */
-void __wasi_stack_forget(
+    const __wasi_stack_snapshot_t * snapshot,
     /**
-     * Hash of the stack that the current thread will be forgetten
+     * Value to be returned when the stack is restored
+     * (if zero this will change to one)
      */
-    const __wasi_hash_t * hash
+    __wasi_longsize_t val
 );
 /**
  * Forks the current process into a new subprocess. If the function

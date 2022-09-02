@@ -161,6 +161,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(filter-out %/dcngettext.c %/textdomain.c %/bind_textdomain_codeset.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/locale/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/setjmp/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/search/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/multibyte/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/regex/*.c) \
@@ -337,7 +338,6 @@ MUSL_OMIT_HEADERS += \
     "resolv.h" \
     "pty.h" \
     "dlfcn.h" \
-    "setjmp.h" \
     "ulimit.h" \
     "sys/xattr.h" \
     "wordexp.h" \

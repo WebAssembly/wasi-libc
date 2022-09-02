@@ -2512,6 +2512,7 @@
 #define _SC_XOPEN_XPG4 100
 #define _SEARCH_H 
 #define _SEMAPHORE_H 
+#define _SETJMP_H 
 #define _SIGNAL_H 
 #define _SIZE_T 
 #define _STDALIGN_H 
@@ -3957,6 +3958,7 @@
 #define scalbn(x,y) __tg_real_2_1(scalbn, (x), (y))
 #define scandir64 scandir
 #define setbit(x,i) __bitop(x,i,|=)
+#define setjmp setjmp
 #define si_addr __si_fields.__sigfault.si_addr
 #define si_addr_lsb __si_fields.__sigfault.si_addr_lsb
 #define si_arch __si_fields.__sigsys.si_arch

@@ -905,37 +905,29 @@ _Noreturn void __wasi_thread_exit(
     __imported_wasix_64v1_thread_exit((int32_t) rval);
 }
 
-void __imported_wasix_64v1_stack_save(int64_t arg0) __attribute__((
+int32_t __imported_wasix_64v1_stack_checkpoint(int64_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_64v1"),
-    __import_name__("stack_save")
+    __import_name__("stack_checkpoint")
 ));
 
-void __wasi_stack_save(
-    __wasi_option_hash_t * hash
+__wasi_errno_t __wasi_stack_checkpoint(
+    __wasi_stack_snapshot_t * snapshot,
+    __wasi_longsize_t *retptr0
 ){
-    __imported_wasix_64v1_stack_save((int64_t) hash);
+    int32_t ret = __imported_wasix_64v1_stack_checkpoint((int64_t) snapshot, (intptr_t) retptr0);
+    return (uint16_t) ret;
 }
 
-void __imported_wasix_64v1_stack_restore(int64_t arg0) __attribute__((
+_Noreturn void __imported_wasix_64v1_stack_restore(int64_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_64v1"),
     __import_name__("stack_restore")
 ));
 
-void __wasi_stack_restore(
-    __wasi_option_hash_t * hash
+_Noreturn void __wasi_stack_restore(
+    const __wasi_stack_snapshot_t * snapshot,
+    __wasi_longsize_t val
 ){
-    __imported_wasix_64v1_stack_restore((int64_t) hash);
-}
-
-void __imported_wasix_64v1_stack_forget(int64_t arg0) __attribute__((
-    __import_module__("wasix_64v1"),
-    __import_name__("stack_forget")
-));
-
-void __wasi_stack_forget(
-    const __wasi_hash_t * hash
-){
-    __imported_wasix_64v1_stack_forget((int64_t) hash);
+    __imported_wasix_64v1_stack_restore((int64_t) snapshot, (int64_t) val);
 }
 
 int32_t __imported_wasix_64v1_fork(int64_t arg0) __attribute__((

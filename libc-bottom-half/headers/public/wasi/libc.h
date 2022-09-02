@@ -1,6 +1,7 @@
 #ifndef __wasi_libc_h
 #define __wasi_libc_h
 
+#include <wasi/api.h>
 #include <__typedef_off_t.h>
 #include <__struct_timespec.h>
 
@@ -46,6 +47,8 @@ unsigned long long __wasilibc_tls_size(void);
 unsigned long long __wasilibc_tls_align(void);
 void* __wasilibc_get_tls_base(void);
 void __wasilibc_set_tls_base(void *val);
+int __wasilibc_setjmp(__wasi_stack_snapshot_t * buf);
+_Noreturn void __wasilibc_longjmp(__wasi_stack_snapshot_t * buf, int val);
 
 /// Return the current file offset. Like `lseek(fd, 0, SEEK_CUR)`, but without
 /// depending on `lseek`.

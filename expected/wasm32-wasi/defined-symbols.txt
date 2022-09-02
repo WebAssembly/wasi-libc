@@ -371,9 +371,8 @@ __wasi_sock_set_opt_size
 __wasi_sock_set_opt_time
 __wasi_sock_shutdown
 __wasi_sock_status
-__wasi_stack_forget
+__wasi_stack_checkpoint
 __wasi_stack_restore
-__wasi_stack_save
 __wasi_thread_exit
 __wasi_thread_id
 __wasi_thread_join
@@ -406,6 +405,7 @@ __wasilibc_initialize_environ
 __wasilibc_link
 __wasilibc_link_newat
 __wasilibc_link_oldat
+__wasilibc_longjmp
 __wasilibc_maybe_reinitialize_environ_eagerly
 __wasilibc_maybe_reinitialize_environ_eagerly
 __wasilibc_nocwd___wasilibc_rmdirat
@@ -429,6 +429,7 @@ __wasilibc_rename_oldat
 __wasilibc_rmdirat
 __wasilibc_set_stack_pointer
 __wasilibc_set_tls_base
+__wasilibc_setjmp
 __wasilibc_stat
 __wasilibc_tell
 __wasilibc_tls_align
@@ -935,6 +936,7 @@ logbf
 logbl
 logf
 logl
+longjmp
 lrand48
 lrint
 lrintf
@@ -1108,6 +1110,7 @@ setegid
 setenv
 seteuid
 setgid
+setjmp
 setkey
 setlinebuf
 setlocale

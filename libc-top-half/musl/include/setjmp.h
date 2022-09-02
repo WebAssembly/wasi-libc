@@ -7,7 +7,7 @@ extern "C" {
 
 #include <features.h>
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no setjmp */
+#ifdef __wasilibc_unmodified_upstream
 #include <bits/setjmp.h>
 
 typedef struct __jmp_buf_tag {
@@ -29,14 +29,16 @@ _Noreturn void siglongjmp (sigjmp_buf, int);
 int _setjmp (jmp_buf);
 _Noreturn void _longjmp (jmp_buf, int);
 #endif
+#else
+#include <wasi/api.h>
+typedef __wasi_stack_snapshot_t __jmp_buf_tag;
+typedef __wasi_stack_snapshot_t jmp_buf[1];
+#endif
 
 int setjmp (jmp_buf);
 _Noreturn void longjmp (jmp_buf, int);
 
 #define setjmp setjmp
-#else
-#warning setjmp is not yet implemented for WASI
-#endif
 
 #ifdef __cplusplus
 }

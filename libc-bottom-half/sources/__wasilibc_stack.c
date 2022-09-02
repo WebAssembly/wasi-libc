@@ -1,4 +1,6 @@
+#include <wasi/api.h>
 #include <sys/types.h>
+#include <stdlib.h>
 
 void* __wasilibc_get_stack_pointer(void) {
   void* val;
@@ -84,4 +86,16 @@ void __wasilibc_set_tls_base(void *val) {
           "local.get %0\n"
           "global.set __tls_base" : /* no outputs */ : "r" (val));
 #endif
+}
+
+int __wasilibc_setjmp(__wasi_stack_snapshot_t * buf) {
+  uint64_t ret = 0;
+  if (__wasi_stack_checkpoint(buf, &ret) != 0) {
+    __builtin_trap();
+  }
+  return (int)ret;
+}
+
+_Noreturn void __wasilibc_longjmp(__wasi_stack_snapshot_t * buf, int val) {
+  __wasi_stack_restore(buf, (uint64_t)val);
 }

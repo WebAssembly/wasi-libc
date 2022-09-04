@@ -207,6 +207,9 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_mutexattr_setpshared.c \
         thread/pthread_mutexattr_setrobust.c \
         thread/pthread_mutexattr_settype.c \
+        thread/pthread_rwlockattr_destroy.c \
+        thread/pthread_rwlockattr_init.c \
+        thread/pthread_rwlockattr_setpshared.c \
         thread/pthread_testcancel.c \
         thread/sem_destroy.c \
         thread/sem_getvalue.c \

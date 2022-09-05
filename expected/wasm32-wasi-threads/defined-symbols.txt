@@ -1044,6 +1044,11 @@ pthread_rwlockattr_setpshared
 pthread_self
 pthread_setcancelstate
 pthread_setspecific
+pthread_spin_destroy
+pthread_spin_init
+pthread_spin_lock
+pthread_spin_trylock
+pthread_spin_unlock
 pthread_testcancel
 pthread_timedjoin_np
 pthread_tryjoin_np

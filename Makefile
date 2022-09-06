@@ -220,11 +220,17 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
         thread/__wait.c \
         thread/__timedwait.c \
+        thread/pthread_cleanup_push.c \
+        thread/pthread_cond_broadcast.c \
+        thread/pthread_cond_destroy.c \
+        thread/pthread_cond_init.c \
+        thread/pthread_cond_signal.c \
+        thread/pthread_cond_timedwait.c \
+        thread/pthread_cond_wait.c \
         thread/pthread_condattr_destroy.c \
         thread/pthread_condattr_init.c \
         thread/pthread_condattr_setclock.c \
         thread/pthread_condattr_setpshared.c \
-        thread/pthread_cleanup_push.c \
         thread/pthread_mutex_consistent.c \
         thread/pthread_mutex_destroy.c \
         thread/pthread_mutex_init.c \

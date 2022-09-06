@@ -3,6 +3,7 @@
 #define IS32BIT(x) !((x)+0x80000000ULL>>32)
 #define CLAMP(x) (int)(IS32BIT(x) ? (x) : 0x7fffffffU+((0ULL+(x))>>63))
 
+#ifdef __wasilibc_unmodified_upstream
 static int __futex4(volatile void *addr, int op, int val, const struct timespec *to)
 {
 #ifdef SYS_futex_time64
@@ -17,6 +18,7 @@ static int __futex4(volatile void *addr, int op, int val, const struct timespec 
 #endif
 	return __syscall(SYS_futex, addr, op, val, to);
 }
+#endif
 
 static int pthread_mutex_timedlock_pi(pthread_mutex_t *restrict m, const struct timespec *restrict at)
 {
@@ -27,16 +29,22 @@ static int pthread_mutex_timedlock_pi(pthread_mutex_t *restrict m, const struct 
 
 	if (!priv) self->robust_list.pending = &m->_m_next;
 
+#ifdef __wasilibc_unmodified_upstream
 	do e = -__futex4(&m->_m_lock, FUTEX_LOCK_PI|priv, 0, at);
 	while (e==EINTR);
 	if (e) self->robust_list.pending = 0;
+#else
+   e = 0;
+#endif
 
 	switch (e) {
 	case 0:
 		/* Catch spurious success for non-robust mutexes. */
 		if (!(type&4) && ((m->_m_lock & 0x40000000) || m->_m_waiters)) {
 			a_store(&m->_m_waiters, -1);
+#ifdef __wasilibc_unmodified_upstream
 			__syscall(SYS_futex, &m->_m_lock, FUTEX_UNLOCK_PI|priv);
+#endif
 			self->robust_list.pending = 0;
 			break;
 		}

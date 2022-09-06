@@ -58,7 +58,11 @@ int pthread_barrierattr_getpshared(const pthread_barrierattr_t *restrict a, int 
 
 int pthread_condattr_getclock(const pthread_condattr_t *restrict a, clockid_t *restrict clk)
 {
+#ifdef __wasilibc_unmodified_upstream
 	*clk = a->__attr & 0x7fffffff;
+#else
+	clk->id = (__wasi_clockid_t)(a->__attr & 0x7fffffff);
+#endif
 	return 0;
 }
 

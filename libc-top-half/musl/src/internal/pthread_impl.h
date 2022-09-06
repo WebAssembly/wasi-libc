@@ -18,6 +18,7 @@
 #include "futex.h"
 
 #include "pthread_arch.h"
+#include <wasi/libc.h>
 
 #define pthread __pthread
 
@@ -181,7 +182,8 @@ static inline void __wake(volatile void *addr, int cnt, int priv)
 	__syscall(SYS_futex, addr, FUTEX_WAKE|priv, cnt) != -ENOSYS ||
 	__syscall(SYS_futex, addr, FUTEX_WAKE, cnt);
 #else
-	__builtin_wasm_memory_atomic_notify((int*)addr, cnt);
+	__wasilibc_futex_wake((int*)addr, cnt);
+	//__builtin_wasm_memory_atomic_notify((int*)addr, cnt);
 #endif
 }
 static inline void __futexwait(volatile void *addr, int val, int priv)
@@ -202,6 +204,10 @@ hidden void __inhibit_ptc(void);
 hidden void __tl_lock(void);
 hidden void __tl_unlock(void);
 hidden void __tl_sync(pthread_t);
+
+hidden void __vm_wait(void);
+hidden void __vm_lock(void);
+hidden void __vm_unlock(void);
 
 extern hidden volatile int __thread_list_lock;
 

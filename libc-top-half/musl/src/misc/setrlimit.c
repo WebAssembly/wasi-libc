@@ -1,8 +1,11 @@
 #include <sys/resource.h>
 #include <errno.h>
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#endif
 #include "libc.h"
 
+#ifdef __wasilibc_unmodified_upstream
 #define MIN(a, b) ((a)<(b) ? (a) : (b))
 #define FIX(x) do{ if ((x)>=SYSCALL_RLIM_INFINITY) (x)=RLIM_INFINITY; }while(0)
 
@@ -18,9 +21,11 @@ static void do_setrlimit(void *p)
 	if (c->err>0) return;
 	c->err = -__syscall(SYS_setrlimit, c->res, c->lim);
 }
+#endif
 
 int setrlimit(int resource, const struct rlimit *rlim)
 {
+#ifdef __wasilibc_unmodified_upstream
 	struct rlimit tmp;
 	if (SYSCALL_RLIM_INFINITY != RLIM_INFINITY) {
 		tmp = *rlim;
@@ -41,6 +46,7 @@ int setrlimit(int resource, const struct rlimit *rlim)
 		if (c.err>0) errno = c.err;
 		return -1;
 	}
+#endif
 	return 0;
 }
 

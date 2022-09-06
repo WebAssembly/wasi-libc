@@ -8,6 +8,7 @@
 pid_t wait4(pid_t pid, int *status, int options, struct rusage *ru)
 {
 	int r;
+#ifdef __wasilibc_unmodified_upstream
 #ifdef SYS_wait4_time64
 	if (ru) {
 		long long kru64[18];
@@ -35,5 +36,8 @@ pid_t wait4(pid_t pid, int *status, int options, struct rusage *ru)
 		ru->ru_stime = (struct timeval)
 			{ .tv_sec = kru[2], .tv_usec = kru[3] };
 	}
+#else
+	r = waitpid(pid, status, options);
+#endif
 	return __syscall_ret(r);
 }

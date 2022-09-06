@@ -30,11 +30,11 @@ void __wasilibc_set_stack_pointer(void *val) {
 
 void __wasm_init_tls(size_t val);
 
-void __wasilibc_init_tls(void *val) {
+static void __wasilibc_init_tls(void *val) {
   __wasm_init_tls((size_t)val);
 }
 
-unsigned long long __wasilibc_tls_size(void) {
+static unsigned long long __wasilibc_tls_size(void) {
   size_t val;
 #if defined(__wasm64__)
   __asm__(".globaltype __tls_size, i64, immutable\n"
@@ -48,7 +48,7 @@ unsigned long long __wasilibc_tls_size(void) {
   return (unsigned long long)val;
 }
 
-unsigned long long __wasilibc_tls_align(void) {
+static unsigned long long __wasilibc_tls_align(void) {
   size_t val;
 #if defined(__wasm64__)
   __asm__(".globaltype __tls_align, i64, immutable\n"

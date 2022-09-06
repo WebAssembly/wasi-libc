@@ -2,10 +2,13 @@
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
+#ifdef __wasilibc_unmodified_upstream
 #include <sys/prctl.h>
+#endif
 
 #include "pthread_impl.h"
 
+#ifdef __wasilibc_unmodified_upstream
 int pthread_setname_np(pthread_t thread, const char *name)
 {
 	int fd, cs, status = 0;
@@ -24,3 +27,9 @@ int pthread_setname_np(pthread_t thread, const char *name)
 	pthread_setcancelstate(cs, 0);
 	return status;
 }
+#else
+int pthread_setname_np(pthread_t thread, const char *name)
+{
+	return 0;
+}
+#endif

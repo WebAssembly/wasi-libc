@@ -33,7 +33,9 @@ int __pthread_mutex_unlock(pthread_mutex_t *m)
 	if (type&8) {
 		if (old<0 || a_cas(&m->_m_lock, old, new)!=old) {
 			if (new) a_store(&m->_m_waiters, -1);
+#ifdef __wasilibc_unmodified_upstream
 			__syscall(SYS_futex, &m->_m_lock, FUTEX_UNLOCK_PI|priv);
+#endif
 		}
 		cont = 0;
 		waiters = 0;

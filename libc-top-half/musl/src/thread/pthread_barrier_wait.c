@@ -88,7 +88,8 @@ int pthread_barrier_wait(pthread_barrier_t *b)
 			__syscall(SYS_futex, &inst->finished, FUTEX_WAIT|FUTEX_PRIVATE, 1, 0) != -ENOSYS
 			|| __syscall(SYS_futex, &inst->finished, FUTEX_WAIT, 1, 0);
 #else
-			__builtin_wasm_memory_atomic_wait32((int*)addr, val);
+			__wasilibc_futex_wait((int*)&inst->finished, 1);
+			//__builtin_wasm_memory_atomic_wait32((int*)addr, val);
 #endif
 		}
 		return PTHREAD_BARRIER_SERIAL_THREAD;

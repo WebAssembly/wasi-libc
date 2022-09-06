@@ -12,7 +12,7 @@ int __clock_settime(clockid_t clock_id, const struct timespec *tp) {
     errno = EINVAL;
     return -1;
   }
-  __wasi_errno_t error = __wasi_clock_time_set(clock_id->id, ts);
+  __wasi_errno_t error = __wasi_clock_time_set(clock_id.id, ts);
   if (error != 0) {
     errno = error;
     return -1;

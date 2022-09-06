@@ -20,11 +20,13 @@ typedef enum {
 pid_t wait (int *);
 pid_t waitpid (pid_t, int *, int );
 
+#ifdef __wasilibc_unmodified_upstream
 #if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) \
  || defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) \
  || defined(_BSD_SOURCE)
 #include <signal.h>
 int waitid (idtype_t, id_t, siginfo_t *, int);
+#endif
 #endif
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)

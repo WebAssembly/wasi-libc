@@ -1,11 +1,14 @@
 #include <sys/time.h>
 #include <errno.h>
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#endif
 
 #define IS32BIT(x) !((x)+0x80000000ULL>>32)
 
 int setitimer(int which, const struct itimerval *restrict new, struct itimerval *restrict old)
 {
+#ifdef __wasilibc_unmodified_upstream
 	if (sizeof(time_t) > sizeof(long)) {
 		time_t is = new->it_interval.tv_sec, vs = new->it_value.tv_sec;
 		long ius = new->it_interval.tv_usec, vus = new->it_value.tv_usec;
@@ -23,4 +26,7 @@ int setitimer(int which, const struct itimerval *restrict new, struct itimerval 
 		return __syscall_ret(r);
 	}
 	return syscall(SYS_setitimer, which, new, old);
+#else
+	return EINVAL;
+#endif
 }

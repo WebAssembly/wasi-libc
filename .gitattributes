@@ -2,3 +2,4 @@
 # them differing depending on the line-ending style of the host they
 # were checked out on.
 * text eol=lf
+*.a binary

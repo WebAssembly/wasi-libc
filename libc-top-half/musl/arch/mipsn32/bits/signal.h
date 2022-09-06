@@ -141,3 +141,5 @@ typedef struct __ucontext {
 #define SIGUNUSED SIGSYS
 
 #define _NSIG 128
+#define _NSIG_BPW   32
+#define _NSIG_WORDS (_NSIG / _NSIG_BPW)

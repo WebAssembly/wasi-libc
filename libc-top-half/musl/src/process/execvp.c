@@ -4,7 +4,9 @@
 #include <errno.h>
 #include <limits.h>
 
+#ifdef __wasilibc_unmodified_upstream
 extern char **__environ;
+#endif
 
 int __execvpe(const char *file, char *const argv[], char *const envp[])
 {
@@ -52,9 +54,14 @@ int __execvpe(const char *file, char *const argv[], char *const envp[])
 	return -1;
 }
 
-int execvp(const char *file, char *const argv[])
+int __execvp(const char *file, char *const argv[])
 {
+#ifdef __wasilibc_unmodified_upstream
 	return __execvpe(file, argv, __environ);
+#else
+	return execv(file, argv);
+#endif
 }
 
-weak_alias(__execvpe, execvpe);
+weak_alias(__execvp, execvp);
+weak_alias(__execvp, execvpe);

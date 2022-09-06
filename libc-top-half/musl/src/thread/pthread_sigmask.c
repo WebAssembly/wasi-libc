@@ -1,5 +1,6 @@
 #include <signal.h>
 #include <errno.h>
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
 
 int pthread_sigmask(int how, const sigset_t *restrict set, sigset_t *restrict old)
@@ -17,3 +18,9 @@ int pthread_sigmask(int how, const sigset_t *restrict set, sigset_t *restrict ol
 	}
 	return ret;
 }
+#else
+int pthread_sigmask(int how, const sigset_t *restrict set, sigset_t *restrict old)
+{
+	return 0;
+}
+#endif

@@ -1,12 +1,18 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
+#ifdef __wasilibc_unmodified_upstream
 #include <sys/wait.h>
+#endif
 #include <spawn.h>
 #include <errno.h>
 #include "pthread_impl.h"
 
+#ifdef __wasilibc_unmodified_upstream
 extern char **__environ;
+#else
+pid_t waitpid(pid_t pid, int *status, int options);
+#endif
 
 int system(const char *cmd)
 {
@@ -32,8 +38,14 @@ int system(const char *cmd)
 	posix_spawnattr_setsigmask(&attr, &old);
 	posix_spawnattr_setsigdefault(&attr, &reset);
 	posix_spawnattr_setflags(&attr, POSIX_SPAWN_SETSIGDEF|POSIX_SPAWN_SETSIGMASK);
+#ifdef __wasilibc_unmodified_upstream
 	ret = posix_spawn(&pid, "/bin/sh", 0, &attr,
 		(char *[]){"sh", "-c", (char *)cmd, 0}, __environ);
+#else
+	char* envp = NULL;
+	ret = posix_spawn(&pid, "/bin/sh", 0, &attr,
+		(char *[]){"sh", "-c", (char *)cmd, 0}, &envp);
+#endif
 	posix_spawnattr_destroy(&attr);
 
 	if (!ret) while (waitpid(pid, &status, 0)<0 && errno == EINTR);

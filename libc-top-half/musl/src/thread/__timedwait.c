@@ -2,12 +2,15 @@
 #include <time.h>
 #include <errno.h>
 #include "futex.h"
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#endif
 #include "pthread_impl.h"
 
 #define IS32BIT(x) !((x)+0x80000000ULL>>32)
 #define CLAMP(x) (int)(IS32BIT(x) ? (x) : 0x7fffffffU+((0ULL+(x))>>63))
 
+#ifdef __wasilibc_unmodified_upstream
 static int __futex4_cp(volatile void *addr, int op, int val, const struct timespec *to)
 {
 	int r;
@@ -28,6 +31,7 @@ static int __futex4_cp(volatile void *addr, int op, int val, const struct timesp
 
 static volatile int dummy = 0;
 weak_alias(dummy, __eintr_valid_flag);
+#endif
 
 int __timedwait_cp(volatile int *addr, int val,
 	clockid_t clk, const struct timespec *at, int priv)
@@ -49,6 +53,7 @@ int __timedwait_cp(volatile int *addr, int val,
 		top = &to;
 	}
 
+#ifdef __wasilibc_unmodified_upstream
 	r = -__futex4_cp(addr, FUTEX_WAIT|priv, val, top);
 	if (r != EINTR && r != ETIMEDOUT && r != ECANCELED) r = 0;
 	/* Mitigate bug in old kernels wrongly reporting EINTR for non-
@@ -56,6 +61,11 @@ int __timedwait_cp(volatile int *addr, int val,
 	 * when NO interrupting signal handlers have been installed, and
 	 * works by sigaction tracking whether that's the case. */
 	if (r == EINTR && !__eintr_valid_flag) r = 0;
+#else
+    volatile int waiters = 0;
+	__wait(addr, &waiters, val, 0);
+	r = 0;
+#endif
 
 	return r;
 }

@@ -97,9 +97,13 @@ static int do_wordexp(const char *s, wordexp_t *we, int flags)
 	}
 
 	if (pipe2(p, O_CLOEXEC) < 0) goto nospace;
+#ifdef __wasilibc_unmodified_upstream
 	__block_all_sigs(&set);
+#endif
 	pid = fork();
+#ifdef __wasilibc_unmodified_upstream
 	__restore_sigs(&set);
+#endif
 	if (pid < 0) {
 		close(p[0]);
 		close(p[1]);

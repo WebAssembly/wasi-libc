@@ -1,5 +1,4 @@
 #include "pthread_impl.h"
-#include "syscall.h"
 
 int pthread_attr_setinheritsched(pthread_attr_t *a, int inherit)
 {

@@ -8,7 +8,7 @@ NM ?= $(patsubst %clang,%llvm-nm,$(filter-out ccache sccache,$(CC)))
 ifeq ($(origin AR), default)
 AR = $(patsubst %clang,%llvm-ar,$(filter-out ccache sccache,$(CC)))
 endif
-EXTRA_CFLAGS ?= -O2 -DNDEBUG -ftls-model=local-exec
+EXTRA_CFLAGS ?= -O2 -DNDEBUG -ftls-model=local-exec -D_WASI_EMULATED_MMAN -D_WASI_EMULATED_PROCESS_CLOCKS
 # The directory where we build the sysroot.
 SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
@@ -69,9 +69,6 @@ LIBWASI_EMULATED_GETPID_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_DIR)/getpid -name \*.c)
 LIBWASI_EMULATED_SIGNAL_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_DIR)/signal -name \*.c)
-LIBWASI_EMULATED_SIGNAL_MUSL_SOURCES = \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/signal/psignal.c \
-    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/string/strsignal.c
 LIBC_BOTTOM_HALF_CRT_SOURCES = $(wildcard $(LIBC_BOTTOM_HALF_DIR)/crt/*.c)
 LIBC_TOP_HALF_DIR = $(CURDIR)/libc-top-half
 LIBC_TOP_HALF_MUSL_DIR = $(LIBC_TOP_HALF_DIR)/musl
@@ -79,6 +76,7 @@ LIBC_TOP_HALF_MUSL_SRC_DIR = $(LIBC_TOP_HALF_MUSL_DIR)/src
 LIBC_TOP_HALF_MUSL_INC = $(LIBC_TOP_HALF_MUSL_DIR)/include
 LIBC_TOP_HALF_MUSL_SOURCES = \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
+        internal/syscall_ret.c \
         misc/a64l.c \
         misc/basename.c \
         misc/dirname.c \
@@ -91,8 +89,11 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         misc/getopt.c \
         misc/getopt_long.c \
         misc/getsubopt.c \
+        misc/getrlimit.c \
+        misc/setrlimit.c \
         misc/uname.c \
         misc/nftw.c \
+        misc/syslog.c \
         errno/strerror.c \
         network/htonl.c \
         network/htons.c \
@@ -124,6 +125,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         time/difftime.c \
         time/timegm.c \
         time/ftime.c \
+        time/times.c \
         time/gmtime.c \
         time/gmtime_r.c \
         time/timespec_get.c \
@@ -145,28 +147,41 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         env/setenv.c \
         env/unsetenv.c \
         unistd/posix_close.c \
+        unistd/tcgetpgrp.c \
+        unistd/tcsetpgrp.c \
+        unistd/getpgid.c \
+        unistd/getpgrp.c \
+        unistd/setpgid.c \
+        unistd/setpgrp.c \
+        unistd/getsid.c \
+        unistd/setsid.c \
+        linux/wait3.c \
+        linux/wait4.c \
         stat/futimesat.c \
     ) \
     $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/*.c)) \
-    $(filter-out %/flockfile.c %/funlockfile.c %/__lockfile.c %/ftrylockfile.c \
-                 %/rename.c \
+    $(filter-out %/rename.c \
                  %/tmpnam.c %/tmpfile.c %/tempnam.c \
                  %/popen.c %/pclose.c \
                  %/remove.c \
                  %/gets.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/*.c)) \
-    $(filter-out %/strsignal.c, \
-                 $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/string/*.c)) \
     $(filter-out %/dcngettext.c %/textdomain.c %/bind_textdomain_codeset.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/locale/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/setjmp/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/thread/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/signal/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/process/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/env/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/exit/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/search/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/multibyte/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/regex/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/prng/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/conf/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/passwd/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/ctype/*.c) \
     $(filter-out %/__signbit.c %/__signbitf.c %/__signbitl.c \
                  %/__fpclassify.c %/__fpclassifyf.c %/__fpclassifyl.c \
@@ -271,7 +286,6 @@ LIBWASI_EMULATED_MMAN_OBJS = $(call objs,$(LIBWASI_EMULATED_MMAN_SOURCES))
 LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS = $(call objs,$(LIBWASI_EMULATED_PROCESS_CLOCKS_SOURCES))
 LIBWASI_EMULATED_GETPID_OBJS = $(call objs,$(LIBWASI_EMULATED_GETPID_SOURCES))
 LIBWASI_EMULATED_SIGNAL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_SOURCES))
-LIBWASI_EMULATED_SIGNAL_MUSL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_MUSL_SOURCES))
 
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
@@ -310,10 +324,8 @@ MUSL_OMIT_HEADERS += \
     "bits/statfs.h" \
     "sys/vfs.h" \
     "sys/statvfs.h" \
-    "syslog.h" "sys/syslog.h" \
-    "wait.h" "sys/wait.h" \
+    "sys/syslog.h" \
     "ucontext.h" "sys/ucontext.h" \
-    "paths.h" \
     "utmp.h" "utmpx.h" \
     "lastlog.h" \
     "sys/acct.h" \
@@ -329,10 +341,9 @@ MUSL_OMIT_HEADERS += \
     "sys/mount.h" \
     "sys/fanotify.h" \
     "sys/personality.h" \
-    "elf.h" "link.h" "bits/link.h" \
+    "link.h" "bits/link.h" \
     "scsi/scsi.h" "scsi/scsi_ioctl.h" "scsi/sg.h" \
     "sys/auxv.h" \
-    "pwd.h" "shadow.h" "grp.h" \
     "mntent.h" \
     "netdb.h" \
     "resolv.h" \
@@ -341,12 +352,9 @@ MUSL_OMIT_HEADERS += \
     "ulimit.h" \
     "sys/xattr.h" \
     "wordexp.h" \
-    "spawn.h" \
     "sys/membarrier.h" \
     "sys/signalfd.h" \
-    "termios.h" \
     "sys/termios.h" \
-    "bits/termios.h" \
     "net/if.h" \
     "net/if_arp.h" \
     "net/ethernet.h" \
@@ -354,7 +362,6 @@ MUSL_OMIT_HEADERS += \
     "netinet/if_ether.h" \
     "netinet/ether.h" \
     "sys/timerfd.h" \
-    "libintl.h" \
     "sys/sysmacros.h"
 
 ifeq ($(THREAD_MODEL), single)
@@ -376,8 +383,6 @@ $(SYSROOT_LIB)/libwasi-emulated-process-clocks.a: $(LIBWASI_EMULATED_PROCESS_CLO
 
 $(SYSROOT_LIB)/libwasi-emulated-getpid.a: $(LIBWASI_EMULATED_GETPID_OBJS)
 
-$(SYSROOT_LIB)/libwasi-emulated-signal.a: $(LIBWASI_EMULATED_SIGNAL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS)
-
 %.a:
 	@mkdir -p "$(@D)"
 	# On Windows, the commandline for the ar invocation got too long, so it needs to be split up.
@@ -390,11 +395,9 @@ $(SYSROOT_LIB)/libwasi-emulated-signal.a: $(LIBWASI_EMULATED_SIGNAL_OBJS) $(LIBW
 	$(AR) crs $@ $(wordlist 800, 100000, $^)
 
 $(MUSL_PRINTSCAN_OBJS): CFLAGS += \
-	    -D__wasilibc_printscan_no_long_double \
 	    -D__wasilibc_printscan_full_support_option="\"add -lc-printscan-long-double to the link command\""
 
 $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): CFLAGS += \
-	    -D__wasilibc_printscan_no_floating_point \
 	    -D__wasilibc_printscan_floating_point_support_option="\"remove -lc-printscan-no-floating-point from the link command\""
 
 # TODO: apply -mbulk-memory globally, once
@@ -404,9 +407,6 @@ $(BULK_MEMORY_OBJS): CFLAGS += \
 
 $(BULK_MEMORY_OBJS): CFLAGS += \
         -DBULK_MEMORY_THRESHOLD=$(BULK_MEMORY_THRESHOLD)
-
-$(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS): CFLAGS += \
-	    -D_WASI_EMULATED_SIGNAL
 
 $(OBJDIR)/%.long-double.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
@@ -432,7 +432,7 @@ startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS): CFLAGS += \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/include \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal
 
-$(LIBC_TOP_HALF_ALL_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS): CFLAGS += \
+$(LIBC_TOP_HALF_ALL_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): CFLAGS += \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/include \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal \
     -I$(LIBC_TOP_HALF_MUSL_DIR)/arch/$(TARGET_ARCH) \
@@ -488,8 +488,7 @@ libc: include_dirs \
     $(SYSROOT_LIB)/libc-printscan-no-floating-point.a \
     $(SYSROOT_LIB)/libwasi-emulated-mman.a \
     $(SYSROOT_LIB)/libwasi-emulated-process-clocks.a \
-    $(SYSROOT_LIB)/libwasi-emulated-getpid.a \
-    $(SYSROOT_LIB)/libwasi-emulated-signal.a
+    $(SYSROOT_LIB)/libwasi-emulated-getpid.a
 
 finish: startup_files libc
 	#

@@ -1,4 +1,6 @@
+#ifndef _WASI_EMULATED_PROCESS_CLOCKS
 #define _WASI_EMULATED_PROCESS_CLOCKS
+#endif
 #include <sys/resource.h>
 #include <errno.h>
 #include <time.h>

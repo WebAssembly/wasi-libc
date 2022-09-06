@@ -1,7 +1,9 @@
 #include <signal.h>
 #include <errno.h>
 #include <string.h>
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#endif
 #include "pthread_impl.h"
 #include "libc.h"
 #include "lock.h"
@@ -17,6 +19,7 @@ void __get_handler_set(sigset_t *set)
 
 volatile int __eintr_valid_flag;
 
+#ifdef __wasilibc_unmodified_upstream
 int __libc_sigaction(int sig, const struct sigaction *restrict sa, struct sigaction *restrict old)
 {
 	struct k_sigaction ksa, ksa_old;
@@ -56,6 +59,7 @@ int __libc_sigaction(int sig, const struct sigaction *restrict sa, struct sigact
 	}
 	return __syscall_ret(r);
 }
+#endif
 
 int __sigaction(int sig, const struct sigaction *restrict sa, struct sigaction *restrict old)
 {
@@ -70,13 +74,21 @@ int __sigaction(int sig, const struct sigaction *restrict sa, struct sigaction *
 	 * so that it cannot be changed while abort is terminating the
 	 * process and so any change made by abort can't be observed. */
 	if (sig == SIGABRT) {
+#ifdef __wasilibc_unmodified_upstream
 		__block_all_sigs(&set);
+#endif
 		LOCK(__abort_lock);
 	}
+#ifdef __wasilibc_unmodified_upstream
 	int r = __libc_sigaction(sig, sa, old);
+#else
+	int r = EINVAL;
+#endif
 	if (sig == SIGABRT) {
 		UNLOCK(__abort_lock);
+#ifdef __wasilibc_unmodified_upstream
 		__restore_sigs(&set);
+#endif
 	}
 	return r;
 }

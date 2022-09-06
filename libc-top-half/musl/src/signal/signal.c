@@ -1,5 +1,18 @@
 #include <signal.h>
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#endif
+
+void __SIG_IGN(int sig) {
+    // do nothing
+}
+
+_Noreturn
+void __SIG_ERR(int sig) {
+    __builtin_trap();
+}
+
+// This is emulated in the bottom end instead
 
 void (*signal(int sig, void (*func)(int)))(int)
 {

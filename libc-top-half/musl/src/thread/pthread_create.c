@@ -6,14 +6,21 @@
 #include <sys/mman.h>
 #include <string.h>
 #include <stddef.h>
+#ifdef __wasilibc_unmodified_upstream
+#else
+#include <wasi/api.h>
+#include <bits/signal.h>
+#endif
 
 static void dummy_0()
 {
 }
+#ifdef __wasilibc_unmodified_upstream
 weak_alias(dummy_0, __acquire_ptc);
 weak_alias(dummy_0, __release_ptc);
 weak_alias(dummy_0, __pthread_tsd_run_dtors);
 weak_alias(dummy_0, __do_orphaned_stdio_locks);
+#endif
 weak_alias(dummy_0, __dl_thread_cleanup);
 weak_alias(dummy_0, __membarrier_init);
 
@@ -69,7 +76,9 @@ _Noreturn void __pthread_exit(void *result)
 
 	__pthread_tsd_run_dtors();
 
+#ifdef __wasilibc_unmodified_upstream
 	__block_app_sigs(&set);
+#endif
 
 	/* This atomic potentially competes with a concurrent pthread_detach
 	 * call; the loser is responsible for freeing thread resources. */
@@ -101,7 +110,9 @@ _Noreturn void __pthread_exit(void *result)
 		__tl_unlock();
 		UNLOCK(self->killlock);
 		self->detach_state = state;
+#ifdef __wasilibc_unmodified_upstream
 		__restore_sigs(&set);
+#endif
 		exit(0);
 	}
 
@@ -143,16 +154,20 @@ _Noreturn void __pthread_exit(void *result)
 		/* Detached threads must block even implementation-internal
 		 * signals, since they will not have a stack in their last
 		 * moments of existence. */
+#ifdef __wasilibc_unmodified_upstream
 		__block_all_sigs(&set);
+#endif
 
 		/* Robust list will no longer be valid, and was already
 		 * processed above, so unregister it with the kernel. */
+#ifdef __wasilibc_unmodified_upstream
 		if (self->robust_list.off)
 			__syscall(SYS_set_robust_list, 0, 3*sizeof(long));
 
 		/* The following call unmaps the thread's stack mapping
 		 * and then exits without touching the stack. */
 		__unmapself(self->map_base, self->map_size);
+#endif
 	}
 
 	/* Wake any joiner. */
@@ -165,7 +180,11 @@ _Noreturn void __pthread_exit(void *result)
 	self->tid = 0;
 	UNLOCK(self->killlock);
 
+#ifdef __wasilibc_unmodified_upstream
 	for (;;) __syscall(SYS_exit, 0);
+#else
+	for (;;) __wasi_thread_exit(0);
+#endif
 }
 
 void __do_cleanup_push(struct __ptcb *cb)
@@ -195,11 +214,17 @@ static int start(void *p)
 		if (a_cas(&args->control, 1, 2)==1)
 			__wait(&args->control, 0, 2, 1);
 		if (args->control) {
+#ifdef __wasilibc_unmodified_upstream
 			__syscall(SYS_set_tid_address, &args->control);
 			for (;;) __syscall(SYS_exit, 0);
+#else
+			for (;;) __wasi_thread_exit(0);
+#endif
 		}
 	}
+#ifdef __wasilibc_unmodified_upstream
 	__syscall(SYS_rt_sigprocmask, SIG_SETMASK, &args->sig_mask, 0, _NSIG/8);
+#endif
 	__pthread_exit(args->start_func(args->start_arg));
 	return 0;
 }
@@ -215,15 +240,19 @@ static int start_c11(void *p)
 #define ROUND(x) (((x)+PAGE_SIZE-1)&-PAGE_SIZE)
 
 /* pthread_key_create.c overrides this */
+#ifdef __wasilibc_unmodified_upstream
 static volatile size_t dummy = 0;
 weak_alias(dummy, __pthread_tsd_size);
 static void *dummy_tsd[1] = { 0 };
 weak_alias(dummy_tsd, __pthread_tsd_main);
+#endif
 
 static FILE *volatile dummy_file = 0;
+#ifdef __wasilibc_unmodified_upstream
 weak_alias(dummy_file, __stdin_used);
 weak_alias(dummy_file, __stdout_used);
 weak_alias(dummy_file, __stderr_used);
+#endif
 
 static void init_file_lock(FILE *f)
 {
@@ -251,7 +280,9 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 		init_file_lock(__stdin_used);
 		init_file_lock(__stdout_used);
 		init_file_lock(__stderr_used);
+#ifdef __wasilibc_unmodified_upstream
 		__syscall(SYS_rt_sigprocmask, SIG_UNBLOCK, SIGPT_SET, 0, _NSIG/8);
+#endif
 		self->tsd = (void **)__pthread_tsd_main;
 		__membarrier_init();
 		libc.threaded = 1;
@@ -287,6 +318,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	}
 
 	if (!tsd) {
+#ifdef __wasilibc_unmodified_upstream
 		if (guard) {
 			map = __mmap(0, size, PROT_NONE, MAP_PRIVATE|MAP_ANON, -1, 0);
 			if (map == MAP_FAILED) goto fail;
@@ -304,6 +336,9 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 			stack = tsd - libc.tls_size;
 			stack_limit = map + guard;
 		}
+#else
+		goto fail;
+#endif
 	}
 
 	new = __copy_tls(tsd - libc.tls_size);
@@ -337,7 +372,9 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	/* Application signals (but not the synccall signal) must be
 	 * blocked before the thread list lock can be taken, to ensure
 	 * that the lock is AS-safe. */
+#ifdef __wasilibc_unmodified_upstream
 	__block_app_sigs(&set);
+#endif
 
 	/* Ensure SIGCANCEL is unblocked in new thread. This requires
 	 * working with a copy of the set so we can restore the
@@ -357,12 +394,16 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	if (ret < 0) {
 		ret = -EAGAIN;
 	} else if (attr._a_sched) {
+#ifdef __wasilibc_unmodified_upstream
 		ret = __syscall(SYS_sched_setscheduler,
 			new->tid, attr._a_policy, &attr._a_prio);
 		if (a_swap(&args->control, ret ? 3 : 0)==2)
 			__wake(&args->control, 1, 1);
 		if (ret)
 			__wait(&args->control, 0, 3, 0);
+#else
+		ret = -EINVAL;
+#endif
 	}
 
 	if (ret >= 0) {
@@ -374,11 +415,15 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 		if (!--libc.threads_minus_1) libc.need_locks = 0;
 	}
 	__tl_unlock();
+#ifdef __wasilibc_unmodified_upstream
 	__restore_sigs(&set);
+#endif
 	__release_ptc();
 
 	if (ret < 0) {
+#ifdef __wasilibc_unmodified_upstream
 		if (map) __munmap(map, size);
+#endif
 		return -ret;
 	}
 

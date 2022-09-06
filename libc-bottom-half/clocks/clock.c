@@ -1,4 +1,6 @@
+#ifndef _WASI_EMULATED_PROCESS_CLOCKS
 #define _WASI_EMULATED_PROCESS_CLOCKS
+#endif
 #include <time.h>
 #include <wasi/api.h>
 #include <common/time.h>

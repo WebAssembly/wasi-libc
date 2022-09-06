@@ -48,9 +48,13 @@ static inline void unlock(volatile int *l)
 static inline void unlock_requeue(volatile int *l, volatile int *r, int w)
 {
 	a_store(l, 0);
+#ifdef __wasilibc_unmodified_upstream
 	if (w) __wake(l, 1, 1);
 	else __syscall(SYS_futex, l, FUTEX_REQUEUE|FUTEX_PRIVATE, 0, 1, r) != -ENOSYS
 		|| __syscall(SYS_futex, l, FUTEX_REQUEUE, 0, 1, r);
+#else
+	__wake(l, 1, 1);
+#endif
 }
 
 enum {
@@ -97,7 +101,13 @@ int __pthread_cond_timedwait(pthread_cond_t *restrict c, pthread_mutex_t *restri
 	__pthread_setcancelstate(PTHREAD_CANCEL_MASKED, &cs);
 	if (cs == PTHREAD_CANCEL_DISABLE) __pthread_setcancelstate(cs, 0);
 
+#ifdef __wasilibc_unmodified_upstream
 	do e = __timedwait_cp(fut, seq, clock, ts, !shared);
+#else
+    clockid_t clockid;
+	clockid.id = clock;
+	do e = __timedwait_cp(fut, seq, clockid, ts, !shared);
+#endif
 	while (*fut==seq && (!e || e==EINTR));
 	if (e == EINTR) e = 0;
 

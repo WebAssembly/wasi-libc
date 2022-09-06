@@ -1,8 +1,10 @@
 #include "stdio_impl.h"
 #include <stdlib.h>
 
+#ifdef __wasilibc_unmodified_upstream
 static void dummy(FILE *f) { }
 weak_alias(dummy, __unlist_locked_file);
+#endif
 
 int fclose(FILE *f)
 {

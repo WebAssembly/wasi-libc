@@ -7,7 +7,11 @@
 #include "pthread_impl.h"
 #include "libc.h"
 #include "atomic.h"
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#else
+#include <wasi/api.h>
+#endif
 
 volatile int __thread_list_lock;
 
@@ -19,7 +23,13 @@ int __init_tp(void *p)
 	if (r < 0) return -1;
 	if (!r) libc.can_do_threads = 1;
 	td->detach_state = DT_JOINABLE;
+#ifdef __wasilibc_unmodified_upstream
 	td->tid = __syscall(SYS_set_tid_address, &__thread_list_lock);
+#else
+	td->tid = 0;
+	r = __wasi_thread_id(&td->tid);
+	if (r != 0) return r;
+#endif
 	td->locale = &libc.global_locale;
 	td->robust_list.head = &td->robust_list.head;
 	td->sysinfo = __sysinfo;
@@ -70,6 +80,7 @@ void *__copy_tls(unsigned char *mem)
 	td->dtv = dtv;
 	return td;
 }
+
 
 #if ULONG_MAX == 0xffffffff
 typedef Elf32_Phdr Phdr;
@@ -134,10 +145,14 @@ void __init_tls(size_t *aux)
 #ifndef SYS_mmap2
 #define SYS_mmap2 SYS_mmap
 #endif
+#ifdef __wasilibc_unmodified_upstream
 		mem = (void *)__syscall(
 			SYS_mmap2,
 			0, libc.tls_size, PROT_READ|PROT_WRITE,
 			MAP_ANONYMOUS|MAP_PRIVATE, -1, 0);
+#else
+		a_crash();
+#endif
 		/* -4095...-1 cast to void * will crash on dereference anyway,
 		 * so don't bloat the init code checking for error codes and
 		 * explicitly calling a_crash(). */

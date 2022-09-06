@@ -1,9 +1,16 @@
 #define _GNU_SOURCE
 #include <string.h>
 #include "pthread_impl.h"
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#else
+#include <wasi/api.h>
+int pthread_kill(pthread_t t, int sig);
+#endif
 
+#ifdef __wasilibc_unmodified_upstream
 hidden long __cancel(), __syscall_cp_asm(), __syscall_cp_c();
+#endif
 
 long __cancel()
 {
@@ -14,6 +21,7 @@ long __cancel()
 	return -ECANCELED;
 }
 
+#ifdef __wasilibc_unmodified_upstream
 long __syscall_cp_asm(volatile void *, syscall_arg_t,
                       syscall_arg_t, syscall_arg_t, syscall_arg_t,
                       syscall_arg_t, syscall_arg_t, syscall_arg_t);
@@ -36,6 +44,7 @@ long __syscall_cp_c(syscall_arg_t nr,
 		r = __cancel();
 	return r;
 }
+#endif
 
 static void _sigaddset(sigset_t *set, int sig)
 {
@@ -45,6 +54,7 @@ static void _sigaddset(sigset_t *set, int sig)
 
 extern hidden const char __cp_begin[1], __cp_end[1], __cp_cancel[1];
 
+#ifdef __wasilibc_unmodified_upstream
 static void cancel_handler(int sig, siginfo_t *si, void *ctx)
 {
 	pthread_t self = __pthread_self();
@@ -63,8 +73,11 @@ static void cancel_handler(int sig, siginfo_t *si, void *ctx)
 #endif
 		return;
 	}
-
+#ifdef __wasilibc_unmodified_upstream
 	__syscall(SYS_tkill, self->tid, SIGCANCEL);
+#else
+	pthread_kill(self, SIGCANCEL);
+#endif
 }
 
 void __testcancel()
@@ -83,9 +96,11 @@ static void init_cancellation()
 	memset(&sa.sa_mask, -1, _NSIG/8);
 	__libc_sigaction(SIGCANCEL, &sa, 0);
 }
+#endif
 
 int pthread_cancel(pthread_t t)
 {
+#ifdef __wasilibc_unmodified_upstream
 	static int init;
 	if (!init) {
 		init_cancellation();
@@ -97,5 +112,6 @@ int pthread_cancel(pthread_t t)
 			pthread_exit(PTHREAD_CANCELED);
 		return 0;
 	}
+#endif
 	return pthread_kill(t, SIGCANCEL);
 }

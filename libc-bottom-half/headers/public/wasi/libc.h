@@ -42,13 +42,14 @@ void __wasilibc_initialize_environ(void);
 /// Used for accessing the stack pointers
 void* __wasilibc_get_stack_pointer(void);
 void __wasilibc_set_stack_pointer(void *val);
-void __wasilibc_init_tls(void *val);
-unsigned long long __wasilibc_tls_size(void);
-unsigned long long __wasilibc_tls_align(void);
 void* __wasilibc_get_tls_base(void);
 void __wasilibc_set_tls_base(void *val);
 int __wasilibc_setjmp(__wasi_stack_snapshot_t * buf);
 _Noreturn void __wasilibc_longjmp(__wasi_stack_snapshot_t * buf, int val);
+
+/// Futex implemenation
+void __wasilibc_futex_wait(int* futex, int expected);
+void __wasilibc_futex_wake(int* futex, int cnt);
 
 /// Return the current file offset. Like `lseek(fd, 0, SEEK_CUR)`, but without
 /// depending on `lseek`.

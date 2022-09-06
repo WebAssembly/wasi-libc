@@ -99,13 +99,7 @@ static const unsigned char states[]['z'-'A'+1] = {
 union arg
 {
 	uintmax_t i;
-#if !defined(__wasilibc_printscan_no_floating_point)
-#if defined(__wasilibc_printscan_no_long_double)
-	long_double f;
-#else
 	long double f;
-#endif
-#endif
 	void *p;
 };
 
@@ -128,17 +122,8 @@ static void pop_arg(union arg *arg, int type, va_list *ap)
 	break; case UMAX:	arg->i = va_arg(*ap, uintmax_t);
 	break; case PDIFF:	arg->i = va_arg(*ap, ptrdiff_t);
 	break; case UIPTR:	arg->i = (uintptr_t)va_arg(*ap, void *);
-#if defined(__wasilibc_printscan_no_floating_point)
-	break; case DBL:
-	break; case LDBL:	floating_point_not_supported();
-#else
 	break; case DBL:	arg->f = va_arg(*ap, double);
-#if defined(__wasilibc_printscan_no_long_double)
-	break; case LDBL:	long_double_not_supported();
-#else
 	break; case LDBL:	arg->f = va_arg(*ap, long double);
-#endif
-#endif
 	}
 }
 
@@ -321,33 +306,6 @@ static int wprintf_core(FILE *f, const wchar_t *fmt, va_list *ap, union arg *nl_
 		}
 
 		if (xp && p<0) goto overflow;
-#if defined(__wasilibc_printscan_no_long_double)
-		// Omit the 'L' modifier for floating-point cases.
-		switch (t|32) {
-		case 'a': case 'e': case 'f': case 'g':
-			snprintf(charfmt, sizeof charfmt, "%%%s%s%s%s%s*.*%c",
-				"#"+!(fl & ALT_FORM),
-				"+"+!(fl & MARK_POS),
-				"-"+!(fl & LEFT_ADJ),
-				" "+!(fl & PAD_POS),
-				"0"+!(fl & ZERO_PAD),
-				t);
-
-			l = fprintf(f, charfmt, w, p, arg.f);
-			break;
-		case 'd': case 'i': case 'o': case 'u': case 'x': case 'p':
-			snprintf(charfmt, sizeof charfmt, "%%%s%s%s%s%s*.*%c%c",
-				"#"+!(fl & ALT_FORM),
-				"+"+!(fl & MARK_POS),
-				"-"+!(fl & LEFT_ADJ),
-				" "+!(fl & PAD_POS),
-				"0"+!(fl & ZERO_PAD),
-				sizeprefix[(t|32)-'a'], t);
-
-			l = fprintf(f, charfmt, w, p, arg.i);
-			break;
-		}
-#else
 		snprintf(charfmt, sizeof charfmt, "%%%s%s%s%s%s*.*%c%c",
 			"#"+!(fl & ALT_FORM),
 			"+"+!(fl & MARK_POS),
@@ -357,16 +315,13 @@ static int wprintf_core(FILE *f, const wchar_t *fmt, va_list *ap, union arg *nl_
 			sizeprefix[(t|32)-'a'], t);
 
 		switch (t|32) {
-#if !defined(__wasilibc_printscan_no_floating_point)
 		case 'a': case 'e': case 'f': case 'g':
 			l = fprintf(f, charfmt, w, p, arg.f);
 			break;
-#endif
 		case 'd': case 'i': case 'o': case 'u': case 'x': case 'p':
 			l = fprintf(f, charfmt, w, p, arg.i);
 			break;
 		}
-#endif
 	}
 
 	if (f) return cnt;

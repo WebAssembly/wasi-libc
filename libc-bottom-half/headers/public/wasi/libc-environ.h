@@ -16,9 +16,6 @@ void __wasilibc_initialize_environ(void);
 /// Used for accessing the stack pointers, pthread_self and init_tls
 void* __wasilibc_get_stack_pointer(void);
 void __wasilibc_set_stack_pointer(void *val);
-void __wasilibc_init_tls(void *val);
-unsigned long long __wasilibc_tls_size(void);
-unsigned long long __wasilibc_tls_align(void);
 void* __wasilibc_get_tls_base(void);
 void __wasilibc_set_tls_base(void *val);
 

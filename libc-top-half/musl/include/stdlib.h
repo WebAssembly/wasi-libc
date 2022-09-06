@@ -98,7 +98,6 @@ size_t __ctype_get_mb_cur_max(void);
  || defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) \
  || defined(_BSD_SOURCE)
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no wait */
 #define WNOHANG    1
 #define WUNTRACED  2
 
@@ -108,7 +107,6 @@ size_t __ctype_get_mb_cur_max(void);
 #define WIFEXITED(s) (!WTERMSIG(s))
 #define WIFSTOPPED(s) ((short)((((s)&0xffff)*0x10001)>>8) > 0x7f00)
 #define WIFSIGNALED(s) (((s)&0xffff)-1U < 0xffu)
-#endif
 
 int posix_memalign (void **, size_t, size_t);
 int setenv (const char *, const char *, int);

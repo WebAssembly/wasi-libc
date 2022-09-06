@@ -4,11 +4,20 @@
 #include <unistd.h>
 #include <signal.h>
 #include <fcntl.h>
+#ifdef __wasilibc_unmodified_upstream
 #include <sys/wait.h>
 #include "syscall.h"
+#else
+#include <wasi/api.h>
+#endif
 #include "lock.h"
 #include "pthread_impl.h"
 #include "fdop.h"
+
+#ifdef __wasilibc_unmodified_upstream
+#else
+pid_t waitpid(pid_t pid, int *status, int options);
+#endif
 
 struct args {
 	int p[2];
@@ -21,10 +30,19 @@ struct args {
 
 static int __sys_dup2(int old, int new)
 {
+#ifdef __wasilibc_unmodified_upstream
 #ifdef SYS_dup2
 	return __syscall(SYS_dup2, old, new);
 #else
 	return __syscall(SYS_dup3, old, new, 0);
+#endif
+#else
+	__wasi_errno_t error = __wasi_fd_renumber(old, new);
+    if (error != 0) {
+        errno = error;
+        return -1;
+    }
+    return 0;
 #endif
 }
 
@@ -55,16 +73,25 @@ static int child(void *args_vp)
 			if (i-32<3U) {
 				sa.sa_handler = SIG_IGN;
 			} else {
+#ifdef __wasilibc_unmodified_upstream
 				__libc_sigaction(i, 0, &sa);
+#else
+				sigaction(i, &sa, &sa);
+#endif
 				if (sa.sa_handler==SIG_IGN) continue;
 				sa.sa_handler = SIG_DFL;
 			}
 		} else {
 			continue;
 		}
+#ifdef __wasilibc_unmodified_upstream
 		__libc_sigaction(i, &sa, 0);
+#else
+		sigaction(i, &sa, &sa);
+#endif
 	}
 
+#ifdef __wasilibc_unmodified_upstream
 	if (attr->__flags & POSIX_SPAWN_SETSID)
 		if ((ret=__syscall(SYS_setsid)) < 0)
 			goto fail;
@@ -80,10 +107,12 @@ static int child(void *args_vp)
 		if ((ret=__syscall(SYS_setgid, __syscall(SYS_getgid))) ||
 		    (ret=__syscall(SYS_setuid, __syscall(SYS_getuid))) )
 			goto fail;
+#endif
 
 	if (fa && fa->__actions) {
 		struct fdop *op;
 		int fd;
+		int err;
 		for (op = fa->__actions; op->next; op = op->next);
 		for (; op; op = op->prev) {
 			/* It's possible that a file operation would clobber
@@ -91,14 +120,26 @@ static int child(void *args_vp)
 			 * parent. To avoid that, we dup the pipe onto
 			 * an unoccupied fd. */
 			if (op->fd == p) {
+#ifdef __wasilibc_unmodified_upstream
 				ret = __syscall(SYS_dup, p);
+#else
+				ret = dup(p);
+#endif
 				if (ret < 0) goto fail;
+#ifdef __wasilibc_unmodified_upstream
 				__syscall(SYS_close, p);
+#else
+				err = __wasi_fd_close(p);
+#endif
 				p = ret;
 			}
 			switch(op->cmd) {
 			case FDOP_CLOSE:
+#ifdef __wasilibc_unmodified_upstream
 				__syscall(SYS_close, op->fd);
+#else
+				err = __wasi_fd_close(op->fd);
+#endif
 				break;
 			case FDOP_DUP2:
 				fd = op->srcfd;
@@ -106,32 +147,64 @@ static int child(void *args_vp)
 					ret = -EBADF;
 					goto fail;
 				}
+				
 				if (fd != op->fd) {
+#ifdef __wasilibc_unmodified_upstream
 					if ((ret=__sys_dup2(fd, op->fd))<0)
 						goto fail;
+#else
+					if ((ret=dup2(fd, op->fd))<0)
+						goto fail;
+#endif
 				} else {
+#ifdef __wasilibc_unmodified_upstream
 					ret = __syscall(SYS_fcntl, fd, F_GETFD);
 					ret = __syscall(SYS_fcntl, fd, F_SETFD,
 					                ret & ~FD_CLOEXEC);
 					if (ret<0)
 						goto fail;
+#else
+					ret = -EBADF;
+					goto fail;
+#endif
 				}
 				break;
 			case FDOP_OPEN:
+#ifdef __wasilibc_unmodified_upstream
 				fd = __sys_open(op->path, op->oflag, op->mode);
+#else
+				fd = open(op->path, op->oflag | op->mode);
+#endif
 				if ((ret=fd) < 0) goto fail;
 				if (fd != op->fd) {
+#ifdef __wasilibc_unmodified_upstream
 					if ((ret=__sys_dup2(fd, op->fd))<0)
+#else
+					if ((ret=dup2(fd, op->fd))<0)
+#endif
 						goto fail;
+#ifdef __wasilibc_unmodified_upstream
 					__syscall(SYS_close, fd);
+#else
+					close(fd);
+#endif
 				}
 				break;
 			case FDOP_CHDIR:
+#ifdef __wasilibc_unmodified_upstream
 				ret = __syscall(SYS_chdir, op->path);
+#else
+				ret = chdir(op->path);
+#endif
 				if (ret<0) goto fail;
 				break;
 			case FDOP_FCHDIR:
+#ifdef __wasilibc_unmodified_upstream
 				ret = __syscall(SYS_fchdir, op->fd);
+#else
+				ret = -EINVAL;
+				goto fail;
+#endif
 				if (ret<0) goto fail;
 				break;
 			}
@@ -142,7 +215,9 @@ static int child(void *args_vp)
 	 * to a different fd. We don't use F_DUPFD_CLOEXEC above because
 	 * it would fail on older kernels and atomicity is not needed --
 	 * in this process there are no threads or signal handlers. */
+#ifdef __wasilibc_unmodified_upstream
 	__syscall(SYS_fcntl, p, F_SETFD, FD_CLOEXEC);
+#endif
 
 	pthread_sigmask(SIG_SETMASK, (attr->__flags & POSIX_SPAWN_SETSIGMASK)
 		? &attr->__mask : &args->oldmask, 0);
@@ -156,7 +231,11 @@ static int child(void *args_vp)
 fail:
 	/* Since sizeof errno < PIPE_BUF, the write is atomic. */
 	ret = -ret;
+#ifdef __wasilibc_unmodified_upstream
 	if (ret) while (__syscall(SYS_write, p, &ret, sizeof ret) < 0);
+#else
+	if (ret) while (write(p, &ret, sizeof ret) < 0);
+#endif
 	_exit(127);
 }
 

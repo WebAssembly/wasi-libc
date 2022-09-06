@@ -100,10 +100,14 @@ int timer_create(clockid_t clk, struct sigevent *restrict evp, timer_t *restrict
 		pthread_barrier_init(&args.b, 0, 2);
 		args.sev = evp;
 
+#ifdef __wasilibc_unmodified_upstream
 		__block_app_sigs(&set);
+#endif
 		__syscall(SYS_rt_sigprocmask, SIG_BLOCK, SIGTIMER_SET, 0, _NSIG/8);
 		r = pthread_create(&td, &attr, start, &args);
+#ifdef __wasilibc_unmodified_upstream
 		__restore_sigs(&set);
+#endif
 		if (r) {
 			errno = r;
 			return -1;

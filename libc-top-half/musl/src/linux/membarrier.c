@@ -31,7 +31,9 @@ int __membarrier(int cmd, int flags)
 	if (r && cmd == MEMBARRIER_CMD_PRIVATE_EXPEDITED && !flags) {
 		pthread_t self=__pthread_self(), td;
 		sigset_t set;
+#ifdef __wasilibc_unmodified_upstream
 		__block_app_sigs(&set);
+#endif
 		__tl_lock();
 		sem_init(&barrier_sem, 0, 0);
 		struct sigaction sa = {
@@ -50,7 +52,9 @@ int __membarrier(int cmd, int flags)
 		}
 		sem_destroy(&barrier_sem);
 		__tl_unlock();
+#ifdef __wasilibc_unmodified_upstream
 		__restore_sigs(&set);
+#endif
 	}
 	return __syscall_ret(r);
 }

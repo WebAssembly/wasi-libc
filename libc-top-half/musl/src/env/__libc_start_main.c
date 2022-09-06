@@ -1,8 +1,11 @@
+#ifdef __wasilibc_unmodified_upstream
 #include <elf.h>
+#endif
 #include <poll.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <unistd.h>
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
 #include "atomic.h"
 #include "libc.h"
@@ -94,3 +97,4 @@ static int libc_start_main_stage2(int (*main)(int,char **,char **), int argc, ch
 	exit(main(argc, argv, envp));
 	return 0;
 }
+#endif

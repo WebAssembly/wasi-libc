@@ -1,8 +1,11 @@
 #include "pthread_impl.h"
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#endif
 
 static volatile int check_pi_result = -1;
 
+#ifdef __wasilibc_unmodified_upstream
 int pthread_mutexattr_setprotocol(pthread_mutexattr_t *a, int protocol)
 {
 	int r;
@@ -26,3 +29,8 @@ int pthread_mutexattr_setprotocol(pthread_mutexattr_t *a, int protocol)
 		return EINVAL;
 	}
 }
+#else
+int pthread_mutexattr_setprotocol(pthread_mutexattr_t *a, int protocol) {
+	return 0;
+}
+#endif

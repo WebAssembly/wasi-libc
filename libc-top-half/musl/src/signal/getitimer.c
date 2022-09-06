@@ -1,8 +1,12 @@
 #include <sys/time.h>
+#include <errno.h>
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#endif
 
 int getitimer(int which, struct itimerval *old)
 {
+#ifdef __wasilibc_unmodified_upstream
 	if (sizeof(time_t) > sizeof(long)) {
 		long old32[4];
 		int r = __syscall(SYS_getitimer, which, old32);
@@ -15,4 +19,7 @@ int getitimer(int which, struct itimerval *old)
 		return __syscall_ret(r);
 	}
 	return syscall(SYS_getitimer, which, old);
+#else
+	return EINVAL;
+#endif
 }

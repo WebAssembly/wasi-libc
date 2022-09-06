@@ -207,7 +207,6 @@ int __libc_current_sigrtmax(void);
 #define SIGRTMAX  (__libc_current_sigrtmax())
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no signals */
 int kill(pid_t, int);
 
 int sigemptyset(sigset_t *);
@@ -224,12 +223,9 @@ int sigwait(const sigset_t *__restrict, int *__restrict);
 int sigwaitinfo(const sigset_t *__restrict, siginfo_t *__restrict);
 int sigtimedwait(const sigset_t *__restrict, siginfo_t *__restrict, const struct timespec *__restrict);
 int sigqueue(pid_t, int, union sigval);
-#endif
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no threads yet */
 int pthread_sigmask(int, const sigset_t *__restrict, sigset_t *__restrict);
 int pthread_kill(pthread_t, int);
-#endif
 
 #ifdef __wasilibc_unmodified_upstream /* WASI has no siginfo */
 void psiginfo(const siginfo_t *, const char *);
@@ -238,9 +234,11 @@ void psignal(int, const char *);
 
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no signals */
 #if defined(_XOPEN_SOURCE) || defined(_BSD_SOURCE) || defined(_GNU_SOURCE)
 int killpg(pid_t, int);
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no signals */
+#if defined(_XOPEN_SOURCE) || defined(_BSD_SOURCE) || defined(_GNU_SOURCE)
 int sigaltstack(const stack_t *__restrict, stack_t *__restrict);
 int sighold(int);
 int sigignore(int);

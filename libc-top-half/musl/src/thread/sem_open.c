@@ -29,6 +29,24 @@ volatile int *const __sem_open_lockptr = lock;
 
 #define FLAGS (O_RDWR|O_NOFOLLOW|O_CLOEXEC|O_NONBLOCK)
 
+char *__shm_mapname(const char *name, char *buf)
+{
+	char *p;
+	while (*name == '/') name++;
+	if (*(p = __strchrnul(name, '/')) || p==name ||
+	    (p-name <= 2 && name[0]=='.' && p[-1]=='.')) {
+		errno = EINVAL;
+		return 0;
+	}
+	if (p-name > NAME_MAX) {
+		errno = ENAMETOOLONG;
+		return 0;
+	}
+	memcpy(buf, "/dev/shm/", 9);
+	memcpy(buf+9, name, p-name+1);
+	return buf;
+}
+
 sem_t *sem_open(const char *name, int flags, ...)
 {
 	va_list ap;

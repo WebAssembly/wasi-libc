@@ -130,7 +130,6 @@ unsigned sleep(unsigned);
 int pause(void);
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no fork/exec */
 pid_t fork(void);
 pid_t _Fork(void);
 int execve(const char *, char *const [], char *const []);
@@ -140,27 +139,22 @@ int execl(const char *, const char *, ...);
 int execvp(const char *, char *const []);
 int execlp(const char *, const char *, ...);
 int fexecve(int, char *const [], char *const []);
-#endif
 _Noreturn void _exit(int);
 
 pid_t getpid(void);
 pid_t getppid(void);
-#ifdef __wasilibc_unmodified_upstream
 pid_t getpgrp(void);
 pid_t getpgid(pid_t);
 int setpgid(pid_t, pid_t);
 pid_t setsid(void);
 pid_t getsid(pid_t);
-#endif
 #ifdef __wasilibc_unmodified_upstream /* WASI has no ttyname */
 char *ttyname(int);
 int ttyname_r(int, char *, size_t);
 #endif
 int isatty(int);
-#ifdef __wasilibc_unmodified_upstream /* WASI has no process groups */
 pid_t tcgetpgrp(int);
 int tcsetpgrp(int, pid_t);
-#endif
 
 #ifdef __wasilibc_unmodified_upstream /* WASI has no getuid etc. */
 int getgroups(int, gid_t []);
@@ -226,8 +220,8 @@ unsigned ualarm(unsigned, unsigned);
 int brk(void *);
 #endif
 void *sbrk(intptr_t);
-#ifdef __wasilibc_unmodified_upstream /* WASI has no processes */
 pid_t vfork(void);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no processes */
 int vhangup(void);
 int chroot(const char *);
 int getdtablesize(void);

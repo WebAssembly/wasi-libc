@@ -1587,7 +1587,9 @@ static void install_new_tls(void)
 	size_t i, j;
 	size_t old_cnt = self->dtv[0];
 
+#ifdef __wasilibc_unmodified_upstream
 	__block_app_sigs(&set);
+#endif
 	__tl_lock();
 	/* Copy existing dtv contents from all existing threads. */
 	for (i=0, td=self; !i || td!=self; i++, td=td->next) {
@@ -1624,7 +1626,9 @@ static void install_new_tls(void)
 	}
 
 	__tl_unlock();
+#ifdef __wasilibc_unmodified_upstream
 	__restore_sigs(&set);
+#endif
 }
 
 /* Stage 1 of the dynamic linker is defined in dlstart.c. It calls the

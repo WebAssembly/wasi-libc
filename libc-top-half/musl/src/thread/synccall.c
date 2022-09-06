@@ -1,4 +1,5 @@
 #include "pthread_impl.h"
+#ifdef __wasilibc_unmodified_upstream
 #include <semaphore.h>
 #include <string.h>
 
@@ -55,7 +56,9 @@ void __synccall(void (*func)(void *), void *ctx)
 	 * deadlock if multiple threads called __synccall. Waiting to block
 	 * any until after the lock would allow re-entry in the same thread
 	 * with the lock already held. */
+#ifdef __wasilibc_unmodified_upstream
 	__block_app_sigs(&oldmask);
+#endif
 	__tl_lock();
 	__block_all_sigs(0);
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
@@ -116,5 +119,8 @@ single_threaded:
 
 	pthread_setcancelstate(cs, 0);
 	__tl_unlock();
+#ifdef __wasilibc_unmodified_upstream
 	__restore_sigs(&oldmask);
+#endif
 }
+#endif

@@ -1,3 +1,4 @@
+#ifdef __wasilibc_unmodified_upstream
 #include "pthread_impl.h"
 #include "syscall.h"
 
@@ -18,3 +19,4 @@ long (__syscall_cp)(syscall_arg_t nr,
 {
 	return __syscall_cp_c(nr, u, v, w, x, y, z);
 }
+#endif

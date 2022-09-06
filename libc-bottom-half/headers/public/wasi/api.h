@@ -25,13 +25,13 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(intptr_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(uintptr_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == 8, "non-wasi data layout");
-typedef int64_t __wasi_int_t;
-typedef uint64_t __wasi_uint_t;
-_Static_assert(_Alignof(__wasi_int_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(__wasi_uint_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(intptr_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(uintptr_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
+typedef int32_t __wasi_int_t;
+typedef uint32_t __wasi_uint_t;
+_Static_assert(_Alignof(__wasi_int_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(__wasi_uint_t) == 4, "non-wasi data layout");
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -43,8 +43,8 @@ extern "C" {
  */
 typedef __wasi_uint_t __wasi_pointersize_t;
 
-_Static_assert(sizeof(__wasi_pointersize_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_pointersize_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_pointersize_t) == 4, "witx calculated size");
+_Static_assert(_Alignof(__wasi_pointersize_t) == 4, "witx calculated align");
 
 /**
  * Represents a number of items
@@ -1031,10 +1031,10 @@ typedef struct __wasi_iovec_t {
 
 } __wasi_iovec_t;
 
-_Static_assert(sizeof(__wasi_iovec_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_iovec_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_iovec_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_iovec_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_iovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 4, "witx calculated offset");
 
 /**
  * A region of memory for scatter/gather writes.
@@ -1052,10 +1052,10 @@ typedef struct __wasi_ciovec_t {
 
 } __wasi_ciovec_t;
 
-_Static_assert(sizeof(__wasi_ciovec_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_ciovec_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_ciovec_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_ciovec_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_ciovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 4, "witx calculated offset");
 
 /**
  * Relative offset within a file.
@@ -3599,7 +3599,7 @@ _Static_assert(sizeof(__wasi_prestat_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
 
 /**
- * @defgroup wasix_64v1
+ * @defgroup wasix_32v1
  * @{
  */
 
@@ -4006,7 +4006,7 @@ __wasi_errno_t __wasi_fd_write(
  * 
  * Pipes are bidirectional
  */
-__wasi_errno_t __wasi_pipe(
+__wasi_errno_t __wasi_fd_pipe(
     __wasi_fd_t *retptr0,
     __wasi_fd_t *retptr1
 ) __attribute__((__warn_unused_result__));
@@ -4227,27 +4227,6 @@ __wasi_errno_t __wasi_poll_oneoff(
     __wasi_size_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
- * Terminate the process normally. An exit code of 0 indicates successful
- * termination of the program. The meanings of other values is dependent on
- * the environment.
- */
-_Noreturn void __wasi_proc_exit(
-    /**
-     * The exit code returned by the process.
-     */
-    __wasi_exitcode_t rval
-);
-/**
- * Send a signal to the process of the calling thread.
- * Note: This is similar to `raise` in POSIX.
- */
-__wasi_errno_t __wasi_proc_raise(
-    /**
-     * The signal condition to trigger.
-     */
-    __wasi_signal_t sig
-) __attribute__((__warn_unused_result__));
-/**
  * Temporarily yield execution of the calling thread.
  * Note: This is similar to `sched_yield` in POSIX.
  */
@@ -4301,6 +4280,50 @@ __wasi_errno_t __wasi_chdir(
      * Path to change the current working directory to
      */
     const char *path
+) __attribute__((__warn_unused_result__));
+/**
+ * Registers a callback function for signals
+ */
+__wasi_errno_t __wasi_callback_signal(
+    /**
+     * Exported function that will be called back when the signal triggers
+     * (must match the callback signature that takes the signal value)
+     * (if this is not specified the default will be "_signal")
+     */
+    const char *callback
+) __attribute__((__warn_unused_result__));
+/**
+ * Registers a callback function for new threads
+ */
+__wasi_errno_t __wasi_callback_thread(
+    /**
+     * Exported function that will be called back when a new thread is created
+     * (must match the callback signature that takes the u64 user_data)
+     * (if this is not specified the default will be "_start_thread")
+     */
+    const char *callback
+) __attribute__((__warn_unused_result__));
+/**
+ * Registers a callback function for reactors
+ */
+__wasi_errno_t __wasi_callback_reactor(
+    /**
+     * Exported function that will be called back when the reactor is triggered
+     * (must match the callback signature that takes the u64 user_data)
+     * (if this is not specified the default will be "_reactor")
+     */
+    const char *callback
+) __attribute__((__warn_unused_result__));
+/**
+ * Registers a callback function for destruction of thread locals
+ */
+__wasi_errno_t __wasi_callback_thread_local_destroy(
+    /**
+     * Exported function that will be called back when the reactor is triggered
+     * (must match the callback signature that takes the u64 user_data)
+     * (if this is not specified the default will be "_thread_local_destroy")
+     */
+    const char *callback
 ) __attribute__((__warn_unused_result__));
 /**
  * Creates a new thread by spawning that shares the same
@@ -4406,6 +4429,19 @@ __wasi_errno_t __wasi_thread_parallelism(
     __wasi_size_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
+ * Sends a signal to a thread
+ */
+__wasi_errno_t __wasi_thread_signal(
+    /**
+     * Handle of the thread to send a singal
+     */
+    __wasi_tid_t tid,
+    /**
+     * Signal to send to the thread
+     */
+    __wasi_signal_t signal
+) __attribute__((__warn_unused_result__));
+/**
  * Wait for a futex_wake operation to wake us.
  * Returns with EINVAL if the futex doesn't hold the expected value.
  * Returns false on timeout, and true in all other cases.
@@ -4446,22 +4482,6 @@ __wasi_errno_t __wasi_futex_wake_all(
      */
     uint32_t * futex,
     __wasi_bool_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Returns the handle of the current process
- */
-__wasi_errno_t __wasi_getpid(
-    __wasi_pid_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Returns the parent handle of a particular process
- */
-__wasi_errno_t __wasi_getppid(
-    /**
-     * Handle of the process to get the parent handle for
-     */
-    __wasi_pid_t pid,
-    __wasi_pid_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Terminates the current running thread, if this is the last thread then
@@ -4508,19 +4528,59 @@ _Noreturn void __wasi_stack_restore(
     __wasi_longsize_t val
 );
 /**
+ * Terminate the process normally. An exit code of 0 indicates successful
+ * termination of the program. The meanings of other values is dependent on
+ * the environment.
+ */
+_Noreturn void __wasi_proc_exit(
+    /**
+     * The exit code returned by the process.
+     */
+    __wasi_exitcode_t rval
+);
+/**
+ * Send a signal to the process of the calling thread.
+ * Note: This is similar to `raise` in POSIX.
+ */
+__wasi_errno_t __wasi_proc_raise(
+    /**
+     * The signal condition to trigger.
+     */
+    __wasi_signal_t sig
+) __attribute__((__warn_unused_result__));
+/**
  * Forks the current process into a new subprocess. If the function
  * returns a zero then its the new subprocess. If it returns a positive
  * number then its the current process and the $pid represents the child.
  */
-__wasi_errno_t __wasi_fork(
+__wasi_errno_t __wasi_proc_fork(
     __wasi_pid_t *retptr0
 ) __attribute__((__warn_unused_result__));
+/**
+ * execve()  executes  the  program  referred to by pathname.  This causes the
+ * program that is currently being run by the calling process to  be  replaced
+ * with  a  new  program, with newly initialized stack, heap, and (initialized
+ * and uninitialized) data segments
+ * 
+ * If the named process does not exist then the process will fail and terminate
+ */
+_Noreturn void __wasi_proc_exec(
+    /**
+     * Name of the process to be spawned
+     */
+    const char *name,
+    /**
+     * List of the arguments to pass the process
+     * (entries are separated by line feeds)
+     */
+    const char *args
+);
 /**
  * Spawns a new process within the context of this machine
  * @return
  * Returns a bus process id that can be used to invoke calls
  */
-__wasi_bus_error_t __wasi_process_spawn(
+__wasi_bus_error_t __wasi_proc_spawn(
     /**
      * Name of the process to be spawned
      */
@@ -4557,6 +4617,47 @@ __wasi_bus_error_t __wasi_process_spawn(
      */
     const char *working_dir,
     __wasi_process_handles_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Returns the handle of the current process
+ */
+__wasi_errno_t __wasi_proc_id(
+    __wasi_pid_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Returns the parent handle of a particular process
+ */
+__wasi_errno_t __wasi_proc_parent(
+    /**
+     * Handle of the process to get the parent handle for
+     */
+    __wasi_pid_t pid,
+    __wasi_pid_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Wait for process to exit
+ * @return
+ * Returns the exit code of the process
+ */
+__wasi_errno_t __wasi_proc_join(
+    /**
+     * ID of the process to wait on
+     */
+    __wasi_pid_t pid,
+    __wasi_exitcode_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Sends a signal to a process
+ */
+__wasi_errno_t __wasi_proc_signal(
+    /**
+     * ID of the process to send a singal
+     */
+    __wasi_pid_t pid,
+    /**
+     * Signal to send to the thread
+     */
+    __wasi_signal_t signal
 ) __attribute__((__warn_unused_result__));
 /**
  * Spawns a new bus process for a particular web WebAssembly
@@ -4772,7 +4873,7 @@ __wasi_errno_t __wasi_http_request(
 /**
  * Retrieves the status of a HTTP request
  */
-void __wasi_http_status(
+__wasi_errno_t __wasi_http_status(
     /**
      * Handle of the HTTP request
      */
@@ -4782,7 +4883,7 @@ void __wasi_http_status(
      * status of this HTTP request
      */
     __wasi_http_status_t * status
-);
+) __attribute__((__warn_unused_result__));
 /**
  * Securely connects to a particular remote network
  */

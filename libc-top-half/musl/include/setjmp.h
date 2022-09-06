@@ -33,6 +33,7 @@ _Noreturn void _longjmp (jmp_buf, int);
 #include <wasi/api.h>
 typedef __wasi_stack_snapshot_t __jmp_buf_tag;
 typedef __wasi_stack_snapshot_t jmp_buf[1];
+typedef jmp_buf sigjmp_buf;
 #endif
 
 int setjmp (jmp_buf);

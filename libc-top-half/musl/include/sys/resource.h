@@ -22,7 +22,6 @@ extern "C" {
 #include <bits/alltypes.h>
 #include <bits/resource.h>
 
-#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 typedef unsigned long long rlim_t;
 
 struct rlimit {
@@ -30,6 +29,14 @@ struct rlimit {
 	rlim_t rlim_max;
 };
 
+#define RLIM_INFINITY (~0ULL)
+#define RLIM_SAVED_CUR RLIM_INFINITY
+#define RLIM_SAVED_MAX RLIM_INFINITY
+
+int getrlimit (int, struct rlimit *);
+int setrlimit (int, const struct rlimit *);
+
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 struct rusage {
 	struct timeval ru_utime;
 	struct timeval ru_stime;
@@ -52,8 +59,6 @@ struct rusage {
 	long    __reserved[16];
 };
 
-int getrlimit (int, struct rlimit *);
-int setrlimit (int, const struct rlimit *);
 int getrusage (int, struct rusage *);
 
 int getpriority (int, id_t);
@@ -74,10 +79,6 @@ int prlimit(pid_t, int, const struct rlimit *, struct rlimit *);
 #define RUSAGE_SELF     0
 #define RUSAGE_CHILDREN (-1)
 #define RUSAGE_THREAD   1
-
-#define RLIM_INFINITY (~0ULL)
-#define RLIM_SAVED_CUR RLIM_INFINITY
-#define RLIM_SAVED_MAX RLIM_INFINITY
 
 #define RLIMIT_CPU     0
 #define RLIMIT_FSIZE   1
@@ -121,6 +122,9 @@ __REDIR(getrusage, __getrusage_time64);
 #ifdef __cplusplus
 }
 #endif
+
+#else
+#include <__struct_rusage.h>
 
 #endif
 #endif

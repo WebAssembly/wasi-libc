@@ -21,7 +21,7 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
   // Prepare polling subscription.
   __wasi_subscription_t sub = {
       .u.tag = __WASI_EVENTTYPE_CLOCK,
-      .u.u.clock.id = clock_id->id,
+      .u.u.clock.id = clock_id.id,
       .u.u.clock.flags = flags,
   };
   if (!timespec_to_timestamp_clamp(rqtp, &sub.u.u.clock.timeout))

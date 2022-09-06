@@ -13,15 +13,6 @@
 #include <string.h>
 #include <assert.h>
 
-void __SIG_IGN(int sig) {
-    // do nothing
-}
-
-_Noreturn
-void __SIG_ERR(int sig) {
-    __builtin_trap();
-}
-
 _Noreturn
 static void core_handler(int sig) {
     fprintf(stderr, "Program recieved fatal signal: %s\n", strsignal(sig));
@@ -101,6 +92,12 @@ static const sighandler_t default_handlers[_NSIG] = {
 
 static sighandler_t handlers[_NSIG];
 
+
+
+/*
+ * This is now moved to the top half
+ *
+
 int raise(int sig) {
     if (sig < 0 || sig >= _NSIG) {
         errno = EINVAL;
@@ -117,7 +114,6 @@ int raise(int sig) {
 
     return 0;
 }
-
 void (*signal(int sig, void (*func)(int)))(int) {
     assert(SIG_DFL == NULL);
 
@@ -140,3 +136,4 @@ void (*signal(int sig, void (*func)(int)))(int) {
 
 extern __typeof(signal) bsd_signal __attribute__((weak, alias("signal")));
 extern __typeof(signal) __sysv_signal __attribute__((weak, alias("signal")));
+*/

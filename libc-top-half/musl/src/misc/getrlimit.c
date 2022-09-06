@@ -1,11 +1,14 @@
 #include <sys/resource.h>
 #include <errno.h>
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#endif
 
 #define FIX(x) do{ if ((x)>=SYSCALL_RLIM_INFINITY) (x)=RLIM_INFINITY; }while(0)
 
 int getrlimit(int resource, struct rlimit *rlim)
 {
+#ifdef __wasilibc_unmodified_upstream
 	unsigned long k_rlim[2];
 	int ret = syscall(SYS_prlimit64, 0, resource, 0, rlim);
 	if (!ret) {
@@ -20,6 +23,10 @@ int getrlimit(int resource, struct rlimit *rlim)
 	rlim->rlim_max = k_rlim[1] == -1UL ? RLIM_INFINITY : k_rlim[1];
 	FIX(rlim->rlim_cur);
 	FIX(rlim->rlim_max);
+#else
+    rlim->rlim_cur = RLIM_INFINITY;
+	rlim->rlim_max = RLIM_INFINITY;
+#endif
 	return 0;
 }
 

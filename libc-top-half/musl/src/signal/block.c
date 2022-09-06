@@ -1,4 +1,5 @@
 #include "pthread_impl.h"
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
 #include <signal.h>
 
@@ -28,6 +29,7 @@ static const unsigned long app_mask[] = {
 #endif
 };
 
+#ifdef __wasilibc_unmodified_upstream
 void __block_all_sigs(void *set)
 {
 	__syscall(SYS_rt_sigprocmask, SIG_BLOCK, &all_mask, set, _NSIG/8);
@@ -42,3 +44,5 @@ void __restore_sigs(void *set)
 {
 	__syscall(SYS_rt_sigprocmask, SIG_SETMASK, set, 0, _NSIG/8);
 }
+#endif
+#endif

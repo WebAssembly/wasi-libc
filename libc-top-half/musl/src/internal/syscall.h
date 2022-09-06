@@ -3,6 +3,8 @@
 
 #include <features.h>
 #include <errno.h>
+
+#ifdef __wasilibc_unmodified_upstream
 #include <sys/syscall.h>
 #include "syscall_arch.h"
 
@@ -395,4 +397,7 @@ hidden void __procfdname(char __buf[static 15+3*sizeof(int)], unsigned);
 
 hidden void *__vdsosym(const char *, const char *);
 
+#else
+hidden long __syscall_ret(unsigned long);
+#endif
 #endif

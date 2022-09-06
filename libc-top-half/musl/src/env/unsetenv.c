@@ -3,8 +3,10 @@
 #include <errno.h>
 #include <unistd.h>
 
+#ifdef __wasilibc_unmodified_upstream
 static void dummy(char *old, char *new) {}
 weak_alias(dummy, __env_rm_add);
+#endif
 
 int unsetenv(const char *name)
 {

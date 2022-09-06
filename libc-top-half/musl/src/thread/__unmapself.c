@@ -1,3 +1,4 @@
+#ifdef __wasilibc_unmodified_upstream
 #include "pthread_impl.h"
 #include "atomic.h"
 #include "syscall.h"
@@ -22,3 +23,4 @@ void __unmapself(void *base, size_t size)
 	unmap_size = size;
 	CRTJMP(do_unmap, stack);
 }
+#endif

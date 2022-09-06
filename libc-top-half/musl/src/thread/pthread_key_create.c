@@ -17,8 +17,10 @@ static void dummy_0(void)
 {
 }
 
+#ifdef __wasilibc_unmodified_upstream
 weak_alias(dummy_0, __tl_lock);
 weak_alias(dummy_0, __tl_unlock);
+#endif
 
 int __pthread_key_create(pthread_key_t *k, void (*dtor)(void *))
 {
@@ -50,7 +52,9 @@ int __pthread_key_delete(pthread_key_t k)
 	sigset_t set;
 	pthread_t self = __pthread_self(), td=self;
 
+#ifdef __wasilibc_unmodified_upstream
 	__block_app_sigs(&set);
+#endif
 	__pthread_rwlock_wrlock(&key_lock);
 
 	__tl_lock();
@@ -61,7 +65,9 @@ int __pthread_key_delete(pthread_key_t k)
 	keys[k] = 0;
 
 	__pthread_rwlock_unlock(&key_lock);
+#ifdef __wasilibc_unmodified_upstream
 	__restore_sigs(&set);
+#endif
 
 	return 0;
 }

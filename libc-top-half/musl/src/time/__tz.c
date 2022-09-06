@@ -29,6 +29,9 @@ static char dst_name[TZNAME_MAX+1];
 #endif
 const char __utc[] = "UTC";
 
+static volatile int lock[1];
+volatile int *const __timezone_lockptr = lock;
+
 #ifdef __wasilibc_unmodified_upstream // timezone data
 static int dst_off;
 static int r0[5], r1[5];
@@ -39,9 +42,6 @@ static size_t map_size;
 static char old_tz_buf[32];
 static char *old_tz = old_tz_buf;
 static size_t old_tz_size = sizeof old_tz_buf;
-
-static volatile int lock[1];
-volatile int *const __timezone_lockptr = lock;
 
 static int getint(const char **p)
 {

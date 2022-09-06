@@ -4,7 +4,11 @@
 // mmap for simple file I/O. It just allocates memory with malloc and reads
 // and writes data with pread and pwrite.
 
+#ifdef __wasilibc_unmodified_upstream
 #define _WASI_EMULATED_MMAN
+#else
+#define _WASI_EMULATED_MMAN 1
+#endif
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>

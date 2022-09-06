@@ -1,10 +1,13 @@
 #include <signal.h>
 #include <errno.h>
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#endif
 
 #define IS32BIT(x) !((x)+0x80000000ULL>>32)
 #define CLAMP(x) (int)(IS32BIT(x) ? (x) : 0x7fffffffU+((0ULL+(x))>>63))
 
+#ifdef __wasilibc_unmodified_upstream
 static int do_sigtimedwait(const sigset_t *restrict mask, siginfo_t *restrict si, const struct timespec *restrict ts)
 {
 #ifdef SYS_rt_sigtimedwait_time64
@@ -22,7 +25,9 @@ static int do_sigtimedwait(const sigset_t *restrict mask, siginfo_t *restrict si
 	return __syscall_cp(SYS_rt_sigtimedwait, mask, si, ts, _NSIG/8);
 #endif
 }
+#endif
 
+#ifdef __wasilibc_unmodified_upstream
 int sigtimedwait(const sigset_t *restrict mask, siginfo_t *restrict si, const struct timespec *restrict timeout)
 {
 	int ret;
@@ -30,3 +35,9 @@ int sigtimedwait(const sigset_t *restrict mask, siginfo_t *restrict si, const st
 	while (ret==-EINTR);
 	return __syscall_ret(ret);
 }
+#else
+int sigtimedwait(const sigset_t *restrict mask, siginfo_t *restrict si, const struct timespec *restrict timeout)
+{
+	return EINVAL;
+}
+#endif

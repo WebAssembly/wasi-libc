@@ -70,17 +70,13 @@
 #define PTHREAD_STACK_MIN 2048
 #define PTHREAD_DESTRUCTOR_ITERATIONS 4
 #endif
-#ifdef __wasilibc_unmodified_upstream /* WASI has no semaphores */
 #define SEM_VALUE_MAX 0x7fffffff
 #define SEM_NSEMS_MAX 256
-#endif
 #define DELAYTIMER_MAX 0x7fffffff
 #ifdef __wasilibc_unmodified_upstream /* WASI has no mq */
 #define MQ_PRIO_MAX 32768
 #endif
-#ifdef __wasilibc_unmodified_upstream /* WASI has no usernames */
 #define LOGIN_NAME_MAX 256
-#endif
 
 /* Arbitrary numbers... */
 

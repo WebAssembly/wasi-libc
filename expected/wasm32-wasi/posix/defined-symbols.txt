@@ -179,8 +179,10 @@ __polevll
 __posix_getopt
 __pow_log_data
 __powf_log2_data
+__private_cond_signal
 __progname
 __progname_full
+__pthread_cond_timedwait
 __pthread_mutex_lock
 __pthread_mutex_timedlock
 __pthread_mutex_trylock
@@ -937,6 +939,12 @@ program_invocation_name
 program_invocation_short_name
 pselect
 psignal
+pthread_cond_broadcast
+pthread_cond_destroy
+pthread_cond_init
+pthread_cond_signal
+pthread_cond_timedwait
+pthread_cond_wait
 pthread_condattr_destroy
 pthread_condattr_init
 pthread_condattr_setclock

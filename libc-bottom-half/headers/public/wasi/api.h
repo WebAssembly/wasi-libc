@@ -4284,47 +4284,47 @@ __wasi_errno_t __wasi_chdir(
 /**
  * Registers a callback function for signals
  */
-__wasi_errno_t __wasi_callback_signal(
+void __wasi_callback_signal(
     /**
      * Exported function that will be called back when the signal triggers
      * (must match the callback signature that takes the signal value)
      * (if this is not specified the default will be "_signal")
      */
     const char *callback
-) __attribute__((__warn_unused_result__));
+);
 /**
  * Registers a callback function for new threads
  */
-__wasi_errno_t __wasi_callback_thread(
+void __wasi_callback_thread(
     /**
      * Exported function that will be called back when a new thread is created
      * (must match the callback signature that takes the u64 user_data)
      * (if this is not specified the default will be "_start_thread")
      */
     const char *callback
-) __attribute__((__warn_unused_result__));
+);
 /**
  * Registers a callback function for reactors
  */
-__wasi_errno_t __wasi_callback_reactor(
+void __wasi_callback_reactor(
     /**
      * Exported function that will be called back when the reactor is triggered
      * (must match the callback signature that takes the u64 user_data)
      * (if this is not specified the default will be "_reactor")
      */
     const char *callback
-) __attribute__((__warn_unused_result__));
+);
 /**
  * Registers a callback function for destruction of thread locals
  */
-__wasi_errno_t __wasi_callback_thread_local_destroy(
+void __wasi_callback_thread_local_destroy(
     /**
      * Exported function that will be called back when the reactor is triggered
      * (must match the callback signature that takes the u64 user_data)
      * (if this is not specified the default will be "_thread_local_destroy")
      */
     const char *callback
-) __attribute__((__warn_unused_result__));
+);
 /**
  * Creates a new thread by spawning that shares the same
  * memory address space, file handles and main event loops.

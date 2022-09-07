@@ -45,9 +45,7 @@ int faccessat(int fd, const char *filename, int amode, int flag)
 	if (pipe2(p, O_CLOEXEC)) return __syscall_ret(-EBUSY);
 	struct ctx c = { .fd = fd, .filename = filename, .amode = amode, .p = p[1] };
 
-#ifdef __wasilibc_unmodified_upstream
 	__block_all_sigs(&set);
-#endif
 	
 	pid = __clone(checker, stack+sizeof stack, 0, &c);
 	__syscall(SYS_close, p[1]);
@@ -57,9 +55,7 @@ int faccessat(int fd, const char *filename, int amode, int flag)
 	__syscall(SYS_close, p[0]);
 	__syscall(SYS_wait4, pid, &status, __WCLONE, 0);
 
-#ifdef __wasilibc_unmodified_upstream
 	__restore_sigs(&set);
-#endif
 
 	return __syscall_ret(ret);
 }

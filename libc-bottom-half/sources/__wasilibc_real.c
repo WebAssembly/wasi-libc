@@ -691,56 +691,52 @@ __wasi_errno_t __wasi_chdir(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_32v1_callback_signal(int32_t arg0, int32_t arg1) __attribute__((
+void __imported_wasix_32v1_callback_signal(int32_t arg0, int32_t arg1) __attribute__((
     __import_module__("wasix_32v1"),
     __import_name__("callback_signal")
 ));
 
-__wasi_errno_t __wasi_callback_signal(
+void __wasi_callback_signal(
     const char *callback
 ){
     size_t callback_len = strlen(callback);
-    int32_t ret = __imported_wasix_32v1_callback_signal((intptr_t) callback, (intptr_t) callback_len);
-    return (uint16_t) ret;
+    __imported_wasix_32v1_callback_signal((intptr_t) callback, (intptr_t) callback_len);
 }
 
-int32_t __imported_wasix_32v1_callback_thread(int32_t arg0, int32_t arg1) __attribute__((
+void __imported_wasix_32v1_callback_thread(int32_t arg0, int32_t arg1) __attribute__((
     __import_module__("wasix_32v1"),
     __import_name__("callback_thread")
 ));
 
-__wasi_errno_t __wasi_callback_thread(
+void __wasi_callback_thread(
     const char *callback
 ){
     size_t callback_len = strlen(callback);
-    int32_t ret = __imported_wasix_32v1_callback_thread((intptr_t) callback, (intptr_t) callback_len);
-    return (uint16_t) ret;
+    __imported_wasix_32v1_callback_thread((intptr_t) callback, (intptr_t) callback_len);
 }
 
-int32_t __imported_wasix_32v1_callback_reactor(int32_t arg0, int32_t arg1) __attribute__((
+void __imported_wasix_32v1_callback_reactor(int32_t arg0, int32_t arg1) __attribute__((
     __import_module__("wasix_32v1"),
     __import_name__("callback_reactor")
 ));
 
-__wasi_errno_t __wasi_callback_reactor(
+void __wasi_callback_reactor(
     const char *callback
 ){
     size_t callback_len = strlen(callback);
-    int32_t ret = __imported_wasix_32v1_callback_reactor((intptr_t) callback, (intptr_t) callback_len);
-    return (uint16_t) ret;
+    __imported_wasix_32v1_callback_reactor((intptr_t) callback, (intptr_t) callback_len);
 }
 
-int32_t __imported_wasix_32v1_callback_thread_local_destroy(int32_t arg0, int32_t arg1) __attribute__((
+void __imported_wasix_32v1_callback_thread_local_destroy(int32_t arg0, int32_t arg1) __attribute__((
     __import_module__("wasix_32v1"),
     __import_name__("callback_thread_local_destroy")
 ));
 
-__wasi_errno_t __wasi_callback_thread_local_destroy(
+void __wasi_callback_thread_local_destroy(
     const char *callback
 ){
     size_t callback_len = strlen(callback);
-    int32_t ret = __imported_wasix_32v1_callback_thread_local_destroy((intptr_t) callback, (intptr_t) callback_len);
-    return (uint16_t) ret;
+    __imported_wasix_32v1_callback_thread_local_destroy((intptr_t) callback, (intptr_t) callback_len);
 }
 
 int32_t __imported_wasix_32v1_thread_spawn(int64_t arg0, int64_t arg1, int32_t arg2, int32_t arg3) __attribute__((

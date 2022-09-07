@@ -24,6 +24,8 @@ __asctime_r
 __assert_fail
 __at_quick_exit_lockptr
 __atexit_lockptr
+__block_all_sigs
+__block_app_sigs
 __bump_lockptr
 __c_dot_utf8
 __c_dot_utf8_locale
@@ -59,6 +61,7 @@ __do_cleanup_push
 __do_des
 __do_orphaned_stdio_locks
 __duplocale
+__eintr_handler_lock
 __eintr_valid_flag
 __env_rm_add
 __execvp
@@ -174,6 +177,7 @@ __libc_current_sigrtmax
 __libc_current_sigrtmin
 __libc_free
 __libc_malloc
+__libc_sigaction
 __loc_is_allocated
 __locale_lock
 __locale_lockptr
@@ -264,6 +268,7 @@ __rem_pio2l
 __reset_tls
 __restore
 __restore_rt
+__restore_sigs
 __rsqrt_tab
 __secs_to_tm
 __secs_to_zone
@@ -539,6 +544,7 @@ __wasilibc_tell
 __wasilibc_unlinkat
 __wasilibc_utimens
 __wasm_call_dtors
+__wasm_signal
 __wcscoll_l
 __wcsftime_l
 __wcsxfrm_l

@@ -1,7 +1,7 @@
 #include <unistd.h>
 #include <signal.h>
-#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#ifdef __wasilibc_unmodified_upstream
 #else
 #include <wasi/api.h>
 #endif
@@ -17,9 +17,7 @@ pid_t _Fork(void)
 {
 	pid_t ret;
 	sigset_t set;
-#ifdef __wasilibc_unmodified_upstream
 	__block_all_sigs(&set);
-#endif
 	__aio_atfork(-1);
 	LOCK(__abort_lock);
 #ifdef __wasilibc_unmodified_upstream
@@ -59,15 +57,6 @@ pid_t _Fork(void)
 	}
 	UNLOCK(__abort_lock);
 	__aio_atfork(!ret);
-#ifdef __wasilibc_unmodified_upstream
 	__restore_sigs(&set);
 	return __syscall_ret(ret);
-#else
-	if (ret > 0) {
-		return ret;
-	} else {
-		errno = -ret;
-		return -1;
-	}
-#endif
 }

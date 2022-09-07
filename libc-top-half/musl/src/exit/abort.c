@@ -19,9 +19,7 @@ _Noreturn void abort(void)
 	 * sigaction from installing a new SIGABRT handler, uninstall any
 	 * handler that may be present, and re-raise the signal to generate
 	 * the default action of abnormal termination. */
-#ifdef __wasilibc_unmodified_upstream
 	__block_all_sigs(0);
-#endif
 	LOCK(__abort_lock);
 #ifdef __wasilibc_unmodified_upstream
 	__syscall(SYS_rt_sigaction, SIGABRT,
@@ -32,6 +30,7 @@ _Noreturn void abort(void)
 #else
 	int r;
 	r = __wasi_thread_signal(__pthread_self()->tid, SIGABRT);
+	_Exit(127);
 #endif
 
 	/* Beyond this point should be unreachable. */

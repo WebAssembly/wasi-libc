@@ -451,13 +451,14 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 			__wait(&args->control, 0, 3, 0);
 	}
 #else
-	/* As in the unmodified version, all spawn failures translate to EAGAIN.
-	 * If the spawn did succeed, then wait for the TID to be populated by the
-	 * child thread. */
+	/* As in the unmodified version, all spawn failures translate to EAGAIN. If
+	 * the spawn did succeed, then we wait forever for the TID to be populated
+	 * by the child thread (it would be a host bug to return success but never
+	 * spawn the new thread). */
 	if (ret != 0) {
 		ret = -EAGAIN;
 	} else {
-		int timeout_ns = -1; // TODO
+		int timeout_ns = -1;
 		int wait_ret = __builtin_wasm_memory_atomic_wait32((int *)new->tid, 0, timeout_ns);
 		if (wait_ret == 1) {
 			// Loaded value != expected value; the pthread was not set up

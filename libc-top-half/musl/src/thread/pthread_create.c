@@ -277,15 +277,6 @@ static void init_file_lock(FILE *f)
 	if (f && f->lock<0) f->lock = 0;
 }
 
-int32_t __imported_wasi_snapshot_preview1_thread_spawn(int32_t arg0) __attribute__((
-    __import_module__("wasi_snapshot_preview1"),
-    __import_name__("thread_spawn")
-));
-
-static int wasi_thread_spawn(void* start_args) {
-	return __imported_wasi_snapshot_preview1_thread_spawn((int32_t) start_args);
-}
-
 int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict attrp, void *(*entry)(void *), void *restrict arg)
 {
 	int ret, c11 = (attrp == __ATTRP_C11_THREAD);
@@ -432,7 +423,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	 * of the current module and start executing the entry function. The
 	 * wasi-threads specification requires the module to export a
 	 * `wasi_thread_start` function, which is invoked with `args`. */
-	ret = wasi_thread_spawn(args);
+	ret = __wasi_thread_spawn((void *) args);
 #endif
 
 #ifdef __wasilibc_unmodified_upstream

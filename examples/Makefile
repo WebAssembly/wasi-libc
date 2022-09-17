@@ -54,7 +54,9 @@ SRC=$(wildcard *.c)
 
 export PATH := $(LLD_PATH):$(PATH)
 
-all: longjmp file-copy signal
+all: longjmp file-copy signal fork
+	cp -f ../dist/wasix/longjmp.wasm ../../ate/wasmer-web/public/bin/example-longjmp.wasm
+	cp -f ../dist/wasix/fork.wasm ../../ate/wasmer-web/public/bin/example-fork.wasm
 
 %: %.c
 	mkdir -p ../dist/host
@@ -62,7 +64,8 @@ all: longjmp file-copy signal
 	mkdir -p ../dist/wasix
 	clang $(CFLAGS) $(CLFLAGS) \
               $@.c \
-              -o ../dist/wasix/$@.wasm
+              -o ../dist/wasix/$@.rustc.wasm
+	wasm-opt -O2 --asyncify ../dist/wasix/$@.rustc.wasm -o ../dist/wasix/$@.wasm
 
 clean:
 	rm -f *.o

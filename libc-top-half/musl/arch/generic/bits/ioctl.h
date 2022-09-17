@@ -113,3 +113,12 @@
 #endif
 
 #include <bits/ioctl_fix.h>
+
+#define FIBMAP          _IO(0x00,1)	/* bmap access */
+#define FIGETBSZ        _IO(0x00,2)	/* get the block size used for bmap */
+#define FIFREEZE        _IOWR('X', 119, int)	/* Freeze */
+#define FITHAW          _IOWR('X', 120, int)	/* Thaw */
+#define FITRIM          _IOWR('X', 121, struct fstrim_range)	/* Trim */
+#define FICLONE         _IOW(0x94, 9, int)
+#define FICLONERANGE	_IOW(0x94, 13, struct file_clone_range)
+#define FIDEDUPERANGE	_IOWR(0x94, 54, struct file_dedupe_

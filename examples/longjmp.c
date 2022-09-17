@@ -3,11 +3,11 @@
 
 jmp_buf bufferA, bufferB;
 
-void routineB(); // forward declaration
+__attribute__ ((noinline)) void routineB(); // forward declaration
 
-void routineA()
+__attribute__ ((noinline)) void routineA()
 {
-    int r ;
+    int r = 1;
 
     printf("(A1)\n");
 
@@ -27,7 +27,7 @@ void routineA()
     printf("(A4) r=%d\n",r);
 }
 
-void routineB()
+__attribute__ ((noinline)) void routineB()
 {
     int r;
 

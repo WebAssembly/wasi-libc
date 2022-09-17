@@ -144,9 +144,12 @@ __lttf2
 __netf2
 __stack_pointer
 __subtf3
+__tls_align
 __tls_base
+__tls_size
 __trunctfdf2
 __trunctfsf2
 __unordtf2
 __wasm_call_ctors
+__wasm_init_tls
 main

@@ -25,13 +25,13 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(intptr_t) == 4, "non-wasi data layout");
-_Static_assert(_Alignof(uintptr_t) == 4, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
-typedef int32_t __wasi_int_t;
-typedef uint32_t __wasi_uint_t;
-_Static_assert(_Alignof(__wasi_int_t) == 4, "non-wasi data layout");
-_Static_assert(_Alignof(__wasi_uint_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(intptr_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(uintptr_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == 8, "non-wasi data layout");
+typedef int64_t __wasi_int_t;
+typedef uint64_t __wasi_uint_t;
+_Static_assert(_Alignof(__wasi_int_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(__wasi_uint_t) == 8, "non-wasi data layout");
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -43,8 +43,8 @@ extern "C" {
  */
 typedef __wasi_uint_t __wasi_pointersize_t;
 
-_Static_assert(sizeof(__wasi_pointersize_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_pointersize_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_pointersize_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_pointersize_t) == 8, "witx calculated align");
 
 /**
  * Represents a number of items
@@ -192,6 +192,11 @@ typedef struct __wasi_stack_snapshot_t {
     uint32_t host_offset;
 
     /**
+     * User defined field that can be used by functions
+     */
+    uint64_t user;
+
+    /**
      * Top part of the stack that is saved for later restoration
      */
     __wasi_stack_part_t stack1;
@@ -202,14 +207,6 @@ typedef struct __wasi_stack_snapshot_t {
 
     __wasi_stack_part_t stack4;
 
-    __wasi_stack_part_t stack5;
-
-    __wasi_stack_part_t stack6;
-
-    __wasi_stack_part_t stack7;
-
-    __wasi_stack_part_t stack8;
-
     /**
      * Hash thats used as an integrity checked
      */
@@ -217,19 +214,16 @@ typedef struct __wasi_stack_snapshot_t {
 
 } __wasi_stack_snapshot_t;
 
-_Static_assert(sizeof(__wasi_stack_snapshot_t) == 1048, "witx calculated size");
+_Static_assert(sizeof(__wasi_stack_snapshot_t) == 544, "witx calculated size");
 _Static_assert(_Alignof(__wasi_stack_snapshot_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_stack_snapshot_t, memory_offset) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_stack_snapshot_t, host_offset) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack1) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack2) == 136, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack3) == 264, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack4) == 392, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack5) == 520, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack6) == 648, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack7) == 776, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack8) == 904, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, hash) == 1032, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, user) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, stack1) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, stack2) == 144, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, stack3) == 272, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, stack4) == 400, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, hash) == 528, "witx calculated offset");
 
 /**
  * Identifiers for clocks.
@@ -1031,10 +1025,10 @@ typedef struct __wasi_iovec_t {
 
 } __wasi_iovec_t;
 
-_Static_assert(sizeof(__wasi_iovec_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_iovec_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_iovec_t) == 16, "witx calculated size");
+_Static_assert(_Alignof(__wasi_iovec_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_iovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 8, "witx calculated offset");
 
 /**
  * A region of memory for scatter/gather writes.
@@ -1052,10 +1046,10 @@ typedef struct __wasi_ciovec_t {
 
 } __wasi_ciovec_t;
 
-_Static_assert(sizeof(__wasi_ciovec_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_ciovec_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_ciovec_t) == 16, "witx calculated size");
+_Static_assert(_Alignof(__wasi_ciovec_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_ciovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 8, "witx calculated offset");
 
 /**
  * Relative offset within a file.
@@ -3599,7 +3593,7 @@ _Static_assert(sizeof(__wasi_prestat_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
 
 /**
- * @defgroup wasix_32v1
+ * @defgroup wasix_64v1
  * @{
  */
 
@@ -4342,6 +4336,10 @@ __wasi_errno_t __wasi_thread_spawn(
      * The base address of the stack allocated for this thread
      */
     uint64_t stack_base,
+    /**
+     * The start address of the stack (where the memory is allocated)
+     */
+    uint64_t stack_start,
     /**
      * Indicates if the function will operate as a reactor or
      * as a normal thread. Reactors will be repeatable called

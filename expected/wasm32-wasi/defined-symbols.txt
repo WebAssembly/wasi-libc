@@ -510,6 +510,7 @@ __wasilibc_get_environ
 __wasilibc_get_stack_pointer
 __wasilibc_get_tls_base
 __wasilibc_iftodt
+__wasilibc_init_tls
 __wasilibc_initialize_environ
 __wasilibc_link
 __wasilibc_link_newat
@@ -541,6 +542,8 @@ __wasilibc_set_tls_base
 __wasilibc_setjmp
 __wasilibc_stat
 __wasilibc_tell
+__wasilibc_tls_align
+__wasilibc_tls_size
 __wasilibc_unlinkat
 __wasilibc_utimens
 __wasm_call_dtors

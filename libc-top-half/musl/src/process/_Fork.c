@@ -28,7 +28,7 @@ pid_t _Fork(void)
 #endif
 #else
 	__wasi_pid_t pid = -1;
-    int err = __wasi_proc_fork(&ret);
+    int err = __wasi_proc_fork(&pid);
 	if (err != 0) {
 		ret = -err;
 	} else {

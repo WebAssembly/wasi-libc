@@ -4,6 +4,7 @@
 #else
 #include <unistd.h>
 #include <wasi/api.h>
+#include <errno.h>
 #endif
 
 pid_t waitpid(pid_t pid, int *status, int options)
@@ -12,6 +13,12 @@ pid_t waitpid(pid_t pid, int *status, int options)
 	return syscall_cp(SYS_wait4, pid, status, options, 0);
 #else
 	__wasi_exitcode_t code;
-	return __wasi_proc_join((__wasi_pid_t)pid, &code);
+	int ret = __wasi_proc_join((__wasi_pid_t)pid, &code);
+	if (ret != 0) {
+		errno = ret;
+		return -1;
+	} else {
+		return pid;
+	}
 #endif
 }

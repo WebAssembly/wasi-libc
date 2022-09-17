@@ -42,8 +42,11 @@ void __wasilibc_initialize_environ(void);
 /// Used for accessing the stack pointers
 void* __wasilibc_get_stack_pointer(void);
 void __wasilibc_set_stack_pointer(void *val);
+void __wasilibc_init_tls(void *val);
 void* __wasilibc_get_tls_base(void);
 void __wasilibc_set_tls_base(void *val);
+unsigned long long __wasilibc_tls_size(void);
+unsigned long long __wasilibc_tls_align(void);
 int __wasilibc_setjmp(__wasi_stack_snapshot_t * buf);
 _Noreturn void __wasilibc_longjmp(__wasi_stack_snapshot_t * buf, int val);
 

@@ -79,7 +79,6 @@ __fwritable
 __fwritex
 __fwriting
 __get_locale
-__get_tp
 __getdelim
 __getentropy
 __getopt_msg

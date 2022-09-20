@@ -4552,6 +4552,12 @@ __wasi_errno_t __wasi_proc_raise(
  * number then its the current process and the $pid represents the child.
  */
 __wasi_errno_t __wasi_proc_fork(
+    /**
+     * Indicates if the memory will be copied into the new process
+     * (if it is not copied this then becomes similar to `vfork` in
+     *  that the current process pauses until `proc_exec` is called)
+     */
+    __wasi_bool_t copy_memory,
     __wasi_pid_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**

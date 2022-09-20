@@ -131,7 +131,8 @@ int pause(void);
 #endif
 
 pid_t fork(void);
-pid_t _Fork(void);
+pid_t _fork_internal(int copy_mem);
+pid_t _Fork(int copy_mem);
 int execve(const char *, char *const [], char *const []);
 int execv(const char *, char *const []);
 int execle(const char *, const char *, ...);

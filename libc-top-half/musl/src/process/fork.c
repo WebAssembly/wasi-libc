@@ -53,6 +53,11 @@ weak_alias(dummy_0, __tl_unlock);
 
 pid_t fork(void)
 {
+	return _fork_internal(1);
+}
+
+pid_t _fork_internal(int copy_mem)
+{
 	sigset_t set;
 	__fork_handler(-1);
 #ifdef __wasilibc_unmodified_upstream
@@ -68,7 +73,7 @@ pid_t fork(void)
 		__tl_lock();
 	}
 	pthread_t self=__pthread_self(), next=self->next;
-	pid_t ret = _Fork();
+	pid_t ret = _Fork(copy_mem);
 	int errno_save = errno;
 	if (need_locks) {
 		if (!ret) {

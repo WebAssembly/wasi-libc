@@ -13,7 +13,7 @@
 static void dummy(int x) { }
 weak_alias(dummy, __aio_atfork);
 
-pid_t _Fork(void)
+pid_t _Fork(int copy_mem)
 {
 	pid_t ret;
 	sigset_t set;
@@ -28,7 +28,7 @@ pid_t _Fork(void)
 #endif
 #else
 	__wasi_pid_t pid = -1;
-    int err = __wasi_proc_fork(&pid);
+    int err = __wasi_proc_fork(copy_mem, &pid);
 	if (err != 0) {
 		ret = -err;
 	} else {

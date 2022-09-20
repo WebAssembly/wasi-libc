@@ -15,6 +15,6 @@ pid_t vfork(void)
 	return syscall(SYS_clone, SIGCHLD, 0);
 #endif
 #else
-	return fork();
+	return _fork_internal(0);
 #endif
 }

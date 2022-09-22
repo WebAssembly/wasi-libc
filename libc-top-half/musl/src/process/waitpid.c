@@ -18,6 +18,7 @@ pid_t waitpid(pid_t pid, int *status, int options)
 		errno = ret;
 		return -1;
 	} else {
+		*status = (int)code;
 		return pid;
 	}
 #endif

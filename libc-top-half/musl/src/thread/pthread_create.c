@@ -16,8 +16,10 @@ weak_alias(dummy_0, __acquire_ptc);
 weak_alias(dummy_0, __release_ptc);
 weak_alias(dummy_0, __pthread_tsd_run_dtors);
 weak_alias(dummy_0, __do_orphaned_stdio_locks);
+#ifdef __wasilibc_unmodified_upstream
 weak_alias(dummy_0, __dl_thread_cleanup);
 weak_alias(dummy_0, __membarrier_init);
+#endif
 
 static int tl_lock_count;
 static int tl_lock_waiters;
@@ -139,7 +141,9 @@ _Noreturn void __pthread_exit(void *result)
 #endif
 
 	__do_orphaned_stdio_locks();
+#ifdef __wasilibc_unmodified_upstream
 	__dl_thread_cleanup();
+#endif
 
 	/* Last, unlink thread from the list. This change will not be visible
 	 * until the lock is released, which only happens after SYS_exit

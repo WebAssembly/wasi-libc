@@ -39,7 +39,6 @@ __ctype_toupper_loc
 __cxa_atexit
 __cxa_finalize
 __des_setkey
-__dl_thread_cleanup
 __do_cleanup_pop
 __do_cleanup_push
 __do_des
@@ -162,7 +161,6 @@ __math_uflow
 __math_uflowf
 __math_xflow
 __math_xflowf
-__membarrier_init
 __memrchr
 __mo_lookup
 __month_to_secs

@@ -12,7 +12,7 @@ int uname(struct utsname *uts)
 #else
 	// Just fill in the fields with placeholder values.
 	strcpy(uts->sysname, "wasi");
-	strcpy(uts->nodename, "(none)");
+	strcpy(uts->nodename, "wasmer.sh");
 	strcpy(uts->release, "0.0.0");
 	strcpy(uts->version, "0.0.0");
 #if defined(__wasm32__)

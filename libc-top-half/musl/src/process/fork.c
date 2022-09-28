@@ -19,8 +19,8 @@ weak_alias(dummy_lockptr, __timezone_lockptr);
 
 weak_alias(dummy_lockptr, __vmlock_lockptr);
 #else
+extern volatile int *const __gettext_lockptr;
 weak_alias(dummy_lockptr, __dlerror_lockptr);
-weak_alias(dummy_lockptr, __gettext_lockptr);
 weak_alias(dummy_lockptr, __bump_lockptr);
 #endif
 

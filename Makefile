@@ -133,6 +133,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         time/localtime.c \
         time/localtime_r.c \
         time/mktime.c \
+        time/gettimeofday.c \
         time/__tm_to_secs.c \
         time/__month_to_secs.c \
         time/__secs_to_tm.c \
@@ -155,6 +156,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         unistd/setpgrp.c \
         unistd/getsid.c \
         unistd/setsid.c \
+        unistd/gethostname.c \
         linux/wait3.c \
         linux/wait4.c \
         stat/futimesat.c \
@@ -167,7 +169,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  %/remove.c \
                  %/gets.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/*.c)) \
-    $(filter-out %/dcngettext.c %/textdomain.c %/bind_textdomain_codeset.c, \
+    $(filter-out %/bind_textdomain_codeset.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/locale/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/setjmp/*.c) \
@@ -182,7 +184,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/prng/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/conf/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/passwd/*.c) \
-    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/ctype/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/temp/*.c) \
     $(filter-out %/__signbit.c %/__signbitf.c %/__signbitl.c \
                  %/__fpclassify.c %/__fpclassifyf.c %/__fpclassifyl.c \
                  %/ceilf.c %/ceil.c \
@@ -345,7 +347,6 @@ MUSL_OMIT_HEADERS += \
     "scsi/scsi.h" "scsi/scsi_ioctl.h" "scsi/sg.h" \
     "sys/auxv.h" \
     "mntent.h" \
-    "netdb.h" \
     "resolv.h" \
     "pty.h" \
     "dlfcn.h" \

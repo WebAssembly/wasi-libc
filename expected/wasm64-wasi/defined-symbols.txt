@@ -114,6 +114,7 @@ __getopt_msg
 __getpw_a
 __getpwent_a
 __gettext_lockptr
+__gettextdomain
 __gmtime_r
 __hwcap
 __inet_aton
@@ -205,6 +206,7 @@ __math_xflow
 __math_xflowf
 __membarrier_init
 __memrchr
+__mkostemps
 __mo_lookup
 __month_to_secs
 __newlocale
@@ -257,6 +259,7 @@ __pthread_tsd_run_dtors
 __pthread_tsd_size
 __putenv
 __rand48_step
+__randname
 __random_lockptr
 __reallocarray
 __register_locked_file
@@ -532,6 +535,7 @@ __wasilibc_nocwd_scandirat
 __wasilibc_nocwd_symlinkat
 __wasilibc_nocwd_utimensat
 __wasilibc_open_nomode
+__wasilibc_pgrp
 __wasilibc_populate_preopens_init
 __wasilibc_register_preopened_fd
 __wasilibc_rename_newat
@@ -611,6 +615,7 @@ basename
 bcmp
 bcopy
 bind
+bindtextdomain
 bsd_signal
 bsd_signal
 bsearch
@@ -731,10 +736,14 @@ ctanhl
 ctanl
 ctime
 ctime_r
+dcgettext
+dcngettext
+dgettext
 difftime
 dirfd
 dirname
 div
+dngettext
 dprintf
 drand48
 drem
@@ -926,6 +935,7 @@ getgrnam
 getgrnam_r
 getgrouplist
 gethostid
+gethostname
 getif_addrs
 getitimer
 getline
@@ -953,6 +963,8 @@ getspent
 getspnam
 getspnam_r
 getsubopt
+gettext
+gettimeofday
 gettimeofday
 getuid
 getw
@@ -1134,6 +1146,16 @@ memrchr
 memset
 mkdir
 mkdirat
+mkdtemp
+mkostemp
+mkostemp64
+mkostemps
+mkostemps64
+mkstemp
+mkstemp64
+mkstemps
+mkstemps64
+mktemp
 mktime
 mmap
 modf
@@ -1163,6 +1185,7 @@ nexttowardf
 nexttowardl
 nftw
 nftw64
+ngettext
 nl_langinfo
 nl_langinfo_l
 nrand48
@@ -1571,6 +1594,7 @@ tcsetpgrp
 tdelete
 tdestroy
 telldir
+textdomain
 tfind
 tgamma
 tgammaf

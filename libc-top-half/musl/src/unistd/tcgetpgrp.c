@@ -5,6 +5,11 @@
 #include <sys/ioctl.h>
 #endif
 
+#ifdef __wasilibc_unmodified_upstream
+#else
+extern int __wasilibc_pgrp;
+#endif
+
 pid_t tcgetpgrp(int fd)
 {
 #ifdef __wasilibc_unmodified_upstream
@@ -13,7 +18,6 @@ pid_t tcgetpgrp(int fd)
 		return -1;
 	return pgrp;
 #else
-	errno = EINVAL;
-	return -1;
+	return __wasilibc_pgrp;
 #endif
 }

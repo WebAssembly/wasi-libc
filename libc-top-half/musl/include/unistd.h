@@ -149,10 +149,8 @@ pid_t getpgid(pid_t);
 int setpgid(pid_t, pid_t);
 pid_t setsid(void);
 pid_t getsid(pid_t);
-#ifdef __wasilibc_unmodified_upstream /* WASI has no ttyname */
 char *ttyname(int);
 int ttyname_r(int, char *, size_t);
-#endif
 int isatty(int);
 pid_t tcgetpgrp(int);
 int tcsetpgrp(int, pid_t);

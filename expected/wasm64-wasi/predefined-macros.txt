@@ -40,6 +40,13 @@
 #define AIO_ALLDONE 2
 #define AIO_CANCELED 0
 #define AIO_NOTCANCELED 1
+#define AI_ADDRCONFIG 0x20
+#define AI_ALL 0x10
+#define AI_CANONNAME 0x02
+#define AI_NUMERICHOST 0x04
+#define AI_NUMERICSERV 0x400
+#define AI_PASSIVE 0x01
+#define AI_V4MAPPED 0x08
 #define ALT_DIGITS 0x2002F
 #define AM_STR 0x20026
 #define ANYMARK 0x01
@@ -537,6 +544,24 @@
 #define EADDRNOTAVAIL __WASI_ERRNO_ADDRNOTAVAIL
 #define EAFNOSUPPORT __WASI_ERRNO_AFNOSUPPORT
 #define EAGAIN __WASI_ERRNO_AGAIN
+#define EAI_ADDRFAMILY -9
+#define EAI_AGAIN -3
+#define EAI_ALLDONE -103
+#define EAI_BADFLAGS -1
+#define EAI_CANCELED -101
+#define EAI_FAIL -4
+#define EAI_FAMILY -6
+#define EAI_IDN_ENCODE -105
+#define EAI_INPROGRESS -100
+#define EAI_INTR -104
+#define EAI_MEMORY -10
+#define EAI_NODATA -5
+#define EAI_NONAME -2
+#define EAI_NOTCANCELED -102
+#define EAI_OVERFLOW -12
+#define EAI_SERVICE -8
+#define EAI_SOCKTYPE -7
+#define EAI_SYSTEM -11
 #define EALREADY __WASI_ERRNO_ALREADY
 #define EBADF __WASI_ERRNO_BADF
 #define EBADID 5
@@ -1168,6 +1193,7 @@
 #define HIBITL MINLONG
 #define HIBITS MINSHORT
 #define HOST_NAME_MAX 255
+#define HOST_NOT_FOUND 1
 #define HUGE 3.40282346638528859812e+38F
 #define HUGE_VAL ((double)INFINITY)
 #define HUGE_VALF INFINITY
@@ -2036,6 +2062,14 @@
 #define NEW_ENV_VAR 0
 #define NGROUPS 32
 #define NGROUPS_MAX 32
+#define NI_DGRAM 0x10
+#define NI_MAXHOST 255
+#define NI_MAXSERV 32
+#define NI_NAMEREQD 0x08
+#define NI_NOFQDN 0x04
+#define NI_NUMERICHOST 0x01
+#define NI_NUMERICSCOPE 0x100
+#define NI_NUMERICSERV 0x02
 #define NL0 0000000
 #define NL1 0000400
 #define NLDLY 0000400
@@ -2058,6 +2092,9 @@
 #define NOTAUTH ns_r_notauth
 #define NOTIMP ns_r_notimpl
 #define NOTZONE ns_r_notzone
+#define NO_ADDRESS NO_DATA
+#define NO_DATA 4
+#define NO_RECOVERY 3
 #define NR_ICMP_TYPES 18
 #define NR_ICMP_UNREACH 15
 #define NSIG _NSIG
@@ -4711,6 +4748,7 @@
 #define TOSTOP 0000400
 #define TOWRITE 00002
 #define TRANSIENT 4
+#define TRY_AGAIN 2
 #define TSGID 02000
 #define TSS_DTOR_ITERATIONS 4
 #define TSUID 04000
@@ -4967,6 +5005,7 @@
 #define _MATH_H 
 #define _MONETARY_H 
 #define _MQUEUE_H 
+#define _NETDB_H 
 #define _NETINET_ICMP6_H 
 #define _NETINET_IGMP_H 
 #define _NETINET_IN_H 
@@ -6543,6 +6582,8 @@
 #define glob64 glob
 #define glob64_t glob_t
 #define globfree64 globfree
+#define h_addr h_addr_list[0]
+#define h_errno (*__h_errno_location())
 #define howmany(n,d) (((n)+((d)-1))/(d))
 #define htobe16(x) __bswap16(x)
 #define htobe32(x) __bswap32(x)

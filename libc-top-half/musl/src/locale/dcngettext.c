@@ -115,13 +115,6 @@ struct msgcat {
 	int cat;
 };
 
-static char *dummy_gettextdomain()
-{
-	return "messages";
-}
-
-weak_alias(dummy_gettextdomain, __gettextdomain);
-
 char *dcngettext(const char *domainname, const char *msgid1, const char *msgid2, unsigned long int n, int category)
 {
 	static struct msgcat *volatile cats;
@@ -183,10 +176,15 @@ notrans:
 		const void *map;
 
 		for (;;) {
-			snprintf(name, sizeof name, "%s/%.*s%.*s/%s/%s.mo\0",
+			snprintf(name, sizeof name, "%s/%.*s%.*s/%s/%s.mo%s",
 				dirname, (int)loclen, locname,
-				(int)alt_modlen, modname, catname, domainname);
+				(int)alt_modlen, modname, catname, domainname, "\0");
+#ifdef __wasilibc_unmodified_upstream // WASI has no mmap, though this code could be made to use something else
 			if (map = __map_file(name, &map_size)) break;
+#else
+			map = 0;
+			break;
+#endif
 
 			/* Try dropping @mod, _YY, then both. */
 			if (alt_modlen) {
@@ -202,14 +200,18 @@ notrans:
 
 		p = calloc(sizeof *p, 1);
 		if (!p) {
+#ifdef __wasilibc_unmodified_upstream
 			__munmap((void *)map, map_size);
+#endif
 			goto notrans;
 		}
 		p->cat = category;
 		p->binding = q;
 		p->lm = lm;
+#ifdef __wasilibc_unmodified_upstream
 		p->map = map;
 		p->map_size = map_size;
+#endif
 
 		const char *rule = "n!=1;";
 		unsigned long np = 2;

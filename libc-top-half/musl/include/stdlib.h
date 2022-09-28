@@ -111,11 +111,9 @@ size_t __ctype_get_mb_cur_max(void);
 int posix_memalign (void **, size_t, size_t);
 int setenv (const char *, const char *, int);
 int unsetenv (const char *);
-#ifdef __wasilibc_unmodified_upstream /* WASI has no temp directories */
 int mkstemp (char *);
 int mkostemp (char *, int);
 char *mkdtemp (char *);
-#endif
 int getsubopt (char **, char *const *, char **);
 int rand_r (unsigned *);
 
@@ -152,11 +150,9 @@ void lcong48 (unsigned short [7]);
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 #include <alloca.h>
-#ifdef __wasilibc_unmodified_upstream /* WASI has no temp directories */
 char *mktemp (char *);
 int mkstemps (char *, int);
 int mkostemps (char *, int, int);
-#endif
 #ifdef __wasilibc_unmodified_upstream /* WASI libc doesn't build the legacy functions */
 void *valloc (size_t);
 void *memalign(size_t, size_t);

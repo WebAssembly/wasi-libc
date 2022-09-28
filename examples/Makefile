@@ -54,13 +54,14 @@ SRC=$(wildcard *.c)
 
 export PATH := $(LLD_PATH):$(PATH)
 
-all: longjmp file-copy signal fork vfork execve spawn
+all: longjmp file-copy signal fork vfork execve spawn pipe
 	cp -f ../dist/wasix/longjmp.wasm ../../ate/wasmer-web/public/bin/example-longjmp.wasm
 	cp -f ../dist/wasix/fork.wasm ../../ate/wasmer-web/public/bin/example-fork.wasm
 	cp -f ../dist/wasix/vfork.wasm ../../ate/wasmer-web/public/bin/example-vfork.wasm
 	cp -f ../dist/wasix/signal.wasm ../../ate/wasmer-web/public/bin/example-signal.wasm
 	cp -f ../dist/wasix/execve.wasm ../../ate/wasmer-web/public/bin/example-execve.wasm
 	cp -f ../dist/wasix/spawn.wasm ../../ate/wasmer-web/public/bin/example-spawn.wasm
+	cp -f ../dist/wasix/pipe.wasm ../../ate/wasmer-web/public/bin/example-pipe.wasm
 
 %: %.c
 	mkdir -p ../dist/host

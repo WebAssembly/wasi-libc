@@ -1,10 +1,15 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/stat.h>
+#ifdef __wasilibc_unmodified_upstream /* WASI has no ttyname */
 #include "syscall.h"
+#else
+#include <wasi/api.h>
+#endif
 
 int ttyname_r(int fd, char *name, size_t size)
 {
+#ifdef __wasilibc_unmodified_upstream /* WASI has no ttyname */
 	struct stat st1, st2;
 	char procname[sizeof "/proc/self/fd/" + 3*sizeof(int) + 2];
 	ssize_t l;
@@ -25,4 +30,25 @@ int ttyname_r(int fd, char *name, size_t size)
 		return ENODEV;
 
 	return 0;
+#else
+	__wasi_tty_t tty;
+	int r = __wasi_tty_get(&tty);
+	if r != 0 {
+		errno = r;
+		return 0;
+	}
+	if (fd == 0 && tty.stdin_tty == __WASI_BOOL_TRUE)  {
+		strncpy(name, "/dev/stdin", size);
+		return 0;
+	}
+	if (fd == 1 && tty.stdout_tty == __WASI_BOOL_TRUE)  {
+		strncpy(name, "/dev/stdout", size);
+		return 0;
+	}
+	if (fd == 2 && tty.stderr_tty == __WASI_BOOL_TRUE)  {
+		strncpy(name, "/dev/stderr", size);
+		return 0;
+	}
+	return ENOTTY;
+#endif
 }

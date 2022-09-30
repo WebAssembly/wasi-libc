@@ -3,8 +3,18 @@ extern void __wasm_call_ctors(void);
 extern int __main_void(void);
 extern void __wasm_call_dtors(void);
 
+// Commands should only be called once per instance. This simple check ensures
+// that the `_start` function isn't started more than once.
+static volatile int started = 0;
+
 __attribute__((export_name("_start")))
 void _start(void) {
+    // Don't allow the program to be called multiple times.
+    if (started != 0) {
+	__builtin_trap();
+    }
+    started = 0;
+
     // The linker synthesizes this to call constructors.
     __wasm_call_ctors();
 

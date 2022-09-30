@@ -13,7 +13,7 @@ void _start(void) {
     if (started != 0) {
 	__builtin_trap();
     }
-    started = 0;
+    started = 1;
 
     // The linker synthesizes this to call constructors.
     __wasm_call_ctors();

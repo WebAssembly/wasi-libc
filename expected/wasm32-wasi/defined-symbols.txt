@@ -51,6 +51,7 @@ __ctype_tolower_loc
 __ctype_toupper_loc
 __cxa_atexit
 __cxa_finalize
+__daylight
 __default_guardsize
 __default_stacksize
 __des_setkey
@@ -339,6 +340,7 @@ __testcancel
 __thread_list_lock
 __timedwait
 __timedwait_cp
+__timezone
 __timezone_lockptr
 __tl_lock
 __tl_sync
@@ -359,6 +361,7 @@ __tre_mem_alloc_impl
 __tre_mem_destroy
 __tre_mem_new_impl
 __tsearch_balance
+__tzname
 __uflow
 __unlist_locked_file
 __unlock
@@ -452,6 +455,7 @@ __wasi_proc_id
 __wasi_proc_join
 __wasi_proc_parent
 __wasi_proc_raise
+__wasi_proc_raise_interval
 __wasi_proc_signal
 __wasi_proc_spawn
 __wasi_random_get
@@ -581,6 +585,7 @@ acosh
 acoshf
 acoshl
 acosl
+alarm
 aligned_alloc
 alphasort
 alphasort64
@@ -667,6 +672,12 @@ ceill
 cexp
 cexpf
 cexpl
+cfgetispeed
+cfgetospeed
+cfmakeraw
+cfsetispeed
+cfsetospeed
+cfsetspeed
 chdir
 chmod
 cimag
@@ -736,6 +747,7 @@ ctanhl
 ctanl
 ctime
 ctime_r
+daylight
 dcgettext
 dcngettext
 dgettext
@@ -955,6 +967,7 @@ getpwuid_r
 getrandom
 getrlimit
 getrlimit64
+getrusage
 getrusage
 getsid
 getsockname
@@ -1590,8 +1603,17 @@ tanh
 tanhf
 tanhl
 tanl
+tcdrain
+tcflow
+tcflush
+tcgetattr
 tcgetpgrp
+tcgetsid
+tcgetwinsize
+tcsendbreak
+tcsetattr
 tcsetpgrp
+tcsetwinsize
 tdelete
 tdestroy
 telldir
@@ -1612,6 +1634,7 @@ time
 timegm
 times
 timespec_get
+timezone
 toascii
 tolower
 tolower_l
@@ -1632,7 +1655,12 @@ tss_create
 tss_delete
 tss_get
 tss_set
+ttyname
+ttyname_r
 twalk
+tzname
+tzset
+ualarm
 ulckpwdf
 umask
 uname

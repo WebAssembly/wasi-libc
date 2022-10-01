@@ -3,9 +3,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef __wasilibc_unmodified_upstream // timezone data
 #include <sys/mman.h>
-#endif
 #include "libc.h"
 #include "lock.h"
 #include "fork_impl.h"
@@ -15,7 +13,6 @@
 #define realloc undef
 #define free undef
 
-#ifdef __wasilibc_unmodified_upstream // timezone data
 long  __timezone = 0;
 int   __daylight = 0;
 char *__tzname[2] = { 0, 0 };
@@ -26,7 +23,6 @@ weak_alias(__tzname, tzname);
 
 static char std_name[TZNAME_MAX+1];
 static char dst_name[TZNAME_MAX+1];
-#endif
 const char __utc[] = "UTC";
 
 static volatile int lock[1];
@@ -421,6 +417,14 @@ static void __tzset()
 
 weak_alias(__tzset, tzset);
 #else
+static void __tzset()
+{
+	LOCK(lock);
+	UNLOCK(lock);
+}
+
+weak_alias(__tzset, tzset);
+
 void __secs_to_zone(long long t, int local, int *isdst, int *offset, long *oppoff, const char **zonename)
 {
 	// Minimalist implementation for now.

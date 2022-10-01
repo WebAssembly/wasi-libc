@@ -1,10 +1,17 @@
 #include <sys/resource.h>
 #include <string.h>
 #include <errno.h>
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#else
+#include <__typedef_clock_t.h>
+#include <__struct_rusage.h>
+clock_t __clock(void);
+#endif
 
 int getrusage(int who, struct rusage *ru)
 {
+#ifdef __wasilibc_unmodified_upstream
 	int r;
 #ifdef SYS_getrusage_time64
 	long long kru64[18];
@@ -32,4 +39,23 @@ int getrusage(int who, struct rusage *ru)
 			{ .tv_sec = kru[2], .tv_usec = kru[3] };
 	}
 	return __syscall_ret(r);
+#else
+	switch (who) {
+		case RUSAGE_SELF: {
+			__wasi_timestamp_t now = 0;
+    		(void)__wasi_clock_time_get(__WASI_CLOCKID_MONOTONIC, 0, &now);
+
+			ru->ru_utime.tv_sec = now / 1000000000;
+			ru->ru_utime.tv_usec = (now % 1000000000) * 1000;
+			ru->ru_stime = ru->ru_utime;
+			return 0;
+		}
+		case RUSAGE_CHILDREN:
+			*ru = (struct rusage) {};
+			return 0;
+		default:
+			errno = EINVAL;
+			return -1;
+	}
+#endif
 }

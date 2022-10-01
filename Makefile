@@ -91,6 +91,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         misc/getsubopt.c \
         misc/getrlimit.c \
         misc/setrlimit.c \
+        misc/getrusage.c \
         misc/uname.c \
         misc/nftw.c \
         misc/syslog.c \
@@ -157,6 +158,10 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         unistd/getsid.c \
         unistd/setsid.c \
         unistd/gethostname.c \
+        unistd/alarm.c \
+        unistd/ualarm.c \
+        unistd/ttyname.c \
+        unistd/ttyname_r.c \
         linux/wait3.c \
         linux/wait4.c \
         stat/futimesat.c \
@@ -184,6 +189,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/prng/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/conf/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/passwd/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/termios/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/temp/*.c) \
     $(filter-out %/__signbit.c %/__signbitf.c %/__signbitl.c \
                  %/__fpclassify.c %/__fpclassifyf.c %/__fpclassifyl.c \

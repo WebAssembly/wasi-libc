@@ -4547,6 +4547,25 @@ __wasi_errno_t __wasi_proc_raise(
     __wasi_signal_t sig
 ) __attribute__((__warn_unused_result__));
 /**
+ * Send a signal to the process of the calling thread on a regular basis
+ * Note: This is similar to `setitimer` in POSIX.
+ */
+__wasi_errno_t __wasi_proc_raise_interval(
+    /**
+     * The signal condition to trigger.
+     */
+    __wasi_signal_t sig,
+    /**
+     * Time to wait before raising the signal
+     * (zero here indicates the signal interval is cancelled)
+     */
+    __wasi_timestamp_t interval,
+    /**
+     * Flag that indicates if the signal will trigger indefinately
+     */
+    __wasi_bool_t repeat
+) __attribute__((__warn_unused_result__));
+/**
  * Forks the current process into a new subprocess. If the function
  * returns a zero then its the new subprocess. If it returns a positive
  * number then its the current process and the $pid represents the child.

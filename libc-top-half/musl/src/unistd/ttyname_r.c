@@ -5,6 +5,7 @@
 #include "syscall.h"
 #else
 #include <wasi/api.h>
+#include <string.h>
 #endif
 
 int ttyname_r(int fd, char *name, size_t size)
@@ -33,7 +34,7 @@ int ttyname_r(int fd, char *name, size_t size)
 #else
 	__wasi_tty_t tty;
 	int r = __wasi_tty_get(&tty);
-	if r != 0 {
+	if (r != 0) {
 		errno = r;
 		return 0;
 	}

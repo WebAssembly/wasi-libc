@@ -8,6 +8,9 @@
 #endif
 #include <string.h>
 #include <stddef.h>
+#ifndef __wasilibc_unmodified_upstream
+#include <stdatomic.h>
+#endif
 
 static void dummy_0()
 {
@@ -249,13 +252,15 @@ __attribute__((export_name("wasi_thread_start")))
 int wasi_thread_start(int tid, void *p)
 {
 	struct start_args *args = p;
-	// Set the thread ID on the pthread structure and save this structure as
-	// the global `pthread_self`.
-	args->thread->tid = tid;
+	// Set the thread ID (TID) on the pthread structure. The TID is stored
+	// atomically since it is also stored by the parent thread; this way,
+	// whichever thread (parent or child) reaches this point first can proceed
+	// without waiting.
+	atomic_store((atomic_int *) &(args->thread->tid), tid);
+	// Save the pointer to the pthread structure as the global `pthread_self`.
 	__asm__("local.set %0\n"
 		  "global.set __wasilibc_pthread_self\n"
           : "=r"(args->thread));
-	__builtin_wasm_memory_atomic_notify((int*)args->thread->tid, 1);
 	// Execute the user's start function.
 	int (*start)(void*) = (int(*)(void*)) args->start_func;
 	__pthread_exit((void *)(uintptr_t)start(args->start_arg));
@@ -409,12 +414,8 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	args->sig_mask[(SIGCANCEL-1)/8/sizeof(long)] &=
 		~(1UL<<((SIGCANCEL-1)%(8*sizeof(long))));
 #else
-	/* The new thread needs a pointer to the pthread struct for two reasons:
-	 * - the new thread needs a way to set up its `wasilibc_pthread_self`
-	 *   global.
-	 * - only the new thread will know it's thread ID because this is determined
-	 *   by the WASI engine; we can set the `tid` in `wasilibc_thread_start` and
-	 *   wait for that in the parent thread. */
+	/* The new thread needs a pointer to the pthread struct so that it can set
+	 * up its `wasilibc_pthread_self` global. */
 	args->thread = new;
 #endif
 
@@ -446,24 +447,17 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 			__wait(&args->control, 0, 3, 0);
 	}
 #else
-	/* As in the unmodified version, all spawn failures translate to EAGAIN. If
-	 * the spawn did succeed, then we wait forever for the TID to be populated
-	 * by the child thread (it would be a host bug to return success but never
-	 * spawn the new thread). */
-	if (ret != 0) {
+	/* `wasi_thread_spawn` will either return a host-provided thread ID (TID)
+	 * (`>= 0`) or an error code (`< 0`). As in the unmodified version, all
+	 * spawn failures translate to EAGAIN; unlike the modified version, there is
+	 * no need to "start up" the child thread--the host does this. If the spawn
+	 * did succeed, then we store the TID atomically, since this parent thread
+	 * is racing with the child thread to set this field; this way, whichever
+	 * thread reaches this point first can continue without waiting. */
+	if (ret < 0) {
 		ret = -EAGAIN;
 	} else {
-		int timeout_ns = -1;
-		int wait_ret = __builtin_wasm_memory_atomic_wait32((int *)new->tid, 0, timeout_ns);
-		if (wait_ret == 1) {
-			// Loaded value != expected value; the pthread was not set up
-			// correctly.
-			return -EINVAL;
-		}
-		if (wait_ret == 2) {
-			// The timeout expired.
-			return -ETIMEDOUT;
-		}
+		atomic_store((atomic_int *) &(args->thread->tid), ret);
 	}
 #endif
 

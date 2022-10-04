@@ -37,6 +37,12 @@ BULK_MEMORY_THRESHOLD ?= 32
 TARGET_TRIPLE = wasm32-wasi
 MULTIARCH_TRIPLE = wasm32-wasi
 
+# Threaded version necessitates a different traget, as objects from different
+# targets can't be mixed together while linking
+ifeq ($(THREAD_MODEL), posix)
+MULTIARCH_TRIPLE = wasm32-wasi-pthread
+endif
+
 # These variables describe the locations of various files and directories in
 # the source tree.
 DLMALLOC_DIR = $(CURDIR)/dlmalloc
@@ -692,7 +698,7 @@ check-symbols: startup_files libc
 
 	# Check that the computed metadata matches the expected metadata.
 	# This ignores whitespace because on Windows the output has CRLF line endings.
-	diff -wur "$(CURDIR)/expected/$(MULTIARCH_TRIPLE)/$(THREAD_MODEL)" "$(SYSROOT_SHARE)"
+	diff -wur "$(CURDIR)/expected/$(MULTIARCH_TRIPLE)" "$(SYSROOT_SHARE)"
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"

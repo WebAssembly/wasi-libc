@@ -231,6 +231,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_condattr_init.c \
         thread/pthread_condattr_setclock.c \
         thread/pthread_condattr_setpshared.c \
+        thread/pthread_create.c \
         thread/pthread_mutex_consistent.c \
         thread/pthread_mutex_destroy.c \
         thread/pthread_mutex_init.c \
@@ -257,6 +258,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_rwlockattr_destroy.c \
         thread/pthread_rwlockattr_init.c \
         thread/pthread_rwlockattr_setpshared.c \
+        thread/pthread_setcancelstate.c \
         thread/pthread_testcancel.c \
         thread/sem_destroy.c \
         thread/sem_getvalue.c \
@@ -265,7 +267,6 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/sem_timedwait.c \
         thread/sem_trywait.c \
         thread/sem_wait.c \
-        thread/pthread_setcancelstate.c \
     )
 endif
 

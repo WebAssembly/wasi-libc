@@ -1,4 +1,7 @@
 __addtf3
+__copy_tls
+__default_guardsize
+__default_stacksize
 __divtf3
 __eqtf2
 __extenddftf2
@@ -145,6 +148,7 @@ __netf2
 __stack_pointer
 __subtf3
 __tls_align
+__thread_list_lock
 __tls_base
 __tls_size
 __trunctfdf2

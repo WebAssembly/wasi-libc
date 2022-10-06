@@ -65,9 +65,10 @@ static int resize(void) {
 
     preopen *old_preopens = preopens;
     preopen *new_preopens = calloc(sizeof(preopen), new_capacity);
-    if (new_preopens == NULL)
+    if (new_preopens == NULL) {
         UNLOCK(lock);
         return -1;
+    }
 
     memcpy(new_preopens, old_preopens, num_preopens * sizeof(preopen));
     preopens = new_preopens;
@@ -111,14 +112,16 @@ static int internal_register_preopened_fd(__wasi_fd_t fd, const char *relprefix)
     assert(fd != -1);
     assert(relprefix != NULL);
 
-    if (num_preopens == preopen_capacity && resize() != 0)
+    if (num_preopens == preopen_capacity && resize() != 0) {
         UNLOCK(lock);
         return -1;
+    }
 
     char *prefix = strdup(strip_prefixes(relprefix));
-    if (prefix == NULL)
+    if (prefix == NULL) {
         UNLOCK(lock);
         return -1;
+    }
     preopens[num_preopens++] = (preopen) { prefix, fd, };
 
     assert_invariants();

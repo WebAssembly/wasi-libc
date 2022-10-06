@@ -14,6 +14,7 @@ ssize_t __wasilibc_nocwd_readlinkat(int fd, const char *restrict path, char *res
   __wasi_errno_t error = __wasi_path_readlink(fd, path,
                                                       (uint8_t*)buf, bufsize, &bufused);
   if (error != 0) {
+    errno = error;
     return -1;
   }
   return bufused;

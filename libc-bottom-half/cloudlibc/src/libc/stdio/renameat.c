@@ -10,6 +10,7 @@
 int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char *new) {
   __wasi_errno_t error = __wasi_path_rename(oldfd, old, newfd, new);
   if (error != 0) {
+    errno = error;
     return -1;
   }
   return 0;

@@ -29,6 +29,7 @@ DIR *fdopendir(int fd) {
   if (error != 0) {
     free(dirp->buffer);
     free(dirp);
+    errno = error;
     return NULL;
   }
 

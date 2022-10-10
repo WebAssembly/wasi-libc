@@ -190,6 +190,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
 ifeq ($(THREAD_MODEL), posix)
 LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
+        thread/__lock.c \
         thread/__wait.c \
         thread/__timedwait.c \
         thread/pthread_cleanup_push.c \

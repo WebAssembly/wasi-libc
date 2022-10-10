@@ -143,6 +143,7 @@ __loc_is_allocated
 __locale_lock
 __locale_lockptr
 __localtime_r
+__lock
 __log2_data
 __log2f_data
 __log_data
@@ -285,6 +286,7 @@ __tre_mem_new_impl
 __tsearch_balance
 __uflow
 __unlist_locked_file
+__unlock
 __uselocale
 __utc
 __wait

@@ -1,0 +1,264 @@
+set(LIBC_TOP_HALF_DIR ${PROJECT_SOURCE_DIR}/libc-top-half)
+set(LIBC_TOP_HALF_SOURCE_DIR ${LIBC_TOP_HALF_DIR}/sources)
+set(LIBC_TOP_HALF_HEADERS_PRIVATE_DIR ${LIBC_TOP_HALF_DIR}/headers/private)
+
+set(LIBC_TOP_HALF_COMMON_COMPILE_OPTIONS
+  -Wno-parentheses
+  -Wno-shift-op-parentheses
+  -Wno-bitwise-op-parentheses
+  -Wno-logical-op-parentheses
+  -Wno-string-plus-int
+  -Wno-dangling-else
+  -Wno-unknown-pragmas
+)
+
+set(LIBC_TOP_HALF_COMMON_INC_DIRS
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/include
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/internal
+  ${LIBC_TOP_HALF_MUSL_DIR}/arch/wasm32
+  ${LIBC_TOP_HALF_MUSL_DIR}/arch/generic
+  ${LIBC_TOP_HALF_HEADERS_PRIVATE_DIR}
+)
+
+file(GLOB_RECURSE LIBC_TOP_HALF_SOURCES
+  CONFIGURE_DEPENDS
+  ${LIBC_TOP_HALF_SOURCE_DIR}/*.c
+)
+
+
+file(GLOB LIBC_TOP_HALF_MUSL_SOURCES
+  CONFIGURE_DEPENDS
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/internal/*.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/stdio/*.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/string/*.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/locale/*.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/stdlib/*.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/search/*.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/multibyte/*.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/regex/*.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/prng/*.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/conf/*.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/ctype/*.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/*.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/complex/*.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/crypt/*.c
+)
+
+list(APPEND LIBC_TOP_HALF_MUSL_SOURCES
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/misc/a64l.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/misc/basename.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/misc/dirname.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/misc/ffs.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/misc/ffsl.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/misc/ffsll.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/misc/fmtmsg.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/misc/getdomainname.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/misc/gethostid.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/misc/getopt.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/misc/getopt_long.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/misc/getsubopt.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/misc/uname.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/misc/nftw.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/errno/strerror.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/network/htonl.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/network/htons.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/network/ntohl.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/network/ntohs.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/network/inet_ntop.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/network/inet_pton.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/network/inet_aton.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/network/in6addr_any.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/network/in6addr_loopback.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/fenv/fenv.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/fenv/fesetround.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/fenv/feupdateenv.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/fenv/fesetexceptflag.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/fenv/fegetexceptflag.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/fenv/feholdexcept.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/exit/exit.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/exit/atexit.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/exit/assert.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/exit/quick_exit.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/exit/at_quick_exit.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/strftime.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/asctime.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/asctime_r.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/ctime.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/ctime_r.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/wcsftime.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/strptime.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/difftime.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/timegm.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/ftime.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/gmtime.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/gmtime_r.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/timespec_get.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/getdate.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/localtime.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/localtime_r.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/mktime.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/__tm_to_secs.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/__month_to_secs.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/__secs_to_tm.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/__year_to_secs.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/time/__tz.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/fcntl/creat.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/dirent/alphasort.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/dirent/versionsort.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/env/clearenv.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/env/getenv.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/env/putenv.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/env/setenv.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/env/unsetenv.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/unistd/posix_close.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/stat/futimesat.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/legacy/getpagesize.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/thrd_sleep.c
+)
+
+list(REMOVE_ITEM LIBC_TOP_HALF_MUSL_SOURCES
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/internal/procfdname.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/internal/syscall.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/internal/syscall_ret.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/internal/vdso.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/internal/version.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/stdio/flockfile.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/stdio/funlockfile.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/stdio/__lockfile.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/stdio/ftrylockfile.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/stdio/rename.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/stdio/tmpnam.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/stdio/tmpfile.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/stdio/tempnam.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/stdio/popen.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/stdio/pclose.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/stdio/remove.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/stdio/gets.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/string/strsignal.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/locale/dcngettext.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/locale/textdomain.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/locale/bind_textdomain_codeset.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/__signbit.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/__signbitf.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/__signbitl.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/__fpclassify.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/__fpclassifyf.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/__fpclassifyl.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/ceilf.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/ceil.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/floorf.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/floor.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/truncf.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/trunc.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/rintf.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/rint.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/nearbyintf.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/nearbyint.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/sqrtf.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/sqrt.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/fabsf.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/fabs.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/copysignf.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/copysign.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/fminf.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/fmaxf.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/fmin.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/math/fmax.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/complex/crealf.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/complex/creal.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/complex/creall.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/complex/cimagf.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/complex/cimag.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/complex/cimagl.c
+)
+
+if("${THREAD_MODEL}" STREQUAL "posix")
+  list(APPEND LIBC_TOP_HALF_MUSL_SOURCES
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/__wait.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/__timedwait.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_cleanup_push.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_cond_broadcast.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_cond_destroy.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_cond_init.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_cond_signal.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_cond_timedwait.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_cond_wait.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_condattr_destroy.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_condattr_init.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_condattr_setclock.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_condattr_setpshared.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_create.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_mutex_consistent.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_mutex_destroy.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_mutex_init.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_mutex_getprioceiling.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_mutex_lock.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_mutex_timedlock.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_mutex_trylock.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_mutex_unlock.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_mutexattr_destroy.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_mutexattr_init.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_mutexattr_setprotocol.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_mutexattr_setpshared.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_mutexattr_setrobust.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_mutexattr_settype.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_rwlock_destroy.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_rwlock_init.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_rwlock_rdlock.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_rwlock_timedrdlock.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_rwlock_timedwrlock.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_rwlock_tryrdlock.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_rwlock_trywrlock.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_rwlock_unlock.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_rwlock_wrlock.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_rwlockattr_destroy.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_rwlockattr_init.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_rwlockattr_setpshared.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_setcancelstate.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/pthread_testcancel.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/sem_destroy.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/sem_getvalue.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/sem_init.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/sem_post.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/sem_timedwait.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/sem_trywait.c
+    ${LIBC_TOP_HALF_MUSL_SRC_DIR}/thread/sem_wait.c
+)
+endif()
+
+set_source_files_properties(
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/string/memcpy.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/string/memmove.c
+  ${LIBC_TOP_HALF_MUSL_SRC_DIR}/string/memset.c
+  PROPERTIES
+    COMPILE_DEFINITIONS
+      BULK_MEMORY_THRESHOLD=${BULK_MEMORY_THRESHOLD}
+    COMPILE_FLAGS
+    -mbulk-memory
+)
+
+if(${BUILD_LIBC_TOP_HALF} STREQUAL "ON")
+  add_library(libc-top-half
+    OBJECT
+      ${LIBC_TOP_HALF_SOURCES}
+      ${LIBC_TOP_HALF_MUSL_SOURCES}
+  )
+  target_include_directories(libc-top-half
+    PRIVATE
+      ${LIBC_TOP_HALF_COMMON_INC_DIRS}
+  )
+
+  if("${THREAD_MODEL}" STREQUAL "posix")
+    target_include_directories(libc-top-half
+      PRIVATE
+        ${LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_DIR})
+  endif()
+  target_compile_options(libc-top-half
+    PRIVATE
+      ${LIBC_TOP_HALF_COMMON_COMPILE_OPTIONS}
+  )
+  add_dependencies(libc-top-half sysroot-headers)
+endif()
+
+
+add_subdirectory(musl)

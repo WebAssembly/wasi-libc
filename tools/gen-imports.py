@@ -65,6 +65,8 @@ def main(argv) -> None:
     args, unparsed = parser.parse_known_args()
 
     args.nm = os.path.normpath(args.nm)
+    print('path:', args.libc_imports_output)
+    print('normalized path:', os.path.normpath(args.libc_imports_output))
     args.libc_imports_output = os.path.normpath(args.libc_imports_output)
     args.defined_symbols_output = os.path.normpath(args.defined_symbols_output)
     args.undefined_symbols_output = os.path.normpath(

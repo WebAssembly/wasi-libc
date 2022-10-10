@@ -58,13 +58,16 @@ jobs:
 
     - name: Build libc
       shell: bash
-      run: make -j4
+      run: |
+        cmake -DCMAKE_INSTALL_PREFIX=install-sysroot .
+        cmake --build . --target install
+        ctest
 
     - uses: actions/upload-artifact@v1
       with:
         # Upload the sysroot folder. Give it a name according to the OS it was built for.
         name: ${{ format( 'sysroot-{0}.tgz', matrix.os) }}
-        path: sysroot
+        path: install-sysroot
 
     - name: Build libc + threads
       # Only build the thread-capable wasi-libc in the latest supported Clang
@@ -72,7 +75,10 @@ jobs:
       # (e.g., `__builtin_wasm_memory_atomic_notify`).
       if: matrix.clang_version != '10.0.0'
       shell: bash
-      run: make -j4 THREAD_MODEL=posix
+      run: |
+        cmake -DCMAKE_INSTALL_PREFIX=install-sysroot -DTHREAD_MODEL=posix .
+        cmake --build . --target install
+        ctest
 
   # Disable the headerstest job for now, while WASI transitions from the
   # witx snapshots to wit proposals, and we have a few manual edits to the

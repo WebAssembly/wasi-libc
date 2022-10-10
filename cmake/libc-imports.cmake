@@ -1,4 +1,5 @@
 add_custom_command(OUTPUT ${SYSROOT_LIB_DIR}/libc.imports
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${SYSROOT_LIB_DIR}
   COMMAND
     ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tools/gen-imports.py
     --nm ${CMAKE_NM}

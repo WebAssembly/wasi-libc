@@ -13,8 +13,6 @@ _IO_putc_unlocked
 __EINVAL
 __ENOMEM
 __SIG_ERR
-__SIG_ERR
-__SIG_IGN
 __SIG_IGN
 __abort_lock
 __acquire_ptc
@@ -332,7 +330,6 @@ __syscall_ret
 __sysinfo
 __syslog_lockptr
 __sysv_signal
-__sysv_signal
 __tan
 __tandf
 __tanl
@@ -621,7 +618,6 @@ bcmp
 bcopy
 bind
 bindtextdomain
-bsd_signal
 bsd_signal
 bsearch
 btowc
@@ -1385,7 +1381,6 @@ pwritev
 qsort
 quick_exit
 raise
-raise
 rand
 rand_r
 random
@@ -1493,7 +1488,6 @@ sigisemptyset
 sigismember
 siglongjmp
 signal
-signal
 signgam
 significand
 significandf
@@ -1568,7 +1562,6 @@ strpbrk
 strptime
 strrchr
 strsep
-strsignal
 strsignal
 strspn
 strstr

@@ -174,6 +174,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  %/remove.c \
                  %/gets.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/*.c)) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/string/*.c) \
     $(filter-out %/bind_textdomain_codeset.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/locale/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdlib/*.c) \
@@ -189,6 +190,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/prng/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/conf/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/passwd/*.c) \
+    $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/ctype/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/termios/*.c) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/temp/*.c) \
     $(filter-out %/__signbit.c %/__signbitf.c %/__signbitl.c \

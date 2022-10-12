@@ -4562,7 +4562,7 @@ static void* tmalloc_small(mstate m, size_t nb) {
 
 #if __wasilibc_unmodified_upstream // Forward declaration of try_init_allocator.
 #else
-static void try_init_allocator(void);
+__attribute__((constructor(0))) static void try_init_allocator(void);
 #endif
 
 void* dlmalloc(size_t bytes) {
@@ -4591,13 +4591,6 @@ void* dlmalloc(size_t bytes) {
 
 #if USE_LOCKS
   ensure_initialization(); /* initialize in sys_alloc if not using locks */
-#endif
-
-#if __wasilibc_unmodified_upstream // Try to initialize the allocator.
-#else
-  if (!is_initialized(gm)) {
-    try_init_allocator();
-  }
 #endif
 
   if (!PREACTION(gm)) {

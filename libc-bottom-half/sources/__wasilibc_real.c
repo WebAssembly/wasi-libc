@@ -1057,16 +1057,16 @@ __wasi_errno_t __wasi_proc_parent(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_64v1_proc_join(int32_t arg0, int64_t arg1) __attribute__((
+int32_t __imported_wasix_64v1_proc_join(int64_t arg0, int64_t arg1) __attribute__((
     __import_module__("wasix_64v1"),
     __import_name__("proc_join")
 ));
 
 __wasi_errno_t __wasi_proc_join(
-    __wasi_pid_t pid,
+    __wasi_pid_t * pid,
     __wasi_exitcode_t *retptr0
 ){
-    int32_t ret = __imported_wasix_64v1_proc_join((int32_t) pid, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_64v1_proc_join((int64_t) pid, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 

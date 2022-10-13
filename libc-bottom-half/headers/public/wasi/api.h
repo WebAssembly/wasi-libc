@@ -4666,7 +4666,7 @@ __wasi_errno_t __wasi_proc_join(
     /**
      * ID of the process to wait on
      */
-    __wasi_pid_t pid,
+    __wasi_pid_t * pid,
     __wasi_exitcode_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**

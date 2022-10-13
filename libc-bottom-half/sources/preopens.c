@@ -156,8 +156,9 @@ int __wasilibc_find_abspath(const char *path,
                             const char **relative_path) {
     // Strip leading `/` characters, the prefixes we're matching won't have
     // them.
-    while (*path == '/')
-        path++;
+    const char *search_path = path;
+    while (*search_path == '/')
+        search_path++;
     // Search through the preopens table. Iterate in reverse so that more
     // recently added preopens take precedence over less recently addded ones.
     size_t match_len = 0;
@@ -171,7 +172,7 @@ int __wasilibc_find_abspath(const char *path,
         // our current best match's path, and the candidate path is a prefix of
         // the requested path, take that as the new best path.
         if ((fd == -1 || len > match_len) &&
-            prefix_matches(prefix, len, path))
+            prefix_matches(prefix, len, search_path))
         {
             fd = pre->fd;
             match_len = len;

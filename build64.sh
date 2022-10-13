@@ -2,7 +2,7 @@
 export TARGET_ARCH=wasm64
 export TARGET_OS=wasix
 cd tools/wasix-headers/WASI
-git pull || true
+git pull origin main || true
 cd ../../..
 cargo run --manifest-path tools/wasix-headers/Cargo.toml generate-libc --64bit
 make -j 14

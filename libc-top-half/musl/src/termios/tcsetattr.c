@@ -24,13 +24,13 @@ int tcsetattr(int fd, int act, const struct termios *tio)
 		return -1;
 	}
 
-	if ((tio->c_lflag | ECHO) != 0) {
+	if ((tio->c_lflag & ECHO) != 0) {
 		tty.echo = __WASI_BOOL_TRUE;
 	} else {
 		tty.echo = __WASI_BOOL_FALSE;
 	}
 
-	if ((tio->c_lflag | ICANON) != 0) {
+	if ((tio->c_lflag & ICANON) != 0) {
 		tty.line_buffered = __WASI_BOOL_TRUE;
 	} else {
 		tty.line_buffered = __WASI_BOOL_FALSE;

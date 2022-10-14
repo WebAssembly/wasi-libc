@@ -10,6 +10,11 @@ __attribute__((export_name("_start")))
 void _start(void) {
     // Commands should only be called once per instance. This simple check
     // ensures that the `_start` function isn't started more than once.
+    //
+    // We use `volatile` here to prevent the store to `started` from being
+    // sunk past any subsequent code, and to prevent any compiler from
+    // optimizing based on the knowledge that `_start` is the program
+    // entrypoint.
 #ifdef _REENTRANT
     static volatile _Atomic int started = 0;
     int expected = 0;

@@ -8,7 +8,7 @@ void _start(void) {
     // Commands should only be called once per instance. This simple check
     // ensures that the `_start` function isn't started more than once.
 #ifdef _REENTRANT
-    static volatile _Atomic int started = 0;
+    static volatile int started = 0;
     if (__sync_val_compare_and_swap(&started, 0, 1) != 0) {
 	__builtin_trap();
     }

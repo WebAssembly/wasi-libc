@@ -47,12 +47,15 @@
 #include <memory.h>
 #include <assert.h>
 #include <malloc.h>
-#include <emscripten/heap.h>
-#include <emscripten/threading.h>
+#include <limits.h>
+#include <stdlib.h>
 
 #ifdef __EMSCRIPTEN_TRACING__
 #include <emscripten/trace.h>
 #endif
+
+// Defind by the linker to have the address of the start of the heap.
+extern unsigned char __heap_base;
 
 // Behavior of right shifting a signed integer is compiler implementation defined.
 static_assert((((int32_t)0x80000000U) >> 31) == -1, "This malloc implementation requires that right-shifting a signed integer produces a sign-extending (arithmetic) shift!");
@@ -60,9 +63,9 @@ static_assert((((int32_t)0x80000000U) >> 31) == -1, "This malloc implementation 
 // Configuration: specifies the minimum alignment that malloc()ed memory outputs. Allocation requests with smaller alignment
 // than this will yield an allocation with this much alignment.
 #define MALLOC_ALIGNMENT alignof(max_align_t)
-static_assert(alignof(max_align_t) == 8, "max_align_t must be correct");
+static_assert(alignof(max_align_t) == 16, "max_align_t must be correct");
 
-#define EMMALLOC_EXPORT __attribute__((weak, __visibility__("default")))
+#define EMMALLOC_EXPORT __attribute__((weak))
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
@@ -138,7 +141,72 @@ static RootRegion *listOfAllRegions = NULL;
 // when adding and removing elements from the linked list, i.e. we are guaranteed that
 // the sentinel node is always fixed and there, and the actual free region list elements
 // start at freeRegionBuckets[i].next each.
-static Region freeRegionBuckets[NUM_FREE_BUCKETS];
+static Region freeRegionBuckets[NUM_FREE_BUCKETS] = {
+	{ .prev = &freeRegionBuckets[0], .next = &freeRegionBuckets[0] },
+	{ .prev = &freeRegionBuckets[1], .next = &freeRegionBuckets[1] },
+	{ .prev = &freeRegionBuckets[2], .next = &freeRegionBuckets[2] },
+	{ .prev = &freeRegionBuckets[3], .next = &freeRegionBuckets[3] },
+	{ .prev = &freeRegionBuckets[4], .next = &freeRegionBuckets[4] },
+	{ .prev = &freeRegionBuckets[5], .next = &freeRegionBuckets[5] },
+	{ .prev = &freeRegionBuckets[6], .next = &freeRegionBuckets[6] },
+	{ .prev = &freeRegionBuckets[7], .next = &freeRegionBuckets[7] },
+	{ .prev = &freeRegionBuckets[8], .next = &freeRegionBuckets[8] },
+	{ .prev = &freeRegionBuckets[9], .next = &freeRegionBuckets[9] },
+	{ .prev = &freeRegionBuckets[10], .next = &freeRegionBuckets[10] },
+	{ .prev = &freeRegionBuckets[11], .next = &freeRegionBuckets[11] },
+	{ .prev = &freeRegionBuckets[12], .next = &freeRegionBuckets[12] },
+	{ .prev = &freeRegionBuckets[13], .next = &freeRegionBuckets[13] },
+	{ .prev = &freeRegionBuckets[14], .next = &freeRegionBuckets[14] },
+	{ .prev = &freeRegionBuckets[15], .next = &freeRegionBuckets[15] },
+	{ .prev = &freeRegionBuckets[16], .next = &freeRegionBuckets[16] },
+	{ .prev = &freeRegionBuckets[17], .next = &freeRegionBuckets[17] },
+	{ .prev = &freeRegionBuckets[18], .next = &freeRegionBuckets[18] },
+	{ .prev = &freeRegionBuckets[19], .next = &freeRegionBuckets[19] },
+	{ .prev = &freeRegionBuckets[20], .next = &freeRegionBuckets[20] },
+	{ .prev = &freeRegionBuckets[21], .next = &freeRegionBuckets[21] },
+	{ .prev = &freeRegionBuckets[22], .next = &freeRegionBuckets[22] },
+	{ .prev = &freeRegionBuckets[23], .next = &freeRegionBuckets[23] },
+	{ .prev = &freeRegionBuckets[24], .next = &freeRegionBuckets[24] },
+	{ .prev = &freeRegionBuckets[25], .next = &freeRegionBuckets[25] },
+	{ .prev = &freeRegionBuckets[26], .next = &freeRegionBuckets[26] },
+	{ .prev = &freeRegionBuckets[27], .next = &freeRegionBuckets[27] },
+	{ .prev = &freeRegionBuckets[28], .next = &freeRegionBuckets[28] },
+	{ .prev = &freeRegionBuckets[29], .next = &freeRegionBuckets[29] },
+	{ .prev = &freeRegionBuckets[30], .next = &freeRegionBuckets[30] },
+	{ .prev = &freeRegionBuckets[31], .next = &freeRegionBuckets[31] },
+	{ .prev = &freeRegionBuckets[32], .next = &freeRegionBuckets[32] },
+	{ .prev = &freeRegionBuckets[33], .next = &freeRegionBuckets[33] },
+	{ .prev = &freeRegionBuckets[34], .next = &freeRegionBuckets[34] },
+	{ .prev = &freeRegionBuckets[35], .next = &freeRegionBuckets[35] },
+	{ .prev = &freeRegionBuckets[36], .next = &freeRegionBuckets[36] },
+	{ .prev = &freeRegionBuckets[37], .next = &freeRegionBuckets[37] },
+	{ .prev = &freeRegionBuckets[38], .next = &freeRegionBuckets[38] },
+	{ .prev = &freeRegionBuckets[39], .next = &freeRegionBuckets[39] },
+	{ .prev = &freeRegionBuckets[40], .next = &freeRegionBuckets[40] },
+	{ .prev = &freeRegionBuckets[41], .next = &freeRegionBuckets[41] },
+	{ .prev = &freeRegionBuckets[42], .next = &freeRegionBuckets[42] },
+	{ .prev = &freeRegionBuckets[43], .next = &freeRegionBuckets[43] },
+	{ .prev = &freeRegionBuckets[44], .next = &freeRegionBuckets[44] },
+	{ .prev = &freeRegionBuckets[45], .next = &freeRegionBuckets[45] },
+	{ .prev = &freeRegionBuckets[46], .next = &freeRegionBuckets[46] },
+	{ .prev = &freeRegionBuckets[47], .next = &freeRegionBuckets[47] },
+	{ .prev = &freeRegionBuckets[48], .next = &freeRegionBuckets[48] },
+	{ .prev = &freeRegionBuckets[49], .next = &freeRegionBuckets[49] },
+	{ .prev = &freeRegionBuckets[50], .next = &freeRegionBuckets[50] },
+	{ .prev = &freeRegionBuckets[51], .next = &freeRegionBuckets[51] },
+	{ .prev = &freeRegionBuckets[52], .next = &freeRegionBuckets[52] },
+	{ .prev = &freeRegionBuckets[53], .next = &freeRegionBuckets[53] },
+	{ .prev = &freeRegionBuckets[54], .next = &freeRegionBuckets[54] },
+	{ .prev = &freeRegionBuckets[55], .next = &freeRegionBuckets[55] },
+	{ .prev = &freeRegionBuckets[56], .next = &freeRegionBuckets[56] },
+	{ .prev = &freeRegionBuckets[57], .next = &freeRegionBuckets[57] },
+	{ .prev = &freeRegionBuckets[58], .next = &freeRegionBuckets[58] },
+	{ .prev = &freeRegionBuckets[59], .next = &freeRegionBuckets[59] },
+	{ .prev = &freeRegionBuckets[60], .next = &freeRegionBuckets[60] },
+	{ .prev = &freeRegionBuckets[61], .next = &freeRegionBuckets[61] },
+	{ .prev = &freeRegionBuckets[62], .next = &freeRegionBuckets[62] },
+	{ .prev = &freeRegionBuckets[63], .next = &freeRegionBuckets[63] },
+};
 
 // A bitmask that tracks the population status for each of the 64 distinct memory regions:
 // a zero at bit position i means that the free list bucket i is empty. This bitmask is
@@ -347,6 +415,7 @@ static void link_to_free_list(Region *freeRegion)
   freeRegionBucketsUsed |= ((BUCKET_BITMASK_T)1) << bucketIndex;
 }
 
+#if 0
 static void dump_memory_regions()
 {
   ASSERT_MALLOC_IS_ACQUIRED();
@@ -458,6 +527,7 @@ int emmalloc_validate_memory_regions()
   MALLOC_RELEASE();
   return memoryError;
 }
+#endif
 
 static bool claim_more_memory(size_t numBytes)
 {
@@ -469,20 +539,38 @@ static bool claim_more_memory(size_t numBytes)
   validate_memory_regions();
 #endif
 
-  // Claim memory via sbrk
-  uint8_t *startPtr = (uint8_t*)sbrk(numBytes);
-  if ((intptr_t)startPtr == -1)
-  {
+  uint8_t *startPtr;
+  uint8_t *endPtr;
+  do {
+    // If this is the first time we're called, see if we can use
+    // the initial heap memory set up by wasm-ld.
+    if (!listOfAllRegions) {
+      unsigned char *heap_end = sbrk(0);
+      if (numBytes <= (size_t)(heap_end - &__heap_base)) {
+        startPtr = &__heap_base;
+        endPtr = heap_end;
+	break;
+      }
+    }
+
+    // Round numBytes up to the nearest page size.
+    numBytes = (numBytes + (PAGE_SIZE-1)) & -PAGE_SIZE;
+
+    // Claim memory via sbrk
+    startPtr = (uint8_t*)sbrk(numBytes);
+    if ((intptr_t)startPtr == -1)
+    {
 #ifdef EMMALLOC_VERBOSE
-    MAIN_THREAD_ASYNC_EM_ASM(console.error('claim_more_memory: sbrk failed!'));
+      MAIN_THREAD_ASYNC_EM_ASM(console.error('claim_more_memory: sbrk failed!'));
 #endif
-    return false;
-  }
+      return false;
+    }
 #ifdef EMMALLOC_VERBOSE
-  MAIN_THREAD_ASYNC_EM_ASM(console.log('claim_more_memory: claimed 0x' + ($0>>>0).toString(16) + ' - 0x' + ($1>>>0).toString(16) + ' (' + ($2>>>0) + ' bytes) via sbrk()'), startPtr, startPtr + numBytes, numBytes);
+    MAIN_THREAD_ASYNC_EM_ASM(console.log('claim_more_memory: claimed 0x' + ($0>>>0).toString(16) + ' - 0x' + ($1>>>0).toString(16) + ' (' + ($2>>>0) + ' bytes) via sbrk()'), startPtr, startPtr + numBytes, numBytes);
 #endif
-  assert(HAS_ALIGNMENT(startPtr, alignof(size_t)));
-  uint8_t *endPtr = startPtr + numBytes;
+    assert(HAS_ALIGNMENT(startPtr, alignof(size_t)));
+    endPtr = startPtr + numBytes;
+  } while (0);
 
   // Create a sentinel region at the end of the new heap block
   Region *endSentinelRegion = (Region*)(endPtr - sizeof(Region));
@@ -535,6 +623,7 @@ static bool claim_more_memory(size_t numBytes)
   return true;
 }
 
+#if 0
 // Initialize emmalloc during static initialization.
 // See system/lib/README.md for static constructor ordering.
 __attribute__((constructor(47)))
@@ -562,6 +651,7 @@ void emmalloc_blank_slate_from_orbit()
   initialize_emmalloc_heap();
   MALLOC_RELEASE();
 }
+#endif
 
 static void *attempt_allocate(Region *freeRegion, size_t alignment, size_t size)
 {
@@ -796,6 +886,7 @@ static void *allocate_memory(size_t alignment, size_t size)
   return 0;
 }
 
+static
 void *emmalloc_memalign(size_t alignment, size_t size)
 {
   MALLOC_ACQUIRE();
@@ -803,12 +894,13 @@ void *emmalloc_memalign(size_t alignment, size_t size)
   MALLOC_RELEASE();
   return ptr;
 }
-extern __typeof(emmalloc_memalign) emscripten_builtin_memalign __attribute__((alias("emmalloc_memalign")));
 
+#if 0
 void * EMMALLOC_EXPORT memalign(size_t alignment, size_t size)
 {
   return emmalloc_memalign(alignment, size);
 }
+#endif
 
 void * EMMALLOC_EXPORT aligned_alloc(size_t alignment, size_t size)
 {
@@ -817,18 +909,18 @@ void * EMMALLOC_EXPORT aligned_alloc(size_t alignment, size_t size)
   return emmalloc_memalign(alignment, size);
 }
 
+static
 void *emmalloc_malloc(size_t size)
 {
   return emmalloc_memalign(MALLOC_ALIGNMENT, size);
 }
-extern __typeof(emmalloc_malloc) emscripten_builtin_malloc __attribute__((alias("emmalloc_malloc")));
-extern __typeof(emmalloc_malloc) __libc_malloc __attribute__((alias("emmalloc_malloc")));
 
 void * EMMALLOC_EXPORT malloc(size_t size)
 {
   return emmalloc_malloc(size);
 }
 
+static
 size_t emmalloc_usable_size(void *ptr)
 {
   if (!ptr)
@@ -854,6 +946,7 @@ size_t EMMALLOC_EXPORT malloc_usable_size(void *ptr)
   return emmalloc_usable_size(ptr);
 }
 
+static
 void emmalloc_free(void *ptr)
 {
 #ifdef EMMALLOC_MEMVALIDATE
@@ -923,12 +1016,10 @@ void emmalloc_free(void *ptr)
   emmalloc_validate_memory_regions();
 #endif
 }
-extern __typeof(emmalloc_free) emscripten_builtin_free __attribute__((alias("emmalloc_free")));
-extern __typeof(emmalloc_free) __libc_free __attribute__((alias("emmalloc_free")));
 
 void EMMALLOC_EXPORT free(void *ptr)
 {
-  return emmalloc_free(ptr);
+  emmalloc_free(ptr);
 }
 
 // Can be called to attempt to increase or decrease the size of the given region
@@ -1005,6 +1096,7 @@ static int acquire_and_attempt_region_resize(Region *region, size_t size)
   return success;
 }
 
+static
 void *emmalloc_aligned_realloc(void *ptr, size_t alignment, size_t size)
 {
 #ifdef EMMALLOC_VERBOSE
@@ -1058,11 +1150,14 @@ void *emmalloc_aligned_realloc(void *ptr, size_t alignment, size_t size)
   return newptr;
 }
 
+#if 0
 void * EMMALLOC_EXPORT aligned_realloc(void *ptr, size_t alignment, size_t size)
 {
   return emmalloc_aligned_realloc(ptr, alignment, size);
 }
+#endif
 
+#if 0
 // realloc_try() is like realloc(), but only attempts to try to resize the existing memory
 // area. If resizing the existing memory area fails, then realloc_try() will return 0
 // (the original memory block is not freed or modified). If resizing succeeds, previous
@@ -1140,25 +1235,29 @@ void *emmalloc_aligned_realloc_uninitialized(void *ptr, size_t alignment, size_t
   free(ptr);
   return emmalloc_memalign(alignment, size);
 }
+#endif
 
+static
 void *emmalloc_realloc(void *ptr, size_t size)
 {
   return emmalloc_aligned_realloc(ptr, MALLOC_ALIGNMENT, size);
 }
-extern __typeof(emmalloc_realloc) __libc_realloc __attribute__((alias("emmalloc_realloc")));
 
 void * EMMALLOC_EXPORT realloc(void *ptr, size_t size)
 {
   return emmalloc_realloc(ptr, size);
 }
 
+#if 0
 // realloc_uninitialized() is like realloc(), but old memory contents
 // will be undefined after reallocation. (old memory is not preserved in any case)
 void *emmalloc_realloc_uninitialized(void *ptr, size_t size)
 {
   return emmalloc_aligned_realloc_uninitialized(ptr, MALLOC_ALIGNMENT, size);
 }
+#endif
 
+static
 int emmalloc_posix_memalign(void **memptr, size_t alignment, size_t size)
 {
   assert(memptr);
@@ -1173,6 +1272,7 @@ int EMMALLOC_EXPORT posix_memalign(void **memptr, size_t alignment, size_t size)
   return emmalloc_posix_memalign(memptr, alignment, size);
 }
 
+static
 void *emmalloc_calloc(size_t num, size_t size)
 {
   size_t bytes = num*size;
@@ -1181,13 +1281,13 @@ void *emmalloc_calloc(size_t num, size_t size)
     memset(ptr, 0, bytes);
   return ptr;
 }
-extern __typeof(emmalloc_calloc) __libc_calloc __attribute__((alias("emmalloc_calloc")));
 
 void * EMMALLOC_EXPORT calloc(size_t num, size_t size)
 {
   return emmalloc_calloc(num, size);
 }
 
+#if 0
 static int count_linked_list_size(Region *list)
 {
   int size = 1;
@@ -1427,3 +1527,9 @@ size_t emmalloc_compute_free_dynamic_memory_fragmentation_map(size_t freeMemoryS
 size_t emmalloc_unclaimed_heap_memory(void) {
   return emscripten_get_heap_max() - (size_t)sbrk(0);
 }
+#endif
+
+// Define these to satisfy musl references.
+void *__libc_malloc(size_t) __attribute__((alias("malloc")));
+void __libc_free(void *) __attribute__((alias("free")));
+void *__libc_calloc(size_t nmemb, size_t size) __attribute__((alias("calloc")));

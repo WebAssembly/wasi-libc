@@ -32,15 +32,13 @@ BULK_MEMORY_THRESHOLD ?= 32
 # Variables from this point on are not meant to be overridable via the
 # make command-line.
 
-# Set the target variables. Multiarch triples notably omit the vendor field,
-# which happens to be what we do for the main target triple too.
+# Set the default WASI target triple.
 TARGET_TRIPLE = wasm32-wasi
-MULTIARCH_TRIPLE = wasm32-wasi
 
 # Threaded version necessitates a different traget, as objects from different
-# targets can't be mixed together while linking
+# targets can't be mixed together while linking.
 ifeq ($(THREAD_MODEL), posix)
-MULTIARCH_TRIPLE = wasm32-wasi-pthread
+TARGET_TRIPLE = wasm32-wasi-pthread
 endif
 
 # These variables describe the locations of various files and directories in
@@ -371,9 +369,9 @@ LIBWASI_EMULATED_SIGNAL_MUSL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_MUSL_S
 
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
-SYSROOT_LIB := $(SYSROOT)/lib/$(MULTIARCH_TRIPLE)
+SYSROOT_LIB := $(SYSROOT)/lib/$(TARGET_TRIPLE)
 SYSROOT_INC = $(SYSROOT)/include
-SYSROOT_SHARE = $(SYSROOT)/share/$(MULTIARCH_TRIPLE)
+SYSROOT_SHARE = $(SYSROOT)/share/$(TARGET_TRIPLE)
 
 # Files from musl's include directory that we don't want to install in the
 # sysroot's include directory.
@@ -698,7 +696,7 @@ check-symbols: startup_files libc
 
 	# Check that the computed metadata matches the expected metadata.
 	# This ignores whitespace because on Windows the output has CRLF line endings.
-	diff -wur "$(CURDIR)/expected/$(MULTIARCH_TRIPLE)" "$(SYSROOT_SHARE)"
+	diff -wur "$(CURDIR)/expected/$(TARGET_TRIPLE)" "$(SYSROOT_SHARE)"
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"

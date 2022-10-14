@@ -43,6 +43,8 @@ DLMALLOC_DIR = $(CURDIR)/dlmalloc
 DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
 DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/dlmalloc.c
 DLMALLOC_INC = $(DLMALLOC_DIR)/include
+EMMALLOC_DIR = $(CURDIR)/emmalloc
+EMMALLOC_SOURCES = $(EMMALLOC_DIR)/emmalloc.c
 LIBC_BOTTOM_HALF_DIR = $(CURDIR)/libc-bottom-half
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC = $(LIBC_BOTTOM_HALF_DIR)/cloudlibc/src
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC = $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/include
@@ -312,10 +314,13 @@ CFLAGS += -isystem "$(SYSROOT_INC)"
 # the build tree.
 objs = $(patsubst $(CURDIR)/%.c,$(OBJDIR)/%.o,$(1))
 DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
+EMMALLOC_OBJS = $(call objs,$(EMMALLOC_SOURCES))
 LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 LIBC_TOP_HALF_ALL_OBJS = $(call objs,$(LIBC_TOP_HALF_ALL_SOURCES))
 ifeq ($(MALLOC_IMPL),dlmalloc)
 LIBC_OBJS += $(DLMALLOC_OBJS)
+else ifeq ($(MALLOC_IMPL),emmalloc)
+LIBC_OBJS += $(EMMALLOC_OBJS)
 else ifeq ($(MALLOC_IMPL),none)
 # No object files to add.
 else

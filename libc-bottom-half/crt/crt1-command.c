@@ -7,13 +7,12 @@ __attribute__((export_name("_start")))
 void _start(void) {
     // Commands should only be called once per instance. This simple check
     // ensures that the `_start` function isn't started more than once.
-#ifdef _REENTRANT
     static volatile int started = 0;
+#ifdef _REENTRANT
     if (__sync_val_compare_and_swap(&started, 0, 1) != 0) {
 	__builtin_trap();
     }
 #else
-    static volatile int started = 0;
     if (started != 0) {
 	__builtin_trap();
     }

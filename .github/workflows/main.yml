@@ -16,8 +16,8 @@ jobs:
     - name: Install LLVM tools (Windows)
       shell: bash
       run: |
-        curl -fsSLO https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/LLVM-10.0.0-win64.exe
-        7z x LLVM-10.0.0-win64.exe -y -o"llvm"
+        curl -fsSLO https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.2/LLVM-15.0.2-win64.exe
+        7z x LLVM-15.0.2-win64.exe -y -o"llvm"
         echo "$(pwd)/llvm/bin" >> $GITHUB_PATH
         echo "CC=$(pwd)/llvm/bin/clang.exe" >> $GITHUB_ENV
         echo "AR=$(pwd)/llvm/bin/llvm-ar.exe" >> $GITHUB_ENV
@@ -25,6 +25,7 @@ jobs:
       if: matrix.os == 'windows-latest'
 
     - name: Override llvm-nm with one from rustup (Windows)
+      shell: bash
       run: |
         rustup update stable
         rustup default stable
@@ -35,8 +36,8 @@ jobs:
     - name: Install LLVM tools (MacOS)
       shell: bash
       run: |
-        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz | tar xJf -
-        export CLANG_DIR=`pwd`/clang+llvm-10.0.0-x86_64-apple-darwin/bin
+        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.2/clang+llvm-15.0.2-x86_64-apple-darwin.tar.xz | tar xJf -
+        export CLANG_DIR=`pwd`/clang+llvm-15.0.2-x86_64-apple-darwin/bin
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
@@ -46,23 +47,29 @@ jobs:
     - name: Install LLVM tools (Linux)
       shell: bash
       run: |
-        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz | tar xJf -
-        export CLANG_DIR=`pwd`/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/bin
+        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.2/clang+llvm-15.0.2-x86_64-unknown-linux-gnu-rhel86.tar.xz | tar xJf -
+        export CLANG_DIR=`pwd`/clang+llvm-15.0.2-x86_64-unknown-linux-gnu-rhel86/bin
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
         echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
       if: matrix.os == 'ubuntu-latest'
 
-    - name: Build libc
+    - name: Build libc-32
       shell: bash
-      run: make -j4
+      run: ./build32.sh
 
-    - uses: actions/upload-artifact@v1
+    - name: Build libc-64
+      shell: bash
+      run: ./build64.sh
+
+    - uses: actions/upload-artifact@v3
       with:
         # Upload the sysroot folder. Give it a name according to the OS it was built for.
         name: ${{ format( 'sysroot-{0}.tgz', matrix.os) }}
-        path: sysroot
+        path: |
+          sysroot32
+          sysroot64
 
   # Disable the headerstest job for now, while WASI transitions from the
   # witx snapshots to wit proposals, and we have a few manual edits to the

@@ -25,8 +25,10 @@ struct pthread {
 	/* Part 1 -- these fields may be external or
 	 * internal (accessed via asm) ABI. Do not change. */
 	struct pthread *self;
+#ifdef __wasilibc_unmodified_upstream
 #ifndef TLS_ABOVE_TP
 	uintptr_t *dtv;
+#endif
 #endif
 	struct pthread *prev, *next; /* non-ABI */
 	uintptr_t sysinfo;

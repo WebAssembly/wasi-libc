@@ -23,6 +23,7 @@ __c_locale
 __clock
 __clock_gettime
 __clock_nanosleep
+__copy_tls
 __cos
 __cosdf
 __cosl
@@ -38,6 +39,8 @@ __ctype_tolower_loc
 __ctype_toupper_loc
 __cxa_atexit
 __cxa_finalize
+__default_guardsize
+__default_stacksize
 __des_setkey
 __do_cleanup_pop
 __do_cleanup_push
@@ -144,6 +147,7 @@ __locale_lock
 __locale_lockptr
 __localtime_r
 __lock
+__lockfile
 __log2_data
 __log2f_data
 __log_data
@@ -265,6 +269,7 @@ __tan
 __tandf
 __tanl
 __testcancel
+__thread_list_lock
 __timedwait
 __timedwait_cp
 __tl_lock
@@ -288,6 +293,7 @@ __tsearch_balance
 __uflow
 __unlist_locked_file
 __unlock
+__unlockfile
 __uselocale
 __utc
 __wait
@@ -371,6 +377,7 @@ __wasilibc_nocwd_scandirat
 __wasilibc_nocwd_symlinkat
 __wasilibc_nocwd_utimensat
 __wasilibc_open_nomode
+__wasilibc_pthread_self
 __wasilibc_register_preopened_fd
 __wasilibc_rename_newat
 __wasilibc_rename_oldat
@@ -953,6 +960,10 @@ program_invocation_name
 program_invocation_short_name
 pselect
 psignal
+pthread_attr_destroy
+pthread_attr_init
+pthread_attr_setstack
+pthread_attr_setstacksize
 pthread_cond_broadcast
 pthread_cond_destroy
 pthread_cond_init
@@ -992,6 +1003,7 @@ pthread_rwlock_wrlock
 pthread_rwlockattr_destroy
 pthread_rwlockattr_init
 pthread_rwlockattr_setpshared
+pthread_self
 pthread_setcancelstate
 pthread_testcancel
 pthread_timedjoin_np
@@ -1182,6 +1194,7 @@ tfind
 tgamma
 tgammaf
 tgammal
+thrd_current
 thrd_sleep
 time
 timegm

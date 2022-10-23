@@ -158,6 +158,14 @@ _Noreturn void __pthread_exit(void *result)
 	self->prev->next = self->next;
 	self->prev = self->next = self;
 
+#ifndef __wasilibc_unmodified_upstream
+	/* On Linux, the thread is created with CLONE_CHILD_CLEARTID,
+	 * and this lock will unlock by kernel when this thread terminates.
+	 * So we should unlock it here in WebAssembly.
+	 * See also set_tid_address(2) */
+	__tl_unlock();
+#endif
+
 #ifdef __wasilibc_unmodified_upstream
 	if (state==DT_DETACHED && self->map_base) {
 		/* Detached threads must block even implementation-internal
@@ -214,7 +222,7 @@ struct start_args {
 #else
 	void *(*start_func)(void *);
 	void *start_arg;
-	struct pthread *thread;
+	void *tls_base;
 #endif
 };
 
@@ -252,15 +260,21 @@ __attribute__((export_name("wasi_thread_start")))
 int wasi_thread_start(int tid, void *p)
 {
 	struct start_args *args = p;
+  	__asm__(".globaltype __tls_base, i32\n"
+			"local.get %0\n"
+			"global.set __tls_base\n"
+			:: "r"(args->tls_base));
+	pthread_t self = __pthread_self();
 	// Set the thread ID (TID) on the pthread structure. The TID is stored
 	// atomically since it is also stored by the parent thread; this way,
 	// whichever thread (parent or child) reaches this point first can proceed
 	// without waiting.
-	atomic_store((atomic_int *) &(args->thread->tid), tid);
-	// Save the pointer to the pthread structure as the global `pthread_self`.
-	__asm__("local.set %0\n"
-		  "global.set __wasilibc_pthread_self\n"
-          : "=r"(args->thread));
+	atomic_store((atomic_int *) &(self->tid), tid);
+	// Set the stack pointer.
+  	__asm__(".globaltype __stack_pointer, i32\n"
+			"local.get %0\n"
+			"global.set __stack_pointer\n"
+			:: "r"(self->stack));
 	// Execute the user's start function.
 	int (*start)(void*) = (int(*)(void*)) args->start_func;
 	__pthread_exit((void *)(uintptr_t)start(args->start_arg));
@@ -299,8 +313,18 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 #endif
 	pthread_attr_t attr = { 0 };
 	sigset_t set;
+#ifndef __wasilibc_unmodified_upstream
+	size_t tls_size = __builtin_wasm_tls_size();
+	size_t tls_align = __builtin_wasm_tls_align();
+	void* tls_base = __builtin_wasm_tls_base();
+	void* new_tls_base;
+	size_t tls_offset;
+	tls_size += tls_align;
+#endif
 
+#ifdef __wasilibc_unmodified_upstream
 	if (!libc.can_do_threads) return ENOSYS;
+#endif
 	self = __pthread_self();
 	if (!libc.threaded) {
 		for (FILE *f=*__ofl_lock(); f; f=f->next)
@@ -327,7 +351,11 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	}
 
 	if (attr._a_stackaddr) {
+#ifdef __wasilibc_unmodified_upstream
 		size_t need = libc.tls_size + __pthread_tsd_size;
+#else
+		size_t need = tls_size + __pthread_tsd_size;
+#endif
 		size = attr._a_stacksize;
 		stack = (void *)(attr._a_stackaddr & -16);
 		stack_limit = (void *)(attr._a_stackaddr - size);
@@ -336,7 +364,11 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 		 * application's stack space. */
 		if (need < size/8 && need < 2048) {
 			tsd = stack - __pthread_tsd_size;
+#ifdef __wasilibc_unmodified_upstream
 			stack = tsd - libc.tls_size;
+#else
+			stack = tsd - tls_size;
+#endif
 			memset(stack, 0, need);
 		} else {
 			size = ROUND(need);
@@ -345,7 +377,11 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	} else {
 		guard = ROUND(attr._a_guardsize);
 		size = guard + ROUND(attr._a_stacksize
+#ifdef __wasilibc_unmodified_upstream
 			+ libc.tls_size +  __pthread_tsd_size);
+#else
+			+ tls_size +  __pthread_tsd_size);
+#endif
 	}
 
 	if (!tsd) {
@@ -368,12 +404,22 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 #endif
 		tsd = map + size - __pthread_tsd_size;
 		if (!stack) {
+#ifdef __wasilibc_unmodified_upstream
 			stack = tsd - libc.tls_size;
+#else
+			stack = tsd - tls_size;
+#endif
 			stack_limit = map + guard;
 		}
 	}
 
+#ifdef __wasilibc_unmodified_upstream
 	new = __copy_tls(tsd - libc.tls_size);
+#else
+	new_tls_base = __copy_tls(tsd - tls_size);
+	tls_offset = new_tls_base - tls_base;
+	new = (void*)((uintptr_t)self + tls_offset);
+#endif
 	new->map_base = map;
 	new->map_size = size;
 	new->stack = stack;
@@ -414,9 +460,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	args->sig_mask[(SIGCANCEL-1)/8/sizeof(long)] &=
 		~(1UL<<((SIGCANCEL-1)%(8*sizeof(long))));
 #else
-	/* The new thread needs a pointer to the pthread struct so that it can set
-	 * up its `wasilibc_pthread_self` global. */
-	args->thread = new;
+	args->tls_base = (void*)new_tls_base;
 #endif
 
 	__tl_lock();
@@ -457,7 +501,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	if (ret < 0) {
 		ret = -EAGAIN;
 	} else {
-		atomic_store((atomic_int *) &(args->thread->tid), ret);
+		atomic_store((atomic_int *) &(new->tid), ret);
 	}
 #endif
 

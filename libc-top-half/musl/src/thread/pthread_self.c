@@ -3,9 +3,7 @@
 
 #if !defined(__wasilibc_unmodified_upstream) && defined(__wasm__) &&           \
     defined(_REENTRANT)
-// We need some place to store the thread ID. This WebAssembly global fits the
-// bill and is used by `__get_tp` elsewhere.
-__asm__(".globaltype __wasilibc_pthread_self, i32\n");
+_Thread_local struct pthread __wasilibc_pthread_self;
 #endif
 
 static pthread_t __pthread_self_internal()

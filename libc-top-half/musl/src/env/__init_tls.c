@@ -1,13 +1,19 @@
 #define SYSCALL_NO_TLS 1
+#ifdef __wasilibc_unmodified_upstream
 #include <elf.h>
+#endif
 #include <limits.h>
+#ifdef __wasilibc_unmodified_upstream
 #include <sys/mman.h>
+#endif
 #include <string.h>
 #include <stddef.h>
 #include "pthread_impl.h"
 #include "libc.h"
 #include "atomic.h"
+#ifdef __wasilibc_unmodified_upstream
 #include "syscall.h"
+#endif
 
 volatile int __thread_list_lock;
 
@@ -19,7 +25,9 @@ int __init_tp(void *p)
 	if (r < 0) return -1;
 	if (!r) libc.can_do_threads = 1;
 	td->detach_state = DT_JOINABLE;
+#ifdef __wasilibc_unmodified_upstream
 	td->tid = __syscall(SYS_set_tid_address, &__thread_list_lock);
+#endif
 	td->locale = &libc.global_locale;
 	td->robust_list.head = &td->robust_list.head;
 	td->sysinfo = __sysinfo;
@@ -61,16 +69,19 @@ void *__copy_tls(unsigned char *mem)
 	mem -= (uintptr_t)mem & (libc.tls_align-1);
 	td = (pthread_t)mem;
 
+#ifdef __wasilibc_unmodified_upstream
 	for (i=1, p=libc.tls_head; p; i++, p=p->next) {
 		dtv[i] = (uintptr_t)(mem - p->offset) + DTP_OFFSET;
 		memcpy(mem - p->offset, p->image, p->len);
 	}
+#endif
 #endif
 	dtv[0] = libc.tls_cnt;
 	td->dtv = dtv;
 	return td;
 }
 
+#ifdef __wasilibc_unmodified_upstream
 #if ULONG_MAX == 0xffffffff
 typedef Elf32_Phdr Phdr;
 #else
@@ -78,14 +89,20 @@ typedef Elf64_Phdr Phdr;
 #endif
 
 extern weak hidden const size_t _DYNAMIC[];
+#endif
 
+#ifdef __wasilibc_unmodified_upstream
 static void static_init_tls(size_t *aux)
+#else
+void __init_tls(size_t *aux)
+#endif
 {
+	void *mem;
+#ifdef __wasilibc_unmodified_upstream
 	unsigned char *p;
 	size_t n;
 	Phdr *phdr, *tls_phdr=0;
 	size_t base = 0;
-	void *mem;
 
 	for (p=(void *)aux[AT_PHDR],n=aux[AT_PHNUM]; n; n--,p+=aux[AT_PHENT]) {
 		phdr = (void *)p;
@@ -121,7 +138,13 @@ static void static_init_tls(size_t *aux)
 	main_tls.offset = main_tls.size;
 #endif
 	if (main_tls.align < MIN_TLS_ALIGN) main_tls.align = MIN_TLS_ALIGN;
-
+#else // __wasilibc_unmodified_upstream
+	main_tls.size = __builtin_wasm_tls_size();
+	main_tls.offset = main_tls.size;
+	main_tls.align = __builtin_wasm_tls_align();
+	if (main_tls.size > 0)
+		libc.tls_cnt = 1;
+#endif // __wasilibc_unmodified_upstream
 	libc.tls_align = main_tls.align;
 	libc.tls_size = 2*sizeof(void *) + sizeof(struct pthread)
 #ifdef TLS_ABOVE_TP
@@ -130,6 +153,7 @@ static void static_init_tls(size_t *aux)
 		+ main_tls.size + main_tls.align
 		+ MIN_TLS_ALIGN-1 & -MIN_TLS_ALIGN;
 
+#ifdef __wasilibc_unmodified_upstream // FIXME
 	if (libc.tls_size > sizeof builtin_tls) {
 #ifndef SYS_mmap2
 #define SYS_mmap2 SYS_mmap
@@ -144,10 +168,15 @@ static void static_init_tls(size_t *aux)
 	} else {
 		mem = builtin_tls;
 	}
+#else // __wasilibc_unmodified_upstream
+	mem = builtin_tls;
+#endif // __wasilibc_unmodified_upstream
 
 	/* Failure to initialize thread pointer is always fatal. */
 	if (__init_tp(__copy_tls(mem)) < 0)
 		a_crash();
 }
 
+#ifdef __wasilibc_unmodified_upstream
 weak_alias(static_init_tls, __init_tls);
+#endif

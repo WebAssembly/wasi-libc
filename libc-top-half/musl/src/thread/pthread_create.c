@@ -174,6 +174,15 @@ _Noreturn void __pthread_exit(void *result)
 		 * and then exits without touching the stack. */
 		__unmapself(self->map_base, self->map_size);
 	}
+#else
+	if (state==DT_DETACHED && self->map_base) {
+		// __syscall(SYS_exit) would unlock the thread, list
+		// do it manually here
+		__tl_unlock();
+		free(self->map_base);
+		// Can't use `exit()` here, because it is too high level
+		for (;;) __wasi_proc_exit(0);
+	}
 #endif
 
 	/* Wake any joiner. */
@@ -185,11 +194,14 @@ _Noreturn void __pthread_exit(void *result)
 	 * it that it's no longer available. */
 	self->tid = 0;
 	UNLOCK(self->killlock);
-
 #ifdef __wasilibc_unmodified_upstream
 	for (;;) __syscall(SYS_exit, 0);
 #else
-	for (;;) exit(0);
+	// __syscall(SYS_exit) would unlock the thread, list
+	// do it manually here
+	__tl_unlock();
+	// Can't use `exit()` here, because it is too high level
+	for (;;) __wasi_proc_exit(0);
 #endif
 }
 
@@ -248,23 +260,70 @@ static int start_c11(void *p)
 	return 0;
 }
 #else
+static inline void *get_stack_ptr() {
+    void *val;
+    __asm__("global.get __stack_pointer\n"
+            "local.set %0"
+            : "=r"(val));
+    return val;
+}
+
+static inline void set_stack_ptr(void *val) {
+    __asm__("local.get %0\n"
+            "global.set __stack_pointer"
+            :: "r"(val));
+}
+
+static _Noreturn void wasi_thread_start_2(int tid, struct start_args *args);
+static _Noreturn void wasi_thread_start_3(int tid, struct start_args *args);
+
+// Small function, which should/must not use $__stack_pointer
 __attribute__((export_name("wasi_thread_start")))
-int wasi_thread_start(int tid, void *p)
+_Noreturn void wasi_thread_start(int tid, struct start_args *args)
 {
-	struct start_args *args = p;
+	void *stack = args->thread->stack;
+	stack -= (uintptr_t)stack % sizeof(uintptr_t);
+	stack -= sizeof(struct start_args);
+	stack -= (uintptr_t)stack % 0x10;
+
+	set_stack_ptr(stack);
+	wasi_thread_start_2(tid, args);
+}
+
+extern void __wasm_init_tls(void *memory);
+
+// make it noinline, so wasi_thread_start does not grow and wants the stack pointer
+__attribute__((noinline))
+static _Noreturn void wasi_thread_start_2(int tid, struct start_args *args) {
+	// Initialize TLS
+	// round up
+	void *tls = (void *) ((uintptr_t)(args->thread->stack + __builtin_wasm_tls_align() - 1));
+	tls -= (uintptr_t) tls & (__builtin_wasm_tls_align() - 1);
+	if (__builtin_wasm_tls_size()) {
+		hidden void __wasm_init_tls(void *);
+		__wasm_init_tls(tls);
+	}
+	wasi_thread_start_3(tid, args);
+}
+
+// make it noinline, so wasi_thread_start does not grow and wants the stack pointer
+// Stack and TLS are now initialized
+__attribute__((noinline))
+static _Noreturn void wasi_thread_start_3(int tid, struct start_args *args)
+{
+	// Save the pointer to the pthread structure as the global `pthread_self`.
+	extern thread_local uintptr_t __wasilibc_pthread_self;
+	__wasilibc_pthread_self	= (uintptr_t) args->thread;
+
 	// Set the thread ID (TID) on the pthread structure. The TID is stored
 	// atomically since it is also stored by the parent thread; this way,
 	// whichever thread (parent or child) reaches this point first can proceed
 	// without waiting.
 	atomic_store((atomic_int *) &(args->thread->tid), tid);
-	// Save the pointer to the pthread structure as the global `pthread_self`.
-	__asm__("local.set %0\n"
-		  "global.set __wasilibc_pthread_self\n"
-          : "=r"(args->thread));
+
 	// Execute the user's start function.
 	int (*start)(void*) = (int(*)(void*)) args->start_func;
 	__pthread_exit((void *)(uintptr_t)start(args->start_arg));
-	return 0;
 }
 #endif
 

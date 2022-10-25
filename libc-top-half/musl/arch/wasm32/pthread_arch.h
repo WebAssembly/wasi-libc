@@ -1,11 +1,11 @@
+#include <threads.h>
+
 static inline uintptr_t __get_tp(void) {
 #if _REENTRANT
-  int val;
-  __asm__("global.get __wasilibc_pthread_self\n"
-          "local.set %0"
-          : "=r"(val));
-  return val;
+	extern thread_local uintptr_t __wasilibc_pthread_self;
+	return __wasilibc_pthread_self;
 #else
-  return 0;
+	return 0;
 #endif
 }
+

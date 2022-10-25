@@ -164,7 +164,15 @@ extern hidden void *__pthread_tsd_main[];
 extern hidden volatile int __eintr_valid_flag;
 
 hidden int __clone(int (*)(void *), void *, int, void *, ...);
+#ifdef __wasilibc_unmodified_upstream
 hidden int __set_thread_area(void *);
+#else
+static inline int __set_thread_area(void *p) {
+	extern thread_local uintptr_t __wasilibc_pthread_self;
+	__wasilibc_pthread_self	= (uintptr_t) p;
+	return 0;
+}
+#endif
 #ifdef __wasilibc_unmodified_upstream /* WASI has no sigaction */
 hidden int __libc_sigaction(int, const struct sigaction *, struct sigaction *);
 #endif
@@ -213,8 +221,13 @@ extern hidden volatile int __abort_lock[1];
 extern hidden unsigned __default_stacksize;
 extern hidden unsigned __default_guardsize;
 
+#ifdef __wasilibc_unmodified_upstream
 #define DEFAULT_STACK_SIZE 131072
 #define DEFAULT_GUARD_SIZE 8192
+#else
+#define DEFAULT_STACK_SIZE 131072
+#define DEFAULT_GUARD_SIZE 0
+#endif
 
 #define DEFAULT_STACK_MAX (8<<20)
 #define DEFAULT_GUARD_MAX (1<<20)

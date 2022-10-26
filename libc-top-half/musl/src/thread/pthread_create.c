@@ -182,6 +182,15 @@ _Noreturn void __pthread_exit(void *result)
 		 * and then exits without touching the stack. */
 		__unmapself(self->map_base, self->map_size);
 	}
+#else
+	if (state==DT_DETACHED && self->map_base) {
+		// __syscall(SYS_exit) would unlock the thread, list
+		// do it manually here
+		__tl_unlock();
+		free(self->map_base);
+		// Can't use `exit()` here, because it is too high level
+		for (;;) __wasi_proc_exit(0);
+	}
 #endif
 
 	/* Wake any joiner. */
@@ -197,7 +206,11 @@ _Noreturn void __pthread_exit(void *result)
 #ifdef __wasilibc_unmodified_upstream
 	for (;;) __syscall(SYS_exit, 0);
 #else
-	for (;;) exit(0);
+	// __syscall(SYS_exit) would unlock the thread, list
+	// do it manually here
+	__tl_unlock();
+	// Can't use `exit()` here, because it is too high level
+	for (;;) __wasi_proc_exit(0);
 #endif
 }
 

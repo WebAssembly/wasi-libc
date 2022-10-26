@@ -15,22 +15,31 @@
 
 volatile int __thread_list_lock;
 
-#ifdef __wasilibc_unmodified_upstream
+#ifndef __wasilibc_unmodified_upstream
+void __wasi_init_tp() {
+	__init_tp((void *)__get_tp());
+}
+#endif
+
 int __init_tp(void *p)
 {
 	pthread_t td = p;
 	td->self = td;
+#ifdef __wasilibc_unmodified_upstream
 	int r = __set_thread_area(TP_ADJ(p));
 	if (r < 0) return -1;
 	if (!r) libc.can_do_threads = 1;
 	td->detach_state = DT_JOINABLE;
 	td->tid = __syscall(SYS_set_tid_address, &__thread_list_lock);
+#endif
 	td->locale = &libc.global_locale;
 	td->robust_list.head = &td->robust_list.head;
 	td->sysinfo = __sysinfo;
 	td->next = td->prev = td;
 	return 0;
 }
+
+#ifdef __wasilibc_unmodified_upstream
 
 static struct builtin_tls {
 	char c;

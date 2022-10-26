@@ -90,6 +90,7 @@ __getopt_msg
 __gmtime_r
 __hwcap
 __inet_aton
+__init_tp
 __intscan
 __invtrigl_R
 __isalnum_l
@@ -324,6 +325,7 @@ __wasi_fd_seek
 __wasi_fd_sync
 __wasi_fd_tell
 __wasi_fd_write
+__wasi_init_tp
 __wasi_path_create_directory
 __wasi_path_filestat_get
 __wasi_path_filestat_set_times

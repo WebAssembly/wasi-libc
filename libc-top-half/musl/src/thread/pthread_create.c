@@ -257,7 +257,7 @@ static int start_c11(void *p)
 }
 #else
 __attribute__((export_name("wasi_thread_start")))
-int wasi_thread_start(int tid, void *p)
+_Noreturn void wasi_thread_start(int tid, void *p)
 {
 	struct start_args *args = p;
   	__asm__(".globaltype __tls_base, i32\n"
@@ -278,7 +278,6 @@ int wasi_thread_start(int tid, void *p)
 	// Execute the user's start function.
 	int (*start)(void*) = (int(*)(void*)) args->start_func;
 	__pthread_exit((void *)(uintptr_t)start(args->start_arg));
-	return 0;
 }
 #endif
 

@@ -164,6 +164,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         unistd/ttyname_r.c \
         linux/wait3.c \
         linux/wait4.c \
+        linux/eventfd.c \
         stat/futimesat.c \
     ) \
     $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \

@@ -182,72 +182,21 @@ _Static_assert(offsetof(__wasi_hash_t, b1) == 8, "witx calculated offset");
  */
 typedef struct __wasi_stack_snapshot_t {
     /**
-     * Offset into the execution memory stack
-     */
-    uint32_t memory_offset;
-
-    /**
-     * Offset into the execution host stack
-     */
-    uint32_t host_offset;
-
-    /**
      * User defined field that can be used by functions
      */
     uint64_t user;
 
     /**
-     * Top part of the stack that is saved for later restoration
-     */
-    __wasi_stack_part_t stack1;
-
-    __wasi_stack_part_t stack2;
-
-    __wasi_stack_part_t stack3;
-
-    __wasi_stack_part_t stack4;
-
-    __wasi_stack_part_t stack5;
-
-    __wasi_stack_part_t stack6;
-
-    __wasi_stack_part_t stack7;
-
-    __wasi_stack_part_t stack8;
-
-    __wasi_stack_part_t stack9;
-
-    __wasi_stack_part_t stack10;
-
-    __wasi_stack_part_t stack11;
-
-    __wasi_stack_part_t stack12;
-
-    /**
-     * Hash thats used as an integrity checked
+     * Hash used to identify which stack snapshot to restore
      */
     __wasi_hash_t hash;
 
 } __wasi_stack_snapshot_t;
 
-_Static_assert(sizeof(__wasi_stack_snapshot_t) == 1568, "witx calculated size");
+_Static_assert(sizeof(__wasi_stack_snapshot_t) == 24, "witx calculated size");
 _Static_assert(_Alignof(__wasi_stack_snapshot_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, memory_offset) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, host_offset) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, user) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack1) == 16, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack2) == 144, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack3) == 272, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack4) == 400, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack5) == 528, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack6) == 656, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack7) == 784, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack8) == 912, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack9) == 1040, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack10) == 1168, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack11) == 1296, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, stack12) == 1424, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_snapshot_t, hash) == 1552, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, user) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_stack_snapshot_t, hash) == 8, "witx calculated offset");
 
 /**
  * Identifiers for clocks.

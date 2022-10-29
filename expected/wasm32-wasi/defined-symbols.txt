@@ -774,6 +774,9 @@ erfcl
 erff
 erfl
 errno
+eventfd
+eventfd_read
+eventfd_write
 execl
 execle
 execlp

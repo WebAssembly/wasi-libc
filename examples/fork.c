@@ -3,11 +3,11 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <errno.h>
-  
+
 int forkexample()
 {
     int x = 1;
-  
+
     int pid = fork();
     if (pid == -1) {
         printf("failed to fork - %d", errno);

@@ -12,6 +12,8 @@
 #include <stdatomic.h>
 #endif
 
+#include <stdalign.h>
+
 static void dummy_0()
 {
 }
@@ -452,12 +454,12 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	/* Setup argument structure for the new thread on its stack.
 	 * It's safe to access from the caller only until the thread
 	 * list is unlocked. */
+#ifdef __wasilibc_unmodified_upstream
 	stack -= (uintptr_t)stack % sizeof(uintptr_t);
 	stack -= sizeof(struct start_args);
 	struct start_args *args = (void *)stack;
 	args->start_func = entry;
 	args->start_arg = arg;
-#ifdef __wasilibc_unmodified_upstream
 	args->control = attr._a_sched ? 1 : 0;
 
 	/* Application signals (but not the synccall signal) must be
@@ -472,6 +474,18 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	args->sig_mask[(SIGCANCEL-1)/8/sizeof(long)] &=
 		~(1UL<<((SIGCANCEL-1)%(8*sizeof(long))));
 #else
+	/* Align the stack to struct start_args */
+	stack -= sizeof(struct start_args);
+	stack -= (uintptr_t)stack % alignof(struct start_args);
+	struct start_args *args = (void *)stack;
+
+	/* Align the stack to 16 and store it */
+	new->stack = (void *)((uintptr_t) stack & -16);
+	/* Correct the stack size */
+	new->stack_size = stack - stack_limit;
+
+	args->start_func = entry;
+	args->start_arg = arg;
 	args->tls_base = (void*)new_tls_base;
 #endif
 

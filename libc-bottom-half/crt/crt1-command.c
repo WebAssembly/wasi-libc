@@ -1,5 +1,6 @@
 #ifdef _REENTRANT
 #include <stdatomic.h>
+extern void __wasi_init_tp(void);
 #endif
 #include <wasi/api.h>
 extern void __wasm_call_ctors(void);
@@ -27,6 +28,10 @@ void _start(void) {
 	__builtin_trap();
     }
     started = 1;
+#endif
+
+#ifdef _REENTRANT
+	__wasi_init_tp();
 #endif
 
     // The linker synthesizes this to call constructors.

@@ -660,13 +660,13 @@ __wasi_errno_t __wasi_sock_shutdown(
 }
 
 #ifdef _REENTRANT
-int32_t __imported_wasi_snapshot_preview2_thread_spawn(int32_t arg0) __attribute__((
-    __import_module__("wasi_snapshot_preview2"),
+int32_t __imported_wasi_thread_spawn(int32_t arg0) __attribute__((
+    __import_module__("wasi"),
     __import_name__("thread_spawn")
 ));
 
 __wasi_errno_t __wasi_thread_spawn(void* start_arg) {
-	int32_t ret = __imported_wasi_snapshot_preview2_thread_spawn((int32_t) start_arg);
+	int32_t ret = __imported_wasi_thread_spawn((int32_t) start_arg);
     return (uint16_t) ret;
 }
 #endif

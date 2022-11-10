@@ -192,9 +192,16 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
 ifeq ($(THREAD_MODEL), posix)
 LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
+        env/__init_tls.c \
+        stdio/__lockfile.c \
         thread/__lock.c \
         thread/__wait.c \
         thread/__timedwait.c \
+        thread/default_attr.c \
+        thread/pthread_attr_destroy.c \
+        thread/pthread_attr_init.c \
+        thread/pthread_attr_setstack.c \
+        thread/pthread_attr_setstacksize.c \
         thread/pthread_cleanup_push.c \
         thread/pthread_cond_broadcast.c \
         thread/pthread_cond_destroy.c \
@@ -235,6 +242,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_rwlockattr_init.c \
         thread/pthread_rwlockattr_setpshared.c \
         thread/pthread_setcancelstate.c \
+        thread/pthread_self.c \
         thread/pthread_testcancel.c \
         thread/sem_destroy.c \
         thread/sem_getvalue.c \

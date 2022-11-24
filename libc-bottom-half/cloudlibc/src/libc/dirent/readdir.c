@@ -3,6 +3,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include <assert.h>
 #include <wasi/api.h>
@@ -77,10 +80,28 @@ struct dirent *readdir(DIR *dirp) {
     GROW(dirp->dirent, dirp->dirent_size,
          offsetof(struct dirent, d_name) + entry.d_namlen + 1);
     struct dirent *dirent = dirp->dirent;
-    dirent->d_ino = entry.d_ino;
     dirent->d_type = entry.d_type;
     memcpy(dirent->d_name, name, entry.d_namlen);
     dirent->d_name[entry.d_namlen] = '\0';
+
+    // `fd_readdir` implementations may set the inode field to zero if the
+    // the inode number is unknown. In that case, do an `fstatat` to get the
+    // inode number.
+    off_t d_ino = entry.d_ino;
+    if (d_ino == 0) {
+      struct stat statbuf;
+      if (fstatat(dirp->fd, dirent->d_name, &statbuf, AT_SYMLINK_NOFOLLOW) != 0) {
+	if (errno == ENOENT) {
+	  // The file disappeared before we could read it, so skip it.
+	  continue;
+	}
+        return NULL;
+      }
+
+      d_ino = statbuf.st_ino;
+    }
+    dirent->d_ino = d_ino;
+
     dirp->cookie = entry.d_next;
     dirp->buffer_processed += entry_size;
     return dirent;

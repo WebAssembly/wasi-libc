@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "dirent_impl.h"
 
@@ -21,6 +22,8 @@ static int sel_true(const struct dirent *de) {
 int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***namelist,
                                int (*sel)(const struct dirent *),
                                int (*compar)(const struct dirent **, const struct dirent **)) {
+  struct stat statbuf;
+
   // Match all files if no select function is provided.
   if (sel == NULL)
     sel = sel_true;
@@ -89,10 +92,23 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***name
         malloc(offsetof(struct dirent, d_name) + entry.d_namlen + 1);
     if (dirent == NULL)
       goto bad;
-    dirent->d_ino = entry.d_ino;
     dirent->d_type = entry.d_type;
     memcpy(dirent->d_name, name, entry.d_namlen);
     dirent->d_name[entry.d_namlen] = '\0';
+
+    // `fd_readdir` implementations may set the inode field to zero if the
+    // the inode number is unknown. In that case, do an `fstatat` to get the
+    // inode number.
+    off_t d_ino = entry.d_ino;
+    if (d_ino == 0) {
+      if (fstatat(fd, dirent->d_name, &statbuf, AT_SYMLINK_NOFOLLOW) != 0) {
+        return -1;
+      }
+
+      d_ino = statbuf.st_ino;
+    }
+    dirent->d_ino = d_ino;
+
     cookie = entry.d_next;
 
     if (sel(dirent)) {

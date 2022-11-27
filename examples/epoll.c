@@ -119,6 +119,9 @@ fail:
     {
         int status = 0;
         waitpid(pid, &status, 0);
+        if (status != 0 && ret == 0) {
+            ret = status;
+        }
         pid = 0;
     }
 

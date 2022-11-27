@@ -12,12 +12,12 @@ int main(void) {
         printf("failed to fork - %d", errno);
         return 1;
     }
-    
+
     if (pid == 0) {
         printf("execve: echo hi-from-child\n");
         char* argv[] = { "echo", "hi-from-child", NULL };
         char* envp[] = { NULL };
-        if (execve("echo", argv, envp) == -1) {
+        if (execve("/bin/echo", argv, envp) == -1) {
             perror("Could not execve");
         }
     } else {
@@ -28,10 +28,10 @@ int main(void) {
         printf("execve: echo hi-from-parent\n");
         char* argv[] = { "echo", "hi-from-parent", NULL };
         char* envp[] = { NULL };
-        if (execve("echo", argv, envp) == -1) {
+        if (execve("/bin/echo", argv, envp) == -1) {
             perror("Could not execve");
         }
     }
-    
+
     return 1;
 }

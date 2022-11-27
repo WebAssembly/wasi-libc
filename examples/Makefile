@@ -55,15 +55,15 @@ SRC=$(wildcard *.c)
 export PATH := $(LLD_PATH):$(PATH)
 
 all: longjmp file-copy signal fork vfork fork-longjmp execve spawn pipe epoll
-	cp -f ../dist/wasix/longjmp.wasm ../../ate/wasmer-web/public/bin/example-longjmp.wasm
-	cp -f ../dist/wasix/fork.wasm ../../ate/wasmer-web/public/bin/example-fork.wasm
-	cp -f ../dist/wasix/fork-longjmp.wasm ../../ate/wasmer-web/public/bin/example-fork-longjmp.wasm
-	cp -f ../dist/wasix/vfork.wasm ../../ate/wasmer-web/public/bin/example-vfork.wasm
-	cp -f ../dist/wasix/signal.wasm ../../ate/wasmer-web/public/bin/example-signal.wasm
-	cp -f ../dist/wasix/execve.wasm ../../ate/wasmer-web/public/bin/example-execve.wasm
-	cp -f ../dist/wasix/spawn.wasm ../../ate/wasmer-web/public/bin/example-spawn.wasm
-	cp -f ../dist/wasix/pipe.wasm ../../ate/wasmer-web/public/bin/example-pipe.wasm
-	cp -f ../dist/wasix/epoll.wasm ../../ate/wasmer-web/public/bin/example-epoll.wasm
+	cp -f ../dist/wasix/longjmp.wasm ../../deploy/wasmer-web/public/bin/example-longjmp.wasm
+	cp -f ../dist/wasix/fork.wasm ../../deploy/wasmer-web/public/bin/example-fork.wasm
+	cp -f ../dist/wasix/fork-longjmp.wasm ../../deploy/wasmer-web/public/bin/example-fork-longjmp.wasm
+	cp -f ../dist/wasix/vfork.wasm ../../deploy/wasmer-web/public/bin/example-vfork.wasm
+	cp -f ../dist/wasix/signal.wasm ../../deploy/wasmer-web/public/bin/example-signal.wasm
+	cp -f ../dist/wasix/execve.wasm ../../deploy/wasmer-web/public/bin/example-execve.wasm
+	cp -f ../dist/wasix/spawn.wasm ../../deploy/wasmer-web/public/bin/example-spawn.wasm
+	cp -f ../dist/wasix/pipe.wasm ../../deploy/wasmer-web/public/bin/example-pipe.wasm
+	cp -f ../dist/wasix/epoll.wasm ../../deploy/wasmer-web/public/bin/example-epoll.wasm
 
 %: %.c
 	mkdir -p ../dist/host

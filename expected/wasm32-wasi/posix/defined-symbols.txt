@@ -48,6 +48,7 @@ __do_des
 __do_orphaned_stdio_locks
 __duplocale
 __env_rm_add
+__errno_location
 __exp2f_data
 __exp_data
 __expo2

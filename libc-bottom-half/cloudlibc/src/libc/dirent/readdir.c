@@ -88,6 +88,7 @@ struct dirent *readdir(DIR *dirp) {
     // the inode number is unknown. In that case, do an `fstatat` to get the
     // inode number.
     off_t d_ino = entry.d_ino;
+    unsigned char d_type = entry.d_type;
     if (d_ino == 0) {
       struct stat statbuf;
       if (fstatat(dirp->fd, dirent->d_name, &statbuf, AT_SYMLINK_NOFOLLOW) != 0) {
@@ -98,9 +99,15 @@ struct dirent *readdir(DIR *dirp) {
         return NULL;
       }
 
+      // Fill in the inode.
       d_ino = statbuf.st_ino;
+
+      // In case someone raced with us and replaced the object with this name
+      // with another of a different type, update the type too.
+      d_type = __wasilibc_iftodt(statbuf.st_mode & S_IFMT);
     }
     dirent->d_ino = d_ino;
+    dirent->d_type = d_type;
 
     dirp->cookie = entry.d_next;
     dirp->buffer_processed += entry_size;

@@ -194,6 +194,8 @@ __pthread_cond_timedwait
 __pthread_create
 __pthread_exit
 __pthread_join
+__pthread_key_create
+__pthread_key_delete
 __pthread_mutex_lock
 __pthread_mutex_timedlock
 __pthread_mutex_trylock
@@ -979,7 +981,10 @@ pthread_condattr_setclock
 pthread_condattr_setpshared
 pthread_create
 pthread_exit
+pthread_getspecific
 pthread_join
+pthread_key_create
+pthread_key_delete
 pthread_mutex_consistent
 pthread_mutex_destroy
 pthread_mutex_getprioceiling
@@ -1008,6 +1013,7 @@ pthread_rwlockattr_init
 pthread_rwlockattr_setpshared
 pthread_self
 pthread_setcancelstate
+pthread_setspecific
 pthread_testcancel
 pthread_timedjoin_np
 pthread_tryjoin_np
@@ -1219,6 +1225,7 @@ truncate
 truncf
 truncl
 tsearch
+tss_get
 twalk
 uname
 ungetc

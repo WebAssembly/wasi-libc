@@ -214,7 +214,9 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_condattr_setclock.c \
         thread/pthread_condattr_setpshared.c \
         thread/pthread_create.c \
+        thread/pthread_getspecific.c \
         thread/pthread_join.c \
+        thread/pthread_key_create.c \
         thread/pthread_mutex_consistent.c \
         thread/pthread_mutex_destroy.c \
         thread/pthread_mutex_init.c \
@@ -242,6 +244,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_rwlockattr_init.c \
         thread/pthread_rwlockattr_setpshared.c \
         thread/pthread_setcancelstate.c \
+        thread/pthread_setspecific.c \
         thread/pthread_self.c \
         thread/pthread_testcancel.c \
         thread/sem_destroy.c \

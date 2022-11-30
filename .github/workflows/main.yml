@@ -15,6 +15,13 @@ jobs:
       with:
         submodules: true
 
+    - name: Install libtinfo5
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get install -y libtinfo5
+      if: matrix.os == 'ubuntu-latest'
+
     - name: Install LLVM tools (Windows)
       shell: bash
       run: |

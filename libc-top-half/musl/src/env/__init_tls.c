@@ -16,6 +16,20 @@
 volatile int __thread_list_lock;
 
 #ifndef __wasilibc_unmodified_upstream
+
+extern unsigned char __heap_base;
+extern unsigned char __data_end;
+
+static inline void setup_default_stack_size()
+{
+	ptrdiff_t stack_size = &__heap_base - &__data_end;
+
+	if (stack_size > __default_stacksize)
+		__default_stacksize =
+			stack_size < DEFAULT_STACK_MAX ?
+			stack_size : DEFAULT_STACK_MAX;
+}
+
 void __wasi_init_tp() {
 	__init_tp((void *)__get_tp());
 }
@@ -31,6 +45,8 @@ int __init_tp(void *p)
 	if (!r) libc.can_do_threads = 1;
 	td->detach_state = DT_JOINABLE;
 	td->tid = __syscall(SYS_set_tid_address, &__thread_list_lock);
+#else
+	setup_default_stack_size();
 #endif
 	td->locale = &libc.global_locale;
 	td->robust_list.head = &td->robust_list.head;

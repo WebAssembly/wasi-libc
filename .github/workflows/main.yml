@@ -58,6 +58,7 @@ jobs:
         curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/clang+llvm-${{ matrix.clang_version }}-x86_64-linux-gnu-ubuntu-18.04.tar.xz | tar xJf -
         export CLANG_DIR=`pwd`/clang+llvm-${{ matrix.clang_version }}-x86_64-linux-gnu-ubuntu-18.04/bin
         echo "$CLANG_DIR" >> $GITHUB_PATH
+        echo "CLANG_DIR=$CLANG_DIR" >> $GITHUB_ENV
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
         echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
@@ -66,6 +67,22 @@ jobs:
     - name: Build libc
       shell: bash
       run: make -j4
+
+    - name: Test
+      shell: bash
+      # For Clang linking to work correctly, we need to place Clang's runtime
+      # library for `wasm32-wasi` in the right location (i.e., the `mkdir` and
+      # `cp` below).
+      run: |
+        cd test
+        make download
+        export WASI_DIR=$(realpath $CLANG_DIR/../lib/clang/${{ matrix.clang_version }}/lib/wasi/)
+        mkdir -p $WASI_DIR
+        cp download/lib/wasi/libclang_rt.builtins-wasm32.a $WASI_DIR
+        make test
+      # The older version of Clang does not provide the expected symbol for the
+      # test entrypoints: `undefined symbol: __main_argc_argv`.
+      if: matrix.os == 'ubuntu-latest' && matrix.clang_version != '10.0.0'
 
     - uses: actions/upload-artifact@v1
       with:

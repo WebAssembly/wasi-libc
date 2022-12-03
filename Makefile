@@ -19,7 +19,7 @@ THREAD_MODEL ?= posix
 MALLOC_IMPL ?= dlmalloc
 # yes or no
 BUILD_LIBC_TOP_HALF ?= yes
-# The directory where we're store intermediate artifacts.
+# The directory where we will store intermediate artifacts.
 OBJDIR ?= $(CURDIR)/build
 
 # When the length is no larger than this threshold, we consider the

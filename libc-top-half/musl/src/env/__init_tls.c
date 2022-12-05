@@ -27,6 +27,7 @@ volatile int __thread_list_lock;
  */
 extern unsigned char __heap_base;
 extern unsigned char __data_end;
+extern unsigned char __global_base;
 extern weak unsigned char __stack_high;
 extern weak unsigned char __stack_low;
 
@@ -34,7 +35,17 @@ static inline void setup_default_stack_size()
 {
 	ptrdiff_t stack_size;
 
-	stack_size = &__stack_high ? &__stack_high - &__stack_low : &__heap_base - &__data_end;
+	if (&__stack_high)
+		stack_size = &__stack_high - &__stack_low;
+	else {
+		unsigned char *sp;
+		__asm__(
+			".globaltype __stack_pointer, i32\n"
+			"global.get __stack_pointer\n"
+			"local.set %0\n"
+			: "=r"(sp));
+		stack_size = sp > &__global_base ? &__heap_base - &__data_end : (ptrdiff_t)&__global_base;
+	}
 
 	if (stack_size > __default_stacksize)
 		__default_stacksize =

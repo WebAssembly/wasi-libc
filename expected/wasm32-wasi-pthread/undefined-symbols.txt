@@ -10,6 +10,7 @@ __fixunstfsi
 __floatsitf
 __floatunsitf
 __getf2
+__global_base
 __gttf2
 __heap_base
 __imported_wasi_snapshot_preview1_args_get

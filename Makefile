@@ -146,6 +146,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         fcntl/creat.c \
         dirent/alphasort.c \
         dirent/versionsort.c \
+        env/__stack_chk_fail.c \
         env/clearenv.c \
         env/getenv.c \
         env/putenv.c \

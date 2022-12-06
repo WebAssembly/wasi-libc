@@ -91,6 +91,7 @@ __getopt_msg
 __gmtime_r
 __hwcap
 __inet_aton
+__init_ssp
 __init_tp
 __intscan
 __invtrigl_R
@@ -236,6 +237,9 @@ __sin
 __sindf
 __sinl
 __small_printf
+__stack_chk_fail
+__stack_chk_fail_local
+__stack_chk_guard
 __stderr_FILE
 __stderr_used
 __stdin_FILE

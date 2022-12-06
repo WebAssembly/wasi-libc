@@ -89,11 +89,12 @@ struct dirent *readdir(DIR *dirp) {
     // inode number.
     off_t d_ino = entry.d_ino;
     unsigned char d_type = entry.d_type;
-    if (d_ino == 0) {
+    if (d_ino == 0 && strcmp(dirent->d_name, "..") != 0) {
       struct stat statbuf;
       if (fstatat(dirp->fd, dirent->d_name, &statbuf, AT_SYMLINK_NOFOLLOW) != 0) {
 	if (errno == ENOENT) {
 	  // The file disappeared before we could read it, so skip it.
+	  dirp->buffer_processed += entry_size;
 	  continue;
 	}
         return NULL;

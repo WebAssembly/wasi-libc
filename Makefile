@@ -650,6 +650,9 @@ check-symbols: startup_files libc
 	@# TODO: Filter out __NO_MATH_ERRNO_ and a few __*WIDTH__ that are new to clang 14.
 	@# TODO: clang defined __FLT_EVAL_METHOD__ until clang 15, so we force-undefine it
 	@# for older versions.
+	@# TODO: Undefine __wasm_mutable_globals__ and __wasm_sign_ext__, that are new to
+	@# clang 16 for -mcpu=generic.
+	@# TODO: As of clang 16, __GNUC_VA_LIST is #defined without a value.
 	$(CC) $(CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -isystem $(SYSROOT_INC) \
 	    -std=gnu17 \
@@ -663,6 +666,8 @@ check-symbols: startup_files libc
 	    -U__clang_version__ \
 	    -U__clang_literal_encoding__ \
 	    -U__clang_wide_literal_encoding__ \
+	    -U__wasm_mutable_globals__ \
+	    -U__wasm_sign_ext__ \
 	    -U__GNUC__ \
 	    -U__GNUC_MINOR__ \
 	    -U__GNUC_PATCHLEVEL__ \
@@ -672,6 +677,7 @@ check-symbols: startup_files libc
 	    -U__BITINT_MAXWIDTH__ \
 	    -U__FLT_EVAL_METHOD__ -Wno-builtin-macro-redefined \
 	    | sed -e 's/__[[:upper:][:digit:]]*_ATOMIC_\([[:upper:][:digit:]_]*\)_LOCK_FREE/__compiler_ATOMIC_\1_LOCK_FREE/' \
+	    | sed -e 's/__GNUC_VA_LIST $$/__GNUC_VA_LIST 1/' \
 	    | grep -v '^#define __FLT16_' \
 	    | grep -v '^#define __\(BOOL\|INT_\(LEAST\|FAST\)\(8\|16\|32\|64\)\|INT\|LONG\|LLONG\|SHRT\)_WIDTH__' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"

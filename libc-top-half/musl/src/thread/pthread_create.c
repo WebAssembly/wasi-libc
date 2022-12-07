@@ -293,8 +293,7 @@ _Noreturn void wasi_thread_start(int tid, void *p)
 			"global.set __stack_pointer\n"
 			:: "r"(self->stack));
 	// Execute the user's start function.
-	int (*start)(void*) = (int(*)(void*)) args->start_func;
-	__pthread_exit((void *)(uintptr_t)start(args->start_arg));
+	__pthread_exit(args->start_func(args->start_arg));
 }
 #endif
 

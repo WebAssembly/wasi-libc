@@ -981,6 +981,9 @@ pthread_attr_getstacksize
 pthread_attr_init
 pthread_attr_setstack
 pthread_attr_setstacksize
+pthread_barrier_destroy
+pthread_barrier_init
+pthread_barrier_wait
 pthread_barrierattr_getpshared
 pthread_cond_broadcast
 pthread_cond_destroy

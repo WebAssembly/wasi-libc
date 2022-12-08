@@ -17,6 +17,7 @@ int pthread_attr_getinheritsched(const pthread_attr_t *restrict a, int *restrict
 	return 0;
 }
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no CPU scheduling support. */
 int pthread_attr_getschedparam(const pthread_attr_t *restrict a, struct sched_param *restrict param)
 {
 	param->sched_priority = a->_a_prio;
@@ -28,6 +29,7 @@ int pthread_attr_getschedpolicy(const pthread_attr_t *restrict a, int *restrict 
 	*policy = a->_a_policy;
 	return 0;
 }
+#endif
 
 int pthread_attr_getscope(const pthread_attr_t *restrict a, int *restrict scope)
 {
@@ -56,6 +58,7 @@ int pthread_barrierattr_getpshared(const pthread_barrierattr_t *restrict a, int 
 	return 0;
 }
 
+#ifdef __wasilibc_unmodified_upstream /* Forward declaration of WASI's `__clockid` type. */
 int pthread_condattr_getclock(const pthread_condattr_t *restrict a, clockid_t *restrict clk)
 {
 #ifdef __wasilibc_unmodified_upstream
@@ -65,6 +68,7 @@ int pthread_condattr_getclock(const pthread_condattr_t *restrict a, clockid_t *r
 #endif
 	return 0;
 }
+#endif
 
 int pthread_condattr_getpshared(const pthread_condattr_t *restrict a, int *restrict pshared)
 {

@@ -223,6 +223,9 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
         env/__init_tls.c \
         stdio/__lockfile.c \
+        stdio/flockfile.c \
+        stdio/ftrylockfile.c \
+        stdio/funlockfile.c \
         thread/__lock.c \
         thread/__wait.c \
         thread/__timedwait.c \

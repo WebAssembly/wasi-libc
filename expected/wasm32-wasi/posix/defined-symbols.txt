@@ -221,6 +221,7 @@ __qsort_r
 __rand48_step
 __random_lockptr
 __reallocarray
+__register_locked_file
 __release_ptc
 __rem_pio2
 __rem_pio2_large
@@ -649,6 +650,7 @@ fileno
 fileno_unlocked
 finite
 finitef
+flockfile
 floor
 floorf
 floorl
@@ -704,6 +706,8 @@ ftello
 ftello64
 ftime
 ftruncate
+ftrylockfile
+funlockfile
 futimens
 futimesat
 fwide

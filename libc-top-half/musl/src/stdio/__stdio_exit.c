@@ -8,9 +8,16 @@ weak_alias(dummy_file, __stderr_used);
 static void close_file(FILE *f)
 {
 	if (!f) return;
+#ifdef __wasilibc_unmodified_upstream
 	FFINALLOCK(f);
+#else
+	FLOCK(f);
+#endif
 	if (f->wpos != f->wbase) f->write(f, 0, 0);
 	if (f->rpos != f->rend) f->seek(f, f->rpos-f->rend, SEEK_CUR);
+#ifndef __wasilibc_unmodified_upstream
+	FUNLOCK(f);
+#endif
 }
 
 void __stdio_exit(void)

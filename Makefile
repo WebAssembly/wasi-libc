@@ -392,9 +392,9 @@ LIBWASI_EMULATED_SIGNAL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_SOURCES))
 
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
-SYSROOT_LIB := $(SYSROOT)/lib/$(MULTIARCH_TRIPLE)
+SYSROOT_LIB := $(SYSROOT)/lib/$(TARGET_TRIPLE)
 SYSROOT_INC = $(SYSROOT)/include
-SYSROOT_SHARE = $(SYSROOT)/share/$(MULTIARCH_TRIPLE)
+SYSROOT_SHARE = $(SYSROOT)/share/$(TARGET_TRIPLE)
 
 # Files from musl's include directory that we don't want to install in the
 # sysroot's include directory.
@@ -699,6 +699,10 @@ check-symbols: startup_files libc
 	    | grep -v '^#define __FLT16_' \
 	    | grep -v '^#define __\(BOOL\|INT_\(LEAST\|FAST\)\(8\|16\|32\|64\)\|INT\|LONG\|LLONG\|SHRT\)_WIDTH__' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
+
+	# Check that the computed metadata matches the expected metadata.
+	# This ignores whitespace because on Windows the output has CRLF line endings.
+	diff -wur "$(CURDIR)/expected/$(TARGET_TRIPLE)" "$(SYSROOT_SHARE)"
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"

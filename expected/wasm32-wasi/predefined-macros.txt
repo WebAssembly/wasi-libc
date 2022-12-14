@@ -37,9 +37,6 @@
 #define AF_INET6 __WASI_ADDRESS_FAMILY_INET6
 #define AF_UNIX __WASI_ADDRESS_FAMILY_UNIX
 #define AF_UNSPEC __WASI_ADDRESS_FAMILY_UNSPEC
-#define AIO_ALLDONE 2
-#define AIO_CANCELED 0
-#define AIO_NOTCANCELED 1
 #define AI_ADDRCONFIG 0x20
 #define AI_ALL 0x10
 #define AI_CANONNAME 0x02
@@ -165,11 +162,6 @@
 #define BS1 0020000
 #define BSDLY 0020000
 #define BUFSIZ 1024
-#define BUS_ADRALN 1
-#define BUS_ADRERR 2
-#define BUS_MCEERR_AO 5
-#define BUS_MCEERR_AR 4
-#define BUS_OBJERR 3
 #define BYTE_ORDER __BYTE_ORDER
 #define CANBSIZ 255
 #define CBAUD 0010017
@@ -191,12 +183,6 @@
 #define CIBAUD 002003600000
 #define CINTR CTRL('c')
 #define CKILL CTRL('u')
-#define CLD_CONTINUED 6
-#define CLD_DUMPED 3
-#define CLD_EXITED 1
-#define CLD_KILLED 2
-#define CLD_STOPPED 5
-#define CLD_TRAPPED 4
 #define CLNEXT CTRL('v')
 #define CLOCAL 0004000
 #define CLOCKS_PER_SEC ((clock_t)1000000000)
@@ -236,7 +222,7 @@
 #define CMSPAR 010000000000
 #define CODESET 14
 #define COLL_WEIGHTS_MAX 2
-#define COMMON_CLOCK_H
+#define COMMON_CLOCK_H 
 #define COMPLETE 2
 #define CONTINUE 3
 #define CONTTYPE '7'
@@ -1131,14 +1117,6 @@
 #define FORM_C 3
 #define FORM_N 1
 #define FORM_T 2
-#define FPE_FLTDIV 3
-#define FPE_FLTINV 7
-#define FPE_FLTOVF 4
-#define FPE_FLTRES 6
-#define FPE_FLTSUB 8
-#define FPE_FLTUND 5
-#define FPE_INTDIV 1
-#define FPE_INTOVF 2
 #define FP_ILOGB0 FP_ILOGBNAN
 #define FP_ILOGBNAN (-1-0x7fffffff)
 #define FP_INFINITE 1
@@ -1352,14 +1330,6 @@
 #define IGNBRK 0000001
 #define IGNCR 0000200
 #define IGNPAR 0000004
-#define ILL_BADSTK 8
-#define ILL_COPROC 7
-#define ILL_ILLADR 3
-#define ILL_ILLOPC 1
-#define ILL_ILLOPN 2
-#define ILL_ILLTRP 4
-#define ILL_PRVOPC 5
-#define ILL_PRVREG 6
 #define IMAXBEL 0020000
 #define IN6ADDRSZ NS_IN6ADDRSZ
 #define IN6ADDR_ANY_INIT { { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } }
@@ -1773,11 +1743,6 @@
 #define LFLOW_ON 1
 #define LFLOW_RESTART_ANY 2
 #define LFLOW_RESTART_XON 3
-#define LIO_NOP 2
-#define LIO_NOWAIT 1
-#define LIO_READ 0
-#define LIO_WAIT 0
-#define LIO_WRITE 1
 #define LITTLE_ENDIAN __LITTLE_ENDIAN
 #define LITUSE_ALPHA_ADDR 0
 #define LITUSE_ALPHA_BASE 1
@@ -2099,7 +2064,6 @@
 #define NO_RECOVERY 3
 #define NR_ICMP_TYPES 18
 #define NR_ICMP_UNREACH 15
-#define NSIG _NSIG
 #define NSLC 18
 #define NS_ALG_DH 2
 #define NS_ALG_DSA 3
@@ -3449,7 +3413,7 @@
 #define R_NIOS2_TLS_TPREL 35
 #define R_NIOS2_U16 2
 #define R_NIOS2_UJMP 18
- #define R_OK (4)
+#define R_OK (4)
 #define R_OR1K_16 2
 #define R_OR1K_16_PCREL 10
 #define R_OR1K_32 1
@@ -4137,10 +4101,6 @@
 #define SEEK_END __WASI_WHENCE_END
 #define SEEK_SET __WASI_WHENCE_SET
 #define SEGSIZE 512
-#define SEGV_ACCERR 2
-#define SEGV_BNDERR 3
-#define SEGV_MAPERR 1
-#define SEGV_PKUERR 4
 #define SELFMAG 4
 #define SEM_FAILED ((sem_t *)0)
 #define SEM_NSEMS_MAX 256
@@ -4293,10 +4253,6 @@
 #define SIGBUS 7
 #define SIGCHLD 17
 #define SIGCONT 18
-#define SIGEV_NONE 1
-#define SIGEV_SIGNAL 0
-#define SIGEV_THREAD 2
-#define SIGEV_THREAD_ID 4
 #define SIGFPE 8
 #define SIGHUP 1
 #define SIGILL 4
@@ -4328,24 +4284,8 @@
 #define SIGXFSZ 25
 #define SIG_ATOMIC_MAX INT32_MAX
 #define SIG_ATOMIC_MIN INT32_MIN
-#define SIG_BLOCK 0
-#define SIG_DFL ((void (*)(int)) 0)
-#define SIG_ERR (__SIG_ERR)
-#define SIG_HOLD ((void (*)(int)) 2)
-#define SIG_IGN (__SIG_IGN)
-#define SIG_SETMASK 2
-#define SIG_UNBLOCK 1
 #define SIZE_MAX UINT32_MAX
-#define SI_ASYNCIO (-4)
-#define SI_ASYNCNL (-60)
-#define SI_KERNEL 128
 #define SI_LOAD_SHIFT 16
-#define SI_MESGQ (-3)
-#define SI_QUEUE (-1)
-#define SI_SIGIO (-5)
-#define SI_TIMER (-2)
-#define SI_TKILL (-6)
-#define SI_USER 0
 #define SLC_ABORT 7
 #define SLC_ACK 0x80
 #define SLC_AO 4
@@ -4920,7 +4860,6 @@
 #define YESSTR 0x50002
 #define YXDOMAIN ns_r_yxdomain
 #define YXRRSET ns_r_yxrrset
-#define _AIO_H
 #define _ALLOCA_H 
 #define _ALL_SOURCE 1
 #define _ARPA_FTP_H 
@@ -4977,7 +4916,7 @@
 #define _Complex_I (0.0f+1.0fi)
 #define _DIRENT_H 
 #define _DIRENT_HAVE_D_TYPE 
-#define _ELF_H
+#define _ELF_H 
 #define _ENDIAN_H 
 #define _ERRNO_H 
 #define _ERR_H 
@@ -4991,7 +4930,7 @@
 #define _GETOPT_H 
 #define _GLOB_H 
 #define _GNU_SOURCE 1
-#define _GRP_H
+#define _GRP_H 
 #define _ICONV_H 
 #define _IFADDRS_H 
 #define _ILP32 1
@@ -5025,7 +4964,7 @@
 #define _NSIG 65
 #define _NSIG_BPW 32
 #define _NSIG_WORDS (_NSIG / _NSIG_BPW)
-#define _PATHS_H
+#define _PATHS_H 
 #define _PATH_BSHELL "/bin/sh"
 #define _PATH_CONSOLE "/dev/console"
 #define _PATH_DEFPATH "/usr/local/bin:/bin:/usr/bin"
@@ -5125,6 +5064,7 @@
 #define _POSIX_STREAM_MAX 8
 #define _POSIX_SYMLINK_MAX 255
 #define _POSIX_SYMLOOP_MAX 8
+#define _POSIX_THREADS _POSIX_VERSION
 #define _POSIX_THREAD_ATTR_STACKADDR _POSIX_VERSION
 #define _POSIX_THREAD_ATTR_STACKSIZE _POSIX_VERSION
 #define _POSIX_THREAD_CPUTIME _POSIX_VERSION
@@ -5147,7 +5087,7 @@
 #define _POSIX_V7_ILP32_OFFBIG (1)
 #define _POSIX_VDISABLE 0
 #define _POSIX_VERSION 200809L
-#define _PTHREAD_H
+#define _PTHREAD_H 
 #define _PTRDIFF_T 
 #define _PWD_H 
 #define _REENTRANT 1
@@ -5297,8 +5237,7 @@
 #define _SEARCH_H 
 #define _SEMAPHORE_H 
 #define _SETJMP_H 
-#define _SHADOW_H
-#define _SIGNAL_H 
+#define _SHADOW_H 
 #define _SIZE_T 
 #define _SPAWN_H 
 #define _STDALIGN_H 
@@ -6418,7 +6357,6 @@
 #define __tg_real_remquo(x,y,z) (__RETCAST_2(x, y)( __FLT(x) && __FLT(y) ? remquof(x, y, z) : __LDBL((x)+(y)) ? remquol(x, y, z) : remquo(x, y, z) ))
 #define __tm_gmtoff tm_gmtoff
 #define __tm_zone tm_zone
-#define __ucontext ucontext
 #define __va_copy(d,s) __builtin_va_copy(d,s)
 #define __wasi__ 1
 #define __wasi_api_h 
@@ -6449,24 +6387,24 @@
 #define __wasilibc___macro_PAGESIZE_h 
 #define __wasilibc___mode_t_h 
 #define __wasilibc___seek_h 
-#define __wasilibc___struct_dirent_h
-#define __wasilibc___struct_group_filter_h
-#define __wasilibc___struct_group_req_h
-#define __wasilibc___struct_group_source_req_h
-#define __wasilibc___struct_if_addrs_h
-#define __wasilibc___struct_in6_addr_h
-#define __wasilibc___struct_in6_mtuinfo_h
-#define __wasilibc___struct_in6_pktinfo_h
-#define __wasilibc___struct_in_addr_h
-#define __wasilibc___struct_in_pktinfo_h
-#define __wasilibc___struct_iovec_h
-#define __wasilibc___struct_ip_mreq_h
-#define __wasilibc___struct_ip_mreq_source_h
-#define __wasilibc___struct_ip_mreqn_h
-#define __wasilibc___struct_ip_msfilter_h
-#define __wasilibc___struct_ip_opts_h
-#define __wasilibc___struct_ipv6_mreq_h
-#define __wasilibc___struct_msghdr_h
+#define __wasilibc___struct_dirent_h 
+#define __wasilibc___struct_group_filter_h 
+#define __wasilibc___struct_group_req_h 
+#define __wasilibc___struct_group_source_req_h 
+#define __wasilibc___struct_if_addrs_h 
+#define __wasilibc___struct_in6_addr_h 
+#define __wasilibc___struct_in6_mtuinfo_h 
+#define __wasilibc___struct_in6_pktinfo_h 
+#define __wasilibc___struct_in_addr_h 
+#define __wasilibc___struct_in_pktinfo_h 
+#define __wasilibc___struct_iovec_h 
+#define __wasilibc___struct_ip_mreq_h 
+#define __wasilibc___struct_ip_mreq_source_h 
+#define __wasilibc___struct_ip_mreqn_h 
+#define __wasilibc___struct_ip_msfilter_h 
+#define __wasilibc___struct_ip_opts_h 
+#define __wasilibc___struct_ipv6_mreq_h 
+#define __wasilibc___struct_msghdr_h 
 #define __wasilibc___struct_pollfd_h 
 #define __wasilibc___struct_rusage_h 
 #define __wasilibc___struct_sockaddr_h 
@@ -6507,20 +6445,10 @@
 #define __wasm__ 1
 #define __wasm_atomics__ 1
 #define __wasm_bulk_memory__ 1
-#define __wasm_mutable_globals__ 1
-#define __wasm_sign_ext__ 1
 #define _tolower(a) ((a)|0x20)
 #define _toupper(a) ((a)&0x5f)
 #define acos(x) __tg_real_complex(acos, (x))
 #define acosh(x) __tg_real_complex(acosh, (x))
-#define aio_cancel64 aio_cancel
-#define aio_error64 aio_error
-#define aio_fsync64 aio_fsync
-#define aio_read64 aio_read
-#define aio_return64 aio_return
-#define aio_suspend64 aio_suspend
-#define aio_write64 aio_write
-#define aiocb64 aiocb
 #define alignas _Alignas
 #define alignof _Alignof
 #define alloca __builtin_alloca
@@ -6673,7 +6601,6 @@
 #define letoh32(x) (uint32_t)(x)
 #define letoh64(x) (uint64_t)(x)
 #define lgamma(x) __tg_real(lgamma, (x))
-#define lio_listio64 lio_listio
 #define llrint(x) __tg_real_nocast(llrint, (x))
 #define llround(x) __tg_real_nocast(llround, (x))
 #define loff_t off_t
@@ -6769,36 +6696,11 @@
 #define rr_code rr_hdr.icmp6_code
 #define rr_seqnum rr_hdr.icmp6_data32[0]
 #define rr_type rr_hdr.icmp6_type
-#define sa_handler __sa_handler.sa_handler
-#define sa_sigaction __sa_handler.sa_sigaction
 #define scalbln(x,y) __tg_real_2_1(scalbln, (x), (y))
 #define scalbn(x,y) __tg_real_2_1(scalbn, (x), (y))
 #define scandir64 scandir
 #define setbit(x,i) __bitop(x,i,|=)
 #define setjmp setjmp
-#define si_addr __si_fields.__sigfault.si_addr
-#define si_addr_lsb __si_fields.__sigfault.si_addr_lsb
-#define si_arch __si_fields.__sigsys.si_arch
-#define si_band __si_fields.__sigpoll.si_band
-#define si_call_addr __si_fields.__sigsys.si_call_addr
-#define si_fd __si_fields.__sigpoll.si_fd
-#define si_int si_value.sival_int
-#define si_lower __si_fields.__sigfault.__first.__addr_bnd.si_lower
-#define si_overrun __si_fields.__si_common.__first.__timer.si_overrun
-#define si_pid __si_fields.__si_common.__first.__piduid.si_pid
-#define si_pkey __si_fields.__sigfault.__first.si_pkey
-#define si_ptr si_value.sival_ptr
-#define si_status __si_fields.__si_common.__second.__sigchld.si_status
-#define si_stime __si_fields.__si_common.__second.__sigchld.si_stime
-#define si_syscall __si_fields.__sigsys.si_syscall
-#define si_timerid __si_fields.__si_common.__first.__timer.si_timerid
-#define si_uid __si_fields.__si_common.__first.__piduid.si_uid
-#define si_upper __si_fields.__sigfault.__first.__addr_bnd.si_upper
-#define si_utime __si_fields.__si_common.__second.__sigchld.si_utime
-#define si_value __si_fields.__si_common.__second.si_value
-#define sigev_notify_attributes __sev_fields.__sev_thread.sigev_notify_attributes
-#define sigev_notify_function __sev_fields.__sev_thread.sigev_notify_function
-#define sigev_notify_thread_id __sev_fields.sigev_notify_thread_id
 #define signbit(x) (__builtin_signbit(x))
 #define sin(x) __tg_real_complex(sin, (x))
 #define sinh(x) __tg_real_complex(sinh, (x))

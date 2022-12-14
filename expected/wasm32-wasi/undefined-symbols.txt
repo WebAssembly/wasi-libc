@@ -150,7 +150,6 @@ __tls_size
 __trunctfdf2
 __trunctfsf2
 __unordtf2
-__wasilibc_pthread_self
 __wasm_call_ctors
 __wasm_init_tls
 main

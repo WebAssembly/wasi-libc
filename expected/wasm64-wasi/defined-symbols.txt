@@ -411,6 +411,7 @@ __wasi_futex_wake_all
 __wasi_getcwd
 __wasi_http_request
 __wasi_http_status
+__wasi_init_tp
 __wasi_path_create_directory
 __wasi_path_filestat_get
 __wasi_path_filestat_set_times
@@ -531,6 +532,7 @@ __wasilibc_nocwd_utimensat
 __wasilibc_open_nomode
 __wasilibc_pgrp
 __wasilibc_populate_preopens_init
+__wasilibc_pthread_self
 __wasilibc_register_preopened_fd
 __wasilibc_rename_newat
 __wasilibc_rename_oldat
@@ -1259,8 +1261,6 @@ pthread_attr_destroy
 pthread_attr_getdetachstate
 pthread_attr_getguardsize
 pthread_attr_getinheritsched
-pthread_attr_getschedparam
-pthread_attr_getschedpolicy
 pthread_attr_getscope
 pthread_attr_getstack
 pthread_attr_getstacksize
@@ -1288,7 +1288,6 @@ pthread_cond_signal
 pthread_cond_timedwait
 pthread_cond_wait
 pthread_condattr_destroy
-pthread_condattr_getclock
 pthread_condattr_getpshared
 pthread_condattr_init
 pthread_condattr_setclock

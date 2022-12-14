@@ -1,5 +1,7 @@
 _CLOCK_MONOTONIC
+_CLOCK_PROCESS_CPUTIME_ID
 _CLOCK_REALTIME
+_CLOCK_THREAD_CPUTIME_ID
 _Exit
 _Fork
 _IO_feof_unlocked
@@ -29,10 +31,10 @@ __c_locale
 __cancel
 __clock
 __clock_gettime
+__clock_nanosleep
 __clock_settime
 __clone
 __copy_tls
-__clock_nanosleep
 __cos
 __cosdf
 __cosl
@@ -62,6 +64,8 @@ __eintr_handler_lock
 __eintr_valid_flag
 __env_rm_add
 __errno_location
+__execvp
+__execvpe
 __exp2f_data
 __exp_data
 __expo2
@@ -407,6 +411,7 @@ __wasi_futex_wake_all
 __wasi_getcwd
 __wasi_http_request
 __wasi_http_status
+__wasi_init_tp
 __wasi_path_create_directory
 __wasi_path_filestat_get
 __wasi_path_filestat_set_times
@@ -485,6 +490,9 @@ __wasi_tty_get
 __wasi_tty_set
 __wasi_ws_connect
 __wasilibc_access
+__wasilibc_cwd
+__wasilibc_cwd_lock
+__wasilibc_cwd_unlock
 __wasilibc_deinitialize_environ
 __wasilibc_dttoif
 __wasilibc_ensure_environ
@@ -493,8 +501,10 @@ __wasilibc_environ_init
 __wasilibc_fd_renumber
 __wasilibc_find_abspath
 __wasilibc_find_relpath
+__wasilibc_find_relpath_alloc
 __wasilibc_futex_wait
-__wasilibc_futex_wake
+__wasilibc_futex_wait_wasix
+__wasilibc_futex_wake_wasix
 __wasilibc_get_environ
 __wasilibc_get_stack_pointer
 __wasilibc_get_tls_base
@@ -522,6 +532,7 @@ __wasilibc_nocwd_utimensat
 __wasilibc_open_nomode
 __wasilibc_pgrp
 __wasilibc_populate_preopens_init
+__wasilibc_pthread_self
 __wasilibc_register_preopened_fd
 __wasilibc_rename_newat
 __wasilibc_rename_oldat
@@ -658,6 +669,7 @@ cfsetispeed
 cfsetospeed
 cfsetspeed
 chdir
+chdir_legacy
 chmod
 cimag
 cimagf
@@ -913,6 +925,7 @@ getc_unlocked
 getchar
 getchar_unlocked
 getcwd
+getcwd_legacy
 getdate
 getdate_err
 getdelim
@@ -936,6 +949,7 @@ getline
 getopt
 getopt_long
 getopt_long_only
+getpagesize
 getpeername
 getpgid
 getpgrp
@@ -1247,8 +1261,6 @@ pthread_attr_destroy
 pthread_attr_getdetachstate
 pthread_attr_getguardsize
 pthread_attr_getinheritsched
-pthread_attr_getschedparam
-pthread_attr_getschedpolicy
 pthread_attr_getscope
 pthread_attr_getstack
 pthread_attr_getstacksize
@@ -1276,7 +1288,6 @@ pthread_cond_signal
 pthread_cond_timedwait
 pthread_cond_wait
 pthread_condattr_destroy
-pthread_condattr_getclock
 pthread_condattr_getpshared
 pthread_condattr_init
 pthread_condattr_setclock

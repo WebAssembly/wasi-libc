@@ -191,7 +191,7 @@ _Noreturn void __pthread_exit(void *result)
 		__tl_unlock();
 		free(self->map_base);
 		// Can't use `exit()` here, because it is too high level
-		for (;;) __wasi_proc_exit(0);
+		for (;;) __wasi_thread_exit();
 	}
 #endif
 
@@ -212,7 +212,7 @@ _Noreturn void __pthread_exit(void *result)
 	// do it manually here
 	__tl_unlock();
 	// Can't use `exit()` here, because it is too high level
-	for (;;) __wasi_proc_exit(0);
+	for (;;) __wasi_thread_exit();
 #endif
 }
 

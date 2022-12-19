@@ -668,4 +668,14 @@ int32_t __imported_wasi_thread_spawn(int32_t arg0) __attribute__((
 int32_t __wasi_thread_spawn(void* start_arg) {
     return __imported_wasi_thread_spawn((int32_t) start_arg);
 }
+
+_Noreturn void __imported_wasi_thread_exit(void) __attribute__((
+    __import_module__("wasi"),
+    __import_name__("thread_exit")
+));
+
+_Noreturn void __wasi_thread_exit(void)
+{
+    __imported_wasi_thread_exit();
+}
 #endif

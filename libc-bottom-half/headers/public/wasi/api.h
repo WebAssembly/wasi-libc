@@ -2106,6 +2106,10 @@ int32_t __wasi_thread_spawn(
      */
     void *start_arg
 )  __attribute__((__warn_unused_result__));
+/**
+ * Terminate the calling thread.
+ */
+_Noreturn void __wasi_thread_exit(void);
 #endif
 
 #ifdef __cplusplus

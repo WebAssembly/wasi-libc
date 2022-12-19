@@ -297,7 +297,17 @@ _Noreturn void wasi_thread_start(int tid, void *p)
 }
 #endif
 
+#ifdef __wasilibc_unmodified_upstream
 #define ROUND(x) (((x)+PAGE_SIZE-1)&-PAGE_SIZE)
+#else
+/*
+ * As we allocate stack with malloc() instead of mmap/mprotect,
+ * there is no point to round it up to PAGE_SIZE.
+ * Instead, round up to a sane alignment.
+ * Note: PAGE_SIZE is rather big on WASM. (65536)
+ */
+#define ROUND(x) (((x)+16-1)&-16)
+#endif
 
 /* pthread_key_create.c overrides this */
 static volatile size_t dummy = 0;

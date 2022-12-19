@@ -193,7 +193,6 @@ __progname
 __progname_full
 __pthread_cond_timedwait
 __pthread_create
-__pthread_exit
 __pthread_join
 __pthread_key_create
 __pthread_key_delete
@@ -1002,7 +1001,6 @@ pthread_condattr_setclock
 pthread_condattr_setpshared
 pthread_create
 pthread_detach
-pthread_exit
 pthread_getspecific
 pthread_join
 pthread_key_create

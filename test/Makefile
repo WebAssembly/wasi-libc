@@ -15,6 +15,10 @@ test: run
 # directory (keeping with the `wasi-libc` conventions).
 OBJDIR ?= $(CURDIR)/build
 DOWNDIR ?= $(CURDIR)/download
+# Like the top-level `wasi-libc` Makefile, here we can decide whether to test
+# with threads (`posix`) or without (`single`). IMPORTANT: the top-level include
+# directory must be built with the same value.
+THREAD_MODEL ?= single
 
 ##### DOWNLOAD #################################################################
 
@@ -90,6 +94,14 @@ TESTS := \
 	$(LIBC_TEST)/src/functional/wcsstr.c \
 	$(LIBC_TEST)/src/functional/wcstol.c
 
+ifeq ($(THREAD_MODEL), posix)
+	TESTS += \
+		$(LIBC_TEST)/src/functional/pthread_cond.c \
+		$(LIBC_TEST)/src/functional/pthread_tsd.c \
+		$(LIBC_TEST)/src/functional/tls_init.c \
+		$(LIBC_TEST)/src/functional/tls_local_exec.c
+endif
+
 # Part of the problem including more tests is that the `libc-test`
 # infrastructure code is not all Wasm-compilable. As we include more tests
 # above, this list will also likely need to grow.
@@ -116,23 +128,54 @@ ifeq ($(origin CC), default)
 CC := clang
 endif
 LDFLAGS ?=
-CFLAGS ?= --target=wasm32-wasi --sysroot=../sysroot
+CFLAGS ?= --sysroot=../sysroot
 # Always include the `libc-test` infrastructure headers.
 CFLAGS += -I$(LIBC_TEST)/src/common
+
+# Configure support for threads.
+ifeq ($(THREAD_MODEL), single)
+CFLAGS += --target=wasm32-wasi -mthread-model single
+endif
+ifeq ($(THREAD_MODEL), posix)
+# Specify the tls-model until LLVM 15 is released (which should contain
+# https://reviews.llvm.org/D130053).
+CFLAGS += --target=wasm32-wasi-pthread -mthread-model posix -pthread -ftls-model=local-exec
+# NOTE: `--export-memory` is invalid until https://reviews.llvm.org/D135898 is
+# available in a released version of `wasm-ld`; this has not happened yet so
+# a built-from-latest-source Clang is necessary.
+LDFLAGS += -Wl,--import-memory,--export-memory,--max-memory=1048576
+endif
+
+# We want to be careful to rebuild the Wasm files if any important variables
+# change. This block calculates a hash from key variables and writes a file
+# (ENV_HASH = `build/env-<hash>`); any targets dependent on `ENV_HASH` will thus
+# be rebuilt whenever `ENV_HASH` is modified, which is whenever `ENV` changes.
+# The phony `env` target can be used to debug this.
+ENV = "CC=$(CC);CFLAGS=$(CFLAGS);LDFLAGS=$(LDFLAGS);THREAD_MODEL=$(THREAD_MODEL)"
+export ENV
+ENV_HASH = $(OBJDIR)/env-$(shell echo $(ENV) | md5sum | cut -d ' ' -f 1)
+$(ENV_HASH): | $(OBJDIRS)
+	rm -f $(OBJDIR)/env-*
+	echo $(ENV) > $@
+env: $(ENV_HASH)
+	@echo ENV = "$$ENV"
+	@echo ENV_HASH = $(ENV_HASH)
+	cat $^
+.PHONY: env
 
 # Compile each selected test using Clang. Note that failures here are likely
 # due to a missing `libclang_rt.builtins-wasm32.a` in the Clang lib directory.
 # This location is system-dependent, but could be fixed by something like:
 #  $ sudo mkdir /usr/lib64/clang/14.0.5/lib/wasi
 #  $ sudo cp download/lib/wasi/libclang_rt.builtins-wasm32.a /usr/lib64/clang/14.0.5/lib/wasi/
-build: download $(WASMS)
+build: download $(WASMS) $(ENV_HASH)
 
 $(WASMS): | $(OBJDIRS)
-$(OBJDIR)/%.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ 
+$(OBJDIR)/%.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS) $(ENV_HASH)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(filter-out $(ENV_HASH), $^) 
 
 $(WASM_OBJS): $(LIBC_TEST)/src/common/test.h | $(OBJDIRS)
-$(OBJDIR)/%.wasm.o: $(LIBC_TEST)/src/%.c
+$(OBJDIR)/%.wasm.o: $(LIBC_TEST)/src/%.c $(ENV_HASH)
 	$(CC) $(CFLAGS) -c -o $@ $< 
 
 $(OBJDIRS):
@@ -144,6 +187,7 @@ clean::
 ##### RUN ######################################################################
 
 ENGINE ?= $(WASMTIME) run
+ENGINE_FLAGS ?= --wasm-features threads --wasi-modules experimental-wasi-threads
 ERRS:=$(WASMS:%.wasm=%.wasm.err)
 
 # Use the provided Wasm engine to execute each test, emitting its output into
@@ -154,7 +198,7 @@ run: build $(ERRS)
 $(ERRS): | $(OBJDIRS)
 
 %.wasm.err: %.wasm
-	$(ENGINE) $< >$@
+	$(ENGINE) $(ENGINE_FLAGS) $<
 
 clean::
 	rm -rf $(OBJDIR)/*/*.err

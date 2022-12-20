@@ -45,9 +45,14 @@ void _start(void) {
     // Call atexit functions, destructors, stdio cleanup, etc.
     __wasm_call_dtors();
 
+#ifdef _REENTRANT
+    // `__wasi_proc_exit` terminates sibling threads.
+    __wasi_proc_exit(r);
+#else
     // If main exited successfully, just return, otherwise call
     // `__wasi_proc_exit`.
     if (r != 0) {
         __wasi_proc_exit(r);
     }
+#endif
 }

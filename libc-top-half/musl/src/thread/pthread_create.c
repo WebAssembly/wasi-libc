@@ -60,7 +60,11 @@ void __tl_sync(pthread_t td)
 	if (tl_lock_waiters) __wake(&__thread_list_lock, 1, 0);
 }
 
+#ifdef __wasilibc_unmodified_upstream
 _Noreturn void __pthread_exit(void *result)
+#else
+static void __pthread_exit(void *result)
+#endif
 {
 	pthread_t self = __pthread_self();
 	sigset_t set;
@@ -191,7 +195,7 @@ _Noreturn void __pthread_exit(void *result)
 		__tl_unlock();
 		free(self->map_base);
 		// Can't use `exit()` here, because it is too high level
-		for (;;) __wasi_proc_exit(0);
+		return;
 	}
 #endif
 
@@ -212,7 +216,6 @@ _Noreturn void __pthread_exit(void *result)
 	// do it manually here
 	__tl_unlock();
 	// Can't use `exit()` here, because it is too high level
-	for (;;) __wasi_proc_exit(0);
 #endif
 }
 
@@ -272,7 +275,7 @@ static int start_c11(void *p)
 }
 #else
 __attribute__((export_name("wasi_thread_start")))
-_Noreturn void wasi_thread_start(int tid, void *p)
+void wasi_thread_start(int tid, void *p)
 {
 	struct start_args *args = p;
   	__asm__(".globaltype __tls_base, i32\n"
@@ -570,5 +573,7 @@ fail:
 	return EAGAIN;
 }
 
+#ifdef __wasilibc_unmodified_upstream
 weak_alias(__pthread_exit, pthread_exit);
+#endif
 weak_alias(__pthread_create, pthread_create);

@@ -192,8 +192,7 @@ _Noreturn void __pthread_exit(void *result)
 		// do it manually here
 		__tl_unlock();
 		free(self->map_base);
-		// Can't use `exit()` here, because it is too high level
-		for (;;) __wasi_proc_exit(0);
+		for (;;) __wasi_thread_exit(0);
 	}
 #endif
 
@@ -213,7 +212,6 @@ _Noreturn void __pthread_exit(void *result)
 	// __syscall(SYS_exit) would unlock the thread, list
 	// do it manually here
 	__tl_unlock();
-	// Can't use `exit()` here, because it is too high level
 	for (;;) __wasi_thread_exit(0);
 #endif
 }
@@ -274,7 +272,7 @@ static int start_c11(void *p)
 }
 #else
 __attribute__((export_name("wasi_thread_start")))
-_Noreturn void wasi_thread_start(int tid, void *p)
+void wasi_thread_start(int tid, void *p)
 {
 	struct start_args *args = p;
   	__asm__(".globaltype __tls_base, i32\n"

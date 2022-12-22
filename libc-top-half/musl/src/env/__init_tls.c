@@ -5,6 +5,8 @@
 #include <limits.h>
 #ifdef __wasilibc_unmodified_upstream
 #include <sys/mman.h>
+#else
+#include <stdlib.h>
 #endif
 #include <string.h>
 #include <stddef.h>
@@ -53,7 +55,29 @@ static inline void setup_default_stack_size()
 			stack_size : DEFAULT_STACK_MAX;
 }
 
+static uintptr_t round_up(uintptr_t p, uintptr_t align)
+{
+	return (p + align - 1) & (-align);
+}
+
+extern void __wasm_init_tls(void*);
+
+static void __wasi_init_tls() {
+	size_t size = __builtin_wasm_tls_size();
+	if (size == 0) {
+		return;
+	}
+	size_t align = __builtin_wasm_tls_align();
+	size = round_up(size, align);
+	void *tls = aligned_alloc(align, size);
+	if (tls == NULL) {
+		a_crash();
+	}
+	__wasm_init_tls(tls);
+}
+
 void __wasi_init_tp() {
+	__wasi_init_tls();
 	__init_tp((void *)__get_tp());
 }
 #endif
@@ -88,10 +112,6 @@ static struct builtin_tls {
 #define MIN_TLS_ALIGN offsetof(struct builtin_tls, pt)
 
 static struct tls_module main_tls;
-#endif
-
-#ifndef __wasilibc_unmodified_upstream
-extern void __wasm_init_tls(void*);
 #endif
 
 void *__copy_tls(unsigned char *mem)

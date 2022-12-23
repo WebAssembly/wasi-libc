@@ -274,6 +274,11 @@ static int start_c11(void *p)
 __attribute__((export_name("wasi_thread_start")))
 void wasi_thread_start(int tid, void *p)
 {
+	/*
+	 * Note: it's fragile to implement wasi_thread_start in C.
+	 * On entry, we don't even have C stack (__stack_pointer)
+	 * set up. Be careful when modifying this function.
+	 */
 	struct start_args *args = p;
   	__asm__(".globaltype __tls_base, i32\n"
 			"local.get %0\n"

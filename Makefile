@@ -20,7 +20,7 @@ MALLOC_IMPL ?= dlmalloc
 # yes or no
 BUILD_LIBC_TOP_HALF ?= yes
 # The directory where we will store intermediate artifacts.
-OBJDIR ?= $(CURDIR)/build
+OBJDIR ?= $(CURDIR)/build/$(TARGET_TRIPLE)
 
 # When the length is no larger than this threshold, we consider the
 # overhead of bulk memory opcodes to outweigh the performance benefit,

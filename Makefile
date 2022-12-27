@@ -251,6 +251,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_condattr_setpshared.c \
         thread/pthread_create.c \
         thread/pthread_detach.c \
+        thread/pthread_equal.c \
         thread/pthread_getspecific.c \
         thread/pthread_join.c \
         thread/pthread_key_create.c \

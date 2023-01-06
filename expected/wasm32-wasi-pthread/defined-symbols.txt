@@ -46,6 +46,7 @@ __do_cleanup_pop
 __do_cleanup_push
 __do_des
 __do_orphaned_stdio_locks
+__dummy_reference
 __duplocale
 __env_rm_add
 __errno_location
@@ -354,6 +355,7 @@ __wasi_sock_recv
 __wasi_sock_send
 __wasi_sock_shutdown
 __wasi_thread_spawn
+__wasi_thread_start_C
 __wasilibc_access
 __wasilibc_cwd
 __wasilibc_cwd_lock

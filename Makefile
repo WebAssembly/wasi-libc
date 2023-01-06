@@ -294,6 +294,7 @@ LIBC_TOP_HALF_ALL_SOURCES = \
 CFLAGS = $(EXTRA_CFLAGS)
 # Set the target.
 CFLAGS += --target=$(TARGET_TRIPLE)
+ASMFLAGS += --target=$(TARGET_TRIPLE)
 # WebAssembly floating-point match doesn't trap.
 # TODO: Add -fno-signaling-nans when the compiler supports it.
 CFLAGS += -fno-trapping-math
@@ -521,7 +522,7 @@ $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
 
 $(OBJDIR)/%.o: $(CURDIR)/%.s include_dirs
 	@mkdir -p "$(@D)"
-	$(CC) -o $@ -c $<
+	$(CC) $(ASMFLAGS) -o $@ -c $<
 
 -include $(shell find $(OBJDIR) -name \*.d)
 

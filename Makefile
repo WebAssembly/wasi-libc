@@ -293,6 +293,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/sem_timedwait.c \
         thread/sem_trywait.c \
         thread/sem_wait.c \
+        thread/wasm32/wasi_thread_start.s \
     )
 endif
 
@@ -311,12 +312,13 @@ LIBC_TOP_HALF_HEADERS_PRIVATE = $(LIBC_TOP_HALF_DIR)/headers/private
 LIBC_TOP_HALF_SOURCES = $(LIBC_TOP_HALF_DIR)/sources
 LIBC_TOP_HALF_ALL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SOURCES) \
-    $(sort $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.c))
+    $(sort $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.[cs]))
 
 # Add any extra flags
 CFLAGS = $(EXTRA_CFLAGS)
 # Set the target.
 CFLAGS += --target=$(TARGET_TRIPLE)
+ASMFLAGS += --target=$(TARGET_TRIPLE)
 # WebAssembly floating-point match doesn't trap.
 # TODO: Add -fno-signaling-nans when the compiler supports it.
 CFLAGS += -fno-trapping-math
@@ -363,10 +365,11 @@ CFLAGS += -isystem "$(SYSROOT_INC)"
 # These variables describe the locations of various files and directories in
 # the build tree.
 objs = $(patsubst $(CURDIR)/%.c,$(OBJDIR)/%.o,$(1))
+asmobjs = $(patsubst $(CURDIR)/%.s,$(OBJDIR)/%.o,$(1))
 DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 EMMALLOC_OBJS = $(call objs,$(EMMALLOC_SOURCES))
 LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
-LIBC_TOP_HALF_ALL_OBJS = $(call objs,$(LIBC_TOP_HALF_ALL_SOURCES))
+LIBC_TOP_HALF_ALL_OBJS = $(call asmobjs,$(call objs,$(LIBC_TOP_HALF_ALL_SOURCES)))
 ifeq ($(MALLOC_IMPL),dlmalloc)
 LIBC_OBJS += $(DLMALLOC_OBJS)
 else ifeq ($(MALLOC_IMPL),emmalloc)
@@ -523,6 +526,10 @@ $(OBJDIR)/%.no-floating-point.o: $(CURDIR)/%.c include_dirs
 $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
+
+$(OBJDIR)/%.o: $(CURDIR)/%.s include_dirs
+	@mkdir -p "$(@D)"
+	$(CC) $(ASMFLAGS) -o $@ -c $<
 
 -include $(shell find $(OBJDIR) -name \*.d)
 

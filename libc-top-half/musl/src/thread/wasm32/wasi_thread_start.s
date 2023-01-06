@@ -3,6 +3,7 @@
 	.export_name	wasi_thread_start, wasi_thread_start
 
 	.globaltype	__stack_pointer, i32
+	.globaltype	__tls_base, i32
 	.functype	__wasi_thread_start_C (i32, i32) -> ()
 
 	.hidden	wasi_thread_start
@@ -17,6 +18,10 @@ wasi_thread_start:
 	local.get   1  # start_arg
 	i32.load    0  # stack
 	global.set  __stack_pointer
+
+	local.get   1  # start_arg
+	i32.load    4  # tls_base
+	global.set  __tls_base
 
 	# Make the C function do the rest of work.
 	local.get   0  # tid

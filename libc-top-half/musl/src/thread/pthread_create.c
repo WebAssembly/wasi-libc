@@ -239,13 +239,13 @@ struct start_args {
 	unsigned long sig_mask[_NSIG/8/sizeof(long)];
 #else
 	/*
-	 * Note: the offset of the "stack" member in this structure is
-	 * hardcoded in wasi_thread_start.
+	 * Note: the offset of the "stack" and "tls_base" members
+	 * in this structure is hardcoded in wasi_thread_start.
 	 */
 	void *stack;
+	void *tls_base;
 	void *(*start_func)(void *);
 	void *start_arg;
-	void *tls_base;
 #endif
 };
 
@@ -292,10 +292,6 @@ hidden void *__dummy_reference = wasi_thread_start;
 hidden void __wasi_thread_start_C(int tid, void *p)
 {
 	struct start_args *args = p;
-  	__asm__(".globaltype __tls_base, i32\n"
-			"local.get %0\n"
-			"global.set __tls_base\n"
-			:: "r"(args->tls_base));
 	pthread_t self = __pthread_self();
 	// Set the thread ID (TID) on the pthread structure. The TID is stored
 	// atomically since it is also stored by the parent thread; this way,

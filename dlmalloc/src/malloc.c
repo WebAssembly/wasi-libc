@@ -5222,8 +5222,20 @@ static void try_init_allocator(void) {
   assert(!is_initialized(gm));
 
   char *base = (char *)&__heap_base;
-  /* Calls sbrk(0) that returns the initial memory position. */
-  char *init = (char *)CALL_MORECORE(0);
+  // Round up `base` to the nearest `PAGESIZE`. The initial size of linear
+  // memory will be at least the heap base to this page boundary, and it's then
+  // assumed that the initial linear memory image was truncated at that point.
+  // While this reflects the default behavior of `wasm-ld` it is also possible
+  // for users to craft larger linear memories by passing options to extend
+  // beyond this threshold. In this situation the memory will not be used for
+  // dlmalloc.
+  //
+  // Note that `sbrk(0)`, or in dlmalloc-ese `CALL_MORECORE(0)`, is specifically
+  // not used here. That captures the current size of the heap but is only
+  // correct if the we're the first to try to grow the heap. If the heap has
+  // grown elsewhere, such as a different allocator in place, then this would
+  // incorrectly claim such memroy as our own.
+  char *init = (char*) (((size_t) base + PAGESIZE - 1) & ~(PAGESIZE - 1));
   int initial_heap_size = init - base;
 
   /* Check that initial heap is long enough to serve a minimal allocation request. */

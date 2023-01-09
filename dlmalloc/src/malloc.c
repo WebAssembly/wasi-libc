@@ -5214,15 +5214,18 @@ static void internal_inspect_all(mstate m,
 /* ------------------ Exported try_init_allocator -------------------- */
 
 /* Symbol marking the end of data, bss and explicit stack, provided by wasm-ld. */
-extern unsigned char __heap_base;
+extern char __heap_base;
+extern char __heap_end __attribute__((__weak__));
 
 /* Initialize the initial state of dlmalloc to be able to use free memory between __heap_base and initial. */
 static void try_init_allocator(void) {
   /* Check that it is a first-time initialization. */
   assert(!is_initialized(gm));
 
-  char *base = (char *)&__heap_base;
-  // Round up `base` to the nearest `PAGESIZE`. The initial size of linear
+  char *base = &__heap_base;
+  // Try to use the linker pseudo-symbol `__heap_end` for the initial size of
+  // the heap, but if that's not defined due to LLVM being too old perhaps then
+  // round up `base` to the nearest `PAGESIZE`. The initial size of linear
   // memory will be at least the heap base to this page boundary, and it's then
   // assumed that the initial linear memory image was truncated at that point.
   // While this reflects the default behavior of `wasm-ld` it is also possible
@@ -5235,7 +5238,9 @@ static void try_init_allocator(void) {
   // correct if the we're the first to try to grow the heap. If the heap has
   // grown elsewhere, such as a different allocator in place, then this would
   // incorrectly claim such memroy as our own.
-  char *init = (char*) (((size_t) base + PAGESIZE - 1) & ~(PAGESIZE - 1));
+  char *init = &__heap_end;
+  if (init == NULL)
+    init = (char*) (((size_t) base + PAGESIZE - 1) & ~(PAGESIZE - 1));
   int initial_heap_size = init - base;
 
   /* Check that initial heap is long enough to serve a minimal allocation request. */

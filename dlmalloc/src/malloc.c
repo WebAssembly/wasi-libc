@@ -5222,6 +5222,9 @@ static void try_init_allocator(void) {
   /* Check that it is a first-time initialization. */
   assert(!is_initialized(gm));
 
+  /* Initialize mstate. */
+  ensure_initialization();
+
   char *base = &__heap_base;
   // Try to use the linker pseudo-symbol `__heap_end` for the initial size of
   // the heap, but if that's not defined due to LLVM being too old perhaps then
@@ -5247,9 +5250,6 @@ static void try_init_allocator(void) {
   if (initial_heap_size <= MIN_CHUNK_SIZE + TOP_FOOT_SIZE + MALLOC_ALIGNMENT) {
     return;
   }
-
-  /* Initialize mstate. */
-  ensure_initialization();
 
   /* Initialize the dlmalloc internal state. */
   gm->least_addr = base;

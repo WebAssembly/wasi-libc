@@ -5238,10 +5238,10 @@ static void try_init_allocator(void) {
   // correct if the we're the first to try to grow the heap. If the heap has
   // grown elsewhere, such as a different allocator in place, then this would
   // incorrectly claim such memroy as our own.
-  char *init = &__heap_end;
-  if (init == NULL)
-    init = (char*) (((size_t) base + PAGESIZE - 1) & ~(PAGESIZE - 1));
-  int initial_heap_size = init - base;
+  char *end = &__heap_end;
+  if (end == NULL)
+    end = (char*) page_align((size_t) base);
+  size_t initial_heap_size = end - base;
 
   /* Check that initial heap is long enough to serve a minimal allocation request. */
   if (initial_heap_size <= MIN_CHUNK_SIZE + TOP_FOOT_SIZE + MALLOC_ALIGNMENT) {

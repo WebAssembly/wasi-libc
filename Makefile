@@ -8,7 +8,8 @@ NM ?= $(patsubst %clang,%llvm-nm,$(filter-out ccache sccache,$(CC)))
 ifeq ($(origin AR), default)
 AR = $(patsubst %clang,%llvm-ar,$(filter-out ccache sccache,$(CC)))
 endif
-EXTRA_CFLAGS ?= -O2 -DNDEBUG
+DEFAULT_EXTRA_CFLAGS = -O2 -DNDEBUG
+EXTRA_CFLAGS ?= $(DEFAULT_EXTRA_CFLAGS)
 # The directory where we build the sysroot.
 SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
@@ -269,7 +270,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/sem_timedwait.c \
         thread/sem_trywait.c \
         thread/sem_wait.c \
-        thread/wasm32/wasi_thread_start.s \
+        thread/wasm32/wasi_thread_start.S \
     )
 endif
 
@@ -341,7 +342,7 @@ CFLAGS += -isystem "$(SYSROOT_INC)"
 # These variables describe the locations of various files and directories in
 # the build tree.
 objs = $(patsubst $(CURDIR)/%.c,$(OBJDIR)/%.o,$(1))
-asmobjs = $(patsubst $(CURDIR)/%.s,$(OBJDIR)/%.o,$(1))
+asmobjs = $(patsubst $(CURDIR)/%.S,$(OBJDIR)/%.o,$(1))
 DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 EMMALLOC_OBJS = $(call objs,$(EMMALLOC_SOURCES))
 LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
@@ -520,7 +521,7 @@ $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
-$(OBJDIR)/%.o: $(CURDIR)/%.s include_dirs
+$(OBJDIR)/%.o: $(CURDIR)/%.S include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(ASMFLAGS) -o $@ -c $<
 
@@ -704,9 +705,13 @@ check-symbols: startup_files libc
 	    | grep -v '^#define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_\(1\|2\|4\|8\)' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
 
+	# Only verify metadata for default set of extra cflags; otherwise, it
+	# most likely won't match.
+ifeq ($(EXTRA_CFLAGS),$(DEFAULT_EXTRA_CFLAGS))
 	# Check that the computed metadata matches the expected metadata.
 	# This ignores whitespace because on Windows the output has CRLF line endings.
 	diff -wur "$(CURDIR)/expected/$(TARGET_TRIPLE)" "$(SYSROOT_SHARE)"
+endif
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"

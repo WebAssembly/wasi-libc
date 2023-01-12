@@ -671,8 +671,6 @@ check-symbols: startup_files libc
 	@# its builtin include path first, which produces compiler-specific
 	@# output.
 	@#
-	@# TODO: Undefine __FLOAT128__ for now since it's not in clang 8.0.
-	@# TODO: Filter out __FLT16_* for now, as not all versions of clang have these.
 	@# TODO: Filter out __NO_MATH_ERRNO_ and a few __*WIDTH__ that are new to clang 14.
 	@# TODO: Filter out __GCC_HAVE_SYNC_COMPARE_AND_SWAP_* that are new to clang 16.
 	@# TODO: clang defined __FLT_EVAL_METHOD__ until clang 15, so we force-undefine it
@@ -699,13 +697,11 @@ check-symbols: startup_files libc
 	    -U__GNUC_MINOR__ \
 	    -U__GNUC_PATCHLEVEL__ \
 	    -U__VERSION__ \
-	    -U__FLOAT128__ \
 	    -U__NO_MATH_ERRNO__ \
 	    -U__BITINT_MAXWIDTH__ \
 	    -U__FLT_EVAL_METHOD__ -Wno-builtin-macro-redefined \
 	    | sed -e 's/__[[:upper:][:digit:]]*_ATOMIC_\([[:upper:][:digit:]_]*\)_LOCK_FREE/__compiler_ATOMIC_\1_LOCK_FREE/' \
 	    | sed -e 's/__GNUC_VA_LIST $$/__GNUC_VA_LIST 1/' \
-	    | grep -v '^#define __FLT16_' \
 	    | grep -v '^#define __\(BOOL\|INT_\(LEAST\|FAST\)\(8\|16\|32\|64\)\|INT\|LONG\|LLONG\|SHRT\)_WIDTH__' \
 	    | grep -v '^#define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_\(1\|2\|4\|8\)' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"

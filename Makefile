@@ -210,6 +210,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_attr_get.c \
         thread/pthread_attr_init.c \
         thread/pthread_attr_setstack.c \
+        thread/pthread_attr_setdetachstate.c \
         thread/pthread_attr_setstacksize.c \
         thread/pthread_barrier_destroy.c \
         thread/pthread_barrier_init.c \

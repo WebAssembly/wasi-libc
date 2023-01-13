@@ -38,7 +38,7 @@ TARGET_TRIPLE = wasm32-wasi
 # Threaded version necessitates a different traget, as objects from different
 # targets can't be mixed together while linking.
 ifeq ($(THREAD_MODEL), posix)
-TARGET_TRIPLE = wasm32-wasi-pthread
+TARGET_TRIPLE = wasm32-wasi-threads
 endif
 
 # These variables describe the locations of various files and directories in

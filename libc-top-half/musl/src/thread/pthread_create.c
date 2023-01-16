@@ -351,6 +351,9 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	void* new_tls_base;
 	size_t tls_offset;
 	tls_size += tls_align;
+	uint8_t is_error;
+	uint32_t tid;
+	uint8_t error;
 #endif
 
 #ifdef __wasilibc_unmodified_upstream
@@ -516,7 +519,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	 * of the current module and start executing the entry function. The
 	 * wasi-threads specification requires the module to export a
 	 * `wasi_thread_start` function, which is invoked with `args`. */
-	ret = __wasi_thread_spawn((void *) args);
+	is_error = __wasi_thread_spawn((void *) args, &error, &tid);
 #endif
 
 #ifdef __wasilibc_unmodified_upstream
@@ -542,10 +545,15 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	 * did succeed, then we store the TID atomically, since this parent thread
 	 * is racing with the child thread to set this field; this way, whichever
 	 * thread reaches this point first can continue without waiting. */
-	if (ret < 0) {
+	if (is_error) {
+		/*
+		 * At this point EAGAIN is the only defined error in wasi-threads.
+		 * when the list grows, maybe we should convert errno.
+		 */
 		ret = -EAGAIN;
 	} else {
-		atomic_store((atomic_int *) &(new->tid), ret);
+		atomic_store((atomic_int *) &(new->tid), (int)tid);
+        ret = 0;
 	}
 #endif
 

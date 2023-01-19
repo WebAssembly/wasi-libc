@@ -11,6 +11,7 @@ __floatunsitf
 __getf2
 __gttf2
 __heap_base
+__heap_end
 __imported_wasi_snapshot_preview1_args_get
 __imported_wasi_snapshot_preview1_args_sizes_get
 __imported_wasi_snapshot_preview1_clock_res_get

@@ -286,6 +286,11 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_setcancelstate.c \
         thread/pthread_setspecific.c \
         thread/pthread_self.c \
+        thread/pthread_spin_destroy.c \
+        thread/pthread_spin_init.c \
+        thread/pthread_spin_lock.c \
+        thread/pthread_spin_trylock.c \
+        thread/pthread_spin_unlock.c \
         thread/pthread_testcancel.c \
         thread/sem_destroy.c \
         thread/sem_getvalue.c \

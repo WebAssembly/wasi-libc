@@ -8,7 +8,7 @@
 // If the program does use `environ`, it'll get this version of
 // `__wasilibc_environ`, which is initialized with a constructor function, so
 // that it's initialized whenever user code might want to access it.
-char **__wasilibc_environ;
+char **__wasilibc_environ = (char **)-1;
 weak_alias(__wasilibc_environ, _environ);
 weak_alias(__wasilibc_environ, environ);
 
@@ -20,12 +20,12 @@ weak_alias(__wasilibc_environ, environ);
 // reserved things to go before or after.
 __attribute__((constructor(50)))
 static void __wasilibc_initialize_environ_eagerly(void) {
-    __wasilibc_initialize_environ();
+    __wasilibc_ensure_environ();
 }
 
 // See the comments in libc-environ.h.
 void __wasilibc_maybe_reinitialize_environ_eagerly(void) {
     // This translation unit is linked in if `environ` is used, meaning we need
     // to eagerly reinitialize the environment variables.
-    __wasilibc_initialize_environ();
+    __wasilibc_ensure_environ();
 }

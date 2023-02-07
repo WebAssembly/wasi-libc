@@ -239,11 +239,14 @@ struct start_args {
 	unsigned long sig_mask[_NSIG/8/sizeof(long)];
 #else
 	/*
-	 * Note: the offset of the "stack" and "tls_base" members
+	 * Note: the offset of the "stack", "stack_limit" and "tls_base" members
 	 * in this structure is hardcoded in wasi_thread_start.
 	 */
 	void *stack;
 	void *tls_base;
+#ifndef NDEBUG
+	void *stack_limit;
+#endif
 	void *(*start_func)(void *);
 	void *start_arg;
 #endif
@@ -501,7 +504,12 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	/* Correct the stack size */
 	new->stack_size = stack - stack_limit;
 
-	args->stack = new->stack; /* just for convenience of asm trampoline */
+	/* just for convenience of asm trampoline */
+	args->stack = new->stack;
+#ifndef NDEBUG
+	args->stack_limit = stack_limit;
+#endif
+
 	args->start_func = entry;
 	args->start_arg = arg;
 	args->tls_base = (void*)new_tls_base;

@@ -98,6 +98,13 @@ jobs:
       shell: bash
       run: make -j4 THREAD_MODEL=posix
 
+    - name: Build libc + threads in debug mode
+      # There are features like stack boundary exposure that
+      # only compile in debug mode (i.e. when NDEBUG is not defined).
+      if: matrix.clang_version != '10.0.0'
+      shell: bash
+      run: make -j4 THREAD_MODEL=posix EXTRA_CFLAGS=
+
   # Disable the headerstest job for now, while WASI transitions from the
   # witx snapshots to wit proposals, and we have a few manual edits to the
   # generated header to make life easier for folks.

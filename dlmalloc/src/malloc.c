@@ -5233,6 +5233,8 @@ static void try_init_allocator(void) {
     // This can happen when 1. you are using an old wasm-ld which doesn't
     // provide `__heap_end` and 2. something (other libraries or maybe
     // your app?) provide a weak reference to `__heap_end`.
+    //
+    // Note: This is a linker bug: https://github.com/llvm/llvm-project/issues/60829
     return;
   }
   size_t initial_heap_size = end - base;

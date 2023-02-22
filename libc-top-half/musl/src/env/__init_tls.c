@@ -47,10 +47,9 @@ static inline void setup_default_stack_size()
 		stack_size = sp > &__global_base ? &__heap_base - &__data_end : (ptrdiff_t)&__global_base;
 	}
 
-	if (stack_size > __default_stacksize)
-		__default_stacksize =
-			stack_size < DEFAULT_STACK_MAX ?
-			stack_size : DEFAULT_STACK_MAX;
+	__default_stacksize =
+		stack_size < DEFAULT_STACK_MAX ?
+		stack_size : DEFAULT_STACK_MAX;
 }
 
 void __wasi_init_tp() {

@@ -20,7 +20,7 @@ MALLOC_IMPL ?= dlmalloc
 # yes or no
 BUILD_LIBC_TOP_HALF ?= yes
 # The directory where we will store intermediate artifacts.
-OBJDIR ?= $(CURDIR)/build/$(TARGET_TRIPLE)
+OBJDIR ?= build/$(TARGET_TRIPLE)
 
 # When the length is no larger than this threshold, we consider the
 # overhead of bulk memory opcodes to outweigh the performance benefit,
@@ -40,13 +40,13 @@ MULTIARCH_TRIPLE = $(TARGET_ARCH)-wasi
 
 # These variables describe the locations of various files and directories in
 # the source tree.
-DLMALLOC_DIR = $(CURDIR)/dlmalloc
+DLMALLOC_DIR = dlmalloc
 DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
 DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/dlmalloc.c
 DLMALLOC_INC = $(DLMALLOC_DIR)/include
-EMMALLOC_DIR = $(CURDIR)/emmalloc
+EMMALLOC_DIR = emmalloc
 EMMALLOC_SOURCES = $(EMMALLOC_DIR)/emmalloc.c
-LIBC_BOTTOM_HALF_DIR = $(CURDIR)/libc-bottom-half
+LIBC_BOTTOM_HALF_DIR = libc-bottom-half
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC = $(LIBC_BOTTOM_HALF_DIR)/cloudlibc/src
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC = $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/include
 LIBC_BOTTOM_HALF_HEADERS_PUBLIC = $(LIBC_BOTTOM_HALF_DIR)/headers/public
@@ -73,7 +73,7 @@ LIBWASI_EMULATED_GETPID_SOURCES = \
 LIBWASI_EMULATED_SIGNAL_SOURCES = \
     $(sort $(shell find $(LIBC_BOTTOM_HALF_DIR)/signal -name \*.c))
 LIBC_BOTTOM_HALF_CRT_SOURCES = $(wildcard $(LIBC_BOTTOM_HALF_DIR)/crt/*.c)
-LIBC_TOP_HALF_DIR = $(CURDIR)/libc-top-half
+LIBC_TOP_HALF_DIR = libc-top-half
 LIBC_TOP_HALF_MUSL_DIR = $(LIBC_TOP_HALF_DIR)/musl
 LIBC_TOP_HALF_MUSL_SRC_DIR = $(LIBC_TOP_HALF_MUSL_DIR)/src
 LIBC_TOP_HALF_MUSL_INC = $(LIBC_TOP_HALF_MUSL_DIR)/include
@@ -370,8 +370,8 @@ CFLAGS += -isystem "$(SYSROOT_INC)"
 
 # These variables describe the locations of various files and directories in
 # the build tree.
-objs = $(patsubst $(CURDIR)/%.c,$(OBJDIR)/%.o,$(1))
-asmobjs = $(patsubst $(CURDIR)/%.s,$(OBJDIR)/%.o,$(1))
+objs = $(patsubst %.c,$(OBJDIR)/%.o,$(1))
+asmobjs = $(patsubst %.s,$(OBJDIR)/%.o,$(1))
 DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 EMMALLOC_OBJS = $(call objs,$(EMMALLOC_SOURCES))
 LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
@@ -399,6 +399,7 @@ LIBWASI_EMULATED_MMAN_OBJS = $(call objs,$(LIBWASI_EMULATED_MMAN_SOURCES))
 LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS = $(call objs,$(LIBWASI_EMULATED_PROCESS_CLOCKS_SOURCES))
 LIBWASI_EMULATED_GETPID_OBJS = $(call objs,$(LIBWASI_EMULATED_GETPID_SOURCES))
 LIBWASI_EMULATED_SIGNAL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_SOURCES))
+LIBC_BOTTOM_HALF_CRT_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_CRT_SOURCES))
 
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
@@ -521,19 +522,19 @@ $(BULK_MEMORY_OBJS): CFLAGS += \
 $(BULK_MEMORY_OBJS): CFLAGS += \
         -DBULK_MEMORY_THRESHOLD=$(BULK_MEMORY_THRESHOLD)
 
-$(OBJDIR)/%.long-double.o: $(CURDIR)/%.c include_dirs
+$(OBJDIR)/%.long-double.o: %.c include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
-$(OBJDIR)/%.no-floating-point.o: $(CURDIR)/%.c include_dirs
-	@mkdir -p "$(@D)"	
-	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
-
-$(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
+$(OBJDIR)/%.no-floating-point.o: %.c include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
-$(OBJDIR)/%.o: $(CURDIR)/%.s include_dirs
+$(OBJDIR)/%.o: %.c include_dirs
+	@mkdir -p "$(@D)"
+	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
+
+$(OBJDIR)/%.o: %.s include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(ASMFLAGS) -o $@ -c $<
 
@@ -589,15 +590,12 @@ include_dirs:
 	# Remove selected header files.
 	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
 
-startup_files: include_dirs
+startup_files: include_dirs $(LIBC_BOTTOM_HALF_CRT_OBJS)
 	#
-	# Build the startup files.
+	# Install the startup files (crt1.o etc).
 	#
-	@mkdir -p "$(OBJDIR)"
-	cd "$(OBJDIR)" && \
-	$(CC) $(CFLAGS) -c $(LIBC_BOTTOM_HALF_CRT_SOURCES) -MD -MP && \
 	mkdir -p "$(SYSROOT_LIB)" && \
-	mv *.o "$(SYSROOT_LIB)"
+	cp $(LIBC_BOTTOM_HALF_CRT_OBJS) "$(SYSROOT_LIB)"
 
 libc: include_dirs \
     $(SYSROOT_LIB)/libc.a \
@@ -714,7 +712,7 @@ check-symbols: startup_files libc
 
 	# Check that the computed metadata matches the expected metadata.
 	# This ignores whitespace because on Windows the output has CRLF line endings.
-	diff -wur "$(CURDIR)/expected/$(TARGET_TRIPLE)" "$(SYSROOT_SHARE)"
+	diff -wur "expected/$(TARGET_TRIPLE)" "$(SYSROOT_SHARE)"
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"

@@ -500,13 +500,13 @@ $(SYSROOT_LIB)/libwasi-emulated-getpid.a: $(LIBWASI_EMULATED_GETPID_OBJS)
 %.a:
 	@mkdir -p "$(@D)"
 	# On Windows, the commandline for the ar invocation got too long, so it needs to be split up.
-	$(AR) crs $@ $(wordlist 1, 199, $^)
-	$(AR) crs $@ $(wordlist 200, 399, $^)
-	$(AR) crs $@ $(wordlist 400, 599, $^)
-	$(AR) crs $@ $(wordlist 600, 799, $^)
+	$(AR) crs $@ $(wordlist 1, 199, $(sort $^))
+	$(AR) crs $@ $(wordlist 200, 399, $(sort $^))
+	$(AR) crs $@ $(wordlist 400, 599, $(sort $^))
+	$(AR) crs $@ $(wordlist 600, 799, $(sort $^))
 	# This might eventually overflow again, but at least it'll do so in a loud way instead of
 	# silently dropping the tail.
-	$(AR) crs $@ $(wordlist 800, 100000, $^)
+	$(AR) crs $@ $(wordlist 800, 100000, $(sort $^))
 
 $(MUSL_PRINTSCAN_OBJS): CFLAGS += \
 	    -D__wasilibc_printscan_full_support_option="\"add -lc-printscan-long-double to the link command\""

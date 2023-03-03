@@ -124,39 +124,6 @@ _Static_assert(offsetof(__wasi_hugesize_t, b0) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_hugesize_t, b1) == 8, "witx calculated offset");
 
 /**
- * Represents a part of the stack (128 bytes)
- */
-typedef struct __wasi_stack_part_t {
-    __wasi_hugesize_t a1;
-
-    __wasi_hugesize_t a2;
-
-    __wasi_hugesize_t a3;
-
-    __wasi_hugesize_t a4;
-
-    __wasi_hugesize_t a5;
-
-    __wasi_hugesize_t a6;
-
-    __wasi_hugesize_t a7;
-
-    __wasi_hugesize_t a8;
-
-} __wasi_stack_part_t;
-
-_Static_assert(sizeof(__wasi_stack_part_t) == 128, "witx calculated size");
-_Static_assert(_Alignof(__wasi_stack_part_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_stack_part_t, a1) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_part_t, a2) == 16, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_part_t, a3) == 32, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_part_t, a4) == 48, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_part_t, a5) == 64, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_part_t, a6) == 80, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_part_t, a7) == 96, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_part_t, a8) == 112, "witx calculated offset");
-
-/**
  * Represents the first 128 bits of a SHA256 hash
  */
 typedef struct __wasi_hash_t {
@@ -627,6 +594,16 @@ typedef uint16_t __wasi_errno_t;
  * Cannot send after socket shutdown.
  */
 #define __WASI_ERRNO_SHUTDOWN (UINT16_C(77))
+
+/**
+ * Memory access violation.
+ */
+#define __WASI_ERRNO_MEMVIOLATION (UINT16_C(78))
+
+/**
+ * Unknown error has occurred.
+ */
+#define __WASI_ERRNO_UNKNOWN (UINT16_C(79))
 
 _Static_assert(sizeof(__wasi_errno_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_errno_t) == 2, "witx calculated align");

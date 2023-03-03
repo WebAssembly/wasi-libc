@@ -83,5 +83,7 @@ static_assert(ESTALE == __WASI_ERRNO_STALE, "Value mismatch");
 static_assert(ETIMEDOUT == __WASI_ERRNO_TIMEDOUT, "Value mismatch");
 static_assert(ETXTBSY == __WASI_ERRNO_TXTBSY, "Value mismatch");
 static_assert(EXDEV == __WASI_ERRNO_XDEV, "Value mismatch");
+static_assert(EMEMVIOLATION == __WASI_ERRNO_MEMVIOLATION, "Value mismatch");
+static_assert(EUNKNOWN == __WASI_ERRNO_UNKNOWN, "Value mismatch");
 
 thread_local int errno = 0;

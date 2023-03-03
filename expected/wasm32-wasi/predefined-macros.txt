@@ -4910,7 +4910,9 @@
 #define WSTOPSIG(s) WEXITSTATUS(s)
 #define WTERMSIG(s) ((s) & 0x7f)
 #define WUNTRACED 2
+#define W_EXITCODE(ret,sig) __W_EXITCODE (ret, sig)
 #define W_OK (2)
+#define W_STOPCODE(sig) __W_STOPCODE (sig)
 #define XCASE 0000004
 #define XTABS 0014000
 #define X_OK (1)
@@ -5982,8 +5984,12 @@
 #define __WASI_FSTFLAGS_ATIM_NOW ((__wasi_fstflags_t)(1 << 1))
 #define __WASI_FSTFLAGS_MTIM ((__wasi_fstflags_t)(1 << 2))
 #define __WASI_FSTFLAGS_MTIM_NOW ((__wasi_fstflags_t)(1 << 3))
-#define __WASI_JOINFLAGS_NON_BLOCKING ((__wasi_joinflags_t)(1 << 0))
-#define __WASI_JOINFLAGS_WAKE_STOPPED ((__wasi_joinflags_t)(1 << 1))
+#define __WASI_JOIN_FLAGS_NON_BLOCKING ((__wasi_join_flags_t)(1 << 0))
+#define __WASI_JOIN_FLAGS_WAKE_STOPPED ((__wasi_join_flags_t)(1 << 1))
+#define __WASI_JOIN_STATUS_TYPE_EXIT_NORMAL (UINT8_C(1))
+#define __WASI_JOIN_STATUS_TYPE_EXIT_SIGNAL (UINT8_C(2))
+#define __WASI_JOIN_STATUS_TYPE_NOTHING (UINT8_C(0))
+#define __WASI_JOIN_STATUS_TYPE_STOPPED (UINT8_C(3))
 #define __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW ((__wasi_lookupflags_t)(1 << 0))
 #define __WASI_OFLAGS_CREAT ((__wasi_oflags_t)(1 << 0))
 #define __WASI_OFLAGS_DIRECTORY ((__wasi_oflags_t)(1 << 1))
@@ -6389,6 +6395,9 @@
 #define __WINT_WIDTH__ 32
 #define __WNOTHREAD 0x20000000
 #define __WORDSIZE 64
+#define __W_CONTINUED 0xffff
+#define __W_EXITCODE(ret,sig) ((ret) << 8 | (sig))
+#define __W_STOPCODE(sig) ((sig) << 8 | 0x7f)
 #define __alignas_is_defined 1
 #define __alignof_is_defined 1
 #define __bitop(x,i,o) ((x)[(i)/8] o (1<<(i)%8))

@@ -103,14 +103,6 @@ _Static_assert(sizeof(__wasi_short_hash_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_short_hash_t) == 8, "witx calculated align");
 
 /**
- * Status code returned by proc_join
- */
-typedef uint32_t __wasi_join_status_t;
-
-_Static_assert(sizeof(__wasi_join_status_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_join_status_t) == 4, "witx calculated align");
-
-/**
  * Represents a 128bit number
  */
 typedef struct __wasi_hugesize_t {
@@ -941,6 +933,21 @@ _Static_assert(sizeof(__wasi_option_cid_t) == 16, "witx calculated size");
 _Static_assert(_Alignof(__wasi_option_cid_t) == 8, "witx calculated align");
 
 /**
+ * Represents an optional process ID
+ */
+typedef union __wasi_option_pid_u_t {
+    uint8_t none;
+    __wasi_pid_t some;
+} __wasi_option_pid_u_t;
+typedef struct __wasi_option_pid_t {
+    uint8_t tag;
+    __wasi_option_pid_u_t u;
+} __wasi_option_pid_t;
+
+_Static_assert(sizeof(__wasi_option_pid_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_option_pid_t) == 4, "witx calculated align");
+
+/**
  * Represents an optional file descriptior
  */
 typedef union __wasi_option_fd_u_t {
@@ -1294,21 +1301,6 @@ typedef uint16_t __wasi_fstflags_t;
  * Adjust the last data modification timestamp to the time of clock `clockid::realtime`.
  */
 #define __WASI_FSTFLAGS_MTIM_NOW ((__wasi_fstflags_t)(1 << 3))
-
-/**
- * join flags.
- */
-typedef uint32_t __wasi_joinflags_t;
-
-/**
- * Non-blocking join on the process
- */
-#define __WASI_JOINFLAGS_NON_BLOCKING ((__wasi_joinflags_t)(1 << 0))
-
-/**
- * Wake on stop
- */
-#define __WASI_JOINFLAGS_WAKE_STOPPED ((__wasi_joinflags_t)(1 << 1))
 
 /**
  * Flags determining the method of how paths are resolved.
@@ -3572,6 +3564,87 @@ _Static_assert(sizeof(__wasi_prestat_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
 
 /**
+ * join flags.
+ */
+typedef uint32_t __wasi_join_flags_t;
+
+/**
+ * Non-blocking join on the process
+ */
+#define __WASI_JOIN_FLAGS_NON_BLOCKING ((__wasi_join_flags_t)(1 << 0))
+
+/**
+ * Return if a process is stopped
+ */
+#define __WASI_JOIN_FLAGS_WAKE_STOPPED ((__wasi_join_flags_t)(1 << 1))
+
+/**
+ * What has happened with the proccess when we joined on it
+ */
+typedef uint8_t __wasi_join_status_type_t;
+
+/**
+ * Nothing has happened
+ */
+#define __WASI_JOIN_STATUS_TYPE_NOTHING (UINT8_C(0))
+
+/**
+ * The process has exited by a normal exit code
+ */
+#define __WASI_JOIN_STATUS_TYPE_EXIT_NORMAL (UINT8_C(1))
+
+/**
+ * The process was terminated by a signal
+ */
+#define __WASI_JOIN_STATUS_TYPE_EXIT_SIGNAL (UINT8_C(2))
+
+/**
+ * The process was stopped by a signal and can be resumed with SIGCONT
+ */
+#define __WASI_JOIN_STATUS_TYPE_STOPPED (UINT8_C(3))
+
+_Static_assert(sizeof(__wasi_join_status_type_t) == 1, "witx calculated size");
+_Static_assert(_Alignof(__wasi_join_status_type_t) == 1, "witx calculated align");
+
+/**
+ * Represents an errno and a signal
+ */
+typedef struct __wasi_errno_signal_t {
+    /**
+     * The exit code that was returned
+     */
+    __wasi_errno_t exit_code;
+
+    /**
+     * The signal that was returned
+     */
+    __wasi_signal_t signal;
+
+} __wasi_errno_signal_t;
+
+_Static_assert(sizeof(__wasi_errno_signal_t) == 4, "witx calculated size");
+_Static_assert(_Alignof(__wasi_errno_signal_t) == 2, "witx calculated align");
+_Static_assert(offsetof(__wasi_errno_signal_t, exit_code) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_errno_signal_t, signal) == 2, "witx calculated offset");
+
+/**
+ * join status.
+ */
+typedef union __wasi_join_status_u_t {
+    uint8_t nothing;
+    __wasi_errno_t exit_normal;
+    __wasi_errno_signal_t exit_signal;
+    __wasi_signal_t stopped;
+} __wasi_join_status_u_t;
+typedef struct __wasi_join_status_t {
+    uint8_t tag;
+    __wasi_join_status_u_t u;
+} __wasi_join_status_t;
+
+_Static_assert(sizeof(__wasi_join_status_t) == 6, "witx calculated size");
+_Static_assert(_Alignof(__wasi_join_status_t) == 2, "witx calculated align");
+
+/**
  * @defgroup wasix_32v1
  * @{
  */
@@ -4645,11 +4718,11 @@ __wasi_errno_t __wasi_proc_join(
     /**
      * ID of the process to wait on
      */
-    __wasi_pid_t * pid,
+    __wasi_option_pid_t * pid,
     /**
      * Flags that determine how the join behaves
      */
-    __wasi_joinflags_t flags,
+    __wasi_join_flags_t flags,
     __wasi_join_status_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**

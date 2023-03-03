@@ -40,7 +40,7 @@ struct __libc {
 	size_t page_size;
 #endif
 	struct __locale_struct global_locale;
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
+#if defined(__wasilibc_unmodified_upstream) && defined(_REENTRANT)
 #else
 	struct __locale_struct *current_locale;
 #endif

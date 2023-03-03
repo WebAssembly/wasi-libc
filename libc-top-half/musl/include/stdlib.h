@@ -108,6 +108,13 @@ size_t __ctype_get_mb_cur_max(void);
 #define WIFSTOPPED(s) ((short)((((s)&0xffff)*0x10001)>>8) > 0x7f00)
 #define WIFSIGNALED(s) (((s)&0xffff)-1U < 0xffu)
 
+/* Macros for constructing status values.  */
+#define __W_EXITCODE(ret, sig)        ((ret) << 8 | (sig))
+#define __W_STOPCODE(sig)        ((sig) << 8 | 0x7f)
+#define __W_CONTINUED                0xffff
+#define W_EXITCODE(ret, sig)	__W_EXITCODE (ret, sig)
+#define W_STOPCODE(sig)	__W_STOPCODE (sig)
+
 int posix_memalign (void **, size_t, size_t);
 int setenv (const char *, const char *, int);
 int unsetenv (const char *);

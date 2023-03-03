@@ -1063,8 +1063,8 @@ int32_t __imported_wasix_32v1_proc_join(int32_t arg0, int32_t arg1, int32_t arg2
 ));
 
 __wasi_errno_t __wasi_proc_join(
-    __wasi_pid_t * pid,
-    __wasi_joinflags_t flags,
+    __wasi_option_pid_t * pid,
+    __wasi_join_flags_t flags,
     __wasi_join_status_t *retptr0
 ){
     int32_t ret = __imported_wasix_32v1_proc_join((int32_t) pid, flags, (intptr_t) retptr0);

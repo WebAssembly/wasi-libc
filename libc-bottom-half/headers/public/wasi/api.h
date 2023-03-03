@@ -25,13 +25,13 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(intptr_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(uintptr_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == 8, "non-wasi data layout");
-typedef int64_t __wasi_int_t;
-typedef uint64_t __wasi_uint_t;
-_Static_assert(_Alignof(__wasi_int_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(__wasi_uint_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(intptr_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(uintptr_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
+typedef int32_t __wasi_int_t;
+typedef uint32_t __wasi_uint_t;
+_Static_assert(_Alignof(__wasi_int_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(__wasi_uint_t) == 4, "non-wasi data layout");
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -43,8 +43,8 @@ extern "C" {
  */
 typedef __wasi_uint_t __wasi_pointersize_t;
 
-_Static_assert(sizeof(__wasi_pointersize_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_pointersize_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_pointersize_t) == 4, "witx calculated size");
+_Static_assert(_Alignof(__wasi_pointersize_t) == 4, "witx calculated align");
 
 /**
  * Represents a number of items
@@ -101,6 +101,14 @@ typedef uint64_t __wasi_short_hash_t;
 
 _Static_assert(sizeof(__wasi_short_hash_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_short_hash_t) == 8, "witx calculated align");
+
+/**
+ * Status code returned by proc_join
+ */
+typedef uint32_t __wasi_join_status_t;
+
+_Static_assert(sizeof(__wasi_join_status_t) == 4, "witx calculated size");
+_Static_assert(_Alignof(__wasi_join_status_t) == 4, "witx calculated align");
 
 /**
  * Represents a 128bit number
@@ -975,10 +983,10 @@ typedef struct __wasi_iovec_t {
 
 } __wasi_iovec_t;
 
-_Static_assert(sizeof(__wasi_iovec_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_iovec_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_iovec_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_iovec_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_iovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 4, "witx calculated offset");
 
 /**
  * A region of memory for scatter/gather writes.
@@ -996,10 +1004,10 @@ typedef struct __wasi_ciovec_t {
 
 } __wasi_ciovec_t;
 
-_Static_assert(sizeof(__wasi_ciovec_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_ciovec_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_ciovec_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_ciovec_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_ciovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 4, "witx calculated offset");
 
 /**
  * Relative offset within a file.
@@ -1286,6 +1294,21 @@ typedef uint16_t __wasi_fstflags_t;
  * Adjust the last data modification timestamp to the time of clock `clockid::realtime`.
  */
 #define __WASI_FSTFLAGS_MTIM_NOW ((__wasi_fstflags_t)(1 << 3))
+
+/**
+ * join flags.
+ */
+typedef uint32_t __wasi_joinflags_t;
+
+/**
+ * Non-blocking join on the process
+ */
+#define __WASI_JOINFLAGS_NON_BLOCKING ((__wasi_joinflags_t)(1 << 0))
+
+/**
+ * Wake on stop
+ */
+#define __WASI_JOINFLAGS_WAKE_STOPPED ((__wasi_joinflags_t)(1 << 1))
 
 /**
  * Flags determining the method of how paths are resolved.
@@ -2164,94 +2187,100 @@ typedef uint8_t __wasi_signal_t;
 #define __WASI_SIGNAL_TERM (UINT8_C(15))
 
 /**
+ * Stkflt
+ * Action: Ignored.
+ */
+#define __WASI_SIGNAL_STKFLT (UINT8_C(16))
+
+/**
  * Child process terminated, stopped, or continued.
  * Action: Ignored.
  */
-#define __WASI_SIGNAL_CHLD (UINT8_C(16))
+#define __WASI_SIGNAL_CHLD (UINT8_C(17))
 
 /**
  * Continue executing, if stopped.
  * Action: Continues executing, if stopped.
  */
-#define __WASI_SIGNAL_CONT (UINT8_C(17))
+#define __WASI_SIGNAL_CONT (UINT8_C(18))
 
 /**
  * Stop executing.
  * Action: Stops executing.
  */
-#define __WASI_SIGNAL_STOP (UINT8_C(18))
+#define __WASI_SIGNAL_STOP (UINT8_C(19))
 
 /**
  * Terminal stop signal.
  * Action: Stops executing.
  */
-#define __WASI_SIGNAL_TSTP (UINT8_C(19))
+#define __WASI_SIGNAL_TSTP (UINT8_C(20))
 
 /**
  * Background process attempting read.
  * Action: Stops executing.
  */
-#define __WASI_SIGNAL_TTIN (UINT8_C(20))
+#define __WASI_SIGNAL_TTIN (UINT8_C(21))
 
 /**
  * Background process attempting write.
  * Action: Stops executing.
  */
-#define __WASI_SIGNAL_TTOU (UINT8_C(21))
+#define __WASI_SIGNAL_TTOU (UINT8_C(22))
 
 /**
  * High bandwidth data is available at a socket.
  * Action: Ignored.
  */
-#define __WASI_SIGNAL_URG (UINT8_C(22))
+#define __WASI_SIGNAL_URG (UINT8_C(23))
 
 /**
  * CPU time limit exceeded.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_XCPU (UINT8_C(23))
+#define __WASI_SIGNAL_XCPU (UINT8_C(24))
 
 /**
  * File size limit exceeded.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_XFSZ (UINT8_C(24))
+#define __WASI_SIGNAL_XFSZ (UINT8_C(25))
 
 /**
  * Virtual timer expired.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_VTALRM (UINT8_C(25))
+#define __WASI_SIGNAL_VTALRM (UINT8_C(26))
 
 /**
  * Profiling timer expired.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_PROF (UINT8_C(26))
+#define __WASI_SIGNAL_PROF (UINT8_C(27))
 
 /**
  * Window changed.
  * Action: Ignored.
  */
-#define __WASI_SIGNAL_WINCH (UINT8_C(27))
+#define __WASI_SIGNAL_WINCH (UINT8_C(28))
 
 /**
  * I/O possible.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_POLL (UINT8_C(28))
+#define __WASI_SIGNAL_POLL (UINT8_C(29))
 
 /**
  * Power failure.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_PWR (UINT8_C(29))
+#define __WASI_SIGNAL_PWR (UINT8_C(30))
 
 /**
  * Bad system call.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_SYS (UINT8_C(30))
+#define __WASI_SIGNAL_SYS (UINT8_C(31))
 
 _Static_assert(sizeof(__wasi_signal_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_signal_t) == 1, "witx calculated align");
@@ -3543,7 +3572,7 @@ _Static_assert(sizeof(__wasi_prestat_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
 
 /**
- * @defgroup wasix_64v1
+ * @defgroup wasix_32v1
  * @{
  */
 
@@ -4610,14 +4639,18 @@ __wasi_errno_t __wasi_proc_parent(
 /**
  * Wait for process to exit
  * @return
- * Returns the exit code of the process
+ * Returns the status of the process
  */
 __wasi_errno_t __wasi_proc_join(
     /**
      * ID of the process to wait on
      */
     __wasi_pid_t * pid,
-    __wasi_exitcode_t *retptr0
+    /**
+     * Flags that determine how the join behaves
+     */
+    __wasi_joinflags_t flags,
+    __wasi_join_status_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Sends a signal to a process

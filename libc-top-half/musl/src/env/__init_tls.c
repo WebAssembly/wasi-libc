@@ -43,11 +43,19 @@ static inline void setup_default_stack_size()
 		stack_size = &__stack_high - &__stack_low;
 	else {
 		unsigned char *sp;
+#if defined(__wasm64__)
+		__asm__(
+			".globaltype __stack_pointer, i64\n"
+			"global.get __stack_pointer\n"
+			"local.set %0\n"
+			: "=r"(sp));
+#else
 		__asm__(
 			".globaltype __stack_pointer, i32\n"
 			"global.get __stack_pointer\n"
 			"local.set %0\n"
 			: "=r"(sp));
+#endif
 		stack_size = sp > &__global_base ? &__heap_base - &__data_end : (ptrdiff_t)&__global_base;
 	}
 

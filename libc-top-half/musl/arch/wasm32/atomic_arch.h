@@ -1,5 +1,6 @@
 #define a_pre_llsc() (__sync_synchronize())
 #define a_post_llsc() (__sync_synchronize())
+
 #define a_barrier() (__sync_synchronize())
 #define a_cas(p, t, s) (__sync_val_compare_and_swap((p), (t), (s)))
 #define a_cas_p(p, t, s) (__sync_val_compare_and_swap((p), (t), (s)))

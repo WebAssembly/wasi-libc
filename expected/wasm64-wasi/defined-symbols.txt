@@ -57,6 +57,7 @@ __do_cleanup_pop
 __do_cleanup_push
 __do_des
 __do_orphaned_stdio_locks
+__dummy_reference
 __duplocale
 __eintr_handler_lock
 __eintr_valid_flag
@@ -482,6 +483,7 @@ __wasi_thread_parallelism
 __wasi_thread_signal
 __wasi_thread_sleep
 __wasi_thread_spawn
+__wasi_thread_start_C
 __wasi_tty_get
 __wasi_tty_set
 __wasi_ws_connect

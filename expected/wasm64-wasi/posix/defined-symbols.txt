@@ -63,6 +63,7 @@ __duplocale
 __eintr_handler_lock
 __eintr_valid_flag
 __env_rm_add
+__errno_location
 __execvp
 __execvpe
 __exp2f_data

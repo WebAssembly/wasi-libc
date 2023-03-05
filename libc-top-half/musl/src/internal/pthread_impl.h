@@ -225,8 +225,7 @@ extern hidden unsigned __default_guardsize;
 #ifdef __wasilibc_unmodified_upstream
 #define DEFAULT_GUARD_SIZE 8192
 #else
-/* guard doesn't make much sense without mprotect. */
-#define DEFAULT_GUARD_SIZE 0
+#define DEFAULT_GUARD_SIZE 4096
 #endif
 
 #define DEFAULT_STACK_MAX (8<<20)

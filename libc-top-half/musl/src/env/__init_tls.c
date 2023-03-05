@@ -106,11 +106,7 @@ void *__copy_tls(unsigned char *mem)
 #endif
 }
 
-<<<<<<< HEAD
-
-=======
 #ifdef __wasilibc_unmodified_upstream
->>>>>>> a00bf32 (threads: implement init of TLS and stack pointer (#342))
 #if ULONG_MAX == 0xffffffff
 typedef Elf32_Phdr Phdr;
 #else
@@ -193,9 +189,6 @@ void __init_tls(size_t *aux)
 	if (__init_tp(__copy_tls(mem)) < 0)
 		a_crash();
 }
-<<<<<<< HEAD
-=======
 
 weak_alias(static_init_tls, __init_tls);
 #endif
->>>>>>> a00bf32 (threads: implement init of TLS and stack pointer (#342))

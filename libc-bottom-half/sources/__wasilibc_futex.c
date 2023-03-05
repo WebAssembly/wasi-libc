@@ -2,21 +2,27 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
-void __wasilibc_futex_wait(int* futex, int expected) {
+int __wasilibc_futex_wait_wasix(volatile void *futex, int op, int expected, int64_t max_wait_ns) {
   __wasi_bool_t woken = __WASI_BOOL_FALSE;
   
   __wasi_option_timestamp_t timeout;
-  timeout.tag = __WASI_OPTION_NONE;
-  timeout.u.none = 0;
+  if (max_wait_ns > 0) {
+    timeout.tag = __WASI_OPTION_SOME;
+    timeout.u.none = max_wait_ns;
+  } else {
+    timeout.tag = __WASI_OPTION_NONE;
+    timeout.u.none = 0;
+  }
 
   for (;woken == __WASI_BOOL_FALSE;) {
     if (__wasi_futex_wait((uint32_t*)futex, expected, &timeout, &woken) != 0) {
       __builtin_trap();
     }
   }
+  return 0;
 }
 
-void __wasilibc_futex_wake(int* futex, int cnt) {
+int __wasilibc_futex_wake_wasix(int* futex, int cnt) {
   __wasi_bool_t woken = __WASI_BOOL_FALSE;
   for (;woken == __WASI_BOOL_FALSE;) {
     if (cnt == INT_MAX) {
@@ -31,4 +37,5 @@ void __wasilibc_futex_wake(int* futex, int cnt) {
       }
     }
   }
+  return 0;
 }

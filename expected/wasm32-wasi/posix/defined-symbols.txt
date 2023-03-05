@@ -504,7 +504,8 @@ __wasilibc_find_abspath
 __wasilibc_find_relpath
 __wasilibc_find_relpath_alloc
 __wasilibc_futex_wait
-__wasilibc_futex_wake
+__wasilibc_futex_wait_wasix
+__wasilibc_futex_wake_wasix
 __wasilibc_get_environ
 __wasilibc_get_stack_pointer
 __wasilibc_get_tls_base
@@ -1318,6 +1319,10 @@ pthread_mutex_timedlock
 pthread_mutex_trylock
 pthread_mutex_unlock
 pthread_mutexattr_destroy
+pthread_mutexattr_getprotocol
+pthread_mutexattr_getpshared
+pthread_mutexattr_getrobust
+pthread_mutexattr_gettype
 pthread_mutexattr_init
 pthread_mutexattr_setprotocol
 pthread_mutexattr_setpshared

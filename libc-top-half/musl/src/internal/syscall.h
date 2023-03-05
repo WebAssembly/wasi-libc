@@ -1,4 +1,3 @@
-#ifdef __wasilibc_unmodified_upstream
 #ifndef _INTERNAL_SYSCALL_H
 #define _INTERNAL_SYSCALL_H
 
@@ -397,9 +396,7 @@ static inline long __alt_socketcall(int sys, int sock, int cp, long a, long b, l
 hidden void __procfdname(char __buf[static 15+3*sizeof(int)], unsigned);
 
 hidden void *__vdsosym(const char *, const char *);
-
 #else
 hidden long __syscall_ret(unsigned long);
-#endif
 #endif
 #endif

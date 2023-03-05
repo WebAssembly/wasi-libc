@@ -499,7 +499,8 @@ __wasilibc_fd_renumber
 __wasilibc_find_abspath
 __wasilibc_find_relpath
 __wasilibc_futex_wait
-__wasilibc_futex_wake
+__wasilibc_futex_wait_wasix
+__wasilibc_futex_wake_wasix
 __wasilibc_get_environ
 __wasilibc_get_stack_pointer
 __wasilibc_get_tls_base

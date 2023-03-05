@@ -8,9 +8,8 @@
 #endif
 #include <string.h>
 #include <stddef.h>
-#ifdef __wasilibc_unmodified_upstream
+#ifndef __wasilibc_unmodified_upstream
 #include <stdatomic.h>
-#else
 #include <wasi/api.h>
 #include <bits/signal.h>
 #endif
@@ -166,20 +165,16 @@ _Noreturn void __pthread_exit(void *result)
 		/* Detached threads must block even implementation-internal
 		 * signals, since they will not have a stack in their last
 		 * moments of existence. */
-#ifdef __wasilibc_unmodified_upstream
 		__block_all_sigs(&set);
-#endif
 
 		/* Robust list will no longer be valid, and was already
 		 * processed above, so unregister it with the kernel. */
-#ifdef __wasilibc_unmodified_upstream
 		if (self->robust_list.off)
 			__syscall(SYS_set_robust_list, 0, 3*sizeof(long));
 
 		/* The following call unmaps the thread's stack mapping
 		 * and then exits without touching the stack. */
 		__unmapself(self->map_base, self->map_size);
-#endif
 	}
 #endif
 
@@ -237,8 +232,6 @@ static int start(void *p)
 #ifdef __wasilibc_unmodified_upstream
 			__syscall(SYS_set_tid_address, &args->control);
 			for (;;) __syscall(SYS_exit, 0);
-#else
-			for (;;) __wasi_thread_exit(0);
 #endif
 		}
 	}
@@ -280,19 +273,15 @@ int wasi_thread_start(int tid, void *p)
 #define ROUND(x) (((x)+PAGE_SIZE-1)&-PAGE_SIZE)
 
 /* pthread_key_create.c overrides this */
-#ifdef __wasilibc_unmodified_upstream
 static volatile size_t dummy = 0;
 weak_alias(dummy, __pthread_tsd_size);
 static void *dummy_tsd[1] = { 0 };
 weak_alias(dummy_tsd, __pthread_tsd_main);
-#endif
 
 static FILE *volatile dummy_file = 0;
-#ifdef __wasilibc_unmodified_upstream
 weak_alias(dummy_file, __stdin_used);
 weak_alias(dummy_file, __stdout_used);
 weak_alias(dummy_file, __stderr_used);
-#endif
 
 static void init_file_lock(FILE *f)
 {
@@ -384,9 +373,6 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 			stack = tsd - libc.tls_size;
 			stack_limit = map + guard;
 		}
-#else
-		goto fail;
-#endif
 	}
 
 	new = __copy_tls(tsd - libc.tls_size);
@@ -421,9 +407,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	/* Application signals (but not the synccall signal) must be
 	 * blocked before the thread list lock can be taken, to ensure
 	 * that the lock is AS-safe. */
-#ifdef __wasilibc_unmodified_upstream
 	__block_app_sigs(&set);
-#endif
 
 	/* Ensure SIGCANCEL is unblocked in new thread. This requires
 	 * working with a copy of the set so we can restore the
@@ -446,7 +430,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	 * of the current module and start executing the entry function. The
 	 * wasi-threads specification requires the module to export a
 	 * `wasi_thread_start` function, which is invoked with `args`. */
-	ret = __wasi_thread_spawn((void *) args);
+    ret = __wasi_thread_spawn((void *) args);
 #endif
 
 #ifdef __wasilibc_unmodified_upstream
@@ -457,16 +441,12 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	if (ret < 0) {
 		ret = -EAGAIN;
 	} else if (attr._a_sched) {
-#ifdef __wasilibc_unmodified_upstream
 		ret = __syscall(SYS_sched_setscheduler,
 			new->tid, attr._a_policy, &attr._a_prio);
 		if (a_swap(&args->control, ret ? 3 : 0)==2)
 			__wake(&args->control, 1, 1);
 		if (ret)
 			__wait(&args->control, 0, 3, 0);
-#else
-		ret = -EINVAL;
-#endif
 	}
 #else
 	/* `wasi_thread_spawn` will either return a host-provided thread ID (TID)
@@ -500,11 +480,8 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	if (ret < 0) {
 #ifdef __wasilibc_unmodified_upstream
 		if (map) __munmap(map, size);
-<<<<<<< HEAD
-=======
 #else
 		free(map);
->>>>>>> 241060c (threads: implement `pthread_create` (#325))
 #endif
 		return -ret;
 	}

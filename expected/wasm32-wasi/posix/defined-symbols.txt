@@ -54,7 +54,6 @@ __daylight
 __default_guardsize
 __default_stacksize
 __des_setkey
-__dl_thread_cleanup
 __dlerror_lockptr
 __do_cleanup_pop
 __do_cleanup_push
@@ -201,7 +200,6 @@ __math_uflow
 __math_uflowf
 __math_xflow
 __math_xflowf
-__membarrier_init
 __memrchr
 __mkostemps
 __mo_lookup

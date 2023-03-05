@@ -739,19 +739,16 @@ void __wasi_callback_thread_local_destroy(
     __imported_wasix_32v1_callback_thread_local_destroy((intptr_t) callback, (intptr_t) callback_len);
 }
 
-int32_t __imported_wasix_32v1_thread_spawn(int64_t arg0, int64_t arg1, int64_t arg2, int32_t arg3, int32_t arg4) __attribute__((
+int32_t __imported_wasix_32v1_thread_spawn(int32_t arg0, int32_t arg1) __attribute__((
     __import_module__("wasix_32v1"),
     __import_name__("thread_spawn")
 ));
 
 __wasi_errno_t __wasi_thread_spawn(
-    uint64_t user_data,
-    uint64_t stack_base,
-    uint64_t stack_start,
-    __wasi_bool_t reactor,
+    __wasi_thread_start_t * args,
     __wasi_tid_t *retptr0
 ){
-    int32_t ret = __imported_wasix_32v1_thread_spawn((int64_t) user_data, (int64_t) stack_base, (int64_t) stack_start, (int32_t) reactor, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_32v1_thread_spawn((int32_t) args, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 

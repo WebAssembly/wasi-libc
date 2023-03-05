@@ -3645,6 +3645,147 @@ _Static_assert(sizeof(__wasi_join_status_t) == 6, "witx calculated size");
 _Static_assert(_Alignof(__wasi_join_status_t) == 2, "witx calculated align");
 
 /**
+ * thread state flags.
+ */
+typedef uint16_t __wasi_thread_flags_t;
+
+/**
+ * tsd_used
+ */
+#define __WASI_THREAD_FLAGS_TSD_USED ((__wasi_thread_flags_t)(1 << 0))
+
+/**
+ * dlerror_flag
+ */
+#define __WASI_THREAD_FLAGS_DLERROR_FLAG ((__wasi_thread_flags_t)(1 << 1))
+
+/**
+ * represents the state of a thread
+ */
+typedef struct __wasi_thread_state_t {
+    __wasi_pointersize_t thread_self;
+
+    __wasi_pointersize_t dtv;
+
+    __wasi_pointersize_t thread_prev;
+
+    __wasi_pointersize_t thread_next;
+
+    __wasi_pointersize_t sysinfo;
+
+    __wasi_pointersize_t canary;
+
+    int32_t tid;
+
+    int32_t errno_val;
+
+    int32_t detach_state;
+
+    int32_t cancel;
+
+    uint8_t canceldisable;
+
+    uint8_t cancelasync;
+
+    __wasi_thread_flags_t flags;
+
+    __wasi_pointersize_t map_base;
+
+    __wasi_pointersize_t map_size;
+
+    __wasi_pointersize_t stack;
+
+    __wasi_pointersize_t stack_size;
+
+    __wasi_pointersize_t guard_size;
+
+    __wasi_pointersize_t result;
+
+    __wasi_pointersize_t cancelbuf;
+
+    __wasi_pointersize_t tsd;
+
+    __wasi_pointersize_t robust_list_head;
+
+    __wasi_pointersize_t robust_list_off;
+
+    __wasi_pointersize_t robust_list_pending;
+
+    int32_t h_errno_val;
+
+    int32_t timer_id;
+
+    __wasi_pointersize_t locale;
+
+    int32_t killlock;
+
+    __wasi_pointersize_t dlerror_buf;
+
+    __wasi_pointersize_t stdio_locks;
+
+} __wasi_thread_state_t;
+
+_Static_assert(sizeof(__wasi_thread_state_t) == 112, "witx calculated size");
+_Static_assert(_Alignof(__wasi_thread_state_t) == 4, "witx calculated align");
+_Static_assert(offsetof(__wasi_thread_state_t, thread_self) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, dtv) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, thread_prev) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, thread_next) == 12, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, sysinfo) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, canary) == 20, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, tid) == 24, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, errno_val) == 28, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, detach_state) == 32, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, cancel) == 36, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, canceldisable) == 40, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, cancelasync) == 41, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, flags) == 42, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, map_base) == 44, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, map_size) == 48, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, stack) == 52, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, stack_size) == 56, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, guard_size) == 60, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, result) == 64, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, cancelbuf) == 68, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, tsd) == 72, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, robust_list_head) == 76, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, robust_list_off) == 80, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, robust_list_pending) == 84, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, h_errno_val) == 88, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, timer_id) == 92, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, locale) == 96, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, killlock) == 100, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, dlerror_buf) == 104, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, stdio_locks) == 108, "witx calculated offset");
+
+/**
+ * thread start type
+ */
+typedef struct __wasi_thread_start_t {
+    /**
+     * Function that will be invoked when the thread starts
+     */
+    __wasi_pointersize_t start_funct;
+
+    /**
+     * Arguments to pass the callback function
+     */
+    __wasi_pointersize_t start_args;
+
+    /**
+     * Pointer to the thread properties
+     */
+    __wasi_pointersize_t thread;
+
+} __wasi_thread_start_t;
+
+_Static_assert(sizeof(__wasi_thread_start_t) == 12, "witx calculated size");
+_Static_assert(_Alignof(__wasi_thread_start_t) == 4, "witx calculated align");
+_Static_assert(offsetof(__wasi_thread_start_t, start_funct) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, start_args) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, thread) == 8, "witx calculated offset");
+
+/**
  * @defgroup wasix_32v1
  * @{
  */
@@ -4374,30 +4515,17 @@ void __wasi_callback_thread_local_destroy(
 /**
  * Creates a new thread by spawning that shares the same
  * memory address space, file handles and main event loops.
- * The web assembly process must export function named '_start_thread'
+ * The web assembly process must export function named 'wasi_thread_start'
  * @return
  * Returns the thread index of the newly created thread
  * (indices always start from zero)
  */
 __wasi_errno_t __wasi_thread_spawn(
     /**
-     * User data that will be supplied to the function when its called
+     * Pointer to the structure the describes the thread
+     * that is being spawened
      */
-    uint64_t user_data,
-    /**
-     * The base address of the stack allocated for this thread
-     */
-    uint64_t stack_base,
-    /**
-     * The start address of the stack (where the memory is allocated)
-     */
-    uint64_t stack_start,
-    /**
-     * Indicates if the function will operate as a reactor or
-     * as a normal thread. Reactors will be repeatable called
-     * whenever IO work is available to be processed.
-     */
-    __wasi_bool_t reactor,
+    __wasi_thread_start_t * args,
     __wasi_tid_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**

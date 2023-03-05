@@ -143,6 +143,7 @@ __imported_wasix_32v1_tty_set
 __imported_wasix_32v1_ws_connect
 __letf2
 __lttf2
+__main_argc_argv
 __netf2
 __stack_pointer
 __subtf3
@@ -154,4 +155,3 @@ __trunctfsf2
 __unordtf2
 __wasm_call_ctors
 __wasm_init_tls
-main

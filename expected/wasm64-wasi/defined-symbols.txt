@@ -1,7 +1,5 @@
 _CLOCK_MONOTONIC
-_CLOCK_PROCESS_CPUTIME_ID
 _CLOCK_REALTIME
-_CLOCK_THREAD_CPUTIME_ID
 _Exit
 _Fork
 _IO_feof_unlocked
@@ -186,7 +184,6 @@ __log2f_data
 __log_data
 __logf_data
 __lseek
-__main_argc_argv
 __main_void
 __malloc_atfork
 __math_divzero
@@ -213,7 +210,6 @@ __ofl_lock
 __ofl_unlock
 __optpos
 __optreset
-__original_main
 __overflow
 __p1evll
 __parsespent

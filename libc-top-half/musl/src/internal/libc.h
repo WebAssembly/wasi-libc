@@ -51,6 +51,9 @@ struct __libc {
 #ifndef PAGE_SIZE
 #define PAGE_SIZE libc.page_size
 #endif
+#ifndef LINUX_PAGE_SIZE
+#define LINUX_PAGE_SIZE 4096
+#endif
 
 extern hidden struct __libc __libc;
 #define libc __libc

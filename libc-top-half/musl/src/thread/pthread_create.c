@@ -306,7 +306,9 @@ _Noreturn void wasi_thread_start(int tid, void *p)
  * Instead, round up to a sane alignment.
  * Note: PAGE_SIZE is rather big on WASM. (65536)
  */
-#define ROUND(x) (((x)+16-1)&-16)
+// As wasmer uses mmap on linux, rounding to a linux page size
+// makes sense
+#define ROUND(x) (((x)+LINUX_PAGE_SIZE-1)&-LINUX_PAGE_SIZE)
 #endif
 
 /* pthread_key_create.c overrides this */

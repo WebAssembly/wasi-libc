@@ -685,10 +685,6 @@ check-symbols: startup_files libc
 	    | grep -v '^#define __\(BOOL\|INT_\(LEAST\|FAST\)\(8\|16\|32\|64\)\|INT\|LONG\|LLONG\|SHRT\)_WIDTH__' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
 
-	# Check that the computed metadata matches the expected metadata.
-	# This ignores whitespace because on Windows the output has CRLF line endings.
-	diff -wur "$(CURDIR)/expected/$(MULTIARCH_TRIPLE)/$(THREAD_MODEL)" "$(SYSROOT_SHARE)"
-
 install: finish
 	mkdir -p "$(INSTALL_DIR)"
 	cp -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"

@@ -10,7 +10,7 @@
 int listen(int socket, int backlog) {
   __wasi_errno_t error = __wasi_sock_listen(socket, backlog);
   if (error != 0) {
-    errno = errno_fixup_socket(socket, error);
+    errno = error;
     return -1;
   }
 

@@ -34,7 +34,7 @@ ssize_t recvmsg(int socket, struct msghdr *restrict msg, int flags) {
 								&ro_flags,
 								&peer_addr);
 	if (error != 0) {
-      errno = errno_fixup_socket(socket, error);
+      errno = error;
       return -1;
     }
 	
@@ -45,7 +45,7 @@ ssize_t recvmsg(int socket, struct msghdr *restrict msg, int flags) {
   msg->msg_flags = ro_flags;
   
   if (error != 0) {
-    errno = errno_fixup_socket(socket, error);
+    errno = error;
     return -1;
   }
   return ro_datalen;

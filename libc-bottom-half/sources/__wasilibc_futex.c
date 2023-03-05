@@ -1,5 +1,6 @@
 #include <wasi/api.h>
 #include <sys/types.h>
+#include <limits.h>
 #include <stdlib.h>
 
 int __wasilibc_futex_wait_wasix(volatile void *futex, int op, int expected, int64_t max_wait_ns) {

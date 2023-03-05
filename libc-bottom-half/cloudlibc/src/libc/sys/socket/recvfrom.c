@@ -30,7 +30,7 @@ ssize_t recvfrom(int socket, void* buffer, size_t length, int flags, struct sock
                                           &ro_flags,
 										  &peer_addr);
   if (error != 0) {
-    errno = errno_fixup_socket(socket, error);
+    errno = error;
     return -1;
   }
 

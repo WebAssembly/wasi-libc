@@ -42,7 +42,7 @@ ssize_t sendmsg(int socket, const struct msghdr* msg, int flags) {
   }
 
   if (error != 0) {
-    errno = errno_fixup_socket(socket, error);
+    errno = error;
     return -1;
   }
   return so_datalen;

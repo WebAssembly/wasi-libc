@@ -37,7 +37,7 @@ ssize_t sendto(int socket, const void *restrict buffer, size_t length, int flags
   __wasi_size_t so_datalen;
   error = __wasi_sock_send_to(socket, si_data, si_data_len, si_flags, &peer_addr, &so_datalen);
   if (error != 0) {
-    errno = errno_fixup_socket(socket, error);
+    errno = error;
     return -1;
   }
   return so_datalen;

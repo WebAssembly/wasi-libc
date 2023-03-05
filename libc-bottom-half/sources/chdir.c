@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <wasi/libc-find-relpath.h>
 #include <wasi/libc.h>
 
 #ifdef _REENTRANT
@@ -16,18 +17,6 @@ void __wasilibc_cwd_unlock(void);
 #endif
 extern char *__wasilibc_cwd;
 static int __wasilibc_cwd_mallocd = 0;
-
-int chdir(const char *path)
-{
-    __wasi_errno_t error = __wasi_chdir(path);
-    if (error != 0) {
-      errno = error;
-      return -1;
-    }
-
-    chdir_legacy(path);
-    return 0;
-}
 
 int chdir_legacy(const char *path)
 {
@@ -176,4 +165,16 @@ int __wasilibc_find_relpath_alloc(
     }
     strcpy(*relative_buf, rel);
     return fd;
+}
+
+int chdir(const char *path)
+{
+    __wasi_errno_t error = __wasi_chdir(path);
+    if (error != 0) {
+      errno = error;
+      return -1;
+    }
+
+    chdir_legacy(path);
+    return 0;
 }

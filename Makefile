@@ -378,7 +378,6 @@ MUSL_OMIT_HEADERS += \
     "netinet/if_ether.h" \
     "netinet/ether.h" \
     "sys/timerfd.h" \
-    "libintl.h" \
     "sys/sysmacros.h" \
     "aio.h"
 

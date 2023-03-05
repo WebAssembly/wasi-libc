@@ -104,7 +104,6 @@ __fwritex
 __fwriting
 __get_handler_set
 __get_locale
-__get_tp
 __getdelim
 __getentropy
 __getgr_a

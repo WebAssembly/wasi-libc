@@ -1,4 +1,4 @@
-#include <common/errno.h>
+#include <errno.h>
 #include <common/net.h>
 #include <sys/socket.h>
 

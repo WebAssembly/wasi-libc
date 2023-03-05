@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <common/errno.h>
+#include <errno.h>
 #include <sys/socket.h>
 
 #include <assert.h>

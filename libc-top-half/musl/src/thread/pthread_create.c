@@ -243,6 +243,10 @@ struct start_args {
 	void *tls_base;
 	void *(*start_func)(void *);
 	void *start_arg;
+
+	void *reserved[10];	// this is reserved for future WASI changes, makes the struct 64 bytes or 128 bytes on 64bit
+	size_t stack_size;
+	size_t guard_size;
 #endif
 };
 
@@ -429,8 +433,13 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 			if (map == MAP_FAILED) goto fail;
 		}
 #else
-		map = malloc(size);
-		if (!map) goto fail;
+		if (guard) {
+			map = malloc(guard + size + guard);
+			if (!map) goto fail;
+		} else {
+			map = malloc(size);
+			if (!map) goto fail;
+		}
 #endif
 		tsd = map + size - __pthread_tsd_size;
 		if (!stack) {
@@ -494,7 +503,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	stack -= sizeof(struct start_args);
 	stack -= (uintptr_t)stack % alignof(struct start_args);
 	struct start_args *args = (void *)stack;
-
+	
 	/* Align the stack to 16 and store it */
 	new->stack = (void *)((uintptr_t) stack & -16);
 	/* Correct the stack size */
@@ -504,6 +513,8 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	args->start_func = entry;
 	args->start_arg = arg;
 	args->tls_base = (void*)new_tls_base;
+	args->stack_size = new->stack_size;		// used by WASIX for stack migration and asyncify
+	args->guard_size = new->guard_size;		// used by WASIX for stack overflow guards using mmap
 #endif
 
 	__tl_lock();

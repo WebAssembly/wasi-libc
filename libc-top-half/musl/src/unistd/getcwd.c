@@ -4,6 +4,7 @@
 #include <string.h>
 #include "syscall.h"
 
+#ifdef __wasilibc_unmodified_upstream
 char *getcwd(char *buf, size_t size)
 {
 	char tmp[buf ? 1 : PATH_MAX];
@@ -23,3 +24,4 @@ char *getcwd(char *buf, size_t size)
 	}
 	return buf == tmp ? strdup(buf) : buf;
 }
+#endif

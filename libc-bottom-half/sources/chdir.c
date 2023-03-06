@@ -175,6 +175,5 @@ int chdir(const char *path)
       return -1;
     }
 
-    chdir_legacy(path);
     return 0;
 }

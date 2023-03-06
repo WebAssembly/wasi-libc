@@ -3763,6 +3763,16 @@ _Static_assert(offsetof(__wasi_thread_state_t, stdio_locks) == 108, "witx calcul
  */
 typedef struct __wasi_thread_start_t {
     /**
+     * Address where the stack starts
+     */
+    __wasi_pointersize_t stack;
+
+    /**
+     * Address where the TLS starts
+     */
+    __wasi_pointersize_t tls_base;
+
+    /**
      * Function that will be invoked when the thread starts
      */
     __wasi_pointersize_t start_funct;
@@ -3772,18 +3782,14 @@ typedef struct __wasi_thread_start_t {
      */
     __wasi_pointersize_t start_args;
 
-    /**
-     * Pointer to the thread properties
-     */
-    __wasi_pointersize_t thread;
-
 } __wasi_thread_start_t;
 
-_Static_assert(sizeof(__wasi_thread_start_t) == 12, "witx calculated size");
+_Static_assert(sizeof(__wasi_thread_start_t) == 16, "witx calculated size");
 _Static_assert(_Alignof(__wasi_thread_start_t) == 4, "witx calculated align");
-_Static_assert(offsetof(__wasi_thread_start_t, start_funct) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, start_args) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, thread) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, stack) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, tls_base) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, start_funct) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, start_args) == 12, "witx calculated offset");
 
 /**
  * @defgroup wasix_32v1

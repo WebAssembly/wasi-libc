@@ -23,7 +23,7 @@ char *getcwd(char *buf, size_t size)
       errno = error;
       return NULL;
     }
-    return 0;
+    return buf;
 }
 
 char *getcwd_legacy(char *buf, size_t size)

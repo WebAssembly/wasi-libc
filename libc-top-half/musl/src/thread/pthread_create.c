@@ -513,7 +513,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	args->start_func = entry;
 	args->start_arg = arg;
 	args->tls_base = (void*)new_tls_base;
-	args->stack_size = new->stack_size;		// used by WASIX for stack migration and asyncify
+	args->stack_size = new->stack_size;		// used by WASIX for stack migration and asyncify support
 	args->guard_size = new->guard_size;		// used by WASIX for stack overflow guards using mmap
 #endif
 

@@ -3782,14 +3782,59 @@ typedef struct __wasi_thread_start_t {
      */
     __wasi_pointersize_t start_args;
 
+    /**
+     * Reserved for future WASI usage
+     */
+    __wasi_pointersize_t reserved0;
+
+    __wasi_pointersize_t reserved1;
+
+    __wasi_pointersize_t reserved2;
+
+    __wasi_pointersize_t reserved3;
+
+    __wasi_pointersize_t reserved4;
+
+    __wasi_pointersize_t reserved5;
+
+    __wasi_pointersize_t reserved6;
+
+    __wasi_pointersize_t reserved7;
+
+    __wasi_pointersize_t reserved8;
+
+    __wasi_pointersize_t reserved9;
+
+    /**
+     * The size of the stack
+     */
+    __wasi_pointersize_t stack_size;
+
+    /**
+     * The size of the guards at the end of the stack
+     */
+    __wasi_pointersize_t guard_size;
+
 } __wasi_thread_start_t;
 
-_Static_assert(sizeof(__wasi_thread_start_t) == 16, "witx calculated size");
+_Static_assert(sizeof(__wasi_thread_start_t) == 64, "witx calculated size");
 _Static_assert(_Alignof(__wasi_thread_start_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_thread_start_t, stack) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_thread_start_t, tls_base) == 4, "witx calculated offset");
 _Static_assert(offsetof(__wasi_thread_start_t, start_funct) == 8, "witx calculated offset");
 _Static_assert(offsetof(__wasi_thread_start_t, start_args) == 12, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved0) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved1) == 20, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved2) == 24, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved3) == 28, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved4) == 32, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved5) == 36, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved6) == 40, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved7) == 44, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved8) == 48, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved9) == 52, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, stack_size) == 56, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, guard_size) == 60, "witx calculated offset");
 
 /**
  * @defgroup wasix_32v1

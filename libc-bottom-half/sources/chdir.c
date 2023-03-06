@@ -169,11 +169,15 @@ int __wasilibc_find_relpath_alloc(
 
 int chdir(const char *path)
 {
+    // we run the legacy chdir function that emulates real
+    // current directory functionality for backwards compatibility reasons
+    chdir_legacy(path);
+
+    // otherwise we let the operating system know we are changing the current path
     __wasi_errno_t error = __wasi_chdir(path);
     if (error != 0) {
       errno = error;
       return -1;
     }
-
     return 0;
 }

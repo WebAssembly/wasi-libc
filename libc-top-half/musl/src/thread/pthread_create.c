@@ -3,14 +3,18 @@
 #include "stdio_impl.h"
 #include "libc.h"
 #include "lock.h"
+#ifdef __wasilibc_unmodified_upstream
 #include <sys/mman.h>
+#endif
 #include <string.h>
 #include <stddef.h>
-#ifdef __wasilibc_unmodified_upstream
-#else
+#ifndef __wasilibc_unmodified_upstream
+#include <stdatomic.h>
 #include <wasi/api.h>
 #include <bits/signal.h>
 #endif
+
+#include <stdalign.h>
 
 static void dummy_0()
 {
@@ -20,9 +24,9 @@ weak_alias(dummy_0, __acquire_ptc);
 weak_alias(dummy_0, __release_ptc);
 weak_alias(dummy_0, __pthread_tsd_run_dtors);
 weak_alias(dummy_0, __do_orphaned_stdio_locks);
-#endif
 weak_alias(dummy_0, __dl_thread_cleanup);
 weak_alias(dummy_0, __membarrier_init);
+#endif
 
 static int tl_lock_count;
 static int tl_lock_waiters;
@@ -89,7 +93,9 @@ _Noreturn void __pthread_exit(void *result)
 		 * explicitly wait for vmlock holders first. This must be
 		 * done before any locks are taken, to avoid lock ordering
 		 * issues that could lead to deadlock. */
+#ifdef __wasilibc_unmodified_upstream
 		__vm_wait();
+#endif
 	}
 
 	/* Access to target the exiting thread with syscalls that use
@@ -118,10 +124,12 @@ _Noreturn void __pthread_exit(void *result)
 
 	/* At this point we are committed to thread termination. */
 
+#ifdef __wasilibc_unmodified_upstream
 	/* Process robust list in userspace to handle non-pshared mutexes
 	 * and the detached thread case where the robust list head will
 	 * be invalid when the kernel would process it. */
 	__vm_lock();
+#endif
 	volatile void *volatile *rp;
 	while ((rp=self->robust_list.head) && rp != &self->robust_list.head) {
 		pthread_mutex_t *m = (void *)((char *)rp
@@ -135,10 +143,14 @@ _Noreturn void __pthread_exit(void *result)
 		if (cont < 0 || waiters)
 			__wake(&m->_m_lock, 1, priv);
 	}
+#ifdef __wasilibc_unmodified_upstream
 	__vm_unlock();
+#endif
 
 	__do_orphaned_stdio_locks();
+#ifdef __wasilibc_unmodified_upstream
 	__dl_thread_cleanup();
+#endif
 
 	/* Last, unlink thread from the list. This change will not be visible
 	 * until the lock is released, which only happens after SYS_exit
@@ -150,25 +162,39 @@ _Noreturn void __pthread_exit(void *result)
 	self->prev->next = self->next;
 	self->prev = self->next = self;
 
+#ifndef __wasilibc_unmodified_upstream
+	/* On Linux, the thread is created with CLONE_CHILD_CLEARTID,
+	 * and this lock will unlock by kernel when this thread terminates.
+	 * So we should unlock it here in WebAssembly.
+	 * See also set_tid_address(2) */
+	__tl_unlock();
+#endif
+
+#ifdef __wasilibc_unmodified_upstream
 	if (state==DT_DETACHED && self->map_base) {
 		/* Detached threads must block even implementation-internal
 		 * signals, since they will not have a stack in their last
 		 * moments of existence. */
-#ifdef __wasilibc_unmodified_upstream
 		__block_all_sigs(&set);
-#endif
 
 		/* Robust list will no longer be valid, and was already
 		 * processed above, so unregister it with the kernel. */
-#ifdef __wasilibc_unmodified_upstream
 		if (self->robust_list.off)
 			__syscall(SYS_set_robust_list, 0, 3*sizeof(long));
 
 		/* The following call unmaps the thread's stack mapping
 		 * and then exits without touching the stack. */
 		__unmapself(self->map_base, self->map_size);
-#endif
 	}
+#else
+	if (state==DT_DETACHED && self->map_base) {
+		// __syscall(SYS_exit) would unlock the thread, list
+		// do it manually here
+		__tl_unlock();
+		free(self->map_base);
+		for (;;) __wasi_thread_exit(0);
+	}
+#endif
 
 	/* Wake any joiner. */
 	a_store(&self->detach_state, DT_EXITED);
@@ -183,6 +209,9 @@ _Noreturn void __pthread_exit(void *result)
 #ifdef __wasilibc_unmodified_upstream
 	for (;;) __syscall(SYS_exit, 0);
 #else
+	// __syscall(SYS_exit) would unlock the thread, list
+	// do it manually here
+	__tl_unlock();
 	for (;;) __wasi_thread_exit(0);
 #endif
 }
@@ -200,12 +229,28 @@ void __do_cleanup_pop(struct __ptcb *cb)
 }
 
 struct start_args {
+#ifdef __wasilibc_unmodified_upstream
 	void *(*start_func)(void *);
 	void *start_arg;
 	volatile int control;
 	unsigned long sig_mask[_NSIG/8/sizeof(long)];
+#else
+	/*
+	 * Note: the offset of the "stack" and "tls_base" members
+	 * in this structure is hardcoded in wasi_thread_start.
+	 */
+	void *stack;
+	void *tls_base;
+	void *(*start_func)(void *);
+	void *start_arg;
+
+	void *reserved[10];	// this is reserved for future WASI changes, makes the struct 64 bytes or 128 bytes on 64bit
+	size_t stack_size;
+	size_t guard_size;
+#endif
 };
 
+#ifdef __wasilibc_unmodified_upstream
 static int start(void *p)
 {
 	struct start_args *args = p;
@@ -217,8 +262,6 @@ static int start(void *p)
 #ifdef __wasilibc_unmodified_upstream
 			__syscall(SYS_set_tid_address, &args->control);
 			for (;;) __syscall(SYS_exit, 0);
-#else
-			for (;;) __wasi_thread_exit(0);
 #endif
 		}
 	}
@@ -236,23 +279,55 @@ static int start_c11(void *p)
 	__pthread_exit((void *)(uintptr_t)start(args->start_arg));
 	return 0;
 }
+#else
 
+/*
+ * We want to ensure wasi_thread_start is linked whenever
+ * pthread_create is used. The following reference is to ensure that.
+ * Otherwise, the linker doesn't notice the dependency because
+ * wasi_thread_start is used indirectly via a wasm export.
+ */
+void wasi_thread_start(int tid, void *p);
+hidden void *__dummy_reference = wasi_thread_start;
+
+hidden void __wasi_thread_start_C(int tid, void *p)
+{
+	struct start_args *args = p;
+	pthread_t self = __pthread_self();
+	// Set the thread ID (TID) on the pthread structure. The TID is stored
+	// atomically since it is also stored by the parent thread; this way,
+	// whichever thread (parent or child) reaches this point first can proceed
+	// without waiting.
+	atomic_store((atomic_int *) &(self->tid), tid);
+	// Execute the user's start function.
+	__pthread_exit(args->start_func(args->start_arg));
+}
+#endif
+
+#ifdef __wasilibc_unmodified_upstream
 #define ROUND(x) (((x)+PAGE_SIZE-1)&-PAGE_SIZE)
+#else
+/*
+ * As we allocate stack with malloc() instead of mmap/mprotect,
+ * there is no point to round it up to PAGE_SIZE.
+ * Instead, round up to a sane alignment.
+ * Note: PAGE_SIZE is rather big on WASM. (65536)
+ */
+// As wasmer uses mmap on linux, rounding to a linux page size
+// makes sense
+#define ROUND(x) (((x)+LINUX_PAGE_SIZE-1)&-LINUX_PAGE_SIZE)
+#endif
 
 /* pthread_key_create.c overrides this */
-#ifdef __wasilibc_unmodified_upstream
 static volatile size_t dummy = 0;
 weak_alias(dummy, __pthread_tsd_size);
 static void *dummy_tsd[1] = { 0 };
 weak_alias(dummy_tsd, __pthread_tsd_main);
-#endif
 
 static FILE *volatile dummy_file = 0;
-#ifdef __wasilibc_unmodified_upstream
 weak_alias(dummy_file, __stdin_used);
 weak_alias(dummy_file, __stdout_used);
 weak_alias(dummy_file, __stderr_used);
-#endif
 
 static void init_file_lock(FILE *f)
 {
@@ -265,13 +340,25 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	size_t size, guard;
 	struct pthread *self, *new;
 	unsigned char *map = 0, *stack = 0, *tsd = 0, *stack_limit;
+#ifdef __wasilibc_unmodified_upstream
 	unsigned flags = CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND
 		| CLONE_THREAD | CLONE_SYSVSEM | CLONE_SETTLS
 		| CLONE_PARENT_SETTID | CLONE_CHILD_CLEARTID | CLONE_DETACHED;
+#endif
 	pthread_attr_t attr = { 0 };
 	sigset_t set;
+#ifndef __wasilibc_unmodified_upstream
+	size_t tls_size = __builtin_wasm_tls_size();
+	size_t tls_align = __builtin_wasm_tls_align();
+	void* tls_base = __builtin_wasm_tls_base();
+	void* new_tls_base;
+	size_t tls_offset;
+	tls_size += tls_align;
+#endif
 
+#ifdef __wasilibc_unmodified_upstream
 	if (!libc.can_do_threads) return ENOSYS;
+#endif
 	self = __pthread_self();
 	if (!libc.threaded) {
 		for (FILE *f=*__ofl_lock(); f; f=f->next)
@@ -284,7 +371,9 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 		__syscall(SYS_rt_sigprocmask, SIG_UNBLOCK, SIGPT_SET, 0, _NSIG/8);
 #endif
 		self->tsd = (void **)__pthread_tsd_main;
+#ifdef __wasilibc_unmodified_upstream
 		__membarrier_init();
+#endif
 		libc.threaded = 1;
 	}
 	if (attrp && !c11) attr = *attrp;
@@ -296,7 +385,11 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	}
 
 	if (attr._a_stackaddr) {
+#ifdef __wasilibc_unmodified_upstream
 		size_t need = libc.tls_size + __pthread_tsd_size;
+#else
+		size_t need = tls_size + __pthread_tsd_size;
+#endif
 		size = attr._a_stacksize;
 		stack = (void *)(attr._a_stackaddr & -16);
 		stack_limit = (void *)(attr._a_stackaddr - size);
@@ -305,7 +398,11 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 		 * application's stack space. */
 		if (need < size/8 && need < 2048) {
 			tsd = stack - __pthread_tsd_size;
+#ifdef __wasilibc_unmodified_upstream
 			stack = tsd - libc.tls_size;
+#else
+			stack = tsd - tls_size;
+#endif
 			memset(stack, 0, need);
 		} else {
 			size = ROUND(need);
@@ -314,7 +411,11 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	} else {
 		guard = ROUND(attr._a_guardsize);
 		size = guard + ROUND(attr._a_stacksize
+#ifdef __wasilibc_unmodified_upstream
 			+ libc.tls_size +  __pthread_tsd_size);
+#else
+			+ tls_size +  __pthread_tsd_size);
+#endif
 	}
 
 	if (!tsd) {
@@ -331,17 +432,33 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 			map = __mmap(0, size, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0);
 			if (map == MAP_FAILED) goto fail;
 		}
+#else
+		if (guard) {
+			map = malloc(guard + size + guard);
+			if (!map) goto fail;
+		} else {
+			map = malloc(size);
+			if (!map) goto fail;
+		}
+#endif
 		tsd = map + size - __pthread_tsd_size;
 		if (!stack) {
+#ifdef __wasilibc_unmodified_upstream
 			stack = tsd - libc.tls_size;
+#else
+			stack = tsd - tls_size;
+#endif
 			stack_limit = map + guard;
 		}
-#else
-		goto fail;
-#endif
 	}
 
+#ifdef __wasilibc_unmodified_upstream
 	new = __copy_tls(tsd - libc.tls_size);
+#else
+	new_tls_base = __copy_tls(tsd - tls_size);
+	tls_offset = new_tls_base - tls_base;
+	new = (void*)((uintptr_t)self + tls_offset);
+#endif
 	new->map_base = map;
 	new->map_size = size;
 	new->stack = stack;
@@ -362,6 +479,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	/* Setup argument structure for the new thread on its stack.
 	 * It's safe to access from the caller only until the thread
 	 * list is unlocked. */
+#ifdef __wasilibc_unmodified_upstream
 	stack -= (uintptr_t)stack % sizeof(uintptr_t);
 	stack -= sizeof(struct start_args);
 	struct start_args *args = (void *)stack;
@@ -372,9 +490,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	/* Application signals (but not the synccall signal) must be
 	 * blocked before the thread list lock can be taken, to ensure
 	 * that the lock is AS-safe. */
-#ifdef __wasilibc_unmodified_upstream
 	__block_app_sigs(&set);
-#endif
 
 	/* Ensure SIGCANCEL is unblocked in new thread. This requires
 	 * working with a copy of the set so we can restore the
@@ -382,11 +498,44 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	memcpy(&args->sig_mask, &set, sizeof args->sig_mask);
 	args->sig_mask[(SIGCANCEL-1)/8/sizeof(long)] &=
 		~(1UL<<((SIGCANCEL-1)%(8*sizeof(long))));
+#else
+	/* Align the stack to struct start_args */
+	stack -= sizeof(struct start_args);
+	stack -= (uintptr_t)stack % alignof(struct start_args);
+	struct start_args *args = (void *)stack;
+	
+	/* Align the stack to 16 and store it */
+	new->stack = (void *)((uintptr_t) stack & -16);
+	/* Correct the stack size */
+	new->stack_size = stack - stack_limit;
+
+	args->stack = new->stack; /* just for convenience of asm trampoline */
+	args->start_func = entry;
+	args->start_arg = arg;
+	args->tls_base = (void*)new_tls_base;
+	args->stack_size = new->stack_size;		// used by WASIX for stack migration and asyncify support
+	args->guard_size = new->guard_size;		// used by WASIX for stack overflow guards using mmap
+#endif
 
 	__tl_lock();
 	if (!libc.threads_minus_1++) libc.need_locks = 1;
+#ifdef __wasilibc_unmodified_upstream
 	ret = __clone((c11 ? start_c11 : start), stack, flags, args, &new->tid, TP_ADJ(new), &__thread_list_lock);
+#else
+	/* Instead of `__clone`, WASI uses a host API to instantiate a new version
+	 * of the current module and start executing the entry function. The
+	 * wasi-threads specification requires the module to export a
+	 * `wasi_thread_start` function, which is invoked with `args`. */
+	int tid;
+	ret = __wasi_thread_spawn((void *) args, &tid);
+	if (ret > 0) {
+		ret = -ret;
+	} else if (ret == 0) {
+		ret = tid;
+	}
+#endif
 
+#ifdef __wasilibc_unmodified_upstream
 	/* All clone failures translate to EAGAIN. If explicit scheduling
 	 * was requested, attempt it before unlocking the thread list so
 	 * that the failed thread is never exposed and so that we can
@@ -394,17 +543,27 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	if (ret < 0) {
 		ret = -EAGAIN;
 	} else if (attr._a_sched) {
-#ifdef __wasilibc_unmodified_upstream
 		ret = __syscall(SYS_sched_setscheduler,
 			new->tid, attr._a_policy, &attr._a_prio);
 		if (a_swap(&args->control, ret ? 3 : 0)==2)
 			__wake(&args->control, 1, 1);
 		if (ret)
 			__wait(&args->control, 0, 3, 0);
-#else
-		ret = -EINVAL;
-#endif
 	}
+#else
+	/* `wasi_thread_spawn` will either return a host-provided thread ID (TID)
+	 * (`>= 0`) or an error code (`< 0`). As in the unmodified version, all
+	 * spawn failures translate to EAGAIN; unlike the modified version, there is
+	 * no need to "start up" the child thread--the host does this. If the spawn
+	 * did succeed, then we store the TID atomically, since this parent thread
+	 * is racing with the child thread to set this field; this way, whichever
+	 * thread reaches this point first can continue without waiting. */
+	if (ret < 0) {
+		ret = -EAGAIN;
+	} else {
+		atomic_store((atomic_int *) &(new->tid), ret);
+	}
+#endif
 
 	if (ret >= 0) {
 		new->next = self->next;
@@ -423,6 +582,8 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	if (ret < 0) {
 #ifdef __wasilibc_unmodified_upstream
 		if (map) __munmap(map, size);
+#else
+		free(map);
 #endif
 		return -ret;
 	}

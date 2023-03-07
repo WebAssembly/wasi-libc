@@ -1,4 +1,4 @@
-#include <common/errno.h>
+#include <errno.h>
 #include <common/net.h>
 
 #include <sys/socket.h>
@@ -26,7 +26,7 @@ ssize_t sendfile(int socket, int in_fd, off_t *__ofs, size_t __count) {
   uint64_t so_datalen = 0;
   error = __wasi_sock_send_file(socket, in_fd, ofs, count, &so_datalen);
   if (error != 0) {
-    errno = errno_fixup_socket(socket, error);
+    errno = error;
     return -1;
   }
   return (ssize_t)so_datalen;

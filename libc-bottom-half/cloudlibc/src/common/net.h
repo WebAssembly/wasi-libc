@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <__struct_sockaddr_in.h>
 #include <__struct_sockaddr_in6.h>
-#include <common/errno.h>
+#include <errno.h>
 
 #include <wasi/api.h>
 #include <string.h>

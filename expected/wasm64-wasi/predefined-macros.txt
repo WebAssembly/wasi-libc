@@ -37,9 +37,6 @@
 #define AF_INET6 __WASI_ADDRESS_FAMILY_INET6
 #define AF_UNIX __WASI_ADDRESS_FAMILY_UNIX
 #define AF_UNSPEC __WASI_ADDRESS_FAMILY_UNSPEC
-#define AIO_ALLDONE 2
-#define AIO_CANCELED 0
-#define AIO_NOTCANCELED 1
 #define AI_ADDRCONFIG 0x20
 #define AI_ALL 0x10
 #define AI_CANONNAME 0x02
@@ -165,11 +162,6 @@
 #define BS1 0020000
 #define BSDLY 0020000
 #define BUFSIZ 1024
-#define BUS_ADRALN 1
-#define BUS_ADRERR 2
-#define BUS_MCEERR_AO 5
-#define BUS_MCEERR_AR 4
-#define BUS_OBJERR 3
 #define BYTE_ORDER __BYTE_ORDER
 #define CANBSIZ 255
 #define CBAUD 0010017
@@ -191,12 +183,6 @@
 #define CIBAUD 002003600000
 #define CINTR CTRL('c')
 #define CKILL CTRL('u')
-#define CLD_CONTINUED 6
-#define CLD_DUMPED 3
-#define CLD_EXITED 1
-#define CLD_KILLED 2
-#define CLD_STOPPED 5
-#define CLD_TRAPPED 4
 #define CLNEXT CTRL('v')
 #define CLOCAL 0004000
 #define CLOCKS_PER_SEC ((clock_t)1000000000)
@@ -236,7 +222,7 @@
 #define CMSPAR 010000000000
 #define CODESET 14
 #define COLL_WEIGHTS_MAX 2
-#define COMMON_CLOCK_H
+#define COMMON_CLOCK_H 
 #define COMPLETE 2
 #define CONTINUE 3
 #define CONTTYPE '7'
@@ -773,6 +759,7 @@
 #define ELF_NOTE_PAGESIZE_HINT 1
 #define ELF_NOTE_SOLARIS "SUNW Solaris"
 #define ELOOP __WASI_ERRNO_LOOP
+#define EMEMVIOLATION __WASI_ERRNO_MEMVIOLATION
 #define EMFILE __WASI_ERRNO_MFILE
 #define EMLINK __WASI_ERRNO_MLINK
 #define EMSGSIZE __WASI_ERRNO_MSGSIZE
@@ -1039,6 +1026,7 @@
 #define ET_NUM 5
 #define ET_REL 1
 #define EUNDEF 0
+#define EUNKNOWN __WASI_ERRNO_UNKNOWN
 #define EV_CURRENT 1
 #define EV_NONE 0
 #define EV_NUM 2
@@ -1129,14 +1117,6 @@
 #define FORM_C 3
 #define FORM_N 1
 #define FORM_T 2
-#define FPE_FLTDIV 3
-#define FPE_FLTINV 7
-#define FPE_FLTOVF 4
-#define FPE_FLTRES 6
-#define FPE_FLTSUB 8
-#define FPE_FLTUND 5
-#define FPE_INTDIV 1
-#define FPE_INTOVF 2
 #define FP_ILOGB0 FP_ILOGBNAN
 #define FP_ILOGBNAN (-1-0x7fffffff)
 #define FP_INFINITE 1
@@ -1350,14 +1330,6 @@
 #define IGNBRK 0000001
 #define IGNCR 0000200
 #define IGNPAR 0000004
-#define ILL_BADSTK 8
-#define ILL_COPROC 7
-#define ILL_ILLADR 3
-#define ILL_ILLOPC 1
-#define ILL_ILLOPN 2
-#define ILL_ILLTRP 4
-#define ILL_PRVOPC 5
-#define ILL_PRVREG 6
 #define IMAXBEL 0020000
 #define IN6ADDRSZ NS_IN6ADDRSZ
 #define IN6ADDR_ANY_INIT { { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } }
@@ -1771,11 +1743,6 @@
 #define LFLOW_ON 1
 #define LFLOW_RESTART_ANY 2
 #define LFLOW_RESTART_XON 3
-#define LIO_NOP 2
-#define LIO_NOWAIT 1
-#define LIO_READ 0
-#define LIO_WAIT 0
-#define LIO_WRITE 1
 #define LITTLE_ENDIAN __LITTLE_ENDIAN
 #define LITUSE_ALPHA_ADDR 0
 #define LITUSE_ALPHA_BASE 1
@@ -2097,7 +2064,6 @@
 #define NO_RECOVERY 3
 #define NR_ICMP_TYPES 18
 #define NR_ICMP_UNREACH 15
-#define NSIG _NSIG
 #define NSLC 18
 #define NS_ALG_DH 2
 #define NS_ALG_DSA 3
@@ -3447,7 +3413,7 @@
 #define R_NIOS2_TLS_TPREL 35
 #define R_NIOS2_U16 2
 #define R_NIOS2_UJMP 18
- #define R_OK (4)
+#define R_OK (4)
 #define R_OR1K_16 2
 #define R_OR1K_16_PCREL 10
 #define R_OR1K_32 1
@@ -4135,10 +4101,6 @@
 #define SEEK_END __WASI_WHENCE_END
 #define SEEK_SET __WASI_WHENCE_SET
 #define SEGSIZE 512
-#define SEGV_ACCERR 2
-#define SEGV_BNDERR 3
-#define SEGV_MAPERR 1
-#define SEGV_PKUERR 4
 #define SELFMAG 4
 #define SEM_FAILED ((sem_t *)0)
 #define SEM_NSEMS_MAX 256
@@ -4291,10 +4253,6 @@
 #define SIGBUS 7
 #define SIGCHLD 17
 #define SIGCONT 18
-#define SIGEV_NONE 1
-#define SIGEV_SIGNAL 0
-#define SIGEV_THREAD 2
-#define SIGEV_THREAD_ID 4
 #define SIGFPE 8
 #define SIGHUP 1
 #define SIGILL 4
@@ -4326,24 +4284,8 @@
 #define SIGXFSZ 25
 #define SIG_ATOMIC_MAX INT32_MAX
 #define SIG_ATOMIC_MIN INT32_MIN
-#define SIG_BLOCK 0
-#define SIG_DFL ((void (*)(int)) 0)
-#define SIG_ERR (__SIG_ERR)
-#define SIG_HOLD ((void (*)(int)) 2)
-#define SIG_IGN (__SIG_IGN)
-#define SIG_SETMASK 2
-#define SIG_UNBLOCK 1
 #define SIZE_MAX UINT64_MAX
-#define SI_ASYNCIO (-4)
-#define SI_ASYNCNL (-60)
-#define SI_KERNEL 128
 #define SI_LOAD_SHIFT 16
-#define SI_MESGQ (-3)
-#define SI_QUEUE (-1)
-#define SI_SIGIO (-5)
-#define SI_TIMER (-2)
-#define SI_TKILL (-6)
-#define SI_USER 0
 #define SLC_ABORT 7
 #define SLC_ACK 0x80
 #define SLC_AO 4
@@ -4908,7 +4850,9 @@
 #define WSTOPSIG(s) WEXITSTATUS(s)
 #define WTERMSIG(s) ((s) & 0x7f)
 #define WUNTRACED 2
+#define W_EXITCODE(ret,sig) __W_EXITCODE (ret, sig)
 #define W_OK (2)
+#define W_STOPCODE(sig) __W_STOPCODE (sig)
 #define XCASE 0000004
 #define XTABS 0014000
 #define X_OK (1)
@@ -4916,7 +4860,6 @@
 #define YESSTR 0x50002
 #define YXDOMAIN ns_r_yxdomain
 #define YXRRSET ns_r_yxrrset
-#define _AIO_H
 #define _ALLOCA_H 
 #define _ALL_SOURCE 1
 #define _ARPA_FTP_H 
@@ -4973,7 +4916,7 @@
 #define _Complex_I (0.0f+1.0fi)
 #define _DIRENT_H 
 #define _DIRENT_HAVE_D_TYPE 
-#define _ELF_H
+#define _ELF_H 
 #define _ENDIAN_H 
 #define _ERRNO_H 
 #define _ERR_H 
@@ -4987,7 +4930,7 @@
 #define _GETOPT_H 
 #define _GLOB_H 
 #define _GNU_SOURCE 1
-#define _GRP_H
+#define _GRP_H 
 #define _ICONV_H 
 #define _IFADDRS_H 
 #define _INTTYPES_H 
@@ -5017,11 +4960,11 @@
 #define _NETINET_UDP_H 
 #define _NETPACKET_PACKET_H 
 #define _NL_LOCALE_NAME(cat) (((cat)<<16) | 0xffff)
-#define _NL_TYPES_H
+#define _NL_TYPES_H 
 #define _NSIG 65
 #define _NSIG_BPW 32
 #define _NSIG_WORDS (_NSIG / _NSIG_BPW)
-#define _PATHS_H
+#define _PATHS_H 
 #define _PATH_BSHELL "/bin/sh"
 #define _PATH_CONSOLE "/dev/console"
 #define _PATH_DEFPATH "/usr/local/bin:/bin:/usr/bin"
@@ -5144,7 +5087,7 @@
 #define _POSIX_V7_ILP32_OFFBIG (1)
 #define _POSIX_VDISABLE 0
 #define _POSIX_VERSION 200809L
-#define _PTHREAD_H
+#define _PTHREAD_H 
 #define _PTRDIFF_T 
 #define _PWD_H 
 #define _REENTRANT 1
@@ -5294,8 +5237,7 @@
 #define _SEARCH_H 
 #define _SEMAPHORE_H 
 #define _SETJMP_H 
-#define _SHADOW_H
-#define _SIGNAL_H
+#define _SHADOW_H 
 #define _SIZE_T 
 #define _SPAWN_H 
 #define _STDALIGN_H 
@@ -5467,6 +5409,7 @@
 #define __DEFINED_wctype_t 
 #define __DEFINED_wint_t 
 #define __FINITE_MATH_ONLY__ 0
+#define __FLOAT128__ 1
 #define __FLT(x) (__IS_REAL(x) && sizeof(x) == sizeof(float))
 #define __FLTCX(x) (__IS_CX(x) && sizeof(x) == sizeof(float complex))
 #define __FLT_DECIMAL_DIG__ 9
@@ -5908,6 +5851,7 @@
 #define __WASI_ERRNO_ISCONN (UINT16_C(30))
 #define __WASI_ERRNO_ISDIR (UINT16_C(31))
 #define __WASI_ERRNO_LOOP (UINT16_C(32))
+#define __WASI_ERRNO_MEMVIOLATION (UINT16_C(78))
 #define __WASI_ERRNO_MFILE (UINT16_C(33))
 #define __WASI_ERRNO_MLINK (UINT16_C(34))
 #define __WASI_ERRNO_MSGSIZE (UINT16_C(35))
@@ -5953,6 +5897,7 @@
 #define __WASI_ERRNO_SUCCESS (UINT16_C(0))
 #define __WASI_ERRNO_TIMEDOUT (UINT16_C(73))
 #define __WASI_ERRNO_TXTBSY (UINT16_C(74))
+#define __WASI_ERRNO_UNKNOWN (UINT16_C(79))
 #define __WASI_ERRNO_XDEV (UINT16_C(75))
 #define __WASI_EVENTFDFLAGS_SEMAPHORE ((__wasi_eventfdflags_t)(1 << 0))
 #define __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP ((__wasi_eventrwflags_t)(1 << 0))
@@ -5978,6 +5923,12 @@
 #define __WASI_FSTFLAGS_ATIM_NOW ((__wasi_fstflags_t)(1 << 1))
 #define __WASI_FSTFLAGS_MTIM ((__wasi_fstflags_t)(1 << 2))
 #define __WASI_FSTFLAGS_MTIM_NOW ((__wasi_fstflags_t)(1 << 3))
+#define __WASI_JOIN_FLAGS_NON_BLOCKING ((__wasi_join_flags_t)(1 << 0))
+#define __WASI_JOIN_FLAGS_WAKE_STOPPED ((__wasi_join_flags_t)(1 << 1))
+#define __WASI_JOIN_STATUS_TYPE_EXIT_NORMAL (UINT8_C(1))
+#define __WASI_JOIN_STATUS_TYPE_EXIT_SIGNAL (UINT8_C(2))
+#define __WASI_JOIN_STATUS_TYPE_NOTHING (UINT8_C(0))
+#define __WASI_JOIN_STATUS_TYPE_STOPPED (UINT8_C(3))
 #define __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW ((__wasi_lookupflags_t)(1 << 0))
 #define __WASI_OFLAGS_CREAT ((__wasi_oflags_t)(1 << 0))
 #define __WASI_OFLAGS_DIRECTORY ((__wasi_oflags_t)(1 << 1))
@@ -6034,8 +5985,8 @@
 #define __WASI_SIGNAL_ABRT (UINT8_C(6))
 #define __WASI_SIGNAL_ALRM (UINT8_C(14))
 #define __WASI_SIGNAL_BUS (UINT8_C(7))
-#define __WASI_SIGNAL_CHLD (UINT8_C(16))
-#define __WASI_SIGNAL_CONT (UINT8_C(17))
+#define __WASI_SIGNAL_CHLD (UINT8_C(17))
+#define __WASI_SIGNAL_CONT (UINT8_C(18))
 #define __WASI_SIGNAL_FPE (UINT8_C(8))
 #define __WASI_SIGNAL_HUP (UINT8_C(1))
 #define __WASI_SIGNAL_ILL (UINT8_C(4))
@@ -6043,25 +5994,26 @@
 #define __WASI_SIGNAL_KILL (UINT8_C(9))
 #define __WASI_SIGNAL_NONE (UINT8_C(0))
 #define __WASI_SIGNAL_PIPE (UINT8_C(13))
-#define __WASI_SIGNAL_POLL (UINT8_C(28))
-#define __WASI_SIGNAL_PROF (UINT8_C(26))
-#define __WASI_SIGNAL_PWR (UINT8_C(29))
+#define __WASI_SIGNAL_POLL (UINT8_C(29))
+#define __WASI_SIGNAL_PROF (UINT8_C(27))
+#define __WASI_SIGNAL_PWR (UINT8_C(30))
 #define __WASI_SIGNAL_QUIT (UINT8_C(3))
 #define __WASI_SIGNAL_SEGV (UINT8_C(11))
-#define __WASI_SIGNAL_STOP (UINT8_C(18))
-#define __WASI_SIGNAL_SYS (UINT8_C(30))
+#define __WASI_SIGNAL_STKFLT (UINT8_C(16))
+#define __WASI_SIGNAL_STOP (UINT8_C(19))
+#define __WASI_SIGNAL_SYS (UINT8_C(31))
 #define __WASI_SIGNAL_TERM (UINT8_C(15))
 #define __WASI_SIGNAL_TRAP (UINT8_C(5))
-#define __WASI_SIGNAL_TSTP (UINT8_C(19))
-#define __WASI_SIGNAL_TTIN (UINT8_C(20))
-#define __WASI_SIGNAL_TTOU (UINT8_C(21))
-#define __WASI_SIGNAL_URG (UINT8_C(22))
+#define __WASI_SIGNAL_TSTP (UINT8_C(20))
+#define __WASI_SIGNAL_TTIN (UINT8_C(21))
+#define __WASI_SIGNAL_TTOU (UINT8_C(22))
+#define __WASI_SIGNAL_URG (UINT8_C(23))
 #define __WASI_SIGNAL_USR1 (UINT8_C(10))
 #define __WASI_SIGNAL_USR2 (UINT8_C(12))
-#define __WASI_SIGNAL_VTALRM (UINT8_C(25))
-#define __WASI_SIGNAL_WINCH (UINT8_C(27))
-#define __WASI_SIGNAL_XCPU (UINT8_C(23))
-#define __WASI_SIGNAL_XFSZ (UINT8_C(24))
+#define __WASI_SIGNAL_VTALRM (UINT8_C(26))
+#define __WASI_SIGNAL_WINCH (UINT8_C(28))
+#define __WASI_SIGNAL_XCPU (UINT8_C(24))
+#define __WASI_SIGNAL_XFSZ (UINT8_C(25))
 #define __WASI_SOCK_OPTION_ACCEPT_TIMEOUT (UINT8_C(22))
 #define __WASI_SOCK_OPTION_BROADCAST (UINT8_C(6))
 #define __WASI_SOCK_OPTION_CONNECT_TIMEOUT (UINT8_C(21))
@@ -6090,212 +6042,212 @@
 #define __WASI_SOCK_OPTION_TTL (UINT8_C(23))
 #define __WASI_SOCK_OPTION_TYPE (UINT8_C(25))
 #define __WASI_SOCK_PROTO_AH (UINT16_C(51))
-#define__WASI_SOCK_PROTO_BEETPH (UINT16_C(94))
-#define__WASI_SOCK_PROTO_COMP (UINT16_C(108))
-#define__WASI_SOCK_PROTO_DCCP (UINT16_C(33))
-#define__WASI_SOCK_PROTO_DSTOPTS (UINT16_C(60))
-#define__WASI_SOCK_PROTO_EGP (UINT16_C(8))
-#define__WASI_SOCK_PROTO_ENCAP (UINT16_C(98))
-#define__WASI_SOCK_PROTO_ESP (UINT16_C(50))
-#define__WASI_SOCK_PROTO_ETHERNET (UINT16_C(143))
-#define__WASI_SOCK_PROTO_FRAGMENT (UINT16_C(44))
-#define__WASI_SOCK_PROTO_GRE (UINT16_C(47))
-#define__WASI_SOCK_PROTO_ICMP (UINT16_C(1))
-#define__WASI_SOCK_PROTO_ICMPV6 (UINT16_C(58))
-#define__WASI_SOCK_PROTO_IDP (UINT16_C(22))
-#define__WASI_SOCK_PROTO_IGMP (UINT16_C(2))
-#define__WASI_SOCK_PROTO_IP (UINT16_C(0))
-#define__WASI_SOCK_PROTO_IPIP (UINT16_C(4))
-#define__WASI_SOCK_PROTO_IPV6 (UINT16_C(41))
-#define__WASI_SOCK_PROTO_MAX (UINT16_C(263))
-#define__WASI_SOCK_PROTO_MH (UINT16_C(135))
-#define__WASI_SOCK_PROTO_MPLS (UINT16_C(137))
-#define__WASI_SOCK_PROTO_MPTCP (UINT16_C(262))
-#define__WASI_SOCK_PROTO_MTP (UINT16_C(92))
-#define__WASI_SOCK_PROTO_NONE (UINT16_C(59))
-#define__WASI_SOCK_PROTO_PIM (UINT16_C(103))
-#define__WASI_SOCK_PROTO_PROTO_10 (UINT16_C(10))
-#define__WASI_SOCK_PROTO_PROTO_100 (UINT16_C(100))
-#define__WASI_SOCK_PROTO_PROTO_101 (UINT16_C(101))
-#define__WASI_SOCK_PROTO_PROTO_102 (UINT16_C(102))
-#define__WASI_SOCK_PROTO_PROTO_104 (UINT16_C(104))
-#define__WASI_SOCK_PROTO_PROTO_105 (UINT16_C(105))
-#define__WASI_SOCK_PROTO_PROTO_106 (UINT16_C(106))
-#define__WASI_SOCK_PROTO_PROTO_107 (UINT16_C(107))
-#define__WASI_SOCK_PROTO_PROTO_109 (UINT16_C(109))
-#define__WASI_SOCK_PROTO_PROTO_11 (UINT16_C(11))
-#define__WASI_SOCK_PROTO_PROTO_110 (UINT16_C(110))
-#define__WASI_SOCK_PROTO_PROTO_111 (UINT16_C(111))
-#define__WASI_SOCK_PROTO_PROTO_112 (UINT16_C(112))
-#define__WASI_SOCK_PROTO_PROTO_113 (UINT16_C(113))
-#define__WASI_SOCK_PROTO_PROTO_114 (UINT16_C(114))
-#define__WASI_SOCK_PROTO_PROTO_115 (UINT16_C(115))
-#define__WASI_SOCK_PROTO_PROTO_116 (UINT16_C(116))
-#define__WASI_SOCK_PROTO_PROTO_117 (UINT16_C(117))
-#define__WASI_SOCK_PROTO_PROTO_118 (UINT16_C(118))
-#define__WASI_SOCK_PROTO_PROTO_119 (UINT16_C(119))
-#define__WASI_SOCK_PROTO_PROTO_120 (UINT16_C(120))
-#define__WASI_SOCK_PROTO_PROTO_121 (UINT16_C(121))
-#define__WASI_SOCK_PROTO_PROTO_122 (UINT16_C(122))
-#define__WASI_SOCK_PROTO_PROTO_123 (UINT16_C(123))
-#define__WASI_SOCK_PROTO_PROTO_124 (UINT16_C(124))
-#define__WASI_SOCK_PROTO_PROTO_125 (UINT16_C(125))
-#define__WASI_SOCK_PROTO_PROTO_126 (UINT16_C(126))
-#define__WASI_SOCK_PROTO_PROTO_127 (UINT16_C(127))
-#define__WASI_SOCK_PROTO_PROTO_128 (UINT16_C(128))
-#define__WASI_SOCK_PROTO_PROTO_129 (UINT16_C(129))
-#define__WASI_SOCK_PROTO_PROTO_13 (UINT16_C(13))
-#define__WASI_SOCK_PROTO_PROTO_130 (UINT16_C(130))
-#define__WASI_SOCK_PROTO_PROTO_131 (UINT16_C(131))
-#define__WASI_SOCK_PROTO_PROTO_133 (UINT16_C(133))
-#define__WASI_SOCK_PROTO_PROTO_134 (UINT16_C(134))
-#define__WASI_SOCK_PROTO_PROTO_138 (UINT16_C(138))
-#define__WASI_SOCK_PROTO_PROTO_139 (UINT16_C(139))
-#define__WASI_SOCK_PROTO_PROTO_14 (UINT16_C(14))
-#define__WASI_SOCK_PROTO_PROTO_140 (UINT16_C(140))
-#define__WASI_SOCK_PROTO_PROTO_141 (UINT16_C(141))
-#define__WASI_SOCK_PROTO_PROTO_142 (UINT16_C(142))
-#define__WASI_SOCK_PROTO_PROTO_144 (UINT16_C(144))
-#define__WASI_SOCK_PROTO_PROTO_145 (UINT16_C(145))
-#define__WASI_SOCK_PROTO_PROTO_146 (UINT16_C(146))
-#define__WASI_SOCK_PROTO_PROTO_147 (UINT16_C(147))
-#define__WASI_SOCK_PROTO_PROTO_148 (UINT16_C(148))
-#define__WASI_SOCK_PROTO_PROTO_149 (UINT16_C(149))
-#define__WASI_SOCK_PROTO_PROTO_15 (UINT16_C(15))
-#define__WASI_SOCK_PROTO_PROTO_150 (UINT16_C(150))
-#define__WASI_SOCK_PROTO_PROTO_151 (UINT16_C(151))
-#define__WASI_SOCK_PROTO_PROTO_152 (UINT16_C(152))
-#define__WASI_SOCK_PROTO_PROTO_153 (UINT16_C(153))
-#define__WASI_SOCK_PROTO_PROTO_154 (UINT16_C(154))
-#define__WASI_SOCK_PROTO_PROTO_155 (UINT16_C(155))
-#define__WASI_SOCK_PROTO_PROTO_156 (UINT16_C(156))
-#define__WASI_SOCK_PROTO_PROTO_157 (UINT16_C(157))
-#define__WASI_SOCK_PROTO_PROTO_158 (UINT16_C(158))
-#define__WASI_SOCK_PROTO_PROTO_159 (UINT16_C(159))
-#define__WASI_SOCK_PROTO_PROTO_16 (UINT16_C(16))
-#define__WASI_SOCK_PROTO_PROTO_160 (UINT16_C(160))
-#define__WASI_SOCK_PROTO_PROTO_161 (UINT16_C(161))
-#define__WASI_SOCK_PROTO_PROTO_162 (UINT16_C(162))
-#define__WASI_SOCK_PROTO_PROTO_163 (UINT16_C(163))
-#define__WASI_SOCK_PROTO_PROTO_164 (UINT16_C(164))
-#define__WASI_SOCK_PROTO_PROTO_165 (UINT16_C(165))
-#define__WASI_SOCK_PROTO_PROTO_166 (UINT16_C(166))
-#define__WASI_SOCK_PROTO_PROTO_167 (UINT16_C(167))
-#define__WASI_SOCK_PROTO_PROTO_168 (UINT16_C(168))
-#define__WASI_SOCK_PROTO_PROTO_169 (UINT16_C(169))
-#define__WASI_SOCK_PROTO_PROTO_170 (UINT16_C(170))
-#define__WASI_SOCK_PROTO_PROTO_171 (UINT16_C(171))
-#define__WASI_SOCK_PROTO_PROTO_172 (UINT16_C(172))
-#define__WASI_SOCK_PROTO_PROTO_173 (UINT16_C(173))
-#define__WASI_SOCK_PROTO_PROTO_174 (UINT16_C(174))
-#define__WASI_SOCK_PROTO_PROTO_175 (UINT16_C(175))
-#define__WASI_SOCK_PROTO_PROTO_176 (UINT16_C(176))
-#define__WASI_SOCK_PROTO_PROTO_177 (UINT16_C(177))
-#define__WASI_SOCK_PROTO_PROTO_178 (UINT16_C(178))
-#define__WASI_SOCK_PROTO_PROTO_179 (UINT16_C(179))
-#define__WASI_SOCK_PROTO_PROTO_18 (UINT16_C(18))
-#define__WASI_SOCK_PROTO_PROTO_180 (UINT16_C(180))
-#define__WASI_SOCK_PROTO_PROTO_181 (UINT16_C(181))
-#define__WASI_SOCK_PROTO_PROTO_182 (UINT16_C(182))
-#define__WASI_SOCK_PROTO_PROTO_183 (UINT16_C(183))
-#define__WASI_SOCK_PROTO_PROTO_184 (UINT16_C(184))
-#define__WASI_SOCK_PROTO_PROTO_185 (UINT16_C(185))
-#define__WASI_SOCK_PROTO_PROTO_186 (UINT16_C(186))
-#define__WASI_SOCK_PROTO_PROTO_187 (UINT16_C(187))
-#define__WASI_SOCK_PROTO_PROTO_188 (UINT16_C(188))
-#define__WASI_SOCK_PROTO_PROTO_189 (UINT16_C(189))
-#define__WASI_SOCK_PROTO_PROTO_19 (UINT16_C(19))
-#define__WASI_SOCK_PROTO_PROTO_190 (UINT16_C(190))
-#define__WASI_SOCK_PROTO_PROTO_191 (UINT16_C(191))
-#define__WASI_SOCK_PROTO_PROTO_192 (UINT16_C(192))
-#define__WASI_SOCK_PROTO_PROTO_193 (UINT16_C(193))
-#define__WASI_SOCK_PROTO_PROTO_194 (UINT16_C(194))
-#define__WASI_SOCK_PROTO_PROTO_195 (UINT16_C(195))
-#define__WASI_SOCK_PROTO_PROTO_196 (UINT16_C(196))
-#define__WASI_SOCK_PROTO_PROTO_197 (UINT16_C(197))
-#define__WASI_SOCK_PROTO_PROTO_198 (UINT16_C(198))
-#define__WASI_SOCK_PROTO_PROTO_199 (UINT16_C(199))
-#define__WASI_SOCK_PROTO_PROTO_20 (UINT16_C(20))
-#define__WASI_SOCK_PROTO_PROTO_200 (UINT16_C(200))
-#define__WASI_SOCK_PROTO_PROTO_201 (UINT16_C(201))
-#define__WASI_SOCK_PROTO_PROTO_202 (UINT16_C(202))
-#define__WASI_SOCK_PROTO_PROTO_203 (UINT16_C(203))
-#define__WASI_SOCK_PROTO_PROTO_204 (UINT16_C(204))
-#define__WASI_SOCK_PROTO_PROTO_205 (UINT16_C(205))
-#define__WASI_SOCK_PROTO_PROTO_206 (UINT16_C(206))
-#define__WASI_SOCK_PROTO_PROTO_207 (UINT16_C(207))
-#define__WASI_SOCK_PROTO_PROTO_208 (UINT16_C(208))
-#define__WASI_SOCK_PROTO_PROTO_209 (UINT16_C(209))
-#define__WASI_SOCK_PROTO_PROTO_21 (UINT16_C(21))
-#define__WASI_SOCK_PROTO_PROTO_210 (UINT16_C(210))
-#define__WASI_SOCK_PROTO_PROTO_211 (UINT16_C(211))
-#define__WASI_SOCK_PROTO_PROTO_212 (UINT16_C(212))
-#define__WASI_SOCK_PROTO_PROTO_213 (UINT16_C(213))
-#define__WASI_SOCK_PROTO_PROTO_214 (UINT16_C(214))
-#define__WASI_SOCK_PROTO_PROTO_215 (UINT16_C(215))
-#define__WASI_SOCK_PROTO_PROTO_216 (UINT16_C(216))
-#define__WASI_SOCK_PROTO_PROTO_217 (UINT16_C(217))
-#define__WASI_SOCK_PROTO_PROTO_218 (UINT16_C(218))
-#define__WASI_SOCK_PROTO_PROTO_219 (UINT16_C(219))
-#define__WASI_SOCK_PROTO_PROTO_220 (UINT16_C(220))
-#define__WASI_SOCK_PROTO_PROTO_221 (UINT16_C(221))
-#define__WASI_SOCK_PROTO_PROTO_222 (UINT16_C(222))
-#define__WASI_SOCK_PROTO_PROTO_223 (UINT16_C(223))
-#define__WASI_SOCK_PROTO_PROTO_224 (UINT16_C(224))
-#define__WASI_SOCK_PROTO_PROTO_225 (UINT16_C(225))
-#define__WASI_SOCK_PROTO_PROTO_226 (UINT16_C(226))
-#define__WASI_SOCK_PROTO_PROTO_227 (UINT16_C(227))
-#define__WASI_SOCK_PROTO_PROTO_228 (UINT16_C(228))
-#define__WASI_SOCK_PROTO_PROTO_229 (UINT16_C(229))
-#define__WASI_SOCK_PROTO_PROTO_23 (UINT16_C(23))
-#define__WASI_SOCK_PROTO_PROTO_230 (UINT16_C(230))
-#define__WASI_SOCK_PROTO_PROTO_231 (UINT16_C(231))
-#define__WASI_SOCK_PROTO_PROTO_232 (UINT16_C(232))
-#define__WASI_SOCK_PROTO_PROTO_233 (UINT16_C(233))
-#define__WASI_SOCK_PROTO_PROTO_234 (UINT16_C(234))
-#define__WASI_SOCK_PROTO_PROTO_235 (UINT16_C(235))
-#define__WASI_SOCK_PROTO_PROTO_236 (UINT16_C(236))
-#define__WASI_SOCK_PROTO_PROTO_237 (UINT16_C(237))
-#define__WASI_SOCK_PROTO_PROTO_238 (UINT16_C(238))
-#define__WASI_SOCK_PROTO_PROTO_239 (UINT16_C(239))
-#define__WASI_SOCK_PROTO_PROTO_24 (UINT16_C(24))
-#define__WASI_SOCK_PROTO_PROTO_240 (UINT16_C(240))
-#define__WASI_SOCK_PROTO_PROTO_241 (UINT16_C(241))
-#define__WASI_SOCK_PROTO_PROTO_242 (UINT16_C(242))
-#define__WASI_SOCK_PROTO_PROTO_243 (UINT16_C(243))
-#define__WASI_SOCK_PROTO_PROTO_244 (UINT16_C(244))
-#define__WASI_SOCK_PROTO_PROTO_245 (UINT16_C(245))
-#define__WASI_SOCK_PROTO_PROTO_246 (UINT16_C(246))
-#define__WASI_SOCK_PROTO_PROTO_247 (UINT16_C(247))
-#define__WASI_SOCK_PROTO_PROTO_248 (UINT16_C(248))
-#define__WASI_SOCK_PROTO_PROTO_249 (UINT16_C(249))
-#define__WASI_SOCK_PROTO_PROTO_25 (UINT16_C(25))
-#define__WASI_SOCK_PROTO_PROTO_250 (UINT16_C(250))
-#define__WASI_SOCK_PROTO_PROTO_251 (UINT16_C(251))
-#define__WASI_SOCK_PROTO_PROTO_252 (UINT16_C(252))
-#define__WASI_SOCK_PROTO_PROTO_253 (UINT16_C(253))
-#define__WASI_SOCK_PROTO_PROTO_254 (UINT16_C(254))
-#define__WASI_SOCK_PROTO_PROTO_256 (UINT16_C(256))
-#define__WASI_SOCK_PROTO_PROTO_257 (UINT16_C(257))
-#define__WASI_SOCK_PROTO_PROTO_258 (UINT16_C(258))
-#define__WASI_SOCK_PROTO_PROTO_259 (UINT16_C(259))
-#define__WASI_SOCK_PROTO_PROTO_26 (UINT16_C(26))
-#define__WASI_SOCK_PROTO_PROTO_260 (UINT16_C(260))
-#define__WASI_SOCK_PROTO_PROTO_261 (UINT16_C(261))
-#define__WASI_SOCK_PROTO_PROTO_27 (UINT16_C(27))
-#define__WASI_SOCK_PROTO_PROTO_28 (UINT16_C(28))
-#define__WASI_SOCK_PROTO_PROTO_3 (UINT16_C(3))
-#define__WASI_SOCK_PROTO_PROTO_30 (UINT16_C(30))
-#define__WASI_SOCK_PROTO_PROTO_31 (UINT16_C(31))
-#define__WASI_SOCK_PROTO_PROTO_32 (UINT16_C(32))
-#define__WASI_SOCK_PROTO_PROTO_34 (UINT16_C(34))
-#define__WASI_SOCK_PROTO_PROTO_35 (UINT16_C(35))
-#define__WASI_SOCK_PROTO_PROTO_36 (UINT16_C(36))
-#define__WASI_SOCK_PROTO_PROTO_37 (UINT16_C(37))
-#define__WASI_SOCK_PROTO_PROTO_38 (UINT16_C(38))
-#define__WASI_SOCK_PROTO_PROTO_39 (UINT16_C(39))
-#define__WASI_SOCK_PROTO_PROTO_40 (UINT16_C(40))
-#define__WASI_SOCK_PROTO_PROTO_42 (UINT16_C(42))
+#define __WASI_SOCK_PROTO_BEETPH (UINT16_C(94))
+#define __WASI_SOCK_PROTO_COMP (UINT16_C(108))
+#define __WASI_SOCK_PROTO_DCCP (UINT16_C(33))
+#define __WASI_SOCK_PROTO_DSTOPTS (UINT16_C(60))
+#define __WASI_SOCK_PROTO_EGP (UINT16_C(8))
+#define __WASI_SOCK_PROTO_ENCAP (UINT16_C(98))
+#define __WASI_SOCK_PROTO_ESP (UINT16_C(50))
+#define __WASI_SOCK_PROTO_ETHERNET (UINT16_C(143))
+#define __WASI_SOCK_PROTO_FRAGMENT (UINT16_C(44))
+#define __WASI_SOCK_PROTO_GRE (UINT16_C(47))
+#define __WASI_SOCK_PROTO_ICMP (UINT16_C(1))
+#define __WASI_SOCK_PROTO_ICMPV6 (UINT16_C(58))
+#define __WASI_SOCK_PROTO_IDP (UINT16_C(22))
+#define __WASI_SOCK_PROTO_IGMP (UINT16_C(2))
+#define __WASI_SOCK_PROTO_IP (UINT16_C(0))
+#define __WASI_SOCK_PROTO_IPIP (UINT16_C(4))
+#define __WASI_SOCK_PROTO_IPV6 (UINT16_C(41))
+#define __WASI_SOCK_PROTO_MAX (UINT16_C(263))
+#define __WASI_SOCK_PROTO_MH (UINT16_C(135))
+#define __WASI_SOCK_PROTO_MPLS (UINT16_C(137))
+#define __WASI_SOCK_PROTO_MPTCP (UINT16_C(262))
+#define __WASI_SOCK_PROTO_MTP (UINT16_C(92))
+#define __WASI_SOCK_PROTO_NONE (UINT16_C(59))
+#define __WASI_SOCK_PROTO_PIM (UINT16_C(103))
+#define __WASI_SOCK_PROTO_PROTO_10 (UINT16_C(10))
+#define __WASI_SOCK_PROTO_PROTO_100 (UINT16_C(100))
+#define __WASI_SOCK_PROTO_PROTO_101 (UINT16_C(101))
+#define __WASI_SOCK_PROTO_PROTO_102 (UINT16_C(102))
+#define __WASI_SOCK_PROTO_PROTO_104 (UINT16_C(104))
+#define __WASI_SOCK_PROTO_PROTO_105 (UINT16_C(105))
+#define __WASI_SOCK_PROTO_PROTO_106 (UINT16_C(106))
+#define __WASI_SOCK_PROTO_PROTO_107 (UINT16_C(107))
+#define __WASI_SOCK_PROTO_PROTO_109 (UINT16_C(109))
+#define __WASI_SOCK_PROTO_PROTO_11 (UINT16_C(11))
+#define __WASI_SOCK_PROTO_PROTO_110 (UINT16_C(110))
+#define __WASI_SOCK_PROTO_PROTO_111 (UINT16_C(111))
+#define __WASI_SOCK_PROTO_PROTO_112 (UINT16_C(112))
+#define __WASI_SOCK_PROTO_PROTO_113 (UINT16_C(113))
+#define __WASI_SOCK_PROTO_PROTO_114 (UINT16_C(114))
+#define __WASI_SOCK_PROTO_PROTO_115 (UINT16_C(115))
+#define __WASI_SOCK_PROTO_PROTO_116 (UINT16_C(116))
+#define __WASI_SOCK_PROTO_PROTO_117 (UINT16_C(117))
+#define __WASI_SOCK_PROTO_PROTO_118 (UINT16_C(118))
+#define __WASI_SOCK_PROTO_PROTO_119 (UINT16_C(119))
+#define __WASI_SOCK_PROTO_PROTO_120 (UINT16_C(120))
+#define __WASI_SOCK_PROTO_PROTO_121 (UINT16_C(121))
+#define __WASI_SOCK_PROTO_PROTO_122 (UINT16_C(122))
+#define __WASI_SOCK_PROTO_PROTO_123 (UINT16_C(123))
+#define __WASI_SOCK_PROTO_PROTO_124 (UINT16_C(124))
+#define __WASI_SOCK_PROTO_PROTO_125 (UINT16_C(125))
+#define __WASI_SOCK_PROTO_PROTO_126 (UINT16_C(126))
+#define __WASI_SOCK_PROTO_PROTO_127 (UINT16_C(127))
+#define __WASI_SOCK_PROTO_PROTO_128 (UINT16_C(128))
+#define __WASI_SOCK_PROTO_PROTO_129 (UINT16_C(129))
+#define __WASI_SOCK_PROTO_PROTO_13 (UINT16_C(13))
+#define __WASI_SOCK_PROTO_PROTO_130 (UINT16_C(130))
+#define __WASI_SOCK_PROTO_PROTO_131 (UINT16_C(131))
+#define __WASI_SOCK_PROTO_PROTO_133 (UINT16_C(133))
+#define __WASI_SOCK_PROTO_PROTO_134 (UINT16_C(134))
+#define __WASI_SOCK_PROTO_PROTO_138 (UINT16_C(138))
+#define __WASI_SOCK_PROTO_PROTO_139 (UINT16_C(139))
+#define __WASI_SOCK_PROTO_PROTO_14 (UINT16_C(14))
+#define __WASI_SOCK_PROTO_PROTO_140 (UINT16_C(140))
+#define __WASI_SOCK_PROTO_PROTO_141 (UINT16_C(141))
+#define __WASI_SOCK_PROTO_PROTO_142 (UINT16_C(142))
+#define __WASI_SOCK_PROTO_PROTO_144 (UINT16_C(144))
+#define __WASI_SOCK_PROTO_PROTO_145 (UINT16_C(145))
+#define __WASI_SOCK_PROTO_PROTO_146 (UINT16_C(146))
+#define __WASI_SOCK_PROTO_PROTO_147 (UINT16_C(147))
+#define __WASI_SOCK_PROTO_PROTO_148 (UINT16_C(148))
+#define __WASI_SOCK_PROTO_PROTO_149 (UINT16_C(149))
+#define __WASI_SOCK_PROTO_PROTO_15 (UINT16_C(15))
+#define __WASI_SOCK_PROTO_PROTO_150 (UINT16_C(150))
+#define __WASI_SOCK_PROTO_PROTO_151 (UINT16_C(151))
+#define __WASI_SOCK_PROTO_PROTO_152 (UINT16_C(152))
+#define __WASI_SOCK_PROTO_PROTO_153 (UINT16_C(153))
+#define __WASI_SOCK_PROTO_PROTO_154 (UINT16_C(154))
+#define __WASI_SOCK_PROTO_PROTO_155 (UINT16_C(155))
+#define __WASI_SOCK_PROTO_PROTO_156 (UINT16_C(156))
+#define __WASI_SOCK_PROTO_PROTO_157 (UINT16_C(157))
+#define __WASI_SOCK_PROTO_PROTO_158 (UINT16_C(158))
+#define __WASI_SOCK_PROTO_PROTO_159 (UINT16_C(159))
+#define __WASI_SOCK_PROTO_PROTO_16 (UINT16_C(16))
+#define __WASI_SOCK_PROTO_PROTO_160 (UINT16_C(160))
+#define __WASI_SOCK_PROTO_PROTO_161 (UINT16_C(161))
+#define __WASI_SOCK_PROTO_PROTO_162 (UINT16_C(162))
+#define __WASI_SOCK_PROTO_PROTO_163 (UINT16_C(163))
+#define __WASI_SOCK_PROTO_PROTO_164 (UINT16_C(164))
+#define __WASI_SOCK_PROTO_PROTO_165 (UINT16_C(165))
+#define __WASI_SOCK_PROTO_PROTO_166 (UINT16_C(166))
+#define __WASI_SOCK_PROTO_PROTO_167 (UINT16_C(167))
+#define __WASI_SOCK_PROTO_PROTO_168 (UINT16_C(168))
+#define __WASI_SOCK_PROTO_PROTO_169 (UINT16_C(169))
+#define __WASI_SOCK_PROTO_PROTO_170 (UINT16_C(170))
+#define __WASI_SOCK_PROTO_PROTO_171 (UINT16_C(171))
+#define __WASI_SOCK_PROTO_PROTO_172 (UINT16_C(172))
+#define __WASI_SOCK_PROTO_PROTO_173 (UINT16_C(173))
+#define __WASI_SOCK_PROTO_PROTO_174 (UINT16_C(174))
+#define __WASI_SOCK_PROTO_PROTO_175 (UINT16_C(175))
+#define __WASI_SOCK_PROTO_PROTO_176 (UINT16_C(176))
+#define __WASI_SOCK_PROTO_PROTO_177 (UINT16_C(177))
+#define __WASI_SOCK_PROTO_PROTO_178 (UINT16_C(178))
+#define __WASI_SOCK_PROTO_PROTO_179 (UINT16_C(179))
+#define __WASI_SOCK_PROTO_PROTO_18 (UINT16_C(18))
+#define __WASI_SOCK_PROTO_PROTO_180 (UINT16_C(180))
+#define __WASI_SOCK_PROTO_PROTO_181 (UINT16_C(181))
+#define __WASI_SOCK_PROTO_PROTO_182 (UINT16_C(182))
+#define __WASI_SOCK_PROTO_PROTO_183 (UINT16_C(183))
+#define __WASI_SOCK_PROTO_PROTO_184 (UINT16_C(184))
+#define __WASI_SOCK_PROTO_PROTO_185 (UINT16_C(185))
+#define __WASI_SOCK_PROTO_PROTO_186 (UINT16_C(186))
+#define __WASI_SOCK_PROTO_PROTO_187 (UINT16_C(187))
+#define __WASI_SOCK_PROTO_PROTO_188 (UINT16_C(188))
+#define __WASI_SOCK_PROTO_PROTO_189 (UINT16_C(189))
+#define __WASI_SOCK_PROTO_PROTO_19 (UINT16_C(19))
+#define __WASI_SOCK_PROTO_PROTO_190 (UINT16_C(190))
+#define __WASI_SOCK_PROTO_PROTO_191 (UINT16_C(191))
+#define __WASI_SOCK_PROTO_PROTO_192 (UINT16_C(192))
+#define __WASI_SOCK_PROTO_PROTO_193 (UINT16_C(193))
+#define __WASI_SOCK_PROTO_PROTO_194 (UINT16_C(194))
+#define __WASI_SOCK_PROTO_PROTO_195 (UINT16_C(195))
+#define __WASI_SOCK_PROTO_PROTO_196 (UINT16_C(196))
+#define __WASI_SOCK_PROTO_PROTO_197 (UINT16_C(197))
+#define __WASI_SOCK_PROTO_PROTO_198 (UINT16_C(198))
+#define __WASI_SOCK_PROTO_PROTO_199 (UINT16_C(199))
+#define __WASI_SOCK_PROTO_PROTO_20 (UINT16_C(20))
+#define __WASI_SOCK_PROTO_PROTO_200 (UINT16_C(200))
+#define __WASI_SOCK_PROTO_PROTO_201 (UINT16_C(201))
+#define __WASI_SOCK_PROTO_PROTO_202 (UINT16_C(202))
+#define __WASI_SOCK_PROTO_PROTO_203 (UINT16_C(203))
+#define __WASI_SOCK_PROTO_PROTO_204 (UINT16_C(204))
+#define __WASI_SOCK_PROTO_PROTO_205 (UINT16_C(205))
+#define __WASI_SOCK_PROTO_PROTO_206 (UINT16_C(206))
+#define __WASI_SOCK_PROTO_PROTO_207 (UINT16_C(207))
+#define __WASI_SOCK_PROTO_PROTO_208 (UINT16_C(208))
+#define __WASI_SOCK_PROTO_PROTO_209 (UINT16_C(209))
+#define __WASI_SOCK_PROTO_PROTO_21 (UINT16_C(21))
+#define __WASI_SOCK_PROTO_PROTO_210 (UINT16_C(210))
+#define __WASI_SOCK_PROTO_PROTO_211 (UINT16_C(211))
+#define __WASI_SOCK_PROTO_PROTO_212 (UINT16_C(212))
+#define __WASI_SOCK_PROTO_PROTO_213 (UINT16_C(213))
+#define __WASI_SOCK_PROTO_PROTO_214 (UINT16_C(214))
+#define __WASI_SOCK_PROTO_PROTO_215 (UINT16_C(215))
+#define __WASI_SOCK_PROTO_PROTO_216 (UINT16_C(216))
+#define __WASI_SOCK_PROTO_PROTO_217 (UINT16_C(217))
+#define __WASI_SOCK_PROTO_PROTO_218 (UINT16_C(218))
+#define __WASI_SOCK_PROTO_PROTO_219 (UINT16_C(219))
+#define __WASI_SOCK_PROTO_PROTO_220 (UINT16_C(220))
+#define __WASI_SOCK_PROTO_PROTO_221 (UINT16_C(221))
+#define __WASI_SOCK_PROTO_PROTO_222 (UINT16_C(222))
+#define __WASI_SOCK_PROTO_PROTO_223 (UINT16_C(223))
+#define __WASI_SOCK_PROTO_PROTO_224 (UINT16_C(224))
+#define __WASI_SOCK_PROTO_PROTO_225 (UINT16_C(225))
+#define __WASI_SOCK_PROTO_PROTO_226 (UINT16_C(226))
+#define __WASI_SOCK_PROTO_PROTO_227 (UINT16_C(227))
+#define __WASI_SOCK_PROTO_PROTO_228 (UINT16_C(228))
+#define __WASI_SOCK_PROTO_PROTO_229 (UINT16_C(229))
+#define __WASI_SOCK_PROTO_PROTO_23 (UINT16_C(23))
+#define __WASI_SOCK_PROTO_PROTO_230 (UINT16_C(230))
+#define __WASI_SOCK_PROTO_PROTO_231 (UINT16_C(231))
+#define __WASI_SOCK_PROTO_PROTO_232 (UINT16_C(232))
+#define __WASI_SOCK_PROTO_PROTO_233 (UINT16_C(233))
+#define __WASI_SOCK_PROTO_PROTO_234 (UINT16_C(234))
+#define __WASI_SOCK_PROTO_PROTO_235 (UINT16_C(235))
+#define __WASI_SOCK_PROTO_PROTO_236 (UINT16_C(236))
+#define __WASI_SOCK_PROTO_PROTO_237 (UINT16_C(237))
+#define __WASI_SOCK_PROTO_PROTO_238 (UINT16_C(238))
+#define __WASI_SOCK_PROTO_PROTO_239 (UINT16_C(239))
+#define __WASI_SOCK_PROTO_PROTO_24 (UINT16_C(24))
+#define __WASI_SOCK_PROTO_PROTO_240 (UINT16_C(240))
+#define __WASI_SOCK_PROTO_PROTO_241 (UINT16_C(241))
+#define __WASI_SOCK_PROTO_PROTO_242 (UINT16_C(242))
+#define __WASI_SOCK_PROTO_PROTO_243 (UINT16_C(243))
+#define __WASI_SOCK_PROTO_PROTO_244 (UINT16_C(244))
+#define __WASI_SOCK_PROTO_PROTO_245 (UINT16_C(245))
+#define __WASI_SOCK_PROTO_PROTO_246 (UINT16_C(246))
+#define __WASI_SOCK_PROTO_PROTO_247 (UINT16_C(247))
+#define __WASI_SOCK_PROTO_PROTO_248 (UINT16_C(248))
+#define __WASI_SOCK_PROTO_PROTO_249 (UINT16_C(249))
+#define __WASI_SOCK_PROTO_PROTO_25 (UINT16_C(25))
+#define __WASI_SOCK_PROTO_PROTO_250 (UINT16_C(250))
+#define __WASI_SOCK_PROTO_PROTO_251 (UINT16_C(251))
+#define __WASI_SOCK_PROTO_PROTO_252 (UINT16_C(252))
+#define __WASI_SOCK_PROTO_PROTO_253 (UINT16_C(253))
+#define __WASI_SOCK_PROTO_PROTO_254 (UINT16_C(254))
+#define __WASI_SOCK_PROTO_PROTO_256 (UINT16_C(256))
+#define __WASI_SOCK_PROTO_PROTO_257 (UINT16_C(257))
+#define __WASI_SOCK_PROTO_PROTO_258 (UINT16_C(258))
+#define __WASI_SOCK_PROTO_PROTO_259 (UINT16_C(259))
+#define __WASI_SOCK_PROTO_PROTO_26 (UINT16_C(26))
+#define __WASI_SOCK_PROTO_PROTO_260 (UINT16_C(260))
+#define __WASI_SOCK_PROTO_PROTO_261 (UINT16_C(261))
+#define __WASI_SOCK_PROTO_PROTO_27 (UINT16_C(27))
+#define __WASI_SOCK_PROTO_PROTO_28 (UINT16_C(28))
+#define __WASI_SOCK_PROTO_PROTO_3 (UINT16_C(3))
+#define __WASI_SOCK_PROTO_PROTO_30 (UINT16_C(30))
+#define __WASI_SOCK_PROTO_PROTO_31 (UINT16_C(31))
+#define __WASI_SOCK_PROTO_PROTO_32 (UINT16_C(32))
+#define __WASI_SOCK_PROTO_PROTO_34 (UINT16_C(34))
+#define __WASI_SOCK_PROTO_PROTO_35 (UINT16_C(35))
+#define __WASI_SOCK_PROTO_PROTO_36 (UINT16_C(36))
+#define __WASI_SOCK_PROTO_PROTO_37 (UINT16_C(37))
+#define __WASI_SOCK_PROTO_PROTO_38 (UINT16_C(38))
+#define __WASI_SOCK_PROTO_PROTO_39 (UINT16_C(39))
+#define __WASI_SOCK_PROTO_PROTO_40 (UINT16_C(40))
+#define __WASI_SOCK_PROTO_PROTO_42 (UINT16_C(42))
 #define __WASI_SOCK_PROTO_PROTO_45 (UINT16_C(45))
 #define __WASI_SOCK_PROTO_PROTO_48 (UINT16_C(48))
 #define __WASI_SOCK_PROTO_PROTO_49 (UINT16_C(49))
@@ -6370,6 +6322,8 @@
 #define __WASI_STREAM_SECURITY_DOUBLE_ENCRYPTION ((__wasi_stream_security_t)(1 << 3))
 #define __WASI_STREAM_SECURITY_UNENCRYPTED ((__wasi_stream_security_t)(1 << 0))
 #define __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME ((__wasi_subclockflags_t)(1 << 0))
+#define __WASI_THREAD_FLAGS_DLERROR_FLAG ((__wasi_thread_flags_t)(1 << 1))
+#define __WASI_THREAD_FLAGS_TSD_USED ((__wasi_thread_flags_t)(1 << 0))
 #define __WASI_WHENCE_CUR (UINT8_C(1))
 #define __WASI_WHENCE_END (UINT8_C(2))
 #define __WASI_WHENCE_SET (UINT8_C(0))
@@ -6382,6 +6336,9 @@
 #define __WINT_WIDTH__ 32
 #define __WNOTHREAD 0x20000000
 #define __WORDSIZE 64
+#define __W_CONTINUED 0xffff
+#define __W_EXITCODE(ret,sig) ((ret) << 8 | (sig))
+#define __W_STOPCODE(sig) ((sig) << 8 | 0x7f)
 #define __alignas_is_defined 1
 #define __alignof_is_defined 1
 #define __bitop(x,i,o) ((x)[(i)/8] o (1<<(i)%8))
@@ -6401,7 +6358,6 @@
 #define __tg_real_remquo(x,y,z) (__RETCAST_2(x, y)( __FLT(x) && __FLT(y) ? remquof(x, y, z) : __LDBL((x)+(y)) ? remquol(x, y, z) : remquo(x, y, z) ))
 #define __tm_gmtoff tm_gmtoff
 #define __tm_zone tm_zone
-#define __ucontext ucontext
 #define __va_copy(d,s) __builtin_va_copy(d,s)
 #define __wasi__ 1
 #define __wasi_api_h 
@@ -6432,24 +6388,24 @@
 #define __wasilibc___macro_PAGESIZE_h 
 #define __wasilibc___mode_t_h 
 #define __wasilibc___seek_h 
-#define __wasilibc___struct_dirent_h
-#define __wasilibc___struct_group_filter_h
-#define __wasilibc___struct_group_req_h
-#define __wasilibc___struct_group_source_req_h
-#define __wasilibc___struct_if_addrs_h
-#define __wasilibc___struct_in6_addr_h
-#define __wasilibc___struct_in6_mtuinfo_h
-#define __wasilibc___struct_in6_pktinfo_h
-#define __wasilibc___struct_in_addr_h
-#define __wasilibc___struct_in_pktinfo_h
-#define __wasilibc___struct_iovec_h
-#define __wasilibc___struct_ip_mreq_h
-#define __wasilibc___struct_ip_mreq_source_h
-#define __wasilibc___struct_ip_mreqn_h
-#define __wasilibc___struct_ip_msfilter_h
-#define __wasilibc___struct_ip_opts_h
-#define __wasilibc___struct_ipv6_mreq_h
-#define __wasilibc___struct_msghdr_h
+#define __wasilibc___struct_dirent_h 
+#define __wasilibc___struct_group_filter_h 
+#define __wasilibc___struct_group_req_h 
+#define __wasilibc___struct_group_source_req_h 
+#define __wasilibc___struct_if_addrs_h 
+#define __wasilibc___struct_in6_addr_h 
+#define __wasilibc___struct_in6_mtuinfo_h 
+#define __wasilibc___struct_in6_pktinfo_h 
+#define __wasilibc___struct_in_addr_h 
+#define __wasilibc___struct_in_pktinfo_h 
+#define __wasilibc___struct_iovec_h 
+#define __wasilibc___struct_ip_mreq_h 
+#define __wasilibc___struct_ip_mreq_source_h 
+#define __wasilibc___struct_ip_mreqn_h 
+#define __wasilibc___struct_ip_msfilter_h 
+#define __wasilibc___struct_ip_opts_h 
+#define __wasilibc___struct_ipv6_mreq_h 
+#define __wasilibc___struct_msghdr_h 
 #define __wasilibc___struct_pollfd_h 
 #define __wasilibc___struct_rusage_h 
 #define __wasilibc___struct_sockaddr_h 
@@ -6490,20 +6446,10 @@
 #define __wasm__ 1
 #define __wasm_atomics__ 1
 #define __wasm_bulk_memory__ 1
-#define __wasm_mutable_globals__ 1
-#define __wasm_sign_ext__ 1
 #define _tolower(a) ((a)|0x20)
 #define _toupper(a) ((a)&0x5f)
 #define acos(x) __tg_real_complex(acos, (x))
 #define acosh(x) __tg_real_complex(acosh, (x))
-#define aio_cancel64 aio_cancel
-#define aio_error64 aio_error
-#define aio_fsync64 aio_fsync
-#define aio_read64 aio_read
-#define aio_return64 aio_return
-#define aio_suspend64 aio_suspend
-#define aio_write64 aio_write
-#define aiocb64 aiocb
 #define alignas _Alignas
 #define alignof _Alignof
 #define alloca __builtin_alloca
@@ -6656,7 +6602,6 @@
 #define letoh32(x) (uint32_t)(x)
 #define letoh64(x) (uint64_t)(x)
 #define lgamma(x) __tg_real(lgamma, (x))
-#define lio_listio64 lio_listio
 #define llrint(x) __tg_real_nocast(llrint, (x))
 #define llround(x) __tg_real_nocast(llround, (x))
 #define loff_t off_t
@@ -6752,36 +6697,11 @@
 #define rr_code rr_hdr.icmp6_code
 #define rr_seqnum rr_hdr.icmp6_data32[0]
 #define rr_type rr_hdr.icmp6_type
-#define sa_handler __sa_handler.sa_handler
-#define sa_sigaction __sa_handler.sa_sigaction
 #define scalbln(x,y) __tg_real_2_1(scalbln, (x), (y))
 #define scalbn(x,y) __tg_real_2_1(scalbn, (x), (y))
 #define scandir64 scandir
 #define setbit(x,i) __bitop(x,i,|=)
 #define setjmp setjmp
-#define si_addr __si_fields.__sigfault.si_addr
-#define si_addr_lsb __si_fields.__sigfault.si_addr_lsb
-#define si_arch __si_fields.__sigsys.si_arch
-#define si_band __si_fields.__sigpoll.si_band
-#define si_call_addr __si_fields.__sigsys.si_call_addr
-#define si_fd __si_fields.__sigpoll.si_fd
-#define si_int si_value.sival_int
-#define si_lower __si_fields.__sigfault.__first.__addr_bnd.si_lower
-#define si_overrun __si_fields.__si_common.__first.__timer.si_overrun
-#define si_pid __si_fields.__si_common.__first.__piduid.si_pid
-#define si_pkey __si_fields.__sigfault.__first.si_pkey
-#define si_ptr si_value.sival_ptr
-#define si_status __si_fields.__si_common.__second.__sigchld.si_status
-#define si_stime __si_fields.__si_common.__second.__sigchld.si_stime
-#define si_syscall __si_fields.__sigsys.si_syscall
-#define si_timerid __si_fields.__si_common.__first.__timer.si_timerid
-#define si_uid __si_fields.__si_common.__first.__piduid.si_uid
-#define si_upper __si_fields.__sigfault.__first.__addr_bnd.si_upper
-#define si_utime __si_fields.__si_common.__second.__sigchld.si_utime
-#define si_value __si_fields.__si_common.__second.si_value
-#define sigev_notify_attributes __sev_fields.__sev_thread.sigev_notify_attributes
-#define sigev_notify_function __sev_fields.__sev_thread.sigev_notify_function
-#define sigev_notify_thread_id __sev_fields.sigev_notify_thread_id
 #define signbit(x) (__builtin_signbit(x))
 #define sin(x) __tg_real_complex(sin, (x))
 #define sinh(x) __tg_real_complex(sinh, (x))

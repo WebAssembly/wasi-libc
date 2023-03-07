@@ -26,8 +26,10 @@ struct pthread {
 	/* Part 1 -- these fields may be external or
 	 * internal (accessed via asm) ABI. Do not change. */
 	struct pthread *self;
+#ifdef __wasilibc_unmodified_upstream
 #ifndef TLS_ABOVE_TP
 	uintptr_t *dtv;
+#endif
 #endif
 	struct pthread *prev, *next; /* non-ABI */
 	uintptr_t sysinfo;
@@ -166,11 +168,14 @@ extern hidden volatile int __eintr_valid_flag;
 
 hidden int __clone(int (*)(void *), void *, int, void *, ...);
 hidden int __set_thread_area(void *);
-#ifdef __wasilibc_unmodified_upstream
+#ifdef __wasilibc_unmodified_upstream /* WASI has no sigaction */
 hidden int __libc_sigaction(int, const struct sigaction *, struct sigaction *);
 #endif
 hidden void __unmapself(void *, size_t);
 
+#ifndef __wasilibc_unmodified_upstream
+hidden int __wasilibc_futex_wait(volatile void *, int, int, int64_t);
+#endif
 hidden int __timedwait(volatile int *, int, clockid_t, const struct timespec *, int);
 hidden int __timedwait_cp(volatile int *, int, clockid_t, const struct timespec *, int);
 hidden void __wait(volatile int *, volatile int *, int, int);
@@ -182,7 +187,7 @@ static inline void __wake(volatile void *addr, int cnt, int priv)
 	__syscall(SYS_futex, addr, FUTEX_WAKE|priv, cnt) != -ENOSYS ||
 	__syscall(SYS_futex, addr, FUTEX_WAKE, cnt);
 #else
-	__wasilibc_futex_wake((int*)addr, cnt);
+	__wasilibc_futex_wake_wasix((int*)addr, cnt);
 	//__builtin_wasm_memory_atomic_notify((int*)addr, cnt);
 #endif
 }
@@ -217,7 +222,11 @@ extern hidden unsigned __default_stacksize;
 extern hidden unsigned __default_guardsize;
 
 #define DEFAULT_STACK_SIZE 131072
+#ifdef __wasilibc_unmodified_upstream
 #define DEFAULT_GUARD_SIZE 8192
+#else
+#define DEFAULT_GUARD_SIZE 4096
+#endif
 
 #define DEFAULT_STACK_MAX (8<<20)
 #define DEFAULT_GUARD_MAX (1<<20)

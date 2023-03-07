@@ -13,14 +13,14 @@ EXTRA_CFLAGS ?= -O2 -DNDEBUG -ftls-model=local-exec -D_WASI_EMULATED_MMAN -D_WAS
 SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
 INSTALL_DIR ?= /usr/local
-# single or posix
+# single or posix; note that pthread support is still a work-in-progress.
 THREAD_MODEL ?= posix
 # dlmalloc or none
 MALLOC_IMPL ?= dlmalloc
 # yes or no
 BUILD_LIBC_TOP_HALF ?= yes
-# The directory where we're store intermediate artifacts.
-OBJDIR ?= $(CURDIR)/build
+# The directory where we will store intermediate artifacts.
+OBJDIR ?= build/$(TARGET_TRIPLE)
 
 # When the length is no larger than this threshold, we consider the
 # overhead of bulk memory opcodes to outweigh the performance benefit,
@@ -40,19 +40,22 @@ MULTIARCH_TRIPLE = $(TARGET_ARCH)-wasi
 
 # These variables describe the locations of various files and directories in
 # the source tree.
-DLMALLOC_DIR = $(CURDIR)/dlmalloc
+DLMALLOC_DIR = dlmalloc
 DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
 DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/dlmalloc.c
 DLMALLOC_INC = $(DLMALLOC_DIR)/include
-LIBC_BOTTOM_HALF_DIR = $(CURDIR)/libc-bottom-half
+EMMALLOC_DIR = emmalloc
+EMMALLOC_SOURCES = $(EMMALLOC_DIR)/emmalloc.c
+LIBC_BOTTOM_HALF_DIR = libc-bottom-half
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC = $(LIBC_BOTTOM_HALF_DIR)/cloudlibc/src
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC = $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/include
 LIBC_BOTTOM_HALF_HEADERS_PUBLIC = $(LIBC_BOTTOM_HALF_DIR)/headers/public
 LIBC_BOTTOM_HALF_HEADERS_PRIVATE = $(LIBC_BOTTOM_HALF_DIR)/headers/private
 LIBC_BOTTOM_HALF_SOURCES = $(LIBC_BOTTOM_HALF_DIR)/sources
 LIBC_BOTTOM_HALF_ALL_SOURCES = \
+    $(sort \
     $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
-    $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c)
+    $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c))
 
 # FIXME(https://reviews.llvm.org/D85567) - due to a bug in LLD the weak
 # references to a function defined in `chdir.c` only work if `chdir.c` is at the
@@ -62,15 +65,15 @@ LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_SOURCES)/chdir.c
 LIBC_BOTTOM_HALF_ALL_SOURCES := $(LIBC_BOTTOM_HALF_ALL_SOURCES) $(LIBC_BOTTOM_HALF_SOURCES)/chdir.c
 
 LIBWASI_EMULATED_MMAN_SOURCES = \
-    $(shell find $(LIBC_BOTTOM_HALF_DIR)/mman -name \*.c)
+    $(sort $(shell find $(LIBC_BOTTOM_HALF_DIR)/mman -name \*.c))
 LIBWASI_EMULATED_PROCESS_CLOCKS_SOURCES = \
-    $(shell find $(LIBC_BOTTOM_HALF_DIR)/clocks -name \*.c)
+    $(sort $(shell find $(LIBC_BOTTOM_HALF_DIR)/clocks -name \*.c))
 LIBWASI_EMULATED_GETPID_SOURCES = \
-    $(shell find $(LIBC_BOTTOM_HALF_DIR)/getpid -name \*.c)
+    $(sort $(shell find $(LIBC_BOTTOM_HALF_DIR)/getpid -name \*.c))
 LIBWASI_EMULATED_SIGNAL_SOURCES = \
-    $(shell find $(LIBC_BOTTOM_HALF_DIR)/signal -name \*.c)
+    $(sort $(shell find $(LIBC_BOTTOM_HALF_DIR)/signal -name \*.c))
 LIBC_BOTTOM_HALF_CRT_SOURCES = $(wildcard $(LIBC_BOTTOM_HALF_DIR)/crt/*.c)
-LIBC_TOP_HALF_DIR = $(CURDIR)/libc-top-half
+LIBC_TOP_HALF_DIR = libc-top-half
 LIBC_TOP_HALF_MUSL_DIR = $(LIBC_TOP_HALF_DIR)/musl
 LIBC_TOP_HALF_MUSL_SRC_DIR = $(LIBC_TOP_HALF_MUSL_DIR)/src
 LIBC_TOP_HALF_MUSL_INC = $(LIBC_TOP_HALF_MUSL_DIR)/include
@@ -143,6 +146,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         fcntl/creat.c \
         dirent/alphasort.c \
         dirent/versionsort.c \
+        env/__stack_chk_fail.c \
         env/clearenv.c \
         env/getenv.c \
         env/putenv.c \
@@ -166,6 +170,8 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         linux/wait4.c \
         linux/eventfd.c \
         stat/futimesat.c \
+        legacy/getpagesize.c \
+        thread/thrd_sleep.c \
     ) \
     $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/*.c)) \
@@ -211,6 +217,92 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  %/cimagf.c %/cimag.c %cimagl.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
+
+ifeq ($(THREAD_MODEL), posix)
+LIBC_TOP_HALF_MUSL_SOURCES += \
+    $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
+        env/__init_tls.c \
+        stdio/__lockfile.c \
+        stdio/flockfile.c \
+        stdio/ftrylockfile.c \
+        stdio/funlockfile.c \
+        thread/__lock.c \
+        thread/__wait.c \
+        thread/__timedwait.c \
+        thread/default_attr.c \
+        thread/pthread_attr_destroy.c \
+        thread/pthread_attr_get.c \
+        thread/pthread_attr_init.c \
+        thread/pthread_attr_setstack.c \
+        thread/pthread_attr_setdetachstate.c \
+        thread/pthread_attr_setstacksize.c \
+        thread/pthread_barrier_destroy.c \
+        thread/pthread_barrier_init.c \
+        thread/pthread_barrier_wait.c \
+        thread/pthread_cleanup_push.c \
+        thread/pthread_cond_broadcast.c \
+        thread/pthread_cond_destroy.c \
+        thread/pthread_cond_init.c \
+        thread/pthread_cond_signal.c \
+        thread/pthread_cond_timedwait.c \
+        thread/pthread_cond_wait.c \
+        thread/pthread_condattr_destroy.c \
+        thread/pthread_condattr_init.c \
+        thread/pthread_condattr_setclock.c \
+        thread/pthread_condattr_setpshared.c \
+        thread/pthread_create.c \
+        thread/pthread_detach.c \
+        thread/pthread_equal.c \
+        thread/pthread_getspecific.c \
+        thread/pthread_join.c \
+        thread/pthread_key_create.c \
+        thread/pthread_mutex_consistent.c \
+        thread/pthread_mutex_destroy.c \
+        thread/pthread_mutex_init.c \
+        thread/pthread_mutex_getprioceiling.c \
+        thread/pthread_mutex_lock.c \
+        thread/pthread_mutex_timedlock.c \
+        thread/pthread_mutex_trylock.c \
+        thread/pthread_mutex_unlock.c \
+        thread/pthread_mutexattr_destroy.c \
+        thread/pthread_mutexattr_init.c \
+        thread/pthread_mutexattr_setprotocol.c \
+        thread/pthread_mutexattr_setpshared.c \
+        thread/pthread_mutexattr_setrobust.c \
+        thread/pthread_mutexattr_settype.c \
+        thread/pthread_once.c \
+        thread/pthread_rwlock_destroy.c \
+        thread/pthread_rwlock_init.c \
+        thread/pthread_rwlock_rdlock.c \
+        thread/pthread_rwlock_timedrdlock.c \
+        thread/pthread_rwlock_timedwrlock.c \
+        thread/pthread_rwlock_tryrdlock.c \
+        thread/pthread_rwlock_trywrlock.c \
+        thread/pthread_rwlock_unlock.c \
+        thread/pthread_rwlock_wrlock.c \
+        thread/pthread_rwlockattr_destroy.c \
+        thread/pthread_rwlockattr_init.c \
+        thread/pthread_rwlockattr_setpshared.c \
+        thread/pthread_setcancelstate.c \
+        thread/pthread_setspecific.c \
+        thread/pthread_self.c \
+        thread/pthread_spin_destroy.c \
+        thread/pthread_spin_init.c \
+        thread/pthread_spin_lock.c \
+        thread/pthread_spin_trylock.c \
+        thread/pthread_spin_unlock.c \
+        thread/pthread_testcancel.c \
+        thread/sem_destroy.c \
+        thread/sem_getvalue.c \
+        thread/sem_init.c \
+        thread/sem_post.c \
+        thread/sem_timedwait.c \
+        thread/sem_trywait.c \
+        thread/sem_wait.c \
+        thread/$(TARGET_ARCH)/wasi_thread_start.s \
+    )
+endif
+
 MUSL_PRINTSCAN_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/floatscan.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfprintf.c \
@@ -226,12 +318,13 @@ LIBC_TOP_HALF_HEADERS_PRIVATE = $(LIBC_TOP_HALF_DIR)/headers/private
 LIBC_TOP_HALF_SOURCES = $(LIBC_TOP_HALF_DIR)/sources
 LIBC_TOP_HALF_ALL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SOURCES) \
-    $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.c)
+    $(sort $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.[cs]))
 
 # Add any extra flags
 CFLAGS = $(EXTRA_CFLAGS)
 # Set the target.
 CFLAGS += --target=$(TARGET_TRIPLE)
+ASMFLAGS += --target=$(TARGET_TRIPLE)
 # WebAssembly floating-point match doesn't trap.
 # TODO: Add -fno-signaling-nans when the compiler supports it.
 CFLAGS += -fno-trapping-math
@@ -253,7 +346,12 @@ ifeq ($(THREAD_MODEL), single)
 CFLAGS += -mthread-model single
 endif
 ifeq ($(THREAD_MODEL), posix)
-CFLAGS += -mthread-model posix -pthread
+# Specify the tls-model until LLVM 15 is released (which should contain
+# https://reviews.llvm.org/D130053).
+CFLAGS += -mthread-model posix -pthread -ftls-model=local-exec
+
+# Include cloudlib's directory to access the structure definition of clockid_t
+CFLAGS += -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 endif
 
 # Expose the public headers to the implementation. We use `-isystem` for
@@ -272,12 +370,16 @@ CFLAGS += -isystem "$(SYSROOT_INC)"
 
 # These variables describe the locations of various files and directories in
 # the build tree.
-objs = $(patsubst $(CURDIR)/%.c,$(OBJDIR)/%.o,$(1))
+objs = $(patsubst %.c,$(OBJDIR)/%.o,$(1))
+asmobjs = $(patsubst %.s,$(OBJDIR)/%.o,$(1))
 DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
+EMMALLOC_OBJS = $(call objs,$(EMMALLOC_SOURCES))
 LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
-LIBC_TOP_HALF_ALL_OBJS = $(call objs,$(LIBC_TOP_HALF_ALL_SOURCES))
+LIBC_TOP_HALF_ALL_OBJS = $(call asmobjs,$(call objs,$(LIBC_TOP_HALF_ALL_SOURCES)))
 ifeq ($(MALLOC_IMPL),dlmalloc)
 LIBC_OBJS += $(DLMALLOC_OBJS)
+else ifeq ($(MALLOC_IMPL),emmalloc)
+LIBC_OBJS += $(EMMALLOC_OBJS)
 else ifeq ($(MALLOC_IMPL),none)
 # No object files to add.
 else
@@ -297,12 +399,13 @@ LIBWASI_EMULATED_MMAN_OBJS = $(call objs,$(LIBWASI_EMULATED_MMAN_SOURCES))
 LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS = $(call objs,$(LIBWASI_EMULATED_PROCESS_CLOCKS_SOURCES))
 LIBWASI_EMULATED_GETPID_OBJS = $(call objs,$(LIBWASI_EMULATED_GETPID_SOURCES))
 LIBWASI_EMULATED_SIGNAL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_SOURCES))
+LIBC_BOTTOM_HALF_CRT_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_CRT_SOURCES))
 
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
-SYSROOT_LIB := $(SYSROOT)/lib/$(MULTIARCH_TRIPLE)
+SYSROOT_LIB := $(SYSROOT)/lib/$(TARGET_TRIPLE)
 SYSROOT_INC = $(SYSROOT)/include
-SYSROOT_SHARE = $(SYSROOT)/share/$(MULTIARCH_TRIPLE)
+SYSROOT_SHARE = $(SYSROOT)/share/$(TARGET_TRIPLE)
 
 # Files from musl's include directory that we don't want to install in the
 # sysroot's include directory.
@@ -372,11 +475,12 @@ MUSL_OMIT_HEADERS += \
     "netinet/if_ether.h" \
     "netinet/ether.h" \
     "sys/timerfd.h" \
-    "sys/sysmacros.h"
+    "sys/sysmacros.h" \
+    "aio.h"
 
 ifeq ($(THREAD_MODEL), single)
 # Remove headers not supported in single-threaded mode.
-MUSL_OMIT_HEADERS += "aio.h" "pthread.h"
+MUSL_OMIT_HEADERS += "pthread.h"
 endif
 
 default: finish
@@ -396,13 +500,13 @@ $(SYSROOT_LIB)/libwasi-emulated-getpid.a: $(LIBWASI_EMULATED_GETPID_OBJS)
 %.a:
 	@mkdir -p "$(@D)"
 	# On Windows, the commandline for the ar invocation got too long, so it needs to be split up.
-	$(AR) crs $@ $(wordlist 1, 199, $^)
-	$(AR) crs $@ $(wordlist 200, 399, $^)
-	$(AR) crs $@ $(wordlist 400, 599, $^)
-	$(AR) crs $@ $(wordlist 600, 799, $^)
+	$(AR) crs $@ $(wordlist 1, 199, $(sort $^))
+	$(AR) crs $@ $(wordlist 200, 399, $(sort $^))
+	$(AR) crs $@ $(wordlist 400, 599, $(sort $^))
+	$(AR) crs $@ $(wordlist 600, 799, $(sort $^))
 	# This might eventually overflow again, but at least it'll do so in a loud way instead of
 	# silently dropping the tail.
-	$(AR) crs $@ $(wordlist 800, 100000, $^)
+	$(AR) crs $@ $(wordlist 800, 100000, $(sort $^))
 
 $(MUSL_PRINTSCAN_OBJS): CFLAGS += \
 	    -D__wasilibc_printscan_full_support_option="\"add -lc-printscan-long-double to the link command\""
@@ -418,17 +522,21 @@ $(BULK_MEMORY_OBJS): CFLAGS += \
 $(BULK_MEMORY_OBJS): CFLAGS += \
         -DBULK_MEMORY_THRESHOLD=$(BULK_MEMORY_THRESHOLD)
 
-$(OBJDIR)/%.long-double.o: $(CURDIR)/%.c include_dirs
+$(OBJDIR)/%.long-double.o: %.c include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
-$(OBJDIR)/%.no-floating-point.o: $(CURDIR)/%.c include_dirs
-	@mkdir -p "$(@D)"	
-	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
-
-$(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
+$(OBJDIR)/%.no-floating-point.o: %.c include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
+
+$(OBJDIR)/%.o: %.c include_dirs
+	@mkdir -p "$(@D)"
+	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
+
+$(OBJDIR)/%.o: %.s include_dirs
+	@mkdir -p "$(@D)"
+	$(CC) $(ASMFLAGS) -o $@ -c $<
 
 -include $(shell find $(OBJDIR) -name \*.d)
 
@@ -482,15 +590,12 @@ include_dirs:
 	# Remove selected header files.
 	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
 
-startup_files: include_dirs
+startup_files: include_dirs $(LIBC_BOTTOM_HALF_CRT_OBJS)
 	#
-	# Build the startup files.
+	# Install the startup files (crt1.o etc).
 	#
-	@mkdir -p "$(OBJDIR)"
-	cd "$(OBJDIR)" && \
-	$(CC) $(CFLAGS) -c $(LIBC_BOTTOM_HALF_CRT_SOURCES) -MD -MP && \
 	mkdir -p "$(SYSROOT_LIB)" && \
-	mv *.o "$(SYSROOT_LIB)"
+	cp $(LIBC_BOTTOM_HALF_CRT_OBJS) "$(SYSROOT_LIB)"
 
 libc: include_dirs \
     $(SYSROOT_LIB)/libc.a \
@@ -536,7 +641,7 @@ check-symbols: startup_files libc
 	@# Ignore certain llvm builtin symbols such as those starting with __mul
 	@# since these dependencies can vary between llvm versions.
 	"$(NM)" --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libwasi-emulated-*.a "$(SYSROOT_LIB)"/*.o \
-	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_ALL=C sort > "$(DEFINED_SYMBOLS)"
+	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_ALL=C sort |uniq > "$(DEFINED_SYMBOLS)"
 	for undef_sym in $$("$(NM)" --undefined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libc-*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$(DEFINED_SYMBOLS)" || echo $$undef_sym; \
@@ -570,11 +675,13 @@ check-symbols: startup_files libc
 	@# its builtin include path first, which produces compiler-specific
 	@# output.
 	@#
-	@# TODO: Undefine __FLOAT128__ for now since it's not in clang 8.0.
-	@# TODO: Filter out __FLT16_* for now, as not all versions of clang have these.
 	@# TODO: Filter out __NO_MATH_ERRNO_ and a few __*WIDTH__ that are new to clang 14.
+	@# TODO: Filter out __GCC_HAVE_SYNC_COMPARE_AND_SWAP_* that are new to clang 16.
 	@# TODO: clang defined __FLT_EVAL_METHOD__ until clang 15, so we force-undefine it
 	@# for older versions.
+	@# TODO: Undefine __wasm_mutable_globals__ and __wasm_sign_ext__, that are new to
+	@# clang 16 for -mcpu=generic.
+	@# TODO: As of clang 16, __GNUC_VA_LIST is #defined without a value.
 	$(CC) $(CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -isystem $(SYSROOT_INC) \
 	    -std=gnu17 \
@@ -588,22 +695,24 @@ check-symbols: startup_files libc
 	    -U__clang_version__ \
 	    -U__clang_literal_encoding__ \
 	    -U__clang_wide_literal_encoding__ \
+	    -U__wasm_mutable_globals__ \
+	    -U__wasm_sign_ext__ \
 	    -U__GNUC__ \
 	    -U__GNUC_MINOR__ \
 	    -U__GNUC_PATCHLEVEL__ \
 	    -U__VERSION__ \
-	    -U__FLOAT128__ \
 	    -U__NO_MATH_ERRNO__ \
 	    -U__BITINT_MAXWIDTH__ \
 	    -U__FLT_EVAL_METHOD__ -Wno-builtin-macro-redefined \
 	    | sed -e 's/__[[:upper:][:digit:]]*_ATOMIC_\([[:upper:][:digit:]_]*\)_LOCK_FREE/__compiler_ATOMIC_\1_LOCK_FREE/' \
-	    | grep -v '^#define __FLT16_' \
+	    | sed -e 's/__GNUC_VA_LIST $$/__GNUC_VA_LIST 1/' \
 	    | grep -v '^#define __\(BOOL\|INT_\(LEAST\|FAST\)\(8\|16\|32\|64\)\|INT\|LONG\|LLONG\|SHRT\)_WIDTH__' \
+	    | grep -v '^#define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_\(1\|2\|4\|8\)' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
 
 	# Check that the computed metadata matches the expected metadata.
 	# This ignores whitespace because on Windows the output has CRLF line endings.
-	diff -wur "$(CURDIR)/expected/$(MULTIARCH_TRIPLE)" "$(SYSROOT_SHARE)"
+	diff -wur "expected/$(TARGET_TRIPLE)" "$(SYSROOT_SHARE)"
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"

@@ -1,4 +1,4 @@
-#include <common/errno.h>
+#include <errno.h>
 #include <common/net.h>
 #include <sys/socket.h>
 
@@ -17,7 +17,7 @@ int bind(int socket, const struct sockaddr *restrict addr, socklen_t addrlen) {
 
   error = __wasi_sock_bind(socket, &peer_addr);
   if (error != 0) {
-    errno = errno_fixup_socket(socket, error);
+    errno = error;
     return -1;
   }
 

@@ -109,7 +109,9 @@ E(ECONNABORTED, "Connection aborted")
 E(ENOBUFS,      "No buffer space available")
 E(EISCONN,      "Socket is connected")
 E(ENOTCONN,     "Socket not connected")
+#ifdef __wasilibc_unmodified_upstream // errno value not in WASI
 E(ESHUTDOWN,    "Cannot send after socket shutdown")
+#endif
 E(EALREADY,     "Operation already in progress")
 E(EINPROGRESS,  "Operation in progress")
 E(ESTALE,       "Stale file handle")
@@ -122,8 +124,17 @@ E(ENOMEDIUM,    "No medium found")
 E(EMEDIUMTYPE,  "Wrong medium type")
 #endif
 E(EMULTIHOP,    "Multihop attempted")
+#ifdef __wasilibc_unmodified_upstream // errno value not in WASI
+E(ENOKEY,       "Required key not available")
+E(EKEYEXPIRED,  "Key has expired")
+E(EKEYREVOKED,  "Key has been revoked")
+E(EKEYREJECTED, "Key was rejected by service")
+#endif
 #ifdef __wasilibc_unmodified_upstream // errno value in WASI and not musl
 #else
 // WASI adds this errno code.
 E(ENOTCAPABLE,  "Capabilities insufficient")
+// WASIX adds these errno code.
+E(EMEMVIOLATION,  "Memory access violation")
+E(EUNKNOWN,  "Unknown")
 #endif

@@ -5214,25 +5214,42 @@ static void internal_inspect_all(mstate m,
 /* ------------------ Exported try_init_allocator -------------------- */
 
 /* Symbol marking the end of data, bss and explicit stack, provided by wasm-ld. */
-extern unsigned char __heap_base;
+extern char __heap_base;
+extern char __heap_end __attribute__((__weak__));
 
 /* Initialize the initial state of dlmalloc to be able to use free memory between __heap_base and initial. */
 static void try_init_allocator(void) {
   /* Check that it is a first-time initialization. */
   assert(!is_initialized(gm));
 
-  char *base = (char *)&__heap_base;
-  /* Calls sbrk(0) that returns the initial memory position. */
-  char *init = (char *)CALL_MORECORE(0);
-  int initial_heap_size = init - base;
+  /* Initialize mstate. */
+  ensure_initialization();
+
+  char *base = &__heap_base;
+  // Try to use the linker pseudo-symbol `__heap_end` for the initial size of
+  // the heap, but if that's not defined due to LLVM being too old perhaps then
+  // round up `base` to the nearest `PAGESIZE`. The initial size of linear
+  // memory will be at least the heap base to this page boundary, and it's then
+  // assumed that the initial linear memory image was truncated at that point.
+  // While this reflects the default behavior of `wasm-ld` it is also possible
+  // for users to craft larger linear memories by passing options to extend
+  // beyond this threshold. In this situation the memory will not be used for
+  // dlmalloc.
+  //
+  // Note that `sbrk(0)`, or in dlmalloc-ese `CALL_MORECORE(0)`, is specifically
+  // not used here. That captures the current size of the heap but is only
+  // correct if the we're the first to try to grow the heap. If the heap has
+  // grown elsewhere, such as a different allocator in place, then this would
+  // incorrectly claim such memroy as our own.
+  char *end = &__heap_end;
+  if (end == NULL)
+    end = (char*) page_align((size_t) base);
+  size_t initial_heap_size = end - base;
 
   /* Check that initial heap is long enough to serve a minimal allocation request. */
   if (initial_heap_size <= MIN_CHUNK_SIZE + TOP_FOOT_SIZE + MALLOC_ALIGNMENT) {
     return;
   }
-
-  /* Initialize mstate. */
-  ensure_initialization();
 
   /* Initialize the dlmalloc internal state. */
   gm->least_addr = base;

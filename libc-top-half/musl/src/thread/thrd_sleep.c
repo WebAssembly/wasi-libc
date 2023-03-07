@@ -1,6 +1,7 @@
 #include <threads.h>
 #include <time.h>
 #include <errno.h>
+#include "syscall.h"
 
 int thrd_sleep(const struct timespec *req, struct timespec *rem)
 {

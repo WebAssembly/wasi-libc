@@ -1,7 +1,5 @@
 _CLOCK_MONOTONIC
-_CLOCK_PROCESS_CPUTIME_ID
 _CLOCK_REALTIME
-_CLOCK_THREAD_CPUTIME_ID
 _Exit
 _Fork
 _IO_feof_unlocked
@@ -31,6 +29,7 @@ __c_locale
 __cancel
 __clock
 __clock_gettime
+__clock_nanosleep
 __clock_settime
 __clone
 __copy_tls
@@ -53,16 +52,17 @@ __daylight
 __default_guardsize
 __default_stacksize
 __des_setkey
-__dl_thread_cleanup
 __dlerror_lockptr
 __do_cleanup_pop
 __do_cleanup_push
 __do_des
 __do_orphaned_stdio_locks
+__dummy_reference
 __duplocale
 __eintr_handler_lock
 __eintr_valid_flag
 __env_rm_add
+__errno_location
 __execvp
 __execvpe
 __exp2f_data
@@ -96,8 +96,6 @@ __fsmu8
 __ftello
 __ftello_unlocked
 __funcs_on_exit
-__funcs_on_exit
-__funcs_on_quick_exit
 __funcs_on_quick_exit
 __futimesat
 __fwritable
@@ -119,7 +117,6 @@ __hwcap
 __inet_aton
 __inhibit_ptc
 __init_ssp
-__init_tls
 __init_tp
 __intscan
 __invtrigl_R
@@ -164,7 +161,6 @@ __isxdigit_l
 __lctrans
 __lctrans_cur
 __lctrans_impl
-__lctrans_impl
 __ldexp_cexp
 __ldexp_cexpf
 __ldso_atfork
@@ -189,7 +185,6 @@ __log2f_data
 __log_data
 __logf_data
 __lseek
-__main_argc_argv
 __main_void
 __malloc_atfork
 __math_divzero
@@ -203,7 +198,6 @@ __math_uflow
 __math_uflowf
 __math_xflow
 __math_xflowf
-__membarrier_init
 __memrchr
 __mkostemps
 __mo_lookup
@@ -217,7 +211,6 @@ __ofl_lock
 __ofl_unlock
 __optpos
 __optreset
-__original_main
 __overflow
 __p1evll
 __parsespent
@@ -292,13 +285,9 @@ __stack_chk_fail_local
 __stack_chk_guard
 __stderr_FILE
 __stderr_used
-__stderr_used
-__stderr_used
 __stdin_FILE
 __stdin_used
-__stdin_used
 __stdio_close
-__stdio_exit
 __stdio_exit
 __stdio_exit_needed
 __stdio_ofl_lockptr
@@ -306,8 +295,6 @@ __stdio_read
 __stdio_seek
 __stdio_write
 __stdout_FILE
-__stdout_used
-__stdout_used
 __stdout_used
 __stdout_write
 __stpcpy
@@ -421,6 +408,7 @@ __wasi_futex_wake_all
 __wasi_getcwd
 __wasi_http_request
 __wasi_http_status
+__wasi_init_tp
 __wasi_path_create_directory
 __wasi_path_filestat_get
 __wasi_path_filestat_set_times
@@ -495,21 +483,26 @@ __wasi_thread_parallelism
 __wasi_thread_signal
 __wasi_thread_sleep
 __wasi_thread_spawn
+__wasi_thread_start_C
 __wasi_tty_get
 __wasi_tty_set
 __wasi_ws_connect
 __wasilibc_access
+__wasilibc_cwd
+__wasilibc_cwd_lock
+__wasilibc_cwd_unlock
 __wasilibc_deinitialize_environ
 __wasilibc_dttoif
 __wasilibc_ensure_environ
-__wasilibc_environ
 __wasilibc_environ
 __wasilibc_environ_init
 __wasilibc_fd_renumber
 __wasilibc_find_abspath
 __wasilibc_find_relpath
+__wasilibc_find_relpath_alloc
 __wasilibc_futex_wait
-__wasilibc_futex_wake
+__wasilibc_futex_wait_wasix
+__wasilibc_futex_wake_wasix
 __wasilibc_get_environ
 __wasilibc_get_stack_pointer
 __wasilibc_get_tls_base
@@ -520,7 +513,6 @@ __wasilibc_link
 __wasilibc_link_newat
 __wasilibc_link_oldat
 __wasilibc_longjmp
-__wasilibc_maybe_reinitialize_environ_eagerly
 __wasilibc_maybe_reinitialize_environ_eagerly
 __wasilibc_nocwd___wasilibc_rmdirat
 __wasilibc_nocwd___wasilibc_unlinkat
@@ -538,6 +530,7 @@ __wasilibc_nocwd_utimensat
 __wasilibc_open_nomode
 __wasilibc_pgrp
 __wasilibc_populate_preopens_init
+__wasilibc_pthread_self
 __wasilibc_register_preopened_fd
 __wasilibc_rename_newat
 __wasilibc_rename_oldat
@@ -568,7 +561,6 @@ _fork_internal
 _initialize
 _pthread_cleanup_pop
 _pthread_cleanup_push
-_start
 _start
 a64l
 abort
@@ -675,6 +667,7 @@ cfsetispeed
 cfsetospeed
 cfsetspeed
 chdir
+chdir_legacy
 chmod
 cimag
 cimagf
@@ -930,6 +923,7 @@ getc_unlocked
 getchar
 getchar_unlocked
 getcwd
+getcwd_legacy
 getdate
 getdate_err
 getdelim
@@ -953,6 +947,7 @@ getline
 getopt
 getopt_long
 getopt_long_only
+getpagesize
 getpeername
 getpgid
 getpgrp
@@ -967,7 +962,6 @@ getrandom
 getrlimit
 getrlimit64
 getrusage
-getrusage
 getsid
 getsockname
 getsockopt
@@ -976,7 +970,6 @@ getspnam
 getspnam_r
 getsubopt
 gettext
-gettimeofday
 gettimeofday
 getuid
 getw
@@ -1266,8 +1259,6 @@ pthread_attr_destroy
 pthread_attr_getdetachstate
 pthread_attr_getguardsize
 pthread_attr_getinheritsched
-pthread_attr_getschedparam
-pthread_attr_getschedpolicy
 pthread_attr_getscope
 pthread_attr_getstack
 pthread_attr_getstacksize
@@ -1295,7 +1286,6 @@ pthread_cond_signal
 pthread_cond_timedwait
 pthread_cond_wait
 pthread_condattr_destroy
-pthread_condattr_getclock
 pthread_condattr_getpshared
 pthread_condattr_init
 pthread_condattr_setclock
@@ -1693,6 +1683,7 @@ wait
 wait3
 wait4
 waitpid
+wasi_thread_start
 wcpcpy
 wcpncpy
 wcrtomb

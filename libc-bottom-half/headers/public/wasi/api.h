@@ -25,13 +25,13 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(intptr_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(uintptr_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == 8, "non-wasi data layout");
-typedef int64_t __wasi_int_t;
-typedef uint64_t __wasi_uint_t;
-_Static_assert(_Alignof(__wasi_int_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(__wasi_uint_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(intptr_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(uintptr_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
+typedef int32_t __wasi_int_t;
+typedef uint32_t __wasi_uint_t;
+_Static_assert(_Alignof(__wasi_int_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(__wasi_uint_t) == 4, "non-wasi data layout");
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -43,8 +43,8 @@ extern "C" {
  */
 typedef __wasi_uint_t __wasi_pointersize_t;
 
-_Static_assert(sizeof(__wasi_pointersize_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_pointersize_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_pointersize_t) == 4, "witx calculated size");
+_Static_assert(_Alignof(__wasi_pointersize_t) == 4, "witx calculated align");
 
 /**
  * Represents a number of items
@@ -122,39 +122,6 @@ _Static_assert(sizeof(__wasi_hugesize_t) == 16, "witx calculated size");
 _Static_assert(_Alignof(__wasi_hugesize_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_hugesize_t, b0) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_hugesize_t, b1) == 8, "witx calculated offset");
-
-/**
- * Represents a part of the stack (128 bytes)
- */
-typedef struct __wasi_stack_part_t {
-    __wasi_hugesize_t a1;
-
-    __wasi_hugesize_t a2;
-
-    __wasi_hugesize_t a3;
-
-    __wasi_hugesize_t a4;
-
-    __wasi_hugesize_t a5;
-
-    __wasi_hugesize_t a6;
-
-    __wasi_hugesize_t a7;
-
-    __wasi_hugesize_t a8;
-
-} __wasi_stack_part_t;
-
-_Static_assert(sizeof(__wasi_stack_part_t) == 128, "witx calculated size");
-_Static_assert(_Alignof(__wasi_stack_part_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_stack_part_t, a1) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_part_t, a2) == 16, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_part_t, a3) == 32, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_part_t, a4) == 48, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_part_t, a5) == 64, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_part_t, a6) == 80, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_part_t, a7) == 96, "witx calculated offset");
-_Static_assert(offsetof(__wasi_stack_part_t, a8) == 112, "witx calculated offset");
 
 /**
  * Represents the first 128 bits of a SHA256 hash
@@ -628,6 +595,16 @@ typedef uint16_t __wasi_errno_t;
  */
 #define __WASI_ERRNO_SHUTDOWN (UINT16_C(77))
 
+/**
+ * Memory access violation.
+ */
+#define __WASI_ERRNO_MEMVIOLATION (UINT16_C(78))
+
+/**
+ * Unknown error has occurred.
+ */
+#define __WASI_ERRNO_UNKNOWN (UINT16_C(79))
+
 _Static_assert(sizeof(__wasi_errno_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_errno_t) == 2, "witx calculated align");
 
@@ -956,6 +933,21 @@ _Static_assert(sizeof(__wasi_option_cid_t) == 16, "witx calculated size");
 _Static_assert(_Alignof(__wasi_option_cid_t) == 8, "witx calculated align");
 
 /**
+ * Represents an optional process ID
+ */
+typedef union __wasi_option_pid_u_t {
+    uint8_t none;
+    __wasi_pid_t some;
+} __wasi_option_pid_u_t;
+typedef struct __wasi_option_pid_t {
+    uint8_t tag;
+    __wasi_option_pid_u_t u;
+} __wasi_option_pid_t;
+
+_Static_assert(sizeof(__wasi_option_pid_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_option_pid_t) == 4, "witx calculated align");
+
+/**
  * Represents an optional file descriptior
  */
 typedef union __wasi_option_fd_u_t {
@@ -998,10 +990,10 @@ typedef struct __wasi_iovec_t {
 
 } __wasi_iovec_t;
 
-_Static_assert(sizeof(__wasi_iovec_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_iovec_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_iovec_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_iovec_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_iovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 4, "witx calculated offset");
 
 /**
  * A region of memory for scatter/gather writes.
@@ -1019,10 +1011,10 @@ typedef struct __wasi_ciovec_t {
 
 } __wasi_ciovec_t;
 
-_Static_assert(sizeof(__wasi_ciovec_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_ciovec_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_ciovec_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_ciovec_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_ciovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 4, "witx calculated offset");
 
 /**
  * Relative offset within a file.
@@ -2187,94 +2179,100 @@ typedef uint8_t __wasi_signal_t;
 #define __WASI_SIGNAL_TERM (UINT8_C(15))
 
 /**
+ * Stkflt
+ * Action: Ignored.
+ */
+#define __WASI_SIGNAL_STKFLT (UINT8_C(16))
+
+/**
  * Child process terminated, stopped, or continued.
  * Action: Ignored.
  */
-#define __WASI_SIGNAL_CHLD (UINT8_C(16))
+#define __WASI_SIGNAL_CHLD (UINT8_C(17))
 
 /**
  * Continue executing, if stopped.
  * Action: Continues executing, if stopped.
  */
-#define __WASI_SIGNAL_CONT (UINT8_C(17))
+#define __WASI_SIGNAL_CONT (UINT8_C(18))
 
 /**
  * Stop executing.
  * Action: Stops executing.
  */
-#define __WASI_SIGNAL_STOP (UINT8_C(18))
+#define __WASI_SIGNAL_STOP (UINT8_C(19))
 
 /**
  * Terminal stop signal.
  * Action: Stops executing.
  */
-#define __WASI_SIGNAL_TSTP (UINT8_C(19))
+#define __WASI_SIGNAL_TSTP (UINT8_C(20))
 
 /**
  * Background process attempting read.
  * Action: Stops executing.
  */
-#define __WASI_SIGNAL_TTIN (UINT8_C(20))
+#define __WASI_SIGNAL_TTIN (UINT8_C(21))
 
 /**
  * Background process attempting write.
  * Action: Stops executing.
  */
-#define __WASI_SIGNAL_TTOU (UINT8_C(21))
+#define __WASI_SIGNAL_TTOU (UINT8_C(22))
 
 /**
  * High bandwidth data is available at a socket.
  * Action: Ignored.
  */
-#define __WASI_SIGNAL_URG (UINT8_C(22))
+#define __WASI_SIGNAL_URG (UINT8_C(23))
 
 /**
  * CPU time limit exceeded.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_XCPU (UINT8_C(23))
+#define __WASI_SIGNAL_XCPU (UINT8_C(24))
 
 /**
  * File size limit exceeded.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_XFSZ (UINT8_C(24))
+#define __WASI_SIGNAL_XFSZ (UINT8_C(25))
 
 /**
  * Virtual timer expired.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_VTALRM (UINT8_C(25))
+#define __WASI_SIGNAL_VTALRM (UINT8_C(26))
 
 /**
  * Profiling timer expired.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_PROF (UINT8_C(26))
+#define __WASI_SIGNAL_PROF (UINT8_C(27))
 
 /**
  * Window changed.
  * Action: Ignored.
  */
-#define __WASI_SIGNAL_WINCH (UINT8_C(27))
+#define __WASI_SIGNAL_WINCH (UINT8_C(28))
 
 /**
  * I/O possible.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_POLL (UINT8_C(28))
+#define __WASI_SIGNAL_POLL (UINT8_C(29))
 
 /**
  * Power failure.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_PWR (UINT8_C(29))
+#define __WASI_SIGNAL_PWR (UINT8_C(30))
 
 /**
  * Bad system call.
  * Action: Terminates the process.
  */
-#define __WASI_SIGNAL_SYS (UINT8_C(30))
+#define __WASI_SIGNAL_SYS (UINT8_C(31))
 
 _Static_assert(sizeof(__wasi_signal_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_signal_t) == 1, "witx calculated align");
@@ -3566,7 +3564,280 @@ _Static_assert(sizeof(__wasi_prestat_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
 
 /**
- * @defgroup wasix_64v1
+ * join flags.
+ */
+typedef uint32_t __wasi_join_flags_t;
+
+/**
+ * Non-blocking join on the process
+ */
+#define __WASI_JOIN_FLAGS_NON_BLOCKING ((__wasi_join_flags_t)(1 << 0))
+
+/**
+ * Return if a process is stopped
+ */
+#define __WASI_JOIN_FLAGS_WAKE_STOPPED ((__wasi_join_flags_t)(1 << 1))
+
+/**
+ * What has happened with the proccess when we joined on it
+ */
+typedef uint8_t __wasi_join_status_type_t;
+
+/**
+ * Nothing has happened
+ */
+#define __WASI_JOIN_STATUS_TYPE_NOTHING (UINT8_C(0))
+
+/**
+ * The process has exited by a normal exit code
+ */
+#define __WASI_JOIN_STATUS_TYPE_EXIT_NORMAL (UINT8_C(1))
+
+/**
+ * The process was terminated by a signal
+ */
+#define __WASI_JOIN_STATUS_TYPE_EXIT_SIGNAL (UINT8_C(2))
+
+/**
+ * The process was stopped by a signal and can be resumed with SIGCONT
+ */
+#define __WASI_JOIN_STATUS_TYPE_STOPPED (UINT8_C(3))
+
+_Static_assert(sizeof(__wasi_join_status_type_t) == 1, "witx calculated size");
+_Static_assert(_Alignof(__wasi_join_status_type_t) == 1, "witx calculated align");
+
+/**
+ * Represents an errno and a signal
+ */
+typedef struct __wasi_errno_signal_t {
+    /**
+     * The exit code that was returned
+     */
+    __wasi_errno_t exit_code;
+
+    /**
+     * The signal that was returned
+     */
+    __wasi_signal_t signal;
+
+} __wasi_errno_signal_t;
+
+_Static_assert(sizeof(__wasi_errno_signal_t) == 4, "witx calculated size");
+_Static_assert(_Alignof(__wasi_errno_signal_t) == 2, "witx calculated align");
+_Static_assert(offsetof(__wasi_errno_signal_t, exit_code) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_errno_signal_t, signal) == 2, "witx calculated offset");
+
+/**
+ * join status.
+ */
+typedef union __wasi_join_status_u_t {
+    uint8_t nothing;
+    __wasi_errno_t exit_normal;
+    __wasi_errno_signal_t exit_signal;
+    __wasi_signal_t stopped;
+} __wasi_join_status_u_t;
+typedef struct __wasi_join_status_t {
+    uint8_t tag;
+    __wasi_join_status_u_t u;
+} __wasi_join_status_t;
+
+_Static_assert(sizeof(__wasi_join_status_t) == 6, "witx calculated size");
+_Static_assert(_Alignof(__wasi_join_status_t) == 2, "witx calculated align");
+
+/**
+ * thread state flags.
+ */
+typedef uint16_t __wasi_thread_flags_t;
+
+/**
+ * tsd_used
+ */
+#define __WASI_THREAD_FLAGS_TSD_USED ((__wasi_thread_flags_t)(1 << 0))
+
+/**
+ * dlerror_flag
+ */
+#define __WASI_THREAD_FLAGS_DLERROR_FLAG ((__wasi_thread_flags_t)(1 << 1))
+
+/**
+ * represents the state of a thread
+ */
+typedef struct __wasi_thread_state_t {
+    __wasi_pointersize_t thread_self;
+
+    __wasi_pointersize_t dtv;
+
+    __wasi_pointersize_t thread_prev;
+
+    __wasi_pointersize_t thread_next;
+
+    __wasi_pointersize_t sysinfo;
+
+    __wasi_pointersize_t canary;
+
+    int32_t tid;
+
+    int32_t errno_val;
+
+    int32_t detach_state;
+
+    int32_t cancel;
+
+    uint8_t canceldisable;
+
+    uint8_t cancelasync;
+
+    __wasi_thread_flags_t flags;
+
+    __wasi_pointersize_t map_base;
+
+    __wasi_pointersize_t map_size;
+
+    __wasi_pointersize_t stack;
+
+    __wasi_pointersize_t stack_size;
+
+    __wasi_pointersize_t guard_size;
+
+    __wasi_pointersize_t result;
+
+    __wasi_pointersize_t cancelbuf;
+
+    __wasi_pointersize_t tsd;
+
+    __wasi_pointersize_t robust_list_head;
+
+    __wasi_pointersize_t robust_list_off;
+
+    __wasi_pointersize_t robust_list_pending;
+
+    int32_t h_errno_val;
+
+    int32_t timer_id;
+
+    __wasi_pointersize_t locale;
+
+    int32_t killlock;
+
+    __wasi_pointersize_t dlerror_buf;
+
+    __wasi_pointersize_t stdio_locks;
+
+} __wasi_thread_state_t;
+
+_Static_assert(sizeof(__wasi_thread_state_t) == 112, "witx calculated size");
+_Static_assert(_Alignof(__wasi_thread_state_t) == 4, "witx calculated align");
+_Static_assert(offsetof(__wasi_thread_state_t, thread_self) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, dtv) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, thread_prev) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, thread_next) == 12, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, sysinfo) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, canary) == 20, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, tid) == 24, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, errno_val) == 28, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, detach_state) == 32, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, cancel) == 36, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, canceldisable) == 40, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, cancelasync) == 41, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, flags) == 42, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, map_base) == 44, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, map_size) == 48, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, stack) == 52, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, stack_size) == 56, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, guard_size) == 60, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, result) == 64, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, cancelbuf) == 68, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, tsd) == 72, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, robust_list_head) == 76, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, robust_list_off) == 80, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, robust_list_pending) == 84, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, h_errno_val) == 88, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, timer_id) == 92, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, locale) == 96, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, killlock) == 100, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, dlerror_buf) == 104, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, stdio_locks) == 108, "witx calculated offset");
+
+/**
+ * thread start type
+ */
+typedef struct __wasi_thread_start_t {
+    /**
+     * Address where the stack starts
+     */
+    __wasi_pointersize_t stack;
+
+    /**
+     * Address where the TLS starts
+     */
+    __wasi_pointersize_t tls_base;
+
+    /**
+     * Function that will be invoked when the thread starts
+     */
+    __wasi_pointersize_t start_funct;
+
+    /**
+     * Arguments to pass the callback function
+     */
+    __wasi_pointersize_t start_args;
+
+    /**
+     * Reserved for future WASI usage
+     */
+    __wasi_pointersize_t reserved0;
+
+    __wasi_pointersize_t reserved1;
+
+    __wasi_pointersize_t reserved2;
+
+    __wasi_pointersize_t reserved3;
+
+    __wasi_pointersize_t reserved4;
+
+    __wasi_pointersize_t reserved5;
+
+    __wasi_pointersize_t reserved6;
+
+    __wasi_pointersize_t reserved7;
+
+    __wasi_pointersize_t reserved8;
+
+    __wasi_pointersize_t reserved9;
+
+    /**
+     * The size of the stack
+     */
+    __wasi_pointersize_t stack_size;
+
+    /**
+     * The size of the guards at the end of the stack
+     */
+    __wasi_pointersize_t guard_size;
+
+} __wasi_thread_start_t;
+
+_Static_assert(sizeof(__wasi_thread_start_t) == 64, "witx calculated size");
+_Static_assert(_Alignof(__wasi_thread_start_t) == 4, "witx calculated align");
+_Static_assert(offsetof(__wasi_thread_start_t, stack) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, tls_base) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, start_funct) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, start_args) == 12, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved0) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved1) == 20, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved2) == 24, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved3) == 28, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved4) == 32, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved5) == 36, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved6) == 40, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved7) == 44, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved8) == 48, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved9) == 52, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, stack_size) == 56, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, guard_size) == 60, "witx calculated offset");
+
+/**
+ * @defgroup wasix_32v1
  * @{
  */
 
@@ -4295,30 +4566,17 @@ void __wasi_callback_thread_local_destroy(
 /**
  * Creates a new thread by spawning that shares the same
  * memory address space, file handles and main event loops.
- * The web assembly process must export function named '_start_thread'
+ * The web assembly process must export function named 'wasi_thread_start'
  * @return
  * Returns the thread index of the newly created thread
  * (indices always start from zero)
  */
 __wasi_errno_t __wasi_thread_spawn(
     /**
-     * User data that will be supplied to the function when its called
+     * Pointer to the structure the describes the thread
+     * that is being spawened
      */
-    uint64_t user_data,
-    /**
-     * The base address of the stack allocated for this thread
-     */
-    uint64_t stack_base,
-    /**
-     * The start address of the stack (where the memory is allocated)
-     */
-    uint64_t stack_start,
-    /**
-     * Indicates if the function will operate as a reactor or
-     * as a normal thread. Reactors will be repeatable called
-     * whenever IO work is available to be processed.
-     */
-    __wasi_bool_t reactor,
+    __wasi_thread_start_t * args,
     __wasi_tid_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
@@ -4633,14 +4891,18 @@ __wasi_errno_t __wasi_proc_parent(
 /**
  * Wait for process to exit
  * @return
- * Returns the exit code of the process
+ * Returns the status of the process
  */
 __wasi_errno_t __wasi_proc_join(
     /**
      * ID of the process to wait on
      */
-    __wasi_pid_t * pid,
-    __wasi_exitcode_t *retptr0
+    __wasi_option_pid_t * pid,
+    /**
+     * Flags that determine how the join behaves
+     */
+    __wasi_join_flags_t flags,
+    __wasi_join_status_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Sends a signal to a process

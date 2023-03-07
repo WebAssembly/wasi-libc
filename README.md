@@ -3,8 +3,12 @@
 WASI Libc is a libc for WebAssembly programs built on top of WASI system calls.
 It provides a wide array of POSIX-compatible C APIs, including support for
 standard I/O, file I/O, filesystem manipulation, memory management, time, string,
-environment variables, program startup, multithreading, networkign, and many other
-APIs.
+environment variables, program startup, and many other APIs.
+
+WASI Libc is sufficiently stable and usable for many purposes, as most of the
+POSIX-compatible APIs are stable, though it is continuing to evolve to better
+align with wasm and WASI. For example, pthread support is still a work in
+progress.
 
 ## Usage
 

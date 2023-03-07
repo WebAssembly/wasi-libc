@@ -13,11 +13,18 @@ jobs:
       with:
         submodules: true
 
+    - name: Install libtinfo5
+      run: |
+        set -ex
+        sudo apt-get update
+        sudo apt-get install -y libtinfo5
+      if: matrix.os == 'ubuntu-latest'
+
     - name: Install LLVM tools (Windows)
       shell: bash
       run: |
-        curl -fsSLO https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/LLVM-10.0.0-win64.exe
-        7z x LLVM-10.0.0-win64.exe -y -o"llvm"
+        curl -fsSLO https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/LLVM-14.0.0-win64.exe
+        7z x LLVM-14.0.0-win64.exe -y -o"llvm"
         echo "$(pwd)/llvm/bin" >> $GITHUB_PATH
         echo "CC=$(pwd)/llvm/bin/clang.exe" >> $GITHUB_ENV
         echo "AR=$(pwd)/llvm/bin/llvm-ar.exe" >> $GITHUB_ENV
@@ -35,8 +42,8 @@ jobs:
     - name: Install LLVM tools (MacOS)
       shell: bash
       run: |
-        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz | tar xJf -
-        export CLANG_DIR=`pwd`/clang+llvm-10.0.0-x86_64-apple-darwin/bin
+        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang+llvm-14.0.0-x86_64-apple-darwin.tar.xz | tar xJf -
+        export CLANG_DIR=`pwd`/clang+llvm-14.0.0-x86_64-apple-darwin/bin
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
@@ -46,9 +53,10 @@ jobs:
     - name: Install LLVM tools (Linux)
       shell: bash
       run: |
-        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz | tar xJf -
-        export CLANG_DIR=`pwd`/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/bin
+        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz | tar xJf -
+        export CLANG_DIR=`pwd`/clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04/bin
         echo "$CLANG_DIR" >> $GITHUB_PATH
+        echo "CLANG_DIR=$CLANG_DIR" >> $GITHUB_ENV
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
         echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
@@ -58,11 +66,35 @@ jobs:
       shell: bash
       run: make -j4
 
+    - name: Test
+      shell: bash
+      # For Clang linking to work correctly, we need to place Clang's runtime
+      # library for `wasm32-wasi` in the right location (i.e., the `mkdir` and
+      # `cp` below).
+      run: |
+        cd test
+        make download
+        export WASI_DIR=$(realpath $CLANG_DIR/../lib/clang/${{ matrix.clang_version }}/lib/wasi/)
+        mkdir -p $WASI_DIR
+        cp download/lib/wasi/libclang_rt.builtins-wasm32.a $WASI_DIR
+        make test
+      # The older version of Clang does not provide the expected symbol for the
+      # test entrypoints: `undefined symbol: __main_argc_argv`.
+      if: matrix.os == 'ubuntu-latest' && matrix.clang_version != '10.0.0'
+
     - uses: actions/upload-artifact@v1
       with:
         # Upload the sysroot folder. Give it a name according to the OS it was built for.
         name: ${{ format( 'sysroot-{0}.tgz', matrix.os) }}
         path: sysroot
+
+    - name: Build libc + threads
+      # Only build the thread-capable wasi-libc in the latest supported Clang
+      # version; the earliest version does not have all necessary builtins
+      # (e.g., `__builtin_wasm_memory_atomic_notify`).
+      if: matrix.clang_version != '10.0.0'
+      shell: bash
+      run: make -j4 THREAD_MODEL=posix
 
   # Disable the headerstest job for now, while WASI transitions from the
   # witx snapshots to wit proposals, and we have a few manual edits to the

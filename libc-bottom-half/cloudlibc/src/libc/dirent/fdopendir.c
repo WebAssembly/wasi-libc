@@ -29,6 +29,7 @@ DIR *fdopendir(int fd) {
                                 __WASI_DIRCOOKIE_START, &buffer_used);
   dirp->buffer_used = buffer_used;
   if (error != 0) {
+    errno = error;
     free(dirp->buffer);
     free(dirp);
     return NULL;

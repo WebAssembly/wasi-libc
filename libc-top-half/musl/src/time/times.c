@@ -25,6 +25,7 @@ clock_t times(struct tms *tms)
 	__wasi_timestamp_t cts;
 	error = __wasi_clock_time_get(__WASI_CLOCKID_PROCESS_CPUTIME_ID, 1, &cts);
 	if (error != 0) {
+		errno = error;
 		tms->tms_cstime = tms->tms_stime;
 		tms->tms_cutime = tms->tms_utime;
 	} else {

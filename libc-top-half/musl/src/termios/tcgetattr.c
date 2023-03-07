@@ -29,6 +29,9 @@ int tcgetattr(int fd, struct termios *tio)
 	if (tty.line_buffered == __WASI_BOOL_TRUE) {
 		tio->c_lflag |= ICANON;
 	}
+	if (tty.line_feeds == __WASI_BOOL_TRUE) {
+		tio->c_lflag |= IGNCR;
+	}
 	return 0;
 #endif
 }

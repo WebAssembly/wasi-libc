@@ -29,6 +29,7 @@ ssize_t recv(int socket, void *restrict buffer, size_t length, int flags) {
                                           &ro_datalen,
                                           &ro_flags);
   if (error != 0) {
+    errno = error;
     return -1;
   }
   return ro_datalen;

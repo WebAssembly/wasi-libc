@@ -20,6 +20,7 @@ int shutdown(int socket, int how) {
 
   __wasi_errno_t error = __wasi_sock_shutdown(socket, how);
   if (error != 0) {
+    errno = error;
     return -1;
   }
   return error;

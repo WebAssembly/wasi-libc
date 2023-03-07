@@ -22,6 +22,7 @@ int __wasilibc_nocwd_faccessat(int fd, const char *path, int amode, int flag) {
   __wasi_errno_t error =
       __wasi_path_filestat_get(fd, lookup_flags, path, &file);
   if (error != 0) {
+    errno = error;
     return -1;
   }
 

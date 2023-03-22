@@ -94,7 +94,7 @@ jobs:
       run: |
         cd test
         make download
-        export WASI_DIR=$(realpath $CLANG_DIR/../lib/clang/${{ matrix.clang_version }}/lib/wasi/)
+        export WASI_DIR=$(realpath $($CLANG_DIR/clang -print-resource-dir)/lib/wasi/)
         mkdir -p $WASI_DIR
         cp download/lib/wasi/libclang_rt.builtins-wasm32.a $WASI_DIR
         make test

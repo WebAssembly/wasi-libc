@@ -1674,6 +1674,11 @@ typedef struct __wasi_tty_t {
      */
     __wasi_bool_t line_buffered;
 
+    /**
+     * Indicates if line feeds are ignored on the input
+     */
+    __wasi_bool_t line_feeds;
+
 } __wasi_tty_t;
 
 _Static_assert(sizeof(__wasi_tty_t) == 24, "witx calculated size");
@@ -1687,6 +1692,7 @@ _Static_assert(offsetof(__wasi_tty_t, stdout_tty) == 17, "witx calculated offset
 _Static_assert(offsetof(__wasi_tty_t, stderr_tty) == 18, "witx calculated offset");
 _Static_assert(offsetof(__wasi_tty_t, echo) == 19, "witx calculated offset");
 _Static_assert(offsetof(__wasi_tty_t, line_buffered) == 20, "witx calculated offset");
+_Static_assert(offsetof(__wasi_tty_t, line_feeds) == 21, "witx calculated offset");
 
 /**
  * Fault codes that can be raised on a bus session.

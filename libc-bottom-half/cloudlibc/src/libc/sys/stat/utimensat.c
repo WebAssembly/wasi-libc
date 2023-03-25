@@ -30,6 +30,7 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
   __wasi_errno_t error =
       __wasi_path_filestat_set_times(fd, lookup_flags, path, st_atim, st_mtim, flags);
   if (error != 0) {
+    errno = error;
     return -1;
   }
   return 0;

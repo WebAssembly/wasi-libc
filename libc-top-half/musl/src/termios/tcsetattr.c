@@ -36,6 +36,12 @@ int tcsetattr(int fd, int act, const struct termios *tio)
 		tty.line_buffered = __WASI_BOOL_FALSE;
 	}
 
+	if ((tio->c_lflag & IGNCR) != 0) {
+		tty.line_feeds = __WASI_BOOL_TRUE;
+	} else {
+		tty.line_feeds = __WASI_BOOL_FALSE;
+	}
+
 	r = __wasi_tty_set(&tty);
 	if (r != 0) {
 		errno = r;

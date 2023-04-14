@@ -164,14 +164,6 @@ static void __pthread_exit(void *result)
 	self->prev->next = self->next;
 	self->prev = self->next = self;
 
-#ifndef __wasilibc_unmodified_upstream
-	/* On Linux, the thread is created with CLONE_CHILD_CLEARTID,
-	 * and this lock will unlock by kernel when this thread terminates.
-	 * So we should unlock it here in WebAssembly.
-	 * See also set_tid_address(2) */
-	__tl_unlock();
-#endif
-
 #ifdef __wasilibc_unmodified_upstream
 	if (state==DT_DETACHED && self->map_base) {
 		/* Detached threads must block even implementation-internal
@@ -190,9 +182,6 @@ static void __pthread_exit(void *result)
 	}
 #else
 	if (state==DT_DETACHED && self->map_base) {
-		// __syscall(SYS_exit) would unlock the thread, list
-		// do it manually here
-		__tl_unlock();
 		free(self->map_base);
 		// Can't use `exit()` here, because it is too high level
 		return;
@@ -212,10 +201,15 @@ static void __pthread_exit(void *result)
 #ifdef __wasilibc_unmodified_upstream
 	for (;;) __syscall(SYS_exit, 0);
 #else
-	// __syscall(SYS_exit) would unlock the thread, list
-	// do it manually here
-	__tl_unlock();
 	// Can't use `exit()` here, because it is too high level
+
+	/* On Linux, the thread is created with CLONE_CHILD_CLEARTID,
+	 * and the lock (__thread_list_lock) will be unlocked by kernel when
+	 * this thread terminates.
+	 * See also set_tid_address(2)
+	 *
+	 * In WebAssembly, we leave it to wasi_thread_start instead.
+	 */
 #endif
 }
 

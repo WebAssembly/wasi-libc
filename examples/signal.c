@@ -25,9 +25,9 @@ int main(void)
   raise(SIGHUP);
   
   // A long long wait so that we can easily issue a signal to this process
-  while(run) {
-    sleep(1);
-  }
+  //while(run) {
+  sleep(1);
+  //}
   
   return 0;
 }

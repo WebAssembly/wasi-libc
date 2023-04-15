@@ -10,8 +10,11 @@ int efd = -1;
 
 void *read_thread(void *dummy)
 {
-    while (1)
+    int cnt = 0;
+    while (cnt < 5)
     {
+        usleep(10000);
+
         fd_set set;
         struct timeval timeout;
 
@@ -28,10 +31,14 @@ void *read_thread(void *dummy)
                 &set, NULL, NULL,
                 &timeout);
         if (ret == 1) {
+            cnt++;
+
             if (FD_ISSET(efd, &set))
             {
                 uint64_t count = 0;
                 ret = read(efd, &count, sizeof(count));
+                usleep(20000);
+
                 if (ret < 0)
                 {
                     perror("read fail:");
@@ -42,8 +49,8 @@ void *read_thread(void *dummy)
                     struct timeval tv;
 
                     gettimeofday(&tv, NULL);
-                    printf("success read from efd, read %d bytes(%llu) at %llds %lldus\n",
-                        ret, (unsigned long long)count, (long long)tv.tv_sec, (long long)tv.tv_usec);
+                    printf("success read from efd, read %d bytes(%llu)\n",
+                        ret, (unsigned long long)count);
                 }
             }
         } else if (ret == 0) {
@@ -88,30 +95,31 @@ int main(int argc, char *argv[])
         perror("fork failed:");
         goto fail;
     }
-    if (ret == 0) {
+    if (ret > 0) {
+        pid = ret;
+        
         read_thread(NULL);
-        return 0;
-    }
-
-    for (i = 0; i < 5; i++)
-    {
-        count = 4;
-        ret = write(efd, &count, sizeof(count));
-        if (ret < 0)
+    } else {
+        for (i = 0; i < 5; i++)
         {
-            perror("write event fd fail:");
-            goto fail;
-        }
-        else
-        {
-            struct timeval tv;
+            count = 4;
+            ret = write(efd, &count, sizeof(count));
+            if (ret < 0)
+            {
+                perror("write event fd fail:");
+                goto fail;
+            }
+            else
+            {
+                struct timeval tv;
 
-            gettimeofday(&tv, NULL);
-            printf("success write to efd, write %d bytes(%llu) at %llds %lldus\n",
-                   ret, (unsigned long long)count, (long long)tv.tv_sec, (long long)tv.tv_usec);
-        }
+                gettimeofday(&tv, NULL);
+                printf("success write to efd, write %d bytes(%llu)\n",
+                    ret, (unsigned long long)count);
+            }
 
-        sleep(1);
+            usleep(200000);
+        }
     }
 
 fail:
@@ -130,5 +138,5 @@ fail:
         close(efd);
         efd = -1;
     }
-    return ret;
+    return 0;
 }

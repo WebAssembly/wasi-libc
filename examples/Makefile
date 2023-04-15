@@ -55,15 +55,17 @@ SRC=$(wildcard *.c)
 export PATH := $(LLD_PATH):$(PATH)
 
 all: longjmp file-copy signal fork vfork fork-longjmp execve spawn pipe epoll
-	cp -f ../dist/wasix/longjmp.wasm ../../deploy/wasmer-web/public/bin/example-longjmp.wasm
-	cp -f ../dist/wasix/fork.wasm ../../deploy/wasmer-web/public/bin/example-fork.wasm
-	cp -f ../dist/wasix/fork-longjmp.wasm ../../deploy/wasmer-web/public/bin/example-fork-longjmp.wasm
-	cp -f ../dist/wasix/vfork.wasm ../../deploy/wasmer-web/public/bin/example-vfork.wasm
-	cp -f ../dist/wasix/signal.wasm ../../deploy/wasmer-web/public/bin/example-signal.wasm
-	cp -f ../dist/wasix/execve.wasm ../../deploy/wasmer-web/public/bin/example-execve.wasm
-	cp -f ../dist/wasix/spawn.wasm ../../deploy/wasmer-web/public/bin/example-spawn.wasm
-	cp -f ../dist/wasix/pipe.wasm ../../deploy/wasmer-web/public/bin/example-pipe.wasm
-	cp -f ../dist/wasix/epoll.wasm ../../deploy/wasmer-web/public/bin/example-epoll.wasm
+	cp -f ../dist/wasix/longjmp.wasm ../../wasmer/tests/integration/cli/tests/wasm/example-longjmp.wasm
+	cp -f ../dist/wasix/fork.wasm ../../wasmer/tests/integration/cli/tests/wasm/example-fork.wasm
+	cp -f ../dist/wasix/fork.wasm ../../packages/fork-test/test.wasm
+	cp -f ../dist/wasix/fork-longjmp.wasm ../../wasmer/tests/integration/cli/tests/wasm/example-fork-longjmp.wasm
+	cp -f ../dist/wasix/vfork.wasm ../../wasmer/tests/integration/cli/tests/wasm/example-vfork.wasm
+	cp -f ../dist/wasix/signal.wasm ../../wasmer/tests/integration/cli/tests/wasm/example-signal.wasm
+	cp -f ../dist/wasix/execve.wasm ../../wasmer/tests/integration/cli/tests/wasm/example-execve.wasm
+	cp -f ../dist/wasix/spawn.wasm ../../wasmer/tests/integration/cli/tests/wasm/example-spawn.wasm
+	cp -f ../dist/wasix/pipe.wasm ../../wasmer/tests/integration/cli/tests/wasm/example-pipe.wasm
+	cp -f ../dist/wasix/epoll.wasm ../../wasmer/tests/integration/cli/tests/wasm/example-epoll.wasm
+	cp -f ../dist/wasix/file-copy.wasm ../../wasmer/tests/integration/cli/tests/wasm/example-file-copy.wasm
 
 %: %.c
 	mkdir -p ../dist/host

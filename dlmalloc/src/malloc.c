@@ -5237,7 +5237,7 @@ static void try_init_allocator(void) {
     // reference.
     //
     // Note: This is a linker bug: https://github.com/llvm/llvm-project/issues/60829
-    return;
+    ABORT;
   }
   size_t initial_heap_size = end - base;
 

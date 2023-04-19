@@ -101,12 +101,9 @@ static const char *strip_prefixes(const char *path) {
     return path;
 }
 
-/// Register the given preopened file descriptor under the given path.
-///
-/// This function takes ownership of `prefix`.
-static int internal_register_preopened_fd(__wasi_fd_t fd, const char *relprefix) {
-    LOCK(lock);
-
+/// Similar to `internal_register_preopened_fd_unlocked` but does not
+/// take a lock.
+static int internal_register_preopened_fd_unlocked(__wasi_fd_t fd, const char *relprefix) {
     // Check preconditions.
     assert_invariants();
     assert(fd != AT_FDCWD);
@@ -114,20 +111,30 @@ static int internal_register_preopened_fd(__wasi_fd_t fd, const char *relprefix)
     assert(relprefix != NULL);
 
     if (num_preopens == preopen_capacity && resize() != 0) {
-        UNLOCK(lock);
         return -1;
     }
 
     char *prefix = strdup(strip_prefixes(relprefix));
     if (prefix == NULL) {
-        UNLOCK(lock);
         return -1;
     }
     preopens[num_preopens++] = (preopen) { prefix, fd, };
 
     assert_invariants();
-    UNLOCK(lock);
     return 0;
+}
+
+/// Register the given preopened file descriptor under the given path.
+///
+/// This function takes ownership of `prefix`.
+static int internal_register_preopened_fd(__wasi_fd_t fd, const char *relprefix) {
+    LOCK(lock);
+
+    int r = internal_register_preopened_fd_unlocked(fd, relprefix);
+
+    UNLOCK(lock);
+
+    return r;
 }
 
 /// Are the `prefix_len` bytes pointed to by `prefix` a prefix of `path`?
@@ -261,7 +268,7 @@ void __wasilibc_populate_preopens(void) {
                 goto oserr;
             prefix[prestat.u.dir.pr_name_len] = '\0';
 
-            if (internal_register_preopened_fd(fd, prefix) != 0)
+            if (internal_register_preopened_fd_unlocked(fd, prefix) != 0)
                 goto software;
             free(prefix);
 

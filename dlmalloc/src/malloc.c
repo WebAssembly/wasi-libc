@@ -5231,8 +5231,10 @@ static void try_init_allocator(void) {
   char *end = &__heap_end;
   if (end == NULL) {
     // This can happen when 1. you are using an old wasm-ld which doesn't
-    // provide `__heap_end` and 2. something (other libraries or maybe
-    // your app?) provide a weak reference to `__heap_end`.
+    // provide `__heap_end` (< 15.0.7) and 2. something (other libraries
+    // or maybe your app?) includes a weak reference to `__heap_end` and
+    // 3. the weak reference is found by the linker before this strong
+    // reference.
     //
     // Note: This is a linker bug: https://github.com/llvm/llvm-project/issues/60829
     return;

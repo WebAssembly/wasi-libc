@@ -4593,14 +4593,14 @@ void* dlmalloc(size_t bytes) {
   ensure_initialization(); /* initialize in sys_alloc if not using locks */
 #endif
 
+  if (!PREACTION(gm)) {
 #if __wasilibc_unmodified_upstream // Try to initialize the allocator.
 #else
-  if (!is_initialized(gm)) {
-    try_init_allocator();
-  }
+    if (!is_initialized(gm)) {
+      try_init_allocator();
+    }
 #endif
 
-  if (!PREACTION(gm)) {
     void* mem;
     size_t nb;
     if (bytes <= MAX_SMALL_REQUEST) {

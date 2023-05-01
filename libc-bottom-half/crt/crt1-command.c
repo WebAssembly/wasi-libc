@@ -1,3 +1,4 @@
+#include <stdint.h>
 #ifdef _REENTRANT
 #include <stdatomic.h>
 extern void __wasi_init_tp(void);
@@ -7,8 +8,18 @@ extern void __wasm_call_ctors(void);
 extern int __main_void(void);
 extern void __wasm_call_dtors(void);
 
+#ifdef WASI_PREVIEW1
 __attribute__((export_name("_start")))
 void _start(void) {
+#endif
+
+#ifdef WASI_PREVIEW2
+int32_t run_run(void) {
+    // Link in the bindings.
+    extern void __component_type_object_force_link_command_public_use_in_this_compilation_unit(void);
+    __component_type_object_force_link_command_public_use_in_this_compilation_unit();
+#endif
+
     // Commands should only be called once per instance. This simple check
     // ensures that the `_start` function isn't started more than once.
     //
@@ -45,9 +56,14 @@ void _start(void) {
     // Call atexit functions, destructors, stdio cleanup, etc.
     __wasm_call_dtors();
 
+#ifdef WASI_PREVIEW1
     // If main exited successfully, just return, otherwise call
     // `__wasi_proc_exit`.
     if (r != 0) {
         __wasi_proc_exit(r);
     }
+#endif
+#ifdef WASI_PREVIEW2
+    return r != 0;
+#endif
 }

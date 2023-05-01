@@ -1936,6 +1936,7 @@
 #define USHRT_MAX 0xffff
 #define UTIME_NOW (-1)
 #define UTIME_OMIT (-2)
+#define WASI_PREVIEW1 1
 #define WCHAR_MAX (0x7fffffff+L'\0')
 #define WCHAR_MIN (-1-0x7fffffff+L'\0')
 #define WEOF 0xffffffffU

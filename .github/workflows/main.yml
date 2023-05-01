@@ -128,6 +128,24 @@ jobs:
     - run: cargo test
       working-directory: tools/wasi-headers
 
+  preview2:
+    name: check wasi preview2 bindings
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: true
+    - name: Install wit-bindgen
+      run: |
+        cargo install wit-bindgen-cli
+    - run: |
+        # Check that the bindings are up to date.
+        cd libc-bottom-half/preview2
+        wit-bindgen c --check ../../wasi-cli/wit
+
   rustfmt:
     name: Rustfmt
     runs-on: ubuntu-latest

@@ -20,7 +20,9 @@ MALLOC_IMPL ?= dlmalloc
 # yes or no
 BUILD_LIBC_TOP_HALF ?= yes
 # The directory where we will store intermediate artifacts.
-OBJDIR ?= build/$(TARGET_TRIPLE)
+OBJDIR ?= build/$(SYSROOT_TARGET_TRIPLE)
+# The WASI API to target, preview1 or preview2.
+WASI ?= preview1
 
 # When the length is no larger than this threshold, we consider the
 # overhead of bulk memory opcodes to outweigh the performance benefit,
@@ -41,6 +43,22 @@ ifeq ($(THREAD_MODEL), posix)
 TARGET_TRIPLE = wasm32-wasi-threads
 endif
 
+# The installation directory. Install preview1 and preview2 next to each other.
+ifeq ($(WASI), preview1)
+ifeq ($(THREAD_MODEL), posix)
+    SYSROOT_TARGET_TRIPLE = wasm32-wasi-preview1-threads
+else
+    SYSROOT_TARGET_TRIPLE = wasm32-wasi-preview1
+endif
+endif
+ifeq ($(WASI), preview2)
+ifeq ($(THREAD_MODEL), posix)
+    SYSROOT_TARGET_TRIPLE = wasm32-wasi-preview2-threads
+else
+    SYSROOT_TARGET_TRIPLE = wasm32-wasi-preview2
+endif
+endif
+
 # These variables describe the locations of various files and directories in
 # the source tree.
 DLMALLOC_DIR = dlmalloc
@@ -55,10 +73,22 @@ LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC = $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/include
 LIBC_BOTTOM_HALF_HEADERS_PUBLIC = $(LIBC_BOTTOM_HALF_DIR)/headers/public
 LIBC_BOTTOM_HALF_HEADERS_PRIVATE = $(LIBC_BOTTOM_HALF_DIR)/headers/private
 LIBC_BOTTOM_HALF_SOURCES = $(LIBC_BOTTOM_HALF_DIR)/sources
+LIBC_BOTTOM_HALF_PREVIEW1 = $(LIBC_BOTTOM_HALF_DIR)/preview1
+LIBC_BOTTOM_HALF_PREVIEW2 = $(LIBC_BOTTOM_HALF_DIR)/preview2
 LIBC_BOTTOM_HALF_ALL_SOURCES = \
     $(sort \
     $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
     $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c))
+ifeq ($(WASI),preview1)
+LIBC_BOTTOM_HALF_ALL_SOURCES += $(shell find $(LIBC_BOTTOM_HALF_PREVIEW1) -name \*.c)
+endif
+ifeq ($(WASI),preview2)
+LIBC_BOTTOM_HALF_ALL_SOURCES += $(shell find $(LIBC_BOTTOM_HALF_PREVIEW2) -name \*.c)
+LIBC_BOTTOM_HALF_ALL_SOURCES += \
+    $(OBJDIR)/bindings/command.c \
+    $(OBJDIR)/bindings/command.h \
+    $(OBJDIR)/bindings/command_component_type.o
+endif
 
 # FIXME(https://reviews.llvm.org/D85567) - due to a bug in LLD the weak
 # references to a function defined in `chdir.c` only work if `chdir.c` is at the
@@ -298,6 +328,15 @@ LIBC_TOP_HALF_ALL_SOURCES = \
 
 # Add any extra flags
 CFLAGS = $(EXTRA_CFLAGS)
+
+# Add WASI target flags.
+ifeq ($(WASI),preview1)
+CFLAGS += -DWASI_PREVIEW1
+endif
+ifeq ($(WASI),preview2)
+CFLAGS += -DWASI_PREVIEW2
+endif
+
 # Set the target.
 CFLAGS += --target=$(TARGET_TRIPLE)
 ASMFLAGS += --target=$(TARGET_TRIPLE)
@@ -380,9 +419,9 @@ LIBC_BOTTOM_HALF_CRT_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_CRT_SOURCES))
 
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
-SYSROOT_LIB := $(SYSROOT)/lib/$(TARGET_TRIPLE)
+SYSROOT_LIB := $(SYSROOT)/lib/$(SYSROOT_TARGET_TRIPLE)
 SYSROOT_INC = $(SYSROOT)/include
-SYSROOT_SHARE = $(SYSROOT)/share/$(TARGET_TRIPLE)
+SYSROOT_SHARE = $(SYSROOT)/share/$(SYSROOT_TARGET_TRIPLE)
 
 # Files from musl's include directory that we don't want to install in the
 # sysroot's include directory.
@@ -487,6 +526,9 @@ $(SYSROOT_LIB)/libwasi-emulated-signal.a: $(LIBWASI_EMULATED_SIGNAL_OBJS) $(LIBW
 
 %.a:
 	@mkdir -p "$(@D)"
+	# `ar crs` will mutate an archive if one exists, so make sure we always
+	# create a new one from scratch to avoid getting stale contents.
+	$(RM) $@
 	# On Windows, the commandline for the ar invocation got too long, so it needs to be split up.
 	$(AR) crs $@ $(wordlist 1, 199, $(sort $^))
 	$(AR) crs $@ $(wordlist 200, 399, $(sort $^))
@@ -495,6 +537,13 @@ $(SYSROOT_LIB)/libwasi-emulated-signal.a: $(LIBWASI_EMULATED_SIGNAL_OBJS) $(LIBW
 	# This might eventually overflow again, but at least it'll do so in a loud way instead of
 	# silently dropping the tail.
 	$(AR) crs $@ $(wordlist 800, 100000, $(sort $^))
+
+# Generate the generated preview2 bindings.
+$(OBJDIR)/bindings/command.c \
+$(OBJDIR)/bindings/command.h \
+$(OBJDIR)/bindings/command_component_type.o: wasi-cli/command.md
+	@mkdir -p "$(@D)"
+	wit-bindgen c --out-dir="$(@D)" wasi-cli/wit
 
 $(MUSL_PRINTSCAN_OBJS): CFLAGS += \
 	    -D__wasilibc_printscan_no_long_double \
@@ -640,14 +689,20 @@ check-symbols: startup_files libc
 	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$(DEFINED_SYMBOLS)" || echo $$undef_sym; \
 	done | grep -v "^__mul" > "$(UNDEFINED_SYMBOLS)"
-	grep '^_*imported_wasi_' "$(UNDEFINED_SYMBOLS)" \
-	    > "$(SYSROOT_LIB)/libc.imports"
+	# Compute the `libc.imports` file.
+	if [ $(WASI) == preview1 ]; then \
+	    grep '^_*imported_wasi_' "$(UNDEFINED_SYMBOLS)" \
+	        > "$(SYSROOT_LIB)/libc.imports"; \
+	elif [ $(WASI) == preview2 ]; then \
+	    grep '^__wasm_import_' "$(UNDEFINED_SYMBOLS)" \
+	        > "$(SYSROOT_LIB)/libc.imports"; \
+	fi
 
 	#
 	# Generate a test file that includes all public C header files.
 	#
 	cd "$(SYSROOT_INC)" && \
-	  for header in $$(find . -type f -not -name mman.h -not -name signal.h -not -name times.h -not -name resource.h |grep -v /bits/ |grep -v /c++/); do \
+	  for header in $$(find . -type f -not -name mman.h -not -name signal.h -not -name times.h -not -name resource.h |grep -v /bits/ |grep -v /c++/ |grep -v /preview2/); do \
 	      echo '#include <'$$header'>' | sed 's/\.\///' ; \
 	done |LC_ALL=C sort >$(SYSROOT_SHARE)/include-all.c ; \
 	cd - >/dev/null
@@ -710,7 +765,7 @@ check-symbols: startup_files libc
 
 	# Check that the computed metadata matches the expected metadata.
 	# This ignores whitespace because on Windows the output has CRLF line endings.
-	diff -wur "expected/$(TARGET_TRIPLE)" "$(SYSROOT_SHARE)"
+	diff -wur "expected/$(SYSROOT_TARGET_TRIPLE)" "$(SYSROOT_SHARE)"
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"

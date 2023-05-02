@@ -17,10 +17,6 @@ int ioctl(int fildes, int request, ...) {
               .u.tag = __WASI_EVENTTYPE_FD_READ,
               .u.u.fd_read.file_descriptor = fildes,
           },
-          {
-              .u.tag = __WASI_EVENTTYPE_CLOCK,
-              .u.u.clock.id = __WASI_CLOCKID_MONOTONIC,
-          },
       };
       __wasi_event_t events[__arraycount(subscriptions)];
       __wasi_size_t nevents;

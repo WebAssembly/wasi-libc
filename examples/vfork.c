@@ -3,6 +3,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <errno.h>
+#include <assert.h>
 
 int main() {
     int pid = vfork();
@@ -18,7 +19,11 @@ int main() {
 
         int status = 0;
         waitpid(pid, &status, 0);
-        printf("Child(%d) exited with %d\n", pid, status);
+
+        int exit_code = WEXITSTATUS(status);
+        printf("Child(%d) exited with %d\n", pid, exit_code);
+
+        assert(exit_code == 10);
     }
     return 0;
 }

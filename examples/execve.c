@@ -23,9 +23,9 @@ int main(void) {
     } else {
         int status = 0;
         waitpid(pid, &status, 0);
-        printf("Child(%d) exited with %d\n", pid, status);
+        fprintf(stderr, "Child(%d) exited with %d\n", pid, status);
 
-        printf("execve: echo hi-from-parent\n");
+        fprintf(stderr, "execve: echo hi-from-parent\n");
         char* argv[] = { "echo", "hi-from-parent", NULL };
         char* envp[] = { NULL };
         if (execve("/bin/echo", argv, envp) == -1) {

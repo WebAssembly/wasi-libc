@@ -56,7 +56,7 @@ int example()
 
         validate_memory(test_memory_size);
         if (child == 0)
-            printf("Child memory is good\n");
+            fprintf(stderr, "Child memory is good\n");
         else
             printf("Parent memory is good\n");
 
@@ -69,9 +69,9 @@ int example()
         return 1;
     } else if (child == is_child) {
         validate_memory(test_memory_size);
-        printf("Child memory after longjmp is good\n");
+        fprintf(stderr, "Child memory after longjmp is good\n");
 
-        printf("Child has x = %d\n", ++x);
+        fprintf(stderr, "Child has x = %d\n", ++x);
         return 5;
     } else {
         validate_memory(test_memory_size);

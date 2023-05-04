@@ -30,7 +30,7 @@ int forkexample()
     if (pid == 0)
         sleep(1);
     if (pid == 0)
-        printf("Child has x = %d\n", ++x);
+        fprintf(stderr, "Child has x = %d\n", ++x);
     else
         printf("Parent has x = %d\n", --x);
 
@@ -44,7 +44,7 @@ int forkexample()
         }
     }
     if (pid == 0)
-        printf("Child memory is good\n");
+        fprintf(stderr, "Child memory is good\n");
     else
         printf("Parent memory is good\n");
 

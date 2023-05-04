@@ -31,17 +31,17 @@ __attribute__ ((noinline)) void routineB()
 {
     int r;
 
-    printf("(B1)\n");
+    fprintf(stderr, "(B1)\n");
 
     r = setjmp(bufferB);
     if (r == 0) longjmp(bufferA, 10001);
 
-    printf("(B2) r=%d\n", r);
+    fprintf(stderr, "(B2) r=%d\n", r);
 
     r = setjmp(bufferB);
     if (r == 0) longjmp(bufferA, 10002);
 
-    printf("(B3) r=%d\n", r);
+    fprintf(stderr, "(B3) r=%d\n", r);
 
     r = setjmp(bufferB);
     if (r == 0) longjmp(bufferA, 10003);

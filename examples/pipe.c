@@ -32,9 +32,9 @@ int main()
         }
 
         // Use the stdout to send bytes to the parent
-        printf("this text should be printed by the parent\n");
+        fprintf(stderr, "this text should be printed by the child\n");
     } else {
-        printf("this text should be printed by the child\n");
+        printf("this text should be printed by the parent\n");
 
         // The parent will read the data from the pipe and write it to stdout
         close(pipefd[0]);

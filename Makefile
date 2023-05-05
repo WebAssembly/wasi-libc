@@ -483,7 +483,16 @@ ifeq ($(THREAD_MODEL), single)
 MUSL_OMIT_HEADERS += "pthread.h"
 endif
 
-default: finish
+default: finish post-finish
+
+wasix-headers:
+	git submodule init
+	git submodule update
+	cargo run --manifest-path tools/wasix-headers/Cargo.toml generate-libc
+
+post-finish: finish
+	rm -f sysroot/lib/wasm32-wasi/libc-printscan-log-double.a
+	rsync -rtvu --delete ./sysroot/ ./sysroot32/
 
 $(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
 

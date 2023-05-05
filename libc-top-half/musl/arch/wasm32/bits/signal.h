@@ -1,3 +1,13 @@
+#pragma once
+
+#include <bits/alltypes.h>
+
+struct sigaltstack {
+	void *ss_sp;
+	int ss_flags;
+	size_t ss_size;
+};
+
 #define SIGHUP    1
 #define SIGINT    2
 #define SIGQUIT   3

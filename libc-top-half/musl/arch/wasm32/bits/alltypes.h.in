@@ -26,6 +26,7 @@
 TYPEDEF unsigned _Addr size_t;
 TYPEDEF float float_t;
 TYPEDEF double double_t;
+TYPEDEF int clockid_t;
 
 #if defined(__NEED_max_align_t) && !defined(__DEFINED_max_align_t)
 #define __need_max_align_t

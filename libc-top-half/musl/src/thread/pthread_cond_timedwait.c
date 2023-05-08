@@ -110,13 +110,7 @@ int __pthread_cond_timedwait(pthread_cond_t *restrict c, pthread_mutex_t *restri
 	__pthread_setcancelstate(PTHREAD_CANCEL_MASKED, &cs);
 	if (cs == PTHREAD_CANCEL_DISABLE) __pthread_setcancelstate(cs, 0);
 
-#ifdef __wasilibc_unmodified_upstream
 	do e = __timedwait_cp(fut, seq, clock, ts, !shared);
-#else
-    clockid_t clockid;
-	clockid.id = clock;
-	do e = __timedwait_cp(fut, seq, clockid, ts, !shared);
-#endif
 	while (*fut==seq && (!e || e==EINTR));
 	if (e == EINTR) e = 0;
 
@@ -140,12 +134,12 @@ int __pthread_cond_timedwait(pthread_cond_t *restrict c, pthread_mutex_t *restri
 		 * via the futex notify below. */
 
 		lock(&c->_c_lock);
-		
+
 		if (c->_c_head == &node) c->_c_head = node.next;
 		else if (node.prev) node.prev->next = node.next;
 		if (c->_c_tail == &node) c->_c_tail = node.prev;
 		else if (node.next) node.next->prev = node.prev;
-		
+
 		unlock(&c->_c_lock);
 
 		if (node.notify) {

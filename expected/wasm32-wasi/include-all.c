@@ -161,6 +161,7 @@
 #include <sys/random.h>
 #include <sys/reg.h>
 #include <sys/select.h>
+#include <sys/sendfile.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/stropts.h>

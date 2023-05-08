@@ -5267,6 +5267,7 @@
 #define _SYS_REG_H 
 #define _SYS_RESOURCE_H 
 #define _SYS_SELECT_H 
+#define _SYS_SENDFILE_H
 #define _SYS_SOCKET_H 
 #define _SYS_STAT_H 
 #define _SYS_SYSCALL_H 
@@ -6677,6 +6678,7 @@
 #define scalbln(x,y) __tg_real_2_1(scalbln, (x), (y))
 #define scalbn(x,y) __tg_real_2_1(scalbn, (x), (y))
 #define scandir64 scandir
+#define sendfile64 sendfile
 #define setbit(x,i) __bitop(x,i,|=)
 #define setjmp setjmp
 #define signbit(x) (__builtin_signbit(x))

@@ -445,7 +445,7 @@ MUSL_OMIT_HEADERS += \
     "sys/acct.h" \
     "sys/cachectl.h" \
     "sys/epoll.h" "sys/reboot.h" "sys/swap.h" \
-    "sys/sendfile.h" "sys/inotify.h" \
+    "sys/inotify.h" \
     "sys/quota.h" \
     "sys/klog.h" \
     "sys/fsuid.h" \

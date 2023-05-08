@@ -120,6 +120,12 @@
 #define AF_INET6 __WASI_ADDRESS_FAMILY_INET6
 #define AF_UNIX __WASI_ADDRESS_FAMILY_UNIX
 
+#define PF_UNSPEC       0
+#define PF_INET         2
+#define PF_INET6        10
+
+#define SOMAXCONN       128
+
 #ifdef __cplusplus
 extern "C" {
 #endif

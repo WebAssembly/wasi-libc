@@ -1446,6 +1446,7 @@ setenv
 seteuid
 setgid
 setgrent
+setgroups
 setitimer
 setjmp
 setkey

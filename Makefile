@@ -176,6 +176,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         linux/wait3.c \
         linux/wait4.c \
         linux/eventfd.c \
+        linux/setgroups.c \
         stat/futimesat.c \
         legacy/getpagesize.c \
         thread/thrd_sleep.c \

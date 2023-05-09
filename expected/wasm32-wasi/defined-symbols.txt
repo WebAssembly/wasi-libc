@@ -113,6 +113,7 @@ __getpwent_a
 __gettext_lockptr
 __gettextdomain
 __gmtime_r
+__h_errno_location
 __hwcap
 __inet_aton
 __inhibit_ptc
@@ -742,6 +743,7 @@ duplocale
 ecvt
 encrypt
 endgrent
+endprotoent
 endpwent
 endspent
 environ
@@ -925,6 +927,8 @@ getgrgid_r
 getgrnam
 getgrnam_r
 getgrouplist
+gethostbyaddr
+gethostbyname
 gethostid
 gethostname
 getif_addrs
@@ -939,6 +943,9 @@ getpgid
 getpgrp
 getpid
 getppid
+getprotobyname
+getprotobynumber
+getprotoent
 getpwent
 getpwnam
 getpwnam_r
@@ -948,6 +955,8 @@ getrandom
 getrlimit
 getrlimit64
 getrusage
+getservbyname
+getservbyport
 getsid
 getsockname
 getsockopt
@@ -969,12 +978,14 @@ globfree
 globfree64
 gmtime
 gmtime_r
+h_errno
 hcreate
 hcreate_r
 hdestroy
 hdestroy_r
 hsearch
 hsearch_r
+hstrerror
 htonl
 htons
 hypot
@@ -1443,6 +1454,7 @@ setlocale
 setlogmask
 setpgid
 setpgrp
+setprotoent
 setpwent
 setrlimit
 setrlimit64

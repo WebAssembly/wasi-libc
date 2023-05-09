@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 
+#include <errno.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <string.h>
@@ -7,5 +8,10 @@
 
 struct hostent *gethostbyname(const char *name)
 {
-	return gethostbyname2(name, AF_INET);
+#ifdef __wasilibc_unmodified_upstream
+  return gethostbyname2(name, AF_INET);
+#else
+  errno = ENOTSUP;
+  return 0;
+#endif
 }

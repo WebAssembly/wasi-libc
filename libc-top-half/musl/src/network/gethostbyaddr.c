@@ -6,6 +6,7 @@
 
 struct hostent *gethostbyaddr(const void *a, socklen_t l, int af)
 {
+#ifdef __wasilibc_unmodified_upstream
 	static struct hostent *h;
 	size_t size = 63;
 	struct hostent *res;
@@ -21,4 +22,8 @@ struct hostent *gethostbyaddr(const void *a, socklen_t l, int af)
 			(void *)(h+1), size-sizeof *h, &res, &h_errno);
 	} while (err == ERANGE);
 	return err ? 0 : h;
+#else
+  errno = ENOTSUP;
+  return 0;
+#endif
 }

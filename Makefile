@@ -99,6 +99,12 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         misc/nftw.c \
         misc/syslog.c \
         errno/strerror.c \
+        network/gethostbyaddr.c \
+        network/gethostbyname.c \
+        network/getservbyname.c \
+        network/getservbyport.c \
+        network/h_errno.c \
+        network/hstrerror.c \
         network/htonl.c \
         network/htons.c \
         network/ntohl.c \
@@ -108,6 +114,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         network/inet_aton.c \
         network/in6addr_any.c \
         network/in6addr_loopback.c \
+        network/proto.c \
         fenv/fenv.c \
         fenv/fesetround.c \
         fenv/feupdateenv.c \

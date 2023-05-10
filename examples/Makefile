@@ -1,9 +1,10 @@
-CC=clang
+CC ?= "clang"
+SYSROOT ?= "../sysroot32"
 LLD_PATH=/prog/rust/build/x86_64-unknown-linux-gnu/lld/bin
 
 CFLAGS = --target=wasm32-wasmer-wasi \
          -O2 \
-         --sysroot ../../wasix-libc/sysroot32 \
+         --sysroot ${SYSROOT} \
          -matomics \
          -mbulk-memory \
          -mmutable-globals \
@@ -54,7 +55,7 @@ SRC=$(wildcard *.c)
 
 export PATH := $(LLD_PATH):$(PATH)
 
-all: longjmp file-copy signal fork vfork fork-longjmp execve spawn pipe epoll
+all: longjmp file-copy signal fork vfork fork-longjmp execve spawn pipe epoll getrandom
 	cp -f ../dist/wasix/longjmp.wasm ../../wasmer/tests/integration/cli/tests/wasm/example-longjmp.wasm
 	cp -f ../dist/wasix/fork.wasm ../../wasmer/tests/integration/cli/tests/wasm/example-fork.wasm
 	cp -f ../dist/wasix/fork.wasm ../../packages/fork-test/test.wasm
@@ -69,9 +70,9 @@ all: longjmp file-copy signal fork vfork fork-longjmp execve spawn pipe epoll
 
 %: %.c
 	mkdir -p ../dist/host
-	clang $@.c -o ../dist/host/$@
+	${CC} $(CFLAGS) $@.c -o ../dist/host/$@
 	mkdir -p ../dist/wasix
-	clang $(CFLAGS) $(CLFLAGS) \
+	${CC} $(CFLAGS) $(CLFLAGS) \
               $@.c \
               -o ../dist/wasix/$@.rustc.wasm
 	wasm-opt -O2 --asyncify ../dist/wasix/$@.rustc.wasm -o ../dist/wasix/$@.wasm

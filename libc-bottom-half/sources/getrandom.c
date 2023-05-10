@@ -14,5 +14,5 @@ ssize_t getrandom(void *buf, size_t buflen, unsigned flags) {
         return -1;
     }
 
-    return 0;
+    return buflen;
 }

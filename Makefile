@@ -472,6 +472,31 @@ endif
 
 default: finish
 
+LIBC_SO_OBJS = $(patsubst %.o,%.pic.o,$(filter-out $(MUSL_PRINTSCAN_OBJS),$(LIBC_OBJS)))
+MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS = $(patsubst %.o,%.pic.o,$(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS))
+LIBWASI_EMULATED_MMAN_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_MMAN_OBJS))
+LIBWASI_EMULATED_PROCESS_CLOCKS_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS))
+LIBWASI_EMULATED_GETPID_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_GETPID_OBJS))
+LIBWASI_EMULATED_SIGNAL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_SIGNAL_OBJS))
+LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS))
+BULK_MEMORY_SO_OBJS = $(patsubst %.o,%.pic.o,$(BULK_MEMORY_OBJS))
+DLMALLOC_SO_OBJS = $(patsubst %.o,%.pic.o,$(DLMALLOC_OBJS))
+LIBC_BOTTOM_HALF_ALL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBC_BOTTOM_HALF_ALL_OBJS))
+LIBC_TOP_HALF_ALL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBC_TOP_HALF_ALL_OBJS))
+
+# TODO: specify SDK version, e.g. libc.so.wasi-sdk-21, as SO_NAME once `wasm-ld` supports it
+$(SYSROOT_LIB)/libc.so: $(SYSROOT_LIB)/libc.so.a $(BUILTINS_LIB)
+	$(CC) -nostdlib -shared -o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB)
+
+$(SYSROOT_LIB)/libc.so.a: \
+		$(LIBC_SO_OBJS) \
+		$(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS) \
+		$(LIBWASI_EMULATED_MMAN_SO_OBJS) \
+		$(LIBWASI_EMULATED_PROCESS_CLOCKS_SO_OBJS) \
+		$(LIBWASI_EMULATED_GETPID_SO_OBJS) \
+		$(LIBWASI_EMULATED_SIGNAL_SO_OBJS) \
+		$(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS)
+
 $(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
 
 $(SYSROOT_LIB)/libc-printscan-long-double.a: $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS)
@@ -507,14 +532,22 @@ $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS): CFLAGS += \
 
 # TODO: apply -mbulk-memory globally, once
 # https://github.com/llvm/llvm-project/issues/52618 is resolved
-$(BULK_MEMORY_OBJS): CFLAGS += \
+$(BULK_MEMORY_OBJS) $(BULK_MEMORY_SO_OBJS): CFLAGS += \
         -mbulk-memory
 
-$(BULK_MEMORY_OBJS): CFLAGS += \
+$(BULK_MEMORY_OBJS) $(BULK_MEMORY_SO_OBJS): CFLAGS += \
         -DBULK_MEMORY_THRESHOLD=$(BULK_MEMORY_THRESHOLD)
 
-$(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS): CFLAGS += \
+$(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS): CFLAGS += \
 	    -D_WASI_EMULATED_SIGNAL
+
+$(OBJDIR)/%.long-double.pic.o: %.c include_dirs
+	@mkdir -p "$(@D)"
+	$(CC) $(CFLAGS) -fPIC -fvisibility=default -MD -MP -o $@ -c $<
+
+$(OBJDIR)/%.pic.o: %.c include_dirs
+	@mkdir -p "$(@D)"
+	$(CC) $(CFLAGS) -fPIC -fvisibility=default -MD -MP -o $@ -c $<
 
 $(OBJDIR)/%.long-double.o: %.c include_dirs
 	@mkdir -p "$(@D)"
@@ -534,17 +567,17 @@ $(OBJDIR)/%.o: %.s include_dirs
 
 -include $(shell find $(OBJDIR) -name \*.d)
 
-$(DLMALLOC_OBJS): CFLAGS += \
+$(DLMALLOC_OBJS) $(DLMALLOC_SO_OBJS): CFLAGS += \
     -I$(DLMALLOC_INC)
 
-startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS): CFLAGS += \
+startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS) $(LIBC_BOTTOM_HALF_ALL_SO_OBJS): CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_HEADERS_PRIVATE) \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC) \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/include \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal
 
-$(LIBC_TOP_HALF_ALL_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS): CFLAGS += \
+$(LIBC_TOP_HALF_ALL_OBJS) $(LIBC_TOP_HALF_ALL_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS): CFLAGS += \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/include \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal \
     -I$(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm32 \
@@ -558,7 +591,7 @@ $(LIBC_TOP_HALF_ALL_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO
     -Wno-dangling-else \
     -Wno-unknown-pragmas
 
-$(LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS): CFLAGS += \
+$(LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS) $(LIBWASI_EMULATED_PROCESS_CLOCKS_SO_OBJS): CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 
 # emmalloc uses a lot of pointer type-punning, which is UB under strict aliasing,
@@ -595,6 +628,15 @@ startup_files: include_dirs $(LIBC_BOTTOM_HALF_CRT_OBJS)
 	#
 	mkdir -p "$(SYSROOT_LIB)" && \
 	cp $(LIBC_BOTTOM_HALF_CRT_OBJS) "$(SYSROOT_LIB)"
+
+# TODO: As of this writing, wasi_thread_start.s uses non-position-independent
+# code, and I'm not sure how to make it position-independent.  Once we've done
+# that, we can enable libc.so for the wasi-threads build.
+ifneq ($(THREAD_MODEL), posix)
+LIBC_SO = $(SYSROOT_LIB)/libc.so
+endif
+
+libc_so: include_dirs $(LIBC_SO)
 
 libc: include_dirs \
     $(SYSROOT_LIB)/libc.a \
@@ -728,4 +770,4 @@ clean:
 	$(RM) -r "$(OBJDIR)"
 	$(RM) -r "$(SYSROOT)"
 
-.PHONY: default startup_files libc finish install include_dirs clean
+.PHONY: default startup_files libc libc_so finish install include_dirs clean check-symbols

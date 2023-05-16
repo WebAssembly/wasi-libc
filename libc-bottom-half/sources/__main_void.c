@@ -3,6 +3,7 @@
 #include <sysexits.h>
 
 // The user's `main` function, expecting arguments.
+__attribute__((__weak__))
 int __main_argc_argv(int argc, char *argv[]);
 
 // If the user's `main` function expects arguments, the compiler will rename

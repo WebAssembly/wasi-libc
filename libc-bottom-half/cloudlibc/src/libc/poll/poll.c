@@ -47,6 +47,13 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
 
   // Create extra event for the timeout.
   if (timeout >= 0) {
+    if (timeout == 0) {
+      // in WASI, a timeout of 0 corresponds to an indefinite wait, so to work
+      // around that and remain compatible with downstream libc users here we
+      // set the subscription timeout to 1 (which actually corresponds to
+      // immediate wakeup)
+      timeout = 1;
+    }
     __wasi_subscription_t *subscription = &subscriptions[nsubscriptions++];
     *subscription = (__wasi_subscription_t){
         .u.tag = __WASI_EVENTTYPE_CLOCK,

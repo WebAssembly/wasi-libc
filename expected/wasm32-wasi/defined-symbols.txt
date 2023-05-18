@@ -185,6 +185,8 @@ __log2_data
 __log2f_data
 __log_data
 __logf_data
+__lookup_name
+__lookup_serv
 __lseek
 __main_void
 __malloc_atfork
@@ -906,6 +908,7 @@ get_avphys_pages
 get_nprocs
 get_nprocs_conf
 get_phys_pages
+getaddrinfo
 getc
 getc_unlocked
 getchar

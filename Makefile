@@ -99,6 +99,17 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         misc/nftw.c \
         misc/syslog.c \
         errno/strerror.c \
+        \
+        network/getaddrinfo.c \
+        network/dn_expand.c \
+        network/dns_parse.c \
+        network/lookup_ipliteral.c \
+        network/lookup_serv.c \
+        network/lookup_name.c \
+        network/res_mkquery.c \
+        network/res_msend.c \
+        network/resolvconf.c \
+        \
         network/gethostbyaddr.c \
         network/gethostbyname.c \
         network/getservbyname.c \
@@ -476,7 +487,6 @@ MUSL_OMIT_HEADERS += \
     "sys/membarrier.h" \
     "sys/signalfd.h" \
     "sys/termios.h" \
-    "net/if.h" \
     "net/if_arp.h" \
     "net/ethernet.h" \
     "net/route.h" \

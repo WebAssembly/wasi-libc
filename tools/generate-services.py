@@ -67,7 +67,8 @@ class Services:
                 if i >= max_entries:
                     break
                 ports = self.ports[name]
-                f.write(f"\tadd_entry({i}, \"{name}\", (struct service[]){{\n")
+                svc_count = len(ports.entries)
+                f.write(f"\tadd_entry({i}, \"{name}\", {svc_count}, (struct service[]){{\n")
                 for (j, tpl) in enumerate(iter(ports.entries)):
                     (port, proto) = tpl
                     socktype = ""

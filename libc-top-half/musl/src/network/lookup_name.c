@@ -135,6 +135,11 @@ static int dns_parse_callback(void *c, int rr, const void *data, int len, const 
 	return 0;
 }
 
+#ifndef __wasilibc_unmodified_upstream
+static int name_from_dns_search(struct address buf[static MAXADDRS], char canon[static 256], const char *name, int family) {
+  return 0;
+}
+#else
 static int name_from_dns(struct address buf[static MAXADDRS], char canon[static 256], const char *name, int family, const struct resolvconf *conf)
 {
 	unsigned char qbuf[2][280], abuf[2][512];
@@ -218,6 +223,7 @@ static int name_from_dns_search(struct address buf[static MAXADDRS], char canon[
 	canon[l] = 0;
 	return name_from_dns(buf, canon, name, family, &conf);
 }
+#endif
 
 static const struct policy {
 	unsigned char addr[16];

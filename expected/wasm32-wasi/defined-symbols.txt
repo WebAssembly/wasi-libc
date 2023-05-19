@@ -53,6 +53,8 @@ __default_guardsize
 __default_stacksize
 __des_setkey
 __dlerror_lockptr
+__dn_expand
+__dns_parse
 __do_cleanup_pop
 __do_cleanup_push
 __do_des
@@ -103,6 +105,7 @@ __fwritex
 __fwriting
 __get_handler_set
 __get_locale
+__get_resolv_conf
 __getdelim
 __getentropy
 __getgr_a
@@ -185,8 +188,9 @@ __log2_data
 __log2f_data
 __log_data
 __logf_data
-__lookup_name
+__lookup_ipliteral
 __lookup_serv
+__lookup_serv_wasi
 __lseek
 __main_void
 __malloc_atfork
@@ -563,6 +567,7 @@ acosh
 acoshf
 acoshl
 acosl
+add_entry
 alarm
 aligned_alloc
 alphasort
@@ -733,6 +738,7 @@ difftime
 dirfd
 dirname
 div
+dn_expand
 dngettext
 dprintf
 drand48
@@ -873,6 +879,7 @@ fputws_unlocked
 fread
 fread_unlocked
 free
+freeaddrinfo
 freeif_addrs
 freelocale
 freopen
@@ -905,6 +912,7 @@ fwrite_unlocked
 fwscanf
 gcvt
 get_avphys_pages
+get_entry
 get_nprocs
 get_nprocs_conf
 get_phys_pages
@@ -1008,6 +1016,7 @@ index
 inet_aton
 inet_ntop
 inet_pton
+init_services
 initstate
 insque
 ioctl
@@ -1442,6 +1451,7 @@ send
 sendfile
 sendmsg
 sendto
+services
 setbuf
 setbuffer
 setegid

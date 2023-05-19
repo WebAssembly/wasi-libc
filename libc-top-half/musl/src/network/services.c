@@ -6,6 +6,12 @@
 services_entry_t *services = NULL;
 static services_entry_t static_services_entries[1001];
 
+struct service* get_entry(const char *name) {
+  struct service* out;
+  HASH_FIND_STR(services, name, out);
+  return out;
+}
+
 void add_entry(int idx, char *name, struct service *svc) {
 	static_services_entries[idx].name = name;
 	static_services_entries[idx].svcs = svc;

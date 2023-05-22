@@ -102,10 +102,10 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         \
         network/services.c \
         network/getaddrinfo.c \
+        network/gethostbyname.c \
+        network/lookup_name.c \
         network/lookup_serv.c \
         network/freeaddrinfo.c \
-        network/dn_expand.c \
-        network/dns_parse.c \
         network/lookup_ipliteral.c \
         network/resolvconf.c \
         \

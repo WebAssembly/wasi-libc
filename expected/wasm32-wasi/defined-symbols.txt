@@ -189,6 +189,7 @@ __log2f_data
 __log_data
 __logf_data
 __lookup_ipliteral
+__lookup_name
 __lookup_serv
 __lookup_serv_wasi
 __lseek

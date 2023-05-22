@@ -128,7 +128,6 @@ __imported_wasix_32v1_tty_get
 __imported_wasix_32v1_tty_set
 __imported_wasix_32v1_ws_connect
 __letf2
-__lookup_name
 __lttf2
 __main_argc_argv
 __netf2

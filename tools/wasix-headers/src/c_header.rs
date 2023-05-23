@@ -144,6 +144,11 @@ fn print_datatype(ret: &mut String, nt: &NamedType) {
         ret.push_str(" */\n");
     }
 
+    if nt.hidden {
+        ret.push_str("/**\n");
+        ret.push_str("*** Hidden type\n");
+    }
+
     match &nt.tref {
         TypeRef::Value(v) => match &**v {
             Type::Record(s) => print_record(ret, &nt.name, s),
@@ -155,6 +160,10 @@ fn print_datatype(ret: &mut String, nt: &NamedType) {
             | Type::ConstPointer { .. } => print_alias(ret, &nt.name, &nt.tref),
         },
         TypeRef::Name(_) => print_alias(ret, &nt.name, &nt.tref),
+    }
+
+    if nt.hidden {
+        ret.push_str(" */\n");
     }
 }
 

@@ -22,7 +22,7 @@ int accept4(int socket, struct sockaddr *restrict addr, socklen_t *restrict addr
   }
 
   __wasi_addr_port_t peer_addr;
-  __wasi_errno_t error = __wasi_sock_accept(socket, (flags & SOCK_NONBLOCK) ? __WASI_FDFLAGS_NONBLOCK : 0, &ret, &peer_addr);
+  __wasi_errno_t error = __wasi_sock_accept_v2(socket, (flags & SOCK_NONBLOCK) ? __WASI_FDFLAGS_NONBLOCK : 0, &ret, &peer_addr);
 
   if (error != 0) {
     errno = error;

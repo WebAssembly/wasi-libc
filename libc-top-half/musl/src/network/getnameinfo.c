@@ -42,8 +42,7 @@ static void mkptr6(char *s, const unsigned char *ip)
 	strcpy(s, "ip6.arpa");
 }
 
-static void reverse_hosts(char *buf, const unsigned char *a, unsigned scopeid, int family)
-{
+static void reverse_hosts(char *buf, const unsigned char *a, unsigned scopeid, int family) {
 	char line[512], *p, *z;
 	unsigned char _buf[1032], atmp[16];
 	struct address iplit;
@@ -154,6 +153,7 @@ int getnameinfo(const struct sockaddr *restrict sa, socklen_t sl,
 		if (!(flags & NI_NUMERICHOST)) {
 			reverse_hosts(buf, a, scopeid, af);
 		}
+#ifdef __wasi_unmodified_upstream
 		if (!*buf && !(flags & NI_NUMERICHOST)) {
 			unsigned char query[18+PTR_MAX], reply[512];
 			int qlen = __res_mkquery(0, ptr, 1, RR_PTR,
@@ -164,15 +164,18 @@ int getnameinfo(const struct sockaddr *restrict sa, socklen_t sl,
 			if (rlen > 0)
 				__dns_parse(reply, rlen, dns_parse_callback, buf);
 		}
+#endif
 		if (!*buf) {
 			if (flags & NI_NAMEREQD) return EAI_NONAME;
 			inet_ntop(af, a, buf, sizeof buf);
 			if (scopeid) {
 				char *p = 0, tmp[IF_NAMESIZE+1];
+#ifdef __wasi_unmodified_upstream
 				if (!(flags & NI_NUMERICSCOPE) &&
 				    (IN6_IS_ADDR_LINKLOCAL(a) ||
 				     IN6_IS_ADDR_MC_LINKLOCAL(a)))
 					p = if_indextoname(scopeid, tmp+1);
+#endif
 				if (!p)
 					p = itoa(num, scopeid);
 				*--p = '%';
@@ -187,8 +190,10 @@ int getnameinfo(const struct sockaddr *restrict sa, socklen_t sl,
 		char *p = buf;
 		int port = ntohs(((struct sockaddr_in *)sa)->sin_port);
 		buf[0] = 0;
+#ifdef __wasi_unmodified_upstream
 		if (!(flags & NI_NUMERICSERV))
 			reverse_services(buf, port, flags & NI_DGRAM);
+#endif
 		if (!*p)
 			p = itoa(num, port);
 		if (strlen(p) >= servlen)

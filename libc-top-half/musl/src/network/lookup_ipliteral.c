@@ -45,7 +45,9 @@ int __lookup_ipliteral(struct address buf[static 1], const char *name, int famil
 			if (!IN6_IS_ADDR_LINKLOCAL(&a6) &&
 			    !IN6_IS_ADDR_MC_LINKLOCAL(&a6))
 				return EAI_NONAME;
+#ifdef __wasi_unmodified_upstream
 			scopeid = if_nametoindex(p);
+#endif
 			if (!scopeid) return EAI_NONAME;
 		}
 		if (scopeid > UINT_MAX) return EAI_NONAME;

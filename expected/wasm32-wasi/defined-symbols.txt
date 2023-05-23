@@ -53,8 +53,6 @@ __default_guardsize
 __default_stacksize
 __des_setkey
 __dlerror_lockptr
-__dn_expand
-__dns_parse
 __do_cleanup_pop
 __do_cleanup_push
 __do_des
@@ -739,7 +737,6 @@ difftime
 dirfd
 dirname
 div
-dn_expand
 dngettext
 dprintf
 drand48
@@ -940,12 +937,16 @@ getgrnam
 getgrnam_r
 getgrouplist
 gethostbyaddr
+gethostbyaddr_r
 gethostbyname
+gethostbyname2
+gethostbyname2_r
 gethostid
 gethostname
 getif_addrs
 getitimer
 getline
+getnameinfo
 getopt
 getopt_long
 getopt_long_only
@@ -968,6 +969,7 @@ getrlimit
 getrlimit64
 getrusage
 getservbyname
+getservbyname_r
 getservbyport
 getsid
 getsockname

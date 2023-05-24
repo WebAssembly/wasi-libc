@@ -3,4 +3,4 @@
 	url = https://github.com/WebAssembly/WASI
 [submodule "tools/wasix-headers/WASI"]
 	path = tools/wasix-headers/WASI
-	url = https://github.com/john-sharratt/wasix-witx.git
+	url = https://github.com/wasix-org/wasix-witx.git

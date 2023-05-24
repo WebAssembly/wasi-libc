@@ -507,11 +507,7 @@ ifeq ($(THREAD_MODEL), single)
 MUSL_OMIT_HEADERS += "pthread.h"
 endif
 
-default: startup_files \
-	include_dirs \
-	$(SYSROOT_LIB)/libc.a \
-	post-finish \
-	check-symbols
+default: finish post-finish
 
 wasix-headers:
 	git submodule init
@@ -521,6 +517,8 @@ wasix-headers:
 post-finish: finish
 	rm -f sysroot/lib/wasm32-wasi/libc-printscan-log-double.a
 	rsync -rtvu --delete ./sysroot/ ./sysroot32/
+
+$(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
 
 $(SYSROOT_LIB)/libc-printscan-long-double.a: $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS)
 
@@ -632,7 +630,8 @@ startup_files: include_dirs $(LIBC_BOTTOM_HALF_CRT_OBJS)
 	mkdir -p "$(SYSROOT_LIB)" && \
 	cp $(LIBC_BOTTOM_HALF_CRT_OBJS) "$(SYSROOT_LIB)"
 
-$(SYSROOT_LIB)/libc.a: $(LIBC_OBJS) \
+libc: include_dirs \
+    $(SYSROOT_LIB)/libc.a \
     $(SYSROOT_LIB)/libc-printscan-long-double.a \
     $(SYSROOT_LIB)/libc-printscan-no-floating-point.a \
     $(SYSROOT_LIB)/libwasi-emulated-mman.a \
@@ -661,27 +660,7 @@ endif
 DEFINED_SYMBOLS = $(SYSROOT_SHARE)/defined-symbols.txt
 UNDEFINED_SYMBOLS = $(SYSROOT_SHARE)/undefined-symbols.txt
 
-update-symbols: generate-symbols
-	cp $(SYSROOT_SHARE)/wasm32-wasi/include-all.c \
-		expected/wasm32-wasi/include-all.c
-	cp $(SYSROOT_SHARE)/wasm32-wasi/predefined-macros.txt \
-		expected/wasm32-wasi/predefined-macros.txt
-	cp $(SYSROOT_SHARE)/share/wasm32-wasi/undefined-symbols.txt \
-		expected/wasm32-wasi/undefined-symbols.txt
-	cp $(SYSROOT_SHARE)/wasm32-wasi/defined-symbols.txt \
-		expected/wasm32-wasi/defined-symbols.txt
-
-check-symbols: generate-symbols
-	#
-	# Test that it compiles.
-	#
-	$(CC) $(CFLAGS) -fsyntax-only "$(SYSROOT_SHARE)/include-all.c" -Wno-\#warnings
-
-	# Check that the computed metadata matches the expected metadata.
-	# This ignores whitespace because on Windows the output has CRLF line endings.
-	diff -wur "expected/$(TARGET_TRIPLE)" "$(SYSROOT_SHARE)"
-
-generate-symbols: startup_files libc
+check-symbols: startup_files libc
 	#
 	# Collect metadata on the sysroot and perform sanity checks.
 	#
@@ -711,6 +690,11 @@ generate-symbols: startup_files libc
 	      echo '#include <'$$header'>' | sed 's/\.\///' ; \
 	done |LC_ALL=C sort >$(SYSROOT_SHARE)/include-all.c ; \
 	cd - >/dev/null
+
+	#
+	# Test that it compiles.
+	#
+	$(CC) $(CFLAGS) -fsyntax-only "$(SYSROOT_SHARE)/include-all.c" -Wno-\#warnings
 
 	#
 	# Collect all the predefined macros, except for compiler version macros
@@ -758,6 +742,10 @@ generate-symbols: startup_files libc
 	    | grep -v '^#define __\(BOOL\|INT_\(LEAST\|FAST\)\(8\|16\|32\|64\)\|INT\|LONG\|LLONG\|SHRT\)_WIDTH__' \
 	    | grep -v '^#define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_\(1\|2\|4\|8\)' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
+
+	# Check that the computed metadata matches the expected metadata.
+	# This ignores whitespace because on Windows the output has CRLF line endings.
+	diff -wur "expected/$(TARGET_TRIPLE)" "$(SYSROOT_SHARE)"
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"

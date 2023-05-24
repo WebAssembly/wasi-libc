@@ -189,6 +189,9 @@
 #include <values.h>
 #include <wait.h>
 #include <wasi/api.h>
+#include <wasi/api_poly.h>
+#include <wasi/api_wasi.h>
+#include <wasi/api_wasix.h>
 #include <wasi/libc-environ.h>
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc-nocwd.h>

@@ -526,13 +526,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	 * of the current module and start executing the entry function. The
 	 * wasi-threads specification requires the module to export a
 	 * `wasi_thread_start` function, which is invoked with `args`. */
-	int tid;
-	ret = __wasi_thread_spawn((void *) args, &tid);
-	if (ret > 0) {
-		ret = -ret;
-	} else if (ret == 0) {
-		ret = tid;
-	}
+	ret = __wasi_thread_spawn((void *) args);
 #endif
 
 #ifdef __wasilibc_unmodified_upstream

@@ -58,6 +58,8 @@ struct tm {
 #include <__header_time.h>
 #endif
 
+typedef int clockid_t;
+
 #if defined(__wasilibc_unmodified_upstream) || defined(_WASI_EMULATED_PROCESS_CLOCKS)
 clock_t clock (void);
 #else

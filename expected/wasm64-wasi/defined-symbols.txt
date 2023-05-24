@@ -103,6 +103,7 @@ __fwritex
 __fwriting
 __get_handler_set
 __get_locale
+__get_resolv_conf
 __getdelim
 __getentropy
 __getgr_a
@@ -113,6 +114,7 @@ __getpwent_a
 __gettext_lockptr
 __gettextdomain
 __gmtime_r
+__h_errno_location
 __hwcap
 __inet_aton
 __inhibit_ptc
@@ -184,6 +186,10 @@ __log2_data
 __log2f_data
 __log_data
 __logf_data
+__lookup_ipliteral
+__lookup_name
+__lookup_serv
+__lookup_serv_wasi
 __lseek
 __main_void
 __malloc_atfork
@@ -560,6 +566,7 @@ acosh
 acoshf
 acoshl
 acosl
+add_entry
 alarm
 aligned_alloc
 alphasort
@@ -742,6 +749,7 @@ duplocale
 ecvt
 encrypt
 endgrent
+endprotoent
 endpwent
 endspent
 environ
@@ -869,6 +877,7 @@ fputws_unlocked
 fread
 fread_unlocked
 free
+freeaddrinfo
 freeif_addrs
 freelocale
 freopen
@@ -901,9 +910,11 @@ fwrite_unlocked
 fwscanf
 gcvt
 get_avphys_pages
+get_entry
 get_nprocs
 get_nprocs_conf
 get_phys_pages
+getaddrinfo
 getc
 getc_unlocked
 getchar
@@ -925,11 +936,17 @@ getgrgid_r
 getgrnam
 getgrnam_r
 getgrouplist
+gethostbyaddr
+gethostbyaddr_r
+gethostbyname
+gethostbyname2
+gethostbyname2_r
 gethostid
 gethostname
 getif_addrs
 getitimer
 getline
+getnameinfo
 getopt
 getopt_long
 getopt_long_only
@@ -939,6 +956,9 @@ getpgid
 getpgrp
 getpid
 getppid
+getprotobyname
+getprotobynumber
+getprotoent
 getpwent
 getpwnam
 getpwnam_r
@@ -948,6 +968,9 @@ getrandom
 getrlimit
 getrlimit64
 getrusage
+getservbyname
+getservbyname_r
+getservbyport
 getsid
 getsockname
 getsockopt
@@ -969,12 +992,14 @@ globfree
 globfree64
 gmtime
 gmtime_r
+h_errno
 hcreate
 hcreate_r
 hdestroy
 hdestroy_r
 hsearch
 hsearch_r
+hstrerror
 htonl
 htons
 hypot
@@ -994,6 +1019,7 @@ index
 inet_aton
 inet_ntop
 inet_pton
+init_services
 initstate
 insque
 ioctl
@@ -1428,6 +1454,7 @@ send
 sendfile
 sendmsg
 sendto
+services
 setbuf
 setbuffer
 setegid
@@ -1435,6 +1462,7 @@ setenv
 seteuid
 setgid
 setgrent
+setgroups
 setitimer
 setjmp
 setkey
@@ -1443,6 +1471,7 @@ setlocale
 setlogmask
 setpgid
 setpgrp
+setprotoent
 setpwent
 setrlimit
 setrlimit64

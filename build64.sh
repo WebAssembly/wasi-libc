@@ -19,6 +19,8 @@ rsync -rtvu --delete tools/wasix-headers/ build/temp
 cp -r -f tools/wasi-headers/WASI/phases/* build/temp/WASI/phases
 mv -f build/temp/WASI/phases/snapshot/witx/wasi_snapshot_preview1.witx build/temp/WASI/phases/snapshot/witx/wasix_v1.witx
 sed -i 's|(field $buf_len $size)|(field $buf_len usize)|g' build/temp/WASI/phases/snapshot/witx/typenames.witx
+sed -i 's|(param $buf_len $size)|(param $buf_len usize)|g' build/temp/WASI/phases/snapshot/witx/wasix_v1.witx
+cargo clean --manifest-path build/temp/Cargo.toml
 cargo run --manifest-path build/temp/Cargo.toml generate-libc --64bit
 cp -f libc-bottom-half/headers/public/wasi/api.h libc-bottom-half/headers/public/wasi/api_wasi.h
 

@@ -1,4 +1,7 @@
-#!/bin/bash -e
+#!/bin/bash
+
+set -Eeuxo pipefail
+
 export TARGET_ARCH=wasm32
 export TARGET_OS=wasix
 cd tools/wasix-headers/WASI

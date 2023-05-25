@@ -36,9 +36,9 @@ static inline bool timespec_to_timestamp_clamp(
   if (timespec->tv_nsec < 0 || timespec->tv_nsec >= NSEC_PER_SEC)
     return false;
 
-  if (timespec->tv_sec < 0) {
+  if (timespec->tv_sec <= 0) {
     // Timestamps before the Epoch are not supported.
-    *timestamp = 0;
+    *timestamp = 1; // means immediate
   } else if (__builtin_mul_overflow(timespec->tv_sec, NSEC_PER_SEC, timestamp) ||
              __builtin_add_overflow(*timestamp, timespec->tv_nsec, timestamp)) {
     // Make sure our timestamp does not overflow.

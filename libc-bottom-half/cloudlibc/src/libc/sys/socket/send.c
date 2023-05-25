@@ -9,8 +9,8 @@
 #include <errno.h>
 
 ssize_t send(int socket, const void *buffer, size_t length, int flags) {
-  // This implementation does not support any flags.
-  if (flags != 0) {
+  // This implementation does not support any flags, but we can ignore NOSIGNAL
+  if ((flags&~MSG_NOSIGNAL) != 0) {
     errno = EOPNOTSUPP;
     return -1;
   }

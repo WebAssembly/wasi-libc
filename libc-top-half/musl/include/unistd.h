@@ -195,11 +195,11 @@ int setregid(gid_t, gid_t);
 int lockf(int, int, off_t);
 #endif
 long gethostid(void);
-#ifdef __wasilibc_unmodified_upstream /* WASI has no nice, sync, or setpgrp */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no nice or sync */
 int nice(int);
 void sync(void);
-pid_t setpgrp(void);
 #endif
+pid_t setpgrp(void);
 char *crypt(const char *, const char *);
 void encrypt(char *, int);
 void swab(const void *__restrict, void *__restrict, ssize_t);

@@ -1,4 +1,9 @@
 #define _GNU_SOURCE
+#define __NEED_gid_t
+
+#include <bits/alltypes.h>
+
+#ifdef __wasilibc_unmodified_upstream
 #include <unistd.h>
 #include <signal.h>
 #include "syscall.h"
@@ -25,12 +30,20 @@ static void do_setgroups(void *p)
 	}
 	c->ret = ret;
 }
+#else
+#include <errno.h>
+#endif
 
 int setgroups(size_t count, const gid_t list[])
 {
+#ifdef __wasilibc_unmodified_upstream
 	/* ret is initially nonzero so that failure of the first thread does not
 	 * trigger the safety kill above. */
 	struct ctx c = { .count = count, .list = list, .ret = 1 };
 	__synccall(do_setgroups, &c);
 	return __syscall_ret(c.ret);
+#else
+  errno = ENOTSUP;
+  return -1;
+#endif
 }

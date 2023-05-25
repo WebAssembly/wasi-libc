@@ -1,3 +1,20 @@
+#pragma once
+
+#include <bits/alltypes.h>
+
+struct sigaltstack {
+	void *ss_sp;
+	int ss_flags;
+	size_t ss_size;
+};
+
+typedef struct sigaltstack stack_t;
+
+int sigaltstack(const stack_t *restrict ss, stack_t *restrict old);
+
+#define MINSIGSTKSZ 2048
+#define SIGSTKSZ 8192
+
 #define SIGHUP    1
 #define SIGINT    2
 #define SIGQUIT   3

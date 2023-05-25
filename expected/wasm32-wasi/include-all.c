@@ -116,6 +116,7 @@
 #include <memory.h>
 #include <monetary.h>
 #include <mqueue.h>
+#include <net/if.h>
 #include <netdb.h>
 #include <netinet/icmp6.h>
 #include <netinet/igmp.h>
@@ -161,6 +162,7 @@
 #include <sys/random.h>
 #include <sys/reg.h>
 #include <sys/select.h>
+#include <sys/sendfile.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/stropts.h>

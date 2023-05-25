@@ -23,8 +23,10 @@
 #define __DEFINED_wint_t
 #endif
 
+TYPEDEF unsigned _Addr size_t;
 TYPEDEF float float_t;
 TYPEDEF double double_t;
+TYPEDEF int clockid_t;
 
 #if defined(__NEED_max_align_t) && !defined(__DEFINED_max_align_t)
 #define __need_max_align_t
@@ -40,6 +42,11 @@ TYPEDEF double double_t;
 #if defined(__NEED_suseconds_t) && !defined(__DEFINED_suseconds_t)
 #include <__typedef_suseconds_t.h>
 #define __DEFINED_suseconds_t
+#endif
+
+#if defined(__NEED_gid_t) && !defined(__DEFINED_gid_t)
+#include <__typedef_gid_t.h>
+#define __DEFINED_gid_t
 #endif
 
 #if defined(__NEED_clockid_t) && !defined(__DEFINED_clockid_t)

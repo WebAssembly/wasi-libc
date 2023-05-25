@@ -99,6 +99,29 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         misc/nftw.c \
         misc/syslog.c \
         errno/strerror.c \
+        \
+        network/services.c \
+        network/getaddrinfo.c \
+        network/getnameinfo.c \
+        network/gethostbyname.c \
+        network/gethostbyname2.c \
+        network/gethostbyname2_r.c \
+        network/getservbyname.c \
+        network/getservbyname_r.c \
+        network/gethostbyaddr.c \
+        network/gethostbyaddr_r.c \
+        network/lookup_ipliteral.c \
+        network/lookup_name.c \
+        network/lookup_serv.c \
+        network/freeaddrinfo.c \
+        network/resolvconf.c \
+        \
+        network/gethostbyaddr.c \
+        network/gethostbyname.c \
+        network/getservbyname.c \
+        network/getservbyport.c \
+        network/h_errno.c \
+        network/hstrerror.c \
         network/htonl.c \
         network/htons.c \
         network/ntohl.c \
@@ -108,6 +131,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         network/inet_aton.c \
         network/in6addr_any.c \
         network/in6addr_loopback.c \
+        network/proto.c \
         fenv/fenv.c \
         fenv/fesetround.c \
         fenv/feupdateenv.c \
@@ -169,6 +193,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         linux/wait3.c \
         linux/wait4.c \
         linux/eventfd.c \
+        linux/setgroups.c \
         stat/futimesat.c \
         legacy/getpagesize.c \
         thread/thrd_sleep.c \
@@ -445,7 +470,7 @@ MUSL_OMIT_HEADERS += \
     "sys/acct.h" \
     "sys/cachectl.h" \
     "sys/epoll.h" "sys/reboot.h" "sys/swap.h" \
-    "sys/sendfile.h" "sys/inotify.h" \
+    "sys/inotify.h" \
     "sys/quota.h" \
     "sys/klog.h" \
     "sys/fsuid.h" \
@@ -468,7 +493,6 @@ MUSL_OMIT_HEADERS += \
     "sys/membarrier.h" \
     "sys/signalfd.h" \
     "sys/termios.h" \
-    "net/if.h" \
     "net/if_arp.h" \
     "net/ethernet.h" \
     "net/route.h" \
@@ -483,7 +507,16 @@ ifeq ($(THREAD_MODEL), single)
 MUSL_OMIT_HEADERS += "pthread.h"
 endif
 
-default: finish
+default: finish post-finish
+
+wasix-headers:
+	git submodule init
+	git submodule update
+	cargo run --manifest-path tools/wasix-headers/Cargo.toml generate-libc
+
+post-finish: finish
+	rm -f sysroot/lib/wasm32-wasi/libc-printscan-log-double.a
+	rsync -rtvu --delete ./sysroot/ ./sysroot32/
 
 $(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
 

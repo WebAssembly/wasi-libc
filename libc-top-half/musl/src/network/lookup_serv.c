@@ -9,6 +9,12 @@
 #include "lookup.h"
 #include "stdio_impl.h"
 
+#ifndef __wasilibc_unmodified_upstream
+#include "services.h"
+
+int __lookup_serv_wasi(struct service buf[static MAXSERVS], const char *name, int proto, int socktype, int flags);
+#endif
+
 int __lookup_serv(struct service buf[static MAXSERVS], const char *name, int proto, int socktype, int flags)
 {
 	char line[128];
@@ -67,6 +73,9 @@ int __lookup_serv(struct service buf[static MAXSERVS], const char *name, int pro
 
 	if (flags & AI_NUMERICSERV) return EAI_NONAME;
 
+#ifndef __wasilibc_unmodified_upstream
+  return __lookup_serv_wasi(buf, name, proto, socktype, flags);
+#else
 	size_t l = strlen(name);
 
 	unsigned char _buf[1032];
@@ -111,4 +120,28 @@ int __lookup_serv(struct service buf[static MAXSERVS], const char *name, int pro
 	}
 	__fclose_ca(f);
 	return cnt > 0 ? cnt : EAI_SERVICE;
+#endif
 }
+
+#ifndef __wasilibc_unmodified_upstream
+int __lookup_serv_wasi(struct service buf[static MAXSERVS], const char *name, int proto, int socktype, int flags) {
+  init_services();
+  services_entry_t *svc_entry;
+
+  svc_entry = get_entry(name);
+  if (svc_entry == NULL) {
+    return EAI_SERVICE;
+  }
+
+  int cnt = 0;
+  for (int i = 0; i < svc_entry->len_svcs && i < MAXSERVS; i++) {
+    if (proto != svc_entry->svcs[i].proto) continue;
+    buf[i].port = svc_entry->svcs[i].port;
+    buf[i].socktype = svc_entry->svcs[i].socktype;
+    buf[i].proto = svc_entry->svcs[i].proto;
+    cnt++;
+  }
+
+  return cnt;
+}
+#endif

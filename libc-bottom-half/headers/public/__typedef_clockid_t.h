@@ -15,6 +15,4 @@ struct __clockid {
 };
 #endif
 
-typedef struct __clockid clockid_t;
-
 #endif

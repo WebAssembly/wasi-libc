@@ -108,6 +108,43 @@ struct dpc_ctx {
 #define RR_CNAME 5
 #define RR_AAAA 28
 
+#ifndef __wasilibc_unmodified_upstream
+
+#include <wasi/api.h>
+static int name_from_dns_search(struct address buf[static MAXADDRS], char canon[static 256], const char *name, int family) {
+  __wasi_size_t naddrs = 0;
+  __wasi_addr_t *addrs;
+  int rv = 0;
+
+  addrs = calloc((MAXADDRS + 1), sizeof(__wasi_addr_t));
+  if (!addrs) {
+    rv = EAI_MEMORY;
+    goto done;
+  }
+
+  __wasi_errno_t error = __wasi_resolve(name, 0, addrs, MAXADDRS, &naddrs);
+  if (error != 0) {
+    errno = error;
+    rv = EAI_NONAME;
+    goto cleanup;
+  }
+
+  for (int i = 0; (i < (int) naddrs) && (i < MAXADDRS); i++) {
+    buf[i] = (struct address){
+      .family = addrs[i].tag,
+      .scopeid = 0,
+      .sortkey = 0,
+    };
+    memcpy(buf[i].addr, &addrs[i].u, 16);
+    rv++;
+  }
+
+  cleanup:
+    free(addrs);
+  done:
+  return rv;
+}
+#else
 static int dns_parse_callback(void *c, int rr, const void *data, int len, const void *packet)
 {
 	char tmp[256];
@@ -218,6 +255,7 @@ static int name_from_dns_search(struct address buf[static MAXADDRS], char canon[
 	canon[l] = 0;
 	return name_from_dns(buf, canon, name, family, &conf);
 }
+#endif
 
 static const struct policy {
 	unsigned char addr[16];

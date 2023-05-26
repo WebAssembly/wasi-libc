@@ -29,4 +29,4 @@ EOF
 
 make -j 14
 rm -f sysroot/lib/wasm32-wasi/libc-printscan-long-double.a
-rsync -rtvu --delete ./sysroot/ ./sysroot32/
+rsync -Lrtv --delete ./sysroot/ ./sysroot32/

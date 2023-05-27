@@ -661,7 +661,7 @@ __wasi_errno_t __wasi_sock_shutdown(
 
 #ifdef _REENTRANT
 int32_t __imported_wasi_thread_spawn(int32_t arg0) __attribute__((
-    __import_module__("wasi"),
+    __import_module__("wasi_snapshot_preview1"),
     __import_name__("thread-spawn")
 ));
 

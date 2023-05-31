@@ -32,7 +32,8 @@ wasi_thread_start:
 	#
 	# Note: once we unlock the thread list, our "map_base" can be freed
 	# by a joining thread. It's safe as we are in ASM and no longer use
-	# our C stack or pthread_t.
+	# our C stack or pthread_t. It's impossible to do this safely in C
+	# because there is no way to tell the C compiler not to use C stack.
 	i32.const   __thread_list_lock
 	i32.const   0
 	i32.atomic.store 0

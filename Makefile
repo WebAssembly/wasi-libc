@@ -325,6 +325,7 @@ ifeq ($(THREAD_MODEL), posix)
 # Specify the tls-model until LLVM 15 is released (which should contain
 # https://reviews.llvm.org/D130053).
 CFLAGS += -mthread-model posix -pthread -ftls-model=local-exec
+ASMFLAGS += -matomics
 
 # Include cloudlib's directory to access the structure definition of clockid_t
 CFLAGS += -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)

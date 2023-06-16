@@ -61,14 +61,13 @@ void __tl_sync(pthread_t td)
 }
 
 #ifndef __wasilibc_unmodified_upstream
-/* this queue has at most one entry */
-static void *map_base_lazy_free_queue;
+static void *map_base_deferred_free;
 
-static void process_map_base_lazy_free_queue()
+static void process_map_base_deferred_free()
 {
 	/* called with __tl_lock held */
-	free(map_base_lazy_free_queue);
-	map_base_lazy_free_queue = NULL;
+	free(map_base_deferred_free);
+	map_base_deferred_free = NULL;
 }
 #endif
 
@@ -194,17 +193,17 @@ static void __pthread_exit(void *result)
 	}
 #else
 	if (state==DT_DETACHED && self->map_base) {
-		// As we use malloc/free which is considerably more complex
-		// than mmap/munmap to call and can even require a valid
-		// thread context, it's difficult to implement __unmapself.
-		//
-		// Here we take an alternative approach which simply defers
-		// the deallocation. An obvious downside of this approach is
-		// that it keeps the stack longer. (possibly forever.)
-		// To avoid wasting too much memory, we keep the free queue
-		// length at most one.
-		process_map_base_lazy_free_queue();
-		map_base_lazy_free_queue = self->map_base;
+		/* As we use malloc/free which is considerably more complex
+		 * than mmap/munmap to call and can even require a valid
+		 * thread context, it's difficult to implement __unmapself.
+		 *
+		 * Here we take an alternative approach which simply defers
+		 * the deallocation. An obvious downside of this approach is
+		 * that it keeps the stack longer. (possibly forever.)
+		 * To avoid wasting too much memory, we only defer a single
+		 * item at most. */
+		process_map_base_deferred_free();
+		map_base_deferred_free = self->map_base;
 		// Can't use `exit()` here, because it is too high level
 		return;
 	}
@@ -446,15 +445,13 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 			if (map == MAP_FAILED) goto fail;
 		}
 #else
-		/*
-		 * Process the free queue before allocationg a new one.
-		 * Hopefully it enables a reuse of the memory.
+		/* Process the deferred free request if any before
+		 * allocationg a new one. Hopefully it enables a reuse of the memory.
 		 *
 		 * Note: We can't perform a simple "handoff" becasue allocation
-		 * sizes might be different. (eg. the stack size might differ)
-		 */
+		 * sizes might be different. (eg. the stack size might differ) */
 		__tl_lock();
-		process_map_base_lazy_free_queue();
+		process_map_base_deferred_free();
 		__tl_unlock();
 		map = malloc(size);
 		if (!map) goto fail;

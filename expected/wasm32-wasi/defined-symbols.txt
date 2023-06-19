@@ -1032,6 +1032,7 @@ in6addr_any
 in6addr_loopback
 index
 inet_aton
+inet_ntoa
 inet_ntop
 inet_pton
 init_services

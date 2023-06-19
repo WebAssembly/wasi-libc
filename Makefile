@@ -127,6 +127,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         network/ntohl.c \
         network/ntohs.c \
         network/inet_ntop.c \
+	network/inet_ntoa.c \
         network/inet_pton.c \
         network/inet_aton.c \
         network/in6addr_any.c \

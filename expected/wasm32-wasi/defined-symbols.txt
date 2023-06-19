@@ -450,6 +450,7 @@ __wasi_resolve
 __wasi_sched_yield
 __wasi_sock_accept
 __wasi_sock_accept_poll
+__wasi_sock_accept_ready_poll
 __wasi_sock_accept_v2
 __wasi_sock_addr_local
 __wasi_sock_addr_peer
@@ -468,9 +469,11 @@ __wasi_sock_recv
 __wasi_sock_recv_from
 __wasi_sock_recv_from_poll
 __wasi_sock_recv_poll
+__wasi_sock_recv_ready_poll
 __wasi_sock_send
 __wasi_sock_send_file
 __wasi_sock_send_poll
+__wasi_sock_send_ready_poll
 __wasi_sock_send_to
 __wasi_sock_send_to_poll
 __wasi_sock_set_opt_flag

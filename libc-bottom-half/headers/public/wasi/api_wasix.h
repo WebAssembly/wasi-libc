@@ -4314,6 +4314,25 @@ __wasi_errno_t __wasi_sock_accept_poll(
     __wasi_addr_port_t *retptr1
 ) __attribute__((__warn_unused_result__));
 /**
+ * Polls if any connections are waiting to be accepted
+ * 
+ * If this function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ * @return
+ * Number of connections that are waiting
+ */
+__wasi_errno_t __wasi_sock_accept_ready_poll(
+    /**
+     * The listening socket.
+     */
+    __wasi_fd_t fd,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
  * Receive a message and its peer address from a socket.
  * 
  * If this function would block it returns Errno::Pending instead
@@ -4344,7 +4363,7 @@ __wasi_errno_t __wasi_sock_recv_from_poll(
     __wasi_addr_port_t *retptr2
 ) __attribute__((__warn_unused_result__));
 /**
- * Receive a message from a socket.
+ * Polls to receive a message from a socket.
  * 
  * If this function would block it returns Errno::Pending instead
  * and invokes the waker in the future.
@@ -4373,6 +4392,22 @@ __wasi_errno_t __wasi_sock_recv_poll(
     __wasi_roflags_t *retptr1
 ) __attribute__((__warn_unused_result__));
 /**
+ * Polls if a message is waiting to be received
+ * 
+ * If this function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ * @return
+ * Number of bytes stored waiting to be received
+ */
+__wasi_errno_t __wasi_sock_recv_ready_poll(
+    __wasi_fd_t fd,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
  * Send a message on a socket.
  * 
  * If this function would block it returns Errno::Pending instead
@@ -4394,6 +4429,22 @@ __wasi_errno_t __wasi_sock_send_poll(
      * Message flags.
      */
     __wasi_siflags_t si_flags,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Polls if the socket is ready to send messages
+ * 
+ * If this function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ * @return
+ * Number of bytes that can be sent.
+ */
+__wasi_errno_t __wasi_sock_send_ready_poll(
+    __wasi_fd_t fd,
     /**
      * Waker that will be invoked when this function is ready to be polled again
      */

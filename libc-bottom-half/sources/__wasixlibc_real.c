@@ -1026,6 +1026,20 @@ __wasi_errno_t __wasi_sock_accept_poll(
     return (uint16_t) ret;
 }
 
+int32_t __imported_wasix_32v1_sock_accept_ready_poll(int32_t arg0, int64_t arg1, int32_t arg2) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("sock_accept_ready_poll")
+));
+
+__wasi_errno_t __wasi_sock_accept_ready_poll(
+    __wasi_fd_t fd,
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0
+){
+    int32_t ret = __imported_wasix_32v1_sock_accept_ready_poll((int32_t) fd, (int64_t) waker, (intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
 int32_t __imported_wasix_32v1_sock_recv_from_poll(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int64_t arg4, int32_t arg5, int32_t arg6, int32_t arg7) __attribute__((
     __import_module__("wasix_32v1"),
     __import_name__("sock_recv_from_poll")
@@ -1063,6 +1077,20 @@ __wasi_errno_t __wasi_sock_recv_poll(
     return (uint16_t) ret;
 }
 
+int32_t __imported_wasix_32v1_sock_recv_ready_poll(int32_t arg0, int64_t arg1, int32_t arg2) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("sock_recv_ready_poll")
+));
+
+__wasi_errno_t __wasi_sock_recv_ready_poll(
+    __wasi_fd_t fd,
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0
+){
+    int32_t ret = __imported_wasix_32v1_sock_recv_ready_poll((int32_t) fd, (int64_t) waker, (intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
 int32_t __imported_wasix_32v1_sock_send_poll(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int64_t arg4, int32_t arg5) __attribute__((
     __import_module__("wasix_32v1"),
     __import_name__("sock_send_poll")
@@ -1077,6 +1105,20 @@ __wasi_errno_t __wasi_sock_send_poll(
     __wasi_size_t *retptr0
 ){
     int32_t ret = __imported_wasix_32v1_sock_send_poll((int32_t) fd, (intptr_t) si_data, (intptr_t) si_data_len, (int32_t) si_flags, (int64_t) waker, (intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
+int32_t __imported_wasix_32v1_sock_send_ready_poll(int32_t arg0, int64_t arg1, int32_t arg2) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("sock_send_ready_poll")
+));
+
+__wasi_errno_t __wasi_sock_send_ready_poll(
+    __wasi_fd_t fd,
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0
+){
+    int32_t ret = __imported_wasix_32v1_sock_send_ready_poll((int32_t) fd, (int64_t) waker, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 

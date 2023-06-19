@@ -25,13 +25,13 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(intptr_t) == 4, "non-wasi data layout");
-_Static_assert(_Alignof(uintptr_t) == 4, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
-typedef int32_t __wasi_int_t;
-typedef uint32_t __wasi_uint_t;
-_Static_assert(_Alignof(__wasi_int_t) == 4, "non-wasi data layout");
-_Static_assert(_Alignof(__wasi_uint_t) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(intptr_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(uintptr_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == 8, "non-wasi data layout");
+typedef int64_t __wasi_int_t;
+typedef uint64_t __wasi_uint_t;
+_Static_assert(_Alignof(__wasi_int_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(__wasi_uint_t) == 8, "non-wasi data layout");
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -43,8 +43,16 @@ extern "C" {
  */
 typedef __wasi_uint_t __wasi_pointersize_t;
 
-_Static_assert(sizeof(__wasi_pointersize_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_pointersize_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_pointersize_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_pointersize_t) == 8, "witx calculated align");
+
+/**
+ * Represents an ID of a waker to be woken
+ */
+typedef uint64_t __wasi_waker_t;
+
+_Static_assert(sizeof(__wasi_waker_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_waker_t) == 8, "witx calculated align");
 
 /**
  * Error codes returned by functions.
@@ -959,10 +967,10 @@ typedef struct __wasi_iovec_t {
 
 } __wasi_iovec_t;
 
-_Static_assert(sizeof(__wasi_iovec_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_iovec_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_iovec_t) == 16, "witx calculated size");
+_Static_assert(_Alignof(__wasi_iovec_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_iovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 8, "witx calculated offset");
 
  */
 /**
@@ -977,10 +985,10 @@ typedef struct __wasi_ciovec_t {
 
 } __wasi_ciovec_t;
 
-_Static_assert(sizeof(__wasi_ciovec_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_ciovec_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_ciovec_t) == 16, "witx calculated size");
+_Static_assert(_Alignof(__wasi_ciovec_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_ciovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 8, "witx calculated offset");
 
  */
 /**
@@ -3084,38 +3092,38 @@ typedef struct __wasi_thread_state_t {
 
 } __wasi_thread_state_t;
 
-_Static_assert(sizeof(__wasi_thread_state_t) == 112, "witx calculated size");
-_Static_assert(_Alignof(__wasi_thread_state_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_thread_state_t) == 200, "witx calculated size");
+_Static_assert(_Alignof(__wasi_thread_state_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_thread_state_t, thread_self) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, dtv) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, thread_prev) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, thread_next) == 12, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, sysinfo) == 16, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, canary) == 20, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, tid) == 24, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, errno_val) == 28, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, detach_state) == 32, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, cancel) == 36, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, canceldisable) == 40, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, cancelasync) == 41, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, flags) == 42, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, map_base) == 44, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, map_size) == 48, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, stack) == 52, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, stack_size) == 56, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, guard_size) == 60, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, result) == 64, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, cancelbuf) == 68, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, tsd) == 72, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, robust_list_head) == 76, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, robust_list_off) == 80, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, robust_list_pending) == 84, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, h_errno_val) == 88, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, timer_id) == 92, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, locale) == 96, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, killlock) == 100, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, dlerror_buf) == 104, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_state_t, stdio_locks) == 108, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, dtv) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, thread_prev) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, thread_next) == 24, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, sysinfo) == 32, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, canary) == 40, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, tid) == 48, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, errno_val) == 52, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, detach_state) == 56, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, cancel) == 60, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, canceldisable) == 64, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, cancelasync) == 65, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, flags) == 66, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, map_base) == 72, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, map_size) == 80, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, stack) == 88, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, stack_size) == 96, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, guard_size) == 104, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, result) == 112, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, cancelbuf) == 120, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, tsd) == 128, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, robust_list_head) == 136, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, robust_list_off) == 144, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, robust_list_pending) == 152, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, h_errno_val) == 160, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, timer_id) == 164, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, locale) == 168, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, killlock) == 176, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, dlerror_buf) == 184, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_state_t, stdio_locks) == 192, "witx calculated offset");
 
 /**
  * thread start type
@@ -3176,27 +3184,27 @@ typedef struct __wasi_thread_start_t {
 
 } __wasi_thread_start_t;
 
-_Static_assert(sizeof(__wasi_thread_start_t) == 64, "witx calculated size");
-_Static_assert(_Alignof(__wasi_thread_start_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_thread_start_t) == 128, "witx calculated size");
+_Static_assert(_Alignof(__wasi_thread_start_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_thread_start_t, stack) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, tls_base) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, start_funct) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, start_args) == 12, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, reserved0) == 16, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, reserved1) == 20, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, reserved2) == 24, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, reserved3) == 28, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, reserved4) == 32, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, reserved5) == 36, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, reserved6) == 40, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, reserved7) == 44, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, reserved8) == 48, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, reserved9) == 52, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, stack_size) == 56, "witx calculated offset");
-_Static_assert(offsetof(__wasi_thread_start_t, guard_size) == 60, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, tls_base) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, start_funct) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, start_args) == 24, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved0) == 32, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved1) == 40, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved2) == 48, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved3) == 56, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved4) == 64, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved5) == 72, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved6) == 80, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved7) == 88, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved8) == 96, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, reserved9) == 104, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, stack_size) == 112, "witx calculated offset");
+_Static_assert(offsetof(__wasi_thread_start_t, guard_size) == 120, "witx calculated offset");
 
 /**
- * @defgroup wasix_32v1
+ * @defgroup wasix_64v1
  * @{
  */
 
@@ -4154,6 +4162,302 @@ __wasi_errno_t __wasi_resolve(
     __wasi_addr_t * addrs,
     __wasi_size_t naddrs,
     __wasi_size_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Registers a callback function for waking up wakers
+ */
+void __wasi_callback_waker_wake(
+    /**
+     * Exported function that will be called back when a waker has been triggered
+     * (if this is not specified the default will be "_waker_wake")
+     */
+    const char *callback
+);
+/**
+ * Registers a callback function for destructing a waker
+ */
+void __wasi_callback_waker_drop(
+    /**
+     * Exported function that will be called back when a waker has been dropped
+     * (if this is not specified the default will be "_waker_drop")
+     */
+    const char *callback
+);
+/**
+ * Read from a file descriptor.
+ * 
+ * If this read function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ * @return
+ * The number of bytes read.
+ */
+__wasi_errno_t __wasi_fd_read_poll(
+    __wasi_fd_t fd,
+    /**
+     * List of scatter/gather vectors to which to store data.
+     */
+    const __wasi_iovec_t *iovs,
+    /**
+     * The length of the array pointed to by `iovs`.
+     */
+    size_t iovs_len,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Write to a file descriptor.
+ * 
+ * If this write function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ */
+__wasi_errno_t __wasi_fd_write_poll(
+    __wasi_fd_t fd,
+    /**
+     * List of scatter/gather vectors from which to retrieve data.
+     */
+    const __wasi_ciovec_t *iovs,
+    /**
+     * The length of the array pointed to by `iovs`.
+     */
+    size_t iovs_len,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Wait for a futex_wake operation to wake us.
+ * 
+ * If this wait function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ * 
+ * Returns with EINVAL if the futex doesn't hold the expected value.
+ * Returns false on timeout, and true in all other cases.
+ */
+__wasi_errno_t __wasi_futex_wait_poll(
+    /**
+     * Memory location that holds the value that will be checked
+     */
+    uint32_t * futex,
+    /**
+     * Expected value that should be currently held at the memory location
+     */
+    uint32_t expected,
+    /**
+     * Timeout should the futex not be triggered in the allocated time
+     */
+    const __wasi_option_timestamp_t * timeout,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker,
+    __wasi_bool_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Wait for process to exit
+ * 
+ * If this function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ * 
+ * Passing none to PID will mean that the call will wait
+ * for any subprocess to exit. PID will be populated with
+ * the process that exited.
+ * @return
+ * Returns the status of the process
+ */
+__wasi_errno_t __wasi_proc_join_poll(
+    /**
+     * ID of the process to wait on
+     */
+    __wasi_option_pid_t * pid,
+    /**
+     * Flags that determine how the join behaves
+     */
+    __wasi_join_flags_t flags,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker,
+    __wasi_join_status_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Accept a new incoming connection.
+ * 
+ * If this function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ * @return
+ * New socket connection
+ */
+__wasi_errno_t __wasi_sock_accept_poll(
+    /**
+     * The listening socket.
+     */
+    __wasi_fd_t fd,
+    /**
+     * The desired values of the file descriptor flags.
+     */
+    __wasi_fdflags_t flags,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker,
+    __wasi_fd_t *retptr0,
+    __wasi_addr_port_t *retptr1
+) __attribute__((__warn_unused_result__));
+/**
+ * Receive a message and its peer address from a socket.
+ * 
+ * If this function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ * @return
+ * Number of bytes stored in ri_data and message flags.
+ */
+__wasi_errno_t __wasi_sock_recv_from_poll(
+    __wasi_fd_t fd,
+    /**
+     * List of scatter/gather vectors to which to store data.
+     */
+    const __wasi_iovec_t *ri_data,
+    /**
+     * The length of the array pointed to by `ri_data`.
+     */
+    size_t ri_data_len,
+    /**
+     * Message flags.
+     */
+    __wasi_riflags_t ri_flags,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0,
+    __wasi_roflags_t *retptr1,
+    __wasi_addr_port_t *retptr2
+) __attribute__((__warn_unused_result__));
+/**
+ * Receive a message from a socket.
+ * 
+ * If this function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ * @return
+ * Number of bytes stored in ri_data and message flags.
+ */
+__wasi_errno_t __wasi_sock_recv_poll(
+    __wasi_fd_t fd,
+    /**
+     * List of scatter/gather vectors to which to store data.
+     */
+    const __wasi_iovec_t *ri_data,
+    /**
+     * The length of the array pointed to by `ri_data`.
+     */
+    size_t ri_data_len,
+    /**
+     * Message flags.
+     */
+    __wasi_riflags_t ri_flags,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0,
+    __wasi_roflags_t *retptr1
+) __attribute__((__warn_unused_result__));
+/**
+ * Send a message on a socket.
+ * 
+ * If this function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ * @return
+ * Number of bytes transmitted.
+ */
+__wasi_errno_t __wasi_sock_send_poll(
+    __wasi_fd_t fd,
+    /**
+     * List of scatter/gather vectors to which to retrieve data
+     */
+    const __wasi_ciovec_t *si_data,
+    /**
+     * The length of the array pointed to by `si_data`.
+     */
+    size_t si_data_len,
+    /**
+     * Message flags.
+     */
+    __wasi_siflags_t si_flags,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Send a message on a socket to a specific address.
+ * 
+ * If this function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ * @return
+ * Number of bytes transmitted.
+ */
+__wasi_errno_t __wasi_sock_send_to_poll(
+    __wasi_fd_t fd,
+    /**
+     * List of scatter/gather vectors to which to retrieve data
+     */
+    const __wasi_ciovec_t *si_data,
+    /**
+     * The length of the array pointed to by `si_data`.
+     */
+    size_t si_data_len,
+    /**
+     * Message flags.
+     */
+    __wasi_siflags_t si_flags,
+    /**
+     * Address of the socket to send message to
+     */
+    const __wasi_addr_port_t * addr,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Joins this thread with another thread, blocking this
+ * 
+ * If this function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ */
+__wasi_errno_t __wasi_thread_join_poll(
+    /**
+     * Handle of the thread to wait on
+     */
+    __wasi_tid_t tid,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker
+) __attribute__((__warn_unused_result__));
+/**
+ * Sends the current thread to sleep for a period of time
+ * 
+ * If this function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ */
+__wasi_errno_t __wasi_thread_sleep_poll(
+    /**
+     * Amount of time that the thread should sleep
+     */
+    __wasi_timestamp_t duration,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker
 ) __attribute__((__warn_unused_result__));
 /** @} */
 

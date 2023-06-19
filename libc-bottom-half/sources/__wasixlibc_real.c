@@ -1124,3 +1124,37 @@ __wasi_errno_t __wasi_thread_sleep_poll(
     return (uint16_t) ret;
 }
 
+int32_t __imported_wasix_32v1_fd_pread_poll(int32_t arg0, int32_t arg1, int32_t arg2, int64_t arg3, int64_t arg4, int32_t arg5) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("fd_pread_poll")
+));
+
+__wasi_errno_t __wasi_fd_pread_poll(
+    __wasi_fd_t fd,
+    const __wasi_iovec_t *iovs,
+    size_t iovs_len,
+    __wasi_filesize_t offset,
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0
+){
+    int32_t ret = __imported_wasix_32v1_fd_pread_poll((int32_t) fd, (intptr_t) iovs, (intptr_t) iovs_len, (int64_t) offset, (int64_t) waker, (intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
+int32_t __imported_wasix_32v1_fd_pwrite_poll(int32_t arg0, int32_t arg1, int32_t arg2, int64_t arg3, int64_t arg4, int32_t arg5) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("fd_pwrite_poll")
+));
+
+__wasi_errno_t __wasi_fd_pwrite_poll(
+    __wasi_fd_t fd,
+    const __wasi_ciovec_t *iovs,
+    size_t iovs_len,
+    __wasi_filesize_t offset,
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0
+){
+    int32_t ret = __imported_wasix_32v1_fd_pwrite_poll((int32_t) fd, (intptr_t) iovs, (intptr_t) iovs_len, (int64_t) offset, (int64_t) waker, (intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+

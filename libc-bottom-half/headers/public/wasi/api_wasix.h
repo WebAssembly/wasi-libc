@@ -4464,6 +4464,62 @@ __wasi_errno_t __wasi_thread_sleep_poll(
      */
     __wasi_waker_t waker
 ) __attribute__((__warn_unused_result__));
+/**
+ * Read from a file descriptor, without using and updating the file descriptor's offset.
+ * 
+ * If this function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ * @return
+ * The number of bytes read.
+ */
+__wasi_errno_t __wasi_fd_pread_poll(
+    __wasi_fd_t fd,
+    /**
+     * List of scatter/gather vectors in which to store data.
+     */
+    const __wasi_iovec_t *iovs,
+    /**
+     * The length of the array pointed to by `iovs`.
+     */
+    size_t iovs_len,
+    /**
+     * The offset within the file at which to read.
+     */
+    __wasi_filesize_t offset,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Write to a file descriptor, without using and updating the file descriptor's offset.
+ * 
+ * If this function would block it returns Errno::Pending instead
+ * and invokes the waker in the future.
+ * @return
+ * The number of bytes written.
+ */
+__wasi_errno_t __wasi_fd_pwrite_poll(
+    __wasi_fd_t fd,
+    /**
+     * List of scatter/gather vectors from which to retrieve data.
+     */
+    const __wasi_ciovec_t *iovs,
+    /**
+     * The length of the array pointed to by `iovs`.
+     */
+    size_t iovs_len,
+    /**
+     * The offset within the file at which to write.
+     */
+    __wasi_filesize_t offset,
+    /**
+     * Waker that will be invoked when this function is ready to be polled again
+     */
+    __wasi_waker_t waker,
+    __wasi_size_t *retptr0
+) __attribute__((__warn_unused_result__));
 /** @} */
 
 #ifdef __cplusplus

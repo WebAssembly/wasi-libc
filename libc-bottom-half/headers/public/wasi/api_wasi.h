@@ -1,18 +1,35 @@
 /**
  * THIS FILE IS AUTO-GENERATED from the following files:
- *   wasix_v1.witx
+ *   wasi_snapshot_preview1.witx
  *
  * To regenerate this file execute:
  *
  *     cargo run --manifest-path tools/wasi-headers/Cargo.toml generate-libc
+ *
+ * Modifications to this file will cause CI to fail, the code generator tool
+ * must be modified to change this file.
+ *
+ * @file
+ * This file describes the [WASI] interface, consisting of functions, types,
+ * and defined values (macros).
+ *
+ * The interface described here is greatly inspired by [CloudABI]'s clean,
+ * thoughtfully-designed, capability-oriented, POSIX-style API.
+ *
+ * [CloudABI]: https://github.com/NuxiNL/cloudlibc
+ * [WASI]: https://github.com/WebAssembly/WASI/
  */
-
-#ifndef __wasi__
-#define __wasi__ 1
-#endif
 
 #ifndef __wasi_api_h
 #define __wasi_api_h
+
+#ifndef __wasi__
+#error <wasi/api.h> is only supported on WASI platforms.
+#endif
+
+#ifndef __wasm32__
+#error <wasi/api.h> only supports wasm32; doesn't yet support wasm64
+#endif
 
 #include <stddef.h>
 #include <stdint.h>
@@ -25,20 +42,15 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(intptr_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(uintptr_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == 8, "non-wasi data layout");
-typedef int64_t __wasi_int_t;
-typedef uint64_t __wasi_uint_t;
-_Static_assert(_Alignof(__wasi_int_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(__wasi_uint_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // TODO: Encoding this in witx.
 #define __WASI_DIRCOOKIE_START (UINT64_C(0))
-typedef uint32_t __wasi_size_t;
+typedef __SIZE_TYPE__ __wasi_size_t;
 
 _Static_assert(sizeof(__wasi_size_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_size_t) == 4, "witx calculated align");
@@ -674,14 +686,14 @@ typedef struct __wasi_iovec_t {
     /**
      * The length of the buffer to be filled.
      */
-    __wasi_uint_t buf_len;
+    __wasi_size_t buf_len;
 
 } __wasi_iovec_t;
 
-_Static_assert(sizeof(__wasi_iovec_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_iovec_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_iovec_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_iovec_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_iovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_iovec_t, buf_len) == 4, "witx calculated offset");
 
 /**
  * A region of memory for scatter/gather writes.
@@ -695,14 +707,14 @@ typedef struct __wasi_ciovec_t {
     /**
      * The length of the buffer to be written.
      */
-    __wasi_uint_t buf_len;
+    __wasi_size_t buf_len;
 
 } __wasi_ciovec_t;
 
-_Static_assert(sizeof(__wasi_ciovec_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_ciovec_t) == 8, "witx calculated align");
+_Static_assert(sizeof(__wasi_ciovec_t) == 8, "witx calculated size");
+_Static_assert(_Alignof(__wasi_ciovec_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_ciovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == 4, "witx calculated offset");
 
 /**
  * Relative offset within a file.
@@ -1874,7 +1886,7 @@ __wasi_errno_t __wasi_fd_readdir(
      * The buffer where directory entries are stored
      */
     uint8_t * buf,
-    __wasi_uint_t buf_len,
+    __wasi_size_t buf_len,
     /**
      * The location within the directory to start reading
      */
@@ -2084,7 +2096,7 @@ __wasi_errno_t __wasi_path_readlink(
      * The buffer to which to write the contents of the symbolic link.
      */
     uint8_t * buf,
-    __wasi_uint_t buf_len,
+    __wasi_size_t buf_len,
     __wasi_size_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
@@ -2206,7 +2218,7 @@ __wasi_errno_t __wasi_random_get(
      * The buffer to fill with random data.
      */
     uint8_t * buf,
-    __wasi_uint_t buf_len
+    __wasi_size_t buf_len
 ) __attribute__((__warn_unused_result__));
 /**
  * Accept a new incoming connection.

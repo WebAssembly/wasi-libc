@@ -44,7 +44,7 @@ jobs:
     - name: Install LLVM tools (MacOS)
       shell: bash
       run: |
-        [[ "${{ matrix.clang_version }}" = 16.* ]] && export DARWIN_VERSION=21.0
+        [[ "${{ matrix.clang_version }}" = 15.* ]] && export DARWIN_VERSION=21.0
         curl -sSfL "https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/clang+llvm-${{ matrix.clang_version }}-x86_64-apple-darwin$DARWIN_VERSION".tar.xz | tar xJf -
         export CLANG_DIR="`pwd`/clang+llvm-${{ matrix.clang_version }}-x86_64-apple-darwin$DARWIN_VERSION/bin"
         echo "$CLANG_DIR" >> $GITHUB_PATH

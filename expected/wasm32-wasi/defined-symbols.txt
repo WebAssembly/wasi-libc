@@ -366,8 +366,7 @@ __wait
 __wasi_args_get
 __wasi_args_sizes_get
 __wasi_callback_signal
-__wasi_callback_waker_drop
-__wasi_callback_waker_wake
+__wasi_callback_wake
 __wasi_chdir
 __wasi_clock_res_get
 __wasi_clock_time_get

@@ -4169,22 +4169,20 @@ __wasi_errno_t __wasi_resolve(
     __wasi_size_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
- * Registers a callback function for waking up wakers
+ * Registers a callback function for waking and dropping wakers passed
+ * into polling syscalls
  */
-void __wasi_callback_waker_wake(
+void __wasi_callback_wake(
     /**
      * Exported function that will be called back when a waker has been triggered
-     * (if this is not specified the default will be "_waker_wake")
-     */
-    const char *callback
-);
-/**
- * Registers a callback function for destructing a waker
- */
-void __wasi_callback_waker_drop(
-    /**
-     * Exported function that will be called back when a waker has been dropped
-     * (if this is not specified the default will be "_waker_drop")
+     * (if this is not specified the default will be "_wake")
+     * 
+     * For the wake function it accepts 8xi64 numbers as parameters where each number
+     * represents what to do with the waker.
+     * > 0 means wake it up
+     * < 0 means drop it and release memory
+     * 0 means noop
+     * 
      */
     const char *callback
 );

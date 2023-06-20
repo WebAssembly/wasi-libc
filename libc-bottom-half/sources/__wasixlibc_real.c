@@ -923,28 +923,16 @@ __wasi_errno_t __wasi_resolve(
     return (uint16_t) ret;
 }
 
-void __imported_wasix_32v1_callback_waker_wake(int32_t arg0, int32_t arg1) __attribute__((
+void __imported_wasix_32v1_callback_wake(int32_t arg0, int32_t arg1) __attribute__((
     __import_module__("wasix_32v1"),
-    __import_name__("callback_waker_wake")
+    __import_name__("callback_wake")
 ));
 
-void __wasi_callback_waker_wake(
+void __wasi_callback_wake(
     const char *callback
 ){
     size_t callback_len = strlen(callback);
-    __imported_wasix_32v1_callback_waker_wake((intptr_t) callback, (intptr_t) callback_len);
-}
-
-void __imported_wasix_32v1_callback_waker_drop(int32_t arg0, int32_t arg1) __attribute__((
-    __import_module__("wasix_32v1"),
-    __import_name__("callback_waker_drop")
-));
-
-void __wasi_callback_waker_drop(
-    const char *callback
-){
-    size_t callback_len = strlen(callback);
-    __imported_wasix_32v1_callback_waker_drop((intptr_t) callback, (intptr_t) callback_len);
+    __imported_wasix_32v1_callback_wake((intptr_t) callback, (intptr_t) callback_len);
 }
 
 int32_t __imported_wasix_32v1_fd_read_poll(int32_t arg0, int32_t arg1, int32_t arg2, int64_t arg3, int32_t arg4) __attribute__((

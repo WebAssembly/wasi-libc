@@ -9,7 +9,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         # oldest and newest supported LLVM version
-        clang_version: [10.0.0, 16.0.6]
+        clang_version: [10.0.0, 15.0.7]
     steps:
     - uses: actions/checkout@v1
       with:
@@ -44,8 +44,9 @@ jobs:
     - name: Install LLVM tools (MacOS)
       shell: bash
       run: |
-        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/clang+llvm-${{ matrix.clang_version }}-x86_64-apple-darwin.tar.xz | tar xJf -
-        export CLANG_DIR=`pwd`/clang+llvm-${{ matrix.clang_version }}-x86_64-apple-darwin/bin
+        [[ "${{ matrix.clang_version }}" = 16.* ]] && export DARWIN_VERSION=21.0
+        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/clang+llvm-${{ matrix.clang_version }}-x86_64-apple-darwin$DARWIN_VERSION.tar.xz | tar xJf -
+        export CLANG_DIR=`pwd`/clang+llvm-${{ matrix.clang_version }}-x86_64-apple-darwin$DARWIN_VERSION/bin
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV

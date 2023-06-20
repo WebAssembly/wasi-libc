@@ -97,9 +97,7 @@ struct tm *localtime_r (const time_t *__restrict, struct tm *__restrict);
 char *asctime_r (const struct tm *__restrict, char *__restrict);
 char *ctime_r (const time_t *, char *);
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no timezone tables */
 void tzset (void);
-#endif
 
 struct itimerspec {
 	struct timespec it_interval;

@@ -9,7 +9,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         # oldest and newest supported LLVM version
-        clang_version: [10.0.0, 14.0.0]
+        clang_version: [10.0.0, 16.0.6]
     steps:
     - uses: actions/checkout@v1
       with:

@@ -97,6 +97,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         misc/getrusage.c \
         misc/uname.c \
         misc/nftw.c \
+	misc/realpath.c \
         misc/syslog.c \
         errno/strerror.c \
         \

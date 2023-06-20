@@ -1415,6 +1415,7 @@ readlinkat
 readv
 realloc
 reallocarray
+realpath
 recv
 recvfrom
 recvmsg

@@ -3209,6 +3209,104 @@ _Static_assert(offsetof(__wasi_thread_start_t, stack_size) == 56, "witx calculat
 _Static_assert(offsetof(__wasi_thread_start_t, guard_size) == 60, "witx calculated offset");
 
 /**
+ * epoll type.
+ */
+typedef uint32_t __wasi_epoll_type_t;
+
+#define __WASI_EPOLL_TYPE_EPOLLIN ((__wasi_epoll_type_t)(1 << 0))
+
+#define __WASI_EPOLL_TYPE_EPOLLOUT ((__wasi_epoll_type_t)(1 << 1))
+
+#define __WASI_EPOLL_TYPE_EPOLLRDHUP ((__wasi_epoll_type_t)(1 << 2))
+
+#define __WASI_EPOLL_TYPE_EPOLLPRI ((__wasi_epoll_type_t)(1 << 3))
+
+#define __WASI_EPOLL_TYPE_EPOLLERR ((__wasi_epoll_type_t)(1 << 4))
+
+#define __WASI_EPOLL_TYPE_EPOLLHUP ((__wasi_epoll_type_t)(1 << 5))
+
+#define __WASI_EPOLL_TYPE_EPOLLET ((__wasi_epoll_type_t)(1 << 6))
+
+#define __WASI_EPOLL_TYPE_EPOLLONESHOT ((__wasi_epoll_type_t)(1 << 7))
+
+/**
+ * epoll ctl
+ */
+typedef uint32_t __wasi_epoll_ctl_t;
+
+/**
+ * Add an entry to the interest list of the epoll file descriptor, epfd.
+ */
+#define __WASI_EPOLL_CTL_ADD (UINT32_C(0))
+
+/**
+ * Change the settings associated with fd in the interest list to the new settings specified in event.
+ */
+#define __WASI_EPOLL_CTL_MOD (UINT32_C(1))
+
+/**
+ * Remove (deregister) the target file descriptor fd from the interest list.
+ */
+#define __WASI_EPOLL_CTL_DEL (UINT32_C(2))
+
+_Static_assert(sizeof(__wasi_epoll_ctl_t) == 4, "witx calculated size");
+_Static_assert(_Alignof(__wasi_epoll_ctl_t) == 4, "witx calculated align");
+
+/**
+ * epoll data
+ */
+typedef struct __wasi_epoll_data_t {
+    /**
+     * Pointer to some user defined data
+     */
+    __wasi_pointersize_t ptr;
+
+    /**
+     * The file descriptor of the event
+     */
+    __wasi_fd_t fd;
+
+    /**
+     * User data for the event
+     */
+    uint32_t data1;
+
+    /**
+     * User data for the event
+     */
+    uint64_t data2;
+
+} __wasi_epoll_data_t;
+
+_Static_assert(sizeof(__wasi_epoll_data_t) == 24, "witx calculated size");
+_Static_assert(_Alignof(__wasi_epoll_data_t) == 8, "witx calculated align");
+_Static_assert(offsetof(__wasi_epoll_data_t, ptr) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_epoll_data_t, fd) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_epoll_data_t, data1) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_epoll_data_t, data2) == 16, "witx calculated offset");
+
+/**
+ * epoll event and its data
+ */
+typedef struct __wasi_epoll_event_t {
+    /**
+     * The events that are triggered for this
+     */
+    __wasi_epoll_type_t events;
+
+    /**
+     * The data of the event
+     */
+    __wasi_epoll_data_t data;
+
+} __wasi_epoll_event_t;
+
+_Static_assert(sizeof(__wasi_epoll_event_t) == 32, "witx calculated size");
+_Static_assert(_Alignof(__wasi_epoll_event_t) == 8, "witx calculated align");
+_Static_assert(offsetof(__wasi_epoll_event_t, events) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_epoll_event_t, data) == 8, "witx calculated offset");
+
+/**
  * @defgroup wasix_32v1
  * @{
  */
@@ -4169,404 +4267,61 @@ __wasi_errno_t __wasi_resolve(
     __wasi_size_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
- * Registers a callback function for waking and dropping wakers passed
- * into polling syscalls
- */
-void __wasi_callback_wake(
-    /**
-     * Exported function that will be called back when a waker has been triggered
-     * (if this is not specified the default will be "_wake")
-     * 
-     * For the wake function it accepts 8xi64 numbers as parameters where each number
-     * represents what to do with the waker.
-     * > 0 means wake it up
-     * < 0 means drop it and release memory
-     * 0 means noop
-     * 
-     */
-    const char *callback
-);
-/**
- * Read from a file descriptor.
+ * Create an epoll interest list
  * 
- * If this read function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
  * @return
- * The number of bytes read.
+ * The file descriptor for this epoll interest list
  */
-__wasi_errno_t __wasi_fd_read_poll(
-    __wasi_fd_t fd,
-    /**
-     * List of scatter/gather vectors to which to store data.
-     */
-    const __wasi_iovec_t *iovs,
-    /**
-     * The length of the array pointed to by `iovs`.
-     */
-    size_t iovs_len,
-    /**
-     * Waker that will be invoked when this function is ready to be polled again
-     */
-    __wasi_waker_t waker,
-    __wasi_size_t *retptr0
+__wasi_errno_t __wasi_epoll_create(
+    __wasi_fd_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
- * Write to a file descriptor.
+ * Modifies an epoll interest list
  * 
- * If this write function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
- */
-__wasi_errno_t __wasi_fd_write_poll(
-    __wasi_fd_t fd,
-    /**
-     * List of scatter/gather vectors from which to retrieve data.
-     */
-    const __wasi_ciovec_t *iovs,
-    /**
-     * The length of the array pointed to by `iovs`.
-     */
-    size_t iovs_len,
-    /**
-     * Waker that will be invoked when this function is ready to be polled again
-     */
-    __wasi_waker_t waker,
-    __wasi_size_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Wait for a futex_wake operation to wake us.
- * 
- * If this wait function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
- * 
- * Returns with EINVAL if the futex doesn't hold the expected value.
- * Returns false on timeout, and true in all other cases.
- */
-__wasi_errno_t __wasi_futex_wait_poll(
-    /**
-     * Memory location that holds the value that will be checked
-     */
-    uint32_t * futex,
-    /**
-     * Expected value that should be currently held at the memory location
-     */
-    uint32_t expected,
-    /**
-     * Timeout should the futex not be triggered in the allocated time
-     */
-    const __wasi_option_timestamp_t * timeout,
-    /**
-     * Waker that will be invoked when this function is ready to be polled again
-     */
-    __wasi_waker_t waker,
-    __wasi_bool_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Wait for process to exit
- * 
- * If this function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
- * 
- * Passing none to PID will mean that the call will wait
- * for any subprocess to exit. PID will be populated with
- * the process that exited.
- * @return
- * Returns the status of the process
- */
-__wasi_errno_t __wasi_proc_join_poll(
-    /**
-     * ID of the process to wait on
-     */
-    __wasi_option_pid_t * pid,
-    /**
-     * Flags that determine how the join behaves
-     */
-    __wasi_join_flags_t flags,
-    /**
-     * Waker that will be invoked when this function is ready to be polled again
-     */
-    __wasi_waker_t waker,
-    __wasi_join_status_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Accept a new incoming connection.
- * 
- * If this function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
- * @return
- * New socket connection
- */
-__wasi_errno_t __wasi_sock_accept_poll(
-    /**
-     * The listening socket.
-     */
-    __wasi_fd_t fd,
-    /**
-     * The desired values of the file descriptor flags.
-     */
-    __wasi_fdflags_t flags,
-    /**
-     * Waker that will be invoked when this function is ready to be polled again
-     */
-    __wasi_waker_t waker,
-    __wasi_fd_t *retptr0,
-    __wasi_addr_port_t *retptr1
-) __attribute__((__warn_unused_result__));
-/**
- * Polls if any connections are waiting to be accepted
- * 
- * If this function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
- * @return
- * Number of connections that are waiting
- */
-__wasi_errno_t __wasi_sock_accept_ready_poll(
-    /**
-     * The listening socket.
-     */
-    __wasi_fd_t fd,
-    /**
-     * Waker that will be invoked when this function is ready to be polled again
-     */
-    __wasi_waker_t waker,
-    __wasi_size_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Receive a message and its peer address from a socket.
- * 
- * If this function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
- * @return
- * Number of bytes stored in ri_data and message flags.
- */
-__wasi_errno_t __wasi_sock_recv_from_poll(
-    __wasi_fd_t fd,
-    /**
-     * List of scatter/gather vectors to which to store data.
-     */
-    const __wasi_iovec_t *ri_data,
-    /**
-     * The length of the array pointed to by `ri_data`.
-     */
-    size_t ri_data_len,
-    /**
-     * Message flags.
-     */
-    __wasi_riflags_t ri_flags,
-    /**
-     * Waker that will be invoked when this function is ready to be polled again
-     */
-    __wasi_waker_t waker,
-    __wasi_size_t *retptr0,
-    __wasi_roflags_t *retptr1,
-    __wasi_addr_port_t *retptr2
-) __attribute__((__warn_unused_result__));
-/**
- * Polls to receive a message from a socket.
- * 
- * If this function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
- * @return
- * Number of bytes stored in ri_data and message flags.
- */
-__wasi_errno_t __wasi_sock_recv_poll(
-    __wasi_fd_t fd,
-    /**
-     * List of scatter/gather vectors to which to store data.
-     */
-    const __wasi_iovec_t *ri_data,
-    /**
-     * The length of the array pointed to by `ri_data`.
-     */
-    size_t ri_data_len,
-    /**
-     * Message flags.
-     */
-    __wasi_riflags_t ri_flags,
-    /**
-     * Waker that will be invoked when this function is ready to be polled again
-     */
-    __wasi_waker_t waker,
-    __wasi_size_t *retptr0,
-    __wasi_roflags_t *retptr1
-) __attribute__((__warn_unused_result__));
-/**
- * Polls if a message is waiting to be received
- * 
- * If this function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
- * @return
- * Number of bytes stored waiting to be received
- */
-__wasi_errno_t __wasi_sock_recv_ready_poll(
-    __wasi_fd_t fd,
-    /**
-     * Waker that will be invoked when this function is ready to be polled again
-     */
-    __wasi_waker_t waker,
-    __wasi_size_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Send a message on a socket.
- * 
- * If this function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
- * @return
- * Number of bytes transmitted.
- */
-__wasi_errno_t __wasi_sock_send_poll(
-    __wasi_fd_t fd,
-    /**
-     * List of scatter/gather vectors to which to retrieve data
-     */
-    const __wasi_ciovec_t *si_data,
-    /**
-     * The length of the array pointed to by `si_data`.
-     */
-    size_t si_data_len,
-    /**
-     * Message flags.
-     */
-    __wasi_siflags_t si_flags,
-    /**
-     * Waker that will be invoked when this function is ready to be polled again
-     */
-    __wasi_waker_t waker,
-    __wasi_size_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Polls if the socket is ready to send messages
- * 
- * If this function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
- * @return
- * Number of bytes that can be sent.
- */
-__wasi_errno_t __wasi_sock_send_ready_poll(
-    __wasi_fd_t fd,
-    /**
-     * Waker that will be invoked when this function is ready to be polled again
-     */
-    __wasi_waker_t waker,
-    __wasi_size_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Send a message on a socket to a specific address.
- * 
- * If this function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
- * @return
- * Number of bytes transmitted.
- */
-__wasi_errno_t __wasi_sock_send_to_poll(
-    __wasi_fd_t fd,
-    /**
-     * List of scatter/gather vectors to which to retrieve data
-     */
-    const __wasi_ciovec_t *si_data,
-    /**
-     * The length of the array pointed to by `si_data`.
-     */
-    size_t si_data_len,
-    /**
-     * Message flags.
-     */
-    __wasi_siflags_t si_flags,
-    /**
-     * Address of the socket to send message to
-     */
-    const __wasi_addr_port_t * addr,
-    /**
-     * Waker that will be invoked when this function is ready to be polled again
-     */
-    __wasi_waker_t waker,
-    __wasi_size_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Joins this thread with another thread, blocking this
- * 
- * If this function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
- */
-__wasi_errno_t __wasi_thread_join_poll(
-    /**
-     * Handle of the thread to wait on
-     */
-    __wasi_tid_t tid,
-    /**
-     * Waker that will be invoked when this function is ready to be polled again
-     */
-    __wasi_waker_t waker
-) __attribute__((__warn_unused_result__));
-/**
- * Sends the current thread to sleep for a period of time
- * 
- * If this function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
- */
-__wasi_errno_t __wasi_thread_sleep_poll(
-    /**
-     * Amount of time that the thread should sleep
-     */
-    __wasi_timestamp_t duration,
-    /**
-     * Waker that will be invoked when this function is ready to be polled again
-     */
-    __wasi_waker_t waker
-) __attribute__((__warn_unused_result__));
-/**
- * Read from a file descriptor, without using and updating the file descriptor's offset.
- * 
- * If this function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
- * @return
- * The number of bytes read.
- */
-__wasi_errno_t __wasi_fd_pread_poll(
-    __wasi_fd_t fd,
-    /**
-     * List of scatter/gather vectors in which to store data.
-     */
-    const __wasi_iovec_t *iovs,
-    /**
-     * The length of the array pointed to by `iovs`.
-     */
-    size_t iovs_len,
-    /**
-     * The offset within the file at which to read.
-     */
-    __wasi_filesize_t offset,
-    /**
-     * Waker that will be invoked when this function is ready to be polled again
-     */
-    __wasi_waker_t waker,
-    __wasi_size_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Write to a file descriptor, without using and updating the file descriptor's offset.
- * 
- * If this function would block it returns Errno::Pending instead
- * and invokes the waker in the future.
  * @return
  * The number of bytes written.
  */
-__wasi_errno_t __wasi_fd_pwrite_poll(
+__wasi_errno_t __wasi_epoll_ctl(
+    /**
+     * File descriptor of the epoll interest list
+     */
+    __wasi_fd_t epfd,
+    /**
+     * Operation to be made on the list
+     */
+    __wasi_epoll_ctl_t op,
+    /**
+     * File descriptor to be added, deleted or modified
+     */
     __wasi_fd_t fd,
     /**
-     * List of scatter/gather vectors from which to retrieve data.
+     * Reference to the event to be added, deleted or modified
      */
-    const __wasi_ciovec_t *iovs,
+    const __wasi_epoll_event_t * event
+) __attribute__((__warn_unused_result__));
+/**
+ * wait for an I/O event on an epoll file descriptor
+ * 
+ * @return
+ * The number of events returned.
+ */
+__wasi_errno_t __wasi_epoll_wait(
     /**
-     * The length of the array pointed to by `iovs`.
+     * File descriptor of the epoll interest list
      */
-    size_t iovs_len,
+    __wasi_fd_t epfd,
     /**
-     * The offset within the file at which to write.
+     * Reference to the array of events
      */
-    __wasi_filesize_t offset,
+    __wasi_epoll_event_t * event,
     /**
-     * Waker that will be invoked when this function is ready to be polled again
+     * Maximum number of events that will be returned in the array
      */
-    __wasi_waker_t waker,
+    __wasi_size_t maxevents,
+    /**
+     * Timeout for the wait event
+     */
+    __wasi_timestamp_t timeout,
     __wasi_size_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /** @} */

@@ -561,6 +561,11 @@ $(LIBC_TOP_HALF_ALL_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_NO
 $(LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS): CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 
+# emmalloc uses a lot of pointer type-punning, which is UB under strict aliasing,
+# and this was found to have real miscompilations in wasi-libc#421.
+$(EMMALLOC_OBJS): CFLAGS += \
+    -fno-strict-aliasing
+
 include_dirs:
 	#
 	# Install the include files.

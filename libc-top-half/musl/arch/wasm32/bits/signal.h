@@ -10,7 +10,7 @@ struct sigaltstack {
 
 typedef struct sigaltstack stack_t;
 
-int sigaltstack(const stack_t *restrict ss, stack_t *restrict old);
+int sigaltstack(const stack_t *__restrict ss, stack_t *__restrict old);
 
 #define MINSIGSTKSZ 2048
 #define SIGSTKSZ 8192

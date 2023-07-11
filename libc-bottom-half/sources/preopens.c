@@ -194,7 +194,14 @@ int __wasilibc_find_abspath(const char *path,
             prefix_matches(prefix, len, search_path))
         {
             fd = pre->fd;
-            match_len = len;
+            if(len) {
+                // also skip the leading '/'
+                match_len = len + (search_path - path);
+                // and  skip '/' following the preopenned folder too
+                while(path[match_len]=='/')
+                    ++match_len;
+            } else  // but don't remove leading '/' for root parent fd
+                match_len = 0;
             *abs_prefix = prefix;
         }
     }

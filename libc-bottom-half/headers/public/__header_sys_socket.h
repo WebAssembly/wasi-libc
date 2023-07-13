@@ -25,9 +25,13 @@
 
 #define SO_TYPE 3
 
-#define AF_UNSPEC 0
-#define AF_INET 1
-#define AF_INET6 2
+#define PF_UNSPEC 0
+#define PF_INET 1
+#define PF_INET6 2
+
+#define AF_UNSPEC PF_UNSPEC
+#define AF_INET PF_INET
+#define AF_INET6 PF_INET6
 #define AF_UNIX 3
 
 #ifdef __cplusplus

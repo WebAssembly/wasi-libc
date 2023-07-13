@@ -33,10 +33,10 @@
 #define ADJ_TAI 0x0080
 #define ADJ_TICK 0x4000
 #define ADJ_TIMECONST 0x0020
-#define AF_INET 1
-#define AF_INET6 2
+#define AF_INET PF_INET
+#define AF_INET6 PF_INET6
 #define AF_UNIX 3
-#define AF_UNSPEC 0
+#define AF_UNSPEC PF_UNSPEC
 #define ALT_DIGITS 0x2002F
 #define AM_STR 0x20026
 #define ANYMARK 0x01
@@ -1315,6 +1315,9 @@
 #define PAGE_SIZE PAGESIZE
 #define PATH_MAX 4096
 #define PDP_ENDIAN __PDP_ENDIAN
+#define PF_INET 1
+#define PF_INET6 2
+#define PF_UNSPEC 0
 #define PM_STR 0x20027
 #define POLLERR 0x1000
 #define POLLHUP 0x2000

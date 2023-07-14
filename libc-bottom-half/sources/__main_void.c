@@ -2,14 +2,11 @@
 #include <stdlib.h>
 #include <sysexits.h>
 
-// The user's `main` function, expecting arguments.
-int __main_argc_argv(int argc, char *argv[]);
-
 // If the user's `main` function expects arguments, the compiler will rename
 // it to `__main_argc_argv`, and this version will get linked in, which
 // initializes the argument data and calls `__main_argc_argv`.
 __attribute__((__weak__, nodebug))
-int __main_void(void) {
+int __call_main_argc_argv(int (*main)(int argc, char *argv[])) {
     __wasi_errno_t err;
 
     // Get the sizes of the arrays we'll have to create to copy in the args.
@@ -50,5 +47,5 @@ int __main_void(void) {
     }
 
     // Call `__main_argc_argv` with the arguments!
-    return __main_argc_argv(argc, argv);
+    return main(argc, argv);
 }

@@ -4,7 +4,9 @@ extern void __wasi_init_tp(void);
 #endif
 #include <wasi/api.h>
 extern void __wasm_call_ctors(void);
-extern int __main_void(void);
+extern int __main_void(void) __attribute__((weak));
+extern int __main_argc_argv(int argc, char *argv[]) __attribute__((weak));
+extern int __call_main_argc_argv(int (*main)(int argc, char *argv[]));
 extern void __wasm_call_dtors(void);
 
 __attribute__((export_name("_start")))
@@ -37,10 +39,17 @@ void _start(void) {
     // The linker synthesizes this to call constructors.
     __wasm_call_ctors();
 
-    // Call `__main_void` which will either be the application's zero-argument
-    // `__main_void` function or a libc routine which obtains the command-line
-    // arguments and calls `__main_argv_argc`.
-    int r = __main_void();
+    // Call `__main_void` or `__call_main_argc_argv`, depending on which kind
+    // of `main` the program has.
+    int r;
+    if (__main_void) {
+        r = __main_void();
+    } else if (__main_argc_argv) {
+        r = __call_main_argc_argv(__main_argc_argv);
+    } else {
+        // Either `__main_void` or `__main_argc_argv` should be defined.
+        __builtin_trap();
+    }
 
     // Call atexit functions, destructors, stdio cleanup, etc.
     __wasm_call_dtors();

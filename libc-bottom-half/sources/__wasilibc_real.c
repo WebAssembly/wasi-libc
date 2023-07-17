@@ -660,12 +660,25 @@ __wasi_errno_t __wasi_sock_shutdown(
 }
 
 #ifdef _REENTRANT
-int32_t __imported_wasi_thread_spawn(int32_t arg0) __attribute__((
+void __imported_wasi_thread_spawn(int32_t arg0, int32_t arg1) __attribute__((
     __import_module__("wasi"),
     __import_name__("thread-spawn")
 ));
 
-int32_t __wasi_thread_spawn(void* start_arg) {
-    return __imported_wasi_thread_spawn((int32_t) start_arg);
+uint8_t __wasi_thread_spawn(void *start_arg, uint8_t *error, uint32_t *tid) {
+    struct {
+        uint8_t is_error;
+        union {
+            uint8_t error;
+            uint32_t tid;
+        } u;
+    } error_or_tid;
+    __imported_wasi_thread_spawn((int32_t) start_arg, (int32_t)(intptr_t) &error_or_tid);
+    if (error_or_tid.is_error) {
+        *error = error_or_tid.u.error;
+        return 1;
+    }
+    *tid = error_or_tid.u.tid;
+    return 0;
 }
 #endif

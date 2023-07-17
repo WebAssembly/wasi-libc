@@ -2099,12 +2099,14 @@ __wasi_errno_t __wasi_sock_shutdown(
  *
  * @see https://github.com/WebAssembly/wasi-threads/#readme
  */
-int32_t __wasi_thread_spawn(
+uint8_t __wasi_thread_spawn(
     /**
      * A pointer to an opaque struct to be passed to the module's entry
      * function.
      */
-    void *start_arg
+    void *start_arg,
+	uint8_t *error,
+	uint32_t *tid
 )  __attribute__((__warn_unused_result__));
 #endif
 

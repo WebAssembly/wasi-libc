@@ -250,7 +250,7 @@ long sysconf(int name)
 	case JT_DELAYTIMER_MAX & 255:
 		return DELAYTIMER_MAX;
 	case JT_NPROCESSORS_CONF & 255:
-	case JT_NPROCESSORS_ONLN & 255: ;
+	case JT_NPROCESSORS_ONLN & 255:
 #ifdef __wasilibc_unmodified_upstream
 		unsigned char set[128] = {1};
 		int i, cnt;
@@ -259,8 +259,13 @@ long sysconf(int name)
 			for (; set[i]; set[i]&=set[i]-1, cnt++);
 		return cnt;
 #else
-		// WASI has no way to query the processor count
-		return 1;
+		{
+			unsigned long n_cpus = 1;
+			int r = __wasi_thread_parallelism(&n_cpus);
+			if(r)	// there was an error in the call
+				n_cpus = 1;
+			return n_cpus;
+		}
 #endif
 #ifdef __wasilibc_unmodified_upstream // WASI has no sysinfo
 	case JT_PHYS_PAGES & 255:

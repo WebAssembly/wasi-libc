@@ -43,9 +43,7 @@ struct _IO_FILE {
 	size_t buf_size;
 	FILE *prev, *next;
 	int fd;
-#ifdef __wasilibc_unmodified_upstream // WASI has no popen
 	int pipe_pid;
-#endif
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	long lockcount;
 #endif

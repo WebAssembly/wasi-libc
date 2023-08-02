@@ -6,6 +6,9 @@
 #include "stdio_impl.h"
 #include "syscall.h"
 
+#ifndef __wasilibc_unmodified_upstream
+#define __environ __wasilibc_environ
+#endif
 extern char **__environ;
 
 FILE *popen(const char *cmd, const char *mode)

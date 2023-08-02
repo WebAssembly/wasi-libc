@@ -1225,10 +1225,12 @@ optind
 optopt
 optreset
 pathconf
+pclose
 perror
 pipe
 pipe2
 poll
+popen
 posix_close
 posix_fadvise
 posix_fallocate

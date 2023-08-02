@@ -204,7 +204,6 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/*.c)) \
     $(filter-out %/rename.c \
                  %/tmpnam.c %/tmpfile.c %/tempnam.c \
-                 %/popen.c %/pclose.c \
                  %/remove.c \
                  %/gets.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/*.c)) \

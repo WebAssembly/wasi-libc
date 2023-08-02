@@ -911,6 +911,7 @@ fwprintf
 fwrite
 fwrite_unlocked
 fwscanf
+gai_strerror
 gcvt
 get_avphys_pages
 get_entry

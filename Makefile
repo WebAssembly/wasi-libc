@@ -117,6 +117,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         network/freeaddrinfo.c \
         network/resolvconf.c \
         \
+        network/gai_strerror.c \
         network/gethostbyaddr.c \
         network/gethostbyname.c \
         network/getservbyname.c \

@@ -35,7 +35,6 @@ FILE *__nscd_query(int32_t req, const char *key, int32_t *buf, size_t len, int *
 	int errno_save = errno;
 
 	*swap = 0;
-#ifdef __wasilibc_unmodified_upstream
 retry:
 	memset(buf, 0, len);
 	buf[0] = NSCDVERSION;
@@ -105,7 +104,4 @@ retry:
 error:
 	fclose(f);
 	return 0;
-#else
-	return NULL;
-#endif
 }

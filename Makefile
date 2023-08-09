@@ -485,17 +485,18 @@ LIBC_BOTTOM_HALF_ALL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBC_BOTTOM_HALF_ALL_OBJ
 LIBC_TOP_HALF_ALL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBC_TOP_HALF_ALL_OBJS))
 
 # TODO: specify SDK version, e.g. libc.so.wasi-sdk-21, as SO_NAME once `wasm-ld` supports it
-$(SYSROOT_LIB)/libc.so: $(SYSROOT_LIB)/libc.so.a $(BUILTINS_LIB)
+$(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(BUILTINS_LIB)
 	$(CC) -nostdlib -shared -o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB)
 
-$(SYSROOT_LIB)/libc.so.a: \
-		$(LIBC_SO_OBJS) \
-		$(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS) \
-		$(LIBWASI_EMULATED_MMAN_SO_OBJS) \
-		$(LIBWASI_EMULATED_PROCESS_CLOCKS_SO_OBJS) \
-		$(LIBWASI_EMULATED_GETPID_SO_OBJS) \
-		$(LIBWASI_EMULATED_SIGNAL_SO_OBJS) \
-		$(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS)
+$(OBJDIR)/libc.so.a: $(LIBC_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS)
+
+$(OBJDIR)/libwasi-emulated-mman.so.a: $(LIBWASI_EMULATED_MMAN_SO_OBJS)
+
+$(OBJDIR)/libwasi-emulated-process-clocks.so.a: $(LIBWASI_EMULATED_PROCESS_CLOCKS_SO_OBJS)
+
+$(OBJDIR)/libwasi-emulated-getpid.so.a: $(LIBWASI_EMULATED_GETPID_SO_OBJS)
+
+$(OBJDIR)/libwasi-emulated-signal.so.a: $(LIBWASI_EMULATED_SIGNAL_SO_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS)
 
 $(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
 
@@ -633,7 +634,12 @@ startup_files: include_dirs $(LIBC_BOTTOM_HALF_CRT_OBJS)
 # code, and I'm not sure how to make it position-independent.  Once we've done
 # that, we can enable libc.so for the wasi-threads build.
 ifneq ($(THREAD_MODEL), posix)
-LIBC_SO = $(SYSROOT_LIB)/libc.so
+LIBC_SO = \
+	$(SYSROOT_LIB)/libc.so \
+	$(SYSROOT_LIB)/libwasi-emulated-mman.so \
+	$(SYSROOT_LIB)/libwasi-emulated-process-clocks.so \
+	$(SYSROOT_LIB)/libwasi-emulated-getpid.so \
+	$(SYSROOT_LIB)/libwasi-emulated-signal.so
 endif
 
 libc_so: include_dirs $(LIBC_SO)

@@ -547,6 +547,10 @@ $(BULK_MEMORY_OBJS) $(BULK_MEMORY_SO_OBJS): CFLAGS += \
 $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS): CFLAGS += \
 	    -D_WASI_EMULATED_SIGNAL
 
+$(OBJDIR)/%.long-double.pic.o: %.c include_dirs
+	@mkdir -p "$(@D)"
+	$(CC) $(CFLAGS) -fPIC -fvisibility=default -MD -MP -o $@ -c $<
+
 $(OBJDIR)/%.pic.o: %.c include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -fPIC -fvisibility=default -MD -MP -o $@ -c $<

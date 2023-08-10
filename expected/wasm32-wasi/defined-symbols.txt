@@ -38,7 +38,6 @@ __des_setkey
 __do_des
 __duplocale
 __env_rm_add
-__errno
 __errno_location
 __exp2f_data
 __exp_data
@@ -525,6 +524,7 @@ erfcf
 erfcl
 erff
 erfl
+errno
 exit
 exp
 exp10

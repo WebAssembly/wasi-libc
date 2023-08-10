@@ -84,4 +84,4 @@ static_assert(ETIMEDOUT == __WASI_ERRNO_TIMEDOUT, "Value mismatch");
 static_assert(ETXTBSY == __WASI_ERRNO_TXTBSY, "Value mismatch");
 static_assert(EXDEV == __WASI_ERRNO_XDEV, "Value mismatch");
 
-thread_local int __errno = 0;
+thread_local int errno = 0;

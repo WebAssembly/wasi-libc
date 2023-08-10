@@ -484,7 +484,13 @@ DLMALLOC_SO_OBJS = $(patsubst %.o,%.pic.o,$(DLMALLOC_OBJS))
 LIBC_BOTTOM_HALF_ALL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBC_BOTTOM_HALF_ALL_OBJS))
 LIBC_TOP_HALF_ALL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBC_TOP_HALF_ALL_OBJS))
 
-# TODO: specify SDK version, e.g. libc.so.wasi-sdk-21, as SO_NAME once `wasm-ld` supports it
+# TODO: Specify SDK version, e.g. libc.so.wasi-sdk-21, as SO_NAME once `wasm-ld`
+# supports it.
+#
+# Note that we collect the object files for each shared library into a .a and
+# link that using `--whole-archive` rather than pass the object files directly
+# to CC.  This is a workaround for a Windows command line size limitation.  See
+# the `%.a` rule below for details.
 $(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(BUILTINS_LIB)
 	$(CC) -nostdlib -shared -o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB)
 

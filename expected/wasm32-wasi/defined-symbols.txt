@@ -945,6 +945,7 @@ gethostbyaddr_r
 gethostbyname
 gethostbyname2
 gethostbyname2_r
+gethostbyname_r
 gethostid
 gethostname
 getif_addrs

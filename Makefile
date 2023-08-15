@@ -496,12 +496,13 @@ $(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(BUILTINS_LIB)
 
 $(OBJDIR)/libc.so.a: $(LIBC_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS)
 
-$(OBJDIR)/libwasi-emulated.so.a: \
-	$(LIBWASI_EMULATED_MMAN_SO_OBJS) \
-	$(LIBWASI_EMULATED_PROCESS_CLOCKS_SO_OBJS) \
-	$(LIBWASI_EMULATED_GETPID_SO_OBJS) \
-	$(LIBWASI_EMULATED_SIGNAL_SO_OBJS) \
-	$(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS)
+$(OBJDIR)/libwasi-emulated-mman.so.a: $(LIBWASI_EMULATED_MMAN_SO_OBJS)
+
+$(OBJDIR)/libwasi-emulated-process-clocks.so.a: $(LIBWASI_EMULATED_PROCESS_CLOCKS_SO_OBJS)
+
+$(OBJDIR)/libwasi-emulated-getpid.so.a: $(LIBWASI_EMULATED_GETPID_SO_OBJS)
+
+$(OBJDIR)/libwasi-emulated-signal.so.a: $(LIBWASI_EMULATED_SIGNAL_SO_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS)
 
 $(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
 
@@ -641,7 +642,10 @@ startup_files: include_dirs $(LIBC_BOTTOM_HALF_CRT_OBJS)
 ifneq ($(THREAD_MODEL), posix)
 LIBC_SO = \
 	$(SYSROOT_LIB)/libc.so \
-	$(SYSROOT_LIB)/libwasi-emulated.so
+	$(SYSROOT_LIB)/libwasi-emulated-mman.so \
+	$(SYSROOT_LIB)/libwasi-emulated-process-clocks.so \
+	$(SYSROOT_LIB)/libwasi-emulated-getpid.so \
+	$(SYSROOT_LIB)/libwasi-emulated-signal.so
 endif
 
 libc_so: include_dirs $(LIBC_SO)

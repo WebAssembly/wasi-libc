@@ -63,7 +63,6 @@ __imported_wasi_thread_spawn
 __letf2
 __lttf2
 __main_argc_argv
-__memory_base
 __netf2
 __stack_pointer
 __subtf3

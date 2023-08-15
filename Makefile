@@ -484,6 +484,20 @@ DLMALLOC_SO_OBJS = $(patsubst %.o,%.pic.o,$(DLMALLOC_OBJS))
 LIBC_BOTTOM_HALF_ALL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBC_BOTTOM_HALF_ALL_OBJS))
 LIBC_TOP_HALF_ALL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBC_TOP_HALF_ALL_OBJS))
 
+PIC_OBJS = \
+	$(LIBC_SO_OBJS) \
+	$(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS) \
+	$(LIBWASI_EMULATED_MMAN_SO_OBJS) \
+	$(LIBWASI_EMULATED_PROCESS_CLOCKS_SO_OBJS) \
+	$(LIBWASI_EMULATED_GETPID_SO_OBJS) \
+	$(LIBWASI_EMULATED_SIGNAL_SO_OBJS) \
+	$(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS) \
+	$(BULK_MEMORY_SO_OBJS) \
+	$(DLMALLOC_SO_OBJS) \
+	$(LIBC_BOTTOM_HALF_ALL_SO_OBJS) \
+	$(LIBC_TOP_HALF_ALL_SO_OBJS) \
+	$(LIBC_BOTTOM_HALF_CRT_OBJS)
+
 # TODO: Specify SDK version, e.g. libc.so.wasi-sdk-21, as SO_NAME once `wasm-ld`
 # supports it.
 #
@@ -529,6 +543,8 @@ $(SYSROOT_LIB)/libwasi-emulated-signal.a: $(LIBWASI_EMULATED_SIGNAL_OBJS) $(LIBW
 	# silently dropping the tail.
 	$(AR) crs $@ $(wordlist 800, 100000, $(sort $^))
 
+$(PIC_OBJS): CFLAGS += -fPIC -fvisibility=default
+
 $(MUSL_PRINTSCAN_OBJS): CFLAGS += \
 	    -D__wasilibc_printscan_no_long_double \
 	    -D__wasilibc_printscan_full_support_option="\"add -lc-printscan-long-double to the link command\""
@@ -550,11 +566,11 @@ $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS): CF
 
 $(OBJDIR)/%.long-double.pic.o: %.c include_dirs
 	@mkdir -p "$(@D)"
-	$(CC) $(CFLAGS) -fPIC -fvisibility=default -MD -MP -o $@ -c $<
+	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
 $(OBJDIR)/%.pic.o: %.c include_dirs
 	@mkdir -p "$(@D)"
-	$(CC) $(CFLAGS) -fPIC -fvisibility=default -MD -MP -o $@ -c $<
+	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
 $(OBJDIR)/%.long-double.o: %.c include_dirs
 	@mkdir -p "$(@D)"

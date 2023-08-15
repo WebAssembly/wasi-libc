@@ -60,6 +60,7 @@ __imported_wasi_snapshot_preview1_sock_shutdown
 __letf2
 __lttf2
 __main_argc_argv
+__memory_base
 __netf2
 __stack_pointer
 __subtf3

@@ -21,7 +21,9 @@ int __pthread_mutex_trylock_owner(pthread_mutex_t *m)
 			return 0;
 		}
 	}
+#ifdef __wasilibc_unmodified_upstream
 	if (own == 0x3fffffff) return ENOTRECOVERABLE;
+#endif
 	if (own || (old && !(type & 4))) return EBUSY;
 
 	if (type & 128) {

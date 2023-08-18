@@ -43,6 +43,7 @@ static void continue_handler(int sig) {
     // do nothing
 }
 
+#ifdef __wasilibc_unmodified_upstream
 typedef void (*sighandler_t)(int);
 static const sighandler_t default_handlers[_NSIG] = {
     // Default behavior: "core".
@@ -98,6 +99,77 @@ static const sighandler_t default_handlers[_NSIG] = {
 #endif
     [SIGPWR] = terminate_handler,
 };
+#else
+typedef void (*sighandler_t)(int);
+static sighandler_t default_handler = NULL;
+
+void __default_handler(int sig) {
+	switch (sig) {
+		// Default behavior: "core".
+		case SIGABRT:
+		case SIGBUS:
+		case SIGFPE:
+		case SIGILL:
+	#if SIGIOT != SIGABRT
+		case SIGIOT:
+	#endif
+		case SIGQUIT:
+		case SIGSEGV:
+		case SIGSYS:
+		case SIGTRAP:
+		case SIGXCPU:
+		case SIGXFSZ:
+	#if defined(SIGUNUSED) && SIGUNUSED != SIGSYS
+		case SIGUNUSED:
+	#endif
+			core_handler(sig);
+			break;
+
+		// Default behavior: ignore.
+		case SIGCHLD:
+#if defined(SIGCLD) && SIGCLD != SIGCHLD
+		case SIGCLD:
+#endif
+		case SIGURG:
+		case SIGWINCH:
+			SIG_IGN(sig);
+			break;
+
+		// Default behavior: "continue".
+		case SIGCONT:
+			continue_handler(sig);
+			break;
+
+		// Default behavior: "stop".
+		case SIGSTOP:
+		case SIGTSTP:
+		case SIGTTIN:
+		case SIGTTOU:
+			stop_handler(sig);
+			break;
+
+		// Default behavior: "terminate".
+		case SIGHUP:
+		case SIGINT:
+		case SIGKILL:
+		case SIGUSR1:
+		case SIGUSR2:
+		case SIGPIPE:
+		case SIGALRM:
+		case SIGTERM:
+		case SIGSTKFLT:
+		case SIGVTALRM:
+		case SIGPROF:
+		case SIGIO:
+#if SIGPOLL != SIGIO
+		case SIGPOLL:
+#endif
+		case SIGPWR:
+			terminate_handler(sig);
+			break;
+	}
+}
+#endif
 
 static sighandler_t handlers[_NSIG];
 
@@ -118,8 +190,7 @@ void __wasm_signal(int sig) {
 	} else {
 		unsigned long set[_NSIG/(8*sizeof(long))];
 		__block_all_sigs(&set);
-		sighandler_t handler = default_handlers[sig];
-		handler(sig);
+		default_handler(sig);
 		__restore_sigs(&set);
 	}
 }
@@ -183,6 +254,7 @@ int __libc_sigaction(int sig, const struct sigaction *restrict sa, struct sigact
 	return __syscall_ret(r);
 }
 
+#ifdef __wasilibc_unmodified_upstream
 int __sigaction(int sig, const struct sigaction *restrict sa, struct sigaction *restrict old)
 {
 	unsigned long set[_NSIG/(8*sizeof(long))];
@@ -206,5 +278,52 @@ int __sigaction(int sig, const struct sigaction *restrict sa, struct sigaction *
 	}
 	return r;
 }
+#else
+int __sigaction_inner(int sig, const struct sigaction *restrict sa, struct sigaction *restrict old)
+{
+	unsigned long set[_NSIG/(8*sizeof(long))];
+
+	if (sig-32U < 3 || sig-1U >= _NSIG-1) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Doing anything with the disposition of SIGABRT requires a lock,
+	 * so that it cannot be changed while abort is terminating the
+	 * process and so any change made by abort can't be observed. */
+	if (sig == SIGABRT) {
+		__block_all_sigs(&set);
+		LOCK(__abort_lock);
+	}
+	int r = __libc_sigaction(sig, sa, old);
+	if (sig == SIGABRT) {
+		UNLOCK(__abort_lock);
+		__restore_sigs(&set);
+	}
+	return r;
+}
+
+int __sigaction(int sig, const struct sigaction *restrict sa, struct sigaction *restrict old)
+{
+	if (default_handler == NULL) default_handler = &__default_handler;
+	return __sigaction_inner(sig, sa, old);
+}
+#endif
 
 weak_alias(__sigaction, sigaction);
+
+#ifdef __wasilibc_unmodified_upstream
+#else
+/* Currently, core_handler cannot be compiled in a rust program.
+ * To keep that out of the compilation, the rust libc does not
+ * use __sigaction above (which references __default_handler),
+ * instead using this function to pass in a default handler of
+ * its own. */
+int __sigaction_external_default(int sig, const struct sigaction *restrict sa, struct sigaction *restrict old, sighandler_t _default_handler)
+{
+	if (default_handler == NULL) default_handler = _default_handler;
+	return __sigaction_inner(sig, sa, old);
+}
+
+weak_alias(__sigaction_external_default, sigaction_external_default);
+#endif

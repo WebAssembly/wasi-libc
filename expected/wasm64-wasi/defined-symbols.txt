@@ -50,6 +50,7 @@ __cxa_atexit
 __cxa_finalize
 __daylight
 __default_guardsize
+__default_handler
 __default_stacksize
 __des_setkey
 __dlerror_lockptr
@@ -280,6 +281,8 @@ __shgetc
 __shlim
 __shm_mapname
 __sigaction
+__sigaction_external_default
+__sigaction_inner
 __signgam
 __sigsetjmp_tail
 __sin
@@ -1488,6 +1491,7 @@ setuid
 setvbuf
 shutdown
 sigaction
+sigaction_external_default
 sigaddset
 sigaltstack
 sigandset

@@ -103,7 +103,7 @@ static const sighandler_t default_handlers[_NSIG] = {
 typedef void (*sighandler_t)(int);
 static sighandler_t default_handler = NULL;
 
-void __default_handler(int sig) {
+static void __default_handler(int sig) {
 	switch (sig) {
 		// Default behavior: "core".
 		case SIGABRT:
@@ -279,7 +279,7 @@ int __sigaction(int sig, const struct sigaction *restrict sa, struct sigaction *
 	return r;
 }
 #else
-int __sigaction_inner(int sig, const struct sigaction *restrict sa, struct sigaction *restrict old)
+static int __sigaction_inner(int sig, const struct sigaction *restrict sa, struct sigaction *restrict old)
 {
 	unsigned long set[_NSIG/(8*sizeof(long))];
 

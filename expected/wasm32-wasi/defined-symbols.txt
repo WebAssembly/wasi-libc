@@ -914,6 +914,7 @@ fwprintf
 fwrite
 fwrite_unlocked
 fwscanf
+gai_strerror
 gcvt
 get_avphys_pages
 get_entry
@@ -947,6 +948,7 @@ gethostbyaddr_r
 gethostbyname
 gethostbyname2
 gethostbyname2_r
+gethostbyname_r
 gethostid
 gethostname
 getif_addrs
@@ -1228,10 +1230,12 @@ optind
 optopt
 optreset
 pathconf
+pclose
 perror
 pipe
 pipe2
 poll
+popen
 posix_close
 posix_fadvise
 posix_fallocate

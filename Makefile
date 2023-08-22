@@ -105,6 +105,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         network/getaddrinfo.c \
         network/getnameinfo.c \
         network/gethostbyname.c \
+        network/gethostbyname_r.c \
         network/gethostbyname2.c \
         network/gethostbyname2_r.c \
         network/getservbyname.c \
@@ -117,9 +118,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         network/freeaddrinfo.c \
         network/resolvconf.c \
         \
-        network/gethostbyaddr.c \
-        network/gethostbyname.c \
-        network/getservbyname.c \
+        network/gai_strerror.c \
         network/getservbyport.c \
         network/h_errno.c \
         network/hstrerror.c \
@@ -128,7 +127,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         network/ntohl.c \
         network/ntohs.c \
         network/inet_ntop.c \
-	network/inet_ntoa.c \
+	    network/inet_ntoa.c \
         network/inet_pton.c \
         network/inet_aton.c \
         network/in6addr_any.c \
@@ -204,7 +203,6 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/*.c)) \
     $(filter-out %/rename.c \
                  %/tmpnam.c %/tmpfile.c %/tempnam.c \
-                 %/popen.c %/pclose.c \
                  %/remove.c \
                  %/gets.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/*.c)) \

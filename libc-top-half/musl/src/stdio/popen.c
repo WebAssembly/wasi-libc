@@ -6,6 +6,9 @@
 #include "stdio_impl.h"
 #include "syscall.h"
 
+#ifndef __wasilibc_unmodified_upstream
+#define __environ __wasilibc_environ
+#endif
 extern char **__environ;
 
 FILE *popen(const char *cmd, const char *mode)
@@ -27,8 +30,13 @@ FILE *popen(const char *cmd, const char *mode)
 	if (pipe2(p, O_CLOEXEC)) return NULL;
 	f = fdopen(p[op], mode);
 	if (!f) {
+#ifdef __wasilibc_unmodified_upstream
 		__syscall(SYS_close, p[0]);
 		__syscall(SYS_close, p[1]);
+#else
+		close(p[0]);
+		close(p[1]);
+#endif
 		return NULL;
 	}
 	FLOCK(f);
@@ -44,7 +52,11 @@ FILE *popen(const char *cmd, const char *mode)
 			e = errno;
 			goto fail;
 		}
+#ifdef __wasilibc_unmodified_upstream
 		__syscall(SYS_close, p[1-op]);
+#else
+		close(p[1-op]);
+#endif
 		p[1-op] = tmp;
 	}
 
@@ -57,7 +69,11 @@ FILE *popen(const char *cmd, const char *mode)
 				f->pipe_pid = pid;
 				if (!strchr(mode, 'e'))
 					fcntl(p[op], F_SETFD, 0);
+#ifdef __wasilibc_unmodified_upstream
 				__syscall(SYS_close, p[1-op]);
+#else
+				close(p[1-op]);
+#endif
 				FUNLOCK(f);
 				return f;
 			}
@@ -66,7 +82,11 @@ FILE *popen(const char *cmd, const char *mode)
 	}
 fail:
 	fclose(f);
+#ifdef __wasilibc_unmodified_upstream
 	__syscall(SYS_close, p[1-op]);
+#else
+	close(p[1-op]);
+#endif
 
 	errno = e;
 	return 0;

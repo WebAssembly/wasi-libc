@@ -280,6 +280,7 @@ __shgetc
 __shlim
 __shm_mapname
 __sigaction
+__sigaction_external_default
 __signgam
 __sigsetjmp_tail
 __sin
@@ -1492,6 +1493,7 @@ setuid
 setvbuf
 shutdown
 sigaction
+sigaction_external_default
 sigaddset
 sigaltstack
 sigandset

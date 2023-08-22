@@ -260,7 +260,7 @@ long sysconf(int name)
 		return cnt;
 #else
 		{
-			unsigned long n_cpus = 1;
+			__wasi_size_t n_cpus = 1;
 			int r = __wasi_thread_parallelism(&n_cpus);
 			if(r)	// there was an error in the call
 				n_cpus = 1;

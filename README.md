@@ -50,8 +50,8 @@ cross-compiled builds of compiler-rt, `libc++.a`, and `libc++abi.a`.
 
 To enable pthreads support via the [wasi-threads] proposal, follow the above
 build directions with one addition: `make ... THREAD_MODEL=posix`. This creates
-additional artifacts in `sysroot/lib/wasm32-wasi-threads` to support `--target
-wasm32-wasi-threads`.
+additional artifacts in `sysroot/lib/wasm32-wasi-preview1-threads` to support `--target
+wasm32-wasi-preview1-threads`.
 
 ## Arch Linux AUR package
 

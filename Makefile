@@ -38,7 +38,14 @@ TARGET_TRIPLE = wasm32-wasi
 # Threaded version necessitates a different traget, as objects from different
 # targets can't be mixed together while linking.
 ifeq ($(THREAD_MODEL), posix)
+ifeq ($(THREAD_IMPL), wasi-threads)
+TARGET_TRIPLE = wasm32-wasi-preview1-threads
+else
+# The target tripple is deprecated and only kept for backward compatibility.
+# This target will most likely be re-used for implementing thread-spawn proposal
+# in the future.
 TARGET_TRIPLE = wasm32-wasi-threads
+endif
 endif
 
 # These variables describe the locations of various files and directories in

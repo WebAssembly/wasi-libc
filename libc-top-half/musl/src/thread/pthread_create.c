@@ -13,6 +13,7 @@
 #endif
 
 #include <stdalign.h>
+#include <assert.h>
 
 static void dummy_0()
 {
@@ -558,13 +559,17 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 			__wait(&args->control, 0, 3, 0);
 	}
 #else
+#define WASI_THREADS_MAX_TID 0x1FFFFFFF
 	/* `wasi_thread_spawn` will either return a host-provided thread ID (TID)
-	 * (`>= 0`) or an error code (`< 0`). As in the unmodified version, all
-	 * spawn failures translate to EAGAIN; unlike the modified version, there is
-	 * no need to "start up" the child thread--the host does this. If the spawn
-	 * did succeed, then we store the TID atomically, since this parent thread
-	 * is racing with the child thread to set this field; this way, whichever
-	 * thread reaches this point first can continue without waiting. */
+	 * (`<1, 0x1FFFFFFF>`) or an error code (`< 0`). Please note that `0` is
+	 * reserved for compatibility reasons and must not be returned by the runtime.
+	 * As in the unmodified version, all spawn failures translate to EAGAIN;
+	 * unlike the modified version, there is no need to "start up" the child
+	 * thread--the host does this. If the spawn did succeed, then we store the
+	 * TID atomically, since this parent thread is racing with the child thread
+	 * to set this field; this way, whichever thread reaches this point first
+	 * can continue without waiting. */
+	assert(ret != 0 && ret <= WASI_THREADS_MAX_TID);
 	if (ret < 0) {
 		ret = -EAGAIN;
 	} else {

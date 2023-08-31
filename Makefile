@@ -202,7 +202,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/*.c)) \
     $(filter-out %/rename.c \
-                 %/tmpnam.c %/tmpfile.c %/tempnam.c \
+                 %/tmpnam.c %/tempnam.c \
                  %/remove.c \
                  %/gets.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/*.c)) \

@@ -1471,6 +1471,7 @@ sigprocmask
 sigqueue
 sigrelse
 sigset
+sigsetjmp
 sigsuspend
 sigtimedwait
 sigwait
@@ -1599,6 +1600,7 @@ timegm
 times
 timespec_get
 timezone
+tmpfile
 toascii
 tolower
 tolower_l

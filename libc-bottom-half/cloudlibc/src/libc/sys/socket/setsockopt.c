@@ -67,7 +67,7 @@ int setsockopt(int socket, int level, int option_name, const void *restrict opti
 	  __wasi_option_timestamp_t tm;
 	  if (option_len >= sizeof(struct timeval)) {
 		struct timeval *tv = (struct timeval *)option_value;
-		tm.tag = tv->tv_sec > 0 && tv->tv_usec > 0 ? __WASI_OPTION_SOME : __WASI_OPTION_NONE;
+		tm.tag = tv->tv_sec > 0 || tv->tv_usec > 0 ? __WASI_OPTION_SOME : __WASI_OPTION_NONE;
 		tm.u.some = (tv->tv_sec * 1000000000ULL) + (tv->tv_usec * 1000ULL);
 	  } else {
 		errno = EINVAL;

@@ -128,6 +128,12 @@ int getsockopt(int socket, int level, int option_name,
         return -1;
       }
       int value = fsb.fs_filetype;
+      switch(fsb.fs_filetype) {
+        case __WASI_FILETYPE_SOCKET_DGRAM: value = SOCK_DGRAM; break;
+        case __WASI_FILETYPE_SOCKET_STREAM: value = SOCK_STREAM; break;
+        case __WASI_FILETYPE_SOCKET_SEQPACKET: value = SOCK_SEQPACKET; break;
+        case __WASI_FILETYPE_SOCKET_RAW: value = SOCK_RAW; break;
+      }
       memcpy(option_value, &value, *option_len < sizeof(int) ? *option_len : sizeof(int));
       *option_len = sizeof(int);
       return 0;

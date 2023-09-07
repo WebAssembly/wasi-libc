@@ -1,0 +1,117 @@
+name: Build C/C++ Sysroot
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  build_cxx_sysroot:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+      options: --user root --workdir /
+    steps:
+      - name: Update and install dependencies
+        run: |
+          pacman -Syu --noconfirm
+          pacman -Sy --noconfirm coreutils nodejs npm wget git cmake ninja llvm clang rsync make lld wasmer
+
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Build
+        run: |
+          TARGET_ARCH=wasm32 TARGET_OS=wasix make CC=clang AR=llvm-ar NM=llvm-nm THREAD_MODEL=posix || true
+          rm -rf /opt/wasix-sysroot
+          cp -r sysroot /opt/wasix-sysroot
+          cp .github/workflows/files/clang-wasix.cmake_toolchain /opt/wasix-sysroot/clang-wasix.cmake_toolchain
+
+      - name: Determine LLVM revision
+        run: |
+          export LLVM_TAG=$(echo "llvmorg-$(llvm-ar --version | grep -i "LLVM version" | sed -r 's/.*version ([0-9\.]+).*/\1/')")
+          echo "LLVM tag: $LLVM_TAG"
+          echo "LLVM_REV=$(git ls-remote --tags https://github.com/llvm/llvm-project.git $LLVM_TAG | sed -r 's/([^ \t]*).*/\1/')" | tee -a $GITHUB_ENV
+          echo "LLVM_TAG=$LLVM_TAG" | tee -a $GITHUB_ENV
+        
+      - name: Cache LLVM
+        uses: actions/cache@v3
+        if: ${{ !env.ACT }}
+        with:
+          path: llvm-project
+          key: llvm-${{ env.LLVM_REV }}
+        
+      - name: Checkout LLVM
+        run: |
+          if [ ! -d "llvm-project" ]; then git clone https://github.com/llvm/llvm-project.git; fi
+          cd llvm-project
+          git fetch origin refs/tags/${{ env.LLVM_TAG }}
+          if [ "$(git rev-parse ${{ env.LLVM_TAG }})" != "$(git rev-parse HEAD)" ]; then echo "Checkout ($(git rev-parse ${{ env.LLVM_TAG }}) != $(git rev-parse HEAD))" && git reset --hard ${{ env.LLVM_TAG }} && echo "checked out $(git rev-parse HEAD)"; fi
+      
+      - name: Build and install compiler_rt builtins
+        run: |
+          mkdir -p build-compiler-rt-builtins
+          cd build-compiler-rt-builtins
+          cmake --fresh -DCOMPILER_RT_BAREMETAL_BUILD=On -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCOMPILER_RT_OS_DIR=wasm32-wasi -DCOMPILER_RT_DEFAULT_TARGET_ONLY:BOOL=ON -DCMAKE_TOOLCHAIN_FILE=/opt/wasix-sysroot/clang-wasix.cmake_toolchain -DCMAKE_SYSROOT=/opt/wasix-sysroot -DCMAKE_INSTALL_PREFIX=/opt/wasix-sysroot ../llvm-project/compiler-rt/lib/builtins
+          cmake --build . --target install --parallel 4
+          export CLANG_MAJOR_VERSION=$(clang --version | grep -i "clang version" | sed -r 's/.*version ([0-9]+).*/\1/')
+          mkdir -p /usr/lib/clang/$CLANG_MAJOR_VERSION/lib/wasi
+          cp /opt/wasix-sysroot/lib/wasm32-wasi/libclang_rt.builtins-wasm32.a /usr/lib/clang/$CLANG_MAJOR_VERSION/lib/wasi/libclang_rt.builtins-wasm32.a
+
+      - name: Build and install LLVM libc++
+        run: >
+          mkdir -p build-libcxx &&
+          cd build-libcxx &&
+          cmake
+          --fresh
+          -DCMAKE_TOOLCHAIN_FILE=/opt/wasix-sysroot/clang-wasix.cmake_toolchain
+          -DCMAKE_SYSROOT=/opt/wasix-sysroot
+          -DCMAKE_INSTALL_PREFIX=/opt/wasix-sysroot
+          -DCXX_SUPPORTS_CXX11=ON
+          -DLIBCXX_ENABLE_THREADS:BOOL=ON
+          -DLIBCXX_HAS_PTHREAD_API:BOOL=ON
+          -DLIBCXX_HAS_EXTERNAL_THREAD_API:BOOL=OFF
+          -DLIBCXX_BUILD_EXTERNAL_THREAD_LIBRARY:BOOL=OFF
+          -DLIBCXX_HAS_WIN32_THREAD_API:BOOL=OFF
+          -DCMAKE_BUILD_TYPE=RelWithDebugInfo
+          -DLIBCXX_ENABLE_SHARED:BOOL=OFF
+          -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY:BOOL=OFF
+          -DLIBCXX_ENABLE_EXCEPTIONS:BOOL=OFF
+          -DLIBCXX_ENABLE_FILESYSTEM:BOOL=OFF
+          -DLIBCXX_CXX_ABI=libcxxabi
+          -DLIBCXX_HAS_MUSL_LIBC:BOOL=ON
+          -DLIBCXX_ABI_VERSION=2
+          -DLIBCXXABI_ENABLE_EXCEPTIONS:BOOL=OFF
+          -DLIBCXXABI_ENABLE_SHARED:BOOL=OFF
+          -DLIBCXXABI_SILENT_TERMINATE:BOOL=ON
+          -DLIBCXXABI_ENABLE_THREADS:BOOL=ON
+          -DLIBCXXABI_HAS_PTHREAD_API:BOOL=ON
+          -DLIBCXXABI_HAS_EXTERNAL_THREAD_API:BOOL=OFF
+          -DLIBCXXABI_BUILD_EXTERNAL_THREAD_LIBRARY:BOOL=OFF
+          -DLIBCXXABI_HAS_WIN32_THREAD_API:BOOL=OFF
+          -DLIBCXXABI_ENABLE_PIC:BOOL=OFF
+          -DCMAKE_C_COMPILER_WORKS=ON
+          -DCMAKE_CXX_COMPILER_WORKS=ON
+          -DLLVM_COMPILER_CHECKED=ON
+          -DUNIX:BOOL=ON
+          -DLIBCXX_LIBDIR_SUFFIX=/wasm32-wasi
+          -DLIBCXXABI_LIBDIR_SUFFIX=/wasm32-wasi
+          -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi"
+          ../llvm-project/runtimes
+          && cmake --build . --target install --parallel 4
+
+      - name: Upload sysroot
+        if: ${{ !env.ACT }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: wasix-sysroot
+          path: /opt/wasix-sysroot
+
+      - name: Run WASIX tests
+        run: |
+          TOOLCHAIN=/opt/wasix-sysroot/clang-wasix.cmake_toolchain ./test/wasix/run_tests.sh

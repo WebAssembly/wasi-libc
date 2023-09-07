@@ -47,6 +47,26 @@ Major bug fixes and/or zero day vulnerabilities will be addressed promptly here
 with careful consideration for resolving issues without compromising the
 long-term support goal.
 
+# Installation
+
+A pre-built sysroot suitable for C/C++ is released in this repository.
+
+To build from source, have a look at the `build_cxx_sysroot.yml` script and
+replicate its build steps.
+
+# Usage
+
+For building CMake projects, a toolchain file is included in the released sysroot
+at `wasix-sysroot/clang-wasm.cmake_toolchain`. In addition to specifying the 
+toolchain:
+
+* `wasm-ld` is needed for linking. It is usually available in your system's `LLVM`
+  linker package. It should be in the `PATH`.
+* `CMAKE_TOOLCHAIN_FILE` and `CMAKE_SYSROOT` should both be set by you. Example:
+
+The WASIX-specific tests and script in `test/wasix` can serve as examples for how
+to set this up.
+
 # WASI Libc
 
 WASI Libc is a libc for WebAssembly programs built on top of WASI system calls.

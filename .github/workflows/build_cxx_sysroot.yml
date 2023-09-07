@@ -20,14 +20,17 @@ jobs:
       - name: Update and install dependencies
         run: |
           pacman -Syu --noconfirm
-          pacman -Sy --noconfirm coreutils nodejs npm wget git cmake ninja llvm clang rsync make lld wasmer
+          pacman -Sy --noconfirm coreutils nodejs npm wget git cmake ninja llvm clang rsync make lld wasmer cargo
 
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          submodules: true
       
       - name: Build
         run: |
-          TARGET_ARCH=wasm32 TARGET_OS=wasix make CC=clang AR=llvm-ar NM=llvm-nm THREAD_MODEL=posix || true
+          git config --global --add safe.directory $(pwd)
+          ./build32.sh
           rm -rf /opt/wasix-sysroot
           cp -r sysroot /opt/wasix-sysroot
           cp .github/workflows/files/clang-wasix.cmake_toolchain /opt/wasix-sysroot/clang-wasix.cmake_toolchain

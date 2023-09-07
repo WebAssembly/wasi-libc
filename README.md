@@ -62,7 +62,7 @@ toolchain:
 
 * `wasm-ld` is needed for linking. It is usually available in your system's `LLVM`
   linker package. It should be in the `PATH`.
-* `CMAKE_TOOLCHAIN_FILE` and `CMAKE_SYSROOT` should both be set by you. Example:
+* `CMAKE_TOOLCHAIN_FILE` and `CMAKE_SYSROOT` should both be set by you.
 
 The WASIX-specific tests and script in `test/wasix` can serve as examples for how
 to set this up.

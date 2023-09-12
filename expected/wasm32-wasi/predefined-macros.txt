@@ -4712,6 +4712,7 @@
 #define TIME_OOP 3
 #define TIME_UTC 1
 #define TIME_WAIT 4
+#define TIOCGWINSZ 0x101
 #define TMAGIC "ustar"
 #define TMAGLEN 6
 #define TOEXEC 00001

@@ -7,6 +7,8 @@
 #include <wasi/api.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <memory.h>
+#include <termios.h>
 
 int ioctl(int fildes, int request, ...) {
   switch (request) {
@@ -74,6 +76,26 @@ int ioctl(int fildes, int request, ...) {
         errno = error;
         return -1;
       }
+      return 0;
+    }
+    case TIOCGWINSZ: {
+      va_list ap;
+      va_start(ap, request);
+      struct winsize *wsz = va_arg(ap, struct winsize *);
+      va_end(ap);
+
+      __wasi_tty_t tty;
+      int r = __wasi_tty_get(&tty);
+      if (r != 0) {
+        errno = r;
+        return -1;
+      }
+
+      memset(wsz, 0, sizeof(struct winsize));
+      wsz->ws_col = tty.cols;
+      wsz->ws_row = tty.rows;
+      wsz->ws_xpixel = tty.width;
+      wsz->ws_ypixel = tty.height;
       return 0;
     }
     default:

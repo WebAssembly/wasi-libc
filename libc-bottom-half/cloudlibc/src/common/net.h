@@ -74,8 +74,8 @@ static inline int wasi_to_sockaddr(const struct __wasi_addr_port_t *restrict pee
     } else if (peer_addr->tag == __WASI_ADDRESS_FAMILY_UNIX) {
       struct sockaddr_un addrun;
       addrun.sun_family = AF_UNIX;
-      memcpy(&addrun.sun_path, &peer_addr->u.unix.b0, 108);
-      addrun.sun_path[107] = '\0'; // make sure the address is null-terminated
+      memcpy(&addrun.sun_path, &peer_addr->u.unix.b0, sizeof(addrun.sun_path));
+      addrun.sun_path[sizeof(addrun.sun_path) - 1] = '\0'; // make sure the address is null-terminated
       *addrlen = offsetof(struct sockaddr_un, sun_path) + strlen(addrun.sun_path);
     } else {
       addr->sa_family = AF_UNSPEC;

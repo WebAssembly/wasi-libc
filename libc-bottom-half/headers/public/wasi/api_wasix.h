@@ -2681,14 +2681,27 @@ typedef struct __wasi_addr_ip6_t {
 
     uint16_t h3;
 
-    uint32_t flow_info;
+    /**
+     * flow_info1 contains the most significant two bytes, and comes first in keeping with all wasix syscalls being little endian
+     */
+    uint16_t flow_info1;
 
-    uint32_t scope_id;
+    /**
+     * flow_info0 contains the least significant two bytes
+     */
+    uint16_t flow_info0;
+
+    /**
+     * Same as flow_info1 and flow_info0
+     */
+    uint16_t scope_id1;
+
+    uint16_t scope_id0;
 
 } __wasi_addr_ip6_t;
 
 _Static_assert(sizeof(__wasi_addr_ip6_t) == 24, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_ip6_t) == 4, "witx calculated align");
+_Static_assert(_Alignof(__wasi_addr_ip6_t) == 2, "witx calculated align");
 _Static_assert(offsetof(__wasi_addr_ip6_t, n0) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_addr_ip6_t, n1) == 2, "witx calculated offset");
 _Static_assert(offsetof(__wasi_addr_ip6_t, n2) == 4, "witx calculated offset");
@@ -2697,8 +2710,10 @@ _Static_assert(offsetof(__wasi_addr_ip6_t, h0) == 8, "witx calculated offset");
 _Static_assert(offsetof(__wasi_addr_ip6_t, h1) == 10, "witx calculated offset");
 _Static_assert(offsetof(__wasi_addr_ip6_t, h2) == 12, "witx calculated offset");
 _Static_assert(offsetof(__wasi_addr_ip6_t, h3) == 14, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip6_t, flow_info) == 16, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip6_t, scope_id) == 20, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_ip6_t, flow_info1) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_ip6_t, flow_info0) == 18, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_ip6_t, scope_id1) == 20, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_ip6_t, scope_id0) == 22, "witx calculated offset");
 
 /**
  * Unix socket that is bound to no more than 107 bytes
@@ -3055,10 +3070,10 @@ typedef struct __wasi_addr_ip6_port_t {
 
 } __wasi_addr_ip6_port_t;
 
-_Static_assert(sizeof(__wasi_addr_ip6_port_t) == 28, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_ip6_port_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_addr_ip6_port_t) == 26, "witx calculated size");
+_Static_assert(_Alignof(__wasi_addr_ip6_port_t) == 2, "witx calculated align");
 _Static_assert(offsetof(__wasi_addr_ip6_port_t, port) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_addr_ip6_port_t, addr) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_addr_ip6_port_t, addr) == 2, "witx calculated offset");
 
 /**
  * An IPv6 address CIDR
@@ -3070,8 +3085,8 @@ typedef struct __wasi_addr_ip6_cidr_t {
 
 } __wasi_addr_ip6_cidr_t;
 
-_Static_assert(sizeof(__wasi_addr_ip6_cidr_t) == 28, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_ip6_cidr_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_addr_ip6_cidr_t) == 26, "witx calculated size");
+_Static_assert(_Alignof(__wasi_addr_ip6_cidr_t) == 2, "witx calculated align");
 _Static_assert(offsetof(__wasi_addr_ip6_cidr_t, addr) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_addr_ip6_cidr_t, prefix) == 24, "witx calculated offset");
 
@@ -3089,8 +3104,8 @@ typedef struct __wasi_addr_t {
     __wasi_addr_u_t u;
 } __wasi_addr_t;
 
-_Static_assert(sizeof(__wasi_addr_t) == 112, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_addr_t) == 110, "witx calculated size");
+_Static_assert(_Alignof(__wasi_addr_t) == 2, "witx calculated align");
 
 /**
  * Union that makes a generic IP address and port
@@ -3106,8 +3121,8 @@ typedef struct __wasi_addr_port_t {
     __wasi_addr_port_u_t u;
 } __wasi_addr_port_t;
 
-_Static_assert(sizeof(__wasi_addr_port_t) == 112, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_port_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_addr_port_t) == 110, "witx calculated size");
+_Static_assert(_Alignof(__wasi_addr_port_t) == 2, "witx calculated align");
 
 /**
  * Union that makes a generic IP address and prefix. a.k.a. CIDR
@@ -3123,8 +3138,8 @@ typedef struct __wasi_addr_cidr_t {
     __wasi_addr_cidr_u_t u;
 } __wasi_addr_cidr_t;
 
-_Static_assert(sizeof(__wasi_addr_cidr_t) == 32, "witx calculated size");
-_Static_assert(_Alignof(__wasi_addr_cidr_t) == 4, "witx calculated align");
+_Static_assert(sizeof(__wasi_addr_cidr_t) == 28, "witx calculated size");
+_Static_assert(_Alignof(__wasi_addr_cidr_t) == 2, "witx calculated align");
 
 typedef struct __wasi_route_t {
     __wasi_addr_cidr_t cidr;
@@ -3140,7 +3155,7 @@ typedef struct __wasi_route_t {
 _Static_assert(sizeof(__wasi_route_t) == 176, "witx calculated size");
 _Static_assert(_Alignof(__wasi_route_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_route_t, cidr) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_route_t, via_router) == 32, "witx calculated offset");
+_Static_assert(offsetof(__wasi_route_t, via_router) == 28, "witx calculated offset");
 _Static_assert(offsetof(__wasi_route_t, preferred_until) == 144, "witx calculated offset");
 _Static_assert(offsetof(__wasi_route_t, expires_at) == 160, "witx calculated offset");
 

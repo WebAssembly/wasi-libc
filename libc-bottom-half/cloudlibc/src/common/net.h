@@ -47,6 +47,7 @@ static inline int is_wasi_port_ok() {
 
 /// Converts a WASI address into a socket address
 static inline int wasi_to_sockaddr(const struct __wasi_addr_port_t *restrict peer_addr, struct sockaddr *restrict addr, socklen_t *restrict addrlen) {
+  // This test needs to be here because some older versions of wasmer report the port as big-endian
   static int tested = 0;
   static int need_revert = 1;
   if(!tested && addr) {
@@ -65,8 +66,8 @@ static inline int wasi_to_sockaddr(const struct __wasi_addr_port_t *restrict pee
     } else if (peer_addr->tag == __WASI_ADDRESS_FAMILY_INET6) {
       struct sockaddr_in6 addr6;
       addr6.sin6_family = AF_INET6;
-      addr6.sin6_flowinfo = need_revert?htonl(peer_addr->u.inet6.addr.flow_info):peer_addr->u.inet6.addr.flow_info;
-      addr6.sin6_scope_id = need_revert?htonl(peer_addr->u.inet6.addr.scope_id):peer_addr->u.inet6.addr.scope_id;;
+      addr6.sin6_flowinfo = peer_addr->u.inet6.addr.flow_info1 << 16 | peer_addr->u.inet6.addr.flow_info0;
+      addr6.sin6_scope_id = peer_addr->u.inet6.addr.scope_id1 << 16 | peer_addr->u.inet6.addr.scope_id0;;
       addr6.sin6_port = need_revert?htons(peer_addr->u.inet6.port):peer_addr->u.inet6.port;
       memcpy(&addr6.sin6_addr.s6_addr, &peer_addr->u.inet6.addr, sizeof(struct in6_addr));
       memcpy(addr, &addr6, MIN(sizeof(struct sockaddr_in6), *addrlen));
@@ -98,8 +99,10 @@ static inline int sockaddr_to_wasi(const struct sockaddr *restrict addr, const s
     struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)addr;
     peer_addr->tag = __WASI_ADDRESS_FAMILY_INET6;
     peer_addr->u.inet6.port = ntohs(addr6->sin6_port);
-    peer_addr->u.inet6.addr.flow_info = ntohl(addr6->sin6_flowinfo);
-    peer_addr->u.inet6.addr.scope_id = ntohl(addr6->sin6_scope_id);
+    peer_addr->u.inet6.addr.flow_info1 = addr6->sin6_flowinfo >> 16;
+    peer_addr->u.inet6.addr.flow_info0 = addr6->sin6_flowinfo & 0xffff;
+    peer_addr->u.inet6.addr.scope_id1 = addr6->sin6_scope_id >> 16;
+    peer_addr->u.inet6.addr.scope_id0 = addr6->sin6_scope_id & 0xffff;
     memcpy(&peer_addr->u.inet6.addr, &addr6->sin6_addr.s6_addr, sizeof(struct in6_addr));
     return 0;
   } else if (addr->sa_family == AF_UNIX && addrlen >= offsetof(struct sockaddr_un, sun_path) + 1) {

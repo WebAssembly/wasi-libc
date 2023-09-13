@@ -20,7 +20,7 @@ int tcgetwinsize(int fd, struct winsize *wsz)
 		return -1;
 	}
 
-	memset(wsz, 0, sizeof(struct termios));
+	memset(wsz, 0, sizeof(struct winsize));
 	wsz->ws_col = tty.cols;
 	wsz->ws_row = tty.rows;
 	wsz->ws_xpixel = tty.width;

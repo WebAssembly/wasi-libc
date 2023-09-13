@@ -4,6 +4,8 @@
 #define FIONREAD 1
 #define FIONBIO 2
 
+#define TIOCGWINSZ 0x101
+
 #ifdef __cplusplus
 extern "C" {
 #endif

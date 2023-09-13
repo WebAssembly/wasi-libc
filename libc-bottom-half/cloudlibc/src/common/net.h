@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <__struct_sockaddr_in.h>
 #include <__struct_sockaddr_in6.h>
+#include <__struct_sockaddr_un.h>
 #include <errno.h>
 
 #include <wasi/api.h>
@@ -46,6 +47,7 @@ static inline int is_wasi_port_ok() {
 
 /// Converts a WASI address into a socket address
 static inline int wasi_to_sockaddr(const struct __wasi_addr_port_t *restrict peer_addr, struct sockaddr *restrict addr, socklen_t *restrict addrlen) {
+  // This test needs to be here because some older versions of wasmer report the port as big-endian
   static int tested = 0;
   static int need_revert = 1;
   if(!tested && addr) {
@@ -64,12 +66,18 @@ static inline int wasi_to_sockaddr(const struct __wasi_addr_port_t *restrict pee
     } else if (peer_addr->tag == __WASI_ADDRESS_FAMILY_INET6) {
       struct sockaddr_in6 addr6;
       addr6.sin6_family = AF_INET6;
-      addr6.sin6_flowinfo = 0;
-      addr6.sin6_scope_id = 0;
+      addr6.sin6_flowinfo = peer_addr->u.inet6.addr.flow_info1 << 16 | peer_addr->u.inet6.addr.flow_info0;
+      addr6.sin6_scope_id = peer_addr->u.inet6.addr.scope_id1 << 16 | peer_addr->u.inet6.addr.scope_id0;;
       addr6.sin6_port = need_revert?htons(peer_addr->u.inet6.port):peer_addr->u.inet6.port;
       memcpy(&addr6.sin6_addr.s6_addr, &peer_addr->u.inet6.addr, sizeof(struct in6_addr));
       memcpy(addr, &addr6, MIN(sizeof(struct sockaddr_in6), *addrlen));
       *addrlen = sizeof(struct sockaddr_in6);
+    } else if (peer_addr->tag == __WASI_ADDRESS_FAMILY_UNIX) {
+      struct sockaddr_un addrun;
+      addrun.sun_family = AF_UNIX;
+      memcpy(&addrun.sun_path, &peer_addr->u.unix.b0, sizeof(addrun.sun_path));
+      addrun.sun_path[sizeof(addrun.sun_path) - 1] = '\0'; // make sure the address is null-terminated
+      *addrlen = offsetof(struct sockaddr_un, sun_path) + strlen(addrun.sun_path);
     } else {
       addr->sa_family = AF_UNSPEC;
       *addrlen = sizeof(struct sockaddr);
@@ -91,7 +99,21 @@ static inline int sockaddr_to_wasi(const struct sockaddr *restrict addr, const s
     struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)addr;
     peer_addr->tag = __WASI_ADDRESS_FAMILY_INET6;
     peer_addr->u.inet6.port = ntohs(addr6->sin6_port);
+    peer_addr->u.inet6.addr.flow_info1 = addr6->sin6_flowinfo >> 16;
+    peer_addr->u.inet6.addr.flow_info0 = addr6->sin6_flowinfo & 0xffff;
+    peer_addr->u.inet6.addr.scope_id1 = addr6->sin6_scope_id >> 16;
+    peer_addr->u.inet6.addr.scope_id0 = addr6->sin6_scope_id & 0xffff;
     memcpy(&peer_addr->u.inet6.addr, &addr6->sin6_addr.s6_addr, sizeof(struct in6_addr));
+    return 0;
+  } else if (addr->sa_family == AF_UNIX && addrlen >= offsetof(struct sockaddr_un, sun_path) + 1) {
+    struct sockaddr_un *addrun = (struct sockaddr_un *)addr;
+    peer_addr->tag = __WASI_ADDRESS_FAMILY_UNIX;
+    socklen_t pathlen = addrlen - offsetof(struct sockaddr_un, sun_path);
+    if (pathlen > 107) { // Addresses are limited to 107 bytes + 1 null byte only
+      return -1;
+    }
+    memcpy(&peer_addr->u.unix.b0, &addrun->sun_path, (size_t)pathlen);
+    *(uint8_t *)(&peer_addr->u.unix.b0 + pathlen) = '\0';
     return 0;
   } else {
     return -1;

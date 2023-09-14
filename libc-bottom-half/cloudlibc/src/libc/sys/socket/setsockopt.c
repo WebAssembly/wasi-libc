@@ -16,6 +16,11 @@ int setsockopt(int socket, int level, int option_name, const void *restrict opti
     option_name = SO_NODELAY;
   }
 
+  if(level!=SOL_SOCKET) {
+    errno = ENOSYS;
+    return -1;
+  }
+
   switch (option_name) {
     case SO_ACCEPTCONN:
     case SO_BROADCAST:

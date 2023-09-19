@@ -75,7 +75,7 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=/opt/wasix-sysroot/clang-wasix.cmake_toolchain
           -DCMAKE_SYSROOT=/opt/wasix-sysroot
           -DCMAKE_INSTALL_PREFIX=/opt/wasix-sysroot
-          -DCXX_SUPPORTS_CXX11=ON
+          -DCXX_SUPPORTS_CXX23=ON
           -DLIBCXX_ENABLE_THREADS:BOOL=ON
           -DLIBCXX_HAS_PTHREAD_API:BOOL=ON
           -DLIBCXX_HAS_EXTERNAL_THREAD_API:BOOL=OFF

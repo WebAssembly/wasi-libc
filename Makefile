@@ -748,6 +748,7 @@ check-symbols: startup_files libc
 	@# TODO: Filter out __NO_MATH_ERRNO_ and a few __*WIDTH__ that are new to clang 14.
 	@# TODO: Filter out __GCC_HAVE_SYNC_COMPARE_AND_SWAP_* that are new to clang 16.
 	@# TODO: Filter out __FPCLASS_* that are new to clang 17.
+	@# TODO: Filter out __FLT128_* that are new to clang 18.
 	@# TODO: clang defined __FLT_EVAL_METHOD__ until clang 15, so we force-undefine it
 	@# for older versions.
 	@# TODO: Undefine __wasm_mutable_globals__ and __wasm_sign_ext__, that are new to
@@ -780,6 +781,7 @@ check-symbols: startup_files libc
 	    | grep -v '^#define __\(BOOL\|INT_\(LEAST\|FAST\)\(8\|16\|32\|64\)\|INT\|LONG\|LLONG\|SHRT\)_WIDTH__' \
 	    | grep -v '^#define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_\(1\|2\|4\|8\)' \
 	    | grep -v '^#define __FPCLASS_' \
+	    | grep -v '^#define __FLT128_' \
 	    | grep -v '^#define NDEBUG' \
 	    | grep -v '^#define __OPTIMIZE__' \
 	    | grep -v '^#define assert' \

@@ -41,6 +41,8 @@ ifeq ($(THREAD_MODEL), posix)
 TARGET_TRIPLE = wasm32-wasi-threads
 endif
 
+BUILTINS_LIB ?= $(shell ${CC} --print-libgcc-file-name)
+
 # These variables describe the locations of various files and directories in
 # the source tree.
 DLMALLOC_DIR = dlmalloc

@@ -41,10 +41,6 @@ pub fn to_c(doc: &Document, inputs_str: &str) -> Generated {
 #error <wasi/api.h> is only supported on WASI platforms.
 #endif
 
-#ifndef __wasm32__
-#error <wasi/api.h> only supports wasm32; doesn't yet support wasm64
-#endif
-
 #include <stddef.h>
 #include <stdint.h>
 
@@ -56,7 +52,7 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == sizeof(uintptr_t), "non-wasi data layout");
 
 #ifdef __cplusplus
 extern "C" {{
@@ -165,7 +161,7 @@ fn print_alias(ret: &mut String, name: &Id, dest: &TypeRef) {
                 ));
             }
             ret.push_str("\n");
-
+/*
             ret.push_str(&format!(
                 "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
                 ident_name(name),
@@ -176,7 +172,7 @@ fn print_alias(ret: &mut String, name: &Id, dest: &TypeRef) {
                 ident_name(name),
                 dest.mem_size_align().align
             ));
-
+*/
             ret.push_str("\n");
         }
     }
@@ -207,7 +203,7 @@ fn print_enum(ret: &mut String, name: &Id, v: &Variant) {
         ));
         ret.push_str("\n");
     }
-
+/*
     ret.push_str(&format!(
         "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
         ident_name(name),
@@ -218,7 +214,7 @@ fn print_enum(ret: &mut String, name: &Id, v: &Variant) {
         ident_name(name),
         v.tag_repr.mem_align()
     ));
-
+*/
     ret.push_str("\n");
 }
 
@@ -289,7 +285,7 @@ fn print_record(ret: &mut String, name: &Id, s: &RecordDatatype) {
 
     ret.push_str(&format!("}} __wasi_{}_t;\n", ident_name(name)));
     ret.push_str("\n");
-
+/*
     ret.push_str(&format!(
         "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
         ident_name(name),
@@ -309,7 +305,7 @@ fn print_record(ret: &mut String, name: &Id, s: &RecordDatatype) {
             layout.offset
         ));
     }
-
+*/
     ret.push_str("\n");
 }
 
@@ -350,7 +346,7 @@ fn print_variant(ret: &mut String, name: &Id, v: &Variant) {
 
     ret.push_str(&format!("}} __wasi_{}_t;\n", ident_name(name)));
     ret.push_str("\n");
-
+/*
     ret.push_str(&format!(
         "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
         ident_name(name),
@@ -361,13 +357,13 @@ fn print_variant(ret: &mut String, name: &Id, v: &Variant) {
         ident_name(name),
         v.mem_align()
     ));
-
+*/
     ret.push_str("\n");
 }
 
-fn print_handle(ret: &mut String, name: &Id, h: &HandleDatatype) {
+fn print_handle(ret: &mut String, name: &Id, _h: &HandleDatatype) {
     ret.push_str(&format!("typedef int __wasi_{}_t;\n\n", ident_name(name)));
-
+/*
     ret.push_str(&format!(
         "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
         ident_name(name),
@@ -378,7 +374,7 @@ fn print_handle(ret: &mut String, name: &Id, h: &HandleDatatype) {
         ident_name(name),
         h.mem_align()
     ));
-
+*/
     ret.push_str("\n");
 }
 
@@ -501,7 +497,7 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
         if i > 0 {
             ret.push_str(", ");
         }
-        ret.push_str(wasm_type(param));
+        ret.push_str(wasm_arg_type(param));
         ret.push_str(&format!(" arg{}", i));
     }
     ret.push_str(") __attribute__((\n");
@@ -633,15 +629,15 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
 
                 Instruction::ListPointerLength => {
                     let list = operands.pop().unwrap();
-                    results.push(format!("(int32_t) {}", list));
-                    results.push(format!("(int32_t) {}_len", list));
+                    results.push(format!("(intptr_t) {}", list));
+                    results.push(format!("(intptr_t) {}_len", list));
                 }
                 Instruction::ReturnPointerGet { n } => {
                     // We currently match the wasi ABI with the actual
                     // function's API signature in C, this means when a return
                     // pointer is asked for we can simply forward our parameter
                     // that's a return pointer.
-                    results.push(format!("(int32_t) retptr{}", n));
+                    results.push(format!("(intptr_t) retptr{}", n));
                 }
 
                 Instruction::Load { .. } => {
@@ -771,10 +767,10 @@ fn add_params(params: &mut Vec<(Option<String>, String)>, name: &str, tref: &Typ
     match &**tref.type_() {
         Type::List(element) => match &**element.type_() {
             Type::Builtin(BuiltinType::Char) => {
-                params.push((docs, format!("const char *{}", name)));
+                params.push((docs, format!("char const *{}", name)));
             }
             _ => {
-                params.push((docs, format!("const {} *{}", typeref_name(&element), name)));
+                params.push((docs, format!("{} const *{}", typeref_name(&element), name)));
                 params.push((
                     Some(format!("The length of the array pointed to by `{}`.", name,)),
                     format!("size_t {}_len", name),
@@ -829,7 +825,7 @@ fn typeref_name(tref: &TypeRef) -> String {
             Type::List(_) => unreachable!("arrays excluded above"),
             Type::Builtin(b) => builtin_type_name(*b).to_string(),
             Type::Pointer(p) => format!("{} *", typeref_name(&*p)),
-            Type::ConstPointer(p) => format!("const {} *", typeref_name(&*p)),
+            Type::ConstPointer(p) => format!("{} const *", typeref_name(&*p)),
             Type::Record { .. } | Type::Variant { .. } | Type::Handle { .. } => unreachable!(
                 "wasi should not have anonymous structs, unions, enums, flags, handles"
             ),
@@ -840,7 +836,7 @@ fn typeref_name(tref: &TypeRef) -> String {
 fn namedtype_name(named_type: &NamedType) -> String {
     match &**named_type.type_() {
         Type::Pointer(p) => format!("{} *", typeref_name(&*p)),
-        Type::ConstPointer(p) => format!("const {} *", typeref_name(&*p)),
+        Type::ConstPointer(p) => format!("{} const *", typeref_name(&*p)),
         Type::List(_) => unreachable!("arrays excluded above"),
         _ => format!("__wasi_{}_t", named_type.name.as_str()),
     }
@@ -867,6 +863,15 @@ fn intrepr_const(i: IntRepr) -> &'static str {
 fn wasm_type(wasm: &WasmType) -> &'static str {
     match wasm {
         WasmType::I32 => "int32_t",
+        WasmType::I64 => "int64_t",
+        WasmType::F32 => "float",
+        WasmType::F64 => "double",
+    }
+}
+
+fn wasm_arg_type(wasm: &WasmType) -> &'static str {
+    match wasm {
+        WasmType::I32 => "intptr_t",
         WasmType::I64 => "int64_t",
         WasmType::F32 => "float",
         WasmType::F64 => "double",

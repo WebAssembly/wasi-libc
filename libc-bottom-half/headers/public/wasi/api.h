@@ -1,9 +1,13 @@
 /**
- * <wasi/api.h>. This file contains declarations describing the WASI ABI
- * as of "snapshot preview1". It was originally auto-generated from
- * wasi_snapshot_preview1.witx, however WASI is in the process of
- * transitioning to a new IDL and header file generator, and this file
- * is temporarily being manually maintained.
+ * THIS FILE IS AUTO-GENERATED from the following files:
+ *   wasi_snapshot_preview1.witx
+ *
+ * To regenerate this file execute:
+ *
+ *     cargo run --manifest-path tools/wasi-headers/Cargo.toml generate-libc
+ *
+ * Modifications to this file will cause CI to fail, the code generator tool
+ * must be modified to change this file.
  *
  * @file
  * This file describes the [WASI] interface, consisting of functions, types,
@@ -34,6 +38,7 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
+_Static_assert(_Alignof(void*) == sizeof(uintptr_t), "non-wasi data layout");
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,21 +48,18 @@ extern "C" {
 #define __WASI_DIRCOOKIE_START (UINT64_C(0))
 typedef __SIZE_TYPE__ __wasi_size_t;
 
+
 /**
  * Non-negative file size or length of a region within a file.
  */
 typedef uint64_t __wasi_filesize_t;
 
-_Static_assert(sizeof(__wasi_filesize_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_filesize_t) == 8, "witx calculated align");
 
 /**
  * Timestamp in nanoseconds.
  */
 typedef uint64_t __wasi_timestamp_t;
 
-_Static_assert(sizeof(__wasi_timestamp_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_timestamp_t) == 8, "witx calculated align");
 
 /**
  * Identifiers for clocks.
@@ -88,8 +90,6 @@ typedef uint32_t __wasi_clockid_t;
  */
 #define __WASI_CLOCKID_THREAD_CPUTIME_ID (UINT32_C(3))
 
-_Static_assert(sizeof(__wasi_clockid_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_clockid_t) == 4, "witx calculated align");
 
 /**
  * Error codes returned by functions.
@@ -484,8 +484,6 @@ typedef uint16_t __wasi_errno_t;
  */
 #define __WASI_ERRNO_NOTCAPABLE (UINT16_C(76))
 
-_Static_assert(sizeof(__wasi_errno_t) == 2, "witx calculated size");
-_Static_assert(_Alignof(__wasi_errno_t) == 2, "witx calculated align");
 
 /**
  * File descriptor rights, determining which actions may be performed.
@@ -659,8 +657,6 @@ typedef uint64_t __wasi_rights_t;
  */
 typedef int __wasi_fd_t;
 
-_Static_assert(sizeof(__wasi_fd_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_fd_t) == 4, "witx calculated align");
 
 /**
  * A region of memory for scatter/gather reads.
@@ -678,10 +674,6 @@ typedef struct __wasi_iovec_t {
 
 } __wasi_iovec_t;
 
-_Static_assert(sizeof(__wasi_iovec_t) == sizeof(uint8_t*)*2, "witx calculated size");
-_Static_assert(_Alignof(__wasi_iovec_t) == sizeof(uint8_t*), "witx calculated align");
-_Static_assert(offsetof(__wasi_iovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_iovec_t, buf_len) == sizeof(uint8_t*), "witx calculated offset");
 
 /**
  * A region of memory for scatter/gather writes.
@@ -690,7 +682,7 @@ typedef struct __wasi_ciovec_t {
     /**
      * The address of the buffer to be written.
      */
-    const uint8_t * buf;
+    uint8_t const * buf;
 
     /**
      * The length of the buffer to be written.
@@ -699,18 +691,12 @@ typedef struct __wasi_ciovec_t {
 
 } __wasi_ciovec_t;
 
-_Static_assert(sizeof(__wasi_ciovec_t) == sizeof(uint8_t*)*2, "witx calculated size");
-_Static_assert(_Alignof(__wasi_ciovec_t) == sizeof(uint8_t*), "witx calculated align");
-_Static_assert(offsetof(__wasi_ciovec_t, buf) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_ciovec_t, buf_len) == sizeof(uint8_t*), "witx calculated offset");
 
 /**
  * Relative offset within a file.
  */
 typedef int64_t __wasi_filedelta_t;
 
-_Static_assert(sizeof(__wasi_filedelta_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_filedelta_t) == 8, "witx calculated align");
 
 /**
  * The position relative to which to set the offset of the file descriptor.
@@ -732,8 +718,6 @@ typedef uint8_t __wasi_whence_t;
  */
 #define __WASI_WHENCE_END (UINT8_C(2))
 
-_Static_assert(sizeof(__wasi_whence_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_whence_t) == 1, "witx calculated align");
 
 /**
  * A reference to the offset of a directory entry.
@@ -742,24 +726,18 @@ _Static_assert(_Alignof(__wasi_whence_t) == 1, "witx calculated align");
  */
 typedef uint64_t __wasi_dircookie_t;
 
-_Static_assert(sizeof(__wasi_dircookie_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_dircookie_t) == 8, "witx calculated align");
 
 /**
  * The type for the `dirent::d_namlen` field of `dirent` struct.
  */
 typedef uint32_t __wasi_dirnamlen_t;
 
-_Static_assert(sizeof(__wasi_dirnamlen_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_dirnamlen_t) == 4, "witx calculated align");
 
 /**
  * File serial number that is unique within its file system.
  */
 typedef uint64_t __wasi_inode_t;
 
-_Static_assert(sizeof(__wasi_inode_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_inode_t) == 8, "witx calculated align");
 
 /**
  * The type of a file descriptor or file.
@@ -806,8 +784,6 @@ typedef uint8_t __wasi_filetype_t;
  */
 #define __WASI_FILETYPE_SYMBOLIC_LINK (UINT8_C(7))
 
-_Static_assert(sizeof(__wasi_filetype_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_filetype_t) == 1, "witx calculated align");
 
 /**
  * A directory entry.
@@ -835,12 +811,6 @@ typedef struct __wasi_dirent_t {
 
 } __wasi_dirent_t;
 
-_Static_assert(sizeof(__wasi_dirent_t) == 24, "witx calculated size");
-_Static_assert(_Alignof(__wasi_dirent_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_dirent_t, d_next) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_dirent_t, d_ino) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_dirent_t, d_namlen) == 16, "witx calculated offset");
-_Static_assert(offsetof(__wasi_dirent_t, d_type) == 20, "witx calculated offset");
 
 /**
  * File or memory access pattern advisory information.
@@ -877,8 +847,6 @@ typedef uint8_t __wasi_advice_t;
  */
 #define __WASI_ADVICE_NOREUSE (UINT8_C(5))
 
-_Static_assert(sizeof(__wasi_advice_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_advice_t) == 1, "witx calculated align");
 
 /**
  * File descriptor flags.
@@ -939,12 +907,6 @@ typedef struct __wasi_fdstat_t {
 
 } __wasi_fdstat_t;
 
-_Static_assert(sizeof(__wasi_fdstat_t) == 24, "witx calculated size");
-_Static_assert(_Alignof(__wasi_fdstat_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_fdstat_t, fs_filetype) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_fdstat_t, fs_flags) == 2, "witx calculated offset");
-_Static_assert(offsetof(__wasi_fdstat_t, fs_rights_base) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_fdstat_t, fs_rights_inheriting) == 16, "witx calculated offset");
 
 /**
  * Identifier for a device containing a file system. Can be used in combination
@@ -952,8 +914,6 @@ _Static_assert(offsetof(__wasi_fdstat_t, fs_rights_inheriting) == 16, "witx calc
  */
 typedef uint64_t __wasi_device_t;
 
-_Static_assert(sizeof(__wasi_device_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_device_t) == 8, "witx calculated align");
 
 /**
  * Which file time attributes to adjust.
@@ -1020,8 +980,6 @@ typedef uint16_t __wasi_oflags_t;
  */
 typedef uint64_t __wasi_linkcount_t;
 
-_Static_assert(sizeof(__wasi_linkcount_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_linkcount_t) == 8, "witx calculated align");
 
 /**
  * File attributes.
@@ -1069,16 +1027,6 @@ typedef struct __wasi_filestat_t {
 
 } __wasi_filestat_t;
 
-_Static_assert(sizeof(__wasi_filestat_t) == 64, "witx calculated size");
-_Static_assert(_Alignof(__wasi_filestat_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_filestat_t, dev) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_filestat_t, ino) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_filestat_t, filetype) == 16, "witx calculated offset");
-_Static_assert(offsetof(__wasi_filestat_t, nlink) == 24, "witx calculated offset");
-_Static_assert(offsetof(__wasi_filestat_t, size) == 32, "witx calculated offset");
-_Static_assert(offsetof(__wasi_filestat_t, atim) == 40, "witx calculated offset");
-_Static_assert(offsetof(__wasi_filestat_t, mtim) == 48, "witx calculated offset");
-_Static_assert(offsetof(__wasi_filestat_t, ctim) == 56, "witx calculated offset");
 
 /**
  * User-provided value that may be attached to objects that is retained when
@@ -1086,8 +1034,6 @@ _Static_assert(offsetof(__wasi_filestat_t, ctim) == 56, "witx calculated offset"
  */
 typedef uint64_t __wasi_userdata_t;
 
-_Static_assert(sizeof(__wasi_userdata_t) == 8, "witx calculated size");
-_Static_assert(_Alignof(__wasi_userdata_t) == 8, "witx calculated align");
 
 /**
  * Type of a subscription to an event or its occurrence.
@@ -1112,8 +1058,6 @@ typedef uint8_t __wasi_eventtype_t;
  */
 #define __WASI_EVENTTYPE_FD_WRITE (UINT8_C(2))
 
-_Static_assert(sizeof(__wasi_eventtype_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_eventtype_t) == 1, "witx calculated align");
 
 /**
  * The state of the file descriptor subscribed to with
@@ -1143,10 +1087,6 @@ typedef struct __wasi_event_fd_readwrite_t {
 
 } __wasi_event_fd_readwrite_t;
 
-_Static_assert(sizeof(__wasi_event_fd_readwrite_t) == 16, "witx calculated size");
-_Static_assert(_Alignof(__wasi_event_fd_readwrite_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_event_fd_readwrite_t, nbytes) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_event_fd_readwrite_t, flags) == 8, "witx calculated offset");
 
 /**
  * An event that occurred.
@@ -1175,12 +1115,6 @@ typedef struct __wasi_event_t {
 
 } __wasi_event_t;
 
-_Static_assert(sizeof(__wasi_event_t) == 32, "witx calculated size");
-_Static_assert(_Alignof(__wasi_event_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_event_t, userdata) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_event_t, error) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_event_t, type) == 10, "witx calculated offset");
-_Static_assert(offsetof(__wasi_event_t, fd_readwrite) == 16, "witx calculated offset");
 
 /**
  * Flags determining how to interpret the timestamp provided in
@@ -1224,12 +1158,6 @@ typedef struct __wasi_subscription_clock_t {
 
 } __wasi_subscription_clock_t;
 
-_Static_assert(sizeof(__wasi_subscription_clock_t) == 32, "witx calculated size");
-_Static_assert(_Alignof(__wasi_subscription_clock_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_subscription_clock_t, id) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_subscription_clock_t, timeout) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_subscription_clock_t, precision) == 16, "witx calculated offset");
-_Static_assert(offsetof(__wasi_subscription_clock_t, flags) == 24, "witx calculated offset");
 
 /**
  * The contents of a `subscription` when type is type is
@@ -1243,9 +1171,6 @@ typedef struct __wasi_subscription_fd_readwrite_t {
 
 } __wasi_subscription_fd_readwrite_t;
 
-_Static_assert(sizeof(__wasi_subscription_fd_readwrite_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_subscription_fd_readwrite_t) == 4, "witx calculated align");
-_Static_assert(offsetof(__wasi_subscription_fd_readwrite_t, file_descriptor) == 0, "witx calculated offset");
 
 /**
  * The contents of a `subscription`.
@@ -1260,8 +1185,6 @@ typedef struct __wasi_subscription_u_t {
     __wasi_subscription_u_u_t u;
 } __wasi_subscription_u_t;
 
-_Static_assert(sizeof(__wasi_subscription_u_t) == 40, "witx calculated size");
-_Static_assert(_Alignof(__wasi_subscription_u_t) == 8, "witx calculated align");
 
 /**
  * Subscription to an event.
@@ -1280,18 +1203,204 @@ typedef struct __wasi_subscription_t {
 
 } __wasi_subscription_t;
 
-_Static_assert(sizeof(__wasi_subscription_t) == 48, "witx calculated size");
-_Static_assert(_Alignof(__wasi_subscription_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_subscription_t, userdata) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_subscription_t, u) == 8, "witx calculated offset");
 
 /**
  * Exit code generated by a process when exiting.
  */
 typedef uint32_t __wasi_exitcode_t;
 
-_Static_assert(sizeof(__wasi_exitcode_t) == 4, "witx calculated size");
-_Static_assert(_Alignof(__wasi_exitcode_t) == 4, "witx calculated align");
+
+/**
+ * Signal condition.
+ */
+typedef uint8_t __wasi_signal_t;
+
+/**
+ * No signal. Note that POSIX has special semantics for `kill(pid, 0)`,
+ * so this value is reserved.
+ */
+#define __WASI_SIGNAL_NONE (UINT8_C(0))
+
+/**
+ * Hangup.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_HUP (UINT8_C(1))
+
+/**
+ * Terminate interrupt signal.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_INT (UINT8_C(2))
+
+/**
+ * Terminal quit signal.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_QUIT (UINT8_C(3))
+
+/**
+ * Illegal instruction.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_ILL (UINT8_C(4))
+
+/**
+ * Trace/breakpoint trap.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_TRAP (UINT8_C(5))
+
+/**
+ * Process abort signal.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_ABRT (UINT8_C(6))
+
+/**
+ * Access to an undefined portion of a memory object.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_BUS (UINT8_C(7))
+
+/**
+ * Erroneous arithmetic operation.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_FPE (UINT8_C(8))
+
+/**
+ * Kill.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_KILL (UINT8_C(9))
+
+/**
+ * User-defined signal 1.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_USR1 (UINT8_C(10))
+
+/**
+ * Invalid memory reference.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_SEGV (UINT8_C(11))
+
+/**
+ * User-defined signal 2.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_USR2 (UINT8_C(12))
+
+/**
+ * Write on a pipe with no one to read it.
+ * Action: Ignored.
+ */
+#define __WASI_SIGNAL_PIPE (UINT8_C(13))
+
+/**
+ * Alarm clock.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_ALRM (UINT8_C(14))
+
+/**
+ * Termination signal.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_TERM (UINT8_C(15))
+
+/**
+ * Child process terminated, stopped, or continued.
+ * Action: Ignored.
+ */
+#define __WASI_SIGNAL_CHLD (UINT8_C(16))
+
+/**
+ * Continue executing, if stopped.
+ * Action: Continues executing, if stopped.
+ */
+#define __WASI_SIGNAL_CONT (UINT8_C(17))
+
+/**
+ * Stop executing.
+ * Action: Stops executing.
+ */
+#define __WASI_SIGNAL_STOP (UINT8_C(18))
+
+/**
+ * Terminal stop signal.
+ * Action: Stops executing.
+ */
+#define __WASI_SIGNAL_TSTP (UINT8_C(19))
+
+/**
+ * Background process attempting read.
+ * Action: Stops executing.
+ */
+#define __WASI_SIGNAL_TTIN (UINT8_C(20))
+
+/**
+ * Background process attempting write.
+ * Action: Stops executing.
+ */
+#define __WASI_SIGNAL_TTOU (UINT8_C(21))
+
+/**
+ * High bandwidth data is available at a socket.
+ * Action: Ignored.
+ */
+#define __WASI_SIGNAL_URG (UINT8_C(22))
+
+/**
+ * CPU time limit exceeded.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_XCPU (UINT8_C(23))
+
+/**
+ * File size limit exceeded.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_XFSZ (UINT8_C(24))
+
+/**
+ * Virtual timer expired.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_VTALRM (UINT8_C(25))
+
+/**
+ * Profiling timer expired.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_PROF (UINT8_C(26))
+
+/**
+ * Window changed.
+ * Action: Ignored.
+ */
+#define __WASI_SIGNAL_WINCH (UINT8_C(27))
+
+/**
+ * I/O possible.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_POLL (UINT8_C(28))
+
+/**
+ * Power failure.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_PWR (UINT8_C(29))
+
+/**
+ * Bad system call.
+ * Action: Terminates the process.
+ */
+#define __WASI_SIGNAL_SYS (UINT8_C(30))
+
 
 /**
  * Flags provided to `sock_recv`.
@@ -1324,8 +1433,6 @@ typedef uint16_t __wasi_roflags_t;
  */
 typedef uint16_t __wasi_siflags_t;
 
-_Static_assert(sizeof(__wasi_siflags_t) == 2, "witx calculated size");
-_Static_assert(_Alignof(__wasi_siflags_t) == 2, "witx calculated align");
 
 /**
  * Which channels on a socket to shut down.
@@ -1352,8 +1459,6 @@ typedef uint8_t __wasi_preopentype_t;
  */
 #define __WASI_PREOPENTYPE_DIR (UINT8_C(0))
 
-_Static_assert(sizeof(__wasi_preopentype_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_preopentype_t) == 1, "witx calculated align");
 
 /**
  * The contents of a $prestat when type is `preopentype::dir`.
@@ -1366,9 +1471,6 @@ typedef struct __wasi_prestat_dir_t {
 
 } __wasi_prestat_dir_t;
 
-_Static_assert(sizeof(__wasi_prestat_dir_t) == sizeof(__wasi_size_t), "witx calculated size");
-_Static_assert(_Alignof(__wasi_prestat_dir_t) == sizeof(__wasi_size_t), "witx calculated align");
-_Static_assert(offsetof(__wasi_prestat_dir_t, pr_name_len) == 0, "witx calculated offset");
 
 /**
  * Information about a pre-opened capability.
@@ -1381,8 +1483,6 @@ typedef struct __wasi_prestat_t {
     __wasi_prestat_u_t u;
 } __wasi_prestat_t;
 
-_Static_assert(sizeof(__wasi_prestat_t) == sizeof(__wasi_size_t)*2, "witx calculated size");
-_Static_assert(_Alignof(__wasi_prestat_t) == sizeof(__wasi_size_t), "witx calculated align");
 
 /**
  * @defgroup wasi_snapshot_preview1
@@ -1590,7 +1690,7 @@ __wasi_errno_t __wasi_fd_pread(
     /**
      * List of scatter/gather vectors in which to store data.
      */
-    const __wasi_iovec_t *iovs,
+    __wasi_iovec_t const *iovs,
     /**
      * The length of the array pointed to by `iovs`.
      */
@@ -1632,7 +1732,7 @@ __wasi_errno_t __wasi_fd_pwrite(
     /**
      * List of scatter/gather vectors from which to retrieve data.
      */
-    const __wasi_ciovec_t *iovs,
+    __wasi_ciovec_t const *iovs,
     /**
      * The length of the array pointed to by `iovs`.
      */
@@ -1654,7 +1754,7 @@ __wasi_errno_t __wasi_fd_read(
     /**
      * List of scatter/gather vectors to which to store data.
      */
-    const __wasi_iovec_t *iovs,
+    __wasi_iovec_t const *iovs,
     /**
      * The length of the array pointed to by `iovs`.
      */
@@ -1748,7 +1848,7 @@ __wasi_errno_t __wasi_fd_write(
     /**
      * List of scatter/gather vectors from which to retrieve data.
      */
-    const __wasi_ciovec_t *iovs,
+    __wasi_ciovec_t const *iovs,
     /**
      * The length of the array pointed to by `iovs`.
      */
@@ -1764,7 +1864,7 @@ __wasi_errno_t __wasi_path_create_directory(
     /**
      * The path at which to create the directory.
      */
-    const char *path
+    char const *path
 ) __attribute__((__warn_unused_result__));
 /**
  * Return the attributes of a file or directory.
@@ -1781,7 +1881,7 @@ __wasi_errno_t __wasi_path_filestat_get(
     /**
      * The path of the file or directory to inspect.
      */
-    const char *path,
+    char const *path,
     __wasi_filestat_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
@@ -1797,7 +1897,7 @@ __wasi_errno_t __wasi_path_filestat_set_times(
     /**
      * The path of the file or directory to operate on.
      */
-    const char *path,
+    char const *path,
     /**
      * The desired values of the data access timestamp.
      */
@@ -1824,7 +1924,7 @@ __wasi_errno_t __wasi_path_link(
     /**
      * The source path from which to link.
      */
-    const char *old_path,
+    char const *old_path,
     /**
      * The working directory at which the resolution of the new path starts.
      */
@@ -1832,7 +1932,7 @@ __wasi_errno_t __wasi_path_link(
     /**
      * The destination path at which to create the hard link.
      */
-    const char *new_path
+    char const *new_path
 ) __attribute__((__warn_unused_result__));
 /**
  * Open a file or directory.
@@ -1855,7 +1955,7 @@ __wasi_errno_t __wasi_path_open(
      * The relative path of the file or directory to open, relative to the
      * `path_open::fd` directory.
      */
-    const char *path,
+    char const *path,
     /**
      * The method by which to open the file.
      */
@@ -1885,7 +1985,7 @@ __wasi_errno_t __wasi_path_readlink(
     /**
      * The path of the symbolic link from which to read.
      */
-    const char *path,
+    char const *path,
     /**
      * The buffer to which to write the contents of the symbolic link.
      */
@@ -1903,7 +2003,7 @@ __wasi_errno_t __wasi_path_remove_directory(
     /**
      * The path to a directory to remove.
      */
-    const char *path
+    char const *path
 ) __attribute__((__warn_unused_result__));
 /**
  * Rename a file or directory.
@@ -1914,7 +2014,7 @@ __wasi_errno_t __wasi_path_rename(
     /**
      * The source path of the file or directory to rename.
      */
-    const char *old_path,
+    char const *old_path,
     /**
      * The working directory at which the resolution of the new path starts.
      */
@@ -1922,7 +2022,7 @@ __wasi_errno_t __wasi_path_rename(
     /**
      * The destination path to which to rename the file or directory.
      */
-    const char *new_path
+    char const *new_path
 ) __attribute__((__warn_unused_result__));
 /**
  * Create a symbolic link.
@@ -1932,12 +2032,12 @@ __wasi_errno_t __wasi_path_symlink(
     /**
      * The contents of the symbolic link.
      */
-    const char *old_path,
+    char const *old_path,
     __wasi_fd_t fd,
     /**
      * The destination path at which to create the symbolic link.
      */
-    const char *new_path
+    char const *new_path
 ) __attribute__((__warn_unused_result__));
 /**
  * Unlink a file.
@@ -1949,7 +2049,7 @@ __wasi_errno_t __wasi_path_unlink_file(
     /**
      * The path to a file to unlink.
      */
-    const char *path
+    char const *path
 ) __attribute__((__warn_unused_result__));
 /**
  * Concurrently poll for the occurrence of a set of events.
@@ -1960,7 +2060,7 @@ __wasi_errno_t __wasi_poll_oneoff(
     /**
      * The events to which to subscribe.
      */
-    const __wasi_subscription_t * in,
+    __wasi_subscription_t const * in,
     /**
      * The events that have occurred.
      */
@@ -1982,6 +2082,16 @@ _Noreturn void __wasi_proc_exit(
      */
     __wasi_exitcode_t rval
 );
+/**
+ * Send a signal to the process of the calling thread.
+ * Note: This is similar to `raise` in POSIX.
+ */
+__wasi_errno_t __wasi_proc_raise(
+    /**
+     * The signal condition to trigger.
+     */
+    __wasi_signal_t sig
+) __attribute__((__warn_unused_result__));
 /**
  * Temporarily yield execution of the calling thread.
  * Note: This is similar to `sched_yield` in POSIX.
@@ -2033,7 +2143,7 @@ __wasi_errno_t __wasi_sock_recv(
     /**
      * List of scatter/gather vectors to which to store data.
      */
-    const __wasi_iovec_t *ri_data,
+    __wasi_iovec_t const *ri_data,
     /**
      * The length of the array pointed to by `ri_data`.
      */
@@ -2057,7 +2167,7 @@ __wasi_errno_t __wasi_sock_send(
     /**
      * List of scatter/gather vectors to which to retrieve data
      */
-    const __wasi_ciovec_t *si_data,
+    __wasi_ciovec_t const *si_data,
     /**
      * The length of the array pointed to by `si_data`.
      */
@@ -2080,25 +2190,6 @@ __wasi_errno_t __wasi_sock_shutdown(
     __wasi_sdflags_t how
 ) __attribute__((__warn_unused_result__));
 /** @} */
-
-#ifdef _REENTRANT
-/**
- * Request a new thread to be created by the host.
- *
- * The host will create a new instance of the current module sharing its
- * memory, find an exported entry function--`wasi_thread_start`--, and call the
- * entry function with `start_arg` in the new thread.
- *
- * @see https://github.com/WebAssembly/wasi-threads/#readme
- */
-int32_t __wasi_thread_spawn(
-    /**
-     * A pointer to an opaque struct to be passed to the module's entry
-     * function.
-     */
-    void *start_arg
-)  __attribute__((__warn_unused_result__));
-#endif
 
 #ifdef __cplusplus
 }

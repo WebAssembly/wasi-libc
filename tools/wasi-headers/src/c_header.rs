@@ -124,7 +124,7 @@ int32_t __wasi_thread_spawn(
 #endif
 
 #endif
-"#
+"#,
     );
 
     source.push_str(
@@ -138,7 +138,7 @@ int32_t __wasi_thread_spawn(void* start_arg) {
     return (int32_t) __imported_wasi_snapshot_preview2_thread_spawn((uintptr_t) start_arg);
 }
 #endif
-"#
+"#,
     );
 
     Generated { header, source }
@@ -189,18 +189,18 @@ fn print_alias(ret: &mut String, name: &Id, dest: &TypeRef) {
                 ));
             }
             ret.push_str("\n");
-/*
-            ret.push_str(&format!(
-                "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
-                ident_name(name),
-                dest.mem_size_align().size
-            ));
-            ret.push_str(&format!(
-                "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
-                ident_name(name),
-                dest.mem_size_align().align
-            ));
-*/
+            /*
+                        ret.push_str(&format!(
+                            "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
+                            ident_name(name),
+                            dest.mem_size_align().size
+                        ));
+                        ret.push_str(&format!(
+                            "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
+                            ident_name(name),
+                            dest.mem_size_align().align
+                        ));
+            */
             ret.push_str("\n");
         }
     }
@@ -231,18 +231,18 @@ fn print_enum(ret: &mut String, name: &Id, v: &Variant) {
         ));
         ret.push_str("\n");
     }
-/*
-    ret.push_str(&format!(
-        "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
-        ident_name(name),
-        v.tag_repr.mem_size()
-    ));
-    ret.push_str(&format!(
-        "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
-        ident_name(name),
-        v.tag_repr.mem_align()
-    ));
-*/
+    /*
+        ret.push_str(&format!(
+            "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
+            ident_name(name),
+            v.tag_repr.mem_size()
+        ));
+        ret.push_str(&format!(
+            "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
+            ident_name(name),
+            v.tag_repr.mem_align()
+        ));
+    */
     ret.push_str("\n");
 }
 
@@ -313,27 +313,27 @@ fn print_record(ret: &mut String, name: &Id, s: &RecordDatatype) {
 
     ret.push_str(&format!("}} __wasi_{}_t;\n", ident_name(name)));
     ret.push_str("\n");
-/*
-    ret.push_str(&format!(
-        "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
-        ident_name(name),
-        s.mem_size()
-    ));
-    ret.push_str(&format!(
-        "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
-        ident_name(name),
-        s.mem_align()
-    ));
-
-    for layout in s.member_layout() {
+    /*
         ret.push_str(&format!(
-            "_Static_assert(offsetof(__wasi_{}_t, {}) == {}, \"witx calculated offset\");\n",
+            "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
             ident_name(name),
-            ident_name(&layout.member.name),
-            layout.offset
+            s.mem_size()
         ));
-    }
-*/
+        ret.push_str(&format!(
+            "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
+            ident_name(name),
+            s.mem_align()
+        ));
+
+        for layout in s.member_layout() {
+            ret.push_str(&format!(
+                "_Static_assert(offsetof(__wasi_{}_t, {}) == {}, \"witx calculated offset\");\n",
+                ident_name(name),
+                ident_name(&layout.member.name),
+                layout.offset
+            ));
+        }
+    */
     ret.push_str("\n");
 }
 
@@ -374,35 +374,35 @@ fn print_variant(ret: &mut String, name: &Id, v: &Variant) {
 
     ret.push_str(&format!("}} __wasi_{}_t;\n", ident_name(name)));
     ret.push_str("\n");
-/*
-    ret.push_str(&format!(
-        "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
-        ident_name(name),
-        v.mem_size()
-    ));
-    ret.push_str(&format!(
-        "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
-        ident_name(name),
-        v.mem_align()
-    ));
-*/
+    /*
+        ret.push_str(&format!(
+            "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
+            ident_name(name),
+            v.mem_size()
+        ));
+        ret.push_str(&format!(
+            "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
+            ident_name(name),
+            v.mem_align()
+        ));
+    */
     ret.push_str("\n");
 }
 
 fn print_handle(ret: &mut String, name: &Id, _h: &HandleDatatype) {
     ret.push_str(&format!("typedef int __wasi_{}_t;\n\n", ident_name(name)));
-/*
-    ret.push_str(&format!(
-        "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
-        ident_name(name),
-        h.mem_size()
-    ));
-    ret.push_str(&format!(
-        "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
-        ident_name(name),
-        h.mem_align()
-    ));
-*/
+    /*
+        ret.push_str(&format!(
+            "_Static_assert(sizeof(__wasi_{}_t) == {}, \"witx calculated size\");\n",
+            ident_name(name),
+            h.mem_size()
+        ));
+        ret.push_str(&format!(
+            "_Static_assert(_Alignof(__wasi_{}_t) == {}, \"witx calculated align\");\n",
+            ident_name(name),
+            h.mem_align()
+        ));
+    */
     ret.push_str("\n");
 }
 
@@ -516,44 +516,50 @@ fn c_typeref_name(tref: &TypeRef, wtp: &witx::WasmType) -> String {
     }
 }
 
-fn print_c_typeref_casting_names(ret: &mut String, func: &InterfaceFunc, signparams: &std::vec::Vec<witx::WasmType>, casting: bool) {
+fn print_c_typeref_casting_names(
+    ret: &mut String,
+    func: &InterfaceFunc,
+    signparams: &std::vec::Vec<witx::WasmType>,
+    casting: bool,
+) {
     let mut iszero = true;
     let mut j = 0;
     for param in func.params.iter() {
         if iszero {
             iszero = false
-        }
-        else {
+        } else {
             ret.push_str(", ");
         }
         let identifiername = ident_name(&param.name);
         match &**param.tref.type_() {
-            Type::List(_)=> {
+            Type::List(_) => {
                 if casting {
-                    ret.push_str(&format!("(uintptr_t) {0}, (__wasi_size_t) {0}_len",&identifiername));
-                }
-                else {
+                    ret.push_str(&format!(
+                        "(uintptr_t) {0}, (__wasi_size_t) {0}_len",
+                        &identifiername
+                    ));
+                } else {
                     ret.push_str("uintptr_t, __wasi_size_t");
                 }
                 j = j + 2;
-            },
+            }
             _ => {
                 // Fix around buf_len which is incorrectly marked uint32_t in metadata
                 if identifiername.ends_with("_len") {
                     if casting {
-                        ret.push_str(&format!("(__wasi_size_t) {}",&identifiername));
-                    }
-                    else {
+                        ret.push_str(&format!("(__wasi_size_t) {}", &identifiername));
+                    } else {
                         ret.push_str("__wasi_size_t");
                     }
-                }
-                else
-                {
+                } else {
                     if casting {
-                        ret.push_str(&format!("({}) {}",c_typeref_name(&param.tref,&signparams[j]),&identifiername));
-                    }
-                    else {
-                        ret.push_str(&c_typeref_name(&param.tref,&signparams[j]));
+                        ret.push_str(&format!(
+                            "({}) {}",
+                            c_typeref_name(&param.tref, &signparams[j]),
+                            &identifiername
+                        ));
+                    } else {
+                        ret.push_str(&c_typeref_name(&param.tref, &signparams[j]));
                     }
                 }
                 j = j + 1;
@@ -561,8 +567,7 @@ fn print_c_typeref_casting_names(ret: &mut String, func: &InterfaceFunc, signpar
         }
     }
     match func.results.len() {
-        0 => {
-        }
+        0 => {}
         1 => {
             assert!(!func.noreturn);
 
@@ -578,17 +583,15 @@ fn print_c_typeref_casting_names(ret: &mut String, func: &InterfaceFunc, signpar
                     };
                     match &**ok.type_() {
                         Type::Record(r) if r.is_tuple() => {
-                            for (i,_) in r.members.iter().enumerate() {
+                            for (i, _) in r.members.iter().enumerate() {
                                 if iszero {
                                     iszero = false
-                                }
-                                else {
+                                } else {
                                     ret.push_str(", ");
                                 }
                                 if casting {
-                                    ret.push_str(&format!("(uintptr_t) retptr{}",i));
-                                }
-                                else {                           
+                                    ret.push_str(&format!("(uintptr_t) retptr{}", i));
+                                } else {
                                     ret.push_str("uintptr_t");
                                 }
                             }
@@ -599,11 +602,9 @@ fn print_c_typeref_casting_names(ret: &mut String, func: &InterfaceFunc, signpar
                             }
                             if casting {
                                 ret.push_str("(uintptr_t) retptr0");
-                            }
-                            else {                           
+                            } else {
                                 ret.push_str("uintptr_t");
                             }
-
                         }
                     }
                 }
@@ -614,11 +615,19 @@ fn print_c_typeref_casting_names(ret: &mut String, func: &InterfaceFunc, signpar
     }
 }
 
-fn print_c_typeref_names(ret: &mut String, func: &InterfaceFunc, signparams: &std::vec::Vec<witx::WasmType>) {
+fn print_c_typeref_names(
+    ret: &mut String,
+    func: &InterfaceFunc,
+    signparams: &std::vec::Vec<witx::WasmType>,
+) {
     (print_c_typeref_casting_names(ret, func, signparams, false));
 }
 
-fn print_c_casting_names(ret: &mut String, func: &InterfaceFunc, signparams: &std::vec::Vec<witx::WasmType>) {
+fn print_c_casting_names(
+    ret: &mut String,
+    func: &InterfaceFunc,
+    signparams: &std::vec::Vec<witx::WasmType>,
+) {
     (print_c_typeref_casting_names(ret, func, signparams, true));
 }
 
@@ -679,7 +688,7 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
     ret.push_str("_");
     ret.push_str(&ident_name(&func.name));
     ret.push_str("(");
-    print_c_casting_names(ret,func,&params);
+    print_c_casting_names(ret, func, &params);
     ret.push_str(");\n}\n\n");
 }
 

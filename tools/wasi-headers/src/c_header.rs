@@ -473,8 +473,94 @@ fn print_func_signature(ret: &mut String, func: &InterfaceFunc, header: bool) {
     ret.push_str(")");
 }
 
+fn c_typeref_name(tref: &TypeRef) -> String {
+    match &**tref.type_() {
+        Type::List(_)=> {
+            return "__wasi_size_t,__wasi_size_t".to_string();
+        },
+        _ => {}
+    }
+
+    match tref {
+        TypeRef::Name(named_type) => namedtype_name(&named_type),
+        TypeRef::Value(anon_type) => match &**anon_type {
+            Type::List(_) => unreachable!("arrays excluded above"),
+            Type::Builtin(b) => builtin_type_name(*b).to_string(),
+            Type::Pointer(_) => "__wasi_size_t".to_string(),
+            Type::ConstPointer(_) => "__wasi_size_t".to_string(),
+            Type::Record { .. } | Type::Variant { .. } | Type::Handle { .. } => unreachable!(
+                "wasi should not have anonymous structs, unions, enums, flags, handles"
+            ),
+        },
+    }
+}
+
+fn print_c_typeref_names(ret: &mut String, func: &InterfaceFunc)
+{
+    let mut params = Vec::new();
+    for param in func.params.iter() {
+        add_params(
+            &mut params,
+            &ident_name(&param.name),
+            &param.tref,
+            &param.docs,
+        );
+    }
+    let mut iszero = true;
+    for param in func.params.iter() {
+        if iszero {
+            iszero = false
+        }
+        else {
+            ret.push_str(", ");
+        }
+        ret.push_str(&c_typeref_name(&param.tref));
+    }
+    match func.results.len() {
+        0 => {
+        }
+        1 => {
+            assert!(!func.noreturn);
+
+            match &**func.results[0].tref.type_() {
+                Type::Variant(v) => {
+                    let _err = match &v.cases[1].tref {
+                        Some(ty) => ty,
+                        None => panic!("unsupported type as a return value"),
+                    };
+                    let ok = match &v.cases[0].tref {
+                        Some(ty) => ty,
+                        None => return,
+                    };
+                    match &**ok.type_() {
+                        Type::Record(r) if r.is_tuple() => {
+                            for _ in r.members.iter() {
+                                if iszero {
+                                    iszero = false
+                                }
+                                else {
+                                    ret.push_str(", ");
+                                }
+                                ret.push_str("__wasi_size_t");
+                            }
+                        }
+                        _ => {
+                            if !iszero {
+                                ret.push_str(", ");
+                            }
+                            ret.push_str("__wasi_size_t");
+                        }
+                    }
+                }
+                _ => panic!("unsupported type as a return value"),
+            }
+        }
+        _ => panic!("unsupported number of return values"),
+    }
+}
+
 fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
-    let (params, results) = func.wasm_signature();
+    let (_, results) = func.wasm_signature();
 
     if func.noreturn {
         ret.push_str("_Noreturn ");
@@ -493,13 +579,8 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
     ret.push_str("_");
     ret.push_str(&ident_name(&func.name));
     ret.push_str("(");
-    for (i, param) in params.iter().enumerate() {
-        if i > 0 {
-            ret.push_str(", ");
-        }
-        ret.push_str(wasm_arg_type(param));
-        ret.push_str(&format!(" arg{}", i));
-    }
+    print_c_typeref_names(ret, func);
+
     ret.push_str(") __attribute__((\n");
     ret.push_str(&format!(
         "    __import_module__(\"{}\"),\n",
@@ -629,15 +710,15 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
 
                 Instruction::ListPointerLength => {
                     let list = operands.pop().unwrap();
-                    results.push(format!("(intptr_t) {}", list));
-                    results.push(format!("(intptr_t) {}_len", list));
+                    results.push(format!("{}", list));
+                    results.push(format!("{}_len", list));
                 }
                 Instruction::ReturnPointerGet { n } => {
                     // We currently match the wasi ABI with the actual
                     // function's API signature in C, this means when a return
                     // pointer is asked for we can simply forward our parameter
                     // that's a return pointer.
-                    results.push(format!("(intptr_t) retptr{}", n));
+                    results.push(format!("retptr{}", n));
                 }
 
                 Instruction::Load { .. } => {
@@ -863,15 +944,6 @@ fn intrepr_const(i: IntRepr) -> &'static str {
 fn wasm_type(wasm: &WasmType) -> &'static str {
     match wasm {
         WasmType::I32 => "int32_t",
-        WasmType::I64 => "int64_t",
-        WasmType::F32 => "float",
-        WasmType::F64 => "double",
-    }
-}
-
-fn wasm_arg_type(wasm: &WasmType) -> &'static str {
-    match wasm {
-        WasmType::I32 => "intptr_t",
         WasmType::I64 => "int64_t",
         WasmType::F32 => "float",
         WasmType::F64 => "double",

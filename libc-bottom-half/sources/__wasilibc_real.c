@@ -632,7 +632,7 @@ uint32_t __imported_wasi_snapshot_preview2_thread_spawn(uintptr_t arg0) __attrib
     __import_name__("thread_spawn")
 ));
 
-__wasi_errno_t __wasi_thread_spawn(void* start_arg) {
-    return (__wasi_errno_t) __imported_wasi_snapshot_preview2_thread_spawn((uintptr_t) start_arg);
+int32_t __wasi_thread_spawn(void* start_arg) {
+    return (int32_t) __imported_wasi_snapshot_preview2_thread_spawn((uintptr_t) start_arg);
 }
 #endif

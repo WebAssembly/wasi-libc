@@ -22,6 +22,8 @@ BUILD_LIBC_TOP_HALF ?= yes
 # The directory where we will store intermediate artifacts.
 OBJDIR ?= build/$(TARGET_TRIPLE)
 
+BUILD_WASI64 ?= no
+
 # When the length is no larger than this threshold, we consider the
 # overhead of bulk memory opcodes to outweigh the performance benefit,
 # and fall back to the original musl implementation. See
@@ -33,12 +35,20 @@ BULK_MEMORY_THRESHOLD ?= 32
 # make command-line.
 
 # Set the default WASI target triple.
+ifeq (${BUILD_WASI64}, yes)
+TARGET_TRIPLE = wasm64-wasi
+else
 TARGET_TRIPLE = wasm32-wasi
+endif
 
 # Threaded version necessitates a different traget, as objects from different
 # targets can't be mixed together while linking.
 ifeq ($(THREAD_MODEL), posix)
-TARGET_TRIPLE = wasm32-wasi-threads
+    ifeq (${BUILD_WASI64}, yes)
+        TARGET_TRIPLE = wasm64-wasi-threads
+    else
+        TARGET_TRIPLE = wasm32-wasi-threads
+    endif
 endif
 
 BUILTINS_LIB ?= $(shell ${CC} --print-libgcc-file-name)
@@ -197,6 +207,15 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
 
 ifeq ($(THREAD_MODEL), posix)
+
+
+ifeq (${BUILD_WASI64}, yes)
+WASM_THREAD_ASM_FILE = thread/wasm64/wasi_thread_start.s
+else
+WASM_THREAD_ASM_FILE = thread/wasm32/wasi_thread_start.s
+endif
+
+
 LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
         env/__init_tls.c \
@@ -277,7 +296,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/sem_timedwait.c \
         thread/sem_trywait.c \
         thread/sem_wait.c \
-        thread/wasm32/wasi_thread_start.s \
+        ${WASM_THREAD_ASM_FILE} \
     )
 endif
 

@@ -1,6 +1,5 @@
 use heck::ShoutySnakeCase;
 use std::collections::HashMap;
-use std::mem;
 use witx::*;
 
 pub struct Generated {
@@ -105,12 +104,45 @@ extern "C" {{
     }
 
     header.push_str(
-        r#"#ifdef __cplusplus
+        r#"#ifdef _REENTRANT
+/**
+    * Request a new thread to be created by the host.
+    *
+    * The host will create a new instance of the current module sharing its
+    * memory, find an exported entry function--`wasi_thread_start`--, and call the
+    * entry function with `start_arg` in the new thread.
+    *
+    * @see https://github.com/WebAssembly/wasi-threads/#readme
+    */
+__wasi_errno_t __wasi_thread_spawn(
+    /**
+        * A pointer to an opaque struct to be passed to the module's entry
+        * function.
+        */
+    void *start_arg
+)  __attribute__((__warn_unused_result__));
+#endif
+
+#ifdef __cplusplus
 }
 #endif
 
 #endif
-"#,
+"#
+    );
+
+    source.push_str(
+        r#"#ifdef _REENTRANT
+uint32_t __imported_wasi_snapshot_preview2_thread_spawn(uintptr_t arg0) __attribute__((
+    __import_module__("wasi_snapshot_preview2"),
+    __import_name__("thread_spawn")
+));
+
+__wasi_errno_t __wasi_thread_spawn(void* start_arg) {
+    return (__wasi_errno_t) __imported_wasi_snapshot_preview2_thread_spawn((uintptr_t) start_arg);
+}
+#endif
+"#
     );
 
     Generated { header, source }
@@ -473,21 +505,14 @@ fn print_func_signature(ret: &mut String, func: &InterfaceFunc, header: bool) {
     ret.push_str(")");
 }
 
-fn c_typeref_name(tref: &TypeRef) -> String {
-    match &**tref.type_() {
-        Type::List(_)=> {
-            return "__wasi_size_t,__wasi_size_t".to_string();
-        },
-        _ => {}
-    }
-
+fn c_typeref_name(tref: &TypeRef, wtp: &witx::WasmType) -> String {
     match tref {
-        TypeRef::Name(named_type) => namedtype_name(&named_type),
+        TypeRef::Name(_) => c_wasm_type(wtp).to_string(),
         TypeRef::Value(anon_type) => match &**anon_type {
             Type::List(_) => unreachable!("arrays excluded above"),
             Type::Builtin(b) => builtin_type_name(*b).to_string(),
-            Type::Pointer(_) => "__wasi_size_t".to_string(),
-            Type::ConstPointer(_) => "__wasi_size_t".to_string(),
+            Type::Pointer(_) => "uintptr_t".to_string(),
+            Type::ConstPointer(_) => "uintptr_t".to_string(),
             Type::Record { .. } | Type::Variant { .. } | Type::Handle { .. } => unreachable!(
                 "wasi should not have anonymous structs, unions, enums, flags, handles"
             ),
@@ -495,18 +520,9 @@ fn c_typeref_name(tref: &TypeRef) -> String {
     }
 }
 
-fn print_c_typeref_names(ret: &mut String, func: &InterfaceFunc)
-{
-    let mut params = Vec::new();
-    for param in func.params.iter() {
-        add_params(
-            &mut params,
-            &ident_name(&param.name),
-            &param.tref,
-            &param.docs,
-        );
-    }
+fn print_c_typeref_casting_names(ret: &mut String, func: &InterfaceFunc, signparams: &std::vec::Vec<witx::WasmType>, casting: bool) {
     let mut iszero = true;
+    let mut j = 0;
     for param in func.params.iter() {
         if iszero {
             iszero = false
@@ -514,7 +530,39 @@ fn print_c_typeref_names(ret: &mut String, func: &InterfaceFunc)
         else {
             ret.push_str(", ");
         }
-        ret.push_str(&c_typeref_name(&param.tref));
+        let identifiername = ident_name(&param.name);
+        match &**param.tref.type_() {
+            Type::List(_)=> {
+                if casting {
+                    ret.push_str(&format!("(uintptr_t) {0}, (__wasi_size_t) {0}_len",&identifiername));
+                }
+                else {
+                    ret.push_str("uintptr_t, __wasi_size_t");
+                }
+                j = j + 2;
+            },
+            _ => {
+                // Fix around buf_len which is incorrectly marked uint32_t in metadata
+                if identifiername.ends_with("_len") {
+                    if casting {
+                        ret.push_str(&format!("(__wasi_size_t) {}",&identifiername));
+                    }
+                    else {
+                        ret.push_str("__wasi_size_t");
+                    }
+                }
+                else
+                {
+                    if casting {
+                        ret.push_str(&format!("({}) {}",c_typeref_name(&param.tref,&signparams[j]),&identifiername));
+                    }
+                    else {
+                        ret.push_str(&c_typeref_name(&param.tref,&signparams[j]));
+                    }
+                }
+                j = j + 1;
+            }
+        }
     }
     match func.results.len() {
         0 => {
@@ -534,21 +582,32 @@ fn print_c_typeref_names(ret: &mut String, func: &InterfaceFunc)
                     };
                     match &**ok.type_() {
                         Type::Record(r) if r.is_tuple() => {
-                            for _ in r.members.iter() {
+                            for (i,_) in r.members.iter().enumerate() {
                                 if iszero {
                                     iszero = false
                                 }
                                 else {
                                     ret.push_str(", ");
                                 }
-                                ret.push_str("__wasi_size_t");
+                                if casting {
+                                    ret.push_str(&format!("(uintptr_t) retptr{}",i));
+                                }
+                                else {                           
+                                    ret.push_str("uintptr_t");
+                                }
                             }
                         }
                         _ => {
                             if !iszero {
                                 ret.push_str(", ");
                             }
-                            ret.push_str("__wasi_size_t");
+                            if casting {
+                                ret.push_str("(uintptr_t) retptr0");
+                            }
+                            else {                           
+                                ret.push_str("uintptr_t");
+                            }
+
                         }
                     }
                 }
@@ -559,8 +618,16 @@ fn print_c_typeref_names(ret: &mut String, func: &InterfaceFunc)
     }
 }
 
+fn print_c_typeref_names(ret: &mut String, func: &InterfaceFunc, signparams: &std::vec::Vec<witx::WasmType>) {
+    (print_c_typeref_casting_names(ret, func, signparams, false));
+}
+
+fn print_c_casting_names(ret: &mut String, func: &InterfaceFunc, signparams: &std::vec::Vec<witx::WasmType>) {
+    (print_c_typeref_casting_names(ret, func, signparams, true));
+}
+
 fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
-    let (_, results) = func.wasm_signature();
+    let (params, results) = func.wasm_signature();
 
     if func.noreturn {
         ret.push_str("_Noreturn ");
@@ -568,7 +635,7 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
     match results.len() {
         0 => ret.push_str("void "),
         1 => {
-            ret.push_str(wasm_type(&results[0]));
+            ret.push_str(c_wasm_type(&results[0]));
             ret.push_str(" ");
         }
         _ => unimplemented!(),
@@ -579,7 +646,7 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
     ret.push_str("_");
     ret.push_str(&ident_name(&func.name));
     ret.push_str("(");
-    print_c_typeref_names(ret, func);
+    print_c_typeref_names(ret, func, &params);
 
     ret.push_str(") __attribute__((\n");
     ret.push_str(&format!(
@@ -607,198 +674,17 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
             }
         }
     }
-
-    func.call_wasm(
-        module_name,
-        &mut C {
-            src: ret,
-            params: &func.params,
-            block_storage: Vec::new(),
-            blocks: Vec::new(),
-        },
-    );
-
-    ret.push_str("}\n\n");
-
-    /// This is a structure which implements the glue necessary to translate
-    /// between the C API of a function and the desired WASI ABI we're being
-    /// told it has.
-    ///
-    /// It's worth nothing that this will, in the long run, get much fancier.
-    /// For now this is extremely simple and entirely assumes that the WASI ABI
-    /// matches our C ABI. This means it will only really generate valid code
-    /// as-is *today* and won't work for any updates to the WASI ABI in the
-    /// future.
-    ///
-    /// It's hoped that this situation will improve as interface types and witx
-    /// continue to evolve and there's a more clear path forward for how to
-    /// translate an interface types signature to a C API.
-    struct C<'a> {
-        src: &'a mut String,
-        params: &'a [InterfaceFuncParam],
-        block_storage: Vec<String>,
-        blocks: Vec<String>,
+    ret.push_str("    ");
+    if !func.noreturn {
+        ret.push_str("return (__wasi_errno_t) ");
     }
-
-    impl Bindgen for C<'_> {
-        type Operand = String;
-
-        fn push_block(&mut self) {
-            let prev = mem::replace(self.src, String::new());
-            self.block_storage.push(prev);
-        }
-
-        fn finish_block(&mut self, operand: Option<String>) {
-            let to_restore = self.block_storage.pop().unwrap();
-            let src = mem::replace(self.src, to_restore);
-            assert!(src.is_empty());
-            match operand {
-                None => self.blocks.push(String::new()),
-                Some(s) => self.blocks.push(s),
-            }
-        }
-
-        fn allocate_space(&mut self, _: usize, _: &NamedType) {
-            // not necessary due to us taking parameters as pointers
-        }
-
-        fn emit(
-            &mut self,
-            inst: &Instruction<'_>,
-            operands: &mut Vec<String>,
-            results: &mut Vec<String>,
-        ) {
-            let mut top_as = |cvt: &str| {
-                let s = operands.pop().unwrap();
-                results.push(format!("({}) {}", cvt, s));
-            };
-
-            match inst {
-                Instruction::GetArg { nth } => {
-                    results.push(ident_name(&self.params[*nth].name));
-                }
-                // For the C bindings right now any parameter which needs its
-                // address taken is already taken as a pointer, so we can just
-                // forward the operand to the result.
-                Instruction::AddrOf => results.push(operands.pop().unwrap()),
-
-                Instruction::I64FromU64 => top_as("int64_t"),
-                Instruction::I32FromPointer
-                | Instruction::I32FromConstPointer
-                | Instruction::I32FromHandle { .. }
-                | Instruction::I32FromUsize
-                | Instruction::I32FromChar
-                | Instruction::I32FromU8
-                | Instruction::I32FromS8
-                | Instruction::I32FromChar8
-                | Instruction::I32FromU16
-                | Instruction::I32FromS16
-                | Instruction::I32FromU32 => top_as("int32_t"),
-
-                Instruction::I32FromBitflags { .. } | Instruction::I64FromBitflags { .. } => {
-                    // Rely on C's casting for this
-                    results.push(operands.pop().unwrap());
-                }
-
-                // No conversion necessary
-                Instruction::F32FromIf32
-                | Instruction::F64FromIf64
-                | Instruction::If32FromF32
-                | Instruction::If64FromF64
-                | Instruction::I64FromS64
-                | Instruction::I32FromS32 => results.push(operands.pop().unwrap()),
-
-                Instruction::ListPointerLength => {
-                    let list = operands.pop().unwrap();
-                    results.push(format!("{}", list));
-                    results.push(format!("{}_len", list));
-                }
-                Instruction::ReturnPointerGet { n } => {
-                    // We currently match the wasi ABI with the actual
-                    // function's API signature in C, this means when a return
-                    // pointer is asked for we can simply forward our parameter
-                    // that's a return pointer.
-                    results.push(format!("retptr{}", n));
-                }
-
-                Instruction::Load { .. } => {
-                    // this is currently skipped because return pointers are
-                    // already evident in parameters and so we don't need to
-                    // load/store from them again
-                    results.push("dummy".to_string());
-                }
-
-                Instruction::ReuseReturn => {
-                    results.push("ret".to_string());
-                }
-
-                Instruction::TupleLift { .. } => {
-                    // this is currently skipped because tuples are only used
-                    // as return values and those are always returned through
-                    // out-ptrs, so the values have already been passed through
-                    // at this point.
-                    results.push("dummy".to_string());
-                }
-
-                Instruction::ResultLift => {
-                    let err = self.blocks.pop().unwrap();
-
-                    // Our ok block should either have done nothing (meaning
-                    // there's no "ok" payload) or it loaded a return pointer
-                    // and/or tuple some values. In all these cases we discard
-                    // the results since out pointers have already been written
-                    // to and we only return the discriminant from the
-                    // function.
-                    let ok = self.blocks.pop().unwrap();
-                    assert!(ok == "dummy" || ok == "");
-
-                    // Note that we just push the result of the error block.
-                    // Our block management asserts that it's an expression,
-                    // which in this case will basically always be casting the
-                    // error code to an error code variant, which we return.
-                    results.push(err);
-                }
-
-                // Enums are represented in C simply as the integral tag type
-                Instruction::EnumLift { ty } => match &**ty.type_() {
-                    Type::Variant(v) => top_as(intrepr_name(v.tag_repr)),
-                    _ => unreachable!(),
-                },
-                Instruction::EnumLower { .. } => top_as("int32_t"),
-
-                Instruction::CallWasm {
-                    module,
-                    name,
-                    params: _,
-                    results: func_results,
-                } => {
-                    assert!(func_results.len() < 2);
-                    self.src.push_str("    ");
-                    if func_results.len() > 0 {
-                        self.src.push_str(wasm_type(&func_results[0]));
-                        self.src.push_str(" ret = ");
-                        results.push("ret".to_string());
-                    }
-                    self.src.push_str("__imported_");
-                    self.src.push_str(module);
-                    self.src.push_str("_");
-                    self.src.push_str(name);
-                    self.src.push_str("(");
-                    self.src.push_str(&operands.join(", "));
-                    self.src.push_str(");\n");
-                }
-
-                Instruction::Return { amt: 0 } => {}
-                Instruction::Return { amt: 1 } => {
-                    self.src.push_str("    return ");
-                    self.src.push_str(&operands[0]);
-                    self.src.push_str(";\n");
-                }
-
-                other => panic!("unimplemented instruction {:?}", other),
-            }
-        }
-    }
+    ret.push_str("__imported_");
+    ret.push_str(&ident_name(module_name));
+    ret.push_str("_");
+    ret.push_str(&ident_name(&func.name));
+    ret.push_str("(");
+    print_c_casting_names(ret,func,&params);
+    ret.push_str(");\n}\n\n");
 }
 
 fn push_return_type(ret: &mut String, params: &mut Vec<(Option<String>, String)>, tref: &TypeRef) {
@@ -940,11 +826,21 @@ fn intrepr_const(i: IntRepr) -> &'static str {
         IntRepr::U64 => "UINT64_C",
     }
 }
-
+/*
 fn wasm_type(wasm: &WasmType) -> &'static str {
     match wasm {
         WasmType::I32 => "int32_t",
         WasmType::I64 => "int64_t",
+        WasmType::F32 => "float",
+        WasmType::F64 => "double",
+    }
+}
+*/
+
+fn c_wasm_type(wasm: &WasmType) -> &'static str {
+    match wasm {
+        WasmType::I32 => "uint32_t",
+        WasmType::I64 => "uint64_t",
         WasmType::F32 => "float",
         WasmType::F64 => "double",
     }

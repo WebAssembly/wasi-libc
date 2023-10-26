@@ -53,6 +53,18 @@ build directions with one addition: `make ... THREAD_MODEL=posix`. This creates
 additional artifacts in `sysroot/lib/wasm32-wasi-threads` to support `--target
 wasm32-wasi-threads`.
 
+## 64 bits support
+
+To enable 64 bits support, follow the above
+build directions with one addition: `make ... BUILD_WASI64=yes`. This creates
+artifacts in `sysroot/lib/wasm64-wasi` to support `--target
+wasm64-wasi`.
+
+You can build 64 bits with pthread support together with
+'make ... BUILD_WASI64=yes THREAD_MODEL=posix'. This creates
+artifacts in `sysroot/lib/wasm64-wasi-threads` to support `--target
+wasm64-wasi-threads`.
+
 ## Arch Linux AUR package
 
 For Arch Linux users, there's an official [wasi-libc] package tracking this Git

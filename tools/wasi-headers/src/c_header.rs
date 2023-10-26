@@ -12,15 +12,11 @@ pub fn to_c(doc: &Document, inputs_str: &str) -> Generated {
 
     header.push_str(&format!(
         r#"/**
- * THIS FILE IS AUTO-GENERATED from the following files:
- *   {}
- *
- * To regenerate this file execute:
- *
- *     cargo run --manifest-path tools/wasi-headers/Cargo.toml generate-libc
- *
- * Modifications to this file will cause CI to fail, the code generator tool
- * must be modified to change this file.
+ * <wasi/api.h>. This file contains declarations describing the WASI ABI
+ * as of "snapshot preview1". It was originally auto-generated from
+ * {}, however WASI is in the process of
+ * transitioning to a new IDL and header file generator, and this file
+ * is temporarily being manually maintained.
  *
  * @file
  * This file describes the [WASI] interface, consisting of functions, types,

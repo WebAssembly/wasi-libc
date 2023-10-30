@@ -536,17 +536,6 @@ _Noreturn void __wasi_proc_exit(
     __imported_wasi_snapshot_preview1_proc_exit((uint32_t) rval);
 }
 
-uint32_t __imported_wasi_snapshot_preview1_proc_raise(uint32_t) __attribute__((
-    __import_module__("wasi_snapshot_preview1"),
-    __import_name__("proc_raise")
-));
-
-__wasi_errno_t __wasi_proc_raise(
-    __wasi_signal_t sig
-){
-    return (__wasi_errno_t) __imported_wasi_snapshot_preview1_proc_raise((uint32_t) sig);
-}
-
 uint32_t __imported_wasi_snapshot_preview1_sched_yield() __attribute__((
     __import_module__("wasi_snapshot_preview1"),
     __import_name__("sched_yield")

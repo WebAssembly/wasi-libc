@@ -47,7 +47,7 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == sizeof(uintptr_t), "non-wasi data layout");
+_Static_assert(_Alignof(void*) == sizeof(intptr_t), "non-wasi data layout");
 
 #ifdef __cplusplus
 extern "C" {{
@@ -85,6 +85,10 @@ extern "C" {{
 
 #include <wasi/api.h>
 #include <string.h>
+
+#ifdef __cplusplus
+extern "C" {{
+#endif
 
 "#,
         inputs_str,
@@ -139,13 +143,17 @@ int32_t __wasi_thread_spawn(
 
     source.push_str(
         r#"#ifdef _REENTRANT
-uint32_t __imported_wasi_thread_spawn(uintptr_t arg0) __WASI_NOEXCEPT __attribute__((
+uint32_t __imported_wasi_thread_spawn(intptr_t arg0) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi"),
     __import_name__("thread-spawn")
 ));
 
 int32_t __wasi_thread_spawn(void* start_arg) __WASI_NOEXCEPT {
-    return (int32_t) __imported_wasi_thread_spawn((uintptr_t) start_arg);
+    return (int32_t) __imported_wasi_thread_spawn((intptr_t) start_arg);
+}
+#endif
+
+#ifdef __cplusplus
 }
 #endif
 "#,
@@ -513,12 +521,12 @@ fn print_func_signature(ret: &mut String, func: &InterfaceFunc, header: bool) {
 
 fn c_typeref_name(tref: &TypeRef, wtp: &witx::WasmType) -> String {
     match tref {
-        TypeRef::Name(_) => c_wasm_type(wtp).to_string(),
+        TypeRef::Name(_) => wasm_type(wtp).to_string(),
         TypeRef::Value(anon_type) => match &**anon_type {
             Type::List(_) => unreachable!("arrays excluded above"),
             Type::Builtin(b) => builtin_type_name(*b).to_string(),
-            Type::Pointer(_) => "uintptr_t".to_string(),
-            Type::ConstPointer(_) => "uintptr_t".to_string(),
+            Type::Pointer(_) => "intptr_t".to_string(),
+            Type::ConstPointer(_) => "intptr_t".to_string(),
             Type::Record { .. } | Type::Variant { .. } | Type::Handle { .. } => unreachable!(
                 "wasi should not have anonymous structs, unions, enums, flags, handles"
             ),
@@ -545,11 +553,11 @@ fn print_c_typeref_casting_names(
             Type::List(_) => {
                 if casting {
                     ret.push_str(&format!(
-                        "(uintptr_t) {0}, (__wasi_size_t) {0}_len",
+                        "(intptr_t) {0}, (__wasi_size_t) {0}_len",
                         &identifiername
                     ));
                 } else {
-                    ret.push_str("uintptr_t, __wasi_size_t");
+                    ret.push_str("intptr_t, __wasi_size_t");
                 }
                 j = j + 2;
             }
@@ -600,9 +608,9 @@ fn print_c_typeref_casting_names(
                                     ret.push_str(", ");
                                 }
                                 if casting {
-                                    ret.push_str(&format!("(uintptr_t) retptr{}", i));
+                                    ret.push_str(&format!("(intptr_t) retptr{}", i));
                                 } else {
-                                    ret.push_str("uintptr_t");
+                                    ret.push_str("intptr_t");
                                 }
                             }
                         }
@@ -611,9 +619,9 @@ fn print_c_typeref_casting_names(
                                 ret.push_str(", ");
                             }
                             if casting {
-                                ret.push_str("(uintptr_t) retptr0");
+                                ret.push_str("(intptr_t) retptr0");
                             } else {
-                                ret.push_str("uintptr_t");
+                                ret.push_str("intptr_t");
                             }
                         }
                     }
@@ -650,7 +658,7 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
     match results.len() {
         0 => ret.push_str("void "),
         1 => {
-            ret.push_str(c_wasm_type(&results[0]));
+            ret.push_str(wasm_type(&results[0]));
             ret.push_str(" ");
         }
         _ => unimplemented!(),
@@ -841,7 +849,7 @@ fn intrepr_const(i: IntRepr) -> &'static str {
         IntRepr::U64 => "UINT64_C",
     }
 }
-/*
+
 fn wasm_type(wasm: &WasmType) -> &'static str {
     match wasm {
         WasmType::I32 => "int32_t",
@@ -850,13 +858,4 @@ fn wasm_type(wasm: &WasmType) -> &'static str {
         WasmType::F64 => "double",
     }
 }
-*/
 
-fn c_wasm_type(wasm: &WasmType) -> &'static str {
-    match wasm {
-        WasmType::I32 => "uint32_t",
-        WasmType::I64 => "uint64_t",
-        WasmType::F32 => "float",
-        WasmType::F64 => "double",
-    }
-}

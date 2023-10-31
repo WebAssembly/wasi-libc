@@ -21,8 +21,8 @@ MALLOC_IMPL ?= dlmalloc
 BUILD_LIBC_TOP_HALF ?= yes
 # The directory where we will store intermediate artifacts.
 OBJDIR ?= build/$(TARGET_TRIPLE)
-
-BUILD_WASI64 ?= no
+# 64 bit wasm?
+WASM64 ?= no
 
 # When the length is no larger than this threshold, we consider the
 # overhead of bulk memory opcodes to outweigh the performance benefit,
@@ -35,7 +35,7 @@ BULK_MEMORY_THRESHOLD ?= 32
 # make command-line.
 
 # Set the default WASI target triple.
-ifeq (${BUILD_WASI64}, yes)
+ifeq (${WASM64}, yes)
 TARGET_TRIPLE = wasm64-wasi
 else
 TARGET_TRIPLE = wasm32-wasi
@@ -44,7 +44,7 @@ endif
 # Threaded version necessitates a different traget, as objects from different
 # targets can't be mixed together while linking.
 ifeq ($(THREAD_MODEL), posix)
-    ifeq (${BUILD_WASI64}, yes)
+    ifeq (${WASM64}, yes)
         TARGET_TRIPLE = wasm64-wasi-threads
     else
         TARGET_TRIPLE = wasm32-wasi-threads
@@ -209,13 +209,6 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
 ifeq ($(THREAD_MODEL), posix)
 
 
-ifeq (${BUILD_WASI64}, yes)
-WASM_THREAD_ASM_FILE = thread/wasm64/wasi_thread_start.s
-else
-WASM_THREAD_ASM_FILE = thread/wasm32/wasi_thread_start.s
-endif
-
-
 LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
         env/__init_tls.c \
@@ -296,7 +289,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/sem_timedwait.c \
         thread/sem_trywait.c \
         thread/sem_wait.c \
-        ${WASM_THREAD_ASM_FILE} \
+        thread/wasm/wasi_thread_start.S \
     )
 endif
 
@@ -346,6 +339,7 @@ ifeq ($(THREAD_MODEL), posix)
 # Specify the tls-model until LLVM 15 is released (which should contain
 # https://reviews.llvm.org/D130053).
 CFLAGS += -mthread-model posix -pthread -ftls-model=local-exec
+
 ASMFLAGS += -matomics
 
 # Include cloudlib's directory to access the structure definition of clockid_t
@@ -369,7 +363,7 @@ CFLAGS += -isystem "$(SYSROOT_INC)"
 # These variables describe the locations of various files and directories in
 # the build tree.
 objs = $(patsubst %.c,$(OBJDIR)/%.o,$(1))
-asmobjs = $(patsubst %.s,$(OBJDIR)/%.o,$(1))
+asmobjs = $(patsubst %.S,$(OBJDIR)/%.o,$(1))
 DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 EMMALLOC_OBJS = $(call objs,$(EMMALLOC_SOURCES))
 LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
@@ -606,7 +600,7 @@ $(OBJDIR)/%.o: %.c include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
-$(OBJDIR)/%.o: %.s include_dirs
+$(OBJDIR)/%.o: %.S include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(ASMFLAGS) -o $@ -c $<
 
@@ -625,7 +619,7 @@ startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS) $(LIBC_BOTTOM_HALF_ALL_SO_OBJS): CFLA
 $(LIBC_TOP_HALF_ALL_OBJS) $(LIBC_TOP_HALF_ALL_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS): CFLAGS += \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/include \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal \
-    -I$(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm32 \
+    -I$(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm \
     -I$(LIBC_TOP_HALF_MUSL_DIR)/arch/generic \
     -I$(LIBC_TOP_HALF_HEADERS_PRIVATE) \
     -Wno-parentheses \
@@ -654,7 +648,7 @@ include_dirs:
 	# Generate musl's bits/alltypes.h header.
 	mkdir -p "$(SYSROOT_INC)/bits"
 	sed -f $(LIBC_TOP_HALF_MUSL_DIR)/tools/mkalltypes.sed \
-	    $(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm32/bits/alltypes.h.in \
+	    $(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm/bits/alltypes.h.in \
 	    $(LIBC_TOP_HALF_MUSL_DIR)/include/alltypes.h.in \
 	    > "$(SYSROOT_INC)/bits/alltypes.h"
 
@@ -662,7 +656,7 @@ include_dirs:
 	cp -r "$(LIBC_TOP_HALF_MUSL_INC)"/* "$(SYSROOT_INC)"
 	# Copy in the musl's "bits" header files.
 	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/generic/bits/* "$(SYSROOT_INC)/bits"
-	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/wasm32/bits/* "$(SYSROOT_INC)/bits"
+	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/wasm/bits/* "$(SYSROOT_INC)/bits"
 
 	# Remove selected header files.
 	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))

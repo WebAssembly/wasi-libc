@@ -56,12 +56,12 @@ wasm32-wasi-threads`.
 ## 64 bits support
 
 To enable 64 bits support, follow the above
-build directions with one addition: `make ... BUILD_WASI64=yes`. This creates
+build directions with one addition: `make ... WASM64=yes`. This creates
 artifacts in `sysroot/lib/wasm64-wasi` to support `--target
 wasm64-wasi`.
 
 You can build 64 bits with pthread support together with
-'make ... BUILD_WASI64=yes THREAD_MODEL=posix'. This creates
+'make ... WASM64=yes THREAD_MODEL=posix'. This creates
 artifacts in `sysroot/lib/wasm64-wasi-threads` to support `--target
 wasm64-wasi-threads`.
 

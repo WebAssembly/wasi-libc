@@ -122,13 +122,13 @@ jobs:
       # Build wasi64
       if: matrix.clang_version != '10.0.0'
       shell: bash
-      run: make -j4 BUILD_WASI64=yes
+      run: make -j4 WASM64=yes
 
     - name: Build wasi64 + libc + threads
       # Build wasi64 with thread support
       if: matrix.clang_version != '10.0.0'
       shell: bash
-      run: make -j4 BUILD_WASI64=yes THREAD_MODEL=posix
+      run: make -j4 WASM64=yes THREAD_MODEL=posix
 
   # Disable the headerstest job for now, while WASI transitions from the
   # witx snapshots to wit proposals, and we have a few manual edits to the

@@ -34,7 +34,7 @@ _Static_assert(_Alignof(int32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(uint32_t) == 4, "non-wasi data layout");
 _Static_assert(_Alignof(int64_t) == 8, "non-wasi data layout");
 _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
-_Static_assert(_Alignof(void*) == sizeof(uintptr_t), "non-wasi data layout");
+_Static_assert(_Alignof(void*) == sizeof(intptr_t), "non-wasi data layout");
 
 #ifdef __cplusplus
 extern "C" {

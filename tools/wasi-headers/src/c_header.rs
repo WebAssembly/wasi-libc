@@ -858,4 +858,3 @@ fn wasm_type(wasm: &WasmType) -> &'static str {
         WasmType::F64 => "double",
     }
 }
-

@@ -53,6 +53,16 @@ _Static_assert(_Alignof(void*) == sizeof(uintptr_t), "non-wasi data layout");
 extern "C" {{
 #endif
 
+#ifdef __cplusplus
+#if __cplusplus >= 201103L
+#define __WASI_NOEXCEPT noexcept
+#else
+#define __WASI_NOEXCEPT throw()
+#endif
+#else
+#define __WASI_NOEXCEPT
+#endif
+
 // TODO: Encoding this in witx.
 #define __WASI_DIRCOOKIE_START (UINT64_C(0))
 "#,
@@ -116,7 +126,7 @@ int32_t __wasi_thread_spawn(
         * function.
         */
     void *start_arg
-)  __attribute__((__warn_unused_result__));
+) __WASI_NOEXCEPT  __attribute__((__warn_unused_result__));
 #endif
 
 #ifdef __cplusplus
@@ -129,13 +139,13 @@ int32_t __wasi_thread_spawn(
 
     source.push_str(
         r#"#ifdef _REENTRANT
-uint32_t __imported_wasi_snapshot_preview2_thread_spawn(uintptr_t arg0) __attribute__((
-    __import_module__("wasi_snapshot_preview2"),
-    __import_name__("thread_spawn")
+uint32_t __imported_wasi_thread_spawn(uintptr_t arg0) __WASI_NOEXCEPT __attribute__((
+    __import_module__("wasi"),
+    __import_name__("thread-spawn")
 ));
 
-int32_t __wasi_thread_spawn(void* start_arg) {
-    return (int32_t) __imported_wasi_snapshot_preview2_thread_spawn((uintptr_t) start_arg);
+int32_t __wasi_thread_spawn(void* start_arg) __WASI_NOEXCEPT {
+    return (int32_t) __imported_wasi_thread_spawn((uintptr_t) start_arg);
 }
 #endif
 "#,
@@ -444,7 +454,7 @@ fn print_func_header(ret: &mut String, func: &InterfaceFunc) {
     }
 
     print_func_signature(ret, func, true);
-
+    ret.push_str(" __WASI_NOEXCEPT ");
     if func.results.len() > 0 {
         ret.push_str(" __attribute__((__warn_unused_result__))");
     }
@@ -653,7 +663,7 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
     ret.push_str("(");
     print_c_typeref_names(ret, func, &params);
 
-    ret.push_str(") __attribute__((\n");
+    ret.push_str(") __WASI_NOEXCEPT __attribute__((\n");
     ret.push_str(&format!(
         "    __import_module__(\"{}\"),\n",
         ident_name(module_name)

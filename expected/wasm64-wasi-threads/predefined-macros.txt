@@ -2956,6 +2956,7 @@
 #define __WASI_FSTFLAGS_MTIM ((__wasi_fstflags_t)(1 << 2))
 #define __WASI_FSTFLAGS_MTIM_NOW ((__wasi_fstflags_t)(1 << 3))
 #define __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW ((__wasi_lookupflags_t)(1 << 0))
+#define __WASI_NOEXCEPT 
 #define __WASI_OFLAGS_CREAT ((__wasi_oflags_t)(1 << 0))
 #define __WASI_OFLAGS_DIRECTORY ((__wasi_oflags_t)(1 << 1))
 #define __WASI_OFLAGS_EXCL ((__wasi_oflags_t)(1 << 2))

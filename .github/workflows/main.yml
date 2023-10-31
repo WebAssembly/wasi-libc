@@ -118,14 +118,14 @@ jobs:
       shell: bash
       run: make -j4 THREAD_MODEL=posix
 
-    - name: Build wasi64 + libc
-      # Build wasi64
+    - name: Build wasm64 + libc
+      # Build wasm64
       if: matrix.clang_version != '10.0.0'
       shell: bash
       run: make -j4 WASM64=yes
 
-    - name: Build wasi64 + libc + threads
-      # Build wasi64 with thread support
+    - name: Build wasm64 + libc + threads
+      # Build wasm64 with thread support
       if: matrix.clang_version != '10.0.0'
       shell: bash
       run: make -j4 WASM64=yes THREAD_MODEL=posix

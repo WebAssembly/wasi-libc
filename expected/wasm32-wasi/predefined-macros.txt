@@ -1468,14 +1468,13 @@
 #define RRQ 01
 #define RS_HIPRI 0x01
 #define RTLD_DEFAULT ((void *)0)
-#define RTLD_DI_LINKMAP 2
-#define RTLD_GLOBAL 256
-#define RTLD_LAZY 1
-#define RTLD_LOCAL 0
+#define RTLD_GLOBAL 0x8
+#define RTLD_LAZY 0x1
+#define RTLD_LOCAL 0x4
 #define RTLD_NEXT ((void *)-1)
-#define RTLD_NODELETE 4096
-#define RTLD_NOLOAD 4
-#define RTLD_NOW 2
+#define RTLD_NODELETE 0x80
+#define RTLD_NOLOAD 0x10
+#define RTLD_NOW 0x2
 #define RUSAGE_CHILDREN 2
 #define RUSAGE_SELF 1
 #define R_OK (4)

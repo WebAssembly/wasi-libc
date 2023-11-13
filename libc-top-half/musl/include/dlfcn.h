@@ -7,25 +7,19 @@ extern "C" {
 
 #include <features.h>
 
-#ifdef __wasilibc_unmodified_upstream
 #define RTLD_LAZY   1
 #define RTLD_NOW    2
 #define RTLD_NOLOAD 4
 #define RTLD_NODELETE 4096
 #define RTLD_GLOBAL 256
+#ifdef __wasilibc_unmodified_upstream
 #define RTLD_LOCAL  0
 #else
-/* For WASI, we use flag values which match MacOS rather than musl.  This gives
- * `RTLD_LOCAL` a non-zero value, avoiding ambiguity and allowing us to defer
- * the decision of whether `RTLD_LOCAL` or `RTLD_GLOBAL` should be the default
- * when neither is specified.
+/* For WASI, we give `RTLD_LOCAL` a non-zero value, avoiding ambiguity and
+ * allowing us to defer the decision of whether `RTLD_LOCAL` or `RTLD_GLOBAL`
+ * should be the default when neither is specified.
  */
-#define RTLD_LAZY     0x1
-#define RTLD_NOW      0x2
-#define RTLD_LOCAL    0x4
-#define RTLD_GLOBAL   0x8
-#define RTLD_NOLOAD   0x10
-#define RTLD_NODELETE 0x80
+#define RTLD_LOCAL  8
 #endif
 
 #define RTLD_NEXT    ((void *)-1)

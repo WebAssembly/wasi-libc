@@ -14,9 +14,10 @@
  * library resolution cannot or should not be supported (and the application can
  * handle this situation gracefully). */
 
+#include <stddef.h>
 #include <dlfcn.h>
 
-static const char *error = 0;
+static const char *error = NULL;
 
 weak int dlclose(void *library)
 {
@@ -27,18 +28,18 @@ weak int dlclose(void *library)
 weak char *dlerror(void)
 {
 	const char *var = error;
-	error = 0;
+	error = NULL;
 	return (char*) var;
 }
 
 weak void *dlopen(const char *name, int flags)
 {
 	error = "dlopen not implemented";
-	return 0;
+	return NULL;
 }
 
 weak void *dlsym(void *library, const char *name)
 {
 	error = "dlsym not implemented";
-	return 0;
+	return NULL;
 }

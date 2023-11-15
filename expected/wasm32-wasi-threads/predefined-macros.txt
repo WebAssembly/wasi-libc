@@ -1499,6 +1499,14 @@
 #define RRFIXEDSZ NS_RRFIXEDSZ
 #define RRQ 01
 #define RS_HIPRI 0x01
+#define RTLD_DEFAULT ((void *)0)
+#define RTLD_GLOBAL 256
+#define RTLD_LAZY 1
+#define RTLD_LOCAL 8
+#define RTLD_NEXT ((void *)-1)
+#define RTLD_NODELETE 4096
+#define RTLD_NOLOAD 4
+#define RTLD_NOW 2
 #define RUSAGE_CHILDREN 2
 #define RUSAGE_SELF 1
 #define R_OK (4)
@@ -2044,6 +2052,7 @@
 #define _Complex_I (0.0f+1.0fi)
 #define _DIRENT_H 
 #define _DIRENT_HAVE_D_TYPE 
+#define _DLFCN_H
 #define _ENDIAN_H 
 #define _ERRNO_H 
 #define _ERR_H 

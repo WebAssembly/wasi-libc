@@ -75,6 +75,7 @@
 #include <crypt.h>
 #include <ctype.h>
 #include <dirent.h>
+#include <dlfcn.h>
 #include <endian.h>
 #include <err.h>
 #include <errno.h>

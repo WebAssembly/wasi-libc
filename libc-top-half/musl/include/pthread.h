@@ -97,7 +97,9 @@ int pthread_equal(pthread_t, pthread_t);
 int pthread_setcancelstate(int, int *);
 int pthread_setcanceltype(int, int *);
 void pthread_testcancel(void);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no cancellation support. */
 int pthread_cancel(pthread_t);
+#endif
 
 #ifdef __wasilibc_unmodified_upstream /* WASI has no CPU scheduling support. */
 int pthread_getschedparam(pthread_t, int *__restrict, struct sched_param *__restrict);

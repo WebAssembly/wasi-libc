@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <errno.h>
 #include <netinet/in.h>
 
@@ -21,14 +20,14 @@ int socket(int domain, int type, int protocol)
         return -1;
     }
 
-    switch (type) {
+    switch (type & ~(SOCK_NONBLOCK | SOCK_CLOEXEC)) {
     case SOCK_STREAM: {
         wasi_sockets_0_2_0_rc_2023_10_18_tcp_create_socket_error_code_t error;
         reactor_own_tcp_socket_t socket;
         if (wasi_sockets_0_2_0_rc_2023_10_18_tcp_create_socket_create_tcp_socket(
                 family, &socket, &error)) {
             descriptor_table_variant_t variant = { .tag = DESCRIPTOR_TABLE_VARIANT_TCP_NEW,
-                .value = { .tcp_new = socket } };
+                .value = { .tcp_new = { .socket = socket, .blocking = (type & SOCK_NONBLOCK) == 0 } } };
             int fd;
             if (!descriptor_table_insert(variant, &fd)) {
                 errno = ENOMEM;
@@ -37,7 +36,7 @@ int socket(int domain, int type, int protocol)
             return fd;
         } else {
             // TODO: map errors appropriately
-            errno = EACCES;
+            errno = EBADF;
             return -1;
         }
     }
@@ -61,13 +60,14 @@ int connect(int fd, struct sockaddr* address, socklen_t len)
         return -1;
     }
 
-    reactor_own_tcp_socket_t socket;
+    descriptor_table_tcp_new_t socket;
     switch (variant.tag) {
     case DESCRIPTOR_TABLE_VARIANT_TCP_NEW:
         socket = variant.value.tcp_new;
         break;
 
     case DESCRIPTOR_TABLE_VARIANT_TCP_CONNECTED:
+        // TODO: should we disallow re-connecting an already-connected socket?
         socket = variant.value.tcp_connected.socket;
         break;
 
@@ -75,6 +75,8 @@ int connect(int fd, struct sockaddr* address, socklen_t len)
         errno = EBADF;
         return -1;
     }
+
+    reactor_borrow_tcp_socket_t socket_borrow = wasi_sockets_0_2_0_rc_2023_10_18_tcp_borrow_tcp_socket(socket.socket);
 
     wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t ip_address;
     switch (address->sa_family) {
@@ -123,35 +125,45 @@ int connect(int fd, struct sockaddr* address, socklen_t len)
 
     reactor_own_network_t network = wasi_sockets_0_2_0_rc_2023_10_18_instance_network_instance_network();
     wasi_sockets_0_2_0_rc_2023_10_18_tcp_error_code_t error;
-    reactor_borrow_tcp_socket_t socket_borrow = wasi_sockets_0_2_0_rc_2023_10_18_tcp_borrow_tcp_socket(socket);
     reactor_borrow_network_t network_borrow = wasi_sockets_0_2_0_rc_2023_10_18_network_borrow_network(network);
     bool result = wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_start_connect(socket_borrow, network_borrow, &ip_address, &error);
     wasi_sockets_0_2_0_rc_2023_10_18_network_network_drop_own(network);
 
     if (!result) {
         // TODO: map errors appropriately
-        errno = EACCES;
+        errno = EBADF;
         return -1;
     }
 
-    // TODO: handle non-blocking connects
     reactor_tuple2_own_input_stream_own_output_stream_t rx_tx;
     while (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_finish_connect(socket_borrow, &rx_tx, &error)) {
         if (error == WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_WOULD_BLOCK) {
-            reactor_own_pollable_t pollable = wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_subscribe(socket_borrow);
-            reactor_borrow_pollable_t pollable_borrow = wasi_io_0_2_0_rc_2023_10_18_poll_borrow_pollable(pollable);
-            wasi_io_0_2_0_rc_2023_10_18_poll_poll_one(pollable_borrow);
-            wasi_io_0_2_0_rc_2023_10_18_poll_pollable_drop_own(pollable);
+            if (socket.blocking) {
+                reactor_own_pollable_t pollable = wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_subscribe(socket_borrow);
+                reactor_borrow_pollable_t pollable_borrow = wasi_io_0_2_0_rc_2023_10_18_poll_borrow_pollable(pollable);
+                wasi_io_0_2_0_rc_2023_10_18_poll_poll_one(pollable_borrow);
+                wasi_io_0_2_0_rc_2023_10_18_poll_pollable_drop_own(pollable);
+            } else {
+                descriptor_table_variant_t new_variant = { .tag = DESCRIPTOR_TABLE_VARIANT_TCP_CONNECTING,
+                    .value = { .tcp_new = socket } };
+                if (!descriptor_table_update(fd, new_variant)) {
+                    abort();
+                }
+                errno = EINPROGRESS;
+                return -1;
+            }
         } else {
             // TODO: map errors appropriately
-            errno = EACCES;
+            errno = EBADF;
             return -1;
         }
     }
 
     descriptor_table_variant_t new_variant = { .tag = DESCRIPTOR_TABLE_VARIANT_TCP_CONNECTED,
         .value = { .tcp_connected = { .socket = socket, .rx = rx_tx.f0, .tx = rx_tx.f1 } } };
-    assert(descriptor_table_update(fd, new_variant));
+    if (!descriptor_table_update(fd, new_variant)) {
+        abort();
+    }
 
     return 0;
 }

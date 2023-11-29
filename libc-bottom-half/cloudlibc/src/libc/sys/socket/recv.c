@@ -47,16 +47,18 @@ ssize_t recv(int socket, void* restrict buffer, size_t length, int flags)
         errno = EOPNOTSUPP;
         return -1;
     }
-    
+
     descriptor_table_variant_t variant;
     if (!descriptor_table_get(socket, &variant)) {
         errno = EBADF;
         return -1;
     }
 
+    bool blocking;
     reactor_own_input_stream_t rx;
     switch (variant.tag) {
     case DESCRIPTOR_TABLE_VARIANT_TCP_CONNECTED:
+        blocking = variant.value.tcp_connected.socket.blocking;
         rx = variant.value.tcp_connected.rx;
         break;
 
@@ -66,16 +68,28 @@ ssize_t recv(int socket, void* restrict buffer, size_t length, int flags)
     }
 
     reactor_borrow_input_stream_t rx_borrow = wasi_io_0_2_0_rc_2023_10_18_streams_borrow_input_stream(rx);
-    reactor_list_u8_t result;
-    wasi_io_0_2_0_rc_2023_10_18_streams_stream_error_t error;
-    if (!wasi_io_0_2_0_rc_2023_10_18_streams_method_input_stream_blocking_read(rx_borrow, length, &result, &error)) {
-        // TODO: map errors appropriately
-        errno = EACCES;
-        return -1;
-    }
+    while (true) {
+        reactor_list_u8_t result;
+        wasi_io_0_2_0_rc_2023_10_18_streams_stream_error_t error;
+        if (!wasi_io_0_2_0_rc_2023_10_18_streams_method_input_stream_read(rx_borrow, length, &result, &error)) {
+            // TODO: map errors appropriately
+            errno = EBADF;
+            return -1;
+        }
 
-    memcpy(buffer, result.ptr, result.len);
-    reactor_list_u8_free(&result);    
-    return result.len;
+        if (result.len) {
+            memcpy(buffer, result.ptr, result.len);
+            reactor_list_u8_free(&result);
+            return result.len;
+        } else if (blocking) {
+            reactor_own_pollable_t pollable = wasi_io_0_2_0_rc_2023_10_18_streams_method_input_stream_subscribe(rx_borrow);
+            reactor_borrow_pollable_t pollable_borrow = wasi_io_0_2_0_rc_2023_10_18_poll_borrow_pollable(pollable);
+            wasi_io_0_2_0_rc_2023_10_18_poll_poll_one(pollable_borrow);
+            wasi_io_0_2_0_rc_2023_10_18_poll_pollable_drop_own(pollable);
+        } else {
+            errno = EAGAIN;
+            return -1;
+        }
+    }
 #endif
 }

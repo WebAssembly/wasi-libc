@@ -40,9 +40,11 @@ ssize_t send(int socket, const void* buffer, size_t length, int flags)
         return -1;
     }
 
+    bool blocking;
     reactor_own_output_stream_t tx;
     switch (variant.tag) {
     case DESCRIPTOR_TABLE_VARIANT_TCP_CONNECTED:
+        blocking = variant.value.tcp_connected.socket.blocking;
         tx = variant.value.tcp_connected.tx;
         break;
 
@@ -51,18 +53,35 @@ ssize_t send(int socket, const void* buffer, size_t length, int flags)
         return -1;
     }
 
-    // TODO: handle non-blocking sends.  Also, when in blocking mode, only block
-    // long enough to send at least one byte (i.e. use `check_write`, `write`,
-    // and `poll_one` instead of `blocking_write_and_flush`.
     reactor_borrow_output_stream_t tx_borrow = wasi_io_0_2_0_rc_2023_10_18_streams_borrow_output_stream(tx);
-    wasi_io_0_2_0_rc_2023_10_18_streams_stream_error_t error;
-    reactor_list_u8_t list = { .ptr = (uint8_t*)buffer, .len = length };
-    if (!wasi_io_0_2_0_rc_2023_10_18_streams_method_output_stream_blocking_write_and_flush(tx_borrow, &list, &error)) {
-        // TODO: map errors appropriately
-        errno = EACCES;
-        return -1;
-    }
+    while (true) {
+        wasi_io_0_2_0_rc_2023_10_18_streams_stream_error_t error;
+        uint64_t count;
+        if (!wasi_io_0_2_0_rc_2023_10_18_streams_method_output_stream_check_write(tx_borrow, &count, &error)) {
+            // TODO: map errors appropriately
+            errno = EBADF;
+            return -1;
+        }
 
-    return length;
+        if (count) {
+            count = count < length ? count : length;
+            reactor_list_u8_t list = { .ptr = (uint8_t*)buffer, .len = count };
+            if (!wasi_io_0_2_0_rc_2023_10_18_streams_method_output_stream_write(tx_borrow, &list, &error)) {
+                // TODO: map errors appropriately
+                errno = EBADF;
+                return -1;
+            } else {
+                return count;
+            }
+        } else if (blocking) {
+            reactor_own_pollable_t pollable = wasi_io_0_2_0_rc_2023_10_18_streams_method_output_stream_subscribe(tx_borrow);
+            reactor_borrow_pollable_t pollable_borrow = wasi_io_0_2_0_rc_2023_10_18_poll_borrow_pollable(pollable);
+            wasi_io_0_2_0_rc_2023_10_18_poll_poll_one(pollable_borrow);
+            wasi_io_0_2_0_rc_2023_10_18_poll_pollable_drop_own(pollable);
+        } else {
+            errno = EAGAIN;
+            return -1;
+        }
+    }
 #endif
 }

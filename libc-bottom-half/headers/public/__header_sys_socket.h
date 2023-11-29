@@ -24,6 +24,7 @@
 #define SOL_SOCKET 0x7fffffff
 
 #define SO_TYPE 3
+#define SO_ERROR 4
 
 #define PF_UNSPEC 0
 #define PF_INET 1

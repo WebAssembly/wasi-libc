@@ -18,7 +18,6 @@ int getsockopt(int socket, int level, int option_name,
         return -1;
     }
 
-    int value;
     switch (option_name) {
     case SO_TYPE: {
         // Return the type of the socket. This information can simply be
@@ -32,8 +31,13 @@ int getsockopt(int socket, int level, int option_name,
             errno = ENOTSOCK;
             return -1;
         }
-        value = fsb.fs_filetype;
-        break;
+        int value = fsb.fs_filetype;
+
+        // Copy out integer value.
+        memcpy(option_value, &value,
+            *option_len < sizeof(int) ? *option_len : sizeof(int));
+        *option_len = sizeof(int);
+        return 0;
     }
     case SO_ERROR: {
         descriptor_table_variant_t variant;
@@ -60,10 +64,4 @@ int getsockopt(int socket, int level, int option_name,
         return -1;
     }
     }
-
-    // Copy out integer value.
-    memcpy(option_value, &value,
-        *option_len < sizeof(int) ? *option_len : sizeof(int));
-    *option_len = sizeof(int);
-    return 0;
 }

@@ -52,7 +52,7 @@ int socket(int domain, int type, int protocol)
     }
 }
 
-int connect(int fd, struct sockaddr* address, socklen_t len)
+int connect(int fd, const struct sockaddr* address, socklen_t len)
 {
     descriptor_table_variant_t variant;
     if (!descriptor_table_get(fd, &variant)) {

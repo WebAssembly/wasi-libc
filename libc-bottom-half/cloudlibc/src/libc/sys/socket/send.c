@@ -13,11 +13,7 @@
 
 ssize_t tcp_send(tcp_socket_t* socket, const void* buffer, size_t length, int flags)
 {
-    // TODO: flags:
-    // - MSG_NOSIGNAL: ignore it. This is always the case. https://github.com/WebAssembly/wasi-sockets/blob/main/Posix-compatibility.md#writing-to-closed-streams-sigpipe-so_nosigpipe-
-    // - MSG_OOB: Not supported in WASI
-    // - MSG_EOR: Not supported in TCP/UDP in general.
-    const int supported_flags = MSG_DONTWAIT;
+    const int supported_flags = MSG_DONTWAIT | MSG_NOSIGNAL;
     if ((flags & supported_flags) != flags) {
         errno = EOPNOTSUPP;
         return -1;
@@ -34,6 +30,12 @@ ssize_t tcp_send(tcp_socket_t* socket, const void* buffer, size_t length, int fl
     bool should_block = socket->blocking;
     if ((flags & MSG_DONTWAIT) != 0) {
         should_block = false;
+    }
+
+    if ((flags & MSG_NOSIGNAL) != 0) {
+        // Ignore it. WASI has no Unix-style signals. So effectively,
+        // MSG_NOSIGNAL is always the case, whether it was explicitly
+        // requested or not.
     }
 
     reactor_borrow_output_stream_t tx_borrow = wasi_io_0_2_0_rc_2023_10_18_streams_borrow_output_stream(connection.output);

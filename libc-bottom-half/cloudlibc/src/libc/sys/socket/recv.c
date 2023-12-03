@@ -12,9 +12,6 @@
 #include <descriptor_table.h>
 #include "__utils.h"
 
-static_assert(MSG_PEEK == __WASI_RIFLAGS_RECV_PEEK, "Value mismatch");
-static_assert(MSG_WAITALL == __WASI_RIFLAGS_RECV_WAITALL, "Value mismatch");
-
 ssize_t tcp_recv(tcp_socket_t* socket, void* restrict buffer, size_t length, int flags)
 {
     // TODO: flags:

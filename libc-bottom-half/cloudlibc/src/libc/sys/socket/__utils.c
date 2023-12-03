@@ -175,3 +175,65 @@ int __wasi_sockets_utils__posix_family(wasi_sockets_0_2_0_rc_2023_10_18_network_
     default: /* unreachable */ abort();
     }
 }
+
+wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t __wasi_sockets_utils__any_addr(wasi_sockets_0_2_0_rc_2023_10_18_network_ip_address_family_t family) {
+    switch (family)
+    {
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_IP_ADDRESS_FAMILY_IPV4:
+        return (wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t){
+            .tag = WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_IP_SOCKET_ADDRESS_IPV4,
+            .val = { .ipv4 = {
+                .port = 0,
+                .address = { 0, 0, 0, 0 },
+            }}
+        };
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_IP_ADDRESS_FAMILY_IPV6:
+        return (wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t){
+            .tag = WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_IP_SOCKET_ADDRESS_IPV6,
+            .val = { .ipv6 = {
+                .port = 0,
+                .address = { 0, 0, 0, 0, 0, 0, 0, 0 },
+                .flow_info = 0,
+                .scope_id = 0,
+            }}
+        };
+    default: /* unreachable */ abort();
+    }
+}
+
+int __wasi_sockets_utils__tcp_bind(tcp_socket_t* socket, wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t* address) {
+
+    tcp_socket_state_unbound_t unbound;
+    if (socket->state_tag == TCP_SOCKET_STATE_UNBOUND) {
+        unbound = socket->state.unbound;
+    } else {
+        errno = EINVAL;
+        return -1;
+    }
+
+	wasi_sockets_0_2_0_rc_2023_10_18_network_error_code_t error;
+	reactor_borrow_network_t network_borrow = __wasi_sockets_utils__borrow_network();
+    reactor_borrow_tcp_socket_t socket_borrow = wasi_sockets_0_2_0_rc_2023_10_18_tcp_borrow_tcp_socket(socket->socket);
+
+	if (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_start_bind(socket_borrow, network_borrow, address, &error)) {
+        errno = __wasi_sockets_utils__map_error(error);
+        return -1;
+    }
+
+    // Bind has successfully started. Attempt to finish it:
+    while (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_finish_bind(socket_borrow, &error)) {
+        if (error == WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_WOULD_BLOCK) {
+			reactor_borrow_pollable_t pollable_borrow = wasi_io_0_2_0_rc_2023_10_18_poll_borrow_pollable(socket->socket_pollable);
+			wasi_io_0_2_0_rc_2023_10_18_poll_poll_one(pollable_borrow);
+        } else {
+            errno = __wasi_sockets_utils__map_error(error);
+            return -1;
+        }
+    }
+
+    // Bind successful.
+
+    socket->state_tag = TCP_SOCKET_STATE_BOUND;
+    socket->state = (tcp_socket_state_t){ .bound = { /* No additional state */ } };
+    return 0;
+}

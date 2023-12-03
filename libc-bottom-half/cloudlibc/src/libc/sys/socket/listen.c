@@ -1,18 +1,32 @@
 #include <errno.h>
 #include <netinet/in.h>
 
+#include <assert.h>
 #include <descriptor_table.h>
 #include "__utils.h"
 
 int tcp_listen(tcp_socket_t* socket, int backlog) {
 
+    wasi_sockets_0_2_0_rc_2023_10_18_network_error_code_t error;
+    reactor_borrow_tcp_socket_t socket_borrow = wasi_sockets_0_2_0_rc_2023_10_18_tcp_borrow_tcp_socket(socket->socket);
+
     switch (socket->state_tag) {
-    case TCP_SOCKET_STATE_UNBOUND:
-        // TODO: perform implicit bind and then continue with this listen operation.
-        errno = EDESTADDRREQ;
-        return -1;
+    case TCP_SOCKET_STATE_UNBOUND: {
+        // Socket is not explicitly bound by the user. We'll do it for them:
+
+        wasi_sockets_0_2_0_rc_2023_10_18_tcp_ip_address_family_t family = wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_address_family(socket_borrow);
+        wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t any = __wasi_sockets_utils__any_addr(family);
+        int result = __wasi_sockets_utils__tcp_bind(socket, &any);
+        if (result != 0) {
+            return result;
+        }
+
+        assert(socket->state_tag == TCP_SOCKET_STATE_BOUND);
+        // Great! We'll continue below.
+        break;
+    }
     case TCP_SOCKET_STATE_BOUND:
-        // These can initiate a connect.
+        // Great! We'll continue below.
         break;
     case TCP_SOCKET_STATE_LISTENING:
         // We can only update the backlog size.
@@ -24,9 +38,6 @@ int tcp_listen(tcp_socket_t* socket, int backlog) {
         errno = EINVAL;
         return -1;
     }
-
-    wasi_sockets_0_2_0_rc_2023_10_18_network_error_code_t error;
-    reactor_borrow_tcp_socket_t socket_borrow = wasi_sockets_0_2_0_rc_2023_10_18_tcp_borrow_tcp_socket(socket->socket);
 
     if (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_set_listen_backlog_size(socket_borrow, backlog, &error)) {
         abort(); // Our own state checks should've prevented this from happening.

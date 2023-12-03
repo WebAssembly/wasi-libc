@@ -14,11 +14,11 @@
 ssize_t tcp_send(tcp_socket_t* socket, const void* buffer, size_t length, int flags)
 {
     // TODO: flags:
-    // - MSG_DONTWAIT: we can probably support this relatively easy.
     // - MSG_NOSIGNAL: ignore it. This is always the case. https://github.com/WebAssembly/wasi-sockets/blob/main/Posix-compatibility.md#writing-to-closed-streams-sigpipe-so_nosigpipe-
     // - MSG_OOB: Not supported in WASI
     // - MSG_EOR: Not supported in TCP/UDP in general.
-    if (flags != 0) {
+    const int supported_flags = MSG_DONTWAIT;
+    if ((flags & supported_flags) != flags) {
         errno = EOPNOTSUPP;
         return -1;
     }
@@ -29,6 +29,11 @@ ssize_t tcp_send(tcp_socket_t* socket, const void* buffer, size_t length, int fl
     } else {
         errno = ENOTCONN;
         return -1;
+    }
+
+    bool should_block = socket->blocking;
+    if ((flags & MSG_DONTWAIT) != 0) {
+        should_block = false;
     }
 
     reactor_borrow_output_stream_t tx_borrow = wasi_io_0_2_0_rc_2023_10_18_streams_borrow_output_stream(connection.output);
@@ -51,11 +56,11 @@ ssize_t tcp_send(tcp_socket_t* socket, const void* buffer, size_t length, int fl
             } else {
                 return count;
             }
-        } else if (socket->blocking) {
+        } else if (should_block) {
             reactor_borrow_pollable_t pollable_borrow = wasi_io_0_2_0_rc_2023_10_18_poll_borrow_pollable(connection.output_pollable);
             wasi_io_0_2_0_rc_2023_10_18_poll_poll_one(pollable_borrow);
         } else {
-            errno = EAGAIN;
+            errno = EWOULDBLOCK;
             return -1;
         }
     }

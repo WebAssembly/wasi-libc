@@ -18,12 +18,13 @@ static_assert(MSG_WAITALL == __WASI_RIFLAGS_RECV_WAITALL, "Value mismatch");
 ssize_t tcp_recv(tcp_socket_t* socket, void* restrict buffer, size_t length, int flags)
 {
     // TODO: flags:
-    // - MSG_DONTWAIT, MSG_WAITALL: we can probably support these relatively easy.
+    // - MSG_WAITALL: we can probably support these relatively easy.
     // - MSG_OOB: could be shimed by always responding that no OOB data is available.
     // - MSG_PEEK: could be shimmed by performing the receive into a local socket-specific buffer. And on subsequent receives first check that buffer.
     // - MSG_TRUNC: return EOPNOTSUPP. Is UDP only.
     // - MSG_EOR, MSG_CMSG_CLOEXEC: return EOPNOTSUPP. Is not supported on TCP or UDP.
-    if (flags != 0) {
+    const int supported_flags = MSG_DONTWAIT;
+    if ((flags & supported_flags) != flags) {
         errno = EOPNOTSUPP;
         return -1;
     }
@@ -34,6 +35,11 @@ ssize_t tcp_recv(tcp_socket_t* socket, void* restrict buffer, size_t length, int
     } else {
         errno = ENOTCONN;
         return -1;
+    }
+
+    bool should_block = socket->blocking;
+    if ((flags & MSG_DONTWAIT) != 0) {
+        should_block = false;
     }
 
     reactor_borrow_input_stream_t rx_borrow = wasi_io_0_2_0_rc_2023_10_18_streams_borrow_input_stream(connection.input);
@@ -50,7 +56,7 @@ ssize_t tcp_recv(tcp_socket_t* socket, void* restrict buffer, size_t length, int
             memcpy(buffer, result.ptr, result.len);
             reactor_list_u8_free(&result);
             return result.len;
-        } else if (socket->blocking) {
+        } else if (should_block) {
             reactor_borrow_pollable_t pollable_borrow = wasi_io_0_2_0_rc_2023_10_18_poll_borrow_pollable(connection.input_pollable);
             wasi_io_0_2_0_rc_2023_10_18_poll_poll_one(pollable_borrow);
         } else {

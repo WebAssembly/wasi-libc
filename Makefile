@@ -112,6 +112,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         network/inet_aton.c \
         network/in6addr_any.c \
         network/in6addr_loopback.c \
+        network/gai_strerror.c \
         fenv/fenv.c \
         fenv/fesetround.c \
         fenv/feupdateenv.c \
@@ -445,7 +446,6 @@ MUSL_OMIT_HEADERS += \
     "sys/auxv.h" \
     "pwd.h" "shadow.h" "grp.h" \
     "mntent.h" \
-    "netdb.h" \
     "resolv.h" \
     "pty.h" \
     "setjmp.h" \

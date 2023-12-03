@@ -2,12 +2,12 @@
  * This file provides a global hashtable for tracking `wasi-libc`-managed file
  * descriptors.
  *
- * WASI Preview 2 has no notion of file descriptors and instead uses
- * non-forgeable resource handles.  Moreover, there's not necessarily a
- * one-to-one correspondence between POSIX file descriptors and resource handles
- * (e.g. a TCP connection may require separate handles for reading, writing, and
- * polling the same connection).  We use this table to map each POSIX descriptor
- * to a set of one or more handles.
+ * WASI Preview 2 has no notion of file descriptors and instead uses unforgeable
+ * resource handles.  Moreover, there's not necessarily a one-to-one
+ * correspondence between POSIX file descriptors and resource handles (e.g. a
+ * TCP connection may require separate handles for reading, writing, and polling
+ * the same connection).  We use this table to map each POSIX descriptor to a
+ * set of one or more handles.
  *
  * As of this writing, we still rely on the WASI Preview 1 adapter
  * (https://github.com/bytecodealliance/wasmtime/tree/main/crates/wasi-preview1-component-adapter)
@@ -22,7 +22,6 @@
  */
 
 #include <assert.h>
-#include <wasi/api.h>
 
 #include <descriptor_table.h>
 
@@ -31,6 +30,13 @@ __attribute__((__import_module__("wasi_snapshot_preview1"), __import_name__("ada
 static bool wasi_preview1_adapter_open_badfd(int* fd)
 {
     return __wasi_preview1_adapter_open_badfd((int32_t)fd) != 0;
+}
+
+__attribute__((__import_module__("wasi_snapshot_preview1"), __import_name__("adapter_close_badfd"))) extern int32_t __wasi_preview1_adapter_close_badfd(int32_t);
+
+static bool wasi_preview1_adapter_close_badfd(int fd)
+{
+    return __wasi_preview1_adapter_close_badfd(fd) != 0;
 }
 
 /*
@@ -211,7 +217,7 @@ bool descriptor_table_insert(descriptor_table_entry_t entry, int* fd)
         if (insert(entry, *fd, &global_table)) {
             return true;
         } else {
-            if (__wasi_fd_close(*fd) != 0) {
+            if (!wasi_preview1_adapter_close_badfd(*fd)) {
                 abort();
             }
             *fd = -1;
@@ -230,7 +236,7 @@ bool descriptor_table_get_ref(int fd, descriptor_table_entry_t** entry)
 bool descriptor_table_remove(int fd, descriptor_table_entry_t* entry)
 {
     if (remove(fd, entry, &global_table)) {
-        if (__wasi_fd_close(fd) != 0) {
+        if (!wasi_preview1_adapter_close_badfd(fd)) {
             abort();
         }
         return true;

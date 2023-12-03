@@ -1,0 +1,177 @@
+#include <assert.h>
+#include <errno.h>
+
+#include "__utils.h"
+
+static reactor_own_network_t global_network;
+static bool global_network_initialized = false;
+
+reactor_borrow_network_t __wasi_sockets_utils__borrow_network() {
+    if (!global_network_initialized) {
+        global_network = wasi_sockets_0_2_0_rc_2023_10_18_instance_network_instance_network();
+        global_network_initialized = true;
+    }
+
+    return wasi_sockets_0_2_0_rc_2023_10_18_network_borrow_network(global_network);
+}
+
+int __wasi_sockets_utils__map_error(wasi_sockets_0_2_0_rc_2023_10_18_network_error_code_t wasi_error) {
+    switch (wasi_error)
+    {
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_ACCESS_DENIED: return EACCES;
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_NOT_SUPPORTED: return EOPNOTSUPP;
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_INVALID_ARGUMENT: return EINVAL;
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_OUT_OF_MEMORY: return ENOMEM;
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_TIMEOUT: return ETIMEDOUT;
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_CONCURRENCY_CONFLICT: return EALREADY;
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_WOULD_BLOCK: return EWOULDBLOCK;
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_NEW_SOCKET_LIMIT: return EMFILE;
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_ADDRESS_NOT_BINDABLE: return EADDRNOTAVAIL;
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_ADDRESS_IN_USE: return EADDRINUSE;
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_REMOTE_UNREACHABLE: return EHOSTUNREACH;
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_CONNECTION_REFUSED: return ECONNREFUSED;
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_CONNECTION_RESET: return ECONNRESET;
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_CONNECTION_ABORTED: return ECONNABORTED;
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_DATAGRAM_TOO_LARGE: return EMSGSIZE;
+
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_INVALID_STATE:
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_NOT_IN_PROGRESS:
+        assert(false /* If our internal state checks are working right, these errors should never show up. */);
+        break;
+
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_NAME_UNRESOLVABLE:
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_TEMPORARY_RESOLVER_FAILURE:
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_PERMANENT_RESOLVER_FAILURE:
+        assert(false /* These errors are specific to getaddrinfo, which should have filtered these errors out before calling this generic method */);
+        break;
+
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_UNKNOWN:
+    default:
+        return EOPNOTSUPP;
+    }
+}
+
+bool __wasi_sockets_utils__parse_address(const struct sockaddr* address, socklen_t len, wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t* output, int* error)
+{
+    *error = 0;
+
+    socklen_t smallest_sockaddr_size = sizeof(struct sockaddr);
+    if (address == NULL || len < smallest_sockaddr_size) {
+        *error = EINVAL;
+        return false;
+    }
+
+    switch (address->sa_family) {
+    case AF_INET: {
+        if (len < sizeof(struct sockaddr_in)) {
+            *error = EINVAL;
+            return false;
+        }
+
+        struct sockaddr_in* ipv4 = (struct sockaddr_in*)address;
+        unsigned ip = ipv4->sin_addr.s_addr;
+        unsigned short port = ipv4->sin_port;
+        *output = (wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t){
+            .tag = WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_IP_SOCKET_ADDRESS_IPV4,
+            .val = { .ipv4 = {
+                .port = ntohs(port), // (port << 8) | (port >> 8),
+                .address = { ip & 0xFF, (ip >> 8) & 0xFF, (ip >> 16) & 0xFF, ip >> 24 },
+            } },
+        };
+        return true;
+    }
+    case AF_INET6: {
+        if (len < sizeof(struct sockaddr_in6)) {
+            *error = EINVAL;
+            return false;
+        }
+
+        struct sockaddr_in6* ipv6 = (struct sockaddr_in6*)address;
+        unsigned char* ip = (unsigned char*)&(ipv6->sin6_addr.s6_addr);
+        unsigned short port = ipv6->sin6_port;
+        *output = (wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t){
+            .tag = WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_IP_SOCKET_ADDRESS_IPV6,
+            .val = { .ipv6 = {
+                .port = ntohs(port),
+                .address = {
+                    (((unsigned short)ip[0]) << 8) | ip[1],
+                    (((unsigned short)ip[2]) << 8) | ip[3],
+                    (((unsigned short)ip[4]) << 8) | ip[5],
+                    (((unsigned short)ip[6]) << 8) | ip[7],
+                    (((unsigned short)ip[8]) << 8) | ip[9],
+                    (((unsigned short)ip[10]) << 8) | ip[11],
+                    (((unsigned short)ip[12]) << 8) | ip[13],
+                    (((unsigned short)ip[14]) << 8) | ip[15],
+                },
+                // TODO: do these need to be endian-reversed?
+                .flow_info = ipv6->sin6_flowinfo,
+                .scope_id = ipv6->sin6_scope_id,
+            } }
+        };
+        return true;
+    }
+    default:
+        *error = EAFNOSUPPORT;
+        return false;
+    }
+}
+
+bool __wasi_sockets_utils__format_address(const wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t* address, struct sockaddr* output_addr, socklen_t* output_addrlen, int* error) {
+    *error = 0;
+
+    if (output_addr == NULL || output_addrlen == NULL) {
+        *error = EINVAL;
+        return false;
+    }
+
+    switch (address->tag)
+    {
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_IP_SOCKET_ADDRESS_IPV4: {
+        if (*output_addrlen < sizeof(struct sockaddr_in)) {
+            *error = EINVAL;
+            return false;
+        }
+        *output_addrlen = sizeof(struct sockaddr_in);
+        struct sockaddr_in* ipv4 = (struct sockaddr_in*)output_addr;
+
+        wasi_sockets_0_2_0_rc_2023_10_18_network_ipv4_address_t ip = address->val.ipv4.address;
+
+        *ipv4 = (struct sockaddr_in) {
+            .sin_family = AF_INET,
+            .sin_port = htons(address->val.ipv4.port),
+            .sin_addr = { .s_addr = 0 }, // TODO
+        };
+        return true;
+    }
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_IP_SOCKET_ADDRESS_IPV6: {
+        if (*output_addrlen < sizeof(struct sockaddr_in6)) {
+            *error = EINVAL;
+            return false;
+        }
+        *output_addrlen = sizeof(struct sockaddr_in6);
+        struct sockaddr_in6* ipv6 = (struct sockaddr_in6*)output_addr;
+
+        wasi_sockets_0_2_0_rc_2023_10_18_network_ipv6_address_t ip = address->val.ipv6.address;
+
+        *ipv6 = (struct sockaddr_in6) {
+            .sin6_family = AF_INET,
+            .sin6_port = htons(address->val.ipv6.port),
+            .sin6_addr = { .s6_addr = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } }, // TODO
+            // TODO: do these need to be endian-reversed?
+            .sin6_flowinfo = address->val.ipv6.flow_info,
+            .sin6_scope_id = address->val.ipv6.scope_id,
+        };
+        return true;
+    }
+    default: /* unreachable */ abort();
+    }
+}
+
+int __wasi_sockets_utils__posix_family(wasi_sockets_0_2_0_rc_2023_10_18_network_ip_address_family_t wasi_family) {
+    switch (wasi_family)
+    {
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_IP_ADDRESS_FAMILY_IPV4: return AF_INET;
+    case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_IP_ADDRESS_FAMILY_IPV6: return AF_INET6;
+    default: /* unreachable */ abort();
+    }
+}

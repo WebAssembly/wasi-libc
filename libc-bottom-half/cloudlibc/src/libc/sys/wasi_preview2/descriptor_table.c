@@ -47,11 +47,11 @@ static bool wasi_preview1_adapter_open_badfd(int* fd)
 typedef struct {
     bool occupied;
     int key;
-    descriptor_table_variant_t variant;
-} descriptor_table_entry_t;
+    descriptor_table_entry_t entry;
+} descriptor_table_item_t;
 
 typedef struct {
-    descriptor_table_entry_t* entries;
+    descriptor_table_item_t* entries;
     size_t mask;
     size_t used;
 } descriptor_table_t;
@@ -68,9 +68,9 @@ static int resize(size_t nel, descriptor_table_t* table)
 {
     size_t newsize;
     size_t i;
-    descriptor_table_entry_t *e, *newe;
-    descriptor_table_entry_t* oldtab = table->entries;
-    descriptor_table_entry_t* oldend = table->entries + table->mask + 1;
+    descriptor_table_item_t *e, *newe;
+    descriptor_table_item_t* oldtab = table->entries;
+    descriptor_table_item_t* oldend = table->entries + table->mask + 1;
 
     if (nel > MAXSIZE)
         nel = MAXSIZE;
@@ -97,10 +97,10 @@ static int resize(size_t nel, descriptor_table_t* table)
     return 1;
 }
 
-static descriptor_table_entry_t* lookup(int key, size_t hash, descriptor_table_t* table)
+static descriptor_table_item_t* lookup(int key, size_t hash, descriptor_table_t* table)
 {
     size_t i;
-    descriptor_table_entry_t* e;
+    descriptor_table_item_t* e;
 
     for (i = hash;; ++i) {
         e = table->entries + (i & table->mask);
@@ -110,7 +110,7 @@ static descriptor_table_entry_t* lookup(int key, size_t hash, descriptor_table_t
     return e;
 }
 
-static bool insert(descriptor_table_variant_t variant, int fd, descriptor_table_t* table)
+static bool insert(descriptor_table_entry_t entry, int fd, descriptor_table_t* table)
 {
     if (!table->entries) {
         if (!resize(MINSIZE, table)) {
@@ -119,9 +119,9 @@ static bool insert(descriptor_table_variant_t variant, int fd, descriptor_table_
     }
 
     size_t hash = keyhash(fd);
-    descriptor_table_entry_t* e = lookup(fd, hash, table);
+    descriptor_table_item_t* e = lookup(fd, hash, table);
 
-    e->variant = variant;
+    e->entry = entry;
     if (!e->occupied) {
         e->key = fd;
         e->occupied = true;
@@ -136,39 +136,23 @@ static bool insert(descriptor_table_variant_t variant, int fd, descriptor_table_
     return true;
 }
 
-static bool update(int fd, descriptor_table_variant_t variant, descriptor_table_t* table)
+static bool get(int fd, descriptor_table_entry_t** entry, descriptor_table_t* table)
 {
     if (!table->entries) {
         return false;
     }
 
     size_t hash = keyhash(fd);
-    descriptor_table_entry_t* e = lookup(fd, hash, table);
+    descriptor_table_item_t* e = lookup(fd, hash, table);
     if (e->occupied) {
-        e->variant = variant;
+        *entry = &e->entry;
         return true;
     } else {
         return false;
     }
 }
 
-static bool get(int fd, descriptor_table_variant_t* variant, descriptor_table_t* table)
-{
-    if (!table->entries) {
-        return false;
-    }
-
-    size_t hash = keyhash(fd);
-    descriptor_table_entry_t* e = lookup(fd, hash, table);
-    if (e->occupied) {
-        *variant = e->variant;
-        return true;
-    } else {
-        return false;
-    }
-}
-
-static bool remove(int fd, descriptor_table_variant_t* variant, descriptor_table_t* table)
+static bool remove(int fd, descriptor_table_entry_t* entry, descriptor_table_t* table)
 {
     if (!table->entries) {
         return false;
@@ -176,7 +160,7 @@ static bool remove(int fd, descriptor_table_variant_t* variant, descriptor_table
 
     size_t hash = keyhash(fd);
     size_t i;
-    descriptor_table_entry_t* e;
+    descriptor_table_item_t* e;
     for (i = hash;; ++i) {
         e = table->entries + (i & table->mask);
         if (!e->occupied || e->key == fd)
@@ -184,7 +168,7 @@ static bool remove(int fd, descriptor_table_variant_t* variant, descriptor_table
     }
 
     if (e->occupied) {
-        *variant = e->variant;
+        *entry = e->entry;
         e->occupied = false;
 
         // Search for any occupied entries which would be lost (due to an
@@ -221,10 +205,10 @@ static bool remove(int fd, descriptor_table_variant_t* variant, descriptor_table
     }
 }
 
-bool descriptor_table_insert(descriptor_table_variant_t variant, int* fd)
+bool descriptor_table_insert(descriptor_table_entry_t entry, int* fd)
 {
     if (wasi_preview1_adapter_open_badfd(fd)) {
-        if (insert(variant, *fd, &global_table)) {
+        if (insert(entry, *fd, &global_table)) {
             return true;
         } else {
             if (__wasi_fd_close(*fd) != 0) {
@@ -238,19 +222,14 @@ bool descriptor_table_insert(descriptor_table_variant_t variant, int* fd)
     }
 }
 
-bool descriptor_table_update(int fd, descriptor_table_variant_t variant)
+bool descriptor_table_get_ref(int fd, descriptor_table_entry_t** entry)
 {
-    return update(fd, variant, &global_table);
+    return get(fd, entry, &global_table);
 }
 
-bool descriptor_table_get(int fd, descriptor_table_variant_t* variant)
+bool descriptor_table_remove(int fd, descriptor_table_entry_t* entry)
 {
-    return get(fd, variant, &global_table);
-}
-
-bool descriptor_table_remove(int fd, descriptor_table_variant_t* variant)
-{
-    if (remove(fd, variant, &global_table)) {
+    if (remove(fd, entry, &global_table)) {
         if (__wasi_fd_close(fd) != 0) {
             abort();
         }

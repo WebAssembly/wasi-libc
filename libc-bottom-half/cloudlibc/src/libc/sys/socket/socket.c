@@ -2,6 +2,46 @@
 #include <netinet/in.h>
 
 #include <descriptor_table.h>
+#include "__utils.h"
+
+int tcp_socket(wasi_sockets_0_2_0_rc_2023_10_18_network_ip_address_family_t family, bool blocking)
+{
+    wasi_sockets_0_2_0_rc_2023_10_18_tcp_create_socket_error_code_t error;
+    reactor_own_tcp_socket_t socket;
+    if (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_create_socket_create_tcp_socket(family, &socket, &error)) {
+        errno = __wasi_sockets_utils__map_error(error);
+        return -1;
+    }
+
+    reactor_borrow_tcp_socket_t socket_borrow = wasi_sockets_0_2_0_rc_2023_10_18_tcp_borrow_tcp_socket(socket);
+    reactor_own_pollable_t socket_pollable = wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_subscribe(socket_borrow);
+
+    descriptor_table_entry_t entry = {
+        .tag = DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET,
+        .value = { .tcp_socket = {
+            .socket = socket,
+            .socket_pollable = socket_pollable,
+            .blocking = blocking,
+            .state_tag = TCP_SOCKET_STATE_UNBOUND,
+            .state = { .unbound = { /* No additional state. */ } },
+        } },
+    };
+
+    int fd;
+    if (!descriptor_table_insert(entry, &fd)) {
+        errno = EMFILE;
+        return -1;
+    }
+    return fd;
+}
+
+int udp_socket(wasi_sockets_0_2_0_rc_2023_10_18_network_ip_address_family_t family, bool blocking)
+{
+    // TODO: implement
+    errno = EPROTONOSUPPORT;
+    return -1;
+}
+
 
 int socket(int domain, int type, int protocol)
 {
@@ -20,150 +60,18 @@ int socket(int domain, int type, int protocol)
         return -1;
     }
 
-    switch (type & ~(SOCK_NONBLOCK | SOCK_CLOEXEC)) {
-    case SOCK_STREAM: {
-        wasi_sockets_0_2_0_rc_2023_10_18_tcp_create_socket_error_code_t error;
-        reactor_own_tcp_socket_t socket;
-        if (wasi_sockets_0_2_0_rc_2023_10_18_tcp_create_socket_create_tcp_socket(
-                family, &socket, &error)) {
-            descriptor_table_variant_t variant = { .tag = DESCRIPTOR_TABLE_VARIANT_TCP_NEW,
-                .value = { .tcp_new = { .socket = socket, .blocking = (type & SOCK_NONBLOCK) == 0 } } };
-            int fd;
-            if (!descriptor_table_insert(variant, &fd)) {
-                errno = ENOMEM;
-                return -1;
-            }
-            return fd;
-        } else {
-            // TODO: map errors appropriately
-            errno = EBADF;
-            return -1;
-        }
-    }
+    int real_type = type & ~(SOCK_NONBLOCK | SOCK_CLOEXEC);
+    bool blocking = (type & SOCK_NONBLOCK) == 0;
+    // Ignore SOCK_CLOEXEC flag. That concept does not exist in WASI.
 
-    case SOCK_DGRAM:
-        // TODO
-        errno = EPROTONOSUPPORT;
-        return -1;
+    if (real_type == SOCK_STREAM && (protocol == 0 || protocol == IPPROTO_TCP)) {
+        return tcp_socket(family, blocking);
 
-    default:
+    } else if (real_type == SOCK_DGRAM && (protocol == 0 || protocol == IPPROTO_UDP)) {
+        return udp_socket(family, blocking);
+        
+    } else {
         errno = EPROTONOSUPPORT;
         return -1;
     }
-}
-
-int connect(int fd, struct sockaddr* address, socklen_t len)
-{
-    descriptor_table_variant_t variant;
-    if (!descriptor_table_get(fd, &variant)) {
-        errno = EBADF;
-        return -1;
-    }
-
-    descriptor_table_tcp_new_t socket;
-    switch (variant.tag) {
-    case DESCRIPTOR_TABLE_VARIANT_TCP_NEW:
-        socket = variant.value.tcp_new;
-        break;
-
-    case DESCRIPTOR_TABLE_VARIANT_TCP_CONNECTED:
-        // TODO: should we disallow re-connecting an already-connected socket?
-        socket = variant.value.tcp_connected.socket;
-        break;
-
-    default:
-        errno = EBADF;
-        return -1;
-    }
-
-    reactor_borrow_tcp_socket_t socket_borrow = wasi_sockets_0_2_0_rc_2023_10_18_tcp_borrow_tcp_socket(socket.socket);
-
-    wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t ip_address;
-    switch (address->sa_family) {
-    case AF_INET: {
-        struct sockaddr_in* ipv4 = (struct sockaddr_in*)address;
-        unsigned ip = ipv4->sin_addr.s_addr;
-        unsigned short port = ipv4->sin_port;
-        wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t my_ip_address = {
-            .tag = WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_IP_SOCKET_ADDRESS_IPV4,
-            .val = { .ipv4 = { .port = (port << 8) | (port >> 8),
-                         .address = { ip & 0xFF, (ip >> 8) & 0xFF, (ip >> 16) & 0xFF, ip >> 24 } } }
-        };
-        ip_address = my_ip_address;
-        break;
-    }
-
-    case AF_INET6: {
-        struct sockaddr_in6* ipv6 = (struct sockaddr_in6*)address;
-        unsigned char* ip = (unsigned char*)&(ipv6->sin6_addr.s6_addr);
-        unsigned short port = ipv6->sin6_port;
-        wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t my_ip_address = {
-            .tag = WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_IP_SOCKET_ADDRESS_IPV6,
-            .val = { .ipv6 = { .port = (port << 8) | (port >> 8),
-                         .address = {
-                             (((unsigned short)ip[0]) << 8) | ip[1],
-                             (((unsigned short)ip[2]) << 8) | ip[3],
-                             (((unsigned short)ip[4]) << 8) | ip[5],
-                             (((unsigned short)ip[6]) << 8) | ip[7],
-                             (((unsigned short)ip[8]) << 8) | ip[9],
-                             (((unsigned short)ip[10]) << 8) | ip[11],
-                             (((unsigned short)ip[12]) << 8) | ip[13],
-                             (((unsigned short)ip[14]) << 8) | ip[15],
-                         },
-                         // TODO: do these need to be endian-reversed?
-                         .flow_info = ipv6->sin6_flowinfo,
-                         .scope_id = ipv6->sin6_flowinfo } }
-        };
-        ip_address = my_ip_address;
-        break;
-    }
-
-    default:
-        errno = EPROTONOSUPPORT;
-        return -1;
-    }
-
-    reactor_own_network_t network = wasi_sockets_0_2_0_rc_2023_10_18_instance_network_instance_network();
-    wasi_sockets_0_2_0_rc_2023_10_18_tcp_error_code_t error;
-    reactor_borrow_network_t network_borrow = wasi_sockets_0_2_0_rc_2023_10_18_network_borrow_network(network);
-    bool result = wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_start_connect(socket_borrow, network_borrow, &ip_address, &error);
-    wasi_sockets_0_2_0_rc_2023_10_18_network_network_drop_own(network);
-
-    if (!result) {
-        // TODO: map errors appropriately
-        errno = EBADF;
-        return -1;
-    }
-
-    reactor_tuple2_own_input_stream_own_output_stream_t rx_tx;
-    while (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_finish_connect(socket_borrow, &rx_tx, &error)) {
-        if (error == WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_WOULD_BLOCK) {
-            if (socket.blocking) {
-                reactor_own_pollable_t pollable = wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_subscribe(socket_borrow);
-                reactor_borrow_pollable_t pollable_borrow = wasi_io_0_2_0_rc_2023_10_18_poll_borrow_pollable(pollable);
-                wasi_io_0_2_0_rc_2023_10_18_poll_poll_one(pollable_borrow);
-                wasi_io_0_2_0_rc_2023_10_18_poll_pollable_drop_own(pollable);
-            } else {
-                descriptor_table_variant_t new_variant = { .tag = DESCRIPTOR_TABLE_VARIANT_TCP_CONNECTING,
-                    .value = { .tcp_new = socket } };
-                if (!descriptor_table_update(fd, new_variant)) {
-                    abort();
-                }
-                errno = EINPROGRESS;
-                return -1;
-            }
-        } else {
-            // TODO: map errors appropriately
-            errno = EBADF;
-            return -1;
-        }
-    }
-
-    descriptor_table_variant_t new_variant = { .tag = DESCRIPTOR_TABLE_VARIANT_TCP_CONNECTED,
-        .value = { .tcp_connected = { .socket = socket, .rx = rx_tx.f0, .tx = rx_tx.f1 } } };
-    if (!descriptor_table_update(fd, new_variant)) {
-        abort();
-    }
-
-    return 0;
 }

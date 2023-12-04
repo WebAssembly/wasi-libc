@@ -3,12 +3,12 @@
 
 int getaddrinfo(const char *restrict host, const char *restrict serv, const struct addrinfo *restrict hint, struct addrinfo **restrict res)
 {
-    // TODO
+    // TODO wasi-sockets
     abort();
 }
 
 void freeaddrinfo(struct addrinfo *p)
 {
-    // TODO
+    // TODO wasi-sockets
     abort();
 }

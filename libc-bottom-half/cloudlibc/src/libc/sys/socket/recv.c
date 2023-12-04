@@ -14,7 +14,7 @@
 
 ssize_t tcp_recv(tcp_socket_t* socket, void* restrict buffer, size_t length, int flags)
 {
-    // TODO: flags:
+    // TODO wasi-sockets: flags:
     // - MSG_WAITALL: we can probably support these relatively easy.
     // - MSG_OOB: could be shimed by always responding that no OOB data is available.
     // - MSG_PEEK: could be shimmed by performing the receive into a local socket-specific buffer. And on subsequent receives first check that buffer.
@@ -44,7 +44,7 @@ ssize_t tcp_recv(tcp_socket_t* socket, void* restrict buffer, size_t length, int
         reactor_list_u8_t result;
         wasi_io_0_2_0_rc_2023_10_18_streams_stream_error_t error;
         if (!wasi_io_0_2_0_rc_2023_10_18_streams_method_input_stream_read(rx_borrow, length, &result, &error)) {
-            // TODO: wasi-sockets has no way to recover stream errors yet.
+            // TODO wasi-sockets: wasi-sockets has no way to recover stream errors yet.
             errno = EPIPE;
             return -1;
         }
@@ -65,7 +65,7 @@ ssize_t tcp_recv(tcp_socket_t* socket, void* restrict buffer, size_t length, int
 
 ssize_t udp_recv(udp_socket_t* socket, void* restrict buffer, size_t length, int flags)
 {
-    // TODO: Implement flags. Same as tcp_recv except that MSG_TRUNC is valid for UDP.
+    // TODO wasi-sockets: Implement flags. Same as tcp_recv except that MSG_TRUNC is valid for UDP.
 
     errno = EOPNOTSUPP;
     return -1;

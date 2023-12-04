@@ -49,11 +49,11 @@ int tcp_shutdown(tcp_socket_t* socket, int posix_how)
     }
 
     if (posix_how == SHUT_RD || posix_how == SHUT_RDWR) {
-        // TODO: drop input stream (if not already). And update `recv` to take dropped input streams into account.
+        // TODO wasi-sockets: drop input stream (if not already). And update `recv` to take dropped input streams into account.
     }
 
     if (posix_how == SHUT_WR || posix_how == SHUT_RDWR) {
-        // TODO: drop output stream (if not already). And update `send` to take dropped output streams into account.
+        // TODO wasi-sockets: drop output stream (if not already). And update `send` to take dropped output streams into account.
     }
 
     return 0;

@@ -46,7 +46,7 @@
 #define SO_SNDTIMEO     21
 #endif
 
-// TODO: These should be in <netinet/tcp.h>
+// TODO wasi-sockets: These should be in <netinet/tcp.h>
 #define TCP_KEEPIDLE   4
 #define TCP_KEEPINTVL  5
 #define TCP_KEEPCNT    6

@@ -9,7 +9,7 @@ int tcp_bind(tcp_socket_t* socket, wasi_sockets_0_2_0_rc_2023_10_18_network_ip_s
 }
 
 int udp_bind(udp_socket_t* socket, wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t* address) {
-    // TODO: implement
+    // TODO wasi-sockets: implement
 	errno = EOPNOTSUPP;
 	return -1;
 }

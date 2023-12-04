@@ -43,7 +43,7 @@ ssize_t tcp_send(tcp_socket_t* socket, const void* buffer, size_t length, int fl
         wasi_io_0_2_0_rc_2023_10_18_streams_stream_error_t error;
         uint64_t count;
         if (!wasi_io_0_2_0_rc_2023_10_18_streams_method_output_stream_check_write(tx_borrow, &count, &error)) {
-            // TODO: wasi-sockets has no way to recover stream errors yet.
+            // TODO wasi-sockets: wasi-sockets has no way to recover stream errors yet.
             errno = EPIPE;
             return -1;
         }
@@ -52,7 +52,7 @@ ssize_t tcp_send(tcp_socket_t* socket, const void* buffer, size_t length, int fl
             count = count < length ? count : length;
             reactor_list_u8_t list = { .ptr = (uint8_t*)buffer, .len = count };
             if (!wasi_io_0_2_0_rc_2023_10_18_streams_method_output_stream_write(tx_borrow, &list, &error)) {
-                // TODO: wasi-sockets has no way to recover stream errors yet.
+                // TODO wasi-sockets: wasi-sockets has no way to recover stream errors yet.
                 errno = EPIPE;
                 return -1;
             } else {
@@ -70,7 +70,7 @@ ssize_t tcp_send(tcp_socket_t* socket, const void* buffer, size_t length, int fl
 
 ssize_t udp_send(udp_socket_t* socket, const void* buffer, size_t length, int flags)
 {
-    // TODO: Implement flags. Same as tcp_send.
+    // TODO wasi-sockets: Implement flags. Same as tcp_send.
 
     errno = EOPNOTSUPP;
     return -1;

@@ -48,7 +48,7 @@ int tcp_getsockopt(tcp_socket_t* socket, int level, int optname,
             break;
         }
         case SO_ACCEPTCONN: {
-            // TODO: use 2023-11-10 snapshot to call out to tcp-socket::is-listening ?
+            // TODO wasi-sockets: use 2023-11-10 snapshot to call out to tcp-socket::is-listening ?
             value = socket->state_tag == TCP_SOCKET_STATE_LISTENING;
             break;
         }
@@ -90,8 +90,8 @@ int tcp_getsockopt(tcp_socket_t* socket, int level, int optname,
             value = result;
             break;
         }
-        case SO_RCVTIMEO: // TODO: emulate in wasi-libc itself
-        case SO_SNDTIMEO: // TODO: emulate in wasi-libc itself
+        case SO_RCVTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
+        case SO_SNDTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -163,9 +163,9 @@ int tcp_getsockopt(tcp_socket_t* socket, int level, int optname,
 
     case SOL_TCP:
         switch (optname) {
-        case TCP_KEEPIDLE: // TODO: implement using the 2023-11-10 preview2 snapshot.
-        case TCP_KEEPINTVL: // TODO: implement using the 2023-11-10 preview2 snapshot.
-        case TCP_KEEPCNT: // TODO: implement using the 2023-11-10 preview2 snapshot.
+        case TCP_KEEPIDLE: // TODO wasi-sockets: implement using the 2023-11-10 preview2 snapshot.
+        case TCP_KEEPINTVL: // TODO wasi-sockets: implement using the 2023-11-10 preview2 snapshot.
+        case TCP_KEEPCNT: // TODO wasi-sockets: implement using the 2023-11-10 preview2 snapshot.
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -220,8 +220,8 @@ int tcp_setsockopt(tcp_socket_t* socket, int level, int optname, const void* opt
 
             return 0;
         }
-        case SO_RCVTIMEO: // TODO: emulate in wasi-libc itself
-        case SO_SNDTIMEO: // TODO: emulate in wasi-libc itself
+        case SO_RCVTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
+        case SO_SNDTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -297,9 +297,9 @@ int tcp_setsockopt(tcp_socket_t* socket, int level, int optname, const void* opt
 
     case SOL_TCP:
         switch (optname) {
-        case TCP_KEEPIDLE: // TODO: implement using the 2023-11-10 preview2 snapshot.
-        case TCP_KEEPINTVL: // TODO: implement using the 2023-11-10 preview2 snapshot.
-        case TCP_KEEPCNT: // TODO: implement using the 2023-11-10 preview2 snapshot.
+        case TCP_KEEPIDLE: // TODO wasi-sockets: implement using the 2023-11-10 preview2 snapshot.
+        case TCP_KEEPINTVL: // TODO wasi-sockets: implement using the 2023-11-10 preview2 snapshot.
+        case TCP_KEEPCNT: // TODO wasi-sockets: implement using the 2023-11-10 preview2 snapshot.
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -328,11 +328,11 @@ int udp_getsockopt(udp_socket_t* socket, int level, int optname,
         case SO_PROTOCOL:
             value = IPPROTO_TCP;
             break;
-        case SO_DOMAIN: // TODO: implement
-        case SO_RCVBUF: // TODO: implement
-        case SO_SNDBUF: // TODO: implement
-        case SO_RCVTIMEO: // TODO: emulate in wasi-libc itself
-        case SO_SNDTIMEO: // TODO: emulate in wasi-libc itself
+        case SO_DOMAIN: // TODO wasi-sockets: implement
+        case SO_RCVBUF: // TODO wasi-sockets: implement
+        case SO_SNDBUF: // TODO wasi-sockets: implement
+        case SO_RCVTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
+        case SO_SNDTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -342,7 +342,7 @@ int udp_getsockopt(udp_socket_t* socket, int level, int optname,
 
     case SOL_IP:
         switch (optname) {
-        case IP_TTL: // TODO: implement
+        case IP_TTL: // TODO wasi-sockets: implement
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -352,8 +352,8 @@ int udp_getsockopt(udp_socket_t* socket, int level, int optname,
 
     case SOL_IPV6:
         switch (optname) {
-        case IPV6_V6ONLY: // TODO: implement
-        case IPV6_UNICAST_HOPS: // TODO: implement
+        case IPV6_V6ONLY: // TODO wasi-sockets: implement
+        case IPV6_UNICAST_HOPS: // TODO wasi-sockets: implement
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -378,10 +378,10 @@ int udp_setsockopt(udp_socket_t* socket, int level, int optname, const void* opt
     {
     case SOL_SOCKET:
         switch (optname) {
-        case SO_RCVBUF: // TODO: implement
-        case SO_SNDBUF: // TODO: implement
-        case SO_RCVTIMEO: // TODO: emulate in wasi-libc itself
-        case SO_SNDTIMEO: // TODO: emulate in wasi-libc itself
+        case SO_RCVBUF: // TODO wasi-sockets: implement
+        case SO_SNDBUF: // TODO wasi-sockets: implement
+        case SO_RCVTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
+        case SO_SNDTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -391,7 +391,7 @@ int udp_setsockopt(udp_socket_t* socket, int level, int optname, const void* opt
 
     case SOL_IP:
         switch (optname) {
-        case IP_TTL: // TODO: implement
+        case IP_TTL: // TODO wasi-sockets: implement
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -401,8 +401,8 @@ int udp_setsockopt(udp_socket_t* socket, int level, int optname, const void* opt
 
     case SOL_IPV6:
         switch (optname) {
-        case IPV6_V6ONLY: // TODO: implement
-        case IPV6_UNICAST_HOPS: // TODO: implement
+        case IPV6_V6ONLY: // TODO wasi-sockets: implement
+        case IPV6_UNICAST_HOPS: // TODO wasi-sockets: implement
         default:
             errno = ENOPROTOOPT;
             return -1;

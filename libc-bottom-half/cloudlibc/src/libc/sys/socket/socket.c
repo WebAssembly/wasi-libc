@@ -37,7 +37,7 @@ int tcp_socket(wasi_sockets_0_2_0_rc_2023_10_18_network_ip_address_family_t fami
 
 int udp_socket(wasi_sockets_0_2_0_rc_2023_10_18_network_ip_address_family_t family, bool blocking)
 {
-    // TODO: implement
+    // TODO wasi-sockets: implement
     errno = EPROTONOSUPPORT;
     return -1;
 }

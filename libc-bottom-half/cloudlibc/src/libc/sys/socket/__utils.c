@@ -103,7 +103,7 @@ bool __wasi_sockets_utils__parse_address(const struct sockaddr* address, socklen
                     (((unsigned short)ip[12]) << 8) | ip[13],
                     (((unsigned short)ip[14]) << 8) | ip[15],
                 },
-                // TODO: do these need to be endian-reversed?
+                // TODO wasi-sockets: do these need to be endian-reversed?
                 .flow_info = ipv6->sin6_flowinfo,
                 .scope_id = ipv6->sin6_scope_id,
             } }
@@ -139,7 +139,7 @@ bool __wasi_sockets_utils__format_address(const wasi_sockets_0_2_0_rc_2023_10_18
         *ipv4 = (struct sockaddr_in) {
             .sin_family = AF_INET,
             .sin_port = htons(address->val.ipv4.port),
-            .sin_addr = { .s_addr = 0 }, // TODO
+            .sin_addr = { .s_addr = 0 }, // TODO wasi-sockets
         };
         return true;
     }
@@ -156,8 +156,8 @@ bool __wasi_sockets_utils__format_address(const wasi_sockets_0_2_0_rc_2023_10_18
         *ipv6 = (struct sockaddr_in6) {
             .sin6_family = AF_INET,
             .sin6_port = htons(address->val.ipv6.port),
-            .sin6_addr = { .s6_addr = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } }, // TODO
-            // TODO: do these need to be endian-reversed?
+            .sin6_addr = { .s6_addr = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } }, // TODO wasi-sockets
+            // TODO wasi-sockets: do these need to be endian-reversed?
             .sin6_flowinfo = address->val.ipv6.flow_info,
             .sin6_scope_id = address->val.ipv6.scope_id,
         };

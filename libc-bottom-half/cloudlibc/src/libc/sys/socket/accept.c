@@ -49,7 +49,7 @@ bool tcp_accept(tcp_socket_t* socket, bool client_blocking, int* out_clientfd, w
 
     if (out_address != NULL) {
         if (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_remote_address(client_borrow, out_address, &error)) {
-            // TODO: How to recover from this in a POSIX compatible way?
+            // TODO wasi-sockets: How to recover from this in a POSIX compatible way?
             abort();
         }
     }
@@ -140,7 +140,7 @@ int accept4(int socket, struct sockaddr *restrict addr, socklen_t *restrict addr
         assert(out_address_ptr != NULL);
 
         if (!__wasi_sockets_utils__format_address(&out_address, addr, addrlen, &err)) {
-            abort(); // TODO: validate provided buffer length _before_ doing the actual accept wasi call.
+            abort(); // TODO wasi-sockets: validate provided buffer length _before_ doing the actual accept wasi call.
         }
     }
 

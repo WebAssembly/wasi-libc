@@ -4,7 +4,6 @@
 
 #include <sys/socket.h>
 
-#include <assert.h>
 #include <errno.h>
 #include <stdint.h>
 #include <wasi/api.h>

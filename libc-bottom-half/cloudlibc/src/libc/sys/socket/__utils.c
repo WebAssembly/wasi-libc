@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <errno.h>
 
 #include "__utils.h"
@@ -36,13 +35,13 @@ int __wasi_sockets_utils__map_error(wasi_sockets_0_2_0_rc_2023_10_18_network_err
 
     case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_INVALID_STATE:
     case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_NOT_IN_PROGRESS:
-        assert(false /* If our internal state checks are working right, these errors should never show up. */);
+        abort(); // If our internal state checks are working right, these errors should never show up.
         break;
 
     case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_NAME_UNRESOLVABLE:
     case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_TEMPORARY_RESOLVER_FAILURE:
     case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_PERMANENT_RESOLVER_FAILURE:
-        assert(false /* These errors are specific to getaddrinfo, which should have filtered these errors out before calling this generic method */);
+        abort(); // These errors are specific to getaddrinfo, which should have filtered these errors out before calling this generic method
         break;
 
     case WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_UNKNOWN:

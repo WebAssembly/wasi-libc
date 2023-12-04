@@ -15,7 +15,7 @@ ssize_t tcp_recv(tcp_socket_t* socket, void* restrict buffer, size_t length, int
 {
     // TODO wasi-sockets: flags:
     // - MSG_WAITALL: we can probably support these relatively easy.
-    // - MSG_OOB: could be shimed by always responding that no OOB data is available.
+    // - MSG_OOB: could be shimmed by always responding that no OOB data is available.
     // - MSG_PEEK: could be shimmed by performing the receive into a local socket-specific buffer. And on subsequent receives first check that buffer.
     // - MSG_TRUNC: return EOPNOTSUPP. Is UDP only.
     // - MSG_EOR, MSG_CMSG_CLOEXEC: return EOPNOTSUPP. Is not supported on TCP or UDP.

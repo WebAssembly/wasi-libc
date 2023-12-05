@@ -4,45 +4,75 @@
 #include <reactor.h>
 
 typedef enum {
-    DESCRIPTOR_TABLE_VARIANT_TCP_NEW,
-    DESCRIPTOR_TABLE_VARIANT_TCP_CONNECTING,
-    DESCRIPTOR_TABLE_VARIANT_TCP_CONNECTED,
-    DESCRIPTOR_TABLE_VARIANT_TCP_ERROR,    
-} descriptor_table_tag_t;
+    TCP_SOCKET_STATE_UNBOUND,
+    TCP_SOCKET_STATE_BOUND,
+    TCP_SOCKET_STATE_CONNECTING,
+    TCP_SOCKET_STATE_CONNECTED,
+    TCP_SOCKET_STATE_CONNECT_FAILED,
+    TCP_SOCKET_STATE_LISTENING,
+} tcp_socket_state_tag_t;
+
+typedef struct {} tcp_socket_state_unbound_t;
+typedef struct {} tcp_socket_state_bound_t;
+typedef struct {} tcp_socket_state_connecting_t;
+typedef struct {} tcp_socket_state_listening_t;
+
+typedef struct {
+    reactor_own_input_stream_t input;
+    reactor_own_pollable_t input_pollable;
+    reactor_own_output_stream_t output;
+    reactor_own_pollable_t output_pollable;
+} tcp_socket_state_connected_t;
+
+typedef struct {
+    wasi_sockets_0_2_0_rc_2023_10_18_network_error_code_t error_code;
+} tcp_socket_state_connect_failed_t;
+
+typedef union {
+    tcp_socket_state_unbound_t unbound;
+    tcp_socket_state_bound_t bound;
+    tcp_socket_state_connecting_t connecting;
+    tcp_socket_state_connected_t connected;
+    tcp_socket_state_connect_failed_t connect_failed;
+    tcp_socket_state_listening_t listening;
+} tcp_socket_state_t;
 
 typedef struct {
     reactor_own_tcp_socket_t socket;
+    reactor_own_pollable_t socket_pollable;
     bool blocking;
-} descriptor_table_tcp_new_t;
+    tcp_socket_state_tag_t state_tag;
+    tcp_socket_state_t state;
+} tcp_socket_t;
+
+
+
 
 typedef struct {
-    descriptor_table_tcp_new_t socket;
-    reactor_own_input_stream_t rx;
-    reactor_own_output_stream_t tx;
-} descriptor_table_tcp_connected_t;
+    reactor_own_udp_socket_t socket;
+    bool blocking;
+} udp_socket_t;
 
-typedef struct {
-    descriptor_table_tcp_new_t socket;
-    wasi_filesystem_0_2_0_rc_2023_10_18_types_error_code_t error_code;
-} descriptor_table_tcp_error_t;
+
+typedef enum {
+    DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET,
+    DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET,
+} descriptor_table_entry_tag_t;
 
 typedef union {
-    descriptor_table_tcp_new_t tcp_new;
-    descriptor_table_tcp_connected_t tcp_connected;
-    descriptor_table_tcp_error_t tcp_error;
-} descriptor_table_value_t;
+    tcp_socket_t tcp_socket;
+    udp_socket_t udp_socket;
+} descriptor_table_entry_value_t;
 
 typedef struct {
-    descriptor_table_tag_t tag;
-    descriptor_table_value_t value;
-} descriptor_table_variant_t;
+    descriptor_table_entry_tag_t tag;
+    descriptor_table_entry_value_t value;
+} descriptor_table_entry_t;
 
-bool descriptor_table_insert(descriptor_table_variant_t variant, int* fd);
+bool descriptor_table_insert(descriptor_table_entry_t entry, int* fd);
 
-bool descriptor_table_update(int fd, descriptor_table_variant_t variant);
+bool descriptor_table_get_ref(int fd, descriptor_table_entry_t** entry);
 
-bool descriptor_table_get(int fd, descriptor_table_variant_t* variant);
-
-bool descriptor_table_remove(int fd, descriptor_table_variant_t* variant);
+bool descriptor_table_remove(int fd, descriptor_table_entry_t* entry);
 
 #endif

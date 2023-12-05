@@ -4,76 +4,47 @@
 
 #include <sys/socket.h>
 
-#include <assert.h>
 #include <errno.h>
 #include <stdint.h>
 #include <wasi/api.h>
 
 #include <descriptor_table.h>
+#include "__utils.h"
 
-static_assert(MSG_PEEK == __WASI_RIFLAGS_RECV_PEEK, "Value mismatch");
-static_assert(MSG_WAITALL == __WASI_RIFLAGS_RECV_WAITALL, "Value mismatch");
-
-ssize_t recv(int socket, void* restrict buffer, size_t length, int flags)
+ssize_t tcp_recv(tcp_socket_t* socket, void* restrict buffer, size_t length, int flags)
 {
-#if 0
-    // Validate flags.
-    if ((flags & ~(MSG_PEEK | MSG_WAITALL)) != 0) {
+    // TODO wasi-sockets: flags:
+    // - MSG_WAITALL: we can probably support these relatively easy.
+    // - MSG_OOB: could be shimmed by always responding that no OOB data is available.
+    // - MSG_PEEK: could be shimmed by performing the receive into a local socket-specific buffer. And on subsequent receives first check that buffer.
+    // - MSG_TRUNC: return EOPNOTSUPP. Is UDP only.
+    // - MSG_EOR, MSG_CMSG_CLOEXEC: return EOPNOTSUPP. Is not supported on TCP or UDP.
+    const int supported_flags = MSG_DONTWAIT;
+    if ((flags & supported_flags) != flags) {
         errno = EOPNOTSUPP;
         return -1;
     }
 
-    // Prepare input parameters.
-    __wasi_iovec_t iov = { .buf = buffer, .buf_len = length };
-    __wasi_iovec_t* ri_data = &iov;
-    size_t ri_data_len = 1;
-    __wasi_riflags_t ri_flags = flags;
-
-    // Perform system call.
-    size_t ro_datalen;
-    __wasi_roflags_t ro_flags;
-    __wasi_errno_t error = __wasi_sock_recv(socket,
-        ri_data, ri_data_len, ri_flags,
-        &ro_datalen,
-        &ro_flags);
-    if (error != 0) {
-        errno = error;
-        return -1;
-    }
-    return ro_datalen;
-#else
-    // TODO: what flags do we support?
-    if (flags != 0) {
-        errno = EOPNOTSUPP;
-        return -1;
-    }
-
-    descriptor_table_variant_t variant;
-    if (!descriptor_table_get(socket, &variant)) {
-        errno = EBADF;
-        return -1;
-    }
-
-    bool blocking;
-    reactor_own_input_stream_t rx;
-    switch (variant.tag) {
-    case DESCRIPTOR_TABLE_VARIANT_TCP_CONNECTED:
-        blocking = variant.value.tcp_connected.socket.blocking;
-        rx = variant.value.tcp_connected.rx;
-        break;
-
-    default:
+    tcp_socket_state_connected_t connection;
+    if (socket->state_tag == TCP_SOCKET_STATE_CONNECTED) {
+        connection = socket->state.connected;
+    } else {
         errno = ENOTCONN;
         return -1;
     }
 
-    reactor_borrow_input_stream_t rx_borrow = wasi_io_0_2_0_rc_2023_10_18_streams_borrow_input_stream(rx);
+    bool should_block = socket->blocking;
+    if ((flags & MSG_DONTWAIT) != 0) {
+        should_block = false;
+    }
+
+    reactor_borrow_input_stream_t rx_borrow = wasi_io_0_2_0_rc_2023_10_18_streams_borrow_input_stream(connection.input);
     while (true) {
         reactor_list_u8_t result;
         wasi_io_0_2_0_rc_2023_10_18_streams_stream_error_t error;
         if (!wasi_io_0_2_0_rc_2023_10_18_streams_method_input_stream_read(rx_borrow, length, &result, &error)) {
-            // TODO: map errors appropriately
-            errno = EBADF;
+            // TODO wasi-sockets: wasi-sockets has no way to recover stream errors yet.
+            errno = EPIPE;
             return -1;
         }
 
@@ -81,15 +52,45 @@ ssize_t recv(int socket, void* restrict buffer, size_t length, int flags)
             memcpy(buffer, result.ptr, result.len);
             reactor_list_u8_free(&result);
             return result.len;
-        } else if (blocking) {
-            reactor_own_pollable_t pollable = wasi_io_0_2_0_rc_2023_10_18_streams_method_input_stream_subscribe(rx_borrow);
-            reactor_borrow_pollable_t pollable_borrow = wasi_io_0_2_0_rc_2023_10_18_poll_borrow_pollable(pollable);
+        } else if (should_block) {
+            reactor_borrow_pollable_t pollable_borrow = wasi_io_0_2_0_rc_2023_10_18_poll_borrow_pollable(connection.input_pollable);
             wasi_io_0_2_0_rc_2023_10_18_poll_poll_one(pollable_borrow);
-            wasi_io_0_2_0_rc_2023_10_18_poll_pollable_drop_own(pollable);
         } else {
-            errno = EAGAIN;
+            errno = EWOULDBLOCK;
             return -1;
         }
     }
-#endif
+}
+
+ssize_t udp_recv(udp_socket_t* socket, void* restrict buffer, size_t length, int flags)
+{
+    // TODO wasi-sockets: Implement flags. Same as tcp_recv except that MSG_TRUNC is valid for UDP.
+
+    errno = EOPNOTSUPP;
+    return -1;
+}
+
+ssize_t recv(int socket, void* restrict buffer, size_t length, int flags)
+{
+    descriptor_table_entry_t* entry;
+    if (!descriptor_table_get_ref(socket, &entry)) {
+        errno = EBADF;
+        return -1;
+    }
+
+    if (buffer == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    switch (entry->tag)
+    {
+    case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
+        return tcp_recv(&entry->value.tcp_socket, buffer, length, flags);
+    case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
+        return udp_recv(&entry->value.udp_socket, buffer, length, flags);
+    default:
+        errno = EOPNOTSUPP;
+        return -1;
+    }
 }

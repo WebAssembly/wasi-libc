@@ -297,15 +297,6 @@ int tcp_setsockopt(tcp_socket_t* socket, int level, int optname, const void* opt
 
     case SOL_TCP:
         switch (optname) {
-        case TCP_NODELAY: {
-            if (wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_set_no_delay(socket_borrow, intval != 0, &error)) {
-                return 0;
-            } else {
-                errno = __wasi_sockets_utils__map_error(error);
-                return -1;
-            }
-        }
-
         case TCP_KEEPIDLE: // TODO wasi-sockets: implement using the 2023-11-10 preview2 snapshot.
         case TCP_KEEPINTVL: // TODO wasi-sockets: implement using the 2023-11-10 preview2 snapshot.
         case TCP_KEEPCNT: // TODO wasi-sockets: implement using the 2023-11-10 preview2 snapshot.

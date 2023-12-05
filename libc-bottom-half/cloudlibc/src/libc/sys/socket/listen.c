@@ -7,15 +7,15 @@
 
 int tcp_listen(tcp_socket_t* socket, int backlog) {
 
-    wasi_sockets_0_2_0_rc_2023_10_18_network_error_code_t error;
-    reactor_borrow_tcp_socket_t socket_borrow = wasi_sockets_0_2_0_rc_2023_10_18_tcp_borrow_tcp_socket(socket->socket);
+    network_error_code_t error;
+    tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
 
     switch (socket->state_tag) {
     case TCP_SOCKET_STATE_UNBOUND: {
         // Socket is not explicitly bound by the user. We'll do it for them:
 
-        wasi_sockets_0_2_0_rc_2023_10_18_tcp_ip_address_family_t family = wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_address_family(socket_borrow);
-        wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t any = __wasi_sockets_utils__any_addr(family);
+        tcp_ip_address_family_t family = tcp_method_tcp_socket_address_family(socket_borrow);
+        network_ip_socket_address_t any = __wasi_sockets_utils__any_addr(family);
         int result = __wasi_sockets_utils__tcp_bind(socket, &any);
         if (result != 0) {
             return result;
@@ -39,7 +39,7 @@ int tcp_listen(tcp_socket_t* socket, int backlog) {
         return -1;
     }
 
-    if (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_set_listen_backlog_size(socket_borrow, backlog, &error)) {
+    if (!tcp_method_tcp_socket_set_listen_backlog_size(socket_borrow, backlog, &error)) {
         abort(); // Our own state checks should've prevented this from happening.
     }
 
@@ -48,17 +48,17 @@ int tcp_listen(tcp_socket_t* socket, int backlog) {
         return 0;
     }
 
-    reactor_borrow_network_t network_borrow = __wasi_sockets_utils__borrow_network();
-    if (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_start_listen(socket_borrow, &error)) {
+    network_borrow_network_t network_borrow = __wasi_sockets_utils__borrow_network();
+    if (!tcp_method_tcp_socket_start_listen(socket_borrow, &error)) {
         errno = __wasi_sockets_utils__map_error(error);
         return -1;
     }
 
     // Listen has successfully started. Attempt to finish it:
-    while (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_finish_listen(socket_borrow, &error)) {
-        if (error == WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_WOULD_BLOCK) {
-    		reactor_borrow_pollable_t pollable_borrow = wasi_io_0_2_0_rc_2023_10_18_poll_borrow_pollable(socket->socket_pollable);
-    		wasi_io_0_2_0_rc_2023_10_18_poll_poll_one(pollable_borrow);
+    while (!tcp_method_tcp_socket_finish_listen(socket_borrow, &error)) {
+        if (error == NETWORK_ERROR_CODE_WOULD_BLOCK) {
+    		poll_borrow_pollable_t pollable_borrow = poll_borrow_pollable(socket->socket_pollable);
+    		poll_method_pollable_block(pollable_borrow);
         } else {
             errno = __wasi_sockets_utils__map_error(error);
             return -1;

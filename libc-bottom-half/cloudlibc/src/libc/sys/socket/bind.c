@@ -4,11 +4,11 @@
 #include <descriptor_table.h>
 #include "__utils.h"
 
-int tcp_bind(tcp_socket_t* socket, wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t* address) {
+int tcp_bind(tcp_socket_t* socket, network_ip_socket_address_t* address) {
     return __wasi_sockets_utils__tcp_bind(socket, address);
 }
 
-int udp_bind(udp_socket_t* socket, wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t* address) {
+int udp_bind(udp_socket_t* socket, network_ip_socket_address_t* address) {
     // TODO wasi-sockets: implement
 	errno = EOPNOTSUPP;
 	return -1;
@@ -22,7 +22,7 @@ int bind(int socket, const struct sockaddr* addr, socklen_t addrlen) {
         return -1;
     }
 
-	wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t ip_address;
+	network_ip_socket_address_t ip_address;
     int parse_err;
     if (!__wasi_sockets_utils__parse_address(addr, addrlen, &ip_address, &parse_err)) {
         errno = parse_err;

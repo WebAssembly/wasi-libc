@@ -38,11 +38,11 @@ ssize_t tcp_recv(tcp_socket_t* socket, void* restrict buffer, size_t length, int
         should_block = false;
     }
 
-    reactor_borrow_input_stream_t rx_borrow = wasi_io_0_2_0_rc_2023_10_18_streams_borrow_input_stream(connection.input);
+    streams_borrow_input_stream_t rx_borrow = streams_borrow_input_stream(connection.input);
     while (true) {
-        reactor_list_u8_t result;
-        wasi_io_0_2_0_rc_2023_10_18_streams_stream_error_t error;
-        if (!wasi_io_0_2_0_rc_2023_10_18_streams_method_input_stream_read(rx_borrow, length, &result, &error)) {
+        streams_list_u8_t result;
+        streams_stream_error_t error;
+        if (!streams_method_input_stream_read(rx_borrow, length, &result, &error)) {
             // TODO wasi-sockets: wasi-sockets has no way to recover stream errors yet.
             errno = EPIPE;
             return -1;
@@ -50,11 +50,11 @@ ssize_t tcp_recv(tcp_socket_t* socket, void* restrict buffer, size_t length, int
 
         if (result.len) {
             memcpy(buffer, result.ptr, result.len);
-            reactor_list_u8_free(&result);
+            streams_list_u8_free(&result);
             return result.len;
         } else if (should_block) {
-            reactor_borrow_pollable_t pollable_borrow = wasi_io_0_2_0_rc_2023_10_18_poll_borrow_pollable(connection.input_pollable);
-            wasi_io_0_2_0_rc_2023_10_18_poll_poll_one(pollable_borrow);
+            poll_borrow_pollable_t pollable_borrow = poll_borrow_pollable(connection.input_pollable);
+            poll_method_pollable_block(pollable_borrow);
         } else {
             errno = EWOULDBLOCK;
             return -1;

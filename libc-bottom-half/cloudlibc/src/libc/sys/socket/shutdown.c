@@ -16,17 +16,17 @@ static_assert(SHUT_WR == __WASI_SDFLAGS_WR, "Value mismatch");
 
 int tcp_shutdown(tcp_socket_t* socket, int posix_how)
 {
-    wasi_sockets_0_2_0_rc_2023_10_18_tcp_shutdown_type_t wasi_how;
+    tcp_shutdown_type_t wasi_how;
     switch (posix_how)
     {
     case SHUT_RD:
-        wasi_how = WASI_SOCKETS_0_2_0_RC_2023_10_18_TCP_SHUTDOWN_TYPE_RECEIVE;
+        wasi_how = TCP_SHUTDOWN_TYPE_RECEIVE;
         break;
     case SHUT_WR:
-        wasi_how = WASI_SOCKETS_0_2_0_RC_2023_10_18_TCP_SHUTDOWN_TYPE_SEND;
+        wasi_how = TCP_SHUTDOWN_TYPE_SEND;
         break;
     case SHUT_RDWR:
-        wasi_how = WASI_SOCKETS_0_2_0_RC_2023_10_18_TCP_SHUTDOWN_TYPE_BOTH;
+        wasi_how = TCP_SHUTDOWN_TYPE_BOTH;
         break;
     default:
         errno = EINVAL;
@@ -41,9 +41,9 @@ int tcp_shutdown(tcp_socket_t* socket, int posix_how)
         return -1;
     }
 
-    wasi_sockets_0_2_0_rc_2023_10_18_network_error_code_t error;
-    reactor_borrow_tcp_socket_t socket_borrow = wasi_sockets_0_2_0_rc_2023_10_18_tcp_borrow_tcp_socket(socket->socket);
-    if (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_shutdown(socket_borrow, wasi_how, &error)) {
+    network_error_code_t error;
+    tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
+    if (!tcp_method_tcp_socket_shutdown(socket_borrow, wasi_how, &error)) {
         errno = __wasi_sockets_utils__map_error(error);
         return -1;
     }

@@ -5,7 +5,7 @@
 #include <descriptor_table.h>
 #include "__utils.h"
 
-bool tcp_accept(tcp_socket_t* socket, bool client_blocking, int* out_clientfd, wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t* out_address, int* out_errno) {
+bool tcp_accept(tcp_socket_t* socket, bool client_blocking, int* out_clientfd, network_ip_socket_address_t* out_address, int* out_errno) {
 
     tcp_socket_state_listening_t listener;
     if (socket->state_tag == TCP_SOCKET_STATE_LISTENING) {
@@ -15,15 +15,15 @@ bool tcp_accept(tcp_socket_t* socket, bool client_blocking, int* out_clientfd, w
         return false;
     }
 
-    reactor_borrow_tcp_socket_t socket_borrow = wasi_sockets_0_2_0_rc_2023_10_18_tcp_borrow_tcp_socket(socket->socket);
+    tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
 
-    reactor_tuple3_own_tcp_socket_own_input_stream_own_output_stream_t client_and_io;
-    wasi_sockets_0_2_0_rc_2023_10_18_network_error_code_t error;
-    while (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_accept(socket_borrow, &client_and_io, &error)) {
-        if (error == WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_ERROR_CODE_WOULD_BLOCK) {
+    tcp_tuple3_own_tcp_socket_own_input_stream_own_output_stream_t client_and_io;
+    network_error_code_t error;
+    while (!tcp_method_tcp_socket_accept(socket_borrow, &client_and_io, &error)) {
+        if (error == NETWORK_ERROR_CODE_WOULD_BLOCK) {
             if (socket->blocking) {
-                reactor_borrow_pollable_t pollable_borrow = wasi_io_0_2_0_rc_2023_10_18_poll_borrow_pollable(socket->socket_pollable);
-                wasi_io_0_2_0_rc_2023_10_18_poll_poll_one(pollable_borrow);
+                poll_borrow_pollable_t pollable_borrow = poll_borrow_pollable(socket->socket_pollable);
+                poll_method_pollable_block(pollable_borrow);
             } else {
                 *out_errno = EWOULDBLOCK;
                 return false;
@@ -34,21 +34,21 @@ bool tcp_accept(tcp_socket_t* socket, bool client_blocking, int* out_clientfd, w
         }
     }
 
-    reactor_own_tcp_socket_t client = client_and_io.f0;
-    reactor_borrow_tcp_socket_t client_borrow = wasi_sockets_0_2_0_rc_2023_10_18_tcp_borrow_tcp_socket(client);
+    tcp_own_tcp_socket_t client = client_and_io.f0;
+    tcp_borrow_tcp_socket_t client_borrow = tcp_borrow_tcp_socket(client);
 
-    reactor_own_pollable_t client_pollable = wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_subscribe(client_borrow);
+    poll_own_pollable_t client_pollable = tcp_method_tcp_socket_subscribe(client_borrow);
 
-    reactor_own_input_stream_t input = client_and_io.f1;
-    reactor_borrow_input_stream_t input_borrow = wasi_io_0_2_0_rc_2023_10_18_streams_borrow_input_stream(input);
-    reactor_own_pollable_t input_pollable = wasi_io_0_2_0_rc_2023_10_18_streams_method_input_stream_subscribe(input_borrow);
+    streams_own_input_stream_t input = client_and_io.f1;
+    streams_borrow_input_stream_t input_borrow = streams_borrow_input_stream(input);
+    poll_own_pollable_t input_pollable = streams_method_input_stream_subscribe(input_borrow);
 
-    reactor_own_output_stream_t output = client_and_io.f2;
-    reactor_borrow_output_stream_t output_borrow = wasi_io_0_2_0_rc_2023_10_18_streams_borrow_output_stream(output);
-    reactor_own_pollable_t output_pollable = wasi_io_0_2_0_rc_2023_10_18_streams_method_output_stream_subscribe(output_borrow);
+    streams_own_output_stream_t output = client_and_io.f2;
+    streams_borrow_output_stream_t output_borrow = streams_borrow_output_stream(output);
+    poll_own_pollable_t output_pollable = streams_method_output_stream_subscribe(output_borrow);
 
     if (out_address != NULL) {
-        if (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_remote_address(client_borrow, out_address, &error)) {
+        if (!tcp_method_tcp_socket_remote_address(client_borrow, out_address, &error)) {
             // TODO wasi-sockets: How to recover from this in a POSIX compatible way?
             abort();
         }
@@ -78,7 +78,7 @@ bool tcp_accept(tcp_socket_t* socket, bool client_blocking, int* out_clientfd, w
     return true;
 }
 
-bool udp_accept(udp_socket_t* socket, bool client_blocking, int* out_clientfd, wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t* out_address, int* out_errno) {
+bool udp_accept(udp_socket_t* socket, bool client_blocking, int* out_clientfd, network_ip_socket_address_t* out_address, int* out_errno) {
     // UDP doesn't support accept
     *out_errno = EOPNOTSUPP;
     return false;
@@ -112,8 +112,8 @@ int accept4(int socket, struct sockaddr *restrict addr, socklen_t *restrict addr
     bool client_blocking = (flags & SOCK_NONBLOCK) == 0;
     // Ignore SOCK_CLOEXEC flag. That concept does not exist in WASI.
 
-    wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t out_address;
-    wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t* out_address_ptr = addr != NULL ? &out_address : NULL;
+    network_ip_socket_address_t out_address;
+    network_ip_socket_address_t* out_address_ptr = addr != NULL ? &out_address : NULL;
 
     int client_fd;
     int err;

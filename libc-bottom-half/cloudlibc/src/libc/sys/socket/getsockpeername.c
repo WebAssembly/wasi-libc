@@ -4,11 +4,11 @@
 #include <descriptor_table.h>
 #include "__utils.h"
 
-bool tcp_getsockname(tcp_socket_t* socket, wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t* out_address)
+bool tcp_getsockname(tcp_socket_t* socket, network_ip_socket_address_t* out_address)
 {
-    wasi_sockets_0_2_0_rc_2023_10_18_network_error_code_t error;
-    reactor_borrow_tcp_socket_t socket_borrow = wasi_sockets_0_2_0_rc_2023_10_18_tcp_borrow_tcp_socket(socket->socket);
-    if (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_local_address(socket_borrow, out_address, &error)) {
+    network_error_code_t error;
+    tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
+    if (!tcp_method_tcp_socket_local_address(socket_borrow, out_address, &error)) {
         errno = __wasi_sockets_utils__map_error(error);
         return false;
     }
@@ -16,11 +16,11 @@ bool tcp_getsockname(tcp_socket_t* socket, wasi_sockets_0_2_0_rc_2023_10_18_netw
     return true;
 }
 
-bool tcp_getpeername(tcp_socket_t* socket, wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t* out_address)
+bool tcp_getpeername(tcp_socket_t* socket, network_ip_socket_address_t* out_address)
 {
-    wasi_sockets_0_2_0_rc_2023_10_18_network_error_code_t error;
-    reactor_borrow_tcp_socket_t socket_borrow = wasi_sockets_0_2_0_rc_2023_10_18_tcp_borrow_tcp_socket(socket->socket);
-    if (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_remote_address(socket_borrow, out_address, &error)) {
+    network_error_code_t error;
+    tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
+    if (!tcp_method_tcp_socket_remote_address(socket_borrow, out_address, &error)) {
         errno = __wasi_sockets_utils__map_error(error);
         return false;
     }
@@ -28,14 +28,14 @@ bool tcp_getpeername(tcp_socket_t* socket, wasi_sockets_0_2_0_rc_2023_10_18_netw
     return true;
 }
 
-bool udp_getsockname(udp_socket_t* socket, wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t* out_address)
+bool udp_getsockname(udp_socket_t* socket, network_ip_socket_address_t* out_address)
 {
     // TODO wasi-sockets: implement
     errno = EOPNOTSUPP;
     return -1;
 }
 
-bool udp_getpeername(udp_socket_t* socket, wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t* out_address)
+bool udp_getpeername(udp_socket_t* socket, network_ip_socket_address_t* out_address)
 {
     // TODO wasi-sockets: implement
     errno = EOPNOTSUPP;
@@ -55,7 +55,7 @@ int getsockname(int socket, struct sockaddr *__restrict addr, socklen_t *__restr
         return -1;
     }
 
-    wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t out_address;
+    network_ip_socket_address_t out_address;
 
     switch (entry->tag)
     {
@@ -98,7 +98,7 @@ int getpeername(int socket, struct sockaddr *__restrict addr, socklen_t *__restr
         return -1;
     }
 
-    wasi_sockets_0_2_0_rc_2023_10_18_network_ip_socket_address_t out_address;
+    network_ip_socket_address_t out_address;
 
     switch (entry->tag)
     {

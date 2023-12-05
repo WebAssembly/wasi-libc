@@ -357,7 +357,7 @@ DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 EMMALLOC_OBJS = $(call objs,$(EMMALLOC_SOURCES))
 LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 LIBC_TOP_HALF_ALL_OBJS = $(call asmobjs,$(call objs,$(LIBC_TOP_HALF_ALL_SOURCES)))
-LIBC_OBJS += $(OBJDIR)/reactor_component_type.o
+LIBC_OBJS += $(OBJDIR)/preview2_component_type.o
 ifeq ($(MALLOC_IMPL),dlmalloc)
 LIBC_OBJS += $(DLMALLOC_OBJS)
 else ifeq ($(MALLOC_IMPL),emmalloc)
@@ -578,7 +578,7 @@ $(OBJDIR)/%.long-double.pic.o: %.c include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
-$(OBJDIR)/reactor_component_type.pic.o $(OBJDIR)/reactor_component_type.o: $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/libc/sys/wasi_preview2/reactor_component_type.o
+$(OBJDIR)/preview2_component_type.pic.o $(OBJDIR)/preview2_component_type.o: $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/libc/sys/wasi_preview2/preview2_component_type.o
 	@mkdir -p "$(@D)"
 	cp $< $@
 

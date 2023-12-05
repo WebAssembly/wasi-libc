@@ -29,17 +29,17 @@ void drop_tcp_socket(tcp_socket_t socket) {
     case TCP_SOCKET_STATE_CONNECTED: {
         tcp_socket_state_connected_t connection = socket.state.connected;
 
-        wasi_io_0_2_0_rc_2023_10_18_poll_pollable_drop_own(connection.input_pollable);
-        wasi_io_0_2_0_rc_2023_10_18_poll_pollable_drop_own(connection.output_pollable);
-        wasi_io_0_2_0_rc_2023_10_18_streams_input_stream_drop_own(connection.input);
-        wasi_io_0_2_0_rc_2023_10_18_streams_output_stream_drop_own(connection.output);
+        poll_pollable_drop_own(connection.input_pollable);
+        poll_pollable_drop_own(connection.output_pollable);
+        streams_input_stream_drop_own(connection.input);
+        streams_output_stream_drop_own(connection.output);
         break;
     }
     default: /* unreachable */ abort();
     }
 
-    wasi_io_0_2_0_rc_2023_10_18_poll_pollable_drop_own(socket.socket_pollable);
-    wasi_sockets_0_2_0_rc_2023_10_18_tcp_tcp_socket_drop_own(socket.socket);
+    poll_pollable_drop_own(socket.socket_pollable);
+    tcp_tcp_socket_drop_own(socket.socket);
 }
 
 void drop_udp_socket(udp_socket_t socket) {

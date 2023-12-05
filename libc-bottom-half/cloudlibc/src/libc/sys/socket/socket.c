@@ -4,17 +4,17 @@
 #include <descriptor_table.h>
 #include "__utils.h"
 
-int tcp_socket(wasi_sockets_0_2_0_rc_2023_10_18_network_ip_address_family_t family, bool blocking)
+int tcp_socket(network_ip_address_family_t family, bool blocking)
 {
-    wasi_sockets_0_2_0_rc_2023_10_18_tcp_create_socket_error_code_t error;
-    reactor_own_tcp_socket_t socket;
-    if (!wasi_sockets_0_2_0_rc_2023_10_18_tcp_create_socket_create_tcp_socket(family, &socket, &error)) {
+    tcp_create_socket_error_code_t error;
+    tcp_own_tcp_socket_t socket;
+    if (!tcp_create_socket_create_tcp_socket(family, &socket, &error)) {
         errno = __wasi_sockets_utils__map_error(error);
         return -1;
     }
 
-    reactor_borrow_tcp_socket_t socket_borrow = wasi_sockets_0_2_0_rc_2023_10_18_tcp_borrow_tcp_socket(socket);
-    reactor_own_pollable_t socket_pollable = wasi_sockets_0_2_0_rc_2023_10_18_tcp_method_tcp_socket_subscribe(socket_borrow);
+    tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket);
+    poll_own_pollable_t socket_pollable = tcp_method_tcp_socket_subscribe(socket_borrow);
 
     descriptor_table_entry_t entry = {
         .tag = DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET,
@@ -35,7 +35,7 @@ int tcp_socket(wasi_sockets_0_2_0_rc_2023_10_18_network_ip_address_family_t fami
     return fd;
 }
 
-int udp_socket(wasi_sockets_0_2_0_rc_2023_10_18_network_ip_address_family_t family, bool blocking)
+int udp_socket(network_ip_address_family_t family, bool blocking)
 {
     // TODO wasi-sockets: implement
     errno = EPROTONOSUPPORT;
@@ -45,14 +45,14 @@ int udp_socket(wasi_sockets_0_2_0_rc_2023_10_18_network_ip_address_family_t fami
 
 int socket(int domain, int type, int protocol)
 {
-    wasi_sockets_0_2_0_rc_2023_10_18_network_ip_address_family_t family;
+    network_ip_address_family_t family;
     switch (domain) {
     case PF_INET:
-        family = WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_IP_ADDRESS_FAMILY_IPV4;
+        family = NETWORK_IP_ADDRESS_FAMILY_IPV4;
         break;
 
     case PF_INET6:
-        family = WASI_SOCKETS_0_2_0_RC_2023_10_18_NETWORK_IP_ADDRESS_FAMILY_IPV6;
+        family = NETWORK_IP_ADDRESS_FAMILY_IPV6;
         break;
 
     default:

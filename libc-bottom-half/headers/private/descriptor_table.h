@@ -1,7 +1,7 @@
 #ifndef DESCRIPTOR_TABLE_H
 #define DESCRIPTOR_TABLE_H
 
-#include <reactor.h>
+#include <preview2.h>
 
 typedef enum {
     TCP_SOCKET_STATE_UNBOUND,
@@ -18,14 +18,14 @@ typedef struct {} tcp_socket_state_connecting_t;
 typedef struct {} tcp_socket_state_listening_t;
 
 typedef struct {
-    reactor_own_input_stream_t input;
-    reactor_own_pollable_t input_pollable;
-    reactor_own_output_stream_t output;
-    reactor_own_pollable_t output_pollable;
+    streams_own_input_stream_t input;
+    poll_own_pollable_t input_pollable;
+    streams_own_output_stream_t output;
+    poll_own_pollable_t output_pollable;
 } tcp_socket_state_connected_t;
 
 typedef struct {
-    wasi_sockets_0_2_0_rc_2023_10_18_network_error_code_t error_code;
+    network_error_code_t error_code;
 } tcp_socket_state_connect_failed_t;
 
 typedef union {
@@ -38,8 +38,8 @@ typedef union {
 } tcp_socket_state_t;
 
 typedef struct {
-    reactor_own_tcp_socket_t socket;
-    reactor_own_pollable_t socket_pollable;
+    tcp_own_tcp_socket_t socket;
+    poll_own_pollable_t socket_pollable;
     bool blocking;
     tcp_socket_state_tag_t state_tag;
     tcp_socket_state_t state;
@@ -49,7 +49,7 @@ typedef struct {
 
 
 typedef struct {
-    reactor_own_udp_socket_t socket;
+    udp_own_udp_socket_t socket;
     bool blocking;
 } udp_socket_t;
 

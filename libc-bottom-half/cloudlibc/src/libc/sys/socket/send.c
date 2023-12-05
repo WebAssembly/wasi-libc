@@ -38,11 +38,11 @@ ssize_t tcp_send(tcp_socket_t* socket, const void* buffer, size_t length, int fl
         // requested or not.
     }
 
-    reactor_borrow_output_stream_t tx_borrow = wasi_io_0_2_0_rc_2023_10_18_streams_borrow_output_stream(connection.output);
+    streams_borrow_output_stream_t tx_borrow = streams_borrow_output_stream(connection.output);
     while (true) {
-        wasi_io_0_2_0_rc_2023_10_18_streams_stream_error_t error;
+        streams_stream_error_t error;
         uint64_t count;
-        if (!wasi_io_0_2_0_rc_2023_10_18_streams_method_output_stream_check_write(tx_borrow, &count, &error)) {
+        if (!streams_method_output_stream_check_write(tx_borrow, &count, &error)) {
             // TODO wasi-sockets: wasi-sockets has no way to recover stream errors yet.
             errno = EPIPE;
             return -1;
@@ -50,8 +50,8 @@ ssize_t tcp_send(tcp_socket_t* socket, const void* buffer, size_t length, int fl
 
         if (count) {
             count = count < length ? count : length;
-            reactor_list_u8_t list = { .ptr = (uint8_t*)buffer, .len = count };
-            if (!wasi_io_0_2_0_rc_2023_10_18_streams_method_output_stream_write(tx_borrow, &list, &error)) {
+            streams_list_u8_t list = { .ptr = (uint8_t*)buffer, .len = count };
+            if (!streams_method_output_stream_write(tx_borrow, &list, &error)) {
                 // TODO wasi-sockets: wasi-sockets has no way to recover stream errors yet.
                 errno = EPIPE;
                 return -1;
@@ -59,8 +59,8 @@ ssize_t tcp_send(tcp_socket_t* socket, const void* buffer, size_t length, int fl
                 return count;
             }
         } else if (should_block) {
-            reactor_borrow_pollable_t pollable_borrow = wasi_io_0_2_0_rc_2023_10_18_poll_borrow_pollable(connection.output_pollable);
-            wasi_io_0_2_0_rc_2023_10_18_poll_poll_one(pollable_borrow);
+            poll_borrow_pollable_t pollable_borrow = poll_borrow_pollable(connection.output_pollable);
+            poll_method_pollable_block(pollable_borrow);
         } else {
             errno = EWOULDBLOCK;
             return -1;

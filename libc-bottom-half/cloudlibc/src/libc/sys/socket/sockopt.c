@@ -36,9 +36,7 @@ int tcp_getsockopt(tcp_socket_t* socket, int level, int optname,
             break;
         }
         case SO_DOMAIN: {
-            value = __wasi_sockets_utils__posix_family(
-                tcp_method_tcp_socket_address_family(socket_borrow)
-            );
+            value = __wasi_sockets_utils__posix_family(socket->family);
             break;
         }
         case SO_ERROR: {
@@ -106,8 +104,7 @@ int tcp_getsockopt(tcp_socket_t* socket, int level, int optname,
     case SOL_IP:
         switch (optname) {
         case IP_TTL: {
-            if (tcp_method_tcp_socket_address_family(socket_borrow)
-                != NETWORK_IP_ADDRESS_FAMILY_IPV4)
+            if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV4)
             {
                 errno = EAFNOSUPPORT;
                 return -1;
@@ -132,8 +129,7 @@ int tcp_getsockopt(tcp_socket_t* socket, int level, int optname,
     case SOL_IPV6:
         switch (optname) {
         case IPV6_UNICAST_HOPS: {
-            if (tcp_method_tcp_socket_address_family(socket_borrow)
-                != NETWORK_IP_ADDRESS_FAMILY_IPV6)
+            if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV6)
             {
                 errno = EAFNOSUPPORT;
                 return -1;
@@ -286,8 +282,7 @@ int tcp_setsockopt(tcp_socket_t* socket, int level, int optname, const void* opt
     case SOL_IP:
         switch (optname) {
         case IP_TTL: {
-            if (tcp_method_tcp_socket_address_family(socket_borrow)
-                != NETWORK_IP_ADDRESS_FAMILY_IPV4)
+            if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV4)
             {
                 errno = EAFNOSUPPORT;
                 return -1;
@@ -315,8 +310,7 @@ int tcp_setsockopt(tcp_socket_t* socket, int level, int optname, const void* opt
     case SOL_IPV6:
         switch (optname) {
         case IPV6_UNICAST_HOPS: {
-            if (tcp_method_tcp_socket_address_family(socket_borrow)
-                != NETWORK_IP_ADDRESS_FAMILY_IPV6)
+            if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV6)
             {
                 errno = EAFNOSUPPORT;
                 return -1;
@@ -411,9 +405,7 @@ int udp_getsockopt(udp_socket_t* socket, int level, int optname,
             break;
         }
         case SO_DOMAIN: {
-            value = __wasi_sockets_utils__posix_family(
-                udp_method_udp_socket_address_family(socket_borrow)
-            );
+            value = __wasi_sockets_utils__posix_family(socket->family);
             break;
         }
         case SO_RCVBUF: {
@@ -456,8 +448,7 @@ int udp_getsockopt(udp_socket_t* socket, int level, int optname,
     case SOL_IP:
         switch (optname) {
         case IP_TTL: {
-            if (udp_method_udp_socket_address_family(socket_borrow)
-                != NETWORK_IP_ADDRESS_FAMILY_IPV4)
+            if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV4)
             {
                 errno = EAFNOSUPPORT;
                 return -1;
@@ -482,8 +473,7 @@ int udp_getsockopt(udp_socket_t* socket, int level, int optname,
     case SOL_IPV6:
         switch (optname) {
         case IPV6_UNICAST_HOPS: {
-            if (udp_method_udp_socket_address_family(socket_borrow)
-                != NETWORK_IP_ADDRESS_FAMILY_IPV6)
+            if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV6)
             {
                 errno = EAFNOSUPPORT;
                 return -1;
@@ -566,8 +556,7 @@ int udp_setsockopt(udp_socket_t* socket, int level, int optname, const void* opt
     case SOL_IP:
         switch (optname) {
         case IP_TTL: {
-            if (udp_method_udp_socket_address_family(socket_borrow)
-                != NETWORK_IP_ADDRESS_FAMILY_IPV4)
+            if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV4)
             {
                 errno = EAFNOSUPPORT;
                 return -1;
@@ -595,8 +584,7 @@ int udp_setsockopt(udp_socket_t* socket, int level, int optname, const void* opt
     case SOL_IPV6:
         switch (optname) {
         case IPV6_UNICAST_HOPS: {
-            if (udp_method_udp_socket_address_family(socket_borrow)
-                != NETWORK_IP_ADDRESS_FAMILY_IPV6)
+            if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV6)
             {
                 errno = EAFNOSUPPORT;
                 return -1;

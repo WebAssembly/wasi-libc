@@ -14,8 +14,7 @@ int tcp_listen(tcp_socket_t* socket, int backlog) {
     case TCP_SOCKET_STATE_UNBOUND: {
         // Socket is not explicitly bound by the user. We'll do it for them:
 
-        tcp_ip_address_family_t family = tcp_method_tcp_socket_address_family(socket_borrow);
-        network_ip_socket_address_t any = __wasi_sockets_utils__any_addr(family);
+        network_ip_socket_address_t any = __wasi_sockets_utils__any_addr(socket->family);
         int result = __wasi_sockets_utils__tcp_bind(socket, &any);
         if (result != 0) {
             return result;

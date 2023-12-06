@@ -20,6 +20,7 @@ int tcp_socket(network_ip_address_family_t family, bool blocking)
         .socket = socket,
         .socket_pollable = socket_pollable,
         .blocking = blocking,
+        .family = family,
         .state = { .tag = TCP_SOCKET_STATE_UNBOUND, .unbound = { /* No additional state. */ } },
     } };
 
@@ -47,6 +48,7 @@ int udp_socket(network_ip_address_family_t family, bool blocking)
         .socket = socket,
         .socket_pollable = socket_pollable,
         .blocking = blocking,
+        .family = family,
         .state = { .tag = UDP_SOCKET_STATE_UNBOUND, .unbound = { /* No additional state. */ } },
     } };
 

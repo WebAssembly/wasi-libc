@@ -2,16 +2,16 @@
 #include "preview2.h"
 
 
-__attribute__((__import_module__("wasi:cli/environment@0.2.0-rc-2023-11-10"), __import_name__("get-environment")))
+__attribute__((__import_module__("wasi:cli/environment@0.2.0-rc-2023-12-05"), __import_name__("get-environment")))
 extern void __wasm_import_environment_get_environment(int32_t);
 
-__attribute__((__import_module__("wasi:cli/environment@0.2.0-rc-2023-11-10"), __import_name__("get-arguments")))
+__attribute__((__import_module__("wasi:cli/environment@0.2.0-rc-2023-12-05"), __import_name__("get-arguments")))
 extern void __wasm_import_environment_get_arguments(int32_t);
 
-__attribute__((__import_module__("wasi:cli/environment@0.2.0-rc-2023-11-10"), __import_name__("initial-cwd")))
+__attribute__((__import_module__("wasi:cli/environment@0.2.0-rc-2023-12-05"), __import_name__("initial-cwd")))
 extern void __wasm_import_environment_initial_cwd(int32_t);
 
-__attribute__((__import_module__("wasi:cli/exit@0.2.0-rc-2023-11-10"), __import_name__("exit")))
+__attribute__((__import_module__("wasi:cli/exit@0.2.0-rc-2023-12-05"), __import_name__("exit")))
 extern void __wasm_import_exit_exit(int32_t);
 
 __attribute__((__import_module__("wasi:io/error@0.2.0-rc-2023-11-10"), __import_name__("[method]error.to-debug-string")))
@@ -71,23 +71,23 @@ extern void __wasm_import_streams_method_output_stream_splice(int32_t, int32_t, 
 __attribute__((__import_module__("wasi:io/streams@0.2.0-rc-2023-11-10"), __import_name__("[method]output-stream.blocking-splice")))
 extern void __wasm_import_streams_method_output_stream_blocking_splice(int32_t, int32_t, int64_t, int32_t);
 
-__attribute__((__import_module__("wasi:cli/stdin@0.2.0-rc-2023-11-10"), __import_name__("get-stdin")))
+__attribute__((__import_module__("wasi:cli/stdin@0.2.0-rc-2023-12-05"), __import_name__("get-stdin")))
 extern int32_t __wasm_import_stdin_get_stdin(void);
 
-__attribute__((__import_module__("wasi:cli/stdout@0.2.0-rc-2023-11-10"), __import_name__("get-stdout")))
+__attribute__((__import_module__("wasi:cli/stdout@0.2.0-rc-2023-12-05"), __import_name__("get-stdout")))
 extern int32_t __wasm_import_stdout_get_stdout(void);
 
-__attribute__((__import_module__("wasi:cli/stderr@0.2.0-rc-2023-11-10"), __import_name__("get-stderr")))
+__attribute__((__import_module__("wasi:cli/stderr@0.2.0-rc-2023-12-05"), __import_name__("get-stderr")))
 extern int32_t __wasm_import_stderr_get_stderr(void);
 
-__attribute__((__import_module__("wasi:cli/terminal-stdin@0.2.0-rc-2023-11-10"), __import_name__("get-terminal-stdin")))
-extern void __wasm_import_wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_get_terminal_stdin(int32_t);
+__attribute__((__import_module__("wasi:cli/terminal-stdin@0.2.0-rc-2023-12-05"), __import_name__("get-terminal-stdin")))
+extern void __wasm_import_terminal_stdin_get_terminal_stdin(int32_t);
 
-__attribute__((__import_module__("wasi:cli/terminal-stdout@0.2.0-rc-2023-11-10"), __import_name__("get-terminal-stdout")))
-extern void __wasm_import_wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_get_terminal_stdout(int32_t);
+__attribute__((__import_module__("wasi:cli/terminal-stdout@0.2.0-rc-2023-12-05"), __import_name__("get-terminal-stdout")))
+extern void __wasm_import_terminal_stdout_get_terminal_stdout(int32_t);
 
-__attribute__((__import_module__("wasi:cli/terminal-stderr@0.2.0-rc-2023-11-10"), __import_name__("get-terminal-stderr")))
-extern void __wasm_import_wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_get_terminal_stderr(int32_t);
+__attribute__((__import_module__("wasi:cli/terminal-stderr@0.2.0-rc-2023-12-05"), __import_name__("get-terminal-stderr")))
+extern void __wasm_import_terminal_stderr_get_terminal_stderr(int32_t);
 
 __attribute__((__import_module__("wasi:clocks/monotonic-clock@0.2.0-rc-2023-11-10"), __import_name__("now")))
 extern int64_t __wasm_import_monotonic_clock_now(void);
@@ -539,47 +539,47 @@ void streams_result_void_stream_error_free(streams_result_void_stream_error_t *p
   }
 }
 
-__attribute__((__import_module__("wasi:cli/terminal-input@0.2.0-rc-2023-11-10"), __import_name__("[resource-drop]terminal-input")))
-extern void __wasm_import_wasi_cli_0_2_0_rc_2023_11_10_terminal_input_terminal_input_drop(int32_t handle);
+__attribute__((__import_module__("wasi:cli/terminal-input@0.2.0-rc-2023-12-05"), __import_name__("[resource-drop]terminal-input")))
+extern void __wasm_import_terminal_input_terminal_input_drop(int32_t handle);
 
-void wasi_cli_0_2_0_rc_2023_11_10_terminal_input_terminal_input_drop_own(wasi_cli_0_2_0_rc_2023_11_10_terminal_input_own_terminal_input_t handle) {
-  __wasm_import_wasi_cli_0_2_0_rc_2023_11_10_terminal_input_terminal_input_drop(handle.__handle);
+void terminal_input_terminal_input_drop_own(terminal_input_own_terminal_input_t handle) {
+  __wasm_import_terminal_input_terminal_input_drop(handle.__handle);
 }
 
-void wasi_cli_0_2_0_rc_2023_11_10_terminal_input_terminal_input_drop_borrow(wasi_cli_0_2_0_rc_2023_11_10_terminal_input_own_terminal_input_t handle) {
-  __wasm_import_wasi_cli_0_2_0_rc_2023_11_10_terminal_input_terminal_input_drop(handle.__handle);
+void terminal_input_terminal_input_drop_borrow(terminal_input_own_terminal_input_t handle) {
+  __wasm_import_terminal_input_terminal_input_drop(handle.__handle);
 }
 
-wasi_cli_0_2_0_rc_2023_11_10_terminal_input_borrow_terminal_input_t wasi_cli_0_2_0_rc_2023_11_10_terminal_input_borrow_terminal_input(wasi_cli_0_2_0_rc_2023_11_10_terminal_input_own_terminal_input_t arg) {
-  return (wasi_cli_0_2_0_rc_2023_11_10_terminal_input_borrow_terminal_input_t) { arg.__handle };
+terminal_input_borrow_terminal_input_t terminal_input_borrow_terminal_input(terminal_input_own_terminal_input_t arg) {
+  return (terminal_input_borrow_terminal_input_t) { arg.__handle };
 }
 
-__attribute__((__import_module__("wasi:cli/terminal-output@0.2.0-rc-2023-11-10"), __import_name__("[resource-drop]terminal-output")))
-extern void __wasm_import_wasi_cli_0_2_0_rc_2023_11_10_terminal_output_terminal_output_drop(int32_t handle);
+__attribute__((__import_module__("wasi:cli/terminal-output@0.2.0-rc-2023-12-05"), __import_name__("[resource-drop]terminal-output")))
+extern void __wasm_import_terminal_output_terminal_output_drop(int32_t handle);
 
-void wasi_cli_0_2_0_rc_2023_11_10_terminal_output_terminal_output_drop_own(wasi_cli_0_2_0_rc_2023_11_10_terminal_output_own_terminal_output_t handle) {
-  __wasm_import_wasi_cli_0_2_0_rc_2023_11_10_terminal_output_terminal_output_drop(handle.__handle);
+void terminal_output_terminal_output_drop_own(terminal_output_own_terminal_output_t handle) {
+  __wasm_import_terminal_output_terminal_output_drop(handle.__handle);
 }
 
-void wasi_cli_0_2_0_rc_2023_11_10_terminal_output_terminal_output_drop_borrow(wasi_cli_0_2_0_rc_2023_11_10_terminal_output_own_terminal_output_t handle) {
-  __wasm_import_wasi_cli_0_2_0_rc_2023_11_10_terminal_output_terminal_output_drop(handle.__handle);
+void terminal_output_terminal_output_drop_borrow(terminal_output_own_terminal_output_t handle) {
+  __wasm_import_terminal_output_terminal_output_drop(handle.__handle);
 }
 
-wasi_cli_0_2_0_rc_2023_11_10_terminal_output_borrow_terminal_output_t wasi_cli_0_2_0_rc_2023_11_10_terminal_output_borrow_terminal_output(wasi_cli_0_2_0_rc_2023_11_10_terminal_output_own_terminal_output_t arg) {
-  return (wasi_cli_0_2_0_rc_2023_11_10_terminal_output_borrow_terminal_output_t) { arg.__handle };
+terminal_output_borrow_terminal_output_t terminal_output_borrow_terminal_output(terminal_output_own_terminal_output_t arg) {
+  return (terminal_output_borrow_terminal_output_t) { arg.__handle };
 }
 
-void wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_option_own_terminal_input_free(wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_option_own_terminal_input_t *ptr) {
+void terminal_stdin_option_own_terminal_input_free(terminal_stdin_option_own_terminal_input_t *ptr) {
   if (ptr->is_some) {
   }
 }
 
-void wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_option_own_terminal_output_free(wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_option_own_terminal_output_t *ptr) {
+void terminal_stdout_option_own_terminal_output_free(terminal_stdout_option_own_terminal_output_t *ptr) {
   if (ptr->is_some) {
   }
 }
 
-void wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_option_own_terminal_output_free(wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_option_own_terminal_output_t *ptr) {
+void terminal_stderr_option_own_terminal_output_free(terminal_stderr_option_own_terminal_output_t *ptr) {
   if (ptr->is_some) {
   }
 }
@@ -1672,12 +1672,12 @@ stderr_own_output_stream_t stderr_get_stderr(void) {
   return (stderr_own_output_stream_t) { ret };
 }
 
-bool wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_get_terminal_stdin(wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_own_terminal_input_t *ret) {
+bool terminal_stdin_get_terminal_stdin(terminal_stdin_own_terminal_input_t *ret) {
   __attribute__((__aligned__(4)))
   uint8_t ret_area[8];
   int32_t ptr = (int32_t) &ret_area;
-  __wasm_import_wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_get_terminal_stdin(ptr);
-  wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_option_own_terminal_input_t option;
+  __wasm_import_terminal_stdin_get_terminal_stdin(ptr);
+  terminal_stdin_option_own_terminal_input_t option;
   switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
     case 0: {
       option.is_some = false;
@@ -1685,7 +1685,7 @@ bool wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_get_terminal_stdin(wasi_cli_0_2
     }
     case 1: {
       option.is_some = true;
-      option.val = (wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_own_terminal_input_t) { *((int32_t*) (ptr + 4)) };
+      option.val = (terminal_stdin_own_terminal_input_t) { *((int32_t*) (ptr + 4)) };
       break;
     }
   }
@@ -1693,12 +1693,12 @@ bool wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_get_terminal_stdin(wasi_cli_0_2
   return option.is_some;
 }
 
-bool wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_get_terminal_stdout(wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_own_terminal_output_t *ret) {
+bool terminal_stdout_get_terminal_stdout(terminal_stdout_own_terminal_output_t *ret) {
   __attribute__((__aligned__(4)))
   uint8_t ret_area[8];
   int32_t ptr = (int32_t) &ret_area;
-  __wasm_import_wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_get_terminal_stdout(ptr);
-  wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_option_own_terminal_output_t option;
+  __wasm_import_terminal_stdout_get_terminal_stdout(ptr);
+  terminal_stdout_option_own_terminal_output_t option;
   switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
     case 0: {
       option.is_some = false;
@@ -1706,7 +1706,7 @@ bool wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_get_terminal_stdout(wasi_cli_0
     }
     case 1: {
       option.is_some = true;
-      option.val = (wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_own_terminal_output_t) { *((int32_t*) (ptr + 4)) };
+      option.val = (terminal_stdout_own_terminal_output_t) { *((int32_t*) (ptr + 4)) };
       break;
     }
   }
@@ -1714,12 +1714,12 @@ bool wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_get_terminal_stdout(wasi_cli_0
   return option.is_some;
 }
 
-bool wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_get_terminal_stderr(wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_own_terminal_output_t *ret) {
+bool terminal_stderr_get_terminal_stderr(terminal_stderr_own_terminal_output_t *ret) {
   __attribute__((__aligned__(4)))
   uint8_t ret_area[8];
   int32_t ptr = (int32_t) &ret_area;
-  __wasm_import_wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_get_terminal_stderr(ptr);
-  wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_option_own_terminal_output_t option;
+  __wasm_import_terminal_stderr_get_terminal_stderr(ptr);
+  terminal_stderr_option_own_terminal_output_t option;
   switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
     case 0: {
       option.is_some = false;
@@ -1727,7 +1727,7 @@ bool wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_get_terminal_stderr(wasi_cli_0
     }
     case 1: {
       option.is_some = true;
-      option.val = (wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_own_terminal_output_t) { *((int32_t*) (ptr + 4)) };
+      option.val = (terminal_stderr_own_terminal_output_t) { *((int32_t*) (ptr + 4)) };
       break;
     }
   }

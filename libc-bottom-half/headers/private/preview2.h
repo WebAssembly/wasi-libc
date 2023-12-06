@@ -136,42 +136,42 @@ typedef streams_own_output_stream_t stdout_own_output_stream_t;
 
 typedef streams_own_output_stream_t stderr_own_output_stream_t;
 
-typedef struct wasi_cli_0_2_0_rc_2023_11_10_terminal_input_own_terminal_input_t {
+typedef struct terminal_input_own_terminal_input_t {
   int32_t __handle;
-} wasi_cli_0_2_0_rc_2023_11_10_terminal_input_own_terminal_input_t;
+} terminal_input_own_terminal_input_t;
 
-typedef struct wasi_cli_0_2_0_rc_2023_11_10_terminal_input_borrow_terminal_input_t {
+typedef struct terminal_input_borrow_terminal_input_t {
   int32_t __handle;
-} wasi_cli_0_2_0_rc_2023_11_10_terminal_input_borrow_terminal_input_t;
+} terminal_input_borrow_terminal_input_t;
 
-typedef struct wasi_cli_0_2_0_rc_2023_11_10_terminal_output_own_terminal_output_t {
+typedef struct terminal_output_own_terminal_output_t {
   int32_t __handle;
-} wasi_cli_0_2_0_rc_2023_11_10_terminal_output_own_terminal_output_t;
+} terminal_output_own_terminal_output_t;
 
-typedef struct wasi_cli_0_2_0_rc_2023_11_10_terminal_output_borrow_terminal_output_t {
+typedef struct terminal_output_borrow_terminal_output_t {
   int32_t __handle;
-} wasi_cli_0_2_0_rc_2023_11_10_terminal_output_borrow_terminal_output_t;
+} terminal_output_borrow_terminal_output_t;
 
-typedef wasi_cli_0_2_0_rc_2023_11_10_terminal_input_own_terminal_input_t wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_own_terminal_input_t;
+typedef terminal_input_own_terminal_input_t terminal_stdin_own_terminal_input_t;
 
 typedef struct {
   bool is_some;
-  wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_own_terminal_input_t val;
-} wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_option_own_terminal_input_t;
+  terminal_stdin_own_terminal_input_t val;
+} terminal_stdin_option_own_terminal_input_t;
 
-typedef wasi_cli_0_2_0_rc_2023_11_10_terminal_output_own_terminal_output_t wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_own_terminal_output_t;
-
-typedef struct {
-  bool is_some;
-  wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_own_terminal_output_t val;
-} wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_option_own_terminal_output_t;
-
-typedef wasi_cli_0_2_0_rc_2023_11_10_terminal_output_own_terminal_output_t wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_own_terminal_output_t;
+typedef terminal_output_own_terminal_output_t terminal_stdout_own_terminal_output_t;
 
 typedef struct {
   bool is_some;
-  wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_own_terminal_output_t val;
-} wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_option_own_terminal_output_t;
+  terminal_stdout_own_terminal_output_t val;
+} terminal_stdout_option_own_terminal_output_t;
+
+typedef terminal_output_own_terminal_output_t terminal_stderr_own_terminal_output_t;
+
+typedef struct {
+  bool is_some;
+  terminal_stderr_own_terminal_output_t val;
+} terminal_stderr_option_own_terminal_output_t;
 
 // An instant in time, in nanoseconds. An instant is relative to an
 // unspecified initial value, and can only be compared to instances from
@@ -1081,7 +1081,7 @@ typedef struct {
   uint64_t f1;
 } random_insecure_seed_tuple2_u64_u64_t;
 
-// Imported Functions from `wasi:cli/environment@0.2.0-rc-2023-11-10`
+// Imported Functions from `wasi:cli/environment@0.2.0-rc-2023-12-05`
 // Get the POSIX-style environment variables.
 // 
 // Each environment variable is provided as a pair of string variable names
@@ -1097,7 +1097,7 @@ extern void environment_get_arguments(environment_list_string_t *ret);
 // directory, interpreting `.` as shorthand for this.
 extern bool environment_initial_cwd(imports_string_t *ret);
 
-// Imported Functions from `wasi:cli/exit@0.2.0-rc-2023-11-10`
+// Imported Functions from `wasi:cli/exit@0.2.0-rc-2023-12-05`
 // Exit the current instance and any linked instances.
 extern void exit_exit(exit_result_void_void_t *status);
 
@@ -1304,29 +1304,29 @@ extern bool streams_method_output_stream_write(streams_borrow_output_stream_t se
     // is ready for reading, before performing the `splice`.
     extern bool streams_method_output_stream_blocking_splice(streams_borrow_output_stream_t self, streams_borrow_input_stream_t src, uint64_t len, uint64_t *ret, streams_stream_error_t *err);
     
-    // Imported Functions from `wasi:cli/stdin@0.2.0-rc-2023-11-10`
+    // Imported Functions from `wasi:cli/stdin@0.2.0-rc-2023-12-05`
     extern stdin_own_input_stream_t stdin_get_stdin(void);
     
-    // Imported Functions from `wasi:cli/stdout@0.2.0-rc-2023-11-10`
+    // Imported Functions from `wasi:cli/stdout@0.2.0-rc-2023-12-05`
     extern stdout_own_output_stream_t stdout_get_stdout(void);
     
-    // Imported Functions from `wasi:cli/stderr@0.2.0-rc-2023-11-10`
+    // Imported Functions from `wasi:cli/stderr@0.2.0-rc-2023-12-05`
     extern stderr_own_output_stream_t stderr_get_stderr(void);
     
-    // Imported Functions from `wasi:cli/terminal-stdin@0.2.0-rc-2023-11-10`
+    // Imported Functions from `wasi:cli/terminal-stdin@0.2.0-rc-2023-12-05`
     // If stdin is connected to a terminal, return a `terminal-input` handle
     // allowing further interaction with it.
-    extern bool wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_get_terminal_stdin(wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_own_terminal_input_t *ret);
+    extern bool terminal_stdin_get_terminal_stdin(terminal_stdin_own_terminal_input_t *ret);
     
-    // Imported Functions from `wasi:cli/terminal-stdout@0.2.0-rc-2023-11-10`
+    // Imported Functions from `wasi:cli/terminal-stdout@0.2.0-rc-2023-12-05`
     // If stdout is connected to a terminal, return a `terminal-output` handle
     // allowing further interaction with it.
-    extern bool wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_get_terminal_stdout(wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_own_terminal_output_t *ret);
+    extern bool terminal_stdout_get_terminal_stdout(terminal_stdout_own_terminal_output_t *ret);
     
-    // Imported Functions from `wasi:cli/terminal-stderr@0.2.0-rc-2023-11-10`
+    // Imported Functions from `wasi:cli/terminal-stderr@0.2.0-rc-2023-12-05`
     // If stderr is connected to a terminal, return a `terminal-output` handle
     // allowing further interaction with it.
-    extern bool wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_get_terminal_stderr(wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_own_terminal_output_t *ret);
+    extern bool terminal_stderr_get_terminal_stderr(terminal_stderr_own_terminal_output_t *ret);
     
     // Imported Functions from `wasi:clocks/monotonic-clock@0.2.0-rc-2023-11-10`
     // Read the current value of the clock.
@@ -2295,21 +2295,21 @@ extern bool streams_method_output_stream_write(streams_borrow_output_stream_t se
         
         void streams_result_void_stream_error_free(streams_result_void_stream_error_t *ptr);
         
-        extern void wasi_cli_0_2_0_rc_2023_11_10_terminal_input_terminal_input_drop_own(wasi_cli_0_2_0_rc_2023_11_10_terminal_input_own_terminal_input_t handle);
-        extern void wasi_cli_0_2_0_rc_2023_11_10_terminal_input_terminal_input_drop_borrow(wasi_cli_0_2_0_rc_2023_11_10_terminal_input_own_terminal_input_t handle);
+        extern void terminal_input_terminal_input_drop_own(terminal_input_own_terminal_input_t handle);
+        extern void terminal_input_terminal_input_drop_borrow(terminal_input_own_terminal_input_t handle);
         
-        extern wasi_cli_0_2_0_rc_2023_11_10_terminal_input_borrow_terminal_input_t wasi_cli_0_2_0_rc_2023_11_10_terminal_input_borrow_terminal_input(wasi_cli_0_2_0_rc_2023_11_10_terminal_input_own_terminal_input_t handle);
+        extern terminal_input_borrow_terminal_input_t terminal_input_borrow_terminal_input(terminal_input_own_terminal_input_t handle);
         
-        extern void wasi_cli_0_2_0_rc_2023_11_10_terminal_output_terminal_output_drop_own(wasi_cli_0_2_0_rc_2023_11_10_terminal_output_own_terminal_output_t handle);
-        extern void wasi_cli_0_2_0_rc_2023_11_10_terminal_output_terminal_output_drop_borrow(wasi_cli_0_2_0_rc_2023_11_10_terminal_output_own_terminal_output_t handle);
+        extern void terminal_output_terminal_output_drop_own(terminal_output_own_terminal_output_t handle);
+        extern void terminal_output_terminal_output_drop_borrow(terminal_output_own_terminal_output_t handle);
         
-        extern wasi_cli_0_2_0_rc_2023_11_10_terminal_output_borrow_terminal_output_t wasi_cli_0_2_0_rc_2023_11_10_terminal_output_borrow_terminal_output(wasi_cli_0_2_0_rc_2023_11_10_terminal_output_own_terminal_output_t handle);
+        extern terminal_output_borrow_terminal_output_t terminal_output_borrow_terminal_output(terminal_output_own_terminal_output_t handle);
         
-        void wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_option_own_terminal_input_free(wasi_cli_0_2_0_rc_2023_11_10_terminal_stdin_option_own_terminal_input_t *ptr);
+        void terminal_stdin_option_own_terminal_input_free(terminal_stdin_option_own_terminal_input_t *ptr);
         
-        void wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_option_own_terminal_output_free(wasi_cli_0_2_0_rc_2023_11_10_terminal_stdout_option_own_terminal_output_t *ptr);
+        void terminal_stdout_option_own_terminal_output_free(terminal_stdout_option_own_terminal_output_t *ptr);
         
-        void wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_option_own_terminal_output_free(wasi_cli_0_2_0_rc_2023_11_10_terminal_stderr_option_own_terminal_output_t *ptr);
+        void terminal_stderr_option_own_terminal_output_free(terminal_stderr_option_own_terminal_output_t *ptr);
         
         void filesystem_option_datetime_free(filesystem_option_datetime_t *ptr);
         

@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <errno.h>
 
 #include "__utils.h"
@@ -50,18 +51,22 @@ int __wasi_sockets_utils__map_error(network_error_code_t wasi_error) {
     }
 }
 
-bool __wasi_sockets_utils__parse_address(const struct sockaddr* address, socklen_t len, network_ip_socket_address_t* output, int* error)
+bool __wasi_sockets_utils__parse_address(network_ip_address_family_t expected_family, const struct sockaddr* address, socklen_t len, network_ip_socket_address_t* result, int* error)
 {
-    *error = 0;
-
-    socklen_t smallest_sockaddr_size = sizeof(struct sockaddr);
-    if (address == NULL || len < smallest_sockaddr_size) {
+    if (address == NULL || len < sizeof(struct sockaddr)) {
         *error = EINVAL;
         return false;
     }
+    
+    switch (expected_family)
+    {
+    case NETWORK_IP_ADDRESS_FAMILY_IPV4: {
 
-    switch (address->sa_family) {
-    case AF_INET: {
+        if (address->sa_family != AF_INET) {
+            *error = EAFNOSUPPORT;
+            return false;
+        }
+
         if (len < sizeof(struct sockaddr_in)) {
             *error = EINVAL;
             return false;
@@ -70,7 +75,7 @@ bool __wasi_sockets_utils__parse_address(const struct sockaddr* address, socklen
         struct sockaddr_in* ipv4 = (struct sockaddr_in*)address;
         unsigned ip = ipv4->sin_addr.s_addr;
         unsigned short port = ipv4->sin_port;
-        *output = (network_ip_socket_address_t){
+        *result = (network_ip_socket_address_t){
             .tag = NETWORK_IP_SOCKET_ADDRESS_IPV4,
             .val = { .ipv4 = {
                 .port = ntohs(port), // (port << 8) | (port >> 8),
@@ -79,7 +84,13 @@ bool __wasi_sockets_utils__parse_address(const struct sockaddr* address, socklen
         };
         return true;
     }
-    case AF_INET6: {
+    case NETWORK_IP_ADDRESS_FAMILY_IPV6: {
+
+        if (address->sa_family != AF_INET6) {
+            *error = EAFNOSUPPORT;
+            return false;
+        }
+
         if (len < sizeof(struct sockaddr_in6)) {
             *error = EINVAL;
             return false;
@@ -88,7 +99,7 @@ bool __wasi_sockets_utils__parse_address(const struct sockaddr* address, socklen
         struct sockaddr_in6* ipv6 = (struct sockaddr_in6*)address;
         unsigned char* ip = (unsigned char*)&(ipv6->sin6_addr.s6_addr);
         unsigned short port = ipv6->sin6_port;
-        *output = (network_ip_socket_address_t){
+        *result = (network_ip_socket_address_t){
             .tag = NETWORK_IP_SOCKET_ADDRESS_IPV6,
             .val = { .ipv6 = {
                 .port = ntohs(port),
@@ -109,52 +120,77 @@ bool __wasi_sockets_utils__parse_address(const struct sockaddr* address, socklen
         };
         return true;
     }
-    default:
-        *error = EAFNOSUPPORT;
+    default: /* unreachable */ abort();
+    }
+}
+
+bool __wasi_sockets_utils__output_addr_validate(network_ip_address_family_t expected_family, struct sockaddr* addr, socklen_t* addrlen, output_sockaddr_t* result) {
+    // The address parameters must be either both null or both _not_ null.
+
+    if (addr == NULL && addrlen == NULL) {
+        *result = (output_sockaddr_t){ .tag = OUTPUT_SOCKADDR_NULL, .null = {} };
+        return true;
+
+    } else if (addr != NULL && addrlen != NULL) {
+
+        if (expected_family == NETWORK_IP_ADDRESS_FAMILY_IPV4) {
+            if (*addrlen < sizeof(struct sockaddr_in)) {
+                return false;
+            }
+
+            *result = (output_sockaddr_t){ .tag = OUTPUT_SOCKADDR_V4, .v4 = {
+                .addr = (struct sockaddr_in*)addr,
+                .addrlen = addrlen,
+            } };
+            return true;
+
+        } else if (expected_family == NETWORK_IP_ADDRESS_FAMILY_IPV6) {
+            if (*addrlen < sizeof(struct sockaddr_in6)) {
+                return false;
+            }
+
+            *result = (output_sockaddr_t){ .tag = OUTPUT_SOCKADDR_V6, .v6 = {
+                .addr = (struct sockaddr_in6*)addr,
+                .addrlen = addrlen,
+            } };
+            return true;
+
+        } else {
+            abort();
+        }
+
+    } else {
         return false;
     }
 }
 
-bool __wasi_sockets_utils__format_address(const network_ip_socket_address_t* address, struct sockaddr* output_addr, socklen_t* output_addrlen, int* error) {
-    *error = 0;
-
-    if (output_addr == NULL || output_addrlen == NULL) {
-        *error = EINVAL;
-        return false;
-    }
-
-    switch (address->tag)
+void __wasi_sockets_utils__output_addr_write(const network_ip_socket_address_t input, output_sockaddr_t* output) {
+    switch (input.tag)
     {
     case NETWORK_IP_SOCKET_ADDRESS_IPV4: {
-        if (*output_addrlen < sizeof(struct sockaddr_in)) {
-            *error = EINVAL;
-            return false;
-        }
-        *output_addrlen = sizeof(struct sockaddr_in);
-        struct sockaddr_in* ipv4 = (struct sockaddr_in*)output_addr;
+        assert(output->tag == OUTPUT_SOCKADDR_V4);
 
-        network_ipv4_address_t ip = address->val.ipv4.address;
+        network_ipv4_socket_address_t input_v4 = input.val.ipv4;
+        network_ipv4_address_t ip = input_v4.address;
 
-        *ipv4 = (struct sockaddr_in) {
+        *output->v4.addrlen = sizeof(struct sockaddr_in);
+        *output->v4.addr = (struct sockaddr_in) {
             .sin_family = AF_INET,
-            .sin_port = htons(address->val.ipv4.port),
+            .sin_port = htons(input_v4.port),
             .sin_addr = { .s_addr = ip.f0 | (ip.f1 << 8) | (ip.f2 << 16) | (ip.f3 << 24) },
         };
-        return true;
+        return;
     }
     case NETWORK_IP_SOCKET_ADDRESS_IPV6: {
-        if (*output_addrlen < sizeof(struct sockaddr_in6)) {
-            *error = EINVAL;
-            return false;
-        }
-        *output_addrlen = sizeof(struct sockaddr_in6);
-        struct sockaddr_in6* ipv6 = (struct sockaddr_in6*)output_addr;
+        assert(output->tag == OUTPUT_SOCKADDR_V6);
 
-        network_ipv6_address_t ip = address->val.ipv6.address;
+        network_ipv6_socket_address_t input_v6 = input.val.ipv6;
+        network_ipv6_address_t ip = input_v6.address;
 
-        *ipv6 = (struct sockaddr_in6) {
+        *output->v6.addrlen = sizeof(struct sockaddr_in6);
+        *output->v6.addr = (struct sockaddr_in6) {
             .sin6_family = AF_INET,
-            .sin6_port = htons(address->val.ipv6.port),
+            .sin6_port = htons(input_v6.port),
             .sin6_addr = { .s6_addr = {
                 ip.f0 >> 8, ip.f0 & 0xFF,
                 ip.f1 >> 8, ip.f1 & 0xFF,
@@ -166,10 +202,10 @@ bool __wasi_sockets_utils__format_address(const network_ip_socket_address_t* add
                 ip.f7 >> 8, ip.f7 & 0xFF,
             } },
             // TODO wasi-sockets: do these need to be endian-reversed?
-            .sin6_flowinfo = address->val.ipv6.flow_info,
-            .sin6_scope_id = address->val.ipv6.scope_id,
+            .sin6_flowinfo = input_v6.flow_info,
+            .sin6_scope_id = input_v6.scope_id,
         };
-        return true;
+        return;
     }
     default: /* unreachable */ abort();
     }

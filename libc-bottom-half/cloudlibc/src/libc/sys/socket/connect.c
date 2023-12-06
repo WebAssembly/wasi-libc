@@ -5,8 +5,15 @@
 #include "__utils.h"
 
 
-int tcp_connect(tcp_socket_t* socket, network_ip_socket_address_t* address)
+int tcp_connect(tcp_socket_t* socket, const struct sockaddr* addr, socklen_t addrlen)
 {
+    network_ip_socket_address_t remote_address;
+    int parse_err;
+    if (!__wasi_sockets_utils__parse_address(socket->family, addr, addrlen, &remote_address, &parse_err)) {
+        errno = parse_err;
+        return -1;
+    }
+
     switch (socket->state.tag) {
     case TCP_SOCKET_STATE_UNBOUND:
     case TCP_SOCKET_STATE_BOUND:
@@ -29,7 +36,7 @@ int tcp_connect(tcp_socket_t* socket, network_ip_socket_address_t* address)
     network_borrow_network_t network_borrow = __wasi_sockets_utils__borrow_network();
     tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
 
-    if (!tcp_method_tcp_socket_start_connect(socket_borrow, network_borrow, address, &error)) {
+    if (!tcp_method_tcp_socket_start_connect(socket_borrow, network_borrow, &remote_address, &error)) {
         errno = __wasi_sockets_utils__map_error(error);
         return -1;
     }
@@ -78,14 +85,14 @@ int tcp_connect(tcp_socket_t* socket, network_ip_socket_address_t* address)
     return 0;
 }
 
-int udp_connect(udp_socket_t* socket, network_ip_socket_address_t* address)
+int udp_connect(udp_socket_t* socket, const struct sockaddr* addr, socklen_t addrlen)
 {
     // TODO wasi-sockets: implement
     errno = EOPNOTSUPP;
     return -1;
 }
 
-int connect(int fd, const struct sockaddr* address, socklen_t len)
+int connect(int fd, const struct sockaddr* addr, socklen_t addrlen)
 {
     descriptor_table_entry_t* entry;
     if (!descriptor_table_get_ref(fd, &entry)) {
@@ -93,19 +100,12 @@ int connect(int fd, const struct sockaddr* address, socklen_t len)
         return -1;
     }
 
-    network_ip_socket_address_t ip_address;
-    int parse_err;
-    if (!__wasi_sockets_utils__parse_address(address, len, &ip_address, &parse_err)) {
-        errno = parse_err;
-        return -1;
-    }
-
     switch (entry->tag)
     {
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-        return tcp_connect(&entry->tcp_socket, &ip_address);
+        return tcp_connect(&entry->tcp_socket, addr, addrlen);
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-        return udp_connect(&entry->udp_socket, &ip_address);
+        return udp_connect(&entry->udp_socket, addr, addrlen);
     default:
         errno = EOPNOTSUPP;
         return -1;

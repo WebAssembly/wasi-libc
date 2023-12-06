@@ -32,9 +32,9 @@ int bind(int socket, const struct sockaddr* addr, socklen_t addrlen) {
     switch (entry->tag)
     {
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-        return tcp_bind(&entry->value.tcp_socket, &ip_address);
+        return tcp_bind(&entry->tcp_socket, &ip_address);
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-        return udp_bind(&entry->value.udp_socket, &ip_address);
+        return udp_bind(&entry->udp_socket, &ip_address);
     default:
         errno = EOPNOTSUPP;
         return -1;

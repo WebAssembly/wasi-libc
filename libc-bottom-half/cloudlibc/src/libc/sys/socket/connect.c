@@ -7,7 +7,7 @@
 
 int tcp_connect(tcp_socket_t* socket, network_ip_socket_address_t* address)
 {
-    switch (socket->state_tag) {
+    switch (socket->state.tag) {
     case TCP_SOCKET_STATE_UNBOUND:
     case TCP_SOCKET_STATE_BOUND:
         // These can initiate a connect.
@@ -35,8 +35,7 @@ int tcp_connect(tcp_socket_t* socket, network_ip_socket_address_t* address)
     }
 
     // Connect has successfully started.
-    socket->state_tag = TCP_SOCKET_STATE_CONNECTING;
-    socket->state = (tcp_socket_state_t){ .connecting = { /* No additional state */ } };
+    socket->state = (tcp_socket_state_t){ .tag = TCP_SOCKET_STATE_CONNECTING, .connecting = { /* No additional state */ } };
 
     // Attempt to finish it:
     tcp_tuple2_own_input_stream_own_output_stream_t io;
@@ -50,7 +49,7 @@ int tcp_connect(tcp_socket_t* socket, network_ip_socket_address_t* address)
                 return -1;
             }
         } else {
-            socket->state_tag = TCP_SOCKET_STATE_CONNECT_FAILED;
+            socket->state.tag = TCP_SOCKET_STATE_CONNECT_FAILED;
             socket->state = (tcp_socket_state_t){ .connect_failed = {
                 .error_code = error,
             } };
@@ -70,8 +69,7 @@ int tcp_connect(tcp_socket_t* socket, network_ip_socket_address_t* address)
     streams_borrow_output_stream_t output_borrow = streams_borrow_output_stream(output);
     poll_own_pollable_t output_pollable = streams_method_output_stream_subscribe(output_borrow);
 
-    socket->state_tag = TCP_SOCKET_STATE_CONNECTED;
-    socket->state = (tcp_socket_state_t){ .connected = {
+    socket->state = (tcp_socket_state_t){ .tag = TCP_SOCKET_STATE_CONNECTED, .connected = {
         .input = input,
         .input_pollable = input_pollable,
         .output = output,
@@ -105,9 +103,9 @@ int connect(int fd, const struct sockaddr* address, socklen_t len)
     switch (entry->tag)
     {
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-        return tcp_connect(&entry->value.tcp_socket, &ip_address);
+        return tcp_connect(&entry->tcp_socket, &ip_address);
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-        return udp_connect(&entry->value.udp_socket, &ip_address);
+        return udp_connect(&entry->udp_socket, &ip_address);
     default:
         errno = EOPNOTSUPP;
         return -1;

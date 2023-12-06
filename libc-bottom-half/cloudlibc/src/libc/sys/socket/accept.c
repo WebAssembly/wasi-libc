@@ -8,7 +8,7 @@
 bool tcp_accept(tcp_socket_t* socket, bool client_blocking, int* out_clientfd, network_ip_socket_address_t* out_address, int* out_errno) {
 
     tcp_socket_state_listening_t listener;
-    if (socket->state_tag == TCP_SOCKET_STATE_LISTENING) {
+    if (socket->state.tag == TCP_SOCKET_STATE_LISTENING) {
         listener = socket->state.listening;
     } else {
         *out_errno = EINVAL;
@@ -54,21 +54,17 @@ bool tcp_accept(tcp_socket_t* socket, bool client_blocking, int* out_clientfd, n
         }
     }
 
-    descriptor_table_entry_t client_entry = {
-        .tag = DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET,
-        .value = { .tcp_socket = {
-            .socket = client,
-            .socket_pollable = client_pollable,
-            .blocking = client_blocking,
-            .state_tag = TCP_SOCKET_STATE_CONNECTED,
-            .state = { .connected = {
-                .input = input,
-                .input_pollable = input_pollable,
-                .output = output,
-                .output_pollable = output_pollable,
-            } },
+    descriptor_table_entry_t client_entry = { .tag = DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET, .tcp_socket = {
+        .socket = client,
+        .socket_pollable = client_pollable,
+        .blocking = client_blocking,
+        .state = { .tag = TCP_SOCKET_STATE_CONNECTED, .connected = {
+            .input = input,
+            .input_pollable = input_pollable,
+            .output = output,
+            .output_pollable = output_pollable,
         } },
-    };
+    } };
 
     if (!descriptor_table_insert(client_entry, out_clientfd)) {
         *out_errno = EMFILE;
@@ -120,13 +116,13 @@ int accept4(int socket, struct sockaddr *restrict addr, socklen_t *restrict addr
     switch (entry->tag)
     {
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-        if (!tcp_accept(&entry->value.tcp_socket, client_blocking, &client_fd, out_address_ptr, &err)) {
+        if (!tcp_accept(&entry->tcp_socket, client_blocking, &client_fd, out_address_ptr, &err)) {
             errno = err;
             return -1;
         }
         break;
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-        if (!udp_accept(&entry->value.udp_socket, client_blocking, &client_fd, out_address_ptr, &err)) {
+        if (!udp_accept(&entry->udp_socket, client_blocking, &client_fd, out_address_ptr, &err)) {
             errno = err;
             return -1;
         }

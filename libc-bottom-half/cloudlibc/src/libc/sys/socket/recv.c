@@ -26,7 +26,7 @@ ssize_t tcp_recv(tcp_socket_t* socket, void* restrict buffer, size_t length, int
     }
 
     tcp_socket_state_connected_t connection;
-    if (socket->state_tag == TCP_SOCKET_STATE_CONNECTED) {
+    if (socket->state.tag == TCP_SOCKET_STATE_CONNECTED) {
         connection = socket->state.connected;
     } else {
         errno = ENOTCONN;
@@ -86,9 +86,9 @@ ssize_t recv(int socket, void* restrict buffer, size_t length, int flags)
     switch (entry->tag)
     {
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-        return tcp_recv(&entry->value.tcp_socket, buffer, length, flags);
+        return tcp_recv(&entry->tcp_socket, buffer, length, flags);
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-        return udp_recv(&entry->value.udp_socket, buffer, length, flags);
+        return udp_recv(&entry->udp_socket, buffer, length, flags);
     default:
         errno = EOPNOTSUPP;
         return -1;

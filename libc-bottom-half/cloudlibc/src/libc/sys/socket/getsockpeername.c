@@ -60,13 +60,13 @@ int getsockname(int socket, struct sockaddr *__restrict addr, socklen_t *__restr
     switch (entry->tag)
     {
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-        if (!tcp_getsockname(&entry->value.tcp_socket, &out_address)) {
+        if (!tcp_getsockname(&entry->tcp_socket, &out_address)) {
             // errno is set by tcp_getsockname
             return -1;
         }
         break;
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-        if (!udp_getsockname(&entry->value.udp_socket, &out_address)) {
+        if (!udp_getsockname(&entry->udp_socket, &out_address)) {
             // errno is set by udp_getsockname
             return -1;
         }
@@ -103,13 +103,13 @@ int getpeername(int socket, struct sockaddr *__restrict addr, socklen_t *__restr
     switch (entry->tag)
     {
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-        if (!tcp_getpeername(&entry->value.tcp_socket, &out_address)) {
+        if (!tcp_getpeername(&entry->tcp_socket, &out_address)) {
             // errno is set by tcp_getpeername
             return -1;
         }
         break;
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-        if (!udp_getpeername(&entry->value.udp_socket, &out_address)) {
+        if (!udp_getpeername(&entry->udp_socket, &out_address)) {
             // errno is set by udp_getpeername
             return -1;
         }

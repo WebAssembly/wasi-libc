@@ -18,7 +18,7 @@ int __wasilibc_fd_renumber(int fd, int newfd) {
 }
 
 void drop_tcp_socket(tcp_socket_t socket) {
-    switch (socket.state_tag) {
+    switch (socket.state.tag) {
     case TCP_SOCKET_STATE_UNBOUND:
     case TCP_SOCKET_STATE_BOUND:
     case TCP_SOCKET_STATE_CONNECTING:
@@ -56,10 +56,10 @@ int close(int fd) {
         switch (entry.tag)
         {
         case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-            drop_tcp_socket(entry.value.tcp_socket);
+            drop_tcp_socket(entry.tcp_socket);
             break;
         case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-            drop_udp_socket(entry.value.udp_socket);
+            drop_udp_socket(entry.udp_socket);
             break;
         default: /* unreachable */ abort();
         }

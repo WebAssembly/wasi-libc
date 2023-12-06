@@ -212,7 +212,7 @@ network_ip_socket_address_t __wasi_sockets_utils__any_addr(network_ip_address_fa
 int __wasi_sockets_utils__tcp_bind(tcp_socket_t* socket, network_ip_socket_address_t* address) {
 
     tcp_socket_state_unbound_t unbound;
-    if (socket->state_tag == TCP_SOCKET_STATE_UNBOUND) {
+    if (socket->state.tag == TCP_SOCKET_STATE_UNBOUND) {
         unbound = socket->state.unbound;
     } else {
         errno = EINVAL;
@@ -241,7 +241,6 @@ int __wasi_sockets_utils__tcp_bind(tcp_socket_t* socket, network_ip_socket_addre
 
     // Bind successful.
 
-    socket->state_tag = TCP_SOCKET_STATE_BOUND;
-    socket->state = (tcp_socket_state_t){ .bound = { /* No additional state */ } };
+    socket->state = (tcp_socket_state_t){ .tag = TCP_SOCKET_STATE_BOUND, .bound = { /* No additional state */ } };
     return 0;
 }

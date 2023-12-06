@@ -42,7 +42,7 @@ int tcp_getsockopt(tcp_socket_t* socket, int level, int optname,
             break;
         }
         case SO_ERROR: {
-            if (socket->state_tag == TCP_SOCKET_STATE_CONNECT_FAILED) {
+            if (socket->state.tag == TCP_SOCKET_STATE_CONNECT_FAILED) {
                 value = __wasi_sockets_utils__map_error(socket->state.connect_failed.error_code);
                 socket->state.connect_failed.error_code = 0;
             } else {
@@ -51,7 +51,7 @@ int tcp_getsockopt(tcp_socket_t* socket, int level, int optname,
             break;
         }
         case SO_ACCEPTCONN: {
-            bool is_listening = socket->state_tag == TCP_SOCKET_STATE_LISTENING;
+            bool is_listening = socket->state.tag == TCP_SOCKET_STATE_LISTENING;
             assert(is_listening == tcp_method_tcp_socket_is_listening(socket_borrow)); // Sanity check.
             value = is_listening;
             break;
@@ -511,9 +511,9 @@ int getsockopt(int sockfd, int level, int optname,
     switch (entry->tag)
     {
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-        return tcp_getsockopt(&entry->value.tcp_socket, level, optname, optval, optlen);
+        return tcp_getsockopt(&entry->tcp_socket, level, optname, optval, optlen);
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-        return udp_getsockopt(&entry->value.udp_socket, level, optname, optval, optlen);
+        return udp_getsockopt(&entry->udp_socket, level, optname, optval, optlen);
     default:
         errno = ENOPROTOOPT;
         return -1;
@@ -537,9 +537,9 @@ int setsockopt(int sockfd, int level, int optname, const void* optval, socklen_t
     switch (entry->tag)
     {
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-        return tcp_setsockopt(&entry->value.tcp_socket, level, optname, optval, optlen);
+        return tcp_setsockopt(&entry->tcp_socket, level, optname, optval, optlen);
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-        return udp_setsockopt(&entry->value.udp_socket, level, optname, optval, optlen);
+        return udp_setsockopt(&entry->udp_socket, level, optname, optval, optlen);
     default:
         errno = ENOPROTOOPT;
         return -1;

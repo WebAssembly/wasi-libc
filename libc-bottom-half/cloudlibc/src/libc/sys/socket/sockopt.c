@@ -395,19 +395,55 @@ int udp_getsockopt(udp_socket_t* socket, int level, int optname,
 {
     int value;
 
+    network_error_code_t error;
+    udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
+
     switch (level)
     {
     case SOL_SOCKET:
         switch (optname) {
-        case SO_TYPE:
-            value = SOCK_STREAM;
+        case SO_TYPE: {
+            value = SOCK_DGRAM;
             break;
-        case SO_PROTOCOL:
-            value = IPPROTO_TCP;
+        }
+        case SO_PROTOCOL: {
+            value = IPPROTO_UDP;
             break;
-        case SO_DOMAIN: // TODO wasi-sockets: implement
-        case SO_RCVBUF: // TODO wasi-sockets: implement
-        case SO_SNDBUF: // TODO wasi-sockets: implement
+        }
+        case SO_DOMAIN: {
+            value = __wasi_sockets_utils__posix_family(
+                udp_method_udp_socket_address_family(socket_borrow)
+            );
+            break;
+        }
+        case SO_RCVBUF: {
+            uint64_t result;
+            if (!udp_method_udp_socket_receive_buffer_size(socket_borrow, &result, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            if (result > INT_MAX) {
+                abort();
+            }
+
+            value = result;
+            break;
+        }
+        case SO_SNDBUF: {
+            uint64_t result;
+            if (!udp_method_udp_socket_send_buffer_size(socket_borrow, &result, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            if (result > INT_MAX) {
+                abort();
+            }
+
+            value = result;
+            break;
+        }
         case SO_RCVTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
         case SO_SNDTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
         default:
@@ -419,7 +455,23 @@ int udp_getsockopt(udp_socket_t* socket, int level, int optname,
 
     case SOL_IP:
         switch (optname) {
-        case IP_TTL: // TODO wasi-sockets: implement
+        case IP_TTL: {
+            if (udp_method_udp_socket_address_family(socket_borrow)
+                != NETWORK_IP_ADDRESS_FAMILY_IPV4)
+            {
+                errno = EAFNOSUPPORT;
+                return -1;
+            }
+
+            uint8_t result;
+            if (!udp_method_udp_socket_unicast_hop_limit(socket_borrow, &result, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            value = result;
+            break;
+        }
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -429,8 +481,33 @@ int udp_getsockopt(udp_socket_t* socket, int level, int optname,
 
     case SOL_IPV6:
         switch (optname) {
-        case IPV6_V6ONLY: // TODO wasi-sockets: implement
-        case IPV6_UNICAST_HOPS: // TODO wasi-sockets: implement
+        case IPV6_UNICAST_HOPS: {
+            if (udp_method_udp_socket_address_family(socket_borrow)
+                != NETWORK_IP_ADDRESS_FAMILY_IPV6)
+            {
+                errno = EAFNOSUPPORT;
+                return -1;
+            }
+
+            uint8_t result;
+            if (!udp_method_udp_socket_unicast_hop_limit(socket_borrow, &result, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            value = result;
+            break;
+        }
+        case IPV6_V6ONLY: {
+            bool result;
+            if (!udp_method_udp_socket_ipv6_only(socket_borrow, &result, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            value = result;
+            break;
+        }
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -451,12 +528,32 @@ int udp_getsockopt(udp_socket_t* socket, int level, int optname,
 }
 
 int udp_setsockopt(udp_socket_t* socket, int level, int optname, const void* optval, socklen_t optlen) {
+
+    int intval = *(int*)optval;
+    
+    network_error_code_t error;
+    udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
+
     switch (level)
     {
     case SOL_SOCKET:
         switch (optname) {
-        case SO_RCVBUF: // TODO wasi-sockets: implement
-        case SO_SNDBUF: // TODO wasi-sockets: implement
+        case SO_RCVBUF: {
+            if (!udp_method_udp_socket_set_receive_buffer_size(socket_borrow, intval, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            return 0;
+        }
+        case SO_SNDBUF: {
+            if (!udp_method_udp_socket_set_send_buffer_size(socket_borrow, intval, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            return 0;
+        }
         case SO_RCVTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
         case SO_SNDTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
         default:
@@ -468,7 +565,26 @@ int udp_setsockopt(udp_socket_t* socket, int level, int optname, const void* opt
 
     case SOL_IP:
         switch (optname) {
-        case IP_TTL: // TODO wasi-sockets: implement
+        case IP_TTL: {
+            if (udp_method_udp_socket_address_family(socket_borrow)
+                != NETWORK_IP_ADDRESS_FAMILY_IPV4)
+            {
+                errno = EAFNOSUPPORT;
+                return -1;
+            }
+
+            if (intval < 0 || intval > UINT8_MAX) {
+                errno = EINVAL;
+                return -1;
+            }
+
+            if (!udp_method_udp_socket_set_unicast_hop_limit(socket_borrow, intval, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            return 0;
+        }
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -478,8 +594,34 @@ int udp_setsockopt(udp_socket_t* socket, int level, int optname, const void* opt
 
     case SOL_IPV6:
         switch (optname) {
-        case IPV6_V6ONLY: // TODO wasi-sockets: implement
-        case IPV6_UNICAST_HOPS: // TODO wasi-sockets: implement
+        case IPV6_UNICAST_HOPS: {
+            if (udp_method_udp_socket_address_family(socket_borrow)
+                != NETWORK_IP_ADDRESS_FAMILY_IPV6)
+            {
+                errno = EAFNOSUPPORT;
+                return -1;
+            }
+
+            if (intval < 0 || intval > UINT8_MAX) {
+                errno = EINVAL;
+                return -1;
+            }
+
+            if (!udp_method_udp_socket_set_unicast_hop_limit(socket_borrow, intval, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            return 0;
+        }
+        case IPV6_V6ONLY: {
+            if (!udp_method_udp_socket_set_ipv6_only(socket_borrow, intval != 0, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            return 0;
+        }
         default:
             errno = ENOPROTOOPT;
             return -1;

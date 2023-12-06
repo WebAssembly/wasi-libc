@@ -4,6 +4,7 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <assert.h>
 
 #include <descriptor_table.h>
 #include <errno.h>
@@ -11,6 +12,8 @@
 #include <string.h>
 #include <wasi/api.h>
 #include "__utils.h"
+
+const uint64_t NS_PER_S = 1000000000;
 
 int tcp_getsockopt(tcp_socket_t* socket, int level, int optname,
     void* restrict optval, socklen_t* restrict optlen)
@@ -48,8 +51,9 @@ int tcp_getsockopt(tcp_socket_t* socket, int level, int optname,
             break;
         }
         case SO_ACCEPTCONN: {
-            // TODO wasi-sockets: use 2023-11-10 snapshot to call out to tcp-socket::is-listening ?
-            value = socket->state_tag == TCP_SOCKET_STATE_LISTENING;
+            bool is_listening = socket->state_tag == TCP_SOCKET_STATE_LISTENING;
+            assert(is_listening == tcp_method_tcp_socket_is_listening(socket_borrow)); // Sanity check.
+            value = is_listening;
             break;
         }
         case SO_KEEPALIVE: {
@@ -163,9 +167,59 @@ int tcp_getsockopt(tcp_socket_t* socket, int level, int optname,
 
     case SOL_TCP:
         switch (optname) {
-        case TCP_KEEPIDLE: // TODO wasi-sockets: implement using the 2023-11-10 preview2 snapshot.
-        case TCP_KEEPINTVL: // TODO wasi-sockets: implement using the 2023-11-10 preview2 snapshot.
-        case TCP_KEEPCNT: // TODO wasi-sockets: implement using the 2023-11-10 preview2 snapshot.
+        case TCP_KEEPIDLE: {
+            tcp_duration_t result_ns;
+            if (!tcp_method_tcp_socket_keep_alive_idle_time(socket_borrow, &result_ns, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            uint64_t result_s = result_ns / NS_PER_S;
+            if (result_s == 0) {
+                result_s = 1; // Value was rounded down to zero. Round it up instead, because 0 is an invalid value for this socket option.
+            }
+
+            if (result_s > INT_MAX) {
+                abort();
+            }
+
+            value = result_s;
+            break;
+        }
+        case TCP_KEEPINTVL: {
+            tcp_duration_t result_ns;
+            if (!tcp_method_tcp_socket_keep_alive_interval(socket_borrow, &result_ns, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            uint64_t result_s = result_ns / NS_PER_S;
+            if (result_s == 0) {
+                result_s = 1; // Value was rounded down to zero. Round it up instead, because 0 is an invalid value for this socket option.
+            }
+
+            if (result_s > INT_MAX) {
+                abort();
+            }
+
+            value = result_s;
+            break;
+        }
+        case TCP_KEEPCNT: {
+            uint32_t result;
+            if (!tcp_method_tcp_socket_keep_alive_count(socket_borrow, &result, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            if (result > INT_MAX) {
+                abort();
+            }
+
+            value = result;
+            break;
+            break;
+        }
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -297,9 +351,32 @@ int tcp_setsockopt(tcp_socket_t* socket, int level, int optname, const void* opt
 
     case SOL_TCP:
         switch (optname) {
-        case TCP_KEEPIDLE: // TODO wasi-sockets: implement using the 2023-11-10 preview2 snapshot.
-        case TCP_KEEPINTVL: // TODO wasi-sockets: implement using the 2023-11-10 preview2 snapshot.
-        case TCP_KEEPCNT: // TODO wasi-sockets: implement using the 2023-11-10 preview2 snapshot.
+        case TCP_KEEPIDLE: {
+            tcp_duration_t duration = intval * NS_PER_S;
+            if (!tcp_method_tcp_socket_set_keep_alive_idle_time(socket_borrow, duration, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            return 0;
+        }
+        case TCP_KEEPINTVL: {
+            tcp_duration_t duration = intval * NS_PER_S;
+            if (!tcp_method_tcp_socket_set_keep_alive_interval(socket_borrow, duration, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            return 0;
+        }
+        case TCP_KEEPCNT: {
+            if (!tcp_method_tcp_socket_set_keep_alive_count(socket_borrow, intval, &error)) {
+                errno = __wasi_sockets_utils__map_error(error);
+                return -1;
+            }
+
+            return 0;
+        }
         default:
             errno = ENOPROTOOPT;
             return -1;

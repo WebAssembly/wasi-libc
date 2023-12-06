@@ -50,9 +50,43 @@ typedef struct {
 
 
 typedef struct {
+    udp_own_incoming_datagram_stream_t incoming;
+    poll_own_pollable_t incoming_pollable;
+    udp_own_outgoing_datagram_stream_t outgoing;
+    poll_own_pollable_t outgoing_pollable;
+} udp_socket_streams_t;
+
+typedef struct {} udp_socket_state_unbound_t;
+
+typedef struct {
+    udp_socket_streams_t streams;
+} udp_socket_state_bound_t;
+
+typedef struct {
+    udp_socket_streams_t streams;
+} udp_socket_state_connected_t;
+
+// This is a tagged union. When adding/removing/renaming cases, be sure to keep the tag and union definitions in sync.
+typedef struct {
+    enum {
+        UDP_SOCKET_STATE_UNBOUND,
+        UDP_SOCKET_STATE_BOUND,
+        UDP_SOCKET_STATE_CONNECTED,
+    } tag;
+    union {
+        udp_socket_state_unbound_t unbound;
+        udp_socket_state_bound_t bound;
+        udp_socket_state_connected_t connected;
+    };
+} udp_socket_state_t;
+
+typedef struct {
     udp_own_udp_socket_t socket;
+    poll_own_pollable_t socket_pollable;
     bool blocking;
+    udp_socket_state_t state;
 } udp_socket_t;
+
 
 
 // This is a tagged union. When adding/removing/renaming cases, be sure to keep the tag and union definitions in sync.

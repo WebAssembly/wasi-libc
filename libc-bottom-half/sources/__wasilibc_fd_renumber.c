@@ -42,8 +42,30 @@ void drop_tcp_socket(tcp_socket_t socket) {
     tcp_tcp_socket_drop_own(socket.socket);
 }
 
+void drop_udp_socket_streams(udp_socket_streams_t streams) {
+    poll_pollable_drop_own(streams.incoming_pollable);
+    poll_pollable_drop_own(streams.outgoing_pollable);
+    udp_incoming_datagram_stream_drop_own(streams.incoming);
+    udp_outgoing_datagram_stream_drop_own(streams.outgoing);
+}
+
 void drop_udp_socket(udp_socket_t socket) {
-    abort(); // TODO
+    switch (socket.state.tag) {
+    case UDP_SOCKET_STATE_UNBOUND:
+        // No additional resources to drop.
+        break;
+    case UDP_SOCKET_STATE_BOUND:
+        drop_udp_socket_streams(socket.state.bound.streams);
+        break;
+    case UDP_SOCKET_STATE_CONNECTED: {
+        drop_udp_socket_streams(socket.state.connected.streams);
+        break;
+    }
+    default: /* unreachable */ abort();
+    }
+
+    poll_pollable_drop_own(socket.socket_pollable);
+    udp_udp_socket_drop_own(socket.socket);
 }
 
 int close(int fd) {

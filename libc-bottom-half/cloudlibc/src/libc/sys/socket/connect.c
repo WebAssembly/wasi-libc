@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <netinet/in.h>
+#include <assert.h>
 
 #include <descriptor_table.h>
 #include "__utils.h"
@@ -85,11 +86,84 @@ int tcp_connect(tcp_socket_t* socket, const struct sockaddr* addr, socklen_t add
     return 0;
 }
 
+// When `connect` is called on a UDP socket with an AF_UNSPEC address, it is actually a "disconnect" request.
 int udp_connect(udp_socket_t* socket, const struct sockaddr* addr, socklen_t addrlen)
 {
-    // TODO wasi-sockets: implement
-    errno = EOPNOTSUPP;
-    return -1;
+    if (addr == NULL || addrlen < sizeof(struct sockaddr)) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    network_ip_socket_address_t remote_address;
+    bool has_remote_address = (addr->sa_family != AF_UNSPEC);
+    if (has_remote_address) {
+        int parse_err;
+        if (!__wasi_sockets_utils__parse_address(socket->family, addr, addrlen, &remote_address, &parse_err)) {
+            errno = parse_err;
+            return -1;
+        }
+    }
+
+    // Prepare the socket; binding it if not bound yet, and disconnecting it if connected.
+    switch (socket->state.tag) {
+    case UDP_SOCKET_STATE_UNBOUND: {
+        // Socket is not explicitly bound by the user. We'll do it for them:
+
+        network_ip_socket_address_t any = __wasi_sockets_utils__any_addr(socket->family);
+        int result = __wasi_sockets_utils__udp_bind(socket, &any);
+        if (result != 0) {
+            return result;
+        }
+        break;
+    }
+    case UDP_SOCKET_STATE_BOUND_NOSTREAMS: {
+        // This is the state we want to be in.
+        break;
+    }
+    case UDP_SOCKET_STATE_BOUND_STREAMING: {
+        __wasi_sockets_utils__drop_streams(socket->state.bound_streaming.streams);
+        socket->state = (udp_socket_state_t){ .tag = UDP_SOCKET_STATE_BOUND_NOSTREAMS, .bound_nostreams = {} };
+        break;
+    }
+    case UDP_SOCKET_STATE_CONNECTED: {
+        __wasi_sockets_utils__drop_streams(socket->state.connected.streams);
+        socket->state = (udp_socket_state_t){ .tag = UDP_SOCKET_STATE_BOUND_NOSTREAMS, .bound_nostreams = {} };
+        break;
+    }
+    default: /* unreachable */ abort();
+    }
+
+    assert(socket->state.tag == UDP_SOCKET_STATE_BOUND_NOSTREAMS);
+
+
+    network_error_code_t error;
+    udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
+    udp_socket_streams_t streams;
+
+    if (has_remote_address) {
+        // Perform "connect"
+        if (!__wasi_sockets_utils__create_streams(socket_borrow, &remote_address, &streams, &error)) {
+            errno = __wasi_sockets_utils__map_error(error);
+            return -1;
+        }
+
+        socket->state = (udp_socket_state_t){ .tag = UDP_SOCKET_STATE_CONNECTED, .connected = {
+            .streams = streams,
+        } };
+        return 0;
+
+    } else {
+        // Perform "disconnect"
+        if (!__wasi_sockets_utils__create_streams(socket_borrow, NULL, &streams, &error)) {
+            errno = __wasi_sockets_utils__map_error(error);
+            return -1;
+        }
+
+        socket->state = (udp_socket_state_t){ .tag = UDP_SOCKET_STATE_BOUND_STREAMING, .bound_streaming = {
+            .streams = streams,
+        } };
+        return 0;
+    }
 }
 
 int connect(int fd, const struct sockaddr* addr, socklen_t addrlen)

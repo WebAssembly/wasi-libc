@@ -351,6 +351,16 @@ int tcp_setsockopt(tcp_socket_t* socket, int level, int optname, const void* opt
 
     case SOL_TCP:
         switch (optname) {
+        case TCP_NODELAY: {
+            if (intval == 0) {
+                errno = EDOM;
+                return -1;
+            } else {
+                // Do nothing -- WASI sockets always have no-delay enabled.
+                return 0;
+            }
+        }
+
         case TCP_KEEPIDLE: {
             tcp_duration_t duration = intval * NS_PER_S;
             if (!tcp_method_tcp_socket_set_keep_alive_idle_time(socket_borrow, duration, &error)) {

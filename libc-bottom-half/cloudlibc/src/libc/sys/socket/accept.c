@@ -60,6 +60,7 @@ bool tcp_accept(tcp_socket_t* socket, bool client_blocking, int* out_clientfd, n
             .socket = client,
             .socket_pollable = client_pollable,
             .blocking = client_blocking,
+            .fake_nodelay = socket->fake_nodelay,
             .state_tag = TCP_SOCKET_STATE_CONNECTED,
             .state = { .connected = {
                 .input = input,

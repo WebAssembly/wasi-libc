@@ -41,6 +41,7 @@ typedef struct {
     tcp_own_tcp_socket_t socket;
     poll_own_pollable_t socket_pollable;
     bool blocking;
+    bool fake_nodelay;
     tcp_socket_state_tag_t state_tag;
     tcp_socket_state_t state;
 } tcp_socket_t;

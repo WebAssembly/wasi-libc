@@ -52,10 +52,11 @@ void drop_udp_socket_streams(udp_socket_streams_t streams) {
 void drop_udp_socket(udp_socket_t socket) {
     switch (socket.state.tag) {
     case UDP_SOCKET_STATE_UNBOUND:
+    case UDP_SOCKET_STATE_BOUND_NOSTREAMS:
         // No additional resources to drop.
         break;
-    case UDP_SOCKET_STATE_BOUND:
-        drop_udp_socket_streams(socket.state.bound.streams);
+    case UDP_SOCKET_STATE_BOUND_STREAMING:
+        drop_udp_socket_streams(socket.state.bound_streaming.streams);
         break;
     case UDP_SOCKET_STATE_CONNECTED: {
         drop_udp_socket_streams(socket.state.connected.streams);

@@ -313,14 +313,7 @@ int __wasi_sockets_utils__udp_bind(udp_socket_t* socket, network_ip_socket_addre
 
     // Bind successful.
 
-    udp_socket_streams_t streams;
-    if (!__wasi_sockets_utils__create_streams(socket_borrow, NULL, &streams, &error)) {
-        abort(); // TODO wasi-sockets: How to recover from this in a POSIX compatible way?
-    }
-
-    socket->state = (udp_socket_state_t){ .tag = UDP_SOCKET_STATE_BOUND, .bound = {
-        .streams = streams,
-    } };
+    socket->state = (udp_socket_state_t){ .tag = UDP_SOCKET_STATE_BOUND_NOSTREAMS, .bound_nostreams = {} };
     return 0;
 }
 

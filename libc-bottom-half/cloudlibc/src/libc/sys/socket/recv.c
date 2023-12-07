@@ -11,7 +11,8 @@
 #include <descriptor_table.h>
 #include "__utils.h"
 
-ssize_t tcp_recv(tcp_socket_t* socket, void* restrict buffer, size_t length, int flags)
+ssize_t tcp_recvfrom(tcp_socket_t* socket, uint8_t* buffer, size_t length, int flags,
+    struct sockaddr* addr , socklen_t* addrlen)
 {
     // TODO wasi-sockets: flags:
     // - MSG_WAITALL: we can probably support these relatively easy.
@@ -22,6 +23,11 @@ ssize_t tcp_recv(tcp_socket_t* socket, void* restrict buffer, size_t length, int
     const int supported_flags = MSG_DONTWAIT;
     if ((flags & supported_flags) != flags) {
         errno = EOPNOTSUPP;
+        return -1;
+    }
+
+    if (addr != NULL || addrlen != NULL) {
+        errno = EISCONN;
         return -1;
     }
 
@@ -62,7 +68,8 @@ ssize_t tcp_recv(tcp_socket_t* socket, void* restrict buffer, size_t length, int
     }
 }
 
-ssize_t udp_recv(udp_socket_t* socket, void* restrict buffer, size_t length, int flags)
+ssize_t udp_recvfrom(udp_socket_t* socket, uint8_t* buffer, size_t length, int flags,
+    struct sockaddr* addr , socklen_t* addrlen)
 {
     // TODO wasi-sockets: Implement flags. Same as tcp_recv except that MSG_TRUNC is valid for UDP.
 
@@ -70,7 +77,12 @@ ssize_t udp_recv(udp_socket_t* socket, void* restrict buffer, size_t length, int
     return -1;
 }
 
-ssize_t recv(int socket, void* restrict buffer, size_t length, int flags)
+ssize_t recv(int socket, void* restrict buffer, size_t length, int flags) {
+    return recvfrom(socket, buffer, length, flags, NULL, NULL);
+}
+
+ssize_t recvfrom(int socket, void *__restrict buffer, size_t length, int flags,
+    struct sockaddr *__restrict addr , socklen_t *__restrict addrlen)
 {
     descriptor_table_entry_t* entry;
     if (!descriptor_table_get_ref(socket, &entry)) {
@@ -86,9 +98,9 @@ ssize_t recv(int socket, void* restrict buffer, size_t length, int flags)
     switch (entry->tag)
     {
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-        return tcp_recv(&entry->tcp_socket, buffer, length, flags);
+        return tcp_recvfrom(&entry->tcp_socket, buffer, length, flags, addr, addrlen);
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-        return udp_recv(&entry->udp_socket, buffer, length, flags);
+        return udp_recvfrom(&entry->udp_socket, buffer, length, flags, addr, addrlen);
     default:
         errno = EOPNOTSUPP;
         return -1;

@@ -11,11 +11,17 @@
 #include <descriptor_table.h>
 #include "__utils.h"
 
-ssize_t tcp_send(tcp_socket_t* socket, const void* buffer, size_t length, int flags)
+ssize_t tcp_sendto(tcp_socket_t* socket, const uint8_t* buffer, size_t length, int flags,
+    const struct sockaddr* addr, socklen_t addrlen)
 {
     const int supported_flags = MSG_DONTWAIT | MSG_NOSIGNAL;
     if ((flags & supported_flags) != flags) {
         errno = EOPNOTSUPP;
+        return -1;
+    }
+
+    if (addr != NULL || addrlen != 0) {
+        errno = EISCONN;
         return -1;
     }
 
@@ -68,7 +74,8 @@ ssize_t tcp_send(tcp_socket_t* socket, const void* buffer, size_t length, int fl
     }
 }
 
-ssize_t udp_send(udp_socket_t* socket, const void* buffer, size_t length, int flags)
+ssize_t udp_sendto(udp_socket_t* socket, const uint8_t* buffer, size_t length, int flags,
+    const struct sockaddr* addr, socklen_t addrlen)
 {
     // TODO wasi-sockets: Implement flags. Same as tcp_send.
 
@@ -76,7 +83,12 @@ ssize_t udp_send(udp_socket_t* socket, const void* buffer, size_t length, int fl
     return -1;
 }
 
-ssize_t send(int socket, const void* buffer, size_t length, int flags)
+ssize_t send(int socket, const void* buffer, size_t length, int flags) {
+    return sendto(socket, buffer, length, flags, NULL, 0);
+}
+
+ssize_t sendto(int socket, const void* buffer, size_t length, int flags,
+    const struct sockaddr* addr, socklen_t addrlen)
 {
     descriptor_table_entry_t* entry;
     if (!descriptor_table_get_ref(socket, &entry)) {
@@ -92,9 +104,9 @@ ssize_t send(int socket, const void* buffer, size_t length, int flags)
     switch (entry->tag)
     {
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-        return tcp_send(&entry->tcp_socket, buffer, length, flags);
+        return tcp_sendto(&entry->tcp_socket, buffer, length, flags, addr, addrlen);
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-        return udp_send(&entry->udp_socket, buffer, length, flags);
+        return udp_sendto(&entry->udp_socket, buffer, length, flags, addr, addrlen);
     default:
         errno = EOPNOTSUPP;
         return -1;

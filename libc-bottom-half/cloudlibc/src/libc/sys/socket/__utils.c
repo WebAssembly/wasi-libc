@@ -280,3 +280,81 @@ int __wasi_sockets_utils__tcp_bind(tcp_socket_t* socket, network_ip_socket_addre
     socket->state = (tcp_socket_state_t){ .tag = TCP_SOCKET_STATE_BOUND, .bound = { /* No additional state */ } };
     return 0;
 }
+
+int __wasi_sockets_utils__udp_bind(udp_socket_t* socket, network_ip_socket_address_t* address) {
+
+    udp_socket_state_unbound_t unbound;
+    if (socket->state.tag == UDP_SOCKET_STATE_UNBOUND) {
+        unbound = socket->state.unbound;
+    } else {
+        errno = EINVAL;
+        return -1;
+    }
+
+    network_error_code_t error;
+    network_borrow_network_t network_borrow = __wasi_sockets_utils__borrow_network();
+    udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
+
+    if (!udp_method_udp_socket_start_bind(socket_borrow, network_borrow, address, &error)) {
+        errno = __wasi_sockets_utils__map_error(error);
+        return -1;
+    }
+
+    // Bind has successfully started. Attempt to finish it:
+    while (!udp_method_udp_socket_finish_bind(socket_borrow, &error)) {
+        if (error == NETWORK_ERROR_CODE_WOULD_BLOCK) {
+            poll_borrow_pollable_t pollable_borrow = poll_borrow_pollable(socket->socket_pollable);
+            poll_method_pollable_block(pollable_borrow);
+        } else {
+            errno = __wasi_sockets_utils__map_error(error);
+            return -1;
+        }
+    }
+
+    // Bind successful.
+
+    udp_socket_streams_t streams;
+    if (!__wasi_sockets_utils__create_streams(socket_borrow, NULL, &streams, &error)) {
+        abort(); // TODO wasi-sockets: How to recover from this in a POSIX compatible way?
+    }
+
+    socket->state = (udp_socket_state_t){ .tag = UDP_SOCKET_STATE_BOUND, .bound = {
+        .streams = streams,
+    } };
+    return 0;
+}
+
+bool __wasi_sockets_utils__create_streams(
+    udp_borrow_udp_socket_t socket_borrow,
+    network_ip_socket_address_t* remote_address,
+    udp_socket_streams_t* result,
+    network_error_code_t* error
+) {
+    udp_tuple2_own_incoming_datagram_stream_own_outgoing_datagram_stream_t io;
+    if (!udp_method_udp_socket_stream(socket_borrow, remote_address, &io, error)) {
+        return false;
+    }
+
+    udp_own_incoming_datagram_stream_t incoming = io.f0;
+    udp_borrow_incoming_datagram_stream_t incoming_borrow = udp_borrow_incoming_datagram_stream(incoming);
+    poll_own_pollable_t incoming_pollable = udp_method_incoming_datagram_stream_subscribe(incoming_borrow);
+
+    udp_own_outgoing_datagram_stream_t outgoing = io.f1;
+    udp_borrow_outgoing_datagram_stream_t outgoing_borrow = udp_borrow_outgoing_datagram_stream(outgoing);
+    poll_own_pollable_t outgoing_pollable = udp_method_outgoing_datagram_stream_subscribe(outgoing_borrow);
+
+    *result = (udp_socket_streams_t){
+        .incoming = incoming,
+        .incoming_pollable = incoming_pollable,
+        .outgoing = outgoing,
+        .outgoing_pollable = outgoing_pollable,
+    };
+    return true;
+}
+
+void __wasi_sockets_utils__drop_streams(udp_socket_streams_t streams) {
+    poll_pollable_drop_own(streams.incoming_pollable);
+    poll_pollable_drop_own(streams.outgoing_pollable);
+    udp_incoming_datagram_stream_drop_own(streams.incoming);
+    udp_outgoing_datagram_stream_drop_own(streams.outgoing);
+}

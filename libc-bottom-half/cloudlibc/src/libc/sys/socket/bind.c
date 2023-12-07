@@ -17,9 +17,15 @@ int tcp_bind(tcp_socket_t* socket, const struct sockaddr* addr, socklen_t addrle
 }
 
 int udp_bind(udp_socket_t* socket, const struct sockaddr* addr, socklen_t addrlen) {
-    // TODO wasi-sockets: implement
-	errno = EOPNOTSUPP;
-	return -1;
+
+    network_ip_socket_address_t local_address;
+    int parse_err;
+    if (!__wasi_sockets_utils__parse_address(socket->family, addr, addrlen, &local_address, &parse_err)) {
+        errno = parse_err;
+        return -1;
+    }
+
+    return __wasi_sockets_utils__udp_bind(socket, &local_address);
 }
 
 int bind(int socket, const struct sockaddr* addr, socklen_t addrlen) {

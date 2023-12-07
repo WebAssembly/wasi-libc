@@ -17,6 +17,22 @@ int tcp_getsockname(tcp_socket_t* socket, struct sockaddr* addr, socklen_t* addr
         return -1;
     }
 
+    switch (socket->state.tag) {
+    case TCP_SOCKET_STATE_UNBOUND:
+        errno = EINVAL;
+        return -1;
+
+    case TCP_SOCKET_STATE_BOUND:
+    case TCP_SOCKET_STATE_CONNECTING:
+    case TCP_SOCKET_STATE_CONNECT_FAILED:
+    case TCP_SOCKET_STATE_LISTENING:
+    case TCP_SOCKET_STATE_CONNECTED:
+        // OK. Continue..
+        break;
+
+    default: /* unreachable */ abort();
+    }
+
     network_error_code_t error;
     network_ip_socket_address_t result;
     tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
@@ -41,6 +57,22 @@ int tcp_getpeername(tcp_socket_t* socket, struct sockaddr* addr, socklen_t* addr
     if (output_addr.tag == OUTPUT_SOCKADDR_NULL) {
         errno = EINVAL;
         return -1;
+    }
+
+    switch (socket->state.tag) {
+    case TCP_SOCKET_STATE_UNBOUND:
+    case TCP_SOCKET_STATE_BOUND:
+    case TCP_SOCKET_STATE_CONNECTING:
+    case TCP_SOCKET_STATE_CONNECT_FAILED:
+    case TCP_SOCKET_STATE_LISTENING:
+        errno = ENOTCONN;
+        return -1;
+
+    case TCP_SOCKET_STATE_CONNECTED:
+        // OK. Continue..
+        break;
+
+    default: /* unreachable */ abort();
     }
 
     network_error_code_t error;

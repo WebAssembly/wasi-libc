@@ -6,8 +6,9 @@
 #include <errno.h>
 #include <poll.h>
 #include <stdbool.h>
+#include <descriptor_table.h>
 
-int poll(struct pollfd *fds, size_t nfds, int timeout) {
+static int poll_preview1(struct pollfd *fds, size_t nfds, int timeout) {
   // Construct events for poll().
   size_t maxevents = 2 * nfds + 1;
   __wasi_subscription_t subscriptions[maxevents];
@@ -126,4 +127,175 @@ int poll(struct pollfd *fds, size_t nfds, int timeout) {
       ++retval;
   }
   return retval;
+}
+
+typedef struct {
+    poll_own_pollable_t pollable;
+    struct pollfd* pollfd;
+    tcp_socket_t* socket;
+    short events;
+} state_t;
+
+static int poll_preview2(struct pollfd* fds, size_t nfds, int timeout)
+{
+    size_t max_pollables = (2 * nfds) + 1;
+    state_t states[max_pollables];
+    size_t state_index = 0;
+    for (size_t i = 0; i < nfds; ++i) {
+        struct pollfd* pollfd = fds + i;
+        descriptor_table_entry_t* entry;
+        if (descriptor_table_get_ref(pollfd->fd, &entry)) {
+            switch (entry->tag) {
+            case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET: {
+                tcp_socket_t* socket = &(entry->value.tcp_socket);
+                switch (socket->state_tag) {
+                case TCP_SOCKET_STATE_CONNECTING: {
+                    if ((pollfd->events & (POLLRDNORM | POLLWRNORM)) != 0) {
+                        state_t state = { .pollable = socket->socket_pollable,
+                            .pollfd = pollfd,
+                            .socket = socket,
+                            .events = pollfd->events };
+                        states[state_index++] = state;
+                    }
+                    break;
+                }
+
+                case TCP_SOCKET_STATE_CONNECTED: {
+                    if ((pollfd->events & POLLRDNORM) != 0) {
+                        state_t state = { .pollable = socket->state.connected.input_pollable,
+                            .pollfd = pollfd,
+                            .socket = socket,
+                            .events = POLLRDNORM };
+                        states[state_index++] = state;
+                    }
+                    if ((pollfd->events & POLLWRNORM) != 0) {
+                        state_t state = { .pollable = socket->state.connected.output_pollable,
+                            .pollfd = pollfd,
+                            .socket = socket,
+                            .events = POLLWRNORM };
+                        states[state_index++] = state;
+                    }
+                    break;
+                }
+
+                default:
+                    errno = ENOTSUP;
+                    return -1;
+                }
+                break;
+            }
+
+            default:
+                // TODO wasi-sockets: UDP
+                errno = ENOTSUP;
+                return -1;
+            }
+        } else {
+            abort();
+        }
+    }
+
+    poll_borrow_pollable_t pollables[state_index + 1];
+    for (size_t i = 0; i < state_index; ++i) {
+        pollables[i] = poll_borrow_pollable(states[i].pollable);
+    }
+
+    poll_own_pollable_t timeout_pollable;
+    size_t pollable_count = state_index;
+    if (timeout >= 0) {
+        timeout_pollable = monotonic_clock_subscribe_duration(((monotonic_clock_duration_t)timeout) * 1000000);
+        pollables[pollable_count++] = poll_borrow_pollable(timeout_pollable);
+    }
+
+    poll_list_u32_t ready;
+    poll_list_borrow_pollable_t list = { .ptr = (poll_borrow_pollable_t*)&pollables, .len = pollable_count };
+    poll_poll(&list, &ready);
+
+    for (size_t i = 0; i < nfds; ++i) {
+        fds[i].revents = 0;
+    }
+
+    int event_count = 0;
+    for (size_t i = 0; i < ready.len; ++i) {
+        size_t index = ready.ptr[i];
+        if (index < state_index) {
+            state_t* state = &states[index];
+            if (state->socket->state_tag == TCP_SOCKET_STATE_CONNECTING) {
+                tcp_borrow_tcp_socket_t borrow = tcp_borrow_tcp_socket(state->socket->socket);
+                tcp_tuple2_own_input_stream_own_output_stream_t tuple;
+                tcp_error_code_t error;
+                if (tcp_method_tcp_socket_finish_connect(borrow, &tuple, &error)) {
+                    state->socket->state_tag = TCP_SOCKET_STATE_CONNECTED;
+                    streams_borrow_input_stream_t input_stream_borrow = streams_borrow_input_stream(tuple.f0);
+                    streams_own_pollable_t input_pollable = streams_method_input_stream_subscribe(input_stream_borrow);
+                    streams_borrow_output_stream_t output_stream_borrow = streams_borrow_output_stream(tuple.f1);
+                    streams_own_pollable_t output_pollable = streams_method_output_stream_subscribe(output_stream_borrow);
+                    tcp_socket_state_t socket_state = { .connected = { .input_pollable = input_pollable,
+                                                            .input = tuple.f0,
+                                                            .output_pollable = output_pollable,
+                                                            .output = tuple.f1 } };
+                    state->socket->state = socket_state;
+                    if (state->pollfd->revents == 0) {
+                        ++event_count;
+                    }
+                    state->pollfd->revents |= state->events;
+                } else if (error == NETWORK_ERROR_CODE_WOULD_BLOCK) {
+                    // No events yet -- application will need to poll again
+                } else {
+                    state->socket->state_tag = TCP_SOCKET_STATE_CONNECT_FAILED;
+                    tcp_socket_state_t socket_state = { .connect_failed = { .error_code = error } };
+                    state->socket->state = socket_state;
+                    if (state->pollfd->revents == 0) {
+                        ++event_count;
+                    }
+                    state->pollfd->revents |= state->events;
+                }
+            } else {
+                if (state->pollfd->revents == 0) {
+                    ++event_count;
+                }
+                state->pollfd->revents |= state->events;
+            }
+        }
+    }
+
+    if (timeout >= 0) {
+        poll_pollable_drop_own(timeout_pollable);
+    }
+
+    return event_count;
+}
+
+int poll(struct pollfd* fds, size_t nfds, int timeout)
+{
+    bool found_socket = false;
+    bool found_non_socket = false;
+    for (size_t i = 0; i < nfds; ++i) {
+        descriptor_table_entry_t* entry;
+        if (descriptor_table_get_ref(fds[i].fd, &entry)) {
+            found_socket = true;
+        } else {
+            found_non_socket = true;
+        }
+    }
+
+    if (found_socket) {
+        if (found_non_socket) {
+            // We currently don't support polling a mix of non-sockets and
+            // sockets here (though you can do it by using the host APIs
+            // directly), and we probably won't until we've migrated entirely to
+            // WASI Preview 2.
+            errno = ENOTSUP;
+            return -1;
+        }
+
+        return poll_preview2(fds, nfds, timeout);
+    } else if (found_non_socket) {
+        return poll_preview1(fds, nfds, timeout);
+    } else if (timeout >= 0) {
+        return poll_preview2(fds, nfds, timeout);        
+    } else {
+        errno = ENOTSUP;
+        return -1;
+    }
 }

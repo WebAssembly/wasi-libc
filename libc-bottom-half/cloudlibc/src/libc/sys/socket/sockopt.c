@@ -163,6 +163,10 @@ int tcp_getsockopt(tcp_socket_t* socket, int level, int optname,
 
     case SOL_TCP:
         switch (optname) {
+        case TCP_NODELAY: {
+            value = socket->fake_nodelay;
+            break;
+        }
         case TCP_KEEPIDLE: {
             tcp_duration_t result_ns;
             if (!tcp_method_tcp_socket_keep_alive_idle_time(socket_borrow, &result_ns, &error)) {
@@ -345,6 +349,19 @@ int tcp_setsockopt(tcp_socket_t* socket, int level, int optname, const void* opt
 
     case SOL_TCP:
         switch (optname) {
+        case TCP_NODELAY: {
+            // At the time of writing, WASI has no support for TCP_NODELAY.
+            // Yet, many applications expect this option to be implemented.
+            // To ensure those applications can run on WASI at all, we fake
+            // support for it by recording the value, but not doing anything
+            // with it.
+            // If/when WASI adds true support, we can remove this workaround
+            // and implement it properly. From the application's perspective
+            // the "worst" thing that can then happen is that it automagically
+            // becomes faster.
+            socket->fake_nodelay = (intval != 0);
+            return 0;
+        }
         case TCP_KEEPIDLE: {
             tcp_duration_t duration = intval * NS_PER_S;
             if (!tcp_method_tcp_socket_set_keep_alive_idle_time(socket_borrow, duration, &error)) {

@@ -67,6 +67,7 @@ int tcp_accept(tcp_socket_t* socket, bool client_blocking, struct sockaddr* addr
         .socket = client,
         .socket_pollable = client_pollable,
         .blocking = client_blocking,
+        .fake_nodelay = socket->fake_nodelay,
         .family = socket->family,
         .state = { .tag = TCP_SOCKET_STATE_CONNECTED, .connected = {
             .input = input,

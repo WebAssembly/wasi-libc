@@ -266,7 +266,7 @@ static int poll_preview2(struct pollfd* fds, size_t nfds, int timeout)
     return event_count;
 }
 
-int poll(struct pollfd* fds, size_t nfds, int timeout)
+int poll(struct pollfd* fds, nfds_t nfds, int timeout)
 {
     bool found_socket = false;
     bool found_non_socket = false;

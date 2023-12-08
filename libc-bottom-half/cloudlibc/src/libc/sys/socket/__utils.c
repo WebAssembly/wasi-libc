@@ -351,3 +351,36 @@ void __wasi_sockets_utils__drop_streams(udp_socket_streams_t streams) {
     udp_incoming_datagram_stream_drop_own(streams.incoming);
     udp_outgoing_datagram_stream_drop_own(streams.outgoing);
 }
+
+bool __wasi_sockets_utils__stream(
+    udp_socket_t* socket,
+    network_ip_socket_address_t* remote_address, // May be null to "disconnect"
+    udp_socket_streams_t* result,
+    network_error_code_t* error
+) {
+
+    // Assert that:
+    // - We're already bound. This is required by WASI.
+    // - We have no active streams. From WASI: 
+    //   > Implementations may trap if the streams returned by a previous
+    //   > invocation haven't been dropped yet before calling `stream` again.
+    assert(socket->state.tag == UDP_SOCKET_STATE_BOUND_NOSTREAMS);
+
+    udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
+
+    if (!__wasi_sockets_utils__create_streams(socket_borrow, remote_address, result, error)) {
+        return false;
+    }
+
+    if (remote_address != NULL) {
+        socket->state = (udp_socket_state_t){ .tag = UDP_SOCKET_STATE_CONNECTED, .connected = {
+            .streams = *result,
+        } };
+    } else {
+        socket->state = (udp_socket_state_t){ .tag = UDP_SOCKET_STATE_BOUND_STREAMING, .bound_streaming = {
+            .streams = *result,
+        } };
+    }
+
+    return true;
+}

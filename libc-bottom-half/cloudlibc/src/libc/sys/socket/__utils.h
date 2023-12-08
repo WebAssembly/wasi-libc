@@ -27,7 +27,7 @@ int __wasi_sockets_utils__posix_family(network_ip_address_family_t wasi_family);
 network_ip_socket_address_t __wasi_sockets_utils__any_addr(network_ip_address_family_t family);
 int __wasi_sockets_utils__tcp_bind(tcp_socket_t* socket, network_ip_socket_address_t* address);
 int __wasi_sockets_utils__udp_bind(udp_socket_t* socket, network_ip_socket_address_t* address);
-bool __wasi_sockets_utils__create_streams(udp_borrow_udp_socket_t socket_borrow, network_ip_socket_address_t* remote_address, udp_socket_streams_t* result, network_error_code_t* error);
+bool __wasi_sockets_utils__stream(udp_socket_t* socket, network_ip_socket_address_t* remote_address, udp_socket_streams_t* result, network_error_code_t* error);
 void __wasi_sockets_utils__drop_streams(udp_socket_streams_t streams);
 
 #endif

@@ -133,37 +133,16 @@ int udp_connect(udp_socket_t* socket, const struct sockaddr* addr, socklen_t add
     default: /* unreachable */ abort();
     }
 
-    assert(socket->state.tag == UDP_SOCKET_STATE_BOUND_NOSTREAMS);
-
 
     network_error_code_t error;
-    udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
     udp_socket_streams_t streams;
 
-    if (has_remote_address) {
-        // Perform "connect"
-        if (!__wasi_sockets_utils__create_streams(socket_borrow, &remote_address, &streams, &error)) {
-            errno = __wasi_sockets_utils__map_error(error);
-            return -1;
-        }
-
-        socket->state = (udp_socket_state_t){ .tag = UDP_SOCKET_STATE_CONNECTED, .connected = {
-            .streams = streams,
-        } };
-        return 0;
-
-    } else {
-        // Perform "disconnect"
-        if (!__wasi_sockets_utils__create_streams(socket_borrow, NULL, &streams, &error)) {
-            errno = __wasi_sockets_utils__map_error(error);
-            return -1;
-        }
-
-        socket->state = (udp_socket_state_t){ .tag = UDP_SOCKET_STATE_BOUND_STREAMING, .bound_streaming = {
-            .streams = streams,
-        } };
-        return 0;
+    if (!__wasi_sockets_utils__stream(socket, has_remote_address ? &remote_address : NULL, &streams, &error)) {
+        errno = __wasi_sockets_utils__map_error(error);
+        return -1;
     }
+
+    return 0;
 }
 
 int connect(int fd, const struct sockaddr* addr, socklen_t addrlen)

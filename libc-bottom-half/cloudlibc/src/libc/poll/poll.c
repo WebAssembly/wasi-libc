@@ -259,6 +259,8 @@ static int poll_preview2(struct pollfd* fds, size_t nfds, int timeout)
         }
     }
 
+    poll_list_u32_free(&ready);
+
     if (timeout >= 0) {
         poll_pollable_drop_own(timeout_pollable);
     }

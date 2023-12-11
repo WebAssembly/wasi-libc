@@ -71,5 +71,5 @@ For Arch Linux users, there's an official [wasi-libc] package tracking this Git
 repository. You might want to install other [WASI related packages] as well.
 
 [wasi-sdk]: https://github.com/WebAssembly/wasi-sdk
-[wasi-libc]: https://archlinux.org/packages/community/any/wasi-libc/
+[wasi-libc]: https://archlinux.org/packages/extra/any/wasi-libc/
 [WASI related packages]: https://archlinux.org/packages/?q=wasi-

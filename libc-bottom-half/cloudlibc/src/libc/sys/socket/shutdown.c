@@ -34,7 +34,7 @@ int tcp_shutdown(tcp_socket_t* socket, int posix_how)
     }
 
     tcp_socket_state_connected_t connection;
-    if (socket->state_tag == TCP_SOCKET_STATE_CONNECTED) {
+    if (socket->state.tag == TCP_SOCKET_STATE_CONNECTED) {
         connection = socket->state.connected;
     } else {
         errno = ENOTCONN;
@@ -77,9 +77,9 @@ int shutdown(int socket, int how) {
     switch (entry->tag)
     {
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-        return tcp_shutdown(&entry->value.tcp_socket, how);
+        return tcp_shutdown(&entry->tcp_socket, how);
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-        return udp_shutdown(&entry->value.udp_socket, how);
+        return udp_shutdown(&entry->udp_socket, how);
     default:
         errno = EOPNOTSUPP;
         return -1;

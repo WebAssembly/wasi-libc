@@ -10,18 +10,17 @@ int tcp_listen(tcp_socket_t* socket, int backlog) {
     network_error_code_t error;
     tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
 
-    switch (socket->state_tag) {
+    switch (socket->state.tag) {
     case TCP_SOCKET_STATE_UNBOUND: {
         // Socket is not explicitly bound by the user. We'll do it for them:
 
-        tcp_ip_address_family_t family = tcp_method_tcp_socket_address_family(socket_borrow);
-        network_ip_socket_address_t any = __wasi_sockets_utils__any_addr(family);
+        network_ip_socket_address_t any = __wasi_sockets_utils__any_addr(socket->family);
         int result = __wasi_sockets_utils__tcp_bind(socket, &any);
         if (result != 0) {
             return result;
         }
 
-        assert(socket->state_tag == TCP_SOCKET_STATE_BOUND);
+        assert(socket->state.tag == TCP_SOCKET_STATE_BOUND);
         // Great! We'll continue below.
         break;
     }
@@ -43,7 +42,7 @@ int tcp_listen(tcp_socket_t* socket, int backlog) {
         abort(); // Our own state checks should've prevented this from happening.
     }
 
-    if (socket->state_tag == TCP_SOCKET_STATE_LISTENING) {
+    if (socket->state.tag == TCP_SOCKET_STATE_LISTENING) {
         // Updating the backlog is all we had to do.
         return 0;
     }
@@ -67,8 +66,7 @@ int tcp_listen(tcp_socket_t* socket, int backlog) {
 
     // Listen successful.
 
-    socket->state_tag = TCP_SOCKET_STATE_LISTENING;
-    socket->state = (tcp_socket_state_t){ .listening = { /* No additional state */ } };
+    socket->state = (tcp_socket_state_t){ .tag = TCP_SOCKET_STATE_LISTENING, .listening = { /* No additional state */ } };
     return 0;
 }
 
@@ -97,9 +95,9 @@ int listen(int socket, int backlog) {
     switch (entry->tag)
     {
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-        return tcp_listen(&entry->value.tcp_socket, backlog);
+        return tcp_listen(&entry->tcp_socket, backlog);
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-        return udp_listen(&entry->value.udp_socket, backlog);
+        return udp_listen(&entry->udp_socket, backlog);
     default:
         errno = EOPNOTSUPP;
         return -1;

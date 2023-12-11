@@ -15,11 +15,12 @@ int ioctl(int fildes, int request, ...)
     if (descriptor_table_get_ref(fildes, &entry)) {
         switch (entry->tag) {
         case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET: {
+            tcp_socket_t* socket = &entry->tcp_socket;
             switch (request) {
             case FIONBIO: {
                 va_list ap;
                 va_start(ap, request);
-                entry->value.tcp_socket.blocking = *va_arg(ap, const int*) != 0;
+                socket->blocking = *va_arg(ap, const int*) != 0;
                 va_end(ap);
 
                 return 0;

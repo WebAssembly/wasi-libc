@@ -4,42 +4,168 @@
 #include <descriptor_table.h>
 #include "__utils.h"
 
-bool tcp_getsockname(tcp_socket_t* socket, network_ip_socket_address_t* out_address)
+int tcp_getsockname(tcp_socket_t* socket, struct sockaddr* addr, socklen_t* addrlen)
 {
-    network_error_code_t error;
-    tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
-    if (!tcp_method_tcp_socket_local_address(socket_borrow, out_address, &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return false;
+    output_sockaddr_t output_addr;
+    if (!__wasi_sockets_utils__output_addr_validate(socket->family, addr, addrlen, &output_addr)) {
+        errno = EINVAL;
+        return -1;
     }
 
-    return true;
-}
-
-bool tcp_getpeername(tcp_socket_t* socket, network_ip_socket_address_t* out_address)
-{
-    network_error_code_t error;
-    tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
-    if (!tcp_method_tcp_socket_remote_address(socket_borrow, out_address, &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return false;
+    if (output_addr.tag == OUTPUT_SOCKADDR_NULL) {
+        errno = EINVAL;
+        return -1;
     }
 
-    return true;
+    switch (socket->state.tag) {
+    case TCP_SOCKET_STATE_UNBOUND:
+        errno = EINVAL;
+        return -1;
+
+    case TCP_SOCKET_STATE_BOUND:
+    case TCP_SOCKET_STATE_CONNECTING:
+    case TCP_SOCKET_STATE_CONNECT_FAILED:
+    case TCP_SOCKET_STATE_LISTENING:
+    case TCP_SOCKET_STATE_CONNECTED:
+        // OK. Continue..
+        break;
+
+    default: /* unreachable */ abort();
+    }
+
+    network_error_code_t error;
+    network_ip_socket_address_t result;
+    tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
+    if (!tcp_method_tcp_socket_local_address(socket_borrow, &result, &error)) {
+        errno = __wasi_sockets_utils__map_error(error);
+        return -1;
+    }
+
+    __wasi_sockets_utils__output_addr_write(result, &output_addr);
+
+    return 0;
 }
 
-bool udp_getsockname(udp_socket_t* socket, network_ip_socket_address_t* out_address)
+int tcp_getpeername(tcp_socket_t* socket, struct sockaddr* addr, socklen_t* addrlen)
 {
-    // TODO wasi-sockets: implement
-    errno = EOPNOTSUPP;
-    return -1;
+    output_sockaddr_t output_addr;
+    if (!__wasi_sockets_utils__output_addr_validate(socket->family, addr, addrlen, &output_addr)) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    if (output_addr.tag == OUTPUT_SOCKADDR_NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    switch (socket->state.tag) {
+    case TCP_SOCKET_STATE_UNBOUND:
+    case TCP_SOCKET_STATE_BOUND:
+    case TCP_SOCKET_STATE_CONNECTING:
+    case TCP_SOCKET_STATE_CONNECT_FAILED:
+    case TCP_SOCKET_STATE_LISTENING:
+        errno = ENOTCONN;
+        return -1;
+
+    case TCP_SOCKET_STATE_CONNECTED:
+        // OK. Continue..
+        break;
+
+    default: /* unreachable */ abort();
+    }
+
+    network_error_code_t error;
+    network_ip_socket_address_t result;
+    tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
+    if (!tcp_method_tcp_socket_remote_address(socket_borrow, &result, &error)) {
+        errno = __wasi_sockets_utils__map_error(error);
+        return -1;
+    }
+
+    __wasi_sockets_utils__output_addr_write(result, &output_addr);
+
+    return 0;
 }
 
-bool udp_getpeername(udp_socket_t* socket, network_ip_socket_address_t* out_address)
+int udp_getsockname(udp_socket_t* socket, struct sockaddr* addr, socklen_t* addrlen)
 {
-    // TODO wasi-sockets: implement
-    errno = EOPNOTSUPP;
-    return -1;
+    output_sockaddr_t output_addr;
+    if (!__wasi_sockets_utils__output_addr_validate(socket->family, addr, addrlen, &output_addr)) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    if (output_addr.tag == OUTPUT_SOCKADDR_NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    switch (socket->state.tag) {
+    case UDP_SOCKET_STATE_UNBOUND:
+        errno = EINVAL;
+        return -1;
+
+    case UDP_SOCKET_STATE_BOUND_NOSTREAMS:
+    case UDP_SOCKET_STATE_BOUND_STREAMING:
+    case UDP_SOCKET_STATE_CONNECTED:
+        // OK. Continue..
+        break;
+
+    default: /* unreachable */ abort();
+    }
+
+    network_error_code_t error;
+    network_ip_socket_address_t result;
+    udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
+    if (!udp_method_udp_socket_local_address(socket_borrow, &result, &error)) {
+        errno = __wasi_sockets_utils__map_error(error);
+        return -1;
+    }
+
+    __wasi_sockets_utils__output_addr_write(result, &output_addr);
+
+    return 0;
+}
+
+int udp_getpeername(udp_socket_t* socket, struct sockaddr* addr, socklen_t* addrlen)
+{
+    output_sockaddr_t output_addr;
+    if (!__wasi_sockets_utils__output_addr_validate(socket->family, addr, addrlen, &output_addr)) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    if (output_addr.tag == OUTPUT_SOCKADDR_NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    switch (socket->state.tag) {
+    case UDP_SOCKET_STATE_UNBOUND:
+    case UDP_SOCKET_STATE_BOUND_NOSTREAMS:
+    case UDP_SOCKET_STATE_BOUND_STREAMING:
+        errno = ENOTCONN;
+        return -1;
+
+    case UDP_SOCKET_STATE_CONNECTED:
+        // OK. Continue..
+        break;
+
+    default: /* unreachable */ abort();
+    }
+
+    network_error_code_t error;
+    network_ip_socket_address_t result;
+    udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
+    if (!udp_method_udp_socket_remote_address(socket_borrow, &result, &error)) {
+        errno = __wasi_sockets_utils__map_error(error);
+        return -1;
+    }
+
+    __wasi_sockets_utils__output_addr_write(result, &output_addr);
+
+    return 0;
 }
 
 int getsockname(int socket, struct sockaddr *__restrict addr, socklen_t *__restrict addrlen)
@@ -50,39 +176,16 @@ int getsockname(int socket, struct sockaddr *__restrict addr, socklen_t *__restr
         return -1;
     }
 
-    if (addr == NULL || addrlen == NULL || *addrlen == 0) {
-        errno = EINVAL;
-        return -1;
-    }
-
-    network_ip_socket_address_t out_address;
-
     switch (entry->tag)
     {
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-        if (!tcp_getsockname(&entry->value.tcp_socket, &out_address)) {
-            // errno is set by tcp_getsockname
-            return -1;
-        }
-        break;
+        return tcp_getsockname(&entry->tcp_socket, addr, addrlen);
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-        if (!udp_getsockname(&entry->value.udp_socket, &out_address)) {
-            // errno is set by udp_getsockname
-            return -1;
-        }
-        break;
+        return udp_getsockname(&entry->udp_socket, addr, addrlen);
     default:
         errno = EOPNOTSUPP;
         return -1;
     }
-
-    int err;
-    if (!__wasi_sockets_utils__format_address(&out_address, addr, addrlen, &err)) {
-        errno = err;
-        return -1;
-    }
-
-    return 0;
 }
 
 int getpeername(int socket, struct sockaddr *__restrict addr, socklen_t *__restrict addrlen)
@@ -93,37 +196,14 @@ int getpeername(int socket, struct sockaddr *__restrict addr, socklen_t *__restr
         return -1;
     }
 
-    if (addr == NULL || addrlen == NULL || *addrlen == 0) {
-        errno = EINVAL;
-        return -1;
-    }
-
-    network_ip_socket_address_t out_address;
-
     switch (entry->tag)
     {
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-        if (!tcp_getpeername(&entry->value.tcp_socket, &out_address)) {
-            // errno is set by tcp_getpeername
-            return -1;
-        }
-        break;
+        return tcp_getpeername(&entry->tcp_socket, addr, addrlen);
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-        if (!udp_getpeername(&entry->value.udp_socket, &out_address)) {
-            // errno is set by udp_getpeername
-            return -1;
-        }
-        break;
+        return udp_getpeername(&entry->udp_socket, addr, addrlen);
     default:
         errno = EOPNOTSUPP;
         return -1;
     }
-
-    int err;
-    if (!__wasi_sockets_utils__format_address(&out_address, addr, addrlen, &err)) {
-        errno = err;
-        return -1;
-    }
-    
-    return 0;
 }

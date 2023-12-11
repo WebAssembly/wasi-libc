@@ -16,17 +16,14 @@ int tcp_socket(network_ip_address_family_t family, bool blocking)
     tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket);
     poll_own_pollable_t socket_pollable = tcp_method_tcp_socket_subscribe(socket_borrow);
 
-    descriptor_table_entry_t entry = {
-        .tag = DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET,
-        .value = { .tcp_socket = {
-            .socket = socket,
-            .socket_pollable = socket_pollable,
-            .blocking = blocking,
-            .fake_nodelay = false,
-            .state_tag = TCP_SOCKET_STATE_UNBOUND,
-            .state = { .unbound = { /* No additional state. */ } },
-        } },
-    };
+    descriptor_table_entry_t entry = { .tag = DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET, .tcp_socket = {
+        .socket = socket,
+        .socket_pollable = socket_pollable,
+        .blocking = blocking,
+        .fake_nodelay = false,
+        .family = family,
+        .state = { .tag = TCP_SOCKET_STATE_UNBOUND, .unbound = { /* No additional state. */ } },
+    } };
 
     int fd;
     if (!descriptor_table_insert(entry, &fd)) {
@@ -38,9 +35,30 @@ int tcp_socket(network_ip_address_family_t family, bool blocking)
 
 int udp_socket(network_ip_address_family_t family, bool blocking)
 {
-    // TODO wasi-sockets: implement
-    errno = EPROTONOSUPPORT;
-    return -1;
+    udp_create_socket_error_code_t error;
+    udp_own_udp_socket_t socket;
+    if (!udp_create_socket_create_udp_socket(family, &socket, &error)) {
+        errno = __wasi_sockets_utils__map_error(error);
+        return -1;
+    }
+
+    udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket);
+    poll_own_pollable_t socket_pollable = udp_method_udp_socket_subscribe(socket_borrow);
+
+    descriptor_table_entry_t entry = { .tag = DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET, .udp_socket = {
+        .socket = socket,
+        .socket_pollable = socket_pollable,
+        .blocking = blocking,
+        .family = family,
+        .state = { .tag = UDP_SOCKET_STATE_UNBOUND, .unbound = { /* No additional state. */ } },
+    } };
+
+    int fd;
+    if (!descriptor_table_insert(entry, &fd)) {
+        errno = EMFILE;
+        return -1;
+    }
+    return fd;
 }
 
 

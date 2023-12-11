@@ -57,8 +57,7 @@ int tcp_connect(tcp_socket_t* socket, const struct sockaddr* addr, socklen_t add
                 return -1;
             }
         } else {
-            socket->state.tag = TCP_SOCKET_STATE_CONNECT_FAILED;
-            socket->state = (tcp_socket_state_t){ .connect_failed = {
+            socket->state = (tcp_socket_state_t){ .tag = TCP_SOCKET_STATE_CONNECT_FAILED, .connect_failed = {
                 .error_code = error,
             } };
 

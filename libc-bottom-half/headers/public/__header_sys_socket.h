@@ -1,6 +1,7 @@
 #ifndef __wasilibc___header_sys_socket_h
 #define __wasilibc___header_sys_socket_h
 
+#include <__wasi_snapshot.h>
 #include <__struct_msghdr.h>
 #include <__struct_sockaddr.h>
 #include <__struct_sockaddr_storage.h>

@@ -29,14 +29,14 @@ __attribute__((__import_module__("wasi_snapshot_preview1"), __import_name__("ada
 
 static bool wasi_preview1_adapter_open_badfd(int* fd)
 {
-    return __wasi_preview1_adapter_open_badfd((int32_t)fd) != 0;
+    return __wasi_preview1_adapter_open_badfd((int32_t)fd) == 0;
 }
 
 __attribute__((__import_module__("wasi_snapshot_preview1"), __import_name__("adapter_close_badfd"))) extern int32_t __wasi_preview1_adapter_close_badfd(int32_t);
 
 static bool wasi_preview1_adapter_close_badfd(int fd)
 {
-    return __wasi_preview1_adapter_close_badfd(fd) != 0;
+    return __wasi_preview1_adapter_close_badfd(fd) == 0;
 }
 
 /*

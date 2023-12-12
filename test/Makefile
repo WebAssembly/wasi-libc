@@ -16,16 +16,29 @@ test: run
 OBJDIR ?= $(CURDIR)/build
 DOWNDIR ?= $(CURDIR)/download
 
+# preview1 or preview2
+WASI_SNAPSHOT ?= preview1
+
 ##### DOWNLOAD #################################################################
 
 LIBC_TEST_URL ?= https://github.com/bytecodealliance/libc-test
 LIBC_TEST = $(DOWNDIR)/libc-test
 LIBRT_URL ?= https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/libclang_rt.builtins-wasm32-wasi-16.0.tar.gz
 LIBRT = $(DOWNDIR)/lib/wasi/libclang_rt.builtins-wasm32.a
-WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v3.0.0/wasmtime-v3.0.0-x86_64-linux.tar.xz
+# TODO: switch to Wasmtime 16 once it's released
+WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/dev/wasmtime-dev-x86_64-linux.tar.xz
 WASMTIME = $(DOWNDIR)/$(shell basename $(WASMTIME_URL) .tar.xz)/wasmtime
+WASM_TOOLS_URL ?= https://github.com/bytecodealliance/wasm-tools/releases/download/wasm-tools-1.0.54/wasm-tools-1.0.54-x86_64-linux.tar.gz
+WASM_TOOLS = $(DOWNDIR)/$(shell basename $(WASM_TOOLS_URL) .tar.gz)/wasm-tools
+ADAPTER_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/dev/wasi_snapshot_preview1.command.wasm
+ADAPTER = $(DOWNDIR)/wasi_snapshot_preview1.command.wasm
 
-download: $(LIBC_TEST) $(LIBRT) $(WASMTIME)
+TO_DOWNLOAD = $(LIBC_TEST) $(LIBRT) $(WASMTIME)
+ifeq ($(WASI_SNAPSHOT), preview2)
+TO_DOWNLOAD += $(ADAPTER) $(WASM_TOOLS)
+endif
+
+download: $(TO_DOWNLOAD)
 
 $(DOWNDIR):
 	mkdir -p download
@@ -41,6 +54,13 @@ $(LIBRT): | $(DOWNDIR)
 $(WASMTIME): | $(DOWNDIR)
 	wget --no-clobber --directory-prefix=$(DOWNDIR) $(WASMTIME_URL)
 	tar --extract --file=$(DOWNDIR)/$(shell basename $(WASMTIME_URL)) --directory=$(DOWNDIR)/
+
+$(WASM_TOOLS): | $(DOWNDIR)
+	wget --no-clobber --directory-prefix=$(DOWNDIR) $(WASM_TOOLS_URL)
+	tar --extract --file=$(DOWNDIR)/$(shell basename $(WASM_TOOLS_URL)) --directory=$(DOWNDIR)/
+
+$(ADAPTER): | $(DOWNDIR)
+	wget --no-clobber --directory-prefix=$(DOWNDIR) $(ADAPTER_URL)
 
 clean::
 	rm -rf download
@@ -110,13 +130,18 @@ WASM_OBJS += $(INFRA_WASM_OBJS)
 DIRS := $(patsubst $(OBJDIR)/%/,%,$(sort $(dir $(WASM_OBJS))))
 OBJDIRS := $(DIRS:%=$(OBJDIR)/%)
 
+TARGET_TRIPLE = wasm32-wasi
+ifeq ($(WASI_SNAPSHOT), preview2)
+TARGET_TRIPLE = wasm32-wasi-preview2
+endif
+
 # Allow $(CC) to be set from the command line; ?= doesn't work for CC because
 # make has a default value for it.
 ifeq ($(origin CC), default)
 CC := clang
 endif
 LDFLAGS ?=
-CFLAGS ?= --target=wasm32-wasi --sysroot=../sysroot
+CFLAGS ?= --target=$(TARGET_TRIPLE) --sysroot=../sysroot
 # Always include the `libc-test` infrastructure headers.
 CFLAGS += -I$(LIBC_TEST)/src/common
 
@@ -129,7 +154,10 @@ build: download $(WASMS)
 
 $(WASMS): | $(OBJDIRS)
 $(OBJDIR)/%.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ 
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+ifeq ($(WASI_SNAPSHOT), preview2)
+	$(WASM_TOOLS) component new --adapt $(ADAPTER) $@ -o $@
+endif
 
 $(WASM_OBJS): $(LIBC_TEST)/src/common/test.h | $(OBJDIRS)
 $(OBJDIR)/%.wasm.o: $(LIBC_TEST)/src/%.c
@@ -144,6 +172,9 @@ clean::
 ##### RUN ######################################################################
 
 ENGINE ?= $(WASMTIME) run
+ifeq ($(WASI_SNAPSHOT), preview2)
+ENGINE += --wasm component-model
+endif
 ERRS:=$(WASMS:%.wasm=%.wasm.err)
 
 # Use the provided Wasm engine to execute each test, emitting its output into

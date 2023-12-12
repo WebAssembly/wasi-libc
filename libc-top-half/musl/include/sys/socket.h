@@ -1,5 +1,8 @@
 #ifndef	_SYS_SOCKET_H
 #define	_SYS_SOCKET_H
+
+#include <__wasi_snapshot.h>
+
 #ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #else
 #include <__header_sys_socket.h>

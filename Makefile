@@ -406,7 +406,7 @@ LIBC_BOTTOM_HALF_CRT_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_CRT_SOURCES))
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
 SYSROOT_LIB := $(SYSROOT)/lib/$(TARGET_TRIPLE)
-SYSROOT_INC = $(SYSROOT)/include
+SYSROOT_INC = $(SYSROOT)/include/$(TARGET_TRIPLE)
 SYSROOT_SHARE = $(SYSROOT)/share/$(TARGET_TRIPLE)
 
 # Files from musl's include directory that we don't want to install in the
@@ -681,6 +681,10 @@ include_dirs:
 
 	# Remove selected header files.
 	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
+ifeq ($(WASI_SNAPSHOT), preview2)
+	printf '#ifndef __wasilibc_use_preview2\n#define __wasilibc_use_preview2\n#endif\n' \
+	    > "$(SYSROOT_INC)/__wasi_snapshot.h"
+endif
 
 startup_files: include_dirs $(LIBC_BOTTOM_HALF_CRT_OBJS)
 	#

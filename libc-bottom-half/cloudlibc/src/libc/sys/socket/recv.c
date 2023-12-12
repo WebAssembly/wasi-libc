@@ -4,10 +4,12 @@
 
 #include <sys/socket.h>
 
+#include <assert.h>
 #include <errno.h>
 #include <stdint.h>
 #include <wasi/api.h>
 
+#ifdef __wasilibc_use_preview2
 #include <descriptor_table.h>
 #include "__utils.h"
 
@@ -180,3 +182,37 @@ ssize_t recvfrom(int socket, void *__restrict buffer, size_t length, int flags,
         return -1;
     }
 }
+
+#else // __wasilibc_use_preview2
+
+static_assert(MSG_PEEK == __WASI_RIFLAGS_RECV_PEEK, "Value mismatch");
+static_assert(MSG_WAITALL == __WASI_RIFLAGS_RECV_WAITALL, "Value mismatch");
+
+ssize_t recv(int socket, void *restrict buffer, size_t length, int flags) {
+  // Validate flags.
+  if ((flags & ~(MSG_PEEK | MSG_WAITALL)) != 0) {
+    errno = EOPNOTSUPP;
+    return -1;
+  }
+
+  // Prepare input parameters.
+  __wasi_iovec_t iov = {.buf = buffer, .buf_len = length};
+  __wasi_iovec_t *ri_data = &iov;
+  size_t ri_data_len = 1;
+  __wasi_riflags_t ri_flags = flags;
+
+  // Perform system call.
+  size_t ro_datalen;
+  __wasi_roflags_t ro_flags;
+  __wasi_errno_t error = __wasi_sock_recv(socket,
+                                          ri_data, ri_data_len, ri_flags,
+                                          &ro_datalen,
+                                          &ro_flags);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+  return ro_datalen;
+}
+
+#endif // __wasilibc_use_preview2

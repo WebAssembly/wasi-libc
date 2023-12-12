@@ -118,10 +118,10 @@ struct hostent *gethostbyaddr (const void *, socklen_t, int);
 #ifdef __GNUC__
 __attribute__((const))
 #endif
-#ifdef __wasilibc_unmodified_upstream 
+#ifdef __wasilibc_unmodified_upstream
 int *__h_errno_location(void);
 #define h_errno (*__h_errno_location())
-#else
+#elif (defined __wasilibc_use_preview2)
 extern _Thread_local int h_errno;
 #define h_errno h_errno
 #endif

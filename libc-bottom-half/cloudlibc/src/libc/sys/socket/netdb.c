@@ -1,3 +1,4 @@
+#ifdef __wasilibc_use_preview2
 #include <netdb.h>
 #include <stdlib.h>
 
@@ -56,3 +57,4 @@ struct protoent* getprotobyname(const char* name)
     // TODO
     abort();
 }
+#endif // __wasilibc_use_preview2

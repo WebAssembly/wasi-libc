@@ -6,7 +6,6 @@
 #include <errno.h>
 #include <poll.h>
 #include <stdbool.h>
-#include <descriptor_table.h>
 
 static int poll_preview1(struct pollfd *fds, size_t nfds, int timeout) {
   // Construct events for poll().
@@ -128,6 +127,9 @@ static int poll_preview1(struct pollfd *fds, size_t nfds, int timeout) {
   }
   return retval;
 }
+
+#ifdef __wasilibc_use_preview2
+#include <descriptor_table.h>
 
 typedef struct {
     poll_own_pollable_t pollable;
@@ -301,3 +303,9 @@ int poll(struct pollfd* fds, nfds_t nfds, int timeout)
         return -1;
     }
 }
+#else // __wasilibc_use_preview2
+int poll(struct pollfd* fds, nfds_t nfds, int timeout)
+{
+    return poll_preview1(fds, nfds, timeout);
+}
+#endif

@@ -14,7 +14,9 @@ SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
 INSTALL_DIR ?= /usr/local
 # single or posix; note that pthread support is still a work-in-progress.
-THREAD_MODEL ?= single
+TARGET_TRIPLE ?= single
+# preview1 or preview2; the latter is not (yet) compatible with multithreading
+WASI_SNAPSHOT ?= preview1
 # dlmalloc or none
 MALLOC_IMPL ?= dlmalloc
 # yes or no
@@ -39,6 +41,10 @@ TARGET_TRIPLE = wasm32-wasi
 # targets can't be mixed together while linking.
 ifeq ($(THREAD_MODEL), posix)
 TARGET_TRIPLE = wasm32-wasi-threads
+endif
+
+ifeq ($(WASI_SNAPSHOT), preview2)
+TARGET_TRIPLE = wasm32-wasi-preview2
 endif
 
 BUILTINS_LIB ?= $(shell ${CC} --print-libgcc-file-name)
@@ -112,7 +118,6 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         network/inet_aton.c \
         network/in6addr_any.c \
         network/in6addr_loopback.c \
-        network/gai_strerror.c \
         fenv/fenv.c \
         fenv/fesetround.c \
         fenv/feupdateenv.c \
@@ -197,6 +202,13 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  %/cimagf.c %/cimag.c %cimagl.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
+
+ifeq ($(WASI_SNAPSHOT), preview2)
+LIBC_TOP_HALF_MUSL_SOURCES += \
+    $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
+	network/gai_strerror.c \
+    )
+endif
 
 ifeq ($(THREAD_MODEL), posix)
 LIBC_TOP_HALF_MUSL_SOURCES += \
@@ -335,6 +347,10 @@ ASMFLAGS += -matomics
 CFLAGS += -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 endif
 
+ifeq ($(WASI_SNAPSHOT), preview2)
+EXTRA_CFLAGS += -D__wasilibc_use_preview2
+endif
+
 # Expose the public headers to the implementation. We use `-isystem` for
 # purpose for two reasons:
 #
@@ -357,7 +373,9 @@ DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 EMMALLOC_OBJS = $(call objs,$(EMMALLOC_SOURCES))
 LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 LIBC_TOP_HALF_ALL_OBJS = $(call asmobjs,$(call objs,$(LIBC_TOP_HALF_ALL_SOURCES)))
+ifeq ($(WASI_SNAPSHOT), preview2)
 LIBC_OBJS += $(OBJDIR)/preview2_component_type.o
+endif
 ifeq ($(MALLOC_IMPL),dlmalloc)
 LIBC_OBJS += $(DLMALLOC_OBJS)
 else ifeq ($(MALLOC_IMPL),emmalloc)
@@ -469,6 +487,11 @@ MUSL_OMIT_HEADERS += \
     "sys/sysmacros.h" \
     "aio.h"
 
+ifeq ($(WASI_SNAPSHOT), preview1)
+# Remove headers not supported in WASI Preview 1.
+MUSL_OMIT_HEADERS += "netdb.h"
+endif
+
 ifeq ($(THREAD_MODEL), single)
 # Remove headers not supported in single-threaded mode.
 MUSL_OMIT_HEADERS += "pthread.h"
@@ -511,7 +534,7 @@ PIC_OBJS = \
 # to CC.  This is a workaround for a Windows command line size limitation.  See
 # the `%.a` rule below for details.
 $(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(BUILTINS_LIB)
-	$(CC) -nodefaultlibs -shared --sysroot=$(SYSROOT) \
+	$(CC) --target=$(TARGET_TRIPLE) -nodefaultlibs -shared --sysroot=$(SYSROOT) \
 	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB)
 
 $(OBJDIR)/libc.so.a: $(LIBC_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS)

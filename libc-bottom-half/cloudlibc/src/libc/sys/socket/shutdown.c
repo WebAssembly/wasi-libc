@@ -8,11 +8,12 @@
 #include <wasi/api.h>
 #include <errno.h>
 
-#include <descriptor_table.h>
-#include "__utils.h"
-
 static_assert(SHUT_RD == __WASI_SDFLAGS_RD, "Value mismatch");
 static_assert(SHUT_WR == __WASI_SDFLAGS_WR, "Value mismatch");
+
+#ifdef __wasilibc_use_preview2
+#include <descriptor_table.h>
+#include "__utils.h"
 
 int tcp_shutdown(tcp_socket_t* socket, int posix_how)
 {
@@ -85,3 +86,22 @@ int shutdown(int socket, int how) {
         return -1;
     }
 }
+
+#else // __wasilibc_use_preview2
+
+int shutdown(int socket, int how) {
+  // Validate shutdown flags.
+  if (how != SHUT_RD && how != SHUT_WR && how != SHUT_RDWR) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  __wasi_errno_t error = __wasi_sock_shutdown(socket, how);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+  return error;
+}
+
+#endif // __wasilibc_use_preview2

@@ -3,8 +3,6 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include <descriptor_table.h>
-
 int __wasilibc_fd_renumber(int fd, int newfd) {
     // Scan the preopen fds before making any changes.
     __wasilibc_populate_preopens();
@@ -16,6 +14,9 @@ int __wasilibc_fd_renumber(int fd, int newfd) {
     }
     return 0;
 }
+
+#ifdef __wasilibc_use_preview2
+#include <descriptor_table.h>
 
 void drop_tcp_socket(tcp_socket_t socket) {
     switch (socket.state.tag) {
@@ -68,11 +69,13 @@ void drop_udp_socket(udp_socket_t socket) {
     poll_pollable_drop_own(socket.socket_pollable);
     udp_udp_socket_drop_own(socket.socket);
 }
+#endif // __wasilibc_use_preview2
 
 int close(int fd) {
     // Scan the preopen fds before making any changes.
     __wasilibc_populate_preopens();
 
+#ifdef __wasilibc_use_preview2
     descriptor_table_entry_t entry;
     if (descriptor_table_remove(fd, &entry)) {
 
@@ -88,15 +91,16 @@ int close(int fd) {
         }
         
         return 0;
-    } else {
-        __wasi_errno_t error = __wasi_fd_close(fd);
-        if (error != 0) {
-            errno = error;
-            return -1;
-        }
-
-        return 0;
     }
+#endif // __wasilibc_use_preview2
+    
+    __wasi_errno_t error = __wasi_fd_close(fd);
+    if (error != 0) {
+        errno = error;
+        return -1;
+    }
+
+    return 0;
 }
 
 weak void __wasilibc_populate_preopens(void) {

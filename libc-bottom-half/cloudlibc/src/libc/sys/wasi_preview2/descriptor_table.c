@@ -12,13 +12,13 @@
  * As of this writing, we still rely on the WASI Preview 1 adapter
  * (https://github.com/bytecodealliance/wasmtime/tree/main/crates/wasi-preview1-component-adapter)
  * to manage non-socket descriptors, so currently this table only tracks TCP and
- * UDP sockets.  We use the adapter's `adapter_open_badfd` and `fd_close`
- * functions to reserve and later close descriptors to avoid confusion (e.g. if
- * an application tries to use Preview 1 host functions directly for socket
- * operations rather than go through `wasi-libc`).  Eventually, we'll switch
- * `wasi-libc` over to Preview 2 entirely, at which point we'll no longer need
- * the adapter.  At that point, all file descriptors will be managed exclusively
- * in this table.
+ * UDP sockets.  We use the adapter's `adapter_open_badfd` and
+ * `adapter_close_badfd` functions to reserve and later close descriptors to
+ * avoid confusion (e.g. if an application tries to use Preview 1 host functions
+ * directly for socket operations rather than go through `wasi-libc`).
+ * Eventually, we'll switch `wasi-libc` over to Preview 2 entirely, at which
+ * point we'll no longer need the adapter.  At that point, all file descriptors
+ * will be managed exclusively in this table.
  */
 
 #include <assert.h>

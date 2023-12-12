@@ -14,7 +14,7 @@ SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
 INSTALL_DIR ?= /usr/local
 # single or posix; note that pthread support is still a work-in-progress.
-TARGET_TRIPLE ?= single
+THREAD_MODEL ?= single
 # preview1 or preview2; the latter is not (yet) compatible with multithreading
 WASI_SNAPSHOT ?= preview1
 # dlmalloc or none
@@ -67,6 +67,23 @@ LIBC_BOTTOM_HALF_ALL_SOURCES = \
     $(sort \
     $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
     $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c))
+
+ifeq ($(WASI_SNAPSHOT), preview1)
+# WASI Preview 1 has minimal socket support, so the following files are not used:
+LIBC_BOTTOM_HALF_OMIT_SOURCES := \
+    $(addprefix $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/libc/sys/, \
+        socket/__utils.c \
+        socket/bind.c \
+        socket/connect.c \
+        socket/getsockpeername.c \
+        socket/listen.c \
+        socket/netdb.c \
+        socket/socket.c \
+        wasi_preview2/descriptor_table.c \
+        wasi_preview2/preview2.c \
+    )
+LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_OMIT_SOURCES),$(LIBC_BOTTOM_HALF_ALL_SOURCES))
+endif
 
 # FIXME(https://reviews.llvm.org/D85567) - due to a bug in LLD the weak
 # references to a function defined in `chdir.c` only work if `chdir.c` is at the
@@ -833,7 +850,7 @@ check-symbols: startup_files libc
 
 	# Check that the computed metadata matches the expected metadata.
 	# This ignores whitespace because on Windows the output has CRLF line endings.
-	: diff -wur "expected/$(TARGET_TRIPLE)" "$(SYSROOT_SHARE)"
+	diff -wur "expected/$(TARGET_TRIPLE)" "$(SYSROOT_SHARE)"
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"

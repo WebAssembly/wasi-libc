@@ -1,7 +1,13 @@
 #!/bin/bash
 
-# As of this writing, the `wit` directory was copied from
-# https://github.com/bytecodealliance/wasmtime/tree/759aa585496adfbe47aefb4fdf9608aabf8d64ac/crates/wasi/wit
+# This script will regenerate the WASI Preview 2 bindings.  To use it, first
+# clone the wit directory from
+# https://github.com/bytecodealliance/wasmtime/tree/release-16.0.0/crates/wasi/wit
+# (or newer), install
+# https://github.com/bytecodealliance/wit-bindgen/releases/tag/wit-bindgen-cli-0.16.0
+# (or newer), and then run the script.
+#
+# TODO: Automate the above instructions.
 
 set -e
 

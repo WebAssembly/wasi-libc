@@ -23,6 +23,8 @@ WASI_SNAPSHOT ?= preview1
 
 LIBC_TEST_URL ?= https://github.com/bytecodealliance/libc-test
 LIBC_TEST = $(DOWNDIR)/libc-test
+# TODO: remove the patch once we support `SO_RCVTIMEO`
+LIBC_TEST_PATCH = $(CURDIR)/libc-test.patch
 LIBRT_URL ?= https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/libclang_rt.builtins-wasm32-wasi-16.0.tar.gz
 LIBRT = $(DOWNDIR)/lib/wasi/libclang_rt.builtins-wasm32.a
 # TODO: switch to Wasmtime 16 once it's released
@@ -45,6 +47,7 @@ $(DOWNDIR):
 
 $(LIBC_TEST): | $(DOWNDIR)
 	git clone --depth 1 $(LIBC_TEST_URL) $@
+	cd $@ && git apply < $(LIBC_TEST_PATCH)
 
 # TODO install target to place into...
 $(LIBRT): | $(DOWNDIR)
@@ -109,6 +112,9 @@ TESTS := \
 	$(LIBC_TEST)/src/functional/udiv.c \
 	$(LIBC_TEST)/src/functional/wcsstr.c \
 	$(LIBC_TEST)/src/functional/wcstol.c
+ifeq ($(WASI_SNAPSHOT), preview2)
+TESTS += $(LIBC_TEST)/src/functional/socket.c
+endif
 
 # Part of the problem including more tests is that the `libc-test`
 # infrastructure code is not all Wasm-compilable. As we include more tests
@@ -173,7 +179,7 @@ clean::
 
 ENGINE ?= $(WASMTIME) run
 ifeq ($(WASI_SNAPSHOT), preview2)
-ENGINE += --wasm component-model
+ENGINE += --wasm component-model --wasi inherit-network
 endif
 ERRS:=$(WASMS:%.wasm=%.wasm.err)
 

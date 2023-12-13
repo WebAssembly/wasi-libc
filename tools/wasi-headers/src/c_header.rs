@@ -87,7 +87,7 @@ extern "C" {{
 #include <string.h>
 
 #ifdef __wasm64__
-#define IMPORT_NAME(x) __import_name__(x "-i64")
+#define IMPORT_NAME(x) __import_name__(x "_i64")
 #else
 #define IMPORT_NAME(x) __import_name__(x)
 #endif

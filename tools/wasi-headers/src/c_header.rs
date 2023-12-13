@@ -136,7 +136,7 @@ int32_t __wasi_thread_spawn(
         * function.
         */
     void *start_arg
-) __WASI_NOEXCEPT  __attribute__((__warn_unused_result__));
+) __WASI_NOEXCEPT __attribute__((__warn_unused_result__));
 #endif
 
 #ifdef __cplusplus
@@ -468,7 +468,7 @@ fn print_func_header(ret: &mut String, func: &InterfaceFunc) {
     }
 
     print_func_signature(ret, func, true);
-    ret.push_str(" __WASI_NOEXCEPT ");
+//    ret.push_str(" __WASI_NOEXCEPT ");
     if func.results.len() > 0 {
         ret.push_str(" __attribute__((__warn_unused_result__))");
     }
@@ -522,7 +522,7 @@ fn print_func_signature(ret: &mut String, func: &InterfaceFunc, header: bool) {
             ret.push_str("\n");
         }
     }
-    ret.push_str(") __WASI_NOEXCEPT ");
+    ret.push_str(") __WASI_NOEXCEPT");
 }
 
 fn c_typeref_name(tref: &TypeRef, wtp: &witx::WasmType) -> String {
@@ -569,7 +569,7 @@ fn print_c_typeref_casting_names(
             }
             _ => {
                 // Fix around buf_len which is incorrectly marked uint32_t in metadata
-                if identifiername.ends_with("_len") {
+                if identifiername == "nsubscriptions" || identifiername.ends_with("_len") {
                     if casting {
                         ret.push_str(&format!("(__wasi_size_t) {}", &identifiername));
                     } else {

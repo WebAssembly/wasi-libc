@@ -468,7 +468,6 @@ fn print_func_header(ret: &mut String, func: &InterfaceFunc) {
     }
 
     print_func_signature(ret, func, true);
-//    ret.push_str(" __WASI_NOEXCEPT ");
     if func.results.len() > 0 {
         ret.push_str(" __attribute__((__warn_unused_result__))");
     }

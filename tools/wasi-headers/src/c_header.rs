@@ -522,7 +522,7 @@ fn print_func_signature(ret: &mut String, func: &InterfaceFunc, header: bool) {
             ret.push_str("\n");
         }
     }
-    ret.push_str(")");
+    ret.push_str(") __WASI_NOEXCEPT ");
 }
 
 fn c_typeref_name(tref: &TypeRef, wtp: &witx::WasmType) -> String {

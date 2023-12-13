@@ -13,13 +13,19 @@
 #include <wasi/api.h>
 #include <string.h>
 
+#ifdef __wasm64__
+#define IMPORT_NAME(x) __import_name__(x "-i64")
+#else
+#define IMPORT_NAME(x) __import_name__(x)
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 int32_t __imported_wasi_snapshot_preview1_args_get(intptr_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("args_get")
+    IMPORT_NAME("args_get")
 ));
 
 __wasi_errno_t __wasi_args_get(
@@ -31,7 +37,7 @@ __wasi_errno_t __wasi_args_get(
 
 int32_t __imported_wasi_snapshot_preview1_args_sizes_get(intptr_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("args_sizes_get")
+    IMPORT_NAME("args_sizes_get")
 ));
 
 __wasi_errno_t __wasi_args_sizes_get(
@@ -43,7 +49,7 @@ __wasi_errno_t __wasi_args_sizes_get(
 
 int32_t __imported_wasi_snapshot_preview1_environ_get(intptr_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("environ_get")
+    IMPORT_NAME("environ_get")
 ));
 
 __wasi_errno_t __wasi_environ_get(
@@ -55,7 +61,7 @@ __wasi_errno_t __wasi_environ_get(
 
 int32_t __imported_wasi_snapshot_preview1_environ_sizes_get(intptr_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("environ_sizes_get")
+    IMPORT_NAME("environ_sizes_get")
 ));
 
 __wasi_errno_t __wasi_environ_sizes_get(
@@ -67,7 +73,7 @@ __wasi_errno_t __wasi_environ_sizes_get(
 
 int32_t __imported_wasi_snapshot_preview1_clock_res_get(int32_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("clock_res_get")
+    IMPORT_NAME("clock_res_get")
 ));
 
 __wasi_errno_t __wasi_clock_res_get(
@@ -79,7 +85,7 @@ __wasi_errno_t __wasi_clock_res_get(
 
 int32_t __imported_wasi_snapshot_preview1_clock_time_get(int32_t, int64_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("clock_time_get")
+    IMPORT_NAME("clock_time_get")
 ));
 
 __wasi_errno_t __wasi_clock_time_get(
@@ -92,7 +98,7 @@ __wasi_errno_t __wasi_clock_time_get(
 
 int32_t __imported_wasi_snapshot_preview1_fd_advise(int32_t, int64_t, int64_t, int32_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_advise")
+    IMPORT_NAME("fd_advise")
 ));
 
 __wasi_errno_t __wasi_fd_advise(
@@ -106,7 +112,7 @@ __wasi_errno_t __wasi_fd_advise(
 
 int32_t __imported_wasi_snapshot_preview1_fd_allocate(int32_t, int64_t, int64_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_allocate")
+    IMPORT_NAME("fd_allocate")
 ));
 
 __wasi_errno_t __wasi_fd_allocate(
@@ -119,7 +125,7 @@ __wasi_errno_t __wasi_fd_allocate(
 
 int32_t __imported_wasi_snapshot_preview1_fd_close(int32_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_close")
+    IMPORT_NAME("fd_close")
 ));
 
 __wasi_errno_t __wasi_fd_close(
@@ -130,7 +136,7 @@ __wasi_errno_t __wasi_fd_close(
 
 int32_t __imported_wasi_snapshot_preview1_fd_datasync(int32_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_datasync")
+    IMPORT_NAME("fd_datasync")
 ));
 
 __wasi_errno_t __wasi_fd_datasync(
@@ -141,7 +147,7 @@ __wasi_errno_t __wasi_fd_datasync(
 
 int32_t __imported_wasi_snapshot_preview1_fd_fdstat_get(int32_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_fdstat_get")
+    IMPORT_NAME("fd_fdstat_get")
 ));
 
 __wasi_errno_t __wasi_fd_fdstat_get(
@@ -153,7 +159,7 @@ __wasi_errno_t __wasi_fd_fdstat_get(
 
 int32_t __imported_wasi_snapshot_preview1_fd_fdstat_set_flags(int32_t, int32_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_fdstat_set_flags")
+    IMPORT_NAME("fd_fdstat_set_flags")
 ));
 
 __wasi_errno_t __wasi_fd_fdstat_set_flags(
@@ -165,7 +171,7 @@ __wasi_errno_t __wasi_fd_fdstat_set_flags(
 
 int32_t __imported_wasi_snapshot_preview1_fd_fdstat_set_rights(int32_t, int64_t, int64_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_fdstat_set_rights")
+    IMPORT_NAME("fd_fdstat_set_rights")
 ));
 
 __wasi_errno_t __wasi_fd_fdstat_set_rights(
@@ -178,7 +184,7 @@ __wasi_errno_t __wasi_fd_fdstat_set_rights(
 
 int32_t __imported_wasi_snapshot_preview1_fd_filestat_get(int32_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_filestat_get")
+    IMPORT_NAME("fd_filestat_get")
 ));
 
 __wasi_errno_t __wasi_fd_filestat_get(
@@ -190,7 +196,7 @@ __wasi_errno_t __wasi_fd_filestat_get(
 
 int32_t __imported_wasi_snapshot_preview1_fd_filestat_set_size(int32_t, int64_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_filestat_set_size")
+    IMPORT_NAME("fd_filestat_set_size")
 ));
 
 __wasi_errno_t __wasi_fd_filestat_set_size(
@@ -202,7 +208,7 @@ __wasi_errno_t __wasi_fd_filestat_set_size(
 
 int32_t __imported_wasi_snapshot_preview1_fd_filestat_set_times(int32_t, int64_t, int64_t, int32_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_filestat_set_times")
+    IMPORT_NAME("fd_filestat_set_times")
 ));
 
 __wasi_errno_t __wasi_fd_filestat_set_times(
@@ -216,7 +222,7 @@ __wasi_errno_t __wasi_fd_filestat_set_times(
 
 int32_t __imported_wasi_snapshot_preview1_fd_pread(int32_t, intptr_t, __wasi_size_t, int64_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_pread")
+    IMPORT_NAME("fd_pread")
 ));
 
 __wasi_errno_t __wasi_fd_pread(
@@ -231,7 +237,7 @@ __wasi_errno_t __wasi_fd_pread(
 
 int32_t __imported_wasi_snapshot_preview1_fd_prestat_get(int32_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_prestat_get")
+    IMPORT_NAME("fd_prestat_get")
 ));
 
 __wasi_errno_t __wasi_fd_prestat_get(
@@ -243,7 +249,7 @@ __wasi_errno_t __wasi_fd_prestat_get(
 
 int32_t __imported_wasi_snapshot_preview1_fd_prestat_dir_name(int32_t, intptr_t, __wasi_size_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_prestat_dir_name")
+    IMPORT_NAME("fd_prestat_dir_name")
 ));
 
 __wasi_errno_t __wasi_fd_prestat_dir_name(
@@ -256,7 +262,7 @@ __wasi_errno_t __wasi_fd_prestat_dir_name(
 
 int32_t __imported_wasi_snapshot_preview1_fd_pwrite(int32_t, intptr_t, __wasi_size_t, int64_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_pwrite")
+    IMPORT_NAME("fd_pwrite")
 ));
 
 __wasi_errno_t __wasi_fd_pwrite(
@@ -271,7 +277,7 @@ __wasi_errno_t __wasi_fd_pwrite(
 
 int32_t __imported_wasi_snapshot_preview1_fd_read(int32_t, intptr_t, __wasi_size_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_read")
+    IMPORT_NAME("fd_read")
 ));
 
 __wasi_errno_t __wasi_fd_read(
@@ -285,7 +291,7 @@ __wasi_errno_t __wasi_fd_read(
 
 int32_t __imported_wasi_snapshot_preview1_fd_readdir(int32_t, intptr_t, __wasi_size_t, int64_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_readdir")
+    IMPORT_NAME("fd_readdir")
 ));
 
 __wasi_errno_t __wasi_fd_readdir(
@@ -300,7 +306,7 @@ __wasi_errno_t __wasi_fd_readdir(
 
 int32_t __imported_wasi_snapshot_preview1_fd_renumber(int32_t, int32_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_renumber")
+    IMPORT_NAME("fd_renumber")
 ));
 
 __wasi_errno_t __wasi_fd_renumber(
@@ -312,7 +318,7 @@ __wasi_errno_t __wasi_fd_renumber(
 
 int32_t __imported_wasi_snapshot_preview1_fd_seek(int32_t, int64_t, int32_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_seek")
+    IMPORT_NAME("fd_seek")
 ));
 
 __wasi_errno_t __wasi_fd_seek(
@@ -326,7 +332,7 @@ __wasi_errno_t __wasi_fd_seek(
 
 int32_t __imported_wasi_snapshot_preview1_fd_sync(int32_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_sync")
+    IMPORT_NAME("fd_sync")
 ));
 
 __wasi_errno_t __wasi_fd_sync(
@@ -337,7 +343,7 @@ __wasi_errno_t __wasi_fd_sync(
 
 int32_t __imported_wasi_snapshot_preview1_fd_tell(int32_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_tell")
+    IMPORT_NAME("fd_tell")
 ));
 
 __wasi_errno_t __wasi_fd_tell(
@@ -349,7 +355,7 @@ __wasi_errno_t __wasi_fd_tell(
 
 int32_t __imported_wasi_snapshot_preview1_fd_write(int32_t, intptr_t, __wasi_size_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("fd_write")
+    IMPORT_NAME("fd_write")
 ));
 
 __wasi_errno_t __wasi_fd_write(
@@ -363,7 +369,7 @@ __wasi_errno_t __wasi_fd_write(
 
 int32_t __imported_wasi_snapshot_preview1_path_create_directory(int32_t, intptr_t, __wasi_size_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("path_create_directory")
+    IMPORT_NAME("path_create_directory")
 ));
 
 __wasi_errno_t __wasi_path_create_directory(
@@ -376,7 +382,7 @@ __wasi_errno_t __wasi_path_create_directory(
 
 int32_t __imported_wasi_snapshot_preview1_path_filestat_get(int32_t, int32_t, intptr_t, __wasi_size_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("path_filestat_get")
+    IMPORT_NAME("path_filestat_get")
 ));
 
 __wasi_errno_t __wasi_path_filestat_get(
@@ -391,7 +397,7 @@ __wasi_errno_t __wasi_path_filestat_get(
 
 int32_t __imported_wasi_snapshot_preview1_path_filestat_set_times(int32_t, int32_t, intptr_t, __wasi_size_t, int64_t, int64_t, int32_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("path_filestat_set_times")
+    IMPORT_NAME("path_filestat_set_times")
 ));
 
 __wasi_errno_t __wasi_path_filestat_set_times(
@@ -408,7 +414,7 @@ __wasi_errno_t __wasi_path_filestat_set_times(
 
 int32_t __imported_wasi_snapshot_preview1_path_link(int32_t, int32_t, intptr_t, __wasi_size_t, int32_t, intptr_t, __wasi_size_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("path_link")
+    IMPORT_NAME("path_link")
 ));
 
 __wasi_errno_t __wasi_path_link(
@@ -425,7 +431,7 @@ __wasi_errno_t __wasi_path_link(
 
 int32_t __imported_wasi_snapshot_preview1_path_open(int32_t, int32_t, intptr_t, __wasi_size_t, int32_t, int64_t, int64_t, int32_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("path_open")
+    IMPORT_NAME("path_open")
 ));
 
 __wasi_errno_t __wasi_path_open(
@@ -444,7 +450,7 @@ __wasi_errno_t __wasi_path_open(
 
 int32_t __imported_wasi_snapshot_preview1_path_readlink(int32_t, intptr_t, __wasi_size_t, intptr_t, __wasi_size_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("path_readlink")
+    IMPORT_NAME("path_readlink")
 ));
 
 __wasi_errno_t __wasi_path_readlink(
@@ -460,7 +466,7 @@ __wasi_errno_t __wasi_path_readlink(
 
 int32_t __imported_wasi_snapshot_preview1_path_remove_directory(int32_t, intptr_t, __wasi_size_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("path_remove_directory")
+    IMPORT_NAME("path_remove_directory")
 ));
 
 __wasi_errno_t __wasi_path_remove_directory(
@@ -473,7 +479,7 @@ __wasi_errno_t __wasi_path_remove_directory(
 
 int32_t __imported_wasi_snapshot_preview1_path_rename(int32_t, intptr_t, __wasi_size_t, int32_t, intptr_t, __wasi_size_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("path_rename")
+    IMPORT_NAME("path_rename")
 ));
 
 __wasi_errno_t __wasi_path_rename(
@@ -489,7 +495,7 @@ __wasi_errno_t __wasi_path_rename(
 
 int32_t __imported_wasi_snapshot_preview1_path_symlink(intptr_t, __wasi_size_t, int32_t, intptr_t, __wasi_size_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("path_symlink")
+    IMPORT_NAME("path_symlink")
 ));
 
 __wasi_errno_t __wasi_path_symlink(
@@ -504,7 +510,7 @@ __wasi_errno_t __wasi_path_symlink(
 
 int32_t __imported_wasi_snapshot_preview1_path_unlink_file(int32_t, intptr_t, __wasi_size_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("path_unlink_file")
+    IMPORT_NAME("path_unlink_file")
 ));
 
 __wasi_errno_t __wasi_path_unlink_file(
@@ -517,7 +523,7 @@ __wasi_errno_t __wasi_path_unlink_file(
 
 int32_t __imported_wasi_snapshot_preview1_poll_oneoff(intptr_t, intptr_t, int32_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("poll_oneoff")
+    IMPORT_NAME("poll_oneoff")
 ));
 
 __wasi_errno_t __wasi_poll_oneoff(
@@ -531,7 +537,7 @@ __wasi_errno_t __wasi_poll_oneoff(
 
 _Noreturn void __imported_wasi_snapshot_preview1_proc_exit(int32_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("proc_exit")
+    IMPORT_NAME("proc_exit")
 ));
 
 _Noreturn void __wasi_proc_exit(
@@ -542,7 +548,7 @@ _Noreturn void __wasi_proc_exit(
 
 int32_t __imported_wasi_snapshot_preview1_sched_yield() __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("sched_yield")
+    IMPORT_NAME("sched_yield")
 ));
 
 __wasi_errno_t __wasi_sched_yield(
@@ -553,7 +559,7 @@ __wasi_errno_t __wasi_sched_yield(
 
 int32_t __imported_wasi_snapshot_preview1_random_get(intptr_t, __wasi_size_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("random_get")
+    IMPORT_NAME("random_get")
 ));
 
 __wasi_errno_t __wasi_random_get(
@@ -565,7 +571,7 @@ __wasi_errno_t __wasi_random_get(
 
 int32_t __imported_wasi_snapshot_preview1_sock_accept(int32_t, int32_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("sock_accept")
+    IMPORT_NAME("sock_accept")
 ));
 
 __wasi_errno_t __wasi_sock_accept(
@@ -578,7 +584,7 @@ __wasi_errno_t __wasi_sock_accept(
 
 int32_t __imported_wasi_snapshot_preview1_sock_recv(int32_t, intptr_t, __wasi_size_t, int32_t, intptr_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("sock_recv")
+    IMPORT_NAME("sock_recv")
 ));
 
 __wasi_errno_t __wasi_sock_recv(
@@ -594,7 +600,7 @@ __wasi_errno_t __wasi_sock_recv(
 
 int32_t __imported_wasi_snapshot_preview1_sock_send(int32_t, intptr_t, __wasi_size_t, int32_t, intptr_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("sock_send")
+    IMPORT_NAME("sock_send")
 ));
 
 __wasi_errno_t __wasi_sock_send(
@@ -609,7 +615,7 @@ __wasi_errno_t __wasi_sock_send(
 
 int32_t __imported_wasi_snapshot_preview1_sock_shutdown(int32_t, int32_t) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi_snapshot_preview1"),
-    __import_name__("sock_shutdown")
+    IMPORT_NAME("sock_shutdown")
 ));
 
 __wasi_errno_t __wasi_sock_shutdown(
@@ -622,7 +628,7 @@ __wasi_errno_t __wasi_sock_shutdown(
 #ifdef _REENTRANT
 uint32_t __imported_wasi_thread_spawn(intptr_t arg0) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi"),
-    __import_name__("thread-spawn")
+    IMPORT_NAME("thread-spawn")
 ));
 
 int32_t __wasi_thread_spawn(void* start_arg) __WASI_NOEXCEPT {

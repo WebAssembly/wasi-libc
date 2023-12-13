@@ -86,6 +86,12 @@ extern "C" {{
 #include <wasi/api.h>
 #include <string.h>
 
+#ifdef __wasm64__
+#define IMPORT_NAME(x) __import_name__(x "-i64")
+#else
+#define IMPORT_NAME(x) __import_name__(x)
+#endif
+
 #ifdef __cplusplus
 extern "C" {{
 #endif
@@ -145,7 +151,7 @@ int32_t __wasi_thread_spawn(
         r#"#ifdef _REENTRANT
 uint32_t __imported_wasi_thread_spawn(intptr_t arg0) __WASI_NOEXCEPT __attribute__((
     __import_module__("wasi"),
-    __import_name__("thread-spawn")
+    IMPORT_NAME("thread-spawn")
 ));
 
 int32_t __wasi_thread_spawn(void* start_arg) __WASI_NOEXCEPT {
@@ -677,7 +683,7 @@ fn print_func_source(ret: &mut String, func: &InterfaceFunc, module_name: &Id) {
         ident_name(module_name)
     ));
     ret.push_str(&format!(
-        "    __import_name__(\"{}\")\n",
+        "    IMPORT_NAME(\"{}\")\n",
         ident_name(&func.name)
     ));
     ret.push_str("));\n\n");

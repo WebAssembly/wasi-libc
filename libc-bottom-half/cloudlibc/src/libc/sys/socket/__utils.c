@@ -189,7 +189,7 @@ void __wasi_sockets_utils__output_addr_write(const network_ip_socket_address_t i
 
         *output->v6.addrlen = sizeof(struct sockaddr_in6);
         *output->v6.addr = (struct sockaddr_in6) {
-            .sin6_family = AF_INET,
+            .sin6_family = AF_INET6,
             .sin6_port = htons(input_v6.port),
             .sin6_addr = { .s6_addr = {
                 ip.f0 >> 8, ip.f0 & 0xFF,

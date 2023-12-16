@@ -23,7 +23,7 @@ int ioctl(int fildes, int request, ...) {
             case FIONBIO: {
                 va_list ap;
                 va_start(ap, request);
-                socket->blocking = *va_arg(ap, const int*) != 0;
+                socket->blocking = *va_arg(ap, const int*) == 0;
                 va_end(ap);
 
                 return 0;

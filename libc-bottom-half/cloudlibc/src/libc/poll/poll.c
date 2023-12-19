@@ -156,7 +156,8 @@ static int poll_preview2(struct pollfd* fds, size_t nfds, int timeout)
             case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET: {
                 tcp_socket_t* socket = &(entry->tcp_socket);
                 switch (socket->state.tag) {
-                case TCP_SOCKET_STATE_CONNECTING: {
+                case TCP_SOCKET_STATE_CONNECTING:
+                case TCP_SOCKET_STATE_LISTENING: {
                     if ((pollfd->events & (POLLRDNORM | POLLWRNORM)) != 0) {
                         states[state_index++] = (state_t) {
                             .pollable = socket->socket_pollable,

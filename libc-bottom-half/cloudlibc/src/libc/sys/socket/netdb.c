@@ -26,7 +26,12 @@ static int map_error(ip_name_lookup_error_code_t error)
 
 int getaddrinfo(const char* restrict host, const char* restrict serv, const struct addrinfo* restrict hint, struct addrinfo** restrict res)
 {
+    if (host == NULL) {
+        host = "localhost";
+    }
+
     *res = NULL;
+    struct addrinfo* current = NULL;
     imports_string_t name = { .ptr = (uint8_t*) host, .len = strlen(host) };
     ip_name_lookup_own_resolve_address_stream_t stream;
     ip_name_lookup_error_code_t error;
@@ -116,9 +121,16 @@ int getaddrinfo(const char* restrict host, const char* restrict serv, const stru
                         .ai_addrlen = addrlen,
                         .ai_addr = addr,
                         .ai_canonname = NULL,
-                        .ai_next = *res
+                        .ai_next = NULL,
                     };
-                    *res = result;
+                    
+                    if (current) {
+                        current->ai_next = result;
+                        current = result;
+                    } else {
+                        current = result;
+                        *res = result;
+                    }
                 } else {
                     return 0;
                 }
@@ -156,36 +168,36 @@ int getnameinfo(const struct sockaddr* restrict sa, socklen_t salen, char* restr
 struct hostent* gethostbyname(const char* name)
 {
     // TODO
-    abort();
+    return NULL;
 }
 
 struct hostent* gethostbyaddr(const void* addr, socklen_t len, int type)
 {
     // TODO
-    abort();
+    return NULL;
 }
 
 const char* hstrerror(int err)
 {
     // TODO
-    abort();
+    return "hstrerror: TODO";
 }
 
 struct servent* getservbyname(const char* name, const char* proto)
 {
     // TODO
-    abort();
+    return NULL;
 }
 
 struct servent* getservbyport(int port, const char* proto)
 {
     // TODO
-    abort();
+    return NULL;
 }
 
 struct protoent* getprotobyname(const char* name)
 {
     // TODO
-    abort();
+    return NULL;
 }
 #endif // __wasilibc_use_preview2

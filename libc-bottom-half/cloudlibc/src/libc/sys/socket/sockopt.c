@@ -93,6 +93,10 @@ int tcp_getsockopt(tcp_socket_t* socket, int level, int optname,
             value = result;
             break;
         }
+        case SO_REUSEADDR: {
+            value = socket->fake_reuseaddr;
+            break;
+        }
         case SO_RCVTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
         case SO_SNDTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
         default:
@@ -273,6 +277,14 @@ int tcp_setsockopt(tcp_socket_t* socket, int level, int optname, const void* opt
                 return -1;
             }
 
+            return 0;
+        }
+        case SO_REUSEADDR: {
+            // As of this writing, WASI has no support for changing SO_REUSEADDR
+            // -- it's enabled by default and cannot be disabled.  To keep
+            // applications happy, we pretend to support enabling and disabling
+            // it.
+            socket->fake_reuseaddr = (intval != 0);
             return 0;
         }
         case SO_RCVTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself

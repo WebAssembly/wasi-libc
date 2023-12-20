@@ -44,6 +44,7 @@ typedef struct {
     poll_own_pollable_t socket_pollable;
     bool blocking;
     bool fake_nodelay;
+    bool fake_reuseaddr;
     network_ip_address_family_t family;
     tcp_socket_state_t state;
 } tcp_socket_t;

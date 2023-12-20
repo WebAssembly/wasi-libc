@@ -22,6 +22,7 @@
 
 #define SOMAXCONN 128
 
+#define SO_REUSEADDR 2
 #define SO_ERROR 4
 #define SO_SNDBUF 7
 #define SO_RCVBUF 8

@@ -46,6 +46,10 @@ int getaddrinfo(const char* restrict host, const char* restrict serv, const stru
                     socklen_t addrlen;
                     switch (address.val.tag) {
                     case NETWORK_IP_ADDRESS_IPV4: {
+                        if (hint && hint->ai_family != AF_UNSPEC && hint->ai_family != AF_INET) {
+                            continue;
+                        }
+
                         network_ipv4_address_t ip = address.val.val.ipv4;
 
                         family = PF_INET;
@@ -65,6 +69,10 @@ int getaddrinfo(const char* restrict host, const char* restrict serv, const stru
                         break;
                     }
                     case NETWORK_IP_ADDRESS_IPV6: {
+                        if (hint && hint->ai_family != AF_UNSPEC && hint->ai_family != AF_INET6) {
+                            continue;
+                        }
+
                         network_ipv6_address_t ip = address.val.val.ipv6;
 
                         family = PF_INET6;

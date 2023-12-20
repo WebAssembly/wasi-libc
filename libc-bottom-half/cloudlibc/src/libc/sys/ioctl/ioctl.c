@@ -35,9 +35,27 @@ int ioctl(int fildes, int request, ...) {
                 return -1;
             }
         }
+            
+        case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET: {
+            udp_socket_t* socket = &entry->udp_socket;
+            switch (request) {
+            case FIONBIO: {
+                va_list ap;
+                va_start(ap, request);
+                socket->blocking = *va_arg(ap, const int*) == 0;
+                va_end(ap);
+
+                return 0;
+            }
+
+            default:
+                // TODO wasi-sockets: anything else we should support?
+                errno = EINVAL;
+                return -1;
+            }
+        }
 
         default:
-            // TODO wasi-sockets: UDP
             errno = ENOPROTOOPT;
             return -1;
         }

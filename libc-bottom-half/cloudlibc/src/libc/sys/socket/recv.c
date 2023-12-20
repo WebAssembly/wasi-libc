@@ -50,9 +50,13 @@ ssize_t tcp_recvfrom(tcp_socket_t* socket, uint8_t* buffer, size_t length, int f
         streams_list_u8_t result;
         streams_stream_error_t error;
         if (!streams_method_input_stream_read(rx_borrow, length, &result, &error)) {
-            // TODO wasi-sockets: wasi-sockets has no way to recover TCP stream errors yet.
-            errno = EPIPE;
-            return -1;
+            if (error.tag == STREAMS_STREAM_ERROR_CLOSED) {
+                return 0;
+            } else {
+                // TODO wasi-sockets: wasi-sockets has no way to recover TCP stream errors yet.
+                errno = EPIPE;
+                return -1;
+            }
         }
 
         if (result.len) {

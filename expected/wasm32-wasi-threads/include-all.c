@@ -60,6 +60,7 @@
 #include <__typedef_suseconds_t.h>
 #include <__typedef_time_t.h>
 #include <__typedef_uid_t.h>
+#include <__wasi_snapshot.h>
 #include <alloca.h>
 #include <ar.h>
 #include <arpa/ftp.h>

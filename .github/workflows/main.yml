@@ -84,7 +84,9 @@ jobs:
 
     - name: Build libc
       shell: bash
-      run: make -j4
+      run: |
+        make -j4
+        WASI_SNAPSHOT=preview2 make -j4
 
     - name: Test
       shell: bash
@@ -98,6 +100,8 @@ jobs:
         mkdir -p $WASI_DIR
         cp download/lib/wasi/libclang_rt.builtins-wasm32.a $WASI_DIR
         make test
+        rm -r build
+        WASI_SNAPSHOT=preview2 make test
       # The older version of Clang does not provide the expected symbol for the
       # test entrypoints: `undefined symbol: __main_argc_argv`.
       # The older (<15.0.7) version of wasm-ld does not provide `__heap_end`,

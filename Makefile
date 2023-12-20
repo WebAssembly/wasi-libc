@@ -15,6 +15,8 @@ SYSROOT ?= $(CURDIR)/sysroot
 INSTALL_DIR ?= /usr/local
 # single or posix; note that pthread support is still a work-in-progress.
 THREAD_MODEL ?= single
+# preview1 or preview2; the latter is not (yet) compatible with multithreading
+WASI_SNAPSHOT ?= preview1
 # dlmalloc or none
 MALLOC_IMPL ?= dlmalloc
 # yes or no
@@ -41,6 +43,10 @@ ifeq ($(THREAD_MODEL), posix)
 TARGET_TRIPLE = wasm32-wasi-threads
 endif
 
+ifeq ($(WASI_SNAPSHOT), preview2)
+TARGET_TRIPLE = wasm32-wasi-preview2
+endif
+
 BUILTINS_LIB ?= $(shell ${CC} --print-libgcc-file-name)
 
 # These variables describe the locations of various files and directories in
@@ -61,6 +67,23 @@ LIBC_BOTTOM_HALF_ALL_SOURCES = \
     $(sort \
     $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
     $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c))
+
+ifeq ($(WASI_SNAPSHOT), preview1)
+# WASI Preview 1 has minimal socket support, so the following files are not used:
+LIBC_BOTTOM_HALF_OMIT_SOURCES := \
+    $(addprefix $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/libc/sys/, \
+        socket/__utils.c \
+        socket/bind.c \
+        socket/connect.c \
+        socket/getsockpeername.c \
+        socket/listen.c \
+        socket/netdb.c \
+        socket/socket.c \
+        wasi_preview2/descriptor_table.c \
+        wasi_preview2/preview2.c \
+    )
+LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_OMIT_SOURCES),$(LIBC_BOTTOM_HALF_ALL_SOURCES))
+endif
 
 # FIXME(https://reviews.llvm.org/D85567) - due to a bug in LLD the weak
 # references to a function defined in `chdir.c` only work if `chdir.c` is at the
@@ -196,6 +219,13 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  %/cimagf.c %/cimag.c %cimagl.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
+
+ifeq ($(WASI_SNAPSHOT), preview2)
+LIBC_TOP_HALF_MUSL_SOURCES += \
+    $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
+	network/gai_strerror.c \
+    )
+endif
 
 ifeq ($(THREAD_MODEL), posix)
 LIBC_TOP_HALF_MUSL_SOURCES += \
@@ -334,6 +364,10 @@ ASMFLAGS += -matomics
 CFLAGS += -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 endif
 
+ifeq ($(WASI_SNAPSHOT), preview2)
+EXTRA_CFLAGS += -D__wasilibc_use_preview2
+endif
+
 # Expose the public headers to the implementation. We use `-isystem` for
 # purpose for two reasons:
 #
@@ -356,6 +390,9 @@ DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 EMMALLOC_OBJS = $(call objs,$(EMMALLOC_SOURCES))
 LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 LIBC_TOP_HALF_ALL_OBJS = $(call asmobjs,$(call objs,$(LIBC_TOP_HALF_ALL_SOURCES)))
+ifeq ($(WASI_SNAPSHOT), preview2)
+LIBC_OBJS += $(OBJDIR)/preview2_component_type.o
+endif
 ifeq ($(MALLOC_IMPL),dlmalloc)
 LIBC_OBJS += $(DLMALLOC_OBJS)
 else ifeq ($(MALLOC_IMPL),emmalloc)
@@ -386,7 +423,7 @@ LIBC_BOTTOM_HALF_CRT_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_CRT_SOURCES))
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
 SYSROOT_LIB := $(SYSROOT)/lib/$(TARGET_TRIPLE)
-SYSROOT_INC = $(SYSROOT)/include
+SYSROOT_INC = $(SYSROOT)/include/$(TARGET_TRIPLE)
 SYSROOT_SHARE = $(SYSROOT)/share/$(TARGET_TRIPLE)
 
 # Files from musl's include directory that we don't want to install in the
@@ -444,7 +481,6 @@ MUSL_OMIT_HEADERS += \
     "sys/auxv.h" \
     "pwd.h" "shadow.h" "grp.h" \
     "mntent.h" \
-    "netdb.h" \
     "resolv.h" \
     "pty.h" \
     "setjmp.h" \
@@ -467,6 +503,11 @@ MUSL_OMIT_HEADERS += \
     "libintl.h" \
     "sys/sysmacros.h" \
     "aio.h"
+
+ifeq ($(WASI_SNAPSHOT), preview1)
+# Remove headers not supported in WASI Preview 1.
+MUSL_OMIT_HEADERS += "netdb.h"
+endif
 
 ifeq ($(THREAD_MODEL), single)
 # Remove headers not supported in single-threaded mode.
@@ -511,7 +552,7 @@ PIC_OBJS = \
 # to CC.  This is a workaround for a Windows command line size limitation.  See
 # the `%.a` rule below for details.
 $(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(BUILTINS_LIB)
-	$(CC) -nodefaultlibs -shared --sysroot=$(SYSROOT) \
+	$(CC) --target=$(TARGET_TRIPLE) -nodefaultlibs -shared --sysroot=$(SYSROOT) \
 	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB)
 
 $(OBJDIR)/libc.so.a: $(LIBC_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS)
@@ -577,6 +618,10 @@ $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS): CF
 $(OBJDIR)/%.long-double.pic.o: %.c include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
+
+$(OBJDIR)/preview2_component_type.pic.o $(OBJDIR)/preview2_component_type.o: $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/libc/sys/wasi_preview2/preview2_component_type.o
+	@mkdir -p "$(@D)"
+	cp $< $@
 
 $(OBJDIR)/%.pic.o: %.c include_dirs
 	@mkdir -p "$(@D)"
@@ -654,6 +699,10 @@ include_dirs:
 
 	# Remove selected header files.
 	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
+ifeq ($(WASI_SNAPSHOT), preview2)
+	printf '#ifndef __wasilibc_use_preview2\n#define __wasilibc_use_preview2\n#endif\n' \
+	    > "$(SYSROOT_INC)/__wasi_snapshot.h"
+endif
 
 startup_files: include_dirs $(LIBC_BOTTOM_HALF_CRT_OBJS)
 	#

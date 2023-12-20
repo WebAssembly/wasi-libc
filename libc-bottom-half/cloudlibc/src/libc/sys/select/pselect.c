@@ -67,6 +67,9 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
           return -1;
       }
 
+      // Convert nanoseconds to milliseconds:
+      timeout_u64 /= 1000000;
+
       if (timeout_u64 > INT_MAX) {
           timeout_u64 = INT_MAX;
       }

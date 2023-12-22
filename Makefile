@@ -15,6 +15,8 @@ SYSROOT ?= $(CURDIR)/sysroot
 INSTALL_DIR ?= /usr/local
 # single or posix; note that pthread support is still a work-in-progress.
 THREAD_MODEL ?= single
+# preview1 or preview2; the latter is not (yet) compatible with multithreading
+WASI_SNAPSHOT ?= preview1
 # dlmalloc or none
 MALLOC_IMPL ?= dlmalloc
 # yes or no
@@ -39,6 +41,10 @@ TARGET_TRIPLE = wasm32-wasi
 # targets can't be mixed together while linking.
 ifeq ($(THREAD_MODEL), posix)
 TARGET_TRIPLE = wasm32-wasi-threads
+endif
+
+ifeq ($(WASI_SNAPSHOT), preview2)
+TARGET_TRIPLE = wasm32-wasi-preview2
 endif
 
 BUILTINS_LIB ?= $(shell ${CC} --print-libgcc-file-name)
@@ -386,7 +392,7 @@ LIBC_BOTTOM_HALF_CRT_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_CRT_SOURCES))
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
 SYSROOT_LIB := $(SYSROOT)/lib/$(TARGET_TRIPLE)
-SYSROOT_INC = $(SYSROOT)/include
+SYSROOT_INC = $(SYSROOT)/include/$(TARGET_TRIPLE)
 SYSROOT_SHARE = $(SYSROOT)/share/$(TARGET_TRIPLE)
 
 # Files from musl's include directory that we don't want to install in the
@@ -511,7 +517,7 @@ PIC_OBJS = \
 # to CC.  This is a workaround for a Windows command line size limitation.  See
 # the `%.a` rule below for details.
 $(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(BUILTINS_LIB)
-	$(CC) -nodefaultlibs -shared --sysroot=$(SYSROOT) \
+	$(CC) --target=$(TARGET_TRIPLE) -nodefaultlibs -shared --sysroot=$(SYSROOT) \
 	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB)
 
 $(OBJDIR)/libc.so.a: $(LIBC_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS)

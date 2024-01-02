@@ -108,12 +108,6 @@ jobs:
       # which is required by our malloc implementation.
       if: matrix.os == 'ubuntu-latest' && matrix.clang_version != '10.0.0'
 
-    - uses: actions/upload-artifact@v1
-      with:
-        # Upload the sysroot folder. Give it a name according to the OS it was built for.
-        name: ${{ format( 'sysroot-{0}.tgz', matrix.os) }}
-        path: sysroot
-
     - name: Build libc + threads
       # Only build the thread-capable wasi-libc in the latest supported Clang
       # version; the earliest version does not have all necessary builtins
@@ -121,6 +115,12 @@ jobs:
       if: matrix.clang_version != '10.0.0'
       shell: bash
       run: make -j4 THREAD_MODEL=posix
+
+    - uses: actions/upload-artifact@v1
+      with:
+        # Upload the sysroot folder. Give it a name according to the OS it was built for.
+        name: ${{ format( 'sysroot-{0}.tgz', matrix.os) }}
+        path: sysroot
 
   # Disable the headerstest job for now, while WASI transitions from the
   # witx snapshots to wit proposals, and we have a few manual edits to the

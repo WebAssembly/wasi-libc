@@ -16,8 +16,7 @@ test: run
 OBJDIR ?= $(CURDIR)/build
 DOWNDIR ?= $(CURDIR)/download
 
-# preview1 or preview2
-WASI_SNAPSHOT ?= preview1
+TARGET_TRIPLE ?= wasm32-wasi
 
 ##### DOWNLOAD #################################################################
 
@@ -25,7 +24,8 @@ LIBC_TEST_URL ?= https://github.com/bytecodealliance/libc-test
 LIBC_TEST = $(DOWNDIR)/libc-test
 LIBRT_URL ?= https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/libclang_rt.builtins-wasm32-wasi-16.0.tar.gz
 LIBRT = $(DOWNDIR)/lib/wasi/libclang_rt.builtins-wasm32.a
-WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v16.0.0/wasmtime-v16.0.0-x86_64-linux.tar.xz
+# TODO: Switch to Wasmtime 17 once it's released, which will include https://github.com/bytecodealliance/wasmtime/pull/7750
+WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/dev/wasmtime-dev-x86_64-linux.tar.xz
 WASMTIME = $(DOWNDIR)/$(shell basename $(WASMTIME_URL) .tar.xz)/wasmtime
 WASM_TOOLS_URL ?= https://github.com/bytecodealliance/wasm-tools/releases/download/wasm-tools-1.0.54/wasm-tools-1.0.54-x86_64-linux.tar.gz
 WASM_TOOLS = $(DOWNDIR)/$(shell basename $(WASM_TOOLS_URL) .tar.gz)/wasm-tools
@@ -33,7 +33,7 @@ ADAPTER_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v1
 ADAPTER = $(DOWNDIR)/wasi_snapshot_preview1.command.wasm
 
 TO_DOWNLOAD = $(LIBC_TEST) $(LIBRT) $(WASMTIME)
-ifeq ($(WASI_SNAPSHOT), preview2)
+ifeq ($(TARGET_TRIPLE), wasm32-wasi-preview2)
 TO_DOWNLOAD += $(ADAPTER) $(WASM_TOOLS)
 endif
 
@@ -129,11 +129,6 @@ WASM_OBJS += $(INFRA_WASM_OBJS)
 DIRS := $(patsubst $(OBJDIR)/%/,%,$(sort $(dir $(WASM_OBJS))))
 OBJDIRS := $(DIRS:%=$(OBJDIR)/%)
 
-TARGET_TRIPLE = wasm32-wasi
-ifeq ($(WASI_SNAPSHOT), preview2)
-TARGET_TRIPLE = wasm32-wasi-preview2
-endif
-
 # Allow $(CC) to be set from the command line; ?= doesn't work for CC because
 # make has a default value for it.
 ifeq ($(origin CC), default)
@@ -143,6 +138,9 @@ LDFLAGS ?=
 CFLAGS ?= --target=$(TARGET_TRIPLE) --sysroot=../sysroot
 # Always include the `libc-test` infrastructure headers.
 CFLAGS += -I$(LIBC_TEST)/src/common
+ifeq ($(TARGET_TRIPLE), wasm32-wasi-threads)
+CFLAGS += -pthread
+endif
 
 # Compile each selected test using Clang. Note that failures here are likely
 # due to a missing `libclang_rt.builtins-wasm32.a` in the Clang lib directory.
@@ -154,7 +152,7 @@ build: download $(WASMS)
 $(WASMS): | $(OBJDIRS)
 $(OBJDIR)/%.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
-ifeq ($(WASI_SNAPSHOT), preview2)
+ifeq ($(TARGET_TRIPLE), wasm32-wasi-preview2)
 	$(WASM_TOOLS) component new --adapt $(ADAPTER) $@ -o $@
 endif
 
@@ -171,7 +169,7 @@ clean::
 ##### RUN ######################################################################
 
 ENGINE ?= $(WASMTIME) run
-ifeq ($(WASI_SNAPSHOT), preview2)
+ifeq ($(TARGET_TRIPLE), wasm32-wasi-preview2)
 ENGINE += --wasm component-model
 endif
 ERRS:=$(WASMS:%.wasm=%.wasm.err)

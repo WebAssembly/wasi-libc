@@ -113,6 +113,7 @@
 #include <netpacket/packet.h>
 #include <nl_types.h>
 #include <poll.h>
+#include <preview2.h>
 #include <regex.h>
 #include <sched.h>
 #include <search.h>
@@ -167,6 +168,5 @@
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc-nocwd.h>
 #include <wasi/libc.h>
-#include <wasi/preview2.h>
 #include <wchar.h>
 #include <wctype.h>

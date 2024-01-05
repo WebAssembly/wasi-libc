@@ -1,5 +1,5 @@
 __addtf3
-__component_type_object_force_link_imports
+__component_type_object_force_link_preview2
 __divtf3
 __eqtf2
 __extenddftf2

@@ -19,7 +19,7 @@ __c_locale
 __clock
 __clock_gettime
 __clock_nanosleep
-__component_type_object_force_link_imports_public_use_in_this_compilation_unit
+__component_type_object_force_link_preview2_public_use_in_this_compilation_unit
 __cos
 __cosdf
 __cosl
@@ -522,10 +522,6 @@ environ
 environment_get_arguments
 environment_get_environment
 environment_initial_cwd
-environment_list_string_free
-environment_list_tuple2_string_string_free
-environment_option_string_free
-environment_tuple2_string_string_free
 erand48
 erf
 erfc
@@ -606,7 +602,6 @@ filesystem_directory_entry_free
 filesystem_directory_entry_stream_drop_borrow
 filesystem_directory_entry_stream_drop_own
 filesystem_filesystem_error_code
-filesystem_list_u8_free
 filesystem_method_descriptor_advise
 filesystem_method_descriptor_append_via_stream
 filesystem_method_descriptor_create_directory_at
@@ -655,7 +650,6 @@ filesystem_result_own_output_stream_error_code_free
 filesystem_result_string_error_code_free
 filesystem_result_tuple2_list_u8_bool_error_code_free
 filesystem_result_void_error_code_free
-filesystem_tuple2_list_u8_bool_free
 finite
 finitef
 floor
@@ -777,9 +771,6 @@ ilogbf
 ilogbl
 imaxabs
 imaxdiv
-imports_string_dup
-imports_string_free
-imports_string_set
 in6addr_any
 in6addr_loopback
 index
@@ -992,7 +983,6 @@ perror
 poll
 poll_borrow_pollable
 poll_list_borrow_pollable_free
-poll_list_u32_free
 poll_method_pollable_block
 poll_method_pollable_ready
 poll_poll
@@ -1010,6 +1000,15 @@ powf
 powl
 pread
 preadv
+preview2_list_string_free
+preview2_list_tuple2_string_string_free
+preview2_list_u32_free
+preview2_list_u8_free
+preview2_option_string_free
+preview2_string_dup
+preview2_string_free
+preview2_string_set
+preview2_tuple2_string_string_free
 printf
 program_invocation_name
 program_invocation_short_name
@@ -1040,7 +1039,6 @@ random_get_random_u64
 random_insecure_get_insecure_random_bytes
 random_insecure_get_insecure_random_u64
 random_insecure_seed_insecure_seed
-random_list_u8_free
 read
 readdir
 readlink
@@ -1147,7 +1145,6 @@ streams_borrow_input_stream
 streams_borrow_output_stream
 streams_input_stream_drop_borrow
 streams_input_stream_drop_own
-streams_list_u8_free
 streams_method_input_stream_blocking_read
 streams_method_input_stream_blocking_skip
 streams_method_input_stream_read
@@ -1319,7 +1316,6 @@ udp_incoming_datagram_stream_drop_own
 udp_ip_socket_address_free
 udp_list_incoming_datagram_free
 udp_list_outgoing_datagram_free
-udp_list_u8_free
 udp_method_incoming_datagram_stream_receive
 udp_method_incoming_datagram_stream_subscribe
 udp_method_outgoing_datagram_stream_check_send

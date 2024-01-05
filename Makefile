@@ -27,8 +27,13 @@ OBJDIR ?= build/$(TARGET_TRIPLE)
 BINDING_WORK_DIR ?= build/bindings
 # URL from which to retrieve the WIT files used to generate the WASI Preview 2 bindings
 WASI_CLI_URL ?= https://github.com/WebAssembly/wasi-cli/archive/refs/tags/v0.2.0-rc-2023-12-05.tar.gz
-# URL from which to retrieve the `wit-bindgen` command used to generate the WASI Preview 2 bindings
-WIT_BINDGEN_URL ?= https://github.com/bytecodealliance/wit-bindgen/releases/download/wit-bindgen-cli-0.16.0/wit-bindgen-v0.16.0-x86_64-linux.tar.gz
+# URL from which to retrieve the `wit-bindgen` command used to generate the WASI
+# Preview 2 bindings.
+#
+# TODO: Switch to bytecodealliance/wit-bindgen 0.17.0 once it's released (which
+# will include https://github.com/bytecodealliance/wit-bindgen/pull/804 and
+# https://github.com/bytecodealliance/wit-bindgen/pull/805, which we rely on)
+WIT_BINDGEN_URL ?= https://github.com/dicej/wit-bindgen/releases/download/wit-bindgen-cli-0.17.0-dicej-pre0/wit-bindgen-v0.17.0-dicej-pre0-x86_64-linux.tar.gz
 
 # When the length is no larger than this threshold, we consider the
 # overhead of bulk memory opcodes to outweigh the performance benefit,
@@ -851,7 +856,10 @@ $(BINDING_WORK_DIR)/wit-bindgen:
 
 bindings: $(BINDING_WORK_DIR)/wasi-cli $(BINDING_WORK_DIR)/wit-bindgen
 	cd "$(BINDING_WORK_DIR)" && \
-		./wit-bindgen/wit-bindgen c --world wasi:cli/imports@0.2.0-rc-2023-12-05 \
+		./wit-bindgen/wit-bindgen c \
+			--rename-world preview2 \
+			--type-section-suffix __wasi_libc \
+			--world wasi:cli/imports@0.2.0-rc-2023-12-05 \
 			--rename wasi:clocks/monotonic-clock@0.2.0-rc-2023-11-10=monotonic_clock \
 			--rename wasi:clocks/wall-clock@0.2.0-rc-2023-11-10=wall_clock \
 			--rename wasi:filesystem/preopens@0.2.0-rc-2023-11-10=filesystem_preopens \
@@ -880,13 +888,8 @@ bindings: $(BINDING_WORK_DIR)/wasi-cli $(BINDING_WORK_DIR)/wit-bindgen
 			--rename wasi:cli/terminal-stdout@0.2.0-rc-2023-12-05=terminal_stdout \
 			--rename wasi:cli/terminal-stderr@0.2.0-rc-2023-12-05=terminal_stderr \
 			./wasi-cli/wit && \
-		mv imports.h ../../libc-bottom-half/headers/public/wasi/preview2.h && \
-		sed 's_#include "imports.h"_#include "wasi/preview2.h"_' \
-			< imports.c \
-			> ../../libc-bottom-half/cloudlibc/src/libc/sys/wasi/preview2.c && \
-		rm imports.c && \
-		mv imports_component_type.o \
-			../../libc-bottom-half/cloudlibc/src/libc/sys/wasi/preview2_component_type.o
+		mv preview2.h ../../libc-bottom-half/headers/public/ && \
+		mv preview2.c preview2_component_type.o ../../libc-bottom-half/cloudlibc/src/libc/sys/wasi/
 
 clean:
 	$(RM) -r "$(BINDING_WORK_DIR)"

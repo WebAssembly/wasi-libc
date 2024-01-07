@@ -123,6 +123,7 @@ jobs:
       run: make -j4 WASM64=yes
 
     - name: Build wasm64 + libc + preview2
+      if: matrix.clang_version != '10.0.0'
       shell: bash
       run: |
         make -j4

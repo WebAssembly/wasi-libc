@@ -54,7 +54,11 @@ ifeq ($(THREAD_MODEL), posix)
 endif
 
 ifeq ($(WASI_SNAPSHOT), preview2)
-TARGET_TRIPLE = wasm32-wasi-preview2
+    ifeq (${WASM64}, yes)
+        TARGET_TRIPLE = wasm64-wasi-preview2
+    else
+        TARGET_TRIPLE = wasm32-wasi-preview2
+    endif
 endif
 
 BUILTINS_LIB ?= $(shell ${CC} --print-libgcc-file-name)

@@ -425,7 +425,6 @@ MUSL_OMIT_HEADERS += \
     "bits/shm.h" "bits/msg.h" "bits/ipc.h" "bits/ptrace.h" \
     "bits/statfs.h" \
     "sys/vfs.h" \
-    "sys/statvfs.h" \
     "syslog.h" "sys/syslog.h" \
     "wait.h" "sys/wait.h" \
     "ucontext.h" "sys/ucontext.h" \

@@ -48,7 +48,7 @@ BULK_MEMORY_THRESHOLD ?= 32
 # Set the default WASI target triple.
 TARGET_TRIPLE = wasm32-wasi
 
-# Threaded version necessitates a different traget, as objects from different
+# Threaded version necessitates a different target, as objects from different
 # targets can't be mixed together while linking.
 ifeq ($(THREAD_MODEL), posix)
 TARGET_TRIPLE = wasm32-wasi-threads
@@ -885,8 +885,13 @@ bindings: $(BINDING_WORK_DIR)/wasi-cli $(BINDING_WORK_DIR)/wit-bindgen
 			--rename wasi:cli/terminal-stdout@0.2.0-rc-2023-12-05=terminal_stdout \
 			--rename wasi:cli/terminal-stderr@0.2.0-rc-2023-12-05=terminal_stderr \
 			./wasi-cli/wit && \
-		mv preview2.h ../../libc-bottom-half/headers/public/ && \
-		mv preview2.c preview2_component_type.o ../../libc-bottom-half/sources
+		mv preview2.h ../../libc-bottom-half/headers/public/wasi/ && \
+		mv preview2_component_type.o ../../libc-bottom-half/sources && \
+		sed 's_#include "preview2.h"_#include "wasi/preview2.h"_' \
+			< preview2.c \
+			> ../../libc-bottom-half/sources/preview2.c && \
+		rm preview2.c
+
 
 clean:
 	$(RM) -r "$(BINDING_WORK_DIR)"

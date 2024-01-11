@@ -83,10 +83,7 @@ ifeq ($(WASI_SNAPSHOT), preview1)
 # Omit source files not relevant to WASI Preview 1.  As we introduce files
 # supporting `wasi-sockets` for `wasm32-wasi-preview2`, we'll add those files to
 # this list.
-LIBC_BOTTOM_HALF_OMIT_SOURCES := \
-    $(addprefix $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/libc/sys/, \
-        wasi/preview2.c \
-    )
+LIBC_BOTTOM_HALF_OMIT_SOURCES := $(LIBC_BOTTOM_HALF_SOURCES)/preview2.c
 LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_OMIT_SOURCES),$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 # Omit preview2.h from include-all.c test.
 INCLUDE_ALL_CLAUSES := -not -name preview2.h
@@ -889,7 +886,7 @@ bindings: $(BINDING_WORK_DIR)/wasi-cli $(BINDING_WORK_DIR)/wit-bindgen
 			--rename wasi:cli/terminal-stderr@0.2.0-rc-2023-12-05=terminal_stderr \
 			./wasi-cli/wit && \
 		mv preview2.h ../../libc-bottom-half/headers/public/ && \
-		mv preview2.c preview2_component_type.o ../../libc-bottom-half/cloudlibc/src/libc/sys/wasi/
+		mv preview2.c preview2_component_type.o ../../libc-bottom-half/sources
 
 clean:
 	$(RM) -r "$(BINDING_WORK_DIR)"

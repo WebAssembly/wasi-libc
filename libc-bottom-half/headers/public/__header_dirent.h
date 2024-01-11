@@ -11,6 +11,13 @@
 #define DT_REG __WASI_FILETYPE_REGULAR_FILE
 #define DT_UNKNOWN __WASI_FILETYPE_UNKNOWN
 
+// DT_SOCK is not supported in WASI Preview 1 (but will be in Preview 2).  We
+// define it regardless so that libc++'s `<filesystem>` implementation builds.
+// The exact value is mostly arbitrary, but chosen so it doesn't conflict with
+// any of the existing `__WASI_FILETYPE_*` flags.  We do not expect any new
+// flags to be added to WASI Preview 1, so that should be sufficient.
+#define DT_SOCK 20
+
 #define IFTODT(x) (__wasilibc_iftodt(x))
 #define DTTOIF(x) (__wasilibc_dttoif(x))
 

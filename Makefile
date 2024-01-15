@@ -25,6 +25,17 @@ BUILD_LIBC_TOP_HALF ?= yes
 OBJDIR ?= build/$(TARGET_TRIPLE)
 # 64 bit wasm?
 WASM64 ?= no
+# The directory where we store files and tools for generating WASI Preview 2 bindings
+BINDING_WORK_DIR ?= build/bindings
+# URL from which to retrieve the WIT files used to generate the WASI Preview 2 bindings
+WASI_CLI_URL ?= https://github.com/WebAssembly/wasi-cli/archive/refs/tags/v0.2.0-rc-2023-12-05.tar.gz
+# URL from which to retrieve the `wit-bindgen` command used to generate the WASI
+# Preview 2 bindings.
+#
+# TODO: Switch to bytecodealliance/wit-bindgen 0.17.0 once it's released (which
+# will include https://github.com/bytecodealliance/wit-bindgen/pull/804 and
+# https://github.com/bytecodealliance/wit-bindgen/pull/805, which we rely on)
+WIT_BINDGEN_URL ?= https://github.com/dicej/wit-bindgen/releases/download/wit-bindgen-cli-0.17.0-dicej-pre0/wit-bindgen-v0.17.0-dicej-pre0-x86_64-linux.tar.gz
 
 # When the length is no larger than this threshold, we consider the
 # overhead of bulk memory opcodes to outweigh the performance benefit,
@@ -43,7 +54,7 @@ else
 TARGET_TRIPLE = wasm32-wasi
 endif
 
-# Threaded version necessitates a different traget, as objects from different
+# Threaded version necessitates a different target, as objects from different
 # targets can't be mixed together while linking.
 ifeq ($(THREAD_MODEL), posix)
     ifeq (${WASM64}, yes)
@@ -81,6 +92,16 @@ LIBC_BOTTOM_HALF_ALL_SOURCES = \
     $(sort \
     $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
     $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c))
+
+ifeq ($(WASI_SNAPSHOT), preview1)
+# Omit source files not relevant to WASI Preview 1.  As we introduce files
+# supporting `wasi-sockets` for `wasm32-wasi-preview2`, we'll add those files to
+# this list.
+LIBC_BOTTOM_HALF_OMIT_SOURCES := $(LIBC_BOTTOM_HALF_SOURCES)/preview2.c
+LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_OMIT_SOURCES),$(LIBC_BOTTOM_HALF_ALL_SOURCES))
+# Omit preview2.h from include-all.c test.
+INCLUDE_ALL_CLAUSES := -not -name preview2.h
+endif
 
 # FIXME(https://reviews.llvm.org/D85567) - due to a bug in LLD the weak
 # references to a function defined in `chdir.c` only work if `chdir.c` is at the
@@ -442,7 +463,6 @@ MUSL_OMIT_HEADERS += \
     "bits/shm.h" "bits/msg.h" "bits/ipc.h" "bits/ptrace.h" \
     "bits/statfs.h" \
     "sys/vfs.h" \
-    "sys/statvfs.h" \
     "syslog.h" "sys/syslog.h" \
     "wait.h" "sys/wait.h" \
     "ucontext.h" "sys/ucontext.h" \
@@ -758,7 +778,7 @@ check-symbols: startup_files libc
 	# Generate a test file that includes all public C header files.
 	#
 	cd "$(SYSROOT_INC)" && \
-	  for header in $$(find . -type f -not -name mman.h -not -name signal.h -not -name times.h -not -name resource.h |grep -v /bits/ |grep -v /c++/); do \
+	  for header in $$(find . -type f -not -name mman.h -not -name signal.h -not -name times.h -not -name resource.h $(INCLUDE_ALL_CLAUSES) |grep -v /bits/ |grep -v /c++/); do \
 	      echo '#include <'$$header'>' | sed 's/\.\///' ; \
 	done |LC_ALL=C sort >$(SYSROOT_SHARE)/include-all.c ; \
 	cd - >/dev/null
@@ -833,8 +853,65 @@ install: finish
 	mkdir -p "$(INSTALL_DIR)"
 	cp -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"
 
+$(BINDING_WORK_DIR)/wasi-cli:
+	mkdir -p "$(BINDING_WORK_DIR)"
+	cd "$(BINDING_WORK_DIR)" && \
+		curl -L "$(WASI_CLI_URL)" -o wasi-cli.tar.gz && \
+		tar xf wasi-cli.tar.gz && \
+		mv wasi-cli-* wasi-cli
+
+$(BINDING_WORK_DIR)/wit-bindgen:
+	mkdir -p "$(BINDING_WORK_DIR)"
+	cd "$(BINDING_WORK_DIR)" && \
+		curl -L "$(WIT_BINDGEN_URL)" -o wit-bindgen.tar.gz && \
+		tar xf wit-bindgen.tar.gz && \
+		mv wit-bindgen-* wit-bindgen
+
+bindings: $(BINDING_WORK_DIR)/wasi-cli $(BINDING_WORK_DIR)/wit-bindgen
+	cd "$(BINDING_WORK_DIR)" && \
+		./wit-bindgen/wit-bindgen c \
+			--rename-world preview2 \
+			--type-section-suffix __wasi_libc \
+			--world wasi:cli/imports@0.2.0-rc-2023-12-05 \
+			--rename wasi:clocks/monotonic-clock@0.2.0-rc-2023-11-10=monotonic_clock \
+			--rename wasi:clocks/wall-clock@0.2.0-rc-2023-11-10=wall_clock \
+			--rename wasi:filesystem/preopens@0.2.0-rc-2023-11-10=filesystem_preopens \
+			--rename wasi:filesystem/types@0.2.0-rc-2023-11-10=filesystem \
+			--rename wasi:io/error@0.2.0-rc-2023-11-10=io_error \
+			--rename wasi:io/poll@0.2.0-rc-2023-11-10=poll \
+			--rename wasi:io/streams@0.2.0-rc-2023-11-10=streams \
+			--rename wasi:random/insecure-seed@0.2.0-rc-2023-11-10=random_insecure_seed \
+			--rename wasi:random/insecure@0.2.0-rc-2023-11-10=random_insecure \
+			--rename wasi:random/random@0.2.0-rc-2023-11-10=random \
+			--rename wasi:sockets/instance-network@0.2.0-rc-2023-11-10=instance_network \
+			--rename wasi:sockets/ip-name-lookup@0.2.0-rc-2023-11-10=ip_name_lookup \
+			--rename wasi:sockets/network@0.2.0-rc-2023-11-10=network \
+			--rename wasi:sockets/tcp-create-socket@0.2.0-rc-2023-11-10=tcp_create_socket \
+			--rename wasi:sockets/tcp@0.2.0-rc-2023-11-10=tcp \
+			--rename wasi:sockets/udp-create-socket@0.2.0-rc-2023-11-10=udp_create_socket \
+			--rename wasi:sockets/udp@0.2.0-rc-2023-11-10=udp \
+			--rename wasi:cli/environment@0.2.0-rc-2023-12-05=environment \
+			--rename wasi:cli/exit@0.2.0-rc-2023-12-05=exit \
+			--rename wasi:cli/stdin@0.2.0-rc-2023-12-05=stdin \
+			--rename wasi:cli/stdout@0.2.0-rc-2023-12-05=stdout \
+			--rename wasi:cli/stderr@0.2.0-rc-2023-12-05=stderr \
+			--rename wasi:cli/terminal-input@0.2.0-rc-2023-12-05=terminal_input \
+			--rename wasi:cli/terminal-output@0.2.0-rc-2023-12-05=terminal_output \
+			--rename wasi:cli/terminal-stdin@0.2.0-rc-2023-12-05=terminal_stdin \
+			--rename wasi:cli/terminal-stdout@0.2.0-rc-2023-12-05=terminal_stdout \
+			--rename wasi:cli/terminal-stderr@0.2.0-rc-2023-12-05=terminal_stderr \
+			./wasi-cli/wit && \
+		mv preview2.h ../../libc-bottom-half/headers/public/wasi/ && \
+		mv preview2_component_type.o ../../libc-bottom-half/sources && \
+		sed 's_#include "preview2.h"_#include "wasi/preview2.h"_' \
+			< preview2.c \
+			> ../../libc-bottom-half/sources/preview2.c && \
+		rm preview2.c
+
+
 clean:
+	$(RM) -r "$(BINDING_WORK_DIR)"
 	$(RM) -r "$(OBJDIR)"
 	$(RM) -r "$(SYSROOT)"
 
-.PHONY: default startup_files libc libc_so finish install include_dirs clean check-symbols
+.PHONY: default startup_files libc libc_so finish install include_dirs clean check-symbols bindings

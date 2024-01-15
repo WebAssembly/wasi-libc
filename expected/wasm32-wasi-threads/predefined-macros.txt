@@ -181,6 +181,7 @@
 #define DT_FIFO __WASI_FILETYPE_SOCKET_STREAM
 #define DT_LNK __WASI_FILETYPE_SYMBOLIC_LINK
 #define DT_REG __WASI_FILETYPE_REGULAR_FILE
+#define DT_SOCK 20
 #define DT_UNKNOWN __WASI_FILETYPE_UNKNOWN
 #define D_FMT 0x20029
 #define D_T_FMT 0x20028
@@ -1671,6 +1672,18 @@
 #define STRU_F 1
 #define STRU_P 3
 #define STRU_R 2
+#define ST_APPEND 256
+#define ST_IMMUTABLE 512
+#define ST_MANDLOCK 64
+#define ST_NOATIME 1024
+#define ST_NODEV 4
+#define ST_NODIRATIME 2048
+#define ST_NOEXEC 8
+#define ST_NOSUID 2
+#define ST_RDONLY 1
+#define ST_RELATIME 4096
+#define ST_SYNCHRONOUS 16
+#define ST_WRITE 128
 #define SUN_LEN(s) (2+strlen((s)->sun_path))
 #define SUSP 237
 #define SYMLOOP_MAX 40
@@ -1685,7 +1698,7 @@
 #define S_IFBLK (0x6000)
 #define S_IFCHR (0x2000)
 #define S_IFDIR (0x4000)
-#define S_IFIFO (0xc000)
+#define S_IFIFO (0x1000)
 #define S_IFLNK (0xa000)
 #define S_IFMT (S_IFBLK | S_IFCHR | S_IFDIR | S_IFIFO | S_IFLNK | S_IFREG | S_IFSOCK)
 #define S_IFREG (0x8000)
@@ -2052,7 +2065,7 @@
 #define _Complex_I (0.0f+1.0fi)
 #define _DIRENT_H 
 #define _DIRENT_HAVE_D_TYPE 
-#define _DLFCN_H
+#define _DLFCN_H 
 #define _ENDIAN_H 
 #define _ERRNO_H 
 #define _ERR_H 
@@ -2360,6 +2373,7 @@
 #define _SYS_REG_H 
 #define _SYS_SELECT_H 
 #define _SYS_SOCKET_H 
+#define _SYS_STATVFS_H 
 #define _SYS_STAT_H 
 #define _SYS_SYSCALL_H 
 #define _SYS_SYSINFO_H 
@@ -3186,6 +3200,7 @@
 #define fsfilcnt64_t fsfilcnt_t
 #define fstat64 fstat
 #define fstatat64 fstatat
+#define fstatvfs64 fstatvfs
 #define ftello64 ftello
 #define ftruncate64 ftruncate
 #define getdents64 getdents
@@ -3372,6 +3387,7 @@
 #define st_mtime st_mtim.tv_sec
 #define stat64 stat
 #define static_assert _Static_assert
+#define statvfs64 statvfs
 #define stderr (stderr)
 #define stdin (stdin)
 #define stdout (stdout)

@@ -141,6 +141,7 @@
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/statvfs.h>
 #include <sys/stropts.h>
 #include <sys/syscall.h>
 #include <sys/sysinfo.h>
@@ -167,5 +168,6 @@
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc-nocwd.h>
 #include <wasi/libc.h>
+#include <wasi/preview2.h>
 #include <wchar.h>
 #include <wctype.h>

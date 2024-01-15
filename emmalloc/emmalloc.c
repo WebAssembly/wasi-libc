@@ -56,6 +56,7 @@
 
 // Defind by the linker to have the address of the start of the heap.
 extern unsigned char __heap_base;
+extern unsigned char __heap_end;
 
 // Behavior of right shifting a signed integer is compiler implementation defined.
 static_assert((((int32_t)0x80000000U) >> 31) == -1, "This malloc implementation requires that right-shifting a signed integer produces a sign-extending (arithmetic) shift!");
@@ -545,9 +546,13 @@ static bool claim_more_memory(size_t numBytes)
     // If this is the first time we're called, see if we can use
     // the initial heap memory set up by wasm-ld.
     if (!listOfAllRegions) {
-      unsigned char *heap_end = sbrk(0);
-      if (numBytes <= (size_t)(heap_end - &__heap_base)) {
-        startPtr = &__heap_base;
+      unsigned char *heap_base = &__heap_base;
+      unsigned char *heap_end = &__heap_end;
+      if (heap_end < heap_base) {
+	__builtin_trap();
+      }
+      if (numBytes <= (size_t)(heap_end - heap_base)) {
+        startPtr = heap_base;
         endPtr = heap_end;
 	break;
       }

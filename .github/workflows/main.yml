@@ -132,13 +132,6 @@ jobs:
       shell: bash
       run: make -j4 WASM64=yes
 
-    - name: Build wasm64 + libc + preview2
-      if: matrix.clang_version != '10.0.0'
-      shell: bash
-      run: |
-        make -j4
-        WASI_SNAPSHOT=preview2 make -j4 WASM64=yes
-
     - name: Build wasm64 + libc + threads
       # Build wasm64 with thread support
       if: matrix.clang_version != '10.0.0'

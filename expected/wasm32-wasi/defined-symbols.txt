@@ -498,6 +498,7 @@ __wasilibc_find_relpath
 __wasilibc_find_relpath_alloc
 __wasilibc_futex_wait
 __wasilibc_futex_wait_wasix
+__wasilibc_futex_wake_wasix
 __wasilibc_get_environ
 __wasilibc_get_stack_pointer
 __wasilibc_get_tls_base

@@ -30,13 +30,30 @@ int __wasilibc_futex_wait_wasix(volatile void *addr, int op, int expected, int64
     return -EWOULDBLOCK;
   }
 
-  int ret = __wasi_futex_wait((uint32_t*)addr, expected, &timeout, &woken);
-  if (ret != 0) {
-    return -ret;
+  if (__wasi_futex_wait((uint32_t*)addr, expected, &timeout, &woken) != 0) {
+    __builtin_trap();
   }
 
   if (woken == __WASI_BOOL_FALSE && *paddr == expected) {
     return -ETIMEDOUT;
+  }
+  return 0;
+}
+
+int __wasilibc_futex_wake_wasix(int* futex, int cnt) {
+  __wasi_bool_t woken = __WASI_BOOL_FALSE;
+  if (cnt == INT_MAX) {
+    int ret = __wasi_futex_wake_all((uint32_t*)futex, &woken);
+    if (ret != 0) {
+      return -ret;
+    }
+  } else {
+    for (int n = 0; n < cnt; n++) {
+      int ret = __wasi_futex_wake((uint32_t*)futex, &woken);
+      if (ret != 0) {
+        return -ret;
+      }
+    }
   }
   return 0;
 }

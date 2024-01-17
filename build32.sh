@@ -9,8 +9,6 @@ git reset --hard
 git pull origin main || true
 cd ../../..
 
-make clean
-
 # Build the extensions
 cargo run --manifest-path tools/wasix-headers/Cargo.toml generate-libc
 cp -f libc-bottom-half/headers/public/wasi/api.h libc-bottom-half/headers/public/wasi/api_wasix.h

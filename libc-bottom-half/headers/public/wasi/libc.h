@@ -51,8 +51,7 @@ int __wasilibc_setjmp(__wasi_stack_snapshot_t * buf);
 _Noreturn void __wasilibc_longjmp(__wasi_stack_snapshot_t * buf, int val);
 
 /// Futex implemenation
-int __wasilibc_futex_wait_wasix(volatile void *futex, int op, int expected, int64_t max_wait_ns);
-int __wasilibc_futex_wake_wasix(int* futex, int cnt);
+int __wasilibc_futex_wait_wasix(volatile void *addr, int op, int expected, int64_t max_wait_ns);
 
 /// Return the current file offset. Like `lseek(fd, 0, SEEK_CUR)`, but without
 /// depending on `lseek`.

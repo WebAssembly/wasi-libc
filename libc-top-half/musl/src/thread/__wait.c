@@ -48,6 +48,9 @@ void __wait(volatile int *addr, volatile int *waiters, int val, int priv)
 		__syscall(SYS_futex, addr, FUTEX_WAIT|priv, val, 0) != -ENOSYS
 		|| __syscall(SYS_futex, addr, FUTEX_WAIT, val, 0);
 #else
+        // we feed the wait operation to a syscall rather than
+        // use atomics so that the asyncify and journaling can
+        // work properly
 		__wasilibc_futex_wait_wasix(addr, FUTEX_WAIT, val, -1);
 #endif
 	}

@@ -149,16 +149,6 @@ int tcp_getsockopt(tcp_socket_t* socket, int level, int optname,
             value = result;
             break;
         }
-        case IPV6_V6ONLY: {
-            bool result;
-            if (!tcp_method_tcp_socket_ipv6_only(socket_borrow, &result, &error)) {
-                errno = __wasi_sockets_utils__map_error(error);
-                return -1;
-            }
-
-            value = result;
-            break;
-        }
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -345,14 +335,6 @@ int tcp_setsockopt(tcp_socket_t* socket, int level, int optname, const void* opt
 
             return 0;
         }
-        case IPV6_V6ONLY: {
-            if (!tcp_method_tcp_socket_set_ipv6_only(socket_borrow, intval != 0, &error)) {
-                errno = __wasi_sockets_utils__map_error(error);
-                return -1;
-            }
-
-            return 0;
-        }
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -518,16 +500,6 @@ int udp_getsockopt(udp_socket_t* socket, int level, int optname,
             value = result;
             break;
         }
-        case IPV6_V6ONLY: {
-            bool result;
-            if (!udp_method_udp_socket_ipv6_only(socket_borrow, &result, &error)) {
-                errno = __wasi_sockets_utils__map_error(error);
-                return -1;
-            }
-
-            value = result;
-            break;
-        }
         default:
             errno = ENOPROTOOPT;
             return -1;
@@ -626,14 +598,6 @@ int udp_setsockopt(udp_socket_t* socket, int level, int optname, const void* opt
             }
 
             if (!udp_method_udp_socket_set_unicast_hop_limit(socket_borrow, intval, &error)) {
-                errno = __wasi_sockets_utils__map_error(error);
-                return -1;
-            }
-
-            return 0;
-        }
-        case IPV6_V6ONLY: {
-            if (!udp_method_udp_socket_set_ipv6_only(socket_borrow, intval != 0, &error)) {
                 errno = __wasi_sockets_utils__map_error(error);
                 return -1;
             }

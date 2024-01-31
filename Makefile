@@ -21,6 +21,8 @@ WASI_SNAPSHOT ?= preview1
 MALLOC_IMPL ?= dlmalloc
 # yes or no
 BUILD_LIBC_TOP_HALF ?= yes
+# Build setjmp/longjmp support. yes or no
+BUILD_SJLJ ?= no
 # The directory where we will store intermediate artifacts.
 OBJDIR ?= build/$(TARGET_TRIPLE)
 # The directory where we store files and tools for generating WASI Preview 2 bindings
@@ -309,6 +311,11 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
     )
 endif
 
+ifeq ($(BUILD_SJLJ),yes)
+LIBC_TOP_HALF_MUSL_SOURCES += \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/setjmp/wasm32/rt.c
+endif
+
 MUSL_PRINTSCAN_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/floatscan.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/stdio/vfprintf.c \
@@ -320,6 +327,8 @@ BULK_MEMORY_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/string/memcpy.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/string/memmove.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/string/memset.c
+SJLJ_SOURCES = \
+    $(LIBC_TOP_HALF_MUSL_SRC_DIR)/setjmp/wasm32/rt.c
 LIBC_TOP_HALF_HEADERS_PRIVATE = $(LIBC_TOP_HALF_DIR)/headers/private
 LIBC_TOP_HALF_SOURCES = $(LIBC_TOP_HALF_DIR)/sources
 LIBC_TOP_HALF_ALL_SOURCES = \
@@ -402,6 +411,7 @@ MUSL_PRINTSCAN_OBJS = $(call objs,$(MUSL_PRINTSCAN_SOURCES))
 MUSL_PRINTSCAN_LONG_DOUBLE_OBJS = $(patsubst %.o,%.long-double.o,$(MUSL_PRINTSCAN_OBJS))
 MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS = $(patsubst %.o,%.no-floating-point.o,$(MUSL_PRINTSCAN_OBJS))
 BULK_MEMORY_OBJS = $(call objs,$(BULK_MEMORY_SOURCES))
+SJLJ_OBJS = $(call objs,$(SJLJ_SOURCES))
 LIBWASI_EMULATED_MMAN_OBJS = $(call objs,$(LIBWASI_EMULATED_MMAN_SOURCES))
 LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS = $(call objs,$(LIBWASI_EMULATED_PROCESS_CLOCKS_SOURCES))
 LIBWASI_EMULATED_GETPID_OBJS = $(call objs,$(LIBWASI_EMULATED_GETPID_SOURCES))
@@ -473,7 +483,6 @@ MUSL_OMIT_HEADERS += \
     "netdb.h" \
     "resolv.h" \
     "pty.h" \
-    "setjmp.h" \
     "ulimit.h" \
     "sys/xattr.h" \
     "wordexp.h" \
@@ -510,6 +519,7 @@ LIBWASI_EMULATED_SIGNAL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_SIGN
 LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS))
 LIBDL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBDL_OBJS))
 BULK_MEMORY_SO_OBJS = $(patsubst %.o,%.pic.o,$(BULK_MEMORY_OBJS))
+SJLJ_SO_OBJS = $(patsubst %.o,%.pic.o,$(SJLJ_OBJS))
 DLMALLOC_SO_OBJS = $(patsubst %.o,%.pic.o,$(DLMALLOC_OBJS))
 LIBC_BOTTOM_HALF_ALL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBC_BOTTOM_HALF_ALL_OBJS))
 LIBC_TOP_HALF_ALL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBC_TOP_HALF_ALL_OBJS))
@@ -524,6 +534,7 @@ PIC_OBJS = \
 	$(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS) \
 	$(LIBDL_SO_OBJS) \
 	$(BULK_MEMORY_SO_OBJS) \
+	$(SJLJ_SO_OBJS) \
 	$(DLMALLOC_SO_OBJS) \
 	$(LIBC_BOTTOM_HALF_ALL_SO_OBJS) \
 	$(LIBC_TOP_HALF_ALL_SO_OBJS) \
@@ -596,6 +607,9 @@ $(BULK_MEMORY_OBJS) $(BULK_MEMORY_SO_OBJS): CFLAGS += \
 
 $(BULK_MEMORY_OBJS) $(BULK_MEMORY_SO_OBJS): CFLAGS += \
         -DBULK_MEMORY_THRESHOLD=$(BULK_MEMORY_THRESHOLD)
+
+$(SJLJ_OBJS) $(SJLJ_SO_OBJS): CFLAGS += \
+        -mllvm -wasm-enable-sjlj
 
 $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS): CFLAGS += \
 	    -D_WASI_EMULATED_SIGNAL

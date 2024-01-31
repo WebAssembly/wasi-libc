@@ -24,12 +24,11 @@ LIBC_TEST_URL ?= https://github.com/bytecodealliance/libc-test
 LIBC_TEST = $(DOWNDIR)/libc-test
 LIBRT_URL ?= https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/libclang_rt.builtins-wasm32-wasi-16.0.tar.gz
 LIBRT = $(DOWNDIR)/lib/wasi/libclang_rt.builtins-wasm32.a
-# TODO: Switch to Wasmtime 17 once it's released, which will include https://github.com/bytecodealliance/wasmtime/pull/7750
-WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/dev/wasmtime-dev-x86_64-linux.tar.xz
+WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v17.0.0/wasmtime-v17.0.0-x86_64-linux.tar.xz
 WASMTIME = $(DOWNDIR)/$(shell basename $(WASMTIME_URL) .tar.xz)/wasmtime
 WASM_TOOLS_URL ?= https://github.com/bytecodealliance/wasm-tools/releases/download/wasm-tools-1.0.54/wasm-tools-1.0.54-x86_64-linux.tar.gz
 WASM_TOOLS = $(DOWNDIR)/$(shell basename $(WASM_TOOLS_URL) .tar.gz)/wasm-tools
-ADAPTER_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v16.0.0/wasi_snapshot_preview1.command.wasm
+ADAPTER_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v17.0.0/wasi_snapshot_preview1.command.wasm
 ADAPTER = $(DOWNDIR)/wasi_snapshot_preview1.command.wasm
 
 TO_DOWNLOAD = $(LIBC_TEST) $(LIBRT) $(WASMTIME)

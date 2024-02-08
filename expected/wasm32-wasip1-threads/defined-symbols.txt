@@ -1010,6 +1010,7 @@ pthread_condattr_setpshared
 pthread_create
 pthread_detach
 pthread_equal
+pthread_getattr_np
 pthread_getspecific
 pthread_join
 pthread_key_create

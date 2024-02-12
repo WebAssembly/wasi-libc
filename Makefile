@@ -886,7 +886,7 @@ bindings: $(BINDING_WORK_DIR)/wasi-cli $(BINDING_WORK_DIR)/wit-bindgen
 			./wasi-cli/wit && \
 		mv preview2.h ../../libc-bottom-half/headers/public/wasi/ && \
 		mv preview2_component_type.o ../../libc-bottom-half/sources && \
-		sed 's_#include "preview2.h"_#include "wasi/preview2.h"_' \
+		sed 's_#include "preview2\.h"_#include "wasi/preview2.h"_' \
 			< preview2.c \
 			> ../../libc-bottom-half/sources/preview2.c && \
 		rm preview2.c

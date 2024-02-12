@@ -151,9 +151,12 @@ build: download $(WASMS)
 
 $(WASMS): | $(OBJDIRS)
 $(OBJDIR)/%.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) $(LDFLAGS) -o tmp.wasm $^
 ifeq ($(TARGET_TRIPLE), wasm32-wasi-preview2)
-	$(WASM_TOOLS) component new --adapt $(ADAPTER) $@ -o $@
+	$(WASM_TOOLS) component new --adapt $(ADAPTER) tmp.wasm -o $@
+	rm tmp.wasm
+else
+	mv tmp.wasm $@
 endif
 
 $(WASM_OBJS): $(LIBC_TEST)/src/common/test.h | $(OBJDIRS)

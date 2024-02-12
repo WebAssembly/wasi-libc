@@ -4,16 +4,16 @@
 #include <wasi/preview2.h>
 
 typedef struct {
-    int dummy;
+	int dummy;
 } tcp_socket_state_unbound_t;
 typedef struct {
-    int dummy;    
+	int dummy;
 } tcp_socket_state_bound_t;
 typedef struct {
-    int dummy;    
+	int dummy;
 } tcp_socket_state_connecting_t;
 typedef struct {
-    int dummy;    
+	int dummy;
 } tcp_socket_state_listening_t;
 
 typedef struct {
@@ -65,10 +65,10 @@ typedef struct {
 } udp_socket_streams_t;
 
 typedef struct {
-    int dummy;    
+	int dummy;
 } udp_socket_state_unbound_t;
 typedef struct {
-    int dummy;    
+	int dummy;
 } udp_socket_state_bound_nostreams_t;
 
 typedef struct {

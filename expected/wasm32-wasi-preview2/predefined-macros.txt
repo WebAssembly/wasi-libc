@@ -166,7 +166,6 @@
 #define DECIMAL_DIG 36
 #define DELAYTIMER_MAX 0x7fffffff
 #define DELETE ns_uop_delete
-#define DESCRIPTOR_TABLE_H 
 #define DEV_BSIZE 512
 #define DIRTYPE '5'
 #define DM 242

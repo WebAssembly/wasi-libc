@@ -3,11 +3,12 @@
  * descriptors.
  *
  * WASI Preview 2 has no notion of file descriptors and instead uses unforgeable
- * resource handles.  Moreover, there's not necessarily a one-to-one
- * correspondence between POSIX file descriptors and resource handles (e.g. a
- * TCP connection may require separate handles for reading, writing, and polling
- * the same connection).  We use this table to map each POSIX descriptor to a
- * set of one or more handles.
+ * resource handles (which are currently represented as integers at the ABI
+ * level, used as indices into per-component tables managed by the host).
+ * Moreover, there's not necessarily a one-to-one correspondence between POSIX
+ * file descriptors and resource handles (e.g. a TCP connection may require
+ * separate handles for reading, writing, and polling the same connection).  We
+ * use this table to map each POSIX descriptor to a set of one or more handles.
  *
  * As of this writing, we still rely on the WASI Preview 1 adapter
  * (https://github.com/bytecodealliance/wasmtime/tree/main/crates/wasi-preview1-component-adapter)

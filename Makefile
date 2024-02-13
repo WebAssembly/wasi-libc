@@ -127,6 +127,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         misc/getopt.c \
         misc/getopt_long.c \
         misc/getsubopt.c \
+        misc/realpath.c \
         misc/uname.c \
         misc/nftw.c \
         errno/strerror.c \

@@ -1050,6 +1050,7 @@ readlinkat
 readv
 realloc
 reallocarray
+realpath
 recv
 regcomp
 regerror

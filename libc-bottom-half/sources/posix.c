@@ -351,6 +351,13 @@ int fstatvfs(int fd, struct statvfs *buf) {
     return -1;
 }
 
+char *realpath (const char *__restrict file_name, char *__restrict resolved_name) {
+    // TODO: We plan to support this eventually in WASI, but not yet.
+    // Meanwhile, we provide a stub so that libc++'s `<filesystem>`
+    // implementation will build unmodified.
+    return NULL;
+}
+
 // Like `access`, but with `faccessat`'s flags argument.
 int
 __wasilibc_access(const char *path, int mode, int flags)

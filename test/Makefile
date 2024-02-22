@@ -121,7 +121,7 @@ COMMON_TEST_INFRA = \
 # $(WASM_OBJS) are compiled in the $(OBJDIRS) and then linked together to form
 # the $(WASMS) tests.
 NAMES := $(TESTS:$(LIBC_TEST)/src/%.c=%)
-WASMS := $(TESTS:$(LIBC_TEST)/src/%.c=$(OBJDIR)/%.wasm)
+WASMS := $(TESTS:$(LIBC_TEST)/src/%.c=$(OBJDIR)/%.core.wasm)
 WASM_OBJS := $(TESTS:$(LIBC_TEST)/src/%.c=$(OBJDIR)/%.wasm.o)
 INFRA_WASM_OBJS := $(COMMON_TEST_INFRA:$(LIBC_TEST)/src/%.c=$(OBJDIR)/%.wasm.o)
 WASM_OBJS += $(INFRA_WASM_OBJS)
@@ -149,10 +149,12 @@ endif
 build: download $(WASMS)
 
 $(WASMS): | $(OBJDIRS)
-$(OBJDIR)/%.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS)
+$(OBJDIR)/%.core.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+
 ifeq ($(TARGET_TRIPLE), wasm32-wasi-preview2)
-	$(WASM_TOOLS) component new --adapt $(ADAPTER) $@ -o $@
+$(OBJDIR)/%.wasm: $(OBJDIR)/%.core.wasm
+	$(WASM_TOOLS) component new --adapt $(ADAPTER) $< -o $@
 endif
 
 $(WASM_OBJS): $(LIBC_TEST)/src/common/test.h | $(OBJDIRS)
@@ -168,10 +170,7 @@ clean::
 ##### RUN ######################################################################
 
 ENGINE ?= $(WASMTIME) run
-ifeq ($(TARGET_TRIPLE), wasm32-wasi-preview2)
-ENGINE += --wasm component-model
-endif
-ERRS:=$(WASMS:%.wasm=%.wasm.err)
+ERRS:=$(WASMS:%.core.wasm=%.wasm.err)
 
 # Use the provided Wasm engine to execute each test, emitting its output into
 # a `.err` file.
@@ -180,8 +179,13 @@ run: build $(ERRS)
 
 $(ERRS): | $(OBJDIRS)
 
+ifeq ($(TARGET_TRIPLE), wasm32-wasi-preview2)
 %.wasm.err: %.wasm
+	$(ENGINE) --wasm component-model $< >$@
+else
+%.wasm.err: %.core.wasm
 	$(ENGINE) $< >$@
+endif
 
 clean::
 	rm -rf $(OBJDIR)/*/*.err

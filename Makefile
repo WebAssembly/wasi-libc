@@ -380,6 +380,9 @@ DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 EMMALLOC_OBJS = $(call objs,$(EMMALLOC_SOURCES))
 LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 LIBC_TOP_HALF_ALL_OBJS = $(call asmobjs,$(call objs,$(LIBC_TOP_HALF_ALL_SOURCES)))
+ifeq ($(WASI_SNAPSHOT), preview2)
+LIBC_OBJS += $(OBJDIR)/preview2_component_type.o
+endif
 ifeq ($(MALLOC_IMPL),dlmalloc)
 LIBC_OBJS += $(DLMALLOC_OBJS)
 else ifeq ($(MALLOC_IMPL),emmalloc)
@@ -600,6 +603,10 @@ $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS): CF
 $(OBJDIR)/%.long-double.pic.o: %.c include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
+
+$(OBJDIR)/preview2_component_type.pic.o $(OBJDIR)/preview2_component_type.o: $(LIBC_BOTTOM_HALF_SOURCES)/preview2_component_type.o
+	@mkdir -p "$(@D)"
+	cp $< $@
 
 $(OBJDIR)/%.pic.o: %.c include_dirs
 	@mkdir -p "$(@D)"

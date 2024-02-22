@@ -19,6 +19,7 @@ __c_locale
 __clock
 __clock_gettime
 __clock_nanosleep
+__component_type_object_force_link_preview2
 __component_type_object_force_link_preview2_public_use_in_this_compilation_unit
 __cos
 __cosdf

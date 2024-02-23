@@ -8,9 +8,11 @@ string, environment variables, program startup, and many other APIs.
 `wasi-libc` is sufficiently stable and usable for many purposes, as most of the
 POSIX-compatible APIs are stable, though it is continuing to evolve to better
 align with wasm and WASI. For example, pthread support is experimentally
-provided via the [wasi-threads] proposal.
+provided via the [wasi-threads] proposal. As WASI transitions from preview 1 to
+preview 2, reference the coming changes in the [transition plan].
 
 [wasi-threads]: https://github.com/WebAssembly/wasi-threads
+[transition plan]: docs/preview2-transition.md
 
 ## Usage
 

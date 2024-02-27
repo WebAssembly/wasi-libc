@@ -509,6 +509,9 @@ ctanhl
 ctanl
 ctime
 ctime_r
+descriptor_table_get_ref
+descriptor_table_insert
+descriptor_table_remove
 difftime
 dirfd
 dirname

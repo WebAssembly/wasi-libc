@@ -32,7 +32,7 @@ ADAPTER_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v1
 ADAPTER = $(DOWNDIR)/wasi_snapshot_preview1.command.wasm
 
 TO_DOWNLOAD = $(LIBC_TEST) $(LIBRT) $(WASMTIME)
-ifeq ($(TARGET_TRIPLE), wasm32-wasi-preview2)
+ifeq ($(TARGET_TRIPLE), wasm32-wasip2)
 TO_DOWNLOAD += $(ADAPTER) $(WASM_TOOLS)
 endif
 
@@ -152,7 +152,7 @@ $(WASMS): | $(OBJDIRS)
 $(OBJDIR)/%.core.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
-ifeq ($(TARGET_TRIPLE), wasm32-wasi-preview2)
+ifeq ($(TARGET_TRIPLE), wasm32-wasip2)
 $(OBJDIR)/%.wasm: $(OBJDIR)/%.core.wasm
 	$(WASM_TOOLS) component new --adapt $(ADAPTER) $< -o $@
 endif
@@ -179,7 +179,7 @@ run: build $(ERRS)
 
 $(ERRS): | $(OBJDIRS)
 
-ifeq ($(TARGET_TRIPLE), wasm32-wasi-preview2)
+ifeq ($(TARGET_TRIPLE), wasm32-wasip2)
 %.wasm.err: %.wasm
 	$(ENGINE) --wasm component-model $< >$@
 else

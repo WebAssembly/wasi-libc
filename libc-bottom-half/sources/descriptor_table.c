@@ -22,8 +22,6 @@
  * will be managed exclusively in this table.
  */
 
-#include <assert.h>
-
 #include <wasi/descriptor_table.h>
 
 __attribute__((__import_module__("wasi_snapshot_preview1"),

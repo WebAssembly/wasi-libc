@@ -81,10 +81,23 @@ ifeq ($(WASI_SNAPSHOT), p1)
 # this list.
 LIBC_BOTTOM_HALF_OMIT_SOURCES := \
 	$(LIBC_BOTTOM_HALF_SOURCES)/wasip2.c \
-	$(LIBC_BOTTOM_HALF_SOURCES)/descriptor_table.c
+	$(LIBC_BOTTOM_HALF_SOURCES)/descriptor_table.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/connect.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/socket.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/send.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/recv.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/sockets_utils.c
 LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_OMIT_SOURCES),$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 # Omit p2-specific headers from include-all.c test.
 INCLUDE_ALL_CLAUSES := -not -name wasip2.h -not -name descriptor_table.h
+endif
+
+ifeq ($(WASI_SNAPSHOT), p2)
+# Omit source files not relevant to WASIp2.
+LIBC_BOTTOM_HALF_OMIT_SOURCES := \
+	$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/libc/sys/socket/send.c \
+	$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/libc/sys/socket/recv.c
+LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_OMIT_SOURCES),$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 endif
 
 # FIXME(https://reviews.llvm.org/D85567) - due to a bug in LLD the weak
@@ -687,6 +700,10 @@ include_dirs:
 
 	# Remove selected header files.
 	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
+ifeq ($(WASI_SNAPSHOT), p2)
+	printf '#ifndef __wasilibc_use_wasip2\n#define __wasilibc_use_wasip2\n#endif\n' \
+		> "$(SYSROOT_INC)/__wasi_snapshot.h"
+endif
 
 startup_files: include_dirs $(LIBC_BOTTOM_HALF_CRT_OBJS)
 	#

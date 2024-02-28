@@ -2352,6 +2352,7 @@
 #define _SC_XOPEN_XPG4 100
 #define _SEARCH_H 
 #define _SEMAPHORE_H 
+#define _SETJMP_H
 #define _SIZE_T 
 #define _STDALIGN_H 
 #define _STDBOOL_H 

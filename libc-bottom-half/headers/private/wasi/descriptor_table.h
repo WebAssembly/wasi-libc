@@ -1,7 +1,7 @@
 #ifndef DESCRIPTOR_TABLE_H
 #define DESCRIPTOR_TABLE_H
 
-#include <wasi/preview2.h>
+#include <wasi/wasip2.h>
 
 typedef struct {
 	int dummy;

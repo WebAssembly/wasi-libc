@@ -47,7 +47,7 @@ $(LIBC_TEST): | $(DOWNDIR)
 # TODO install target to place into...
 $(LIBRT): | $(DOWNDIR)
 	wget --no-clobber --directory-prefix=$(DOWNDIR) $(LIBRT_URL)
-	tar --extract --file=$(DOWNDIR)/$(shell basename $(LIBRT_URL)) --directory=$(DOWNDIR)/	
+	tar --extract --file=$(DOWNDIR)/$(shell basename $(LIBRT_URL)) --directory=$(DOWNDIR)/
 
 $(WASMTIME): | $(DOWNDIR)
 	wget --no-clobber --directory-prefix=$(DOWNDIR) $(WASMTIME_URL)
@@ -137,7 +137,7 @@ LDFLAGS ?=
 CFLAGS ?= --target=$(TARGET_TRIPLE) --sysroot=../sysroot
 # Always include the `libc-test` infrastructure headers.
 CFLAGS += -I$(LIBC_TEST)/src/common
-ifeq ($(TARGET_TRIPLE), wasm32-wasi-threads)
+ifneq ($(findstring -threads,$(TARGET_TRIPLE)),)
 CFLAGS += -pthread
 endif
 
@@ -159,7 +159,7 @@ endif
 
 $(WASM_OBJS): $(LIBC_TEST)/src/common/test.h | $(OBJDIRS)
 $(OBJDIR)/%.wasm.o: $(LIBC_TEST)/src/%.c
-	$(CC) $(CFLAGS) -c -o $@ $< 
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(OBJDIRS):
 	mkdir -p $@

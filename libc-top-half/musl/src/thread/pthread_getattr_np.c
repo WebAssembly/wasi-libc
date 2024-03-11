@@ -1,7 +1,9 @@
 #define _GNU_SOURCE
 #include "pthread_impl.h"
 #include "libc.h"
+#ifdef __wasilibc_unmodified_upstream
 #include <sys/mman.h>
+#endif
 
 int pthread_getattr_np(pthread_t t, pthread_attr_t *a)
 {
@@ -12,6 +14,7 @@ int pthread_getattr_np(pthread_t t, pthread_attr_t *a)
 		a->_a_stackaddr = (uintptr_t)t->stack;
 		a->_a_stacksize = t->stack_size;
 	} else {
+#ifdef __wasilibc_unmodified_upstream
 		char *p = (void *)libc.auxv;
 		size_t l = PAGE_SIZE;
 		p += -(uintptr_t)p & PAGE_SIZE-1;
@@ -19,6 +22,9 @@ int pthread_getattr_np(pthread_t t, pthread_attr_t *a)
 		while (mremap(p-l-PAGE_SIZE, PAGE_SIZE, 2*PAGE_SIZE, 0)==MAP_FAILED && errno==ENOMEM)
 			l += PAGE_SIZE;
 		a->_a_stacksize = l;
+#else
+		return ENOSYS;
+#endif
 	}
 	return 0;
 }

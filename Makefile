@@ -86,7 +86,10 @@ LIBC_BOTTOM_HALF_OMIT_SOURCES := \
 	$(LIBC_BOTTOM_HALF_SOURCES)/socket.c \
 	$(LIBC_BOTTOM_HALF_SOURCES)/send.c \
 	$(LIBC_BOTTOM_HALF_SOURCES)/recv.c \
-	$(LIBC_BOTTOM_HALF_SOURCES)/sockets_utils.c
+	$(LIBC_BOTTOM_HALF_SOURCES)/sockets_utils.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/bind.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/listen.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/accept-wasip2.c
 LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_OMIT_SOURCES),$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 # Omit p2-specific headers from include-all.c test.
 INCLUDE_ALL_CLAUSES := -not -name wasip2.h -not -name descriptor_table.h
@@ -96,7 +99,8 @@ ifeq ($(WASI_SNAPSHOT), p2)
 # Omit source files not relevant to WASIp2.
 LIBC_BOTTOM_HALF_OMIT_SOURCES := \
 	$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/libc/sys/socket/send.c \
-	$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/libc/sys/socket/recv.c
+	$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/libc/sys/socket/recv.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/accept-wasip1.c
 LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_OMIT_SOURCES),$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 endif
 

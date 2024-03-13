@@ -410,8 +410,6 @@ int shutdown (int, int);
 
 #if (defined __wasilibc_unmodified_upstream) || (defined __wasilibc_use_wasip2)
 int connect (int, const struct sockaddr *, socklen_t);
-#endif
-#ifdef __wasilibc_unmodified_upstream /* WASI has no bind/listen */
 int bind (int, const struct sockaddr *, socklen_t);
 int listen (int, int);
 #endif

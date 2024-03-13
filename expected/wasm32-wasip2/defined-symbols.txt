@@ -300,6 +300,18 @@ __wasi_sock_accept
 __wasi_sock_recv
 __wasi_sock_send
 __wasi_sock_shutdown
+__wasi_sockets_utils__any_addr
+__wasi_sockets_utils__borrow_network
+__wasi_sockets_utils__create_streams
+__wasi_sockets_utils__drop_streams
+__wasi_sockets_utils__map_error
+__wasi_sockets_utils__output_addr_validate
+__wasi_sockets_utils__output_addr_write
+__wasi_sockets_utils__parse_address
+__wasi_sockets_utils__posix_family
+__wasi_sockets_utils__stream
+__wasi_sockets_utils__tcp_bind
+__wasi_sockets_utils__udp_bind
 __wasilibc_access
 __wasilibc_cwd
 __wasilibc_deinitialize_environ
@@ -470,6 +482,7 @@ confstr
 conj
 conjf
 conjl
+connect
 copysign
 copysignf
 copysignl
@@ -1047,6 +1060,7 @@ realloc
 reallocarray
 realpath
 recv
+recvfrom
 regcomp
 regerror
 regexec
@@ -1088,6 +1102,7 @@ seed48
 seekdir
 select
 send
+sendto
 setbuf
 setbuffer
 setenv
@@ -1112,6 +1127,7 @@ sinhl
 sinl
 sleep
 snprintf
+socket
 sprintf
 sqrt
 sqrtf

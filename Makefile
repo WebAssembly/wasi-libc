@@ -21,6 +21,8 @@ WASI_SNAPSHOT ?= p1
 MALLOC_IMPL ?= dlmalloc
 # yes or no
 BUILD_LIBC_TOP_HALF ?= yes
+# yes or no
+BUILD_LIBSETJMP ?= yes
 # The directory where we will store intermediate artifacts.
 OBJDIR ?= build/$(TARGET_TRIPLE)
 # The directory where we store files and tools for generating WASIp2 bindings
@@ -737,13 +739,16 @@ LIBC_SO = \
 	$(SYSROOT_LIB)/libwasi-emulated-process-clocks.so \
 	$(SYSROOT_LIB)/libwasi-emulated-getpid.so \
 	$(SYSROOT_LIB)/libwasi-emulated-signal.so \
-	$(SYSROOT_LIB)/libdl.so \
+	$(SYSROOT_LIB)/libdl.so
+ifeq ($(BUILD_LIBSETJMP),yes)
+LIBC_SO += \
 	$(SYSROOT_LIB)/libsetjmp.so
+endif
 endif
 
 libc_so: include_dirs $(LIBC_SO)
 
-libc: include_dirs \
+STATIC_LIBS = \
     $(SYSROOT_LIB)/libc.a \
     $(SYSROOT_LIB)/libc-printscan-long-double.a \
     $(SYSROOT_LIB)/libc-printscan-no-floating-point.a \
@@ -751,8 +756,13 @@ libc: include_dirs \
     $(SYSROOT_LIB)/libwasi-emulated-process-clocks.a \
     $(SYSROOT_LIB)/libwasi-emulated-getpid.a \
     $(SYSROOT_LIB)/libwasi-emulated-signal.a \
-    $(SYSROOT_LIB)/libdl.a \
-    $(SYSROOT_LIB)/libsetjmp.a
+    $(SYSROOT_LIB)/libdl.a
+ifeq ($(BUILD_LIBSETJMP),yes)
+STATIC_LIBS += \
+	$(SYSROOT_LIB)/libsetjmp.a
+endif
+
+libc: include_dirs $(STATIC_LIBS)
 
 finish: startup_files libc
 	#

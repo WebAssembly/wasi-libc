@@ -85,8 +85,9 @@ jobs:
     - name: Build libc
       shell: bash
       run: |
-        make -j4
-        WASI_SNAPSHOT=preview2 make -j4
+        make -j4 TARGET_TRIPLE=wasm32-wasi
+        make -j4 TARGET_TRIPLE=wasm32-wasip1
+        make -j4 TARGET_TRIPLE=wasm32-wasip2 WASI_SNAPSHOT=p2
 
     - name: Build libc + threads
       # Only build the thread-capable wasi-libc in the latest supported Clang
@@ -94,7 +95,9 @@ jobs:
       # (e.g., `__builtin_wasm_memory_atomic_notify`).
       if: matrix.clang_version != '10.0.0'
       shell: bash
-      run: make -j4 THREAD_MODEL=posix
+      run: |
+        make -j4 THREAD_MODEL=posix TARGET_TRIPLE=wasm32-wasi-threads
+        make -j4 THREAD_MODEL=posix TARGET_TRIPLE=wasm32-wasip1-threads
 
     - name: Test
       shell: bash
@@ -105,13 +108,21 @@ jobs:
         cd test
         make download
         export WASI_DIR=$(realpath $($CLANG_DIR/clang -print-resource-dir)/lib/wasi/)
-        mkdir -p $WASI_DIR
+        export WASIP1_DIR=$(realpath $($CLANG_DIR/clang -print-resource-dir)/lib/wasip1/)
+        export WASIP2_DIR=$(realpath $($CLANG_DIR/clang -print-resource-dir)/lib/wasip2/)
+        mkdir -p $WASI_DIR $WASIP1_DIR $WASIP2_DIR
         cp download/lib/wasi/libclang_rt.builtins-wasm32.a $WASI_DIR
+        cp download/lib/wasi/libclang_rt.builtins-wasm32.a $WASIP1_DIR
+        cp download/lib/wasi/libclang_rt.builtins-wasm32.a $WASIP2_DIR
         TARGET_TRIPLE=wasm32-wasi make test
         rm -r build
-        TARGET_TRIPLE=wasm32-wasi-preview2 make test
+        TARGET_TRIPLE=wasm32-wasip1 make test
+        rm -r build
+        TARGET_TRIPLE=wasm32-wasip2 make test
         rm -r build
         TARGET_TRIPLE=wasm32-wasi-threads make test
+        rm -r build
+        TARGET_TRIPLE=wasm32-wasip1-threads make test
       # The older version of Clang does not provide the expected symbol for the
       # test entrypoints: `undefined symbol: __main_argc_argv`.
       # The older (<15.0.7) version of wasm-ld does not provide `__heap_end`,

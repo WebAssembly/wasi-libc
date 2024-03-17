@@ -15,8 +15,8 @@ SYSROOT ?= $(CURDIR)/sysroot
 INSTALL_DIR ?= /usr/local
 # single or posix; note that pthread support is still a work-in-progress.
 THREAD_MODEL ?= single
-# preview1 or preview2; the latter is not (yet) compatible with multithreading
-WASI_SNAPSHOT ?= preview1
+# p1 or p2; the latter is not (yet) compatible with multithreading
+WASI_SNAPSHOT ?= p1
 # dlmalloc or none
 MALLOC_IMPL ?= dlmalloc
 # yes or no
@@ -25,17 +25,13 @@ BUILD_LIBC_TOP_HALF ?= yes
 OBJDIR ?= build/$(TARGET_TRIPLE)
 # 64 bit wasm?
 WASM64 ?= no
-# The directory where we store files and tools for generating WASI Preview 2 bindings
+# The directory where we store files and tools for generating WASIp2 bindings
 BINDING_WORK_DIR ?= build/bindings
-# URL from which to retrieve the WIT files used to generate the WASI Preview 2 bindings
-WASI_CLI_URL ?= https://github.com/WebAssembly/wasi-cli/archive/refs/tags/v0.2.0-rc-2023-12-05.tar.gz
-# URL from which to retrieve the `wit-bindgen` command used to generate the WASI
-# Preview 2 bindings.
-#
-# TODO: Switch to bytecodealliance/wit-bindgen 0.17.0 once it's released (which
-# will include https://github.com/bytecodealliance/wit-bindgen/pull/804 and
-# https://github.com/bytecodealliance/wit-bindgen/pull/805, which we rely on)
-WIT_BINDGEN_URL ?= https://github.com/dicej/wit-bindgen/releases/download/wit-bindgen-cli-0.17.0-dicej-pre0/wit-bindgen-v0.17.0-dicej-pre0-x86_64-linux.tar.gz
+# URL from which to retrieve the WIT files used to generate the WASIp2 bindings
+WASI_CLI_URL ?= https://github.com/WebAssembly/wasi-cli/archive/refs/tags/v0.2.0.tar.gz
+# URL from which to retrieve the `wit-bindgen` command used to generate the
+# WASIp2 bindings.
+WIT_BINDGEN_URL ?= https://github.com/bytecodealliance/wit-bindgen/releases/download/wit-bindgen-cli-0.17.0/wit-bindgen-v0.17.0-x86_64-linux.tar.gz
 
 # When the length is no larger than this threshold, we consider the
 # overhead of bulk memory opcodes to outweigh the performance benefit,
@@ -64,11 +60,11 @@ ifeq ($(THREAD_MODEL), posix)
     endif
 endif
 
-ifeq ($(WASI_SNAPSHOT), preview2)
+ifeq ($(WASI_SNAPSHOT), p2)
     ifeq (${WASM64}, yes)
-        TARGET_TRIPLE = wasm64-wasi-preview2
+        TARGET_TRIPLE = wasm64-wasip2
     else
-        TARGET_TRIPLE = wasm32-wasi-preview2
+        TARGET_TRIPLE = wasm32-wasip2
     endif
 endif
 
@@ -93,14 +89,33 @@ LIBC_BOTTOM_HALF_ALL_SOURCES = \
     $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
     $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c))
 
-ifeq ($(WASI_SNAPSHOT), preview1)
-# Omit source files not relevant to WASI Preview 1.  As we introduce files
-# supporting `wasi-sockets` for `wasm32-wasi-preview2`, we'll add those files to
+ifeq ($(WASI_SNAPSHOT), p1)
+# Omit source files not relevant to WASIp1.  As we introduce files
+# supporting `wasi-sockets` for `wasm32-wasip2`, we'll add those files to
 # this list.
-LIBC_BOTTOM_HALF_OMIT_SOURCES := $(LIBC_BOTTOM_HALF_SOURCES)/preview2.c
+LIBC_BOTTOM_HALF_OMIT_SOURCES := \
+	$(LIBC_BOTTOM_HALF_SOURCES)/wasip2.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/descriptor_table.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/connect.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/socket.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/send.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/recv.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/sockets_utils.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/bind.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/listen.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/accept-wasip2.c
 LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_OMIT_SOURCES),$(LIBC_BOTTOM_HALF_ALL_SOURCES))
-# Omit preview2.h from include-all.c test.
-INCLUDE_ALL_CLAUSES := -not -name preview2.h
+# Omit p2-specific headers from include-all.c test.
+INCLUDE_ALL_CLAUSES := -not -name wasip2.h -not -name descriptor_table.h
+endif
+
+ifeq ($(WASI_SNAPSHOT), p2)
+# Omit source files not relevant to WASIp2.
+LIBC_BOTTOM_HALF_OMIT_SOURCES := \
+	$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/libc/sys/socket/send.c \
+	$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/libc/sys/socket/recv.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/accept-wasip1.c
+LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_OMIT_SOURCES),$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 endif
 
 # FIXME(https://reviews.llvm.org/D85567) - due to a bug in LLD the weak
@@ -141,6 +156,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         misc/getopt.c \
         misc/getopt_long.c \
         misc/getsubopt.c \
+        misc/realpath.c \
         misc/uname.c \
         misc/nftw.c \
         errno/strerror.c \
@@ -275,6 +291,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_create.c \
         thread/pthread_detach.c \
         thread/pthread_equal.c \
+        thread/pthread_getattr_np.c \
         thread/pthread_getspecific.c \
         thread/pthread_join.c \
         thread/pthread_key_create.c \
@@ -400,6 +417,9 @@ DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 EMMALLOC_OBJS = $(call objs,$(EMMALLOC_SOURCES))
 LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 LIBC_TOP_HALF_ALL_OBJS = $(call asmobjs,$(call objs,$(LIBC_TOP_HALF_ALL_SOURCES)))
+ifeq ($(WASI_SNAPSHOT), p2)
+LIBC_OBJS += $(OBJDIR)/wasip2_component_type.o
+endif
 ifeq ($(MALLOC_IMPL),dlmalloc)
 LIBC_OBJS += $(DLMALLOC_OBJS)
 else ifeq ($(MALLOC_IMPL),emmalloc)
@@ -621,6 +641,10 @@ $(OBJDIR)/%.long-double.pic.o: %.c include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
+$(OBJDIR)/wasip2_component_type.pic.o $(OBJDIR)/wasip2_component_type.o: $(LIBC_BOTTOM_HALF_SOURCES)/wasip2_component_type.o
+	@mkdir -p "$(@D)"
+	cp $< $@
+
 $(OBJDIR)/%.pic.o: %.c include_dirs
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
@@ -697,6 +721,10 @@ include_dirs:
 
 	# Remove selected header files.
 	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
+ifeq ($(WASI_SNAPSHOT), p2)
+	printf '#ifndef __wasilibc_use_wasip2\n#define __wasilibc_use_wasip2\n#endif\n' \
+		> "$(SYSROOT_INC)/__wasi_snapshot.h"
+endif
 
 startup_files: include_dirs $(LIBC_BOTTOM_HALF_CRT_OBJS)
 	#
@@ -751,6 +779,17 @@ endif
 
 DEFINED_SYMBOLS = $(SYSROOT_SHARE)/defined-symbols.txt
 UNDEFINED_SYMBOLS = $(SYSROOT_SHARE)/undefined-symbols.txt
+
+ifeq ($(WASI_SNAPSHOT),p2)
+EXPECTED_TARGET_DIR = expected/wasm32-wasip2
+else
+ifeq ($(THREAD_MODEL),posix)
+EXPECTED_TARGET_DIR = expected/wasm32-wasip1-threads
+else
+EXPECTED_TARGET_DIR = expected/wasm32-wasip1
+endif
+endif
+
 
 check-symbols: startup_files libc
 	#
@@ -847,7 +886,7 @@ check-symbols: startup_files libc
 
 	# Check that the computed metadata matches the expected metadata.
 	# This ignores whitespace because on Windows the output has CRLF line endings.
-	diff -wur "expected/$(TARGET_TRIPLE)" "$(SYSROOT_SHARE)"
+	diff -wur "$(EXPECTED_TARGET_DIR)" "$(SYSROOT_SHARE)"
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"
@@ -870,43 +909,44 @@ $(BINDING_WORK_DIR)/wit-bindgen:
 bindings: $(BINDING_WORK_DIR)/wasi-cli $(BINDING_WORK_DIR)/wit-bindgen
 	cd "$(BINDING_WORK_DIR)" && \
 		./wit-bindgen/wit-bindgen c \
-			--rename-world preview2 \
+			--autodrop-borrows yes \
+			--rename-world wasip2 \
 			--type-section-suffix __wasi_libc \
-			--world wasi:cli/imports@0.2.0-rc-2023-12-05 \
-			--rename wasi:clocks/monotonic-clock@0.2.0-rc-2023-11-10=monotonic_clock \
-			--rename wasi:clocks/wall-clock@0.2.0-rc-2023-11-10=wall_clock \
-			--rename wasi:filesystem/preopens@0.2.0-rc-2023-11-10=filesystem_preopens \
-			--rename wasi:filesystem/types@0.2.0-rc-2023-11-10=filesystem \
-			--rename wasi:io/error@0.2.0-rc-2023-11-10=io_error \
-			--rename wasi:io/poll@0.2.0-rc-2023-11-10=poll \
-			--rename wasi:io/streams@0.2.0-rc-2023-11-10=streams \
-			--rename wasi:random/insecure-seed@0.2.0-rc-2023-11-10=random_insecure_seed \
-			--rename wasi:random/insecure@0.2.0-rc-2023-11-10=random_insecure \
-			--rename wasi:random/random@0.2.0-rc-2023-11-10=random \
-			--rename wasi:sockets/instance-network@0.2.0-rc-2023-11-10=instance_network \
-			--rename wasi:sockets/ip-name-lookup@0.2.0-rc-2023-11-10=ip_name_lookup \
-			--rename wasi:sockets/network@0.2.0-rc-2023-11-10=network \
-			--rename wasi:sockets/tcp-create-socket@0.2.0-rc-2023-11-10=tcp_create_socket \
-			--rename wasi:sockets/tcp@0.2.0-rc-2023-11-10=tcp \
-			--rename wasi:sockets/udp-create-socket@0.2.0-rc-2023-11-10=udp_create_socket \
-			--rename wasi:sockets/udp@0.2.0-rc-2023-11-10=udp \
-			--rename wasi:cli/environment@0.2.0-rc-2023-12-05=environment \
-			--rename wasi:cli/exit@0.2.0-rc-2023-12-05=exit \
-			--rename wasi:cli/stdin@0.2.0-rc-2023-12-05=stdin \
-			--rename wasi:cli/stdout@0.2.0-rc-2023-12-05=stdout \
-			--rename wasi:cli/stderr@0.2.0-rc-2023-12-05=stderr \
-			--rename wasi:cli/terminal-input@0.2.0-rc-2023-12-05=terminal_input \
-			--rename wasi:cli/terminal-output@0.2.0-rc-2023-12-05=terminal_output \
-			--rename wasi:cli/terminal-stdin@0.2.0-rc-2023-12-05=terminal_stdin \
-			--rename wasi:cli/terminal-stdout@0.2.0-rc-2023-12-05=terminal_stdout \
-			--rename wasi:cli/terminal-stderr@0.2.0-rc-2023-12-05=terminal_stderr \
+			--world wasi:cli/imports@0.2.0 \
+			--rename wasi:clocks/monotonic-clock@0.2.0=monotonic_clock \
+			--rename wasi:clocks/wall-clock@0.2.0=wall_clock \
+			--rename wasi:filesystem/preopens@0.2.0=filesystem_preopens \
+			--rename wasi:filesystem/types@0.2.0=filesystem \
+			--rename wasi:io/error@0.2.0=io_error \
+			--rename wasi:io/poll@0.2.0=poll \
+			--rename wasi:io/streams@0.2.0=streams \
+			--rename wasi:random/insecure-seed@0.2.0=random_insecure_seed \
+			--rename wasi:random/insecure@0.2.0=random_insecure \
+			--rename wasi:random/random@0.2.0=random \
+			--rename wasi:sockets/instance-network@0.2.0=instance_network \
+			--rename wasi:sockets/ip-name-lookup@0.2.0=ip_name_lookup \
+			--rename wasi:sockets/network@0.2.0=network \
+			--rename wasi:sockets/tcp-create-socket@0.2.0=tcp_create_socket \
+			--rename wasi:sockets/tcp@0.2.0=tcp \
+			--rename wasi:sockets/udp-create-socket@0.2.0=udp_create_socket \
+			--rename wasi:sockets/udp@0.2.0=udp \
+			--rename wasi:cli/environment@0.2.0=environment \
+			--rename wasi:cli/exit@0.2.0=exit \
+			--rename wasi:cli/stdin@0.2.0=stdin \
+			--rename wasi:cli/stdout@0.2.0=stdout \
+			--rename wasi:cli/stderr@0.2.0=stderr \
+			--rename wasi:cli/terminal-input@0.2.0=terminal_input \
+			--rename wasi:cli/terminal-output@0.2.0=terminal_output \
+			--rename wasi:cli/terminal-stdin@0.2.0=terminal_stdin \
+			--rename wasi:cli/terminal-stdout@0.2.0=terminal_stdout \
+			--rename wasi:cli/terminal-stderr@0.2.0=terminal_stderr \
 			./wasi-cli/wit && \
-		mv preview2.h ../../libc-bottom-half/headers/public/wasi/ && \
-		mv preview2_component_type.o ../../libc-bottom-half/sources && \
-		sed 's_#include "preview2.h"_#include "wasi/preview2.h"_' \
-			< preview2.c \
-			> ../../libc-bottom-half/sources/preview2.c && \
-		rm preview2.c
+		mv wasip2.h ../../libc-bottom-half/headers/public/wasi/ && \
+		mv wasip2_component_type.o ../../libc-bottom-half/sources && \
+		sed 's_#include "wasip2\.h"_#include "wasi/wasip2.h"_' \
+			< wasip2.c \
+			> ../../libc-bottom-half/sources/wasip2.c && \
+		rm wasip2.c
 
 
 clean:

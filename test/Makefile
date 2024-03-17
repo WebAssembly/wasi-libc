@@ -32,7 +32,7 @@ ADAPTER_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v1
 ADAPTER = $(DOWNDIR)/wasi_snapshot_preview1.command.wasm
 
 TO_DOWNLOAD = $(LIBC_TEST) $(LIBRT) $(WASMTIME)
-ifeq ($(TARGET_TRIPLE), wasm32-wasi-preview2)
+ifeq ($(TARGET_TRIPLE), wasm32-wasip2)
 TO_DOWNLOAD += $(ADAPTER) $(WASM_TOOLS)
 endif
 
@@ -47,7 +47,7 @@ $(LIBC_TEST): | $(DOWNDIR)
 # TODO install target to place into...
 $(LIBRT): | $(DOWNDIR)
 	wget --no-clobber --directory-prefix=$(DOWNDIR) $(LIBRT_URL)
-	tar --extract --file=$(DOWNDIR)/$(shell basename $(LIBRT_URL)) --directory=$(DOWNDIR)/	
+	tar --extract --file=$(DOWNDIR)/$(shell basename $(LIBRT_URL)) --directory=$(DOWNDIR)/
 
 $(WASMTIME): | $(DOWNDIR)
 	wget --no-clobber --directory-prefix=$(DOWNDIR) $(WASMTIME_URL)
@@ -121,7 +121,7 @@ COMMON_TEST_INFRA = \
 # $(WASM_OBJS) are compiled in the $(OBJDIRS) and then linked together to form
 # the $(WASMS) tests.
 NAMES := $(TESTS:$(LIBC_TEST)/src/%.c=%)
-WASMS := $(TESTS:$(LIBC_TEST)/src/%.c=$(OBJDIR)/%.wasm)
+WASMS := $(TESTS:$(LIBC_TEST)/src/%.c=$(OBJDIR)/%.core.wasm)
 WASM_OBJS := $(TESTS:$(LIBC_TEST)/src/%.c=$(OBJDIR)/%.wasm.o)
 INFRA_WASM_OBJS := $(COMMON_TEST_INFRA:$(LIBC_TEST)/src/%.c=$(OBJDIR)/%.wasm.o)
 WASM_OBJS += $(INFRA_WASM_OBJS)
@@ -137,7 +137,7 @@ LDFLAGS ?=
 CFLAGS ?= --target=$(TARGET_TRIPLE) --sysroot=../sysroot
 # Always include the `libc-test` infrastructure headers.
 CFLAGS += -I$(LIBC_TEST)/src/common
-ifeq ($(TARGET_TRIPLE), wasm32-wasi-threads)
+ifneq ($(findstring -threads,$(TARGET_TRIPLE)),)
 CFLAGS += -pthread
 endif
 
@@ -149,15 +149,17 @@ endif
 build: download $(WASMS)
 
 $(WASMS): | $(OBJDIRS)
-$(OBJDIR)/%.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS)
+$(OBJDIR)/%.core.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
-ifeq ($(TARGET_TRIPLE), wasm32-wasi-preview2)
-	$(WASM_TOOLS) component new --adapt $(ADAPTER) $@ -o $@
+
+ifeq ($(TARGET_TRIPLE), wasm32-wasip2)
+$(OBJDIR)/%.wasm: $(OBJDIR)/%.core.wasm
+	$(WASM_TOOLS) component new --adapt $(ADAPTER) $< -o $@
 endif
 
 $(WASM_OBJS): $(LIBC_TEST)/src/common/test.h | $(OBJDIRS)
 $(OBJDIR)/%.wasm.o: $(LIBC_TEST)/src/%.c
-	$(CC) $(CFLAGS) -c -o $@ $< 
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(OBJDIRS):
 	mkdir -p $@
@@ -168,10 +170,7 @@ clean::
 ##### RUN ######################################################################
 
 ENGINE ?= $(WASMTIME) run
-ifeq ($(TARGET_TRIPLE), wasm32-wasi-preview2)
-ENGINE += --wasm component-model
-endif
-ERRS:=$(WASMS:%.wasm=%.wasm.err)
+ERRS:=$(WASMS:%.core.wasm=%.wasm.err)
 
 # Use the provided Wasm engine to execute each test, emitting its output into
 # a `.err` file.
@@ -180,8 +179,13 @@ run: build $(ERRS)
 
 $(ERRS): | $(OBJDIRS)
 
+ifeq ($(TARGET_TRIPLE), wasm32-wasip2)
 %.wasm.err: %.wasm
+	$(ENGINE) --wasm component-model $< >$@
+else
+%.wasm.err: %.core.wasm
 	$(ENGINE) $< >$@
+endif
 
 clean::
 	rm -rf $(OBJDIR)/*/*.err

@@ -46,8 +46,6 @@ BULK_MEMORY_THRESHOLD ?= 32
 # Threaded version necessitates a different target, as objects from different
 # targets can't be mixed together while linking.
 
-
-
 ifeq ($(THREAD_MODEL), posix)
 THREADS_SUFFIX=-threads
 else
@@ -61,7 +59,20 @@ WASM_SUFFIX=32
 endif
 
 TARGET_TRIPLE = wasm${WASM_SUFFIX}-wasi$(WASI_SNAPSHOT)${THREADS_SUFFIX}
-EXPECTED_TARGET_DIR = expected/${TARGET_TRIPLE}
+
+ifeq ($(TARGET_TRIPLE), wasm32-wasi)
+EXPECTED_TARGET_TRIPLE = wasm32-wasip1
+else ifeq ($(TARGET_TRIPLE), wasm32-wasi-threads)
+EXPECTED_TARGET_TRIPLE = wasm32-wasip1-threads
+else ifeq ($(TARGET_TRIPLE), wasm64-wasi)
+EXPECTED_TARGET_TRIPLE = wasm64-wasip1
+else ifeq ($(TARGET_TRIPLE), wasm64-wasi-threads)
+EXPECTED_TARGET_TRIPLE = wasm64-wasip1-threads
+else
+EXPECTED_TARGET_TRIPLE = ${TARGET_TRIPLE}
+endif
+
+EXPECTED_TARGET_DIR = expected/${EXPECTED_TARGET_TRIPLE}
 
 BUILTINS_LIB ?= $(shell ${CC} --print-libgcc-file-name)
 

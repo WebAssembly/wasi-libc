@@ -43,30 +43,25 @@ BULK_MEMORY_THRESHOLD ?= 32
 # Variables from this point on are not meant to be overridable via the
 # make command-line.
 
-# Set the default WASI target triple.
-ifeq (${WASM64}, yes)
-TARGET_TRIPLE = wasm64-wasi
-else
-TARGET_TRIPLE = wasm32-wasi
-endif
-
 # Threaded version necessitates a different target, as objects from different
 # targets can't be mixed together while linking.
+
+
+
 ifeq ($(THREAD_MODEL), posix)
-    ifeq (${WASM64}, yes)
-        TARGET_TRIPLE = wasm64-wasi-threads
-    else
-        TARGET_TRIPLE = wasm32-wasi-threads
-    endif
+THREADS_SUFFIX=-threads
+else
+THREADS_SUFFIX=
 endif
 
-ifeq ($(WASI_SNAPSHOT), p2)
-    ifeq (${WASM64}, yes)
-        TARGET_TRIPLE = wasm64-wasip2
-    else
-        TARGET_TRIPLE = wasm32-wasip2
-    endif
+ifeq ($(WASM64), yes)
+WASM_SUFFIX=64
+else
+WASM_SUFFIX=32
 endif
+
+TARGET_TRIPLE = wasm${WASM_SUFFIX}-wasi$(WASI_SNAPSHOT)${THREADS_SUFFIX}
+EXPECTED_TARGET_DIR = expected/${TARGET_TRIPLE}
 
 BUILTINS_LIB ?= $(shell ${CC} --print-libgcc-file-name)
 
@@ -779,17 +774,6 @@ endif
 
 DEFINED_SYMBOLS = $(SYSROOT_SHARE)/defined-symbols.txt
 UNDEFINED_SYMBOLS = $(SYSROOT_SHARE)/undefined-symbols.txt
-
-ifeq ($(WASI_SNAPSHOT),p2)
-EXPECTED_TARGET_DIR = expected/wasm32-wasip2
-else
-ifeq ($(THREAD_MODEL),posix)
-EXPECTED_TARGET_DIR = expected/wasm32-wasip1-threads
-else
-EXPECTED_TARGET_DIR = expected/wasm32-wasip1
-endif
-endif
-
 
 check-symbols: startup_files libc
 	#

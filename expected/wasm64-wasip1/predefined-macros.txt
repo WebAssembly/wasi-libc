@@ -181,6 +181,7 @@
 #define DT_FIFO __WASI_FILETYPE_SOCKET_STREAM
 #define DT_LNK __WASI_FILETYPE_SYMBOLIC_LINK
 #define DT_REG __WASI_FILETYPE_REGULAR_FILE
+#define DT_SOCK 20
 #define DT_UNKNOWN __WASI_FILETYPE_UNKNOWN
 #define D_FMT 0x20029
 #define D_T_FMT 0x20028
@@ -609,7 +610,7 @@
 #define INT32_C(c) c
 #define INT32_MAX (0x7fffffff)
 #define INT32_MIN (-1-0x7fffffff)
-#define INT64_C(c) c ## LL
+#define INT64_C(c) c ## L
 #define INT64_MAX (0x7fffffffffffffff)
 #define INT64_MIN (-1-0x7fffffffffffffff)
 #define INT8SZ NS_INT8SZ
@@ -617,11 +618,11 @@
 #define INT8_MAX (0x7f)
 #define INT8_MIN (-1-0x7f)
 #define INTBITS (sizeof(int) * 8)
-#define INTMAX_C(c) c ## LL
+#define INTMAX_C(c) c ## L
 #define INTMAX_MAX INT64_MAX
 #define INTMAX_MIN INT64_MIN
-#define INTPTR_MAX INT32_MAX
-#define INTPTR_MIN INT32_MIN
+#define INTPTR_MAX INT64_MAX
+#define INTPTR_MIN INT64_MIN
 #define INT_FAST16_MAX INT16_MAX
 #define INT_FAST16_MIN INT16_MIN
 #define INT_FAST32_MAX INT32_MAX
@@ -1419,8 +1420,8 @@
 #define PRIxMAX __UINTMAX_FMTx__
 #define PRIxPTR __UINTPTR_FMTx__
 #define PTRBITS (sizeof(char *) * 8)
-#define PTRDIFF_MAX INT32_MAX
-#define PTRDIFF_MIN INT32_MIN
+#define PTRDIFF_MAX INT64_MAX
+#define PTRDIFF_MIN INT64_MIN
 #define PUTLONG NS_PUT32
 #define PUTSHORT NS_PUT16
 #define QFIXEDSZ NS_QFIXEDSZ
@@ -1567,7 +1568,7 @@
 #define SHUT_WR __WASI_SDFLAGS_WR
 #define SIG_ATOMIC_MAX INT32_MAX
 #define SIG_ATOMIC_MIN INT32_MIN
-#define SIZE_MAX UINT32_MAX
+#define SIZE_MAX UINT64_MAX
 #define SI_LOAD_SHIFT 16
 #define SLC_ABORT 7
 #define SLC_ACK 0x80
@@ -1637,6 +1638,18 @@
 #define STRU_F 1
 #define STRU_P 3
 #define STRU_R 2
+#define ST_APPEND 256
+#define ST_IMMUTABLE 512
+#define ST_MANDLOCK 64
+#define ST_NOATIME 1024
+#define ST_NODEV 4
+#define ST_NODIRATIME 2048
+#define ST_NOEXEC 8
+#define ST_NOSUID 2
+#define ST_RDONLY 1
+#define ST_RELATIME 4096
+#define ST_SYNCHRONOUS 16
+#define ST_WRITE 128
 #define SUN_LEN(s) (2+strlen((s)->sun_path))
 #define SUSP 237
 #define SYMLOOP_MAX 40
@@ -1651,7 +1664,7 @@
 #define S_IFBLK (0x6000)
 #define S_IFCHR (0x2000)
 #define S_IFDIR (0x4000)
-#define S_IFIFO (0xc000)
+#define S_IFIFO (0x1000)
 #define S_IFLNK (0xa000)
 #define S_IFMT (S_IFBLK | S_IFCHR | S_IFDIR | S_IFIFO | S_IFLNK | S_IFREG | S_IFSOCK)
 #define S_IFREG (0x8000)
@@ -1925,13 +1938,13 @@
 #define UINT16_MAX (0xffff)
 #define UINT32_C(c) c ## U
 #define UINT32_MAX (0xffffffffu)
-#define UINT64_C(c) c ## ULL
+#define UINT64_C(c) c ## UL
 #define UINT64_MAX (0xffffffffffffffffu)
 #define UINT8_C(c) c
 #define UINT8_MAX (0xff)
-#define UINTMAX_C(c) c ## ULL
+#define UINTMAX_C(c) c ## UL
 #define UINTMAX_MAX UINT64_MAX
-#define UINTPTR_MAX UINT32_MAX
+#define UINTPTR_MAX UINT64_MAX
 #define UINT_FAST16_MAX UINT16_MAX
 #define UINT_FAST32_MAX UINT32_MAX
 #define UINT_FAST64_MAX UINT64_MAX
@@ -2323,6 +2336,7 @@
 #define _SYS_REG_H 
 #define _SYS_SELECT_H 
 #define _SYS_SOCKET_H 
+#define _SYS_STATVFS_H 
 #define _SYS_STAT_H 
 #define _SYS_SYSCALL_H 
 #define _SYS_SYSINFO_H 
@@ -3147,6 +3161,7 @@
 #define fsfilcnt64_t fsfilcnt_t
 #define fstat64 fstat
 #define fstatat64 fstatat
+#define fstatvfs64 fstatvfs
 #define ftello64 ftello
 #define ftruncate64 ftruncate
 #define getdents64 getdents
@@ -3330,6 +3345,7 @@
 #define st_mtime st_mtim.tv_sec
 #define stat64 stat
 #define static_assert _Static_assert
+#define statvfs64 statvfs
 #define stderr (stderr)
 #define stdin (stdin)
 #define stdout (stdout)

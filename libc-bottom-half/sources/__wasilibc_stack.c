@@ -97,5 +97,8 @@ int __wasilibc_setjmp(__wasi_stack_snapshot_t * buf) {
 }
 
 _Noreturn void __wasilibc_longjmp(__wasi_stack_snapshot_t * buf, int val) {
+  if (val == 0) {
+    val = 1;
+  }
   __wasi_stack_restore(buf, (uint64_t)val);
 }

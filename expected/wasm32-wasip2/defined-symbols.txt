@@ -1012,6 +1012,7 @@ poll_method_pollable_ready
 poll_poll
 poll_pollable_drop_borrow
 poll_pollable_drop_own
+poll_wasip2
 posix_close
 posix_fadvise
 posix_fallocate

@@ -91,7 +91,8 @@ LIBC_BOTTOM_HALF_OMIT_SOURCES := \
 	$(LIBC_BOTTOM_HALF_SOURCES)/listen.c \
 	$(LIBC_BOTTOM_HALF_SOURCES)/accept-wasip2.c \
 	$(LIBC_BOTTOM_HALF_SOURCES)/shutdown.c \
-	$(LIBC_BOTTOM_HALF_SOURCES)/sockopt.c
+	$(LIBC_BOTTOM_HALF_SOURCES)/sockopt.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/poll-wasip2.c
 LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_OMIT_SOURCES),$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 # Omit p2-specific headers from include-all.c test.
 INCLUDE_ALL_CLAUSES := -not -name wasip2.h -not -name descriptor_table.h

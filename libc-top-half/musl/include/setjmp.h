@@ -7,7 +7,12 @@ extern "C" {
 
 #include <features.h>
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no setjmp */
+#ifndef __wasilibc_unmodified_upstream
+/* WASI has no setjmp */
+#if !defined(__wasm_exception_handling__)
+#error Setjmp/longjmp support requires Exception handling support, which is [not yet standardized](https://github.com/WebAssembly/proposals?tab=readme-ov-file#phase-3---implementation-phase-cg--wg). To enable it, compile with `-mllvm -wasm-enable-sjlj` and use an engine that implements the Exception handling proposal.
+#endif
+#endif
 #include <bits/setjmp.h>
 
 typedef struct __jmp_buf_tag {
@@ -40,9 +45,6 @@ int setjmp (jmp_buf) __setjmp_attr;
 _Noreturn void longjmp (jmp_buf, int);
 
 #define setjmp setjmp
-#else
-#warning setjmp is not yet implemented for WASI
-#endif
 
 #undef __setjmp_attr
 

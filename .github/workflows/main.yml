@@ -82,6 +82,12 @@ jobs:
         echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
       if: matrix.os == 'ubuntu-latest'
 
+    - name: Disable libsetjmp for old LLVM
+      shell: bash
+      run: |
+        echo "BUILD_LIBSETJMP=no" >> $GITHUB_ENV
+      if: matrix.clang_version == '10.0.0'
+
     - name: Build libc
       shell: bash
       run: |

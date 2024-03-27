@@ -297,9 +297,12 @@ static int compute_free_list_bucket(size_t allocSize)
 {
   if (allocSize < 128) return (allocSize >> 3) - 1;
   int clz = __builtin_clz(allocSize);
-  int bucketIndex = (clz > 19) ? 110 - (clz<<2) + ((allocSize >> (29-clz)) ^ 4) : MIN(71 - (clz<<1) + ((allocSize >> (30-clz)) ^ 2), NUM_FREE_BUCKETS-1);
+  int bucketIndex = (clz > 19)? 110 - (clz << 2) + ((allocSize >> (29 - clz)) ^ 4):
+	  MIN(71 - (clz << 1) + ((allocSize >> (30 - clz)) ^ 2), NUM_FREE_BUCKETS - 1);
+
   assert(bucketIndex >= 0);
   assert(bucketIndex < NUM_FREE_BUCKETS);
+
   return bucketIndex;
 }
 
@@ -341,6 +344,7 @@ static size_t size_of_region_from_ceiling(Region *r)
 static bool debug_region_is_consistent(Region *r)
 {
   assert(r);
+
   size_t sizeAtBottom = r->size;
   size_t sizeAtCeiling = size_of_region_from_ceiling(r);
   return sizeAtBottom == sizeAtCeiling;
@@ -362,6 +366,7 @@ static void create_used_region(void *ptr, size_t size)
   assert(HAS_ALIGNMENT(ptr, sizeof(size_t)));
   assert(HAS_ALIGNMENT(size, sizeof(size_t)));
   assert(size >= sizeof(Region));
+
   *(size_t*)ptr = size;
   ((size_t*)ptr)[(size/sizeof(size_t))-1] = size;
 }
@@ -372,9 +377,10 @@ static void create_free_region(void *ptr, size_t size)
   assert(HAS_ALIGNMENT(ptr, sizeof(size_t)));
   assert(HAS_ALIGNMENT(size, sizeof(size_t)));
   assert(size >= sizeof(Region));
+
   Region *freeRegion = (Region*)ptr;
   freeRegion->size = size;
-  ((size_t*)ptr)[(size/sizeof(size_t))-1] = size | FREE_REGION_FLAG;
+  ((size_t*) ptr)[(size / sizeof(size_t))-1] = size | FREE_REGION_FLAG;
 }
 
 static void prepend_to_free_list(Region *region, Region *prependTo)
@@ -385,9 +391,12 @@ static void prepend_to_free_list(Region *region, Region *prependTo)
   // which represents a dummy node that is technically not a free node, so
   // region_is_free(prependTo) does not hold.
   assert(region_is_free((Region*)region));
+
   region->next = prependTo;
   region->prev = prependTo->prev;
+
   assert(region->prev);
+
   prependTo->prev = region;
   region->prev->next = region;
 }
@@ -398,6 +407,7 @@ static void unlink_from_free_list(Region *region)
   assert(region_is_free((Region*)region));
   assert(region->prev);
   assert(region->next);
+
   region->prev->next = region->next;
   region->next->prev = region->prev;
 }
@@ -406,11 +416,14 @@ static void link_to_free_list(Region *freeRegion)
 {
   assert(freeRegion);
   assert(freeRegion->size >= sizeof(Region));
+
   int bucketIndex = compute_free_list_bucket(freeRegion->size-REGION_HEADER_SIZE);
   Region *freeListHead = freeRegionBuckets + bucketIndex;
   freeRegion->prev = freeListHead;
   freeRegion->next = freeListHead->next;
+
   assert(freeRegion->next);
+
   freeListHead->next = freeRegion;
   freeRegion->next->prev = freeRegion;
   freeRegionBucketsUsed |= ((BUCKET_BITMASK_T)1) << bucketIndex;
@@ -422,34 +435,40 @@ static void dump_memory_regions()
   ASSERT_MALLOC_IS_ACQUIRED();
   RootRegion *root = listOfAllRegions;
   MAIN_THREAD_ASYNC_EM_ASM(console.log('All memory regions:'));
+  
+  Region *r;
+  uint8_t* r_ = (uint8_t*) r, *lastRegionEnd;
   while(root)
   {
-    Region *r = (Region*)root;
+    r = (Region*)root;
     assert(debug_region_is_consistent(r));
-    uint8_t *lastRegionEnd = root->endPtr;
-    MAIN_THREAD_ASYNC_EM_ASM(console.log('Region block 0x'+($0>>>0).toString(16)+' - 0x'+($1>>>0).toString(16)+ ' ('+($2>>>0)+' bytes):'),
-      r, lastRegionEnd, lastRegionEnd-(uint8_t*)r);
-    while((uint8_t*)r < lastRegionEnd)
+    lastRegionEnd = root->endPtr;
+    MAIN_THREAD_ASYNC_EM_ASM(console.log('Region block 0x' + ($0 >>> 0).toString(16) + ' - 0x' + ($1 >>> 0).toString(16)+ ' (' + ($2 >>> 0)+' bytes):'),
+      r, lastRegionEnd, lastRegionEnd - r_);
+
+    while(r_ < lastRegionEnd)
     {
-      MAIN_THREAD_ASYNC_EM_ASM(console.log('Region 0x'+($0>>>0).toString(16)+', size: '+($1>>>0)+' ('+($2?"used":"--FREE--")+')'),
+      MAIN_THREAD_ASYNC_EM_ASM(console.log('Region 0x' + ($0 >>> 0).toString(16) + ', size: ' + ($1 >>> 0) + ' (' + ($2? "used": "--FREE--") + ')'),
         r, r->size, region_ceiling_size(r) == r->size);
 
       assert(debug_region_is_consistent(r));
       size_t sizeFromCeiling = size_of_region_from_ceiling(r);
-      if (sizeFromCeiling != r->size)
-        MAIN_THREAD_ASYNC_EM_ASM(console.log('Corrupt region! Size marker at the end of the region does not match: '+($0>>>0)), sizeFromCeiling);
-      if (r->size == 0)
-        break;
+      if (sizeFromCeiling != r->size) MAIN_THREAD_ASYNC_EM_ASM(
+		  console.log('Corrupt region! Size marker at the end of the region does not match: ' +
+			  ($0 >>> 0)), sizeFromCeiling);
+      if (r->size == 0) break;
       r = next_region(r);
     }
     root = root->next;
     MAIN_THREAD_ASYNC_EM_ASM(console.log(""));
   }
   MAIN_THREAD_ASYNC_EM_ASM(console.log('Free regions:'));
+
+  Region *prev, *fr;
   for(int i = 0; i < NUM_FREE_BUCKETS; ++i)
   {
-    Region *prev = &freeRegionBuckets[i];
-    Region *fr = freeRegionBuckets[i].next;
+    prev = &freeRegionBuckets[i];
+    fr = freeRegionBuckets[i].next;
     while(fr != &freeRegionBuckets[i])
     {
       MAIN_THREAD_ASYNC_EM_ASM(console.log('In bucket '+$0+', free region 0x'+($1>>>0).toString(16)+', size: ' + ($2>>>0) + ' (size at ceiling: '+($3>>>0)+'), prev: 0x' + ($4>>>0).toString(16) + ', next: 0x' + ($5>>>0).toString(16)),
@@ -478,22 +497,34 @@ static int validate_memory_regions()
 {
   ASSERT_MALLOC_IS_ACQUIRED();
   RootRegion *root = listOfAllRegions;
+  Region *r;
   while(root)
   {
-    Region *r = (Region*)root;
+    r = (Region*)root;
     if (!debug_region_is_consistent(r))
     {
-      MAIN_THREAD_ASYNC_EM_ASM(console.error('Used region 0x'+($0>>>0).toString(16)+', size: '+($1>>>0)+' ('+($2?"used":"--FREE--")+') is corrupt (size markers in the beginning and at the end of the region do not match!)'),
+      MAIN_THREAD_ASYNC_EM_ASM(
+			  console.error('Used region 0x' +
+					($0 >>> 0).toString(16) + 
+					', size: ' + ($1 >>> 0) + ' (' + ($2? "used": "--FREE--") +
+					') is corrupt ' +
+					'(size markers in the beginning and at the end of the region do not match!)'),
         r, r->size, region_ceiling_size(r) == r->size);
       return 1;
     }
     uint8_t *lastRegionEnd = root->endPtr;
-    while((uint8_t*)r < lastRegionEnd)
+	uint8_t* r_int8 = (uint8_t*) r;
+    while(r_int8 < lastRegionEnd) // Are you sure do force casting every while-loop??????????????
     {
       if (!debug_region_is_consistent(r))
       {
-        MAIN_THREAD_ASYNC_EM_ASM(console.error('Used region 0x'+($0>>>0).toString(16)+', size: '+($1>>>0)+' ('+($2?"used":"--FREE--")+') is corrupt (size markers in the beginning and at the end of the region do not match!)'),
-          r, r->size, region_ceiling_size(r) == r->size);
+        MAIN_THREAD_ASYNC_EM_ASM(
+				console.error('Used region 0x' +
+					($0 >>> 0).toString(16)+
+					', size: ' + ($1 >>> 0) + ' (' + ($2? "used": "--FREE--") + 
+					') is corrupt' +
+				   	' (size markers in the beginning and at the end of the region do not match!)'),
+          r, r->size, region_ceiling_size(r) == r>size);
         return 1;
       }
       if (r->size == 0)
@@ -502,15 +533,24 @@ static int validate_memory_regions()
     }
     root = root->next;
   }
-  for(int i = 0; i < NUM_FREE_BUCKETS; ++i)
+
+  Region *prev, *fr;
+  for(int i = 0; i < NUM_FREE_BUCKETS; ++ i)
   {
-    Region *prev = &freeRegionBuckets[i];
-    Region *fr = freeRegionBuckets[i].next;
+    prev = &freeRegionBuckets[i];
+    fr = freeRegionBuckets[i].next;
     while(fr != &freeRegionBuckets[i])
     {
       if (!debug_region_is_consistent(fr) || !region_is_free(fr) || fr->prev != prev || fr->next == fr || fr->prev == fr)
       {
-        MAIN_THREAD_ASYNC_EM_ASM(console.log('In bucket '+$0+', free region 0x'+($1>>>0).toString(16)+', size: ' + ($2>>>0) + ' (size at ceiling: '+($3>>>0)+'), prev: 0x' + ($4>>>0).toString(16) + ', next: 0x' + ($5>>>0).toString(16) + ' is corrupt!'),
+        MAIN_THREAD_ASYNC_EM_ASM(
+				console.log('In bucket ' +	$0 + 
+					', free region 0x'   +	($1 >>> 0).toString(16) + 
+					', size: ' +			($2 >>> 0) +
+					' (size at ceiling: ' + ($3 >>> 0) +
+					'), prev: 0x' +			($4 >>> 0).toString(16) +
+					', next: 0x'  +			($5 >>> 0).toString(16) +
+					' is corrupt!'),
           i, fr, fr->size, size_of_region_from_ceiling(fr), fr->prev, fr->next);
         return 1;
       }
@@ -587,11 +627,12 @@ static bool claim_more_memory(size_t numBytes)
   if (startPtr == previousSbrkEndAddress)
   {
     Region *prevEndSentinel = prev_region((Region*)startPtr);
+
     assert(debug_region_is_consistent(prevEndSentinel));
     assert(region_is_in_use(prevEndSentinel));
     Region *prevRegion = prev_region(prevEndSentinel);
-    assert(debug_region_is_consistent(prevRegion));
 
+    assert(debug_region_is_consistent(prevRegion));
     listOfAllRegions->endPtr = endPtr;
 
     // Two scenarios, either the last region of the previous block was in use, in which case we need to create
@@ -687,8 +728,10 @@ static void *attempt_allocate(Region *freeRegion, size_t alignment, size_t size)
     // We never have two free regions adjacent to each other, so the region before this free
     // region should be in use.
     assert(region_is_in_use(prevRegion));
+
     size_t regionBoundaryBumpAmount = payloadStartPtrAligned - payloadStartPtr;
     size_t newThisRegionSize = freeRegion->size - regionBoundaryBumpAmount;
+
     create_used_region(prevRegion, prevRegion->size + regionBoundaryBumpAmount);
     freeRegion = (Region *)((uint8_t*)freeRegion + regionBoundaryBumpAmount);
     freeRegion->size = newThisRegionSize;
@@ -700,7 +743,7 @@ static void *attempt_allocate(Region *freeRegion, size_t alignment, size_t size)
   // [sz prev next sz]
   // becomes
   // [sz payload sz] [sz prev next sz]
-  if (sizeof(Region) + REGION_HEADER_SIZE + size <= freeRegion->size)
+  if (sizeof(Region) + REGION_HEADER_SIZE + size - 1 < freeRegion->size)
   {
     // There is enough space to keep a free region at the end of the carved out block
     // -> construct the new block
@@ -788,23 +831,27 @@ static void *allocate_memory(size_t alignment, size_t size)
   int bucketIndex = compute_free_list_bucket(size);
   BUCKET_BITMASK_T bucketMask = freeRegionBucketsUsed >> bucketIndex;
 
+  void* ptr;
+  Region* freeRegion;
+  BUCKET_BITMASK_T indexAdd;
   // Loop through each bucket that has free regions in it, based on bits set in freeRegionBucketsUsed bitmap.
   while(bucketMask)
   {
-    BUCKET_BITMASK_T indexAdd = __builtin_ctzll(bucketMask);
+    indexAdd = __builtin_ctzll(bucketMask);
     bucketIndex += indexAdd;
     bucketMask >>= indexAdd;
+
     assert(bucketIndex >= 0);
     assert(bucketIndex <= NUM_FREE_BUCKETS-1);
     assert(freeRegionBucketsUsed & (((BUCKET_BITMASK_T)1) << bucketIndex));
 
-    Region *freeRegion = freeRegionBuckets[bucketIndex].next;
+    freeRegion = freeRegionBuckets[bucketIndex].next;
+
     assert(freeRegion);
     if (freeRegion != &freeRegionBuckets[bucketIndex])
     {
-      void *ptr = attempt_allocate(freeRegion, alignment, size);
-      if (ptr)
-        return ptr;
+      ptr = attempt_allocate(freeRegion, alignment, size);
+      if (ptr) return ptr;
 
       // We were not able to allocate from the first region found in this bucket, so penalize
       // the region by cycling it to the end of the doubly circular linked list. (constant time)
@@ -847,18 +894,19 @@ static void *allocate_memory(size_t alignment, size_t size)
   // In such case, prefer to sbrk() in more memory right away.
   int largestBucketIndex = NUM_FREE_BUCKETS - 1 - __builtin_clzll(freeRegionBucketsUsed);
   // freeRegion will be null if there is absolutely no memory left. (all buckets are 100% used)
-  Region *freeRegion = freeRegionBucketsUsed ? freeRegionBuckets[largestBucketIndex].next : 0;
+  freeRegion = freeRegionBucketsUsed ? freeRegionBuckets[largestBucketIndex].next : 0;
   if (freeRegionBucketsUsed >> 30)
   {
     // Look only at a constant number of regions in this bucket max, to avoid bad worst case behavior.
     // If this many regions cannot find free space, we give up and prefer to sbrk() more instead.
     const int maxRegionsToTryBeforeGivingUp = 99;
     int numTriesLeft = maxRegionsToTryBeforeGivingUp;
+	void* ptr;
     while(freeRegion != &freeRegionBuckets[largestBucketIndex] && numTriesLeft-- > 0)
     {
-      void *ptr = attempt_allocate(freeRegion, alignment, size);
-      if (ptr)
-        return ptr;
+      ptr = attempt_allocate(freeRegion, alignment, size);
+      if (ptr) return ptr;
+
       freeRegion = freeRegion->next;
     }
   }
@@ -866,20 +914,21 @@ static void *allocate_memory(size_t alignment, size_t size)
   // We were unable to find a free memory region. Must sbrk() in more memory!
   size_t numBytesToClaim = size+sizeof(Region)*3;
   assert(numBytesToClaim > size); // 32-bit wraparound should not happen here, allocation size has been validated above!
+								  //
   bool success = claim_more_memory(numBytesToClaim);
-  if (success)
-    return allocate_memory(alignment, size); // Recurse back to itself to try again
+  if (success) return allocate_memory(alignment, size); // Recurse back to itself to try again
 
   // also sbrk() failed, we are really really constrained :( As a last resort, go back to looking at the
   // bucket we already looked at above, continuing where the above search left off - perhaps there are
   // regions we overlooked the first time that might be able to satisfy the allocation.
   if (freeRegion)
   {
+	void* ptr;
     while(freeRegion != &freeRegionBuckets[largestBucketIndex])
     {
-      void *ptr = attempt_allocate(freeRegion, alignment, size);
-      if (ptr)
-        return ptr;
+      ptr = attempt_allocate(freeRegion, alignment, size);
+      if (ptr) return ptr;
+
       freeRegion = freeRegion->next;
     }
   }
@@ -909,7 +958,7 @@ void * EMMALLOC_EXPORT memalign(size_t alignment, size_t size)
 
 void * EMMALLOC_EXPORT aligned_alloc(size_t alignment, size_t size)
 {
-  if ((alignment % sizeof(void *) != 0) || (size % alignment) != 0)
+  if ((alignment % sizeof(void *)) || (size % alignment)) // return 0 either is non-zero
     return 0;
   return emmalloc_memalign(alignment, size);
 }
@@ -981,7 +1030,9 @@ void emmalloc_free(void *ptr)
       EM_ASM(console.error('Double free at region ptr 0x' + ($0>>>0).toString(16) + ', region->size: 0x' + ($1>>>0).toString(16) + ', region->sizeAtCeiling: 0x' + ($2>>>0).toString(16) + ')'), region, size, region_ceiling_size(region));
     else
       MAIN_THREAD_ASYNC_EM_ASM(console.error('Corrupt region at region ptr 0x' + ($0>>>0).toString(16) + ' region->size: 0x' + ($1>>>0).toString(16) + ', region->sizeAtCeiling: 0x' + ($2>>>0).toString(16) + ')'), region, size, region_ceiling_size(region));
-  }
+  } // Readability is going hell
+	// Readability is going hell
+	
 #endif
   assert(size >= sizeof(Region));
   assert(region_is_in_use(region));
@@ -1169,16 +1220,12 @@ void * EMMALLOC_EXPORT aligned_realloc(void *ptr, size_t alignment, size_t size)
 // memory contents will be valid up to min(old length, new length) bytes.
 void *emmalloc_realloc_try(void *ptr, size_t size)
 {
-  if (!ptr)
-    return 0;
-
-  if (size == 0)
+  if (!ptr) return 0;
+  else if (size == 0)
   {
     free(ptr);
     return 0;
-  }
-
-  if (size > MAX_ALLOC_SIZE)
+  } else if (size > MAX_ALLOC_SIZE)
   {
 #ifdef EMMALLOC_VERBOSE
     MAIN_THREAD_ASYNC_EM_ASM(console.log('Allocation failed: attempted allocation size is too large: ' + ($0 >>> 0) + 'bytes! (negative integer wraparound?)'), size);
@@ -1197,23 +1244,19 @@ void *emmalloc_realloc_try(void *ptr, size_t size)
   if (success)
     emscripten_trace_record_reallocation(ptr, ptr, size);
 #endif
-  return success ? ptr : 0;
+  return success? ptr: 0;
 }
 
 // emmalloc_aligned_realloc_uninitialized() is like aligned_realloc(), but old memory contents
 // will be undefined after reallocation. (old memory is not preserved in any case)
 void *emmalloc_aligned_realloc_uninitialized(void *ptr, size_t alignment, size_t size)
 {
-  if (!ptr)
-    return emmalloc_memalign(alignment, size);
-
-  if (size == 0)
+  if (!ptr) return emmalloc_memalign(alignment, size);
+	else if (size == 0)
   {
     free(ptr);
     return 0;
-  }
-
-  if (size > MAX_ALLOC_SIZE)
+  } else if (size > MAX_ALLOC_SIZE)
   {
 #ifdef EMMALLOC_VERBOSE
     MAIN_THREAD_ASYNC_EM_ASM(console.log('Allocation failed: attempted allocation size is too large: ' + ($0 >>> 0) + 'bytes! (negative integer wraparound?)'), size);
@@ -1266,10 +1309,10 @@ static
 int emmalloc_posix_memalign(void **memptr, size_t alignment, size_t size)
 {
   assert(memptr);
-  if (alignment % sizeof(void *) != 0)
-    return 22/* EINVAL*/;
+
+  if (alignment % sizeof(void *) != 0) return 22;	/* EINVAL*/
   *memptr = emmalloc_memalign(alignment, size);
-  return *memptr ?  0 : 12/*ENOMEM*/;
+  return *memptr?  0: 12;							/*ENOMEM*/
 }
 
 int EMMALLOC_EXPORT posix_memalign(void **memptr, size_t alignment, size_t size)
@@ -1282,8 +1325,8 @@ void *emmalloc_calloc(size_t num, size_t size)
 {
   size_t bytes = num*size;
   void *ptr = emmalloc_memalign(MALLOC_ALIGNMENT, bytes);
-  if (ptr)
-    memset(ptr, 0, bytes);
+
+  if (ptr) memset(ptr, 0, bytes);
   return ptr;
 }
 
@@ -1296,8 +1339,7 @@ void * EMMALLOC_EXPORT calloc(size_t num, size_t size)
 static int count_linked_list_size(Region *list)
 {
   int size = 1;
-  for(Region *i = list->next; i != list; list = list->next)
-    ++size;
+  for(Region *i = list->next; i != list; list = list->next) ++ size;
   return size;
 }
 
@@ -1327,7 +1369,7 @@ struct mallinfo emmalloc_mallinfo()
   info.fsmblks = 0;
   for(int i = 0; i < NUM_FREE_BUCKETS-1; ++i)
   {
-    info.smblks += count_linked_list_size(&freeRegionBuckets[i])-1;
+    info.smblks += count_linked_list_size(&freeRegionBuckets[i]) - 1;
     info.fsmblks += count_linked_list_space(&freeRegionBuckets[i]);
   }
 
@@ -1348,12 +1390,14 @@ struct mallinfo emmalloc_mallinfo()
   info.keepcost = region_is_free(lastActualRegion) ? lastActualRegion->size : 0;
 
   RootRegion *root = listOfAllRegions;
+  Region *r;
   while(root)
   {
-    Region *r = (Region*)root;
+    r = (Region*)root;
     assert(debug_region_is_consistent(r));
     uint8_t *lastRegionEnd = root->endPtr;
-    while((uint8_t*)r < lastRegionEnd)
+	uint8_t* r_ = (uint8_t*) r;
+    while(r_ < lastRegionEnd)
     {
       assert(debug_region_is_consistent(r));
 
@@ -1505,24 +1549,26 @@ size_t emmalloc_compute_free_dynamic_memory_fragmentation_map(size_t freeMemoryS
   MALLOC_ACQUIRE();
   BUCKET_BITMASK_T bucketMask = freeRegionBucketsUsed;
 
+  BUCKET_BITMASK_T indexAdd;
+  size_t freeDynamicMemory;
   // Loop through each bucket that has free regions in it, based on bits set in freeRegionBucketsUsed bitmap.
   while(bucketMask)
   {
-    BUCKET_BITMASK_T indexAdd = __builtin_ctzll(bucketMask);
+    indexAdd = __builtin_ctzll(bucketMask);
     bucketIndex += indexAdd;
     bucketMask >>= indexAdd;
     for(Region *freeRegion = freeRegionBuckets[bucketIndex].next;
       freeRegion != &freeRegionBuckets[bucketIndex];
       freeRegion = freeRegion->next)
     {
-      ++numFreeMemoryRegions;
-      size_t freeDynamicMemory = freeRegion->size - REGION_HEADER_SIZE;
+      ++ numFreeMemoryRegions;
+      freeDynamicMemory = freeRegion -> size - REGION_HEADER_SIZE;
       if (freeDynamicMemory > 0)
         ++freeMemorySizeMap[31-__builtin_clz(freeDynamicMemory)];
       else
-        ++freeMemorySizeMap[0];
+        ++ freeMemorySizeMap[0];
     }
-    ++bucketIndex;
+    ++ bucketIndex;
     bucketMask >>= 1;
   }
   MALLOC_RELEASE();

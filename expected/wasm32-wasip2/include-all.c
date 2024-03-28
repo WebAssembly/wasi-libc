@@ -102,6 +102,7 @@
 #include <memory.h>
 #include <monetary.h>
 #include <mqueue.h>
+#include <netdb.h>
 #include <netinet/icmp6.h>
 #include <netinet/igmp.h>
 #include <netinet/in.h>

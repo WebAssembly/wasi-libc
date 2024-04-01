@@ -21,6 +21,8 @@ WASI_SNAPSHOT ?= p1
 MALLOC_IMPL ?= dlmalloc
 # yes or no
 BUILD_LIBC_TOP_HALF ?= yes
+# yes or no
+BUILD_LIBSETJMP ?= yes
 # The directory where we will store intermediate artifacts.
 OBJDIR ?= build/$(TARGET_TRIPLE)
 # The directory where we store files and tools for generating WASIp2 bindings
@@ -95,6 +97,7 @@ LIBC_BOTTOM_HALF_OMIT_SOURCES := \
 	$(LIBC_BOTTOM_HALF_SOURCES)/poll-wasip2.c
 LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_OMIT_SOURCES),$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 # Omit p2-specific headers from include-all.c test.
+# for exception-handling.
 INCLUDE_ALL_CLAUSES := -not -name wasip2.h -not -name descriptor_table.h
 endif
 
@@ -128,6 +131,7 @@ LIBWASI_EMULATED_SIGNAL_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/signal/psignal.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/string/strsignal.c
 LIBDL_SOURCES = $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/dl.c
+LIBSETJMP_SOURCES = $(LIBC_TOP_HALF_MUSL_SRC_DIR)/setjmp/wasm32/rt.c
 LIBC_BOTTOM_HALF_CRT_SOURCES = $(wildcard $(LIBC_BOTTOM_HALF_DIR)/crt/*.c)
 LIBC_TOP_HALF_DIR = libc-top-half
 LIBC_TOP_HALF_MUSL_DIR = $(LIBC_TOP_HALF_DIR)/musl
@@ -433,6 +437,7 @@ LIBWASI_EMULATED_GETPID_OBJS = $(call objs,$(LIBWASI_EMULATED_GETPID_SOURCES))
 LIBWASI_EMULATED_SIGNAL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_SOURCES))
 LIBWASI_EMULATED_SIGNAL_MUSL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_MUSL_SOURCES))
 LIBDL_OBJS = $(call objs,$(LIBDL_SOURCES))
+LIBSETJMP_OBJS = $(call objs,$(LIBSETJMP_SOURCES))
 LIBC_BOTTOM_HALF_CRT_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_CRT_SOURCES))
 
 # These variables describe the locations of various files and
@@ -498,7 +503,6 @@ MUSL_OMIT_HEADERS += \
     "netdb.h" \
     "resolv.h" \
     "pty.h" \
-    "setjmp.h" \
     "ulimit.h" \
     "sys/xattr.h" \
     "wordexp.h" \
@@ -534,6 +538,7 @@ LIBWASI_EMULATED_GETPID_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_GETP
 LIBWASI_EMULATED_SIGNAL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_SIGNAL_OBJS))
 LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS))
 LIBDL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBDL_OBJS))
+LIBSETJMP_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBSETJMP_OBJS))
 BULK_MEMORY_SO_OBJS = $(patsubst %.o,%.pic.o,$(BULK_MEMORY_OBJS))
 DLMALLOC_SO_OBJS = $(patsubst %.o,%.pic.o,$(DLMALLOC_OBJS))
 LIBC_BOTTOM_HALF_ALL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBC_BOTTOM_HALF_ALL_OBJS))
@@ -548,6 +553,7 @@ PIC_OBJS = \
 	$(LIBWASI_EMULATED_SIGNAL_SO_OBJS) \
 	$(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS) \
 	$(LIBDL_SO_OBJS) \
+	$(LIBSETJMP_SO_OBJS) \
 	$(BULK_MEMORY_SO_OBJS) \
 	$(DLMALLOC_SO_OBJS) \
 	$(LIBC_BOTTOM_HALF_ALL_SO_OBJS) \
@@ -577,6 +583,8 @@ $(OBJDIR)/libwasi-emulated-signal.so.a: $(LIBWASI_EMULATED_SIGNAL_SO_OBJS) $(LIB
 
 $(OBJDIR)/libdl.so.a: $(LIBDL_SO_OBJS)
 
+$(OBJDIR)/libsetjmp.so.a: $(LIBSETJMP_SO_OBJS)
+
 $(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
 
 $(SYSROOT_LIB)/libc-printscan-long-double.a: $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS)
@@ -592,6 +600,8 @@ $(SYSROOT_LIB)/libwasi-emulated-getpid.a: $(LIBWASI_EMULATED_GETPID_OBJS)
 $(SYSROOT_LIB)/libwasi-emulated-signal.a: $(LIBWASI_EMULATED_SIGNAL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS)
 
 $(SYSROOT_LIB)/libdl.a: $(LIBDL_OBJS)
+
+$(SYSROOT_LIB)/libsetjmp.a: $(LIBSETJMP_OBJS)
 
 %.a:
 	@mkdir -p "$(@D)"
@@ -621,6 +631,9 @@ $(BULK_MEMORY_OBJS) $(BULK_MEMORY_SO_OBJS): CFLAGS += \
 
 $(BULK_MEMORY_OBJS) $(BULK_MEMORY_SO_OBJS): CFLAGS += \
         -DBULK_MEMORY_THRESHOLD=$(BULK_MEMORY_THRESHOLD)
+
+$(LIBSETJMP_OBJS) $(LIBSETJMP_SO_OBJS): CFLAGS += \
+        -mllvm -wasm-enable-sjlj
 
 $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS): CFLAGS += \
 	    -D_WASI_EMULATED_SIGNAL
@@ -665,7 +678,7 @@ startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS) $(LIBC_BOTTOM_HALF_ALL_SO_OBJS): CFLA
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/include \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal
 
-$(LIBC_TOP_HALF_ALL_OBJS) $(LIBC_TOP_HALF_ALL_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS) $(LIBDL_OBJS) $(LIBDL_SO_OBJS): CFLAGS += \
+$(LIBC_TOP_HALF_ALL_OBJS) $(LIBC_TOP_HALF_ALL_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS) $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS) $(LIBDL_OBJS) $(LIBDL_SO_OBJS) $(LIBSETJMP_OBJS) $(LIBSETJMP_SO_OBJS): CFLAGS += \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/include \
     -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal \
     -I$(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm32 \
@@ -732,11 +745,15 @@ LIBC_SO = \
 	$(SYSROOT_LIB)/libwasi-emulated-getpid.so \
 	$(SYSROOT_LIB)/libwasi-emulated-signal.so \
 	$(SYSROOT_LIB)/libdl.so
+ifeq ($(BUILD_LIBSETJMP),yes)
+LIBC_SO += \
+	$(SYSROOT_LIB)/libsetjmp.so
+endif
 endif
 
 libc_so: include_dirs $(LIBC_SO)
 
-libc: include_dirs \
+STATIC_LIBS = \
     $(SYSROOT_LIB)/libc.a \
     $(SYSROOT_LIB)/libc-printscan-long-double.a \
     $(SYSROOT_LIB)/libc-printscan-no-floating-point.a \
@@ -745,6 +762,12 @@ libc: include_dirs \
     $(SYSROOT_LIB)/libwasi-emulated-getpid.a \
     $(SYSROOT_LIB)/libwasi-emulated-signal.a \
     $(SYSROOT_LIB)/libdl.a
+ifeq ($(BUILD_LIBSETJMP),yes)
+STATIC_LIBS += \
+	$(SYSROOT_LIB)/libsetjmp.a
+endif
+
+libc: include_dirs $(STATIC_LIBS)
 
 finish: startup_files libc
 	#
@@ -804,8 +827,10 @@ check-symbols: startup_files libc
 	#
 	# Generate a test file that includes all public C header files.
 	#
+	# setjmp.h is excluded because it requires a different compiler option
+	#
 	cd "$(SYSROOT_INC)" && \
-	  for header in $$(find . -type f -not -name mman.h -not -name signal.h -not -name times.h -not -name resource.h $(INCLUDE_ALL_CLAUSES) |grep -v /bits/ |grep -v /c++/); do \
+	  for header in $$(find . -type f -not -name mman.h -not -name signal.h -not -name times.h -not -name resource.h -not -name setjmp.h $(INCLUDE_ALL_CLAUSES) |grep -v /bits/ |grep -v /c++/); do \
 	      echo '#include <'$$header'>' | sed 's/\.\///' ; \
 	done |LC_ALL=C sort >$(SYSROOT_SHARE)/include-all.c ; \
 	cd - >/dev/null

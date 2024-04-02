@@ -94,7 +94,9 @@ LIBC_BOTTOM_HALF_OMIT_SOURCES := \
 	$(LIBC_BOTTOM_HALF_SOURCES)/accept-wasip2.c \
 	$(LIBC_BOTTOM_HALF_SOURCES)/shutdown.c \
 	$(LIBC_BOTTOM_HALF_SOURCES)/sockopt.c \
-	$(LIBC_BOTTOM_HALF_SOURCES)/poll-wasip2.c
+	$(LIBC_BOTTOM_HALF_SOURCES)/poll-wasip2.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/getsockpeername.c \
+	$(LIBC_BOTTOM_HALF_SOURCES)/netdb.c
 LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_OMIT_SOURCES),$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 # Omit p2-specific headers from include-all.c test.
 # for exception-handling.
@@ -249,6 +251,13 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
 
+ifeq ($(WASI_SNAPSHOT), p2)
+LIBC_TOP_HALF_MUSL_SOURCES += \
+    $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
+       network/gai_strerror.c \
+    )
+endif
+
 ifeq ($(THREAD_MODEL), posix)
 LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
@@ -387,6 +396,10 @@ ASMFLAGS += -matomics
 CFLAGS += -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 endif
 
+ifeq ($(WASI_SNAPSHOT), p2)
+EXTRA_CFLAGS += -D__wasilibc_use_wasip2
+endif
+
 # Expose the public headers to the implementation. We use `-isystem` for
 # purpose for two reasons:
 #
@@ -500,7 +513,6 @@ MUSL_OMIT_HEADERS += \
     "sys/auxv.h" \
     "pwd.h" "shadow.h" "grp.h" \
     "mntent.h" \
-    "netdb.h" \
     "resolv.h" \
     "pty.h" \
     "ulimit.h" \
@@ -522,6 +534,10 @@ MUSL_OMIT_HEADERS += \
     "libintl.h" \
     "sys/sysmacros.h" \
     "aio.h"
+
+ifeq ($(WASI_SNAPSHOT), p1)
+MUSL_OMIT_HEADERS += "netdb.h"
+endif
 
 ifeq ($(THREAD_MODEL), single)
 # Remove headers not supported in single-threaded mode.

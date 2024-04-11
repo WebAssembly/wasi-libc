@@ -260,7 +260,7 @@ void __wasilibc_populate_preopens(void) {
             if (prefix == NULL)
                 goto software;
 
-            // TODO: Remove the cast on `path` once the witx is updated with
+            // TODO: Remove the cast on `prefix` once the witx is updated with
             // char8 support.
             ret = __wasi_fd_prestat_dir_name(fd, (uint8_t *)prefix,
                                              prestat.u.dir.pr_name_len);
@@ -289,4 +289,24 @@ oserr:
     _Exit(EX_OSERR);
 software:
     _Exit(EX_SOFTWARE);
+}
+
+void __wasilibc_reset_preopens(void) {
+    LOCK(lock);
+
+    if (num_preopens) {
+        for (int i = 0; i < num_preopens; ++i) {
+            free((void*) preopens[i].prefix);
+        }
+        free(preopens);
+    }
+    
+    preopens_populated = false;
+    preopens = NULL;
+    num_preopens = 0;
+    preopen_capacity = 0;
+    
+    assert_invariants();
+    
+    UNLOCK(lock);
 }

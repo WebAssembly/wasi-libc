@@ -24,7 +24,7 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
       .u.u.clock.id = clock_id,
       .u.u.clock.flags = flags,
   };
-  if (!timespec_to_timestamp_clamp(rqtp, &sub.u.u.clock.timeout))
+  if (!timespec_to_timestamp_exact(rqtp, &sub.u.u.clock.timeout))
     return EINVAL;
 
   // Block until polling event is triggered.

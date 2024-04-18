@@ -36,7 +36,7 @@ struct pthread {
 #ifdef CANARY_PAD
 	uintptr_t canary_pad;
 #endif
-	uintptr_t canary;
+	// uintptr_t canary;
 #endif
 
 	/* Part 2 -- implementation details, non-ABI. */
@@ -70,7 +70,7 @@ struct pthread {
 	/* Part 3 -- the positions of these fields relative to
 	 * the end of the structure is external and internal ABI. */
 #ifdef TLS_ABOVE_TP
-	uintptr_t canary;
+	// uintptr_t canary;
 	uintptr_t *dtv;
 #endif
 };

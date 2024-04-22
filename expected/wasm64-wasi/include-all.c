@@ -152,6 +152,7 @@
 #include <strings.h>
 #include <stropts.h>
 #include <sys/dir.h>
+#include <sys/epoll.h>
 #include <sys/errno.h>
 #include <sys/eventfd.h>
 #include <sys/fcntl.h>

@@ -873,6 +873,7 @@ check-symbols: startup_files libc
 	@# TODO: Filter out __FPCLASS_* that are new to clang 17.
 	@# TODO: Filter out __FLT128_* that are new to clang 18.
 	@# TODO: Filter out __MEMORY_SCOPE_* that are new to clang 18.
+	@# TODO: Filter out __GCC_(CON|DE)STRUCTIVE_SIZE that are new to clang 19.
 	@# TODO: clang defined __FLT_EVAL_METHOD__ until clang 15, so we force-undefine it
 	@# for older versions.
 	@# TODO: Undefine __wasm_mutable_globals__ and __wasm_sign_ext__, that are new to
@@ -907,6 +908,7 @@ check-symbols: startup_files libc
 	    | grep -v '^#define __FPCLASS_' \
 	    | grep -v '^#define __FLT128_' \
 	    | grep -v '^#define __MEMORY_SCOPE_' \
+	    | grep -v '^#define __GCC_\(CON\|DE\)STRUCTIVE_SIZE' \
 	    | grep -v '^#define NDEBUG' \
 	    | grep -v '^#define __OPTIMIZE__' \
 	    | grep -v '^#define assert' \

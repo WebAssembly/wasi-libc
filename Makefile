@@ -836,7 +836,7 @@ check-symbols: startup_files libc
 	for undef_sym in $$("$(NM)" --undefined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libc-*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$(DEFINED_SYMBOLS)" || echo $$undef_sym; \
-	done | grep -E -v "^__mul|__memory_base" > "$(UNDEFINED_SYMBOLS)"
+	done | grep -E -v "^__mul|__memory_base|__indirect_function_table" > "$(UNDEFINED_SYMBOLS)"
 	grep '^_*imported_wasi_' "$(UNDEFINED_SYMBOLS)" \
 	    > "$(SYSROOT_LIB)/libc.imports"
 
@@ -878,6 +878,8 @@ check-symbols: startup_files libc
 	@# for older versions.
 	@# TODO: Undefine __wasm_mutable_globals__ and __wasm_sign_ext__, that are new to
 	@# clang 16 for -mcpu=generic.
+	@# TODO: Undefine __wasm_multivalue__ and __wasm_reference_types__, that are new to
+	@# clang 19 for -mcpu=generic.
 	@# TODO: As of clang 16, __GNUC_VA_LIST is #defined without a value.
 	$(CC) $(CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -isystem $(SYSROOT_INC) \
@@ -894,6 +896,8 @@ check-symbols: startup_files libc
 	    -U__clang_wide_literal_encoding__ \
 	    -U__wasm_mutable_globals__ \
 	    -U__wasm_sign_ext__ \
+	    -U__wasm_multivalue__ \
+	    -U__wasm_reference_types__ \
 	    -U__GNUC__ \
 	    -U__GNUC_MINOR__ \
 	    -U__GNUC_PATCHLEVEL__ \

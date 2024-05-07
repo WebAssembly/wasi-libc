@@ -601,6 +601,15 @@ $(OBJDIR)/libdl.so.a: $(LIBDL_SO_OBJS)
 
 $(OBJDIR)/libsetjmp.so.a: $(LIBSETJMP_SO_OBJS)
 
+# For the wasip2 target default to `-fPIC` for all archives to make them
+# suitable for linking later into a shared object if desired. This can come with
+# modest runtime overhead so this isn't the default for all targets, so other
+# targets below compile non-PIC versions of objects and use those for archives
+# instead.
+ifeq ($(WASI_SNAPSHOT),p2)
+$(SYSROOT_LIB)/%.a: $(OBJDIR)/%.so.a
+	cp $< $@
+else
 $(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
 
 $(SYSROOT_LIB)/libc-printscan-long-double.a: $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS)
@@ -618,6 +627,7 @@ $(SYSROOT_LIB)/libwasi-emulated-signal.a: $(LIBWASI_EMULATED_SIGNAL_OBJS) $(LIBW
 $(SYSROOT_LIB)/libdl.a: $(LIBDL_OBJS)
 
 $(SYSROOT_LIB)/libsetjmp.a: $(LIBSETJMP_OBJS)
+endif
 
 %.a:
 	@mkdir -p "$(@D)"
@@ -836,7 +846,7 @@ check-symbols: startup_files libc
 	for undef_sym in $$("$(NM)" --undefined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libc-*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$(DEFINED_SYMBOLS)" || echo $$undef_sym; \
-	done | grep -E -v "^__mul|__memory_base|__indirect_function_table" > "$(UNDEFINED_SYMBOLS)"
+	done | grep -E -v "^__mul|__memory_base|__indirect_function_table|__table_base" > "$(UNDEFINED_SYMBOLS)"
 	grep '^_*imported_wasi_' "$(UNDEFINED_SYMBOLS)" \
 	    > "$(SYSROOT_LIB)/libc.imports"
 

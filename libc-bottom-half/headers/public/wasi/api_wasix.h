@@ -3160,61 +3160,6 @@ _Static_assert(offsetof(__wasi_route_t, preferred_until) == 144, "witx calculate
 _Static_assert(offsetof(__wasi_route_t, expires_at) == 160, "witx calculated offset");
 
 /**
- * HTTP request handles used to send and receive data to the server
- */
-typedef struct __wasi_http_handles_t {
-    /**
-     * File handle used to write the request data
-     */
-    __wasi_fd_t request;
-
-    /**
-     * File handle used to receive the response data
-     */
-    __wasi_fd_t response;
-
-    /**
-     * File handle used to read the response headers
-     * (entries are separated by line feeds)
-     */
-    __wasi_fd_t headers;
-
-} __wasi_http_handles_t;
-
-_Static_assert(sizeof(__wasi_http_handles_t) == 12, "witx calculated size");
-_Static_assert(_Alignof(__wasi_http_handles_t) == 4, "witx calculated align");
-_Static_assert(offsetof(__wasi_http_handles_t, request) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_http_handles_t, response) == 4, "witx calculated offset");
-_Static_assert(offsetof(__wasi_http_handles_t, headers) == 8, "witx calculated offset");
-
-/**
- * HTTP response status
- */
-typedef struct __wasi_http_status_t {
-    __wasi_bool_t ok;
-
-    __wasi_bool_t redirected;
-
-    /**
-     * Size of the response
-     */
-    __wasi_filesize_t size;
-
-    /**
-     * HTTP status code for this response
-     */
-    uint16_t status;
-
-} __wasi_http_status_t;
-
-_Static_assert(sizeof(__wasi_http_status_t) == 24, "witx calculated size");
-_Static_assert(_Alignof(__wasi_http_status_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_http_status_t, ok) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_http_status_t, redirected) == 1, "witx calculated offset");
-_Static_assert(offsetof(__wasi_http_status_t, size) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_http_status_t, status) == 16, "witx calculated offset");
-
-/**
  * join flags.
  */
 typedef uint32_t __wasi_join_flags_t;
@@ -3976,59 +3921,6 @@ __wasi_errno_t __wasi_proc_signal(
      * Signal to send to the thread
      */
     __wasi_signal_t signal
-) __attribute__((__warn_unused_result__));
-/**
- * Connects to a websocket at a particular network URL
- * @return
- * Returns a socket handle which is used to send and receive data
- */
-__wasi_errno_t __wasi_ws_connect(
-    /**
-     * URL of the web socket destination to connect to
-     */
-    const char *url,
-    __wasi_fd_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Makes a HTTP request to a remote web resource and
- * returns a socket handles that are used to send and receive data
- * @return
- * The body of the response can be streamed from the returned
- * file handle
- */
-__wasi_errno_t __wasi_http_request(
-    /**
-     * URL of the HTTP resource to connect to
-     */
-    const char *url,
-    /**
-     * HTTP method to be invoked
-     */
-    const char *method,
-    /**
-     * HTTP headers to attach to the request
-     * (headers seperated by lines)
-     */
-    const char *headers,
-    /**
-     * Should the request body be compressed
-     */
-    __wasi_bool_t gzip,
-    __wasi_http_handles_t *retptr0
-) __attribute__((__warn_unused_result__));
-/**
- * Retrieves the status of a HTTP request
- */
-__wasi_errno_t __wasi_http_status(
-    /**
-     * Handle of the HTTP request
-     */
-    __wasi_fd_t fd,
-    /**
-     * Pointer to a buffer that will be filled with the current
-     * status of this HTTP request
-     */
-    __wasi_http_status_t * status
 ) __attribute__((__warn_unused_result__));
 /**
  * Securely connects to a particular remote network

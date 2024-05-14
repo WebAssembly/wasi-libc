@@ -400,8 +400,6 @@ __wasi_futex_wait
 __wasi_futex_wake
 __wasi_futex_wake_all
 __wasi_getcwd
-__wasi_http_request
-__wasi_http_status
 __wasi_init_tp
 __wasi_path_create_directory
 __wasi_path_filestat_get

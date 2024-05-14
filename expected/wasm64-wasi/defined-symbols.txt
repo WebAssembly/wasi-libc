@@ -404,8 +404,6 @@ __wasi_futex_wait
 __wasi_futex_wake
 __wasi_futex_wake_all
 __wasi_getcwd
-__wasi_http_request
-__wasi_http_status
 __wasi_init_tp
 __wasi_path_create_directory
 __wasi_path_filestat_get
@@ -482,7 +480,6 @@ __wasi_thread_spawn_v2
 __wasi_thread_start_C
 __wasi_tty_get
 __wasi_tty_set
-__wasi_ws_connect
 __wasilibc_access
 __wasilibc_cwd
 __wasilibc_cwd_lock

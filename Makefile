@@ -397,7 +397,7 @@ CFLAGS += -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 endif
 
 ifeq ($(WASI_SNAPSHOT), p2)
-EXTRA_CFLAGS += -D__wasilibc_use_wasip2
+CFLAGS += -D__wasilibc_use_wasip2
 endif
 
 # Expose the public headers to the implementation. We use `-isystem` for

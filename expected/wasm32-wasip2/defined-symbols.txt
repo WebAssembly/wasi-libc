@@ -980,6 +980,7 @@ monotonic_clock_now
 monotonic_clock_resolution
 monotonic_clock_subscribe_duration
 monotonic_clock_subscribe_instant
+mprotect
 mrand48
 munmap
 nan

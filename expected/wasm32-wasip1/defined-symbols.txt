@@ -861,6 +861,7 @@ mmap
 modf
 modff
 modfl
+mprotect
 mrand48
 munmap
 nan

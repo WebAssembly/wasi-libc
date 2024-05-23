@@ -113,7 +113,7 @@ struct dpc_ctx {
 #include <wasi/api.h>
 static int name_from_dns_search(struct address buf[static MAXADDRS], char canon[static 256], const char *name, int family) {
   __wasi_size_t naddrs = 0;
-  __wasi_addr_t *addrs;
+  __wasi_addr_ip_t *addrs;
   int rv = 0;
 
   addrs = calloc((MAXADDRS + 1), sizeof(__wasi_addr_t));

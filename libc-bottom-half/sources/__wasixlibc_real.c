@@ -868,7 +868,7 @@ int32_t __imported_wasix_32v1_resolve(int32_t arg0, int32_t arg1, int32_t arg2, 
 __wasi_errno_t __wasi_resolve(
     const char *host,
     uint16_t port,
-    __wasi_addr_t * addrs,
+    __wasi_addr_ip_t * addrs,
     __wasi_size_t naddrs,
     __wasi_size_t *retptr0
 ){

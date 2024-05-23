@@ -6,7 +6,10 @@
 #include <netinet/in.h>
 #include <errno.h>
 #include <stdint.h>
+#include <wasi/api.h>
 #include "lookup.h"
+
+int printf (const char *, ...);
 
 int gethostbyname2_r(const char *name, int af,
 	struct hostent *h, char *buf, size_t buflen,
@@ -14,8 +17,20 @@ int gethostbyname2_r(const char *name, int af,
 {
 	struct address addrs[MAXADDRS];
 	char canon[256];
-	int i, cnt;
+	int i, j, cnt, total_cnt;
 	size_t align, need;
+	int wasi_af;
+	
+	if (af == AF_INET) {
+		wasi_af = __WASI_ADDRESS_FAMILY_IP_INET4;
+	} else if (af == AF_INET6) {
+		wasi_af = __WASI_ADDRESS_FAMILY_IP_INET6;
+	} else {
+		*err = NO_RECOVERY;
+		return ENOTSUP;
+	}
+
+	printf("af %d wasi_af %d\n", af, wasi_af);
 
 	*res = 0;
 	cnt = __lookup_name(addrs, canon, name, af, AI_CANONNAME);
@@ -34,6 +49,15 @@ int gethostbyname2_r(const char *name, int af,
 	case EAI_SYSTEM:
 		*err = NO_RECOVERY;
 		return errno;
+	}
+
+	total_cnt = cnt;
+
+	for (i = 0; i < total_cnt; ++i) {
+		if (addrs[i].family != wasi_af) {
+			printf("%d family %d skipped\n", i, addrs[i].family);
+			--cnt;
+		}
 	}
 
 	h->h_addrtype = af;
@@ -56,12 +80,15 @@ int gethostbyname2_r(const char *name, int af,
 	h->h_addr_list = (void *)buf;
 	buf += (cnt+1)*sizeof(char *);
 
-	for (i=0; i<cnt; i++) {
-		h->h_addr_list[i] = (void *)buf;
+	for (i=0,j=0; i<total_cnt; i++) {
+		if (addrs[i].family != wasi_af) continue;
+
+		printf("%d %d family %d reported\n", i, j, addrs[i].family);
+		h->h_addr_list[j] = (void *)buf;
 		buf += h->h_length;
-		memcpy(h->h_addr_list[i], addrs[i].addr, h->h_length);
+		memcpy(h->h_addr_list[j++], addrs[i].addr, h->h_length);
 	}
-	h->h_addr_list[i] = 0;
+	h->h_addr_list[j] = 0;
 
 	h->h_name = h->h_aliases[0] = buf;
 	strcpy(h->h_name, canon);

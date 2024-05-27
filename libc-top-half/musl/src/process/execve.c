@@ -9,42 +9,34 @@ extern char **__environ;
 #include <wasi/api.h>
 #endif
 
+#if !defined(__wasilibc_unmodified_upstream)
+static char* combine_strings(char* const strings[]) {
+	int combined_len = 0;
+	for (char **ptr = (char **)strings; *ptr != NULL; ptr++) {
+		combined_len += strlen(*ptr) + 1;
+	}
+
+	char *combined = malloc((combined_len + 1));
+	char *combined_p = combined;
+	for (char **ptr = (char **)strings; *ptr != NULL; ptr++) {
+		memcpy(combined_p, *ptr, strlen(*ptr));
+		combined_p += strlen(*ptr);
+		*combined_p = '\n';
+		combined_p++;
+	}
+	*combined_p = 0;
+
+	return combined;
+}
+#endif
+
 int execve(const char *path, char *const argv[], char *const envp[])
 {
 #ifdef __wasilibc_unmodified_upstream
 	return execve(path, argv, __environ);
-#else
-	// combine args
-	int argv_combined_len = 0;
-	for (char **argvp = (char **)argv; *argvp != NULL; argvp++) {
-		argv_combined_len += strlen(*argvp) + 1;
-	}
-
-	char *combined_argv = malloc((argv_combined_len + 1));
-	char *combined_argv_p = combined_argv;
-	for (char **argvp = (char **)argv; *argvp != NULL; argvp++) {
-		memcpy(combined_argv_p, *argvp, strlen(*argvp));
-		combined_argv_p += strlen(*argvp);
-		*combined_argv_p = '\n';
-		combined_argv_p++;
-	}
-	*combined_argv_p = 0;
-
-	// combine env vars
-	int env_combined_len = 0;
-	for (char **envpp = (char **)envp; *envpp != NULL; envpp++) {
-		env_combined_len += strlen(*envpp) + 1;
-	}
-
-	char *combined_env = malloc((env_combined_len + 1));
-	char *combined_env_p = combined_env;
-	for (char **envpp = (char **)envp; *envpp != NULL; envpp++) {
-		memcpy(combined_env_p, *envpp, strlen(*envpp));
-		combined_env_p += strlen(*envpp);
-		*combined_env_p = '\n';
-		combined_env_p++;
-	}
-	*combined_env_p = 0;
+#else	
+	char *combined_argv = combine_strings(argv);
+	char *combined_env = combine_strings(envp);
 
 	printf("calling the __wasi_proc_exec2\n");
 	

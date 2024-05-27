@@ -785,7 +785,7 @@ endif
 
 libc: include_dirs $(STATIC_LIBS)
 
-finish: startup_files libc
+dummy_libs:
 	#
 	# Create empty placeholder libraries.
 	#
@@ -793,6 +793,7 @@ finish: startup_files libc
 	    $(AR) crs "$(SYSROOT_LIB)/lib$${name}.a"; \
 	done
 
+finish: startup_files libc dummy_libs
 	#
 	# The build succeeded! The generated sysroot is in $(SYSROOT).
 	#
@@ -989,4 +990,4 @@ clean:
 	$(RM) -r "$(OBJDIR)"
 	$(RM) -r "$(SYSROOT)"
 
-.PHONY: default startup_files libc libc_so finish install include_dirs clean check-symbols bindings
+.PHONY: default startup_files libc libc_so dummy_libs finish install include_dirs clean check-symbols bindings

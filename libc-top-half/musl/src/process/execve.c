@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #ifdef __wasilibc_unmodified_upstream
-extern char **__environ;
+#include "syscall.h"
 #else
 #include <stdlib.h>
 #include <wasi/api.h>
@@ -32,8 +32,9 @@ static char* combine_strings(char* const strings[]) {
 
 int execve(const char *path, char *const argv[], char *const envp[])
 {
-#ifdef __wasilibc_unmodified_upstream
-	return execve(path, argv, __environ);
+#ifdef __wasilibc_unmodified_upstream	
+	/* do we need to use environ if envp is null? */
+	return syscall(SYS_execve, path, argv, envp);
 #else	
 	char *combined_argv = combine_strings(argv);
 	char *combined_env = combine_strings(envp);

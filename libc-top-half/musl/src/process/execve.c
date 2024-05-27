@@ -38,8 +38,6 @@ int execve(const char *path, char *const argv[], char *const envp[])
 #else	
 	char *combined_argv = combine_strings(argv);
 	char *combined_env = combine_strings(envp);
-
-	printf("calling the __wasi_proc_exec2\n");
 	
 	__wasi_proc_exec2(path, combined_argv, combined_env);
 #endif

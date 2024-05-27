@@ -320,6 +320,22 @@ _Noreturn void __wasi_proc_exec(
     __imported_wasix_32v1_proc_exec((intptr_t) name, (intptr_t) name_len, (intptr_t) args, (intptr_t) args_len);
 }
 
+_Noreturn void __imported_wasix_32v1_proc_exec2(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("proc_exec2")
+));
+
+_Noreturn void __wasi_proc_exec2(
+    const char *name,
+    const char *args,
+    const char *envs
+){
+    size_t name_len = strlen(name);
+    size_t args_len = strlen(args);
+    size_t envs_len = strlen(envs);
+    __imported_wasix_32v1_proc_exec2((intptr_t) name, (intptr_t) name_len, (intptr_t) args, (intptr_t) args_len, (intptr_t) envs, (intptr_t) envs_len);
+}
+
 int32_t __imported_wasix_32v1_proc_spawn(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5, int32_t arg6, int32_t arg7, int32_t arg8, int32_t arg9, int32_t arg10, int32_t arg11, int32_t arg12) __attribute__((
     __import_module__("wasix_32v1"),
     __import_name__("proc_spawn")

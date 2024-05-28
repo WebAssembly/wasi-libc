@@ -539,11 +539,6 @@ ifeq ($(WASI_SNAPSHOT), p1)
 MUSL_OMIT_HEADERS += "netdb.h"
 endif
 
-ifeq ($(THREAD_MODEL), single)
-# Remove headers not supported in single-threaded mode.
-MUSL_OMIT_HEADERS += "pthread.h"
-endif
-
 default: finish
 
 LIBC_SO_OBJS = $(patsubst %.o,%.pic.o,$(filter-out $(MUSL_PRINTSCAN_OBJS),$(LIBC_OBJS)))

@@ -789,6 +789,7 @@ dummy_libs:
 	#
 	# Create empty placeholder libraries.
 	#
+	mkdir -p "$(SYSROOT_LIB)" && \
 	for name in m rt pthread crypt util xnet resolv; do \
 	    $(AR) crs "$(SYSROOT_LIB)/lib$${name}.a"; \
 	done

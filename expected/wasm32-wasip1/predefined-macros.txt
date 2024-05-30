@@ -1419,6 +1419,35 @@
 #define PRIxLEAST8 __UINT_LEAST8_FMTx__
 #define PRIxMAX __UINTMAX_FMTx__
 #define PRIxPTR __UINTPTR_FMTx__
+#define PTHREAD_BARRIER_SERIAL_THREAD (-1)
+#define PTHREAD_CANCELED ((void *)-1)
+#define PTHREAD_CANCEL_ASYNCHRONOUS 1
+#define PTHREAD_CANCEL_DEFERRED 0
+#define PTHREAD_CANCEL_DISABLE 1
+#define PTHREAD_CANCEL_ENABLE 0
+#define PTHREAD_CANCEL_MASKED 2
+#define PTHREAD_COND_INITIALIZER {{{0}}}
+#define PTHREAD_CREATE_DETACHED 1
+#define PTHREAD_CREATE_JOINABLE 0
+#define PTHREAD_EXPLICIT_SCHED 1
+#define PTHREAD_INHERIT_SCHED 0
+#define PTHREAD_MUTEX_DEFAULT 0
+#define PTHREAD_MUTEX_ERRORCHECK 2
+#define PTHREAD_MUTEX_INITIALIZER {{{0}}}
+#define PTHREAD_MUTEX_NORMAL 0
+#define PTHREAD_MUTEX_RECURSIVE 1
+#define PTHREAD_MUTEX_ROBUST 1
+#define PTHREAD_MUTEX_STALLED 0
+#define PTHREAD_NULL ((pthread_t)0)
+#define PTHREAD_ONCE_INIT 0
+#define PTHREAD_PRIO_INHERIT 1
+#define PTHREAD_PRIO_NONE 0
+#define PTHREAD_PRIO_PROTECT 2
+#define PTHREAD_PROCESS_PRIVATE 0
+#define PTHREAD_PROCESS_SHARED 1
+#define PTHREAD_RWLOCK_INITIALIZER {{{0}}}
+#define PTHREAD_SCOPE_PROCESS 1
+#define PTHREAD_SCOPE_SYSTEM 0
 #define PTRBITS (sizeof(char *) * 8)
 #define PTRDIFF_MAX INT32_MAX
 #define PTRDIFF_MIN INT32_MIN
@@ -2147,14 +2176,8 @@
 #define _POSIX_STREAM_MAX 8
 #define _POSIX_SYMLINK_MAX 255
 #define _POSIX_SYMLOOP_MAX 8
-#define _POSIX_THREAD_ATTR_STACKADDR _POSIX_VERSION
-#define _POSIX_THREAD_ATTR_STACKSIZE _POSIX_VERSION
-#define _POSIX_THREAD_CPUTIME _POSIX_VERSION
 #define _POSIX_THREAD_DESTRUCTOR_ITERATIONS 4
 #define _POSIX_THREAD_KEYS_MAX 128
-#define _POSIX_THREAD_PRIORITY_SCHEDULING _POSIX_VERSION
-#define _POSIX_THREAD_PROCESS_SHARED _POSIX_VERSION
-#define _POSIX_THREAD_SAFE_FUNCTIONS _POSIX_VERSION
 #define _POSIX_THREAD_THREADS_MAX 64
 #define _POSIX_TIMEOUTS _POSIX_VERSION
 #define _POSIX_TIMERS _POSIX_VERSION
@@ -2169,6 +2192,7 @@
 #define _POSIX_V7_ILP32_OFFBIG (1)
 #define _POSIX_VDISABLE 0
 #define _POSIX_VERSION 200809L
+#define _PTHREAD_H 
 #define _PTRDIFF_T 
 #define _REGEX_H 
 #define _SCHED_H 
@@ -3013,7 +3037,7 @@
 #define __tg_real_remquo(x,y,z) (__RETCAST_2(x, y)( __FLT(x) && __FLT(y) ? remquof(x, y, z) : __LDBL((x)+(y)) ? remquol(x, y, z) : remquo(x, y, z) ))
 #define __tm_gmtoff tm_gmtoff
 #define __tm_zone tm_zone
-#define __va_copy(d,s) __builtin_va_copy(d,s)
+#define __va_copy(d,s) __builtin_va_copy(d, s)
 #define __wasi__ 1
 #define __wasi_api_h 
 #define __wasi_libc_environ_h 
@@ -3319,6 +3343,9 @@
 #define powerof2(n) !(((n)-1) & (n))
 #define pread64 pread
 #define preadv64 preadv
+#define pthread_cleanup_pop(r) _pthread_cleanup_pop(&__cb, (r)); } while(0)
+#define pthread_cleanup_push(f,x) do { struct __ptcb __cb; _pthread_cleanup_push(&__cb, f, x);
+#define pthread_equal(x,y) ((x)==(y))
 #define pwrite64 pwrite
 #define pwritev64 pwritev
 #define readdir64 readdir

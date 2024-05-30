@@ -59,7 +59,6 @@ static void assert_invariants(void) {
 
 /// Allocate space for more preopens. Returns 0 on success and -1 on failure.
 static int resize(void) {
-    LOCK(lock);
     size_t start_capacity = 4;
     size_t old_capacity = preopen_capacity;
     size_t new_capacity = old_capacity == 0 ? start_capacity : old_capacity * 2;
@@ -67,7 +66,6 @@ static int resize(void) {
     preopen *old_preopens = preopens;
     preopen *new_preopens = calloc(sizeof(preopen), new_capacity);
     if (new_preopens == NULL) {
-        UNLOCK(lock);
         return -1;
     }
 
@@ -77,7 +75,6 @@ static int resize(void) {
     free(old_preopens);
 
     assert_invariants();
-    UNLOCK(lock);
     return 0;
 }
 
@@ -101,8 +98,7 @@ static const char *strip_prefixes(const char *path) {
     return path;
 }
 
-/// Similar to `internal_register_preopened_fd_unlocked` but does not
-/// take a lock.
+/// Similar to `internal_register_preopened_fd` but does not take a lock.
 static int internal_register_preopened_fd_unlocked(__wasi_fd_t fd, const char *relprefix) {
     // Check preconditions.
     assert_invariants();
@@ -260,7 +256,7 @@ void __wasilibc_populate_preopens(void) {
             if (prefix == NULL)
                 goto software;
 
-            // TODO: Remove the cast on `path` once the witx is updated with
+            // TODO: Remove the cast on `prefix` once the witx is updated with
             // char8 support.
             ret = __wasi_fd_prestat_dir_name(fd, (uint8_t *)prefix,
                                              prestat.u.dir.pr_name_len);
@@ -289,4 +285,24 @@ oserr:
     _Exit(EX_OSERR);
 software:
     _Exit(EX_SOFTWARE);
+}
+
+void __wasilibc_reset_preopens(void) {
+    LOCK(lock);
+
+    if (num_preopens) {
+        for (int i = 0; i < num_preopens; ++i) {
+            free((void*) preopens[i].prefix);
+        }
+        free(preopens);
+    }
+    
+    preopens_populated = false;
+    preopens = NULL;
+    num_preopens = 0;
+    preopen_capacity = 0;
+    
+    assert_invariants();
+    
+    UNLOCK(lock);
 }

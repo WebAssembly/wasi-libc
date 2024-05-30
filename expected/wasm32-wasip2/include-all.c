@@ -102,6 +102,7 @@
 #include <memory.h>
 #include <monetary.h>
 #include <mqueue.h>
+#include <netdb.h>
 #include <netinet/icmp6.h>
 #include <netinet/igmp.h>
 #include <netinet/in.h>
@@ -114,6 +115,7 @@
 #include <netpacket/packet.h>
 #include <nl_types.h>
 #include <poll.h>
+#include <pthread.h>
 #include <regex.h>
 #include <sched.h>
 #include <search.h>

@@ -5250,6 +5250,8 @@ static void try_init_allocator(void) {
   gm->least_addr = base;
   gm->seg.base = base;
   gm->seg.size = initial_heap_size;
+  gm->footprint = initial_heap_size;
+  gm->max_footprint = initial_heap_size;
   gm->magic = mparams.magic;
   gm->release_checks = MAX_RELEASE_CHECK_RATE;
   init_bins(gm);

@@ -417,7 +417,7 @@ int listen (int, int);
 int accept (int, struct sockaddr *__restrict, socklen_t *__restrict);
 int accept4(int, struct sockaddr *__restrict, socklen_t *__restrict, int);
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no getsockname/getpeername */
+#if (defined __wasilibc_unmodified_upstream) || (defined __wasilibc_use_wasip2)
 int getsockname (int, struct sockaddr *__restrict, socklen_t *__restrict);
 int getpeername (int, struct sockaddr *__restrict, socklen_t *__restrict);
 #endif
@@ -434,7 +434,7 @@ ssize_t recvmsg (int, struct msghdr *, int);
 #endif
 
 int getsockopt (int, int, int, void *__restrict, socklen_t *__restrict);
-#ifdef __wasilibc_unmodified_upstream /* WASI has no setsockopt */
+#if (defined __wasilibc_unmodified_upstream) || (defined __wasilibc_use_wasip2)
 int setsockopt (int, int, int, const void *, socklen_t);
 #endif
 

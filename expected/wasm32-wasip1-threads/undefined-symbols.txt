@@ -66,7 +66,6 @@ __netf2
 __stack_pointer
 __subtf3
 __tls_align
-__tls_base
 __tls_size
 __trunctfdf2
 __trunctfsf2

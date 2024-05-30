@@ -37,6 +37,13 @@
 #define AF_INET6 PF_INET6
 #define AF_UNIX 3
 #define AF_UNSPEC PF_UNSPEC
+#define AI_ADDRCONFIG 0x20
+#define AI_ALL 0x10
+#define AI_CANONNAME 0x02
+#define AI_NUMERICHOST 0x04
+#define AI_NUMERICSERV 0x400
+#define AI_PASSIVE 0x01
+#define AI_V4MAPPED 0x08
 #define ALT_DIGITS 0x2002F
 #define AM_STR 0x20026
 #define ANYMARK 0x01
@@ -192,6 +199,24 @@
 #define EADDRNOTAVAIL __WASI_ERRNO_ADDRNOTAVAIL
 #define EAFNOSUPPORT __WASI_ERRNO_AFNOSUPPORT
 #define EAGAIN __WASI_ERRNO_AGAIN
+#define EAI_ADDRFAMILY -9
+#define EAI_AGAIN -3
+#define EAI_ALLDONE -103
+#define EAI_BADFLAGS -1
+#define EAI_CANCELED -101
+#define EAI_FAIL -4
+#define EAI_FAMILY -6
+#define EAI_IDN_ENCODE -105
+#define EAI_INPROGRESS -100
+#define EAI_INTR -104
+#define EAI_MEMORY -10
+#define EAI_NODATA -5
+#define EAI_NONAME -2
+#define EAI_NOTCANCELED -102
+#define EAI_OVERFLOW -12
+#define EAI_SERVICE -8
+#define EAI_SOCKTYPE -7
+#define EAI_SYSTEM -11
 #define EALREADY __WASI_ERRNO_ALREADY
 #define EBADF __WASI_ERRNO_BADF
 #define EBADID 5
@@ -489,6 +514,7 @@
 #define HIBITL MINLONG
 #define HIBITS MINSHORT
 #define HOST_NAME_MAX 255
+#define HOST_NOT_FOUND 1
 #define HUGE 3.40282346638528859812e+38F
 #define HUGE_VAL ((double)INFINITY)
 #define HUGE_VALF INFINITY
@@ -1239,6 +1265,14 @@
 #define NEW_ENV_VAR 0
 #define NGROUPS 32
 #define NGROUPS_MAX 32
+#define NI_DGRAM 0x10
+#define NI_MAXHOST 255
+#define NI_MAXSERV 32
+#define NI_NAMEREQD 0x08
+#define NI_NOFQDN 0x04
+#define NI_NUMERICHOST 0x01
+#define NI_NUMERICSCOPE 0x100
+#define NI_NUMERICSERV 0x02
 #define NL_ARGMAX 9
 #define NL_CAT_LOCALE 1
 #define NL_LANGMAX 32
@@ -1257,6 +1291,9 @@
 #define NOTAUTH ns_r_notauth
 #define NOTIMP ns_r_notimpl
 #define NOTZONE ns_r_notzone
+#define NO_ADDRESS NO_DATA
+#define NO_DATA 4
+#define NO_RECOVERY 3
 #define NR_ICMP_TYPES 18
 #define NR_ICMP_UNREACH 15
 #define NSLC 18
@@ -1513,6 +1550,35 @@
 #define PRIxLEAST8 __UINT_LEAST8_FMTx__
 #define PRIxMAX __UINTMAX_FMTx__
 #define PRIxPTR __UINTPTR_FMTx__
+#define PTHREAD_BARRIER_SERIAL_THREAD (-1)
+#define PTHREAD_CANCELED ((void *)-1)
+#define PTHREAD_CANCEL_ASYNCHRONOUS 1
+#define PTHREAD_CANCEL_DEFERRED 0
+#define PTHREAD_CANCEL_DISABLE 1
+#define PTHREAD_CANCEL_ENABLE 0
+#define PTHREAD_CANCEL_MASKED 2
+#define PTHREAD_COND_INITIALIZER {{{0}}}
+#define PTHREAD_CREATE_DETACHED 1
+#define PTHREAD_CREATE_JOINABLE 0
+#define PTHREAD_EXPLICIT_SCHED 1
+#define PTHREAD_INHERIT_SCHED 0
+#define PTHREAD_MUTEX_DEFAULT 0
+#define PTHREAD_MUTEX_ERRORCHECK 2
+#define PTHREAD_MUTEX_INITIALIZER {{{0}}}
+#define PTHREAD_MUTEX_NORMAL 0
+#define PTHREAD_MUTEX_RECURSIVE 1
+#define PTHREAD_MUTEX_ROBUST 1
+#define PTHREAD_MUTEX_STALLED 0
+#define PTHREAD_NULL ((pthread_t)0)
+#define PTHREAD_ONCE_INIT 0
+#define PTHREAD_PRIO_INHERIT 1
+#define PTHREAD_PRIO_NONE 0
+#define PTHREAD_PRIO_PROTECT 2
+#define PTHREAD_PROCESS_PRIVATE 0
+#define PTHREAD_PROCESS_SHARED 1
+#define PTHREAD_RWLOCK_INITIALIZER {{{0}}}
+#define PTHREAD_SCOPE_PROCESS 1
+#define PTHREAD_SCOPE_SYSTEM 0
 #define PTRBITS (sizeof(char *) * 8)
 #define PTRDIFF_MAX INT32_MAX
 #define PTRDIFF_MIN INT32_MIN
@@ -1968,6 +2034,7 @@
 #define TOREAD 00004
 #define TOWRITE 00002
 #define TRANSIENT 4
+#define TRY_AGAIN 2
 #define TSGID 02000
 #define TSS_DTOR_ITERATIONS 4
 #define TSUID 04000
@@ -2173,6 +2240,7 @@
 #define _MATH_H 
 #define _MONETARY_H 
 #define _MQUEUE_H 
+#define _NETDB_H 
 #define _NETINET_ICMP6_H 
 #define _NETINET_IGMP_H 
 #define _NETINET_IN_H 
@@ -2259,14 +2327,8 @@
 #define _POSIX_STREAM_MAX 8
 #define _POSIX_SYMLINK_MAX 255
 #define _POSIX_SYMLOOP_MAX 8
-#define _POSIX_THREAD_ATTR_STACKADDR _POSIX_VERSION
-#define _POSIX_THREAD_ATTR_STACKSIZE _POSIX_VERSION
-#define _POSIX_THREAD_CPUTIME _POSIX_VERSION
 #define _POSIX_THREAD_DESTRUCTOR_ITERATIONS 4
 #define _POSIX_THREAD_KEYS_MAX 128
-#define _POSIX_THREAD_PRIORITY_SCHEDULING _POSIX_VERSION
-#define _POSIX_THREAD_PROCESS_SHARED _POSIX_VERSION
-#define _POSIX_THREAD_SAFE_FUNCTIONS _POSIX_VERSION
 #define _POSIX_THREAD_THREADS_MAX 64
 #define _POSIX_TIMEOUTS _POSIX_VERSION
 #define _POSIX_TIMERS _POSIX_VERSION
@@ -2281,6 +2343,7 @@
 #define _POSIX_V7_ILP32_OFFBIG (1)
 #define _POSIX_VDISABLE 0
 #define _POSIX_VERSION 200809L
+#define _PTHREAD_H 
 #define _PTRDIFF_T 
 #define _REGEX_H 
 #define _SCHED_H 
@@ -3195,7 +3258,7 @@
 #define __wasilibc___typedef_suseconds_t_h 
 #define __wasilibc___typedef_time_t_h 
 #define __wasilibc___typedef_uid_t_h 
-#define __wasilibc_use_wasip2 
+#define __wasilibc_use_wasip2 1
 #define __wasm 1
 #define __wasm32 1
 #define __wasm32__ 1
@@ -3282,6 +3345,8 @@
 #define glob64 glob
 #define glob64_t glob_t
 #define globfree64 globfree
+#define h_addr h_addr_list[0]
+#define h_errno h_errno
 #define howmany(n,d) (((n)+((d)-1))/(d))
 #define htobe16(x) __bswap16(x)
 #define htobe32(x) __bswap32(x)
@@ -3433,6 +3498,9 @@
 #define powerof2(n) !(((n)-1) & (n))
 #define pread64 pread
 #define preadv64 preadv
+#define pthread_cleanup_pop(r) _pthread_cleanup_pop(&__cb, (r)); } while(0)
+#define pthread_cleanup_push(f,x) do { struct __ptcb __cb; _pthread_cleanup_push(&__cb, f, x);
+#define pthread_equal(x,y) ((x)==(y))
 #define pwrite64 pwrite
 #define pwritev64 pwritev
 #define readdir64 readdir

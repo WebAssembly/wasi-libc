@@ -25,6 +25,16 @@ BUILD_LIBC_TOP_HALF ?= yes
 BUILD_LIBSETJMP ?= yes
 # The directory where we will store intermediate artifacts.
 OBJDIR ?= build/$(TARGET_TRIPLE)
+
+# LTO; no, full, or thin
+# Note: thin LTO here is just for experimentation. It has known issues:
+# - https://github.com/llvm/llvm-project/issues/91700
+# - https://github.com/llvm/llvm-project/issues/91711
+LTO ?= no
+ifneq ($(LTO),no)
+CLANG_VERSION ?= $(shell ${CC} -dumpversion)
+override OBJDIR := $(OBJDIR)/llvm-lto/$(CLANG_VERSION)
+endif
 # The directory where we store files and tools for generating WASIp2 bindings
 BINDING_WORK_DIR ?= build/bindings
 # URL from which to retrieve the WIT files used to generate the WASIp2 bindings
@@ -396,6 +406,18 @@ ASMFLAGS += -matomics
 CFLAGS += -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 endif
 
+ifneq ($(LTO),no)
+ifeq ($(LTO),full)
+CFLAGS += -flto=full
+else
+ifeq ($(LTO),thin)
+CFLAGS += -flto=thin
+else
+$(error unknown LTO value: $(LTO))
+endif
+endif
+endif
+
 ifeq ($(WASI_SNAPSHOT), p2)
 CFLAGS += -D__wasilibc_use_wasip2
 endif
@@ -456,6 +478,9 @@ LIBC_BOTTOM_HALF_CRT_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_CRT_SOURCES))
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
 SYSROOT_LIB := $(SYSROOT)/lib/$(TARGET_TRIPLE)
+ifneq ($(LTO),no)
+override SYSROOT_LIB := $(SYSROOT_LIB)/llvm-lto/$(CLANG_VERSION)
+endif
 SYSROOT_INC = $(SYSROOT)/include/$(TARGET_TRIPLE)
 SYSROOT_SHARE = $(SYSROOT)/share/$(TARGET_TRIPLE)
 
@@ -794,11 +819,13 @@ finish: startup_files libc dummy_libs
 	# The build succeeded! The generated sysroot is in $(SYSROOT).
 	#
 
+ifeq ($(LTO),no)
 # The check for defined and undefined symbols expects there to be a heap
 # alloctor (providing malloc, calloc, free, etc). Skip this step if the build
 # is done without a malloc implementation.
 ifneq ($(MALLOC_IMPL),none)
 finish: check-symbols
+endif
 endif
 
 DEFINED_SYMBOLS = $(SYSROOT_SHARE)/defined-symbols.txt

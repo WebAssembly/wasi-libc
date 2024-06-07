@@ -261,6 +261,11 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
 
+LIBC_NONLTO_SOURCES = \
+    $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
+        exit/atexit.c \
+    )
+
 ifeq ($(WASI_SNAPSHOT), p2)
 LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
@@ -474,6 +479,7 @@ LIBWASI_EMULATED_SIGNAL_MUSL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_MUSL_S
 LIBDL_OBJS = $(call objs,$(LIBDL_SOURCES))
 LIBSETJMP_OBJS = $(call objs,$(LIBSETJMP_SOURCES))
 LIBC_BOTTOM_HALF_CRT_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_CRT_SOURCES))
+LIBC_NONLTO_OBJS = $(call objs,$(LIBC_NONLTO_SOURCES))
 
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
@@ -651,6 +657,8 @@ $(SYSROOT_LIB)/libsetjmp.a: $(LIBSETJMP_OBJS)
 	$(AR) crs $@ $(wordlist 800, 100000, $(sort $^))
 
 $(PIC_OBJS): CFLAGS += -fPIC -fvisibility=default
+
+$(LIBC_NONLTO_OBJS): CFLAGS += -fno-lto
 
 $(MUSL_PRINTSCAN_OBJS): CFLAGS += \
 	    -D__wasilibc_printscan_no_long_double \

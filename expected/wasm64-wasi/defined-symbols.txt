@@ -430,6 +430,7 @@ __wasi_port_route_list
 __wasi_port_route_remove
 __wasi_port_unbridge
 __wasi_proc_exec
+__wasi_proc_exec2
 __wasi_proc_exit
 __wasi_proc_fork
 __wasi_proc_id

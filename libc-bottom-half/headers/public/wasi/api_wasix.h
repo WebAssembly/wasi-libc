@@ -3883,7 +3883,7 @@ __wasi_errno_t __wasi_proc_fork(
     __wasi_pid_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
- * execve()  executes  the  program  referred to by pathname.  This causes the
+ * execv()  executes  the  program  referred to by pathname.  This causes the
  * program that is currently being run by the calling process to  be  replaced
  * with  a  new  program, with newly initialized stack, heap, and (initialized
  * and uninitialized) data segments
@@ -3900,6 +3900,30 @@ _Noreturn void __wasi_proc_exec(
      * (entries are separated by line feeds)
      */
     const char *args
+);
+/**
+ * execve()  executes  the  program  referred to by pathname.  This causes the
+ * program that is currently being run by the calling process to  be  replaced
+ * with  a  new  program, with newly initialized stack, heap, and (initialized
+ * and uninitialized) data segments
+ * 
+ * If the named process does not exist then the process will fail and terminate
+ */
+_Noreturn void __wasi_proc_exec2(
+    /**
+     * Name of the process to be spawned
+     */
+    const char *name,
+    /**
+     * List of the arguments to pass the process
+     * (entries are separated by line feeds)
+     */
+    const char *args,
+    /**
+     * List of the env vars to pass the process
+     * (entries are separated by line feeds)
+     */
+    const char *envs
 );
 /**
  * Spawns a new process within the context of the parent process

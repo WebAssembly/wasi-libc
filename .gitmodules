@@ -4,3 +4,6 @@
 [submodule "tools/wasix-headers/WASI"]
 	path = tools/wasix-headers/WASI
 	url = https://github.com/wasix-org/wasix-witx.git
+[submodule "tools/llvm-project"]
+	path = tools/llvm-project
+	url = https://github.com/llvm/llvm-project.git

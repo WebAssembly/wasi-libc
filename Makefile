@@ -508,7 +508,10 @@ ifeq ($(THREAD_MODEL), single)
 MUSL_OMIT_HEADERS += "pthread.h"
 endif
 
-default: finish post-finish
+default: prepare finish post-finish
+
+prepare:
+	rm $(SYSROOT)/lib/$(TARGET_TRIPLE)/libc.a || true
 
 wasix-headers:
 	git submodule init

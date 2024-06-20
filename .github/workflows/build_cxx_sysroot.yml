@@ -2,9 +2,10 @@ name: Build C/C++ Sysroot
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
+  workflow_call:
 
 permissions:
   contents: read
@@ -88,7 +89,6 @@ jobs:
           TOOLCHAIN=/opt/wasix-sysroot/clang-wasix.cmake_toolchain ./test/wasix/run_tests.sh
 
       - name: Upload sysroot
-        if: ${{ !env.ACT }}
         uses: actions/upload-artifact@v2
         with:
           name: wasix-sysroot

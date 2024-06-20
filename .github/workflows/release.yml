@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v*
+
+permissions:
+  contents: write
+  packages: write
+  checks: write
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_cxx_sysroot.yml
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: wasix-sysroot
+          path: wasix-sysroot
+
+      - name: Create published artifacts
+        run: |
+          mkdir publish
+          tar -czf publish/sysroot.tar.gz wasix-sysroot
+
+      - name: Publish
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          draft: true
+          automatic_release_tag: "${{ github.ref_name }}"
+          files: publish/*

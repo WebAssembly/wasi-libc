@@ -9,8 +9,6 @@
 #include <wasi/api.h>
 #include "lookup.h"
 
-int printf (const char *, ...);
-
 int gethostbyname2_r(const char *name, int af,
 	struct hostent *h, char *buf, size_t buflen,
 	struct hostent **res, int *err)
@@ -29,8 +27,6 @@ int gethostbyname2_r(const char *name, int af,
 		*err = NO_RECOVERY;
 		return ENOTSUP;
 	}
-
-	printf("af %d wasi_af %d\n", af, wasi_af);
 
 	*res = 0;
 	cnt = __lookup_name(addrs, canon, name, af, AI_CANONNAME);
@@ -55,7 +51,6 @@ int gethostbyname2_r(const char *name, int af,
 
 	for (i = 0; i < total_cnt; ++i) {
 		if (addrs[i].family != wasi_af) {
-			printf("%d family %d skipped\n", i, addrs[i].family);
 			--cnt;
 		}
 	}
@@ -83,7 +78,6 @@ int gethostbyname2_r(const char *name, int af,
 	for (i=0,j=0; i<total_cnt; i++) {
 		if (addrs[i].family != wasi_af) continue;
 
-		printf("%d %d family %d reported\n", i, j, addrs[i].family);
 		h->h_addr_list[j] = (void *)buf;
 		buf += h->h_length;
 		memcpy(h->h_addr_list[j++], addrs[i].addr, h->h_length);

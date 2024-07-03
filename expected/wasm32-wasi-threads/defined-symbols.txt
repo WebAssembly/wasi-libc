@@ -1155,6 +1155,7 @@ modf
 modff
 modfl
 mrand48
+msync
 mtx_destroy
 mtx_init
 mtx_lock

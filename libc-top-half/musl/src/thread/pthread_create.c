@@ -458,6 +458,9 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 		if (!map) goto fail;
 #endif
 		tsd = map + size - __pthread_tsd_size;
+#ifndef __wasilibc_unmodified_upstream
+	        memset(tsd, 0, __pthread_tsd_size);
+#endif
 		if (!stack) {
 #ifdef __wasilibc_unmodified_upstream
 			stack = tsd - libc.tls_size;

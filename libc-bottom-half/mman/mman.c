@@ -21,6 +21,7 @@ struct map {
     int flags;
     off_t offset;
     size_t length;
+    int fd;
 };
 
 void *mmap(void *addr, size_t length, int prot, int flags,
@@ -90,6 +91,17 @@ void *mmap(void *addr, size_t length, int prot, int flags,
     // or with zeros.
     addr = map + 1;
     if ((flags & MAP_ANON) == 0) {
+        int new_fd = dup(fd);
+
+        if (new_fd < 0) {
+            errno = EINVAL;
+            free(map);
+
+            return NULL;
+        }
+
+        map->fd = new_fd;
+
         char *body = (char *)addr;
         while (length > 0) {
             const ssize_t nread = pread(fd, body, length, offset);
@@ -124,5 +136,38 @@ int munmap(void *addr, size_t length) {
     free(map);
 
     // Success!
+    return 0;
+}
+
+int msync (void *addr, size_t length, int flags) {
+    struct map *map = (struct map *)addr - 1;
+    size_t map_flags = map->flags;
+    off_t map_offset = map->offset;
+    size_t map_length = map->length;
+    int fd = map->fd;
+
+    if (length > map_length) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    if ((map_flags & MAP_ANON) == 0) {
+        char *body = (char *)addr;
+
+        while (length > 0) {
+            const ssize_t nwrite = pwrite(fd, body, length, map_offset);
+
+            if (nwrite > 0) {
+                length -= (size_t)nwrite;
+                map_offset += (size_t)nwrite;
+                body += (size_t)nwrite;
+            } else if (errno == EINTR) {
+                continue;
+            } else {
+                return -1;
+            }
+        }
+    }
+
     return 0;
 }

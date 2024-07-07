@@ -658,7 +658,7 @@ $(SYSROOT_LIB)/libsetjmp.a: $(LIBSETJMP_OBJS)
 
 $(PIC_OBJS): CFLAGS += -fPIC -fvisibility=default
 
-$(LIBC_NONLTO_OBJS): CFLAGS += -fno-lto
+$(LIBC_NONLTO_OBJS): CFLAGS := $(filter-out -flto% -fno-lto, $(CFLAGS)) -fno-lto
 
 $(MUSL_PRINTSCAN_OBJS): CFLAGS += \
 	    -D__wasilibc_printscan_no_long_double \

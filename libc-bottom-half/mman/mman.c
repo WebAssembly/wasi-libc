@@ -117,6 +117,7 @@ void *mmap(void *addr, size_t length, int prot, int flags,
             body += (size_t)nread;
         }
     } else {
+        map->fd = -1;
         memset(addr, 0, length);
     }
 
@@ -135,6 +136,16 @@ int munmap(void *addr, size_t length) {
     // Release the memory.
     free(map);
 
+    // Write the data back to the backing file and close
+    // the file handle
+    if (map->fd != -1) {
+        if ((map->prot & PROT_WRITE) != 0) {
+            msync(addr, length, MS_SYNC);
+        }
+
+        close(map->fd);
+    }
+
     // Success!
     return 0;
 }
@@ -147,6 +158,11 @@ int msync (void *addr, size_t length, int flags) {
     int fd = map->fd;
 
     if (length > map_length) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    if ((map->prot & PROT_WRITE) != 0) {
         errno = EINVAL;
         return -1;
     }

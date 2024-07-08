@@ -138,7 +138,7 @@ int munmap(void *addr, size_t length) {
 
     // Write the data back to the backing file and close
     // the file handle
-    if (map->fd != -1) {
+    if (map->fd > 0) {
         if ((map->prot & PROT_WRITE) != 0) {
             msync(addr, length, MS_SYNC);
         }

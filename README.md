@@ -21,6 +21,9 @@ additional extensions:
 - pipe and event support (`pipe`, `event` )
 - DNS resolution support (`resolve` )
 
+# NOTES
+- Memory mapping is currently not compatible with threads
+
 # WASI(X) Extensions Spec
 
 [WASIX](https://wasix.org) is maintained by wasix.org [here](https://github.com/wasix-org/wasix-witx)

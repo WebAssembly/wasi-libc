@@ -1,5 +1,9 @@
 #include "pthread_impl.h"
 
+#ifndef __wasilibc_unmodified_upstream
+#include <common/clock.h>
+#endif
+
 int pthread_attr_getdetachstate(const pthread_attr_t *a, int *state)
 {
 	*state = a->_a_detach;
@@ -68,6 +72,15 @@ int pthread_barrierattr_getpshared(const pthread_barrierattr_t *restrict a, int 
 int pthread_condattr_getclock(const pthread_condattr_t *restrict a, clockid_t *restrict clk)
 {
 	*clk = a->__attr & 0x7fffffff;
+	return 0;
+}
+#else
+int pthread_condattr_getclock(const pthread_condattr_t *restrict a, clockid_t *restrict clk)
+{
+	if (a->__attr & 0x7fffffff == __WASI_CLOCKID_REALTIME)
+		*clk = CLOCK_REALTIME;
+	if (a->__attr & 0x7fffffff == __WASI_CLOCKID_MONOTONIC)
+		*clk = CLOCK_MONOTONIC;
 	return 0;
 }
 #endif

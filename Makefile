@@ -290,6 +290,14 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_barrierattr_destroy.c \
         thread/pthread_barrierattr_init.c \
         thread/pthread_barrierattr_setpshared.c \
+        thread/pthread_mutex_destroy.c \
+        thread/pthread_mutex_init.c \
+        thread/pthread_mutexattr_destroy.c \
+        thread/pthread_mutexattr_init.c \
+        thread/pthread_mutexattr_setprotocol.c \
+        thread/pthread_mutexattr_setpshared.c \
+        thread/pthread_mutexattr_setrobust.c \
+        thread/pthread_mutexattr_settype.c \
     )
 ifeq ($(THREAD_MODEL), posix)
 # pthreads functions needed for actual thread support
@@ -326,19 +334,11 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_join.c \
         thread/pthread_key_create.c \
         thread/pthread_mutex_consistent.c \
-        thread/pthread_mutex_destroy.c \
-        thread/pthread_mutex_init.c \
         thread/pthread_mutex_getprioceiling.c \
         thread/pthread_mutex_lock.c \
         thread/pthread_mutex_timedlock.c \
         thread/pthread_mutex_trylock.c \
         thread/pthread_mutex_unlock.c \
-        thread/pthread_mutexattr_destroy.c \
-        thread/pthread_mutexattr_init.c \
-        thread/pthread_mutexattr_setprotocol.c \
-        thread/pthread_mutexattr_setpshared.c \
-        thread/pthread_mutexattr_setrobust.c \
-        thread/pthread_mutexattr_settype.c \
         thread/pthread_once.c \
         thread/pthread_rwlock_destroy.c \
         thread/pthread_rwlock_init.c \
@@ -376,6 +376,7 @@ ifeq ($(THREAD_MODEL), single)
 # pthreads stubs for single-threaded environment
 LIBC_TOP_HALF_MUSL_SOURCES += \
     $(STUB_PTHREADS_DIR)/barrier.c \
+    $(STUB_PTHREADS_DIR)/mutex.c \
     $(STUB_PTHREADS_DIR)/stub-pthreads-good.c
 endif
 

@@ -987,7 +987,6 @@ pthread_attr_destroy
 pthread_attr_getdetachstate
 pthread_attr_getguardsize
 pthread_attr_getschedparam
-pthread_attr_getscope
 pthread_attr_getstack
 pthread_attr_getstacksize
 pthread_attr_init

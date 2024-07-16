@@ -29,6 +29,12 @@ int pthread_attr_getschedpolicy(const pthread_attr_t *restrict a, int *restrict 
 	*policy = a->_a_policy;
 	return 0;
 }
+
+int pthread_attr_getscope(const pthread_attr_t *restrict a, int *restrict scope)
+{
+	*scope = PTHREAD_SCOPE_SYSTEM;
+	return 0;
+}
 #else
 int pthread_attr_getschedparam(const pthread_attr_t *restrict a, struct sched_param *restrict param)
 {
@@ -36,12 +42,6 @@ int pthread_attr_getschedparam(const pthread_attr_t *restrict a, struct sched_pa
 	return 0;
 }
 #endif
-
-int pthread_attr_getscope(const pthread_attr_t *restrict a, int *restrict scope)
-{
-	*scope = PTHREAD_SCOPE_SYSTEM;
-	return 0;
-}
 
 int pthread_attr_getstack(const pthread_attr_t *restrict a, void **restrict addr, size_t *restrict size)
 {

@@ -41,6 +41,8 @@ __cxa_finalize
 __default_guardsize
 __default_stacksize
 __des_setkey
+__do_cleanup_pop
+__do_cleanup_push
 __do_des
 __duplocale
 __env_rm_add
@@ -396,6 +398,8 @@ _environ
 _exit
 _flushlbf
 _initialize
+_pthread_cleanup_pop
+_pthread_cleanup_push
 _start
 a64l
 abort
@@ -1115,6 +1119,7 @@ pthread_condattr_init
 pthread_condattr_setclock
 pthread_condattr_setpshared
 pthread_equal
+pthread_exit
 pthread_getspecific
 pthread_key_create
 pthread_key_delete

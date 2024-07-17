@@ -347,6 +347,7 @@ __wasilibc_nocwd_symlinkat
 __wasilibc_nocwd_utimensat
 __wasilibc_open_nomode
 __wasilibc_populate_preopens
+__wasilibc_pthread_self
 __wasilibc_register_preopened_fd
 __wasilibc_rename_newat
 __wasilibc_rename_oldat
@@ -999,6 +1000,7 @@ pthread_rwlockattr_destroy
 pthread_rwlockattr_getpshared
 pthread_rwlockattr_init
 pthread_rwlockattr_setpshared
+pthread_self
 pthread_spin_destroy
 pthread_spin_init
 pthread_spin_lock
@@ -1185,6 +1187,7 @@ tfind
 tgamma
 tgammaf
 tgammal
+thrd_current
 thrd_sleep
 time
 timegm

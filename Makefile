@@ -300,6 +300,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_barrierattr_init.c \
         thread/pthread_barrierattr_setpshared.c \
         thread/pthread_cleanup_push.c \
+        thread/pthread_cancel.c \
         thread/pthread_cond_broadcast.c \
         thread/pthread_cond_destroy.c \
         thread/pthread_cond_init.c \
@@ -345,6 +346,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_rwlockattr_init.c \
         thread/pthread_rwlockattr_setpshared.c \
         thread/pthread_setcancelstate.c \
+        thread/pthread_setcanceltype.c \
         thread/pthread_setspecific.c \
         thread/pthread_self.c \
         thread/pthread_spin_destroy.c \

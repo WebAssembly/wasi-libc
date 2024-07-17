@@ -182,6 +182,8 @@ __powf_log2_data
 __progname
 __progname_full
 __pthread_cond_timedwait
+__pthread_key_create
+__pthread_key_delete
 __pthread_mutex_consistent
 __pthread_mutex_lock
 __pthread_mutex_timedlock
@@ -194,6 +196,11 @@ __pthread_rwlock_tryrdlock
 __pthread_rwlock_trywrlock
 __pthread_rwlock_unlock
 __pthread_rwlock_wrlock
+__pthread_setcancelstate
+__pthread_testcancel
+__pthread_tsd_main
+__pthread_tsd_run_dtors
+__pthread_tsd_size
 __putenv
 __qsort_r
 __rand48_step
@@ -254,6 +261,9 @@ __sysv_signal
 __tan
 __tandf
 __tanl
+__testcancel
+__tl_lock
+__tl_unlock
 __tm_to_secs
 __tm_to_tzname
 __tolower_l
@@ -1091,6 +1101,7 @@ pthread_barrierattr_destroy
 pthread_barrierattr_getpshared
 pthread_barrierattr_init
 pthread_barrierattr_setpshared
+pthread_cancel
 pthread_cond_broadcast
 pthread_cond_destroy
 pthread_cond_init
@@ -1103,6 +1114,10 @@ pthread_condattr_getpshared
 pthread_condattr_init
 pthread_condattr_setclock
 pthread_condattr_setpshared
+pthread_equal
+pthread_getspecific
+pthread_key_create
+pthread_key_delete
 pthread_mutex_consistent
 pthread_mutex_destroy
 pthread_mutex_init
@@ -1134,11 +1149,15 @@ pthread_rwlockattr_getpshared
 pthread_rwlockattr_init
 pthread_rwlockattr_setpshared
 pthread_self
+pthread_setcancelstate
+pthread_setcanceltype
+pthread_setspecific
 pthread_spin_destroy
 pthread_spin_init
 pthread_spin_lock
 pthread_spin_trylock
 pthread_spin_unlock
+pthread_testcancel
 putc
 putc_unlocked
 putchar
@@ -1421,6 +1440,7 @@ tgamma
 tgammaf
 tgammal
 thrd_current
+thrd_equal
 thrd_sleep
 time
 timegm
@@ -1442,6 +1462,7 @@ truncate
 truncf
 truncl
 tsearch
+tss_get
 twalk
 udp_accept
 udp_bind

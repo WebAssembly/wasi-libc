@@ -290,10 +290,14 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_barrierattr_destroy.c \
         thread/pthread_barrierattr_init.c \
         thread/pthread_barrierattr_setpshared.c \
+        thread/pthread_cancel.c \
         thread/pthread_condattr_destroy.c \
         thread/pthread_condattr_init.c \
         thread/pthread_condattr_setclock.c \
         thread/pthread_condattr_setpshared.c \
+        thread/pthread_equal.c \
+        thread/pthread_getspecific.c \
+        thread/pthread_key_create.c \
         thread/pthread_mutex_destroy.c \
         thread/pthread_mutex_init.c \
         thread/pthread_mutexattr_destroy.c \
@@ -308,8 +312,12 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_rwlockattr_init.c \
         thread/pthread_rwlockattr_setpshared.c \
         thread/pthread_self.c \
+        thread/pthread_setcancelstate.c \
+        thread/pthread_setcanceltype.c \
+        thread/pthread_setspecific.c \
         thread/pthread_spin_destroy.c \
         thread/pthread_spin_init.c \
+        thread/pthread_testcancel.c \
     )
 ifeq ($(THREAD_MODEL), posix)
 # pthreads functions needed for actual thread support
@@ -327,7 +335,6 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_barrier_init.c \
         thread/pthread_barrier_wait.c \
         thread/pthread_cleanup_push.c \
-        thread/pthread_cancel.c \
         thread/pthread_cond_broadcast.c \
         thread/pthread_cond_destroy.c \
         thread/pthread_cond_init.c \
@@ -336,11 +343,8 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_cond_wait.c \
         thread/pthread_create.c \
         thread/pthread_detach.c \
-        thread/pthread_equal.c \
         thread/pthread_getattr_np.c \
-        thread/pthread_getspecific.c \
         thread/pthread_join.c \
-        thread/pthread_key_create.c \
         thread/pthread_mutex_consistent.c \
         thread/pthread_mutex_getprioceiling.c \
         thread/pthread_mutex_lock.c \
@@ -355,13 +359,9 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_rwlock_trywrlock.c \
         thread/pthread_rwlock_unlock.c \
         thread/pthread_rwlock_wrlock.c \
-        thread/pthread_setcancelstate.c \
-        thread/pthread_setcanceltype.c \
-        thread/pthread_setspecific.c \
         thread/pthread_spin_lock.c \
         thread/pthread_spin_trylock.c \
         thread/pthread_spin_unlock.c \
-        thread/pthread_testcancel.c \
         thread/sem_destroy.c \
         thread/sem_getvalue.c \
         thread/sem_init.c \

@@ -290,6 +290,10 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_barrierattr_destroy.c \
         thread/pthread_barrierattr_init.c \
         thread/pthread_barrierattr_setpshared.c \
+        thread/pthread_condattr_destroy.c \
+        thread/pthread_condattr_init.c \
+        thread/pthread_condattr_setclock.c \
+        thread/pthread_condattr_setpshared.c \
         thread/pthread_mutex_destroy.c \
         thread/pthread_mutex_init.c \
         thread/pthread_mutexattr_destroy.c \
@@ -322,10 +326,6 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_cond_signal.c \
         thread/pthread_cond_timedwait.c \
         thread/pthread_cond_wait.c \
-        thread/pthread_condattr_destroy.c \
-        thread/pthread_condattr_init.c \
-        thread/pthread_condattr_setclock.c \
-        thread/pthread_condattr_setpshared.c \
         thread/pthread_create.c \
         thread/pthread_detach.c \
         thread/pthread_equal.c \
@@ -376,6 +376,7 @@ ifeq ($(THREAD_MODEL), single)
 # pthreads stubs for single-threaded environment
 LIBC_TOP_HALF_MUSL_SOURCES += \
     $(STUB_PTHREADS_DIR)/barrier.c \
+    $(STUB_PTHREADS_DIR)/condvar.c \
     $(STUB_PTHREADS_DIR)/mutex.c \
     $(STUB_PTHREADS_DIR)/stub-pthreads-good.c
 endif

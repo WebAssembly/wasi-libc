@@ -181,6 +181,7 @@ __pow_log_data
 __powf_log2_data
 __progname
 __progname_full
+__pthread_cond_timedwait
 __pthread_mutex_consistent
 __pthread_mutex_lock
 __pthread_mutex_timedlock
@@ -1082,8 +1083,18 @@ pthread_barrierattr_destroy
 pthread_barrierattr_getpshared
 pthread_barrierattr_init
 pthread_barrierattr_setpshared
+pthread_cond_broadcast
+pthread_cond_destroy
+pthread_cond_init
+pthread_cond_signal
+pthread_cond_timedwait
+pthread_cond_wait
+pthread_condattr_destroy
 pthread_condattr_getclock
 pthread_condattr_getpshared
+pthread_condattr_init
+pthread_condattr_setclock
+pthread_condattr_setpshared
 pthread_mutex_consistent
 pthread_mutex_destroy
 pthread_mutex_init

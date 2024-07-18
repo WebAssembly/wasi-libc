@@ -1132,6 +1132,11 @@ pthread_rwlockattr_destroy
 pthread_rwlockattr_getpshared
 pthread_rwlockattr_init
 pthread_rwlockattr_setpshared
+pthread_spin_destroy
+pthread_spin_init
+pthread_spin_lock
+pthread_spin_trylock
+pthread_spin_unlock
 putc
 putc_unlocked
 putchar

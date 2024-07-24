@@ -66,7 +66,7 @@ ifeq ($(WASI_SNAPSHOT), p2)
 TARGET_TRIPLE = wasm32-wasip2
 endif
 
-BUILTINS_LIB ?= $(shell ${CC} --print-libgcc-file-name)
+BUILTINS_LIB ?= $(shell ${CC} ${CFLAGS} --print-libgcc-file-name)
 
 # These variables describe the locations of various files and directories in
 # the source tree.

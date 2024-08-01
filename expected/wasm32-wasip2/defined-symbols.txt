@@ -735,6 +735,11 @@ ftello
 ftello64
 ftime
 ftruncate
+fts_children
+fts_close
+fts_open
+fts_read
+fts_set
 futimens
 futimesat
 fwide

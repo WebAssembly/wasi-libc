@@ -16,7 +16,6 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no CPU scheduling support. */
 struct sched_param {
 	int sched_priority;
 	int __reserved1;
@@ -31,6 +30,7 @@ struct sched_param {
 	int __reserved3;
 };
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no CPU scheduling support. */
 int    sched_get_priority_max(int);
 int    sched_get_priority_min(int);
 int    sched_getparam(pid_t, struct sched_param *);

@@ -273,7 +273,53 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
     )
 endif
 
+# pthreads functions (possibly stub) for either thread model
+LIBC_TOP_HALF_MUSL_SOURCES += \
+    $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
+        thread/default_attr.c \
+        thread/pthread_attr_destroy.c \
+        thread/pthread_attr_get.c \
+        thread/pthread_attr_init.c \
+        thread/pthread_attr_setdetachstate.c \
+        thread/pthread_attr_setguardsize.c \
+        thread/pthread_attr_setschedparam.c \
+        thread/pthread_attr_setstack.c \
+        thread/pthread_attr_setstacksize.c \
+        thread/pthread_barrierattr_destroy.c \
+        thread/pthread_barrierattr_init.c \
+        thread/pthread_barrierattr_setpshared.c \
+        thread/pthread_cancel.c \
+        thread/pthread_cleanup_push.c \
+        thread/pthread_condattr_destroy.c \
+        thread/pthread_condattr_init.c \
+        thread/pthread_condattr_setclock.c \
+        thread/pthread_condattr_setpshared.c \
+        thread/pthread_equal.c \
+        thread/pthread_getspecific.c \
+        thread/pthread_key_create.c \
+        thread/pthread_mutex_destroy.c \
+        thread/pthread_mutex_init.c \
+        thread/pthread_mutexattr_destroy.c \
+        thread/pthread_mutexattr_init.c \
+        thread/pthread_mutexattr_setprotocol.c \
+        thread/pthread_mutexattr_setpshared.c \
+        thread/pthread_mutexattr_setrobust.c \
+        thread/pthread_mutexattr_settype.c \
+        thread/pthread_rwlock_destroy.c \
+        thread/pthread_rwlock_init.c \
+        thread/pthread_rwlockattr_destroy.c \
+        thread/pthread_rwlockattr_init.c \
+        thread/pthread_rwlockattr_setpshared.c \
+        thread/pthread_self.c \
+        thread/pthread_setcancelstate.c \
+        thread/pthread_setcanceltype.c \
+        thread/pthread_setspecific.c \
+        thread/pthread_spin_destroy.c \
+        thread/pthread_spin_init.c \
+        thread/pthread_testcancel.c \
+    )
 ifeq ($(THREAD_MODEL), posix)
+# pthreads functions needed for actual thread support
 LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
         env/__init_tls.c \
@@ -284,57 +330,26 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/__lock.c \
         thread/__wait.c \
         thread/__timedwait.c \
-        thread/default_attr.c \
-        thread/pthread_attr_destroy.c \
-        thread/pthread_attr_get.c \
-        thread/pthread_attr_init.c \
-        thread/pthread_attr_setdetachstate.c \
-        thread/pthread_attr_setguardsize.c \
-        thread/pthread_attr_setstack.c \
-        thread/pthread_attr_setstacksize.c \
-        thread/pthread_attr_setschedparam.c \
         thread/pthread_barrier_destroy.c \
         thread/pthread_barrier_init.c \
         thread/pthread_barrier_wait.c \
-        thread/pthread_barrierattr_destroy.c \
-        thread/pthread_barrierattr_init.c \
-        thread/pthread_barrierattr_setpshared.c \
-        thread/pthread_cleanup_push.c \
-        thread/pthread_cancel.c \
         thread/pthread_cond_broadcast.c \
         thread/pthread_cond_destroy.c \
         thread/pthread_cond_init.c \
         thread/pthread_cond_signal.c \
         thread/pthread_cond_timedwait.c \
         thread/pthread_cond_wait.c \
-        thread/pthread_condattr_destroy.c \
-        thread/pthread_condattr_init.c \
-        thread/pthread_condattr_setclock.c \
-        thread/pthread_condattr_setpshared.c \
         thread/pthread_create.c \
         thread/pthread_detach.c \
-        thread/pthread_equal.c \
         thread/pthread_getattr_np.c \
-        thread/pthread_getspecific.c \
         thread/pthread_join.c \
-        thread/pthread_key_create.c \
         thread/pthread_mutex_consistent.c \
-        thread/pthread_mutex_destroy.c \
-        thread/pthread_mutex_init.c \
         thread/pthread_mutex_getprioceiling.c \
         thread/pthread_mutex_lock.c \
         thread/pthread_mutex_timedlock.c \
         thread/pthread_mutex_trylock.c \
         thread/pthread_mutex_unlock.c \
-        thread/pthread_mutexattr_destroy.c \
-        thread/pthread_mutexattr_init.c \
-        thread/pthread_mutexattr_setprotocol.c \
-        thread/pthread_mutexattr_setpshared.c \
-        thread/pthread_mutexattr_setrobust.c \
-        thread/pthread_mutexattr_settype.c \
         thread/pthread_once.c \
-        thread/pthread_rwlock_destroy.c \
-        thread/pthread_rwlock_init.c \
         thread/pthread_rwlock_rdlock.c \
         thread/pthread_rwlock_timedrdlock.c \
         thread/pthread_rwlock_timedwrlock.c \
@@ -342,19 +357,9 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_rwlock_trywrlock.c \
         thread/pthread_rwlock_unlock.c \
         thread/pthread_rwlock_wrlock.c \
-        thread/pthread_rwlockattr_destroy.c \
-        thread/pthread_rwlockattr_init.c \
-        thread/pthread_rwlockattr_setpshared.c \
-        thread/pthread_setcancelstate.c \
-        thread/pthread_setcanceltype.c \
-        thread/pthread_setspecific.c \
-        thread/pthread_self.c \
-        thread/pthread_spin_destroy.c \
-        thread/pthread_spin_init.c \
         thread/pthread_spin_lock.c \
         thread/pthread_spin_trylock.c \
         thread/pthread_spin_unlock.c \
-        thread/pthread_testcancel.c \
         thread/sem_destroy.c \
         thread/sem_getvalue.c \
         thread/sem_init.c \
@@ -363,6 +368,18 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/sem_trywait.c \
         thread/sem_wait.c \
         thread/wasm32/wasi_thread_start.s \
+    )
+endif
+ifeq ($(THREAD_MODEL), single)
+# pthreads stubs for single-threaded environment
+LIBC_TOP_HALF_MUSL_SOURCES += \
+    $(addprefix $(LIBC_TOP_HALF_DIR)/stub-pthreads/, \
+        barrier.c \
+        condvar.c \
+        mutex.c \
+        rwlock.c \
+        spinlock.c \
+        stub-pthreads.c \
     )
 endif
 
@@ -413,10 +430,10 @@ ifeq ($(THREAD_MODEL), posix)
 # https://reviews.llvm.org/D130053).
 CFLAGS += -mthread-model posix -pthread -ftls-model=local-exec
 ASMFLAGS += -matomics
+endif
 
 # Include cloudlib's directory to access the structure definition of clockid_t
 CFLAGS += -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
-endif
 
 ifneq ($(LTO),no)
 ifeq ($(LTO),full)

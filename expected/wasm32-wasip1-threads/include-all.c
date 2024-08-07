@@ -86,6 +86,7 @@
 #include <float.h>
 #include <fmtmsg.h>
 #include <fnmatch.h>
+#include <fts.h>
 #include <ftw.h>
 #include <getopt.h>
 #include <glob.h>

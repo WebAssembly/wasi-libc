@@ -9,7 +9,7 @@
 # - `run`: execute the benchmarks with a Wasm `$(ENGINE)` of choice (e.g.,
 #   Wasmtime)
 
-test: run
+test: run run_smoke
 
 # Unlike the `libc-test` directory, we will output all artifacts to the `build`
 # directory (keeping with the `wasi-libc` conventions).
@@ -189,6 +189,10 @@ endif
 
 clean::
 	rm -rf $(OBJDIR)/*/*.err
+
+##### SMOKE TEST SUITE #########################################################
+
+include smoke/smoke.mk
 
 ##### MISC #####################################################################
 

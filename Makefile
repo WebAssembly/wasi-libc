@@ -619,12 +619,12 @@ PIC_OBJS = \
 
 # Note: libc.so is special because it shouldn't link to libc.so.
 $(SYSROOT_LIB)/libc.so: $(OBJDIR)/libc.so.a $(BUILTINS_LIB)
-	$(CC) --target=$(TARGET_TRIPLE) -nodefaultlibs -shared --sysroot=$(SYSROOT) \
+	$(CC) $(CFLAGS) -nodefaultlibs -shared --sysroot=$(SYSROOT) \
 	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB) \
 	-Wl,--allow-undefined-file=linker-provided-symbols.txt
 
 $(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(SYSROOT_LIB)/libc.so
-	$(CC) --target=$(TARGET_TRIPLE) -shared --sysroot=$(SYSROOT) \
+	$(CC) $(CFLAGS) -shared --sysroot=$(SYSROOT) \
 	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive \
 	-Wl,--allow-undefined-file=linker-provided-symbols.txt
 

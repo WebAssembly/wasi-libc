@@ -624,7 +624,7 @@ $(SYSROOT_LIB)/libc.so: $(OBJDIR)/libc.so.a $(BUILTINS_LIB)
 	-Wl,--allow-undefined-file=linker-provided-symbols.txt
 
 $(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(SYSROOT_LIB)/libc.so
-	$(CC) -v --target=$(TARGET_TRIPLE) -shared --sysroot=$(SYSROOT) \
+	$(CC) --target=$(TARGET_TRIPLE) -shared --sysroot=$(SYSROOT) \
 	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive \
 	-Wl,--allow-undefined-file=linker-provided-symbols.txt
 

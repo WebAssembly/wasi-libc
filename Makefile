@@ -618,6 +618,8 @@ PIC_OBJS = \
 # the `%.a` rule below for details.
 
 # Note: libc.so is special because it shouldn't link to libc.so.
+# Note: --allow-undefined-file=linker-provided-symbols.txt is
+# a workaround for https://github.com/llvm/llvm-project/issues/103592
 $(SYSROOT_LIB)/libc.so: $(OBJDIR)/libc.so.a $(BUILTINS_LIB)
 	$(CC) $(CFLAGS) -nodefaultlibs -shared --sysroot=$(SYSROOT) \
 	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB) \

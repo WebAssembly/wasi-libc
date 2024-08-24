@@ -621,12 +621,14 @@ PIC_OBJS = \
 # Note: --allow-undefined-file=linker-provided-symbols.txt is
 # a workaround for https://github.com/llvm/llvm-project/issues/103592
 $(SYSROOT_LIB)/libc.so: $(OBJDIR)/libc.so.a $(BUILTINS_LIB)
-	$(CC) $(CFLAGS) -nodefaultlibs -shared --sysroot=$(SYSROOT) \
+	$(CC) $(EXTRA_CFLAGS) --target=${TARGET_TRIPLE} -nodefaultlibs \
+	-shared --sysroot=$(SYSROOT) \
 	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB) \
 	-Wl,--allow-undefined-file=linker-provided-symbols.txt
 
 $(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(SYSROOT_LIB)/libc.so
-	$(CC) $(CFLAGS) -shared --sysroot=$(SYSROOT) \
+	$(CC) $(EXTRA_CFLAGS) --target=${TARGET_TRIPLE} \
+	-shared --sysroot=$(SYSROOT) \
 	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive \
 	-Wl,--allow-undefined-file=linker-provided-symbols.txt
 

@@ -264,6 +264,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
 LIBC_NONLTO_SOURCES = \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
         exit/atexit.c \
+        setjmp/wasm32/rt.c \
     )
 
 ifeq ($(WASI_SNAPSHOT), p2)

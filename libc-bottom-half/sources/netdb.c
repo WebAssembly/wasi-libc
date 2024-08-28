@@ -1,6 +1,7 @@
 #include <netdb.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <arpa/inet.h>
 
 #include <wasi/sockets_utils.h>
 
@@ -25,6 +26,7 @@ static int map_error(ip_name_lookup_error_code_t error)
 }
 
 static int add_addr(ip_name_lookup_option_ip_address_t address,
+		    in_port_t port,
 		    const struct addrinfo *restrict hint,
 		    struct addrinfo **restrict current,
 		    struct addrinfo **restrict res)
@@ -51,7 +53,7 @@ static int add_addr(ip_name_lookup_option_ip_address_t address,
 
 		struct sockaddr_in sockaddr = {
 			.sin_family = AF_INET,
-			.sin_port = 0,
+			.sin_port = port,
 			.sin_addr = { .s_addr = ip.f0 | (ip.f1 << 8) |
 						(ip.f2 << 16) | (ip.f3 << 24) },
 		};
@@ -76,7 +78,7 @@ static int add_addr(ip_name_lookup_option_ip_address_t address,
 
 		struct sockaddr_in6 sockaddr = {
 		    .sin6_family = AF_INET6,
-		    .sin6_port = 0,
+		    .sin6_port = port,
 		    .sin6_addr = {
 			.s6_addr = {
 			    ip.f0 >> 8,
@@ -152,12 +154,25 @@ int getaddrinfo(const char *restrict host, const char *restrict serv,
 		    &error)) {
 		ip_name_lookup_borrow_resolve_address_stream_t stream_borrow =
 			ip_name_lookup_borrow_resolve_address_stream(stream);
+		// The 'serv' parameter can be either a port number or a service name.
+		//
+		// TODO wasi-sockets: If the conversion of 'serv' to a valid port
+		// number fails, use getservbyname() to resolve the service name to
+		// its corresponding port number. This can be done after the
+		// getservbyname function is implemented.)
+		int port = 0;
+		if (serv != NULL) {
+			port = __wasi_sockets_utils__parse_port(serv);
+			if (port < 0) {
+				return EAI_NONAME;
+			}
+		}
 		while (true) {
 			ip_name_lookup_option_ip_address_t address;
 			if (ip_name_lookup_method_resolve_address_stream_resolve_next_address(
 				    stream_borrow, &address, &error)) {
 				if (address.is_some) {
-					int error = add_addr(address, hint,
+					int error = add_addr(address, htons(port), hint,
 							     &current, res);
 					if (error) {
 						return error;

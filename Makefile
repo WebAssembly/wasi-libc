@@ -617,9 +617,21 @@ PIC_OBJS = \
 # link that using `--whole-archive` rather than pass the object files directly
 # to CC.  This is a workaround for a Windows command line size limitation.  See
 # the `%.a` rule below for details.
-$(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(BUILTINS_LIB)
-	$(CC) --target=$(TARGET_TRIPLE) -nodefaultlibs -shared --sysroot=$(SYSROOT) \
-	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB)
+
+# Note: libc.so is special because it shouldn't link to libc.so.
+# Note: --allow-undefined-file=linker-provided-symbols.txt is
+# a workaround for https://github.com/llvm/llvm-project/issues/103592
+$(SYSROOT_LIB)/libc.so: $(OBJDIR)/libc.so.a $(BUILTINS_LIB)
+	$(CC) $(EXTRA_CFLAGS) --target=${TARGET_TRIPLE} -nodefaultlibs \
+	-shared --sysroot=$(SYSROOT) \
+	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB) \
+	-Wl,--allow-undefined-file=linker-provided-symbols.txt
+
+$(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(SYSROOT_LIB)/libc.so
+	$(CC) $(EXTRA_CFLAGS) --target=${TARGET_TRIPLE} \
+	-shared --sysroot=$(SYSROOT) \
+	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive \
+	-Wl,--allow-undefined-file=linker-provided-symbols.txt
 
 $(OBJDIR)/libc.so.a: $(LIBC_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS)
 

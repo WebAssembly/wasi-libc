@@ -807,13 +807,7 @@ $(LIBWASI_EMULATED_PTHREAD_OBJS) $(LIBWASI_EMULATED_PTHREAD_SO_OBJS): CFLAGS += 
 $(EMMALLOC_OBJS): CFLAGS += \
     -fno-strict-aliasing
 
-include_dirs:
-	#
-	# Install the include files.
-	#
-	mkdir -p "$(SYSROOT_INC)"
-	cp -r "$(LIBC_BOTTOM_HALF_HEADERS_PUBLIC)"/* "$(SYSROOT_INC)"
-
+$(SYSROOT_INC)/bits/alltypes.h: $(LIBC_TOP_HALF_MUSL_DIR)/tools/mkalltypes.sed $(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm32/bits/alltypes.h.in $(LIBC_TOP_HALF_MUSL_DIR)/include/alltypes.h.in
 	# Generate musl's bits/alltypes.h header.
 	mkdir -p "$(SYSROOT_INC)/bits"
 	sed -f $(LIBC_TOP_HALF_MUSL_DIR)/tools/mkalltypes.sed \
@@ -821,20 +815,33 @@ include_dirs:
 	    $(LIBC_TOP_HALF_MUSL_DIR)/include/alltypes.h.in \
 	    > "$(SYSROOT_INC)/bits/alltypes.h"
 
-	# Copy in the bulk of musl's public header files.
-	cp -r "$(LIBC_TOP_HALF_MUSL_INC)"/* "$(SYSROOT_INC)"
-	# Copy in the musl's "bits" header files.
-	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/generic/bits/* "$(SYSROOT_INC)/bits"
-	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/wasm32/bits/* "$(SYSROOT_INC)/bits"
-
-	cp "$(MUSL_FTS_SRC_DIR)/fts.h" "$(SYSROOT_INC)/fts.h"
-
-	# Remove selected header files.
-	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
+$(SYSROOT_INC)/__wasi_snapshot.h:
+	mkdir -p "$(SYSROOT_INC)"
 ifeq ($(WASI_SNAPSHOT), p2)
 	printf '#ifndef __wasilibc_use_wasip2\n#define __wasilibc_use_wasip2\n#endif\n' \
 		> "$(SYSROOT_INC)/__wasi_snapshot.h"
+else
+	printf '/* This file is (practically) empty by default.  The Makefile will replace it\n   with a non-empty version that defines `__wasilibc_use_wasip2` if targeting\n   `wasm32-wasip2`.\n */\n\n' \
+		> "$(SYSROOT_INC)/__wasi_snapshot.h"
 endif
+
+include_dirs: $(SYSROOT_INC)/bits/alltypes.h $(SYSROOT_INC)/__wasi_snapshot.h
+	#
+	# Install the include files.
+	#
+	mkdir -p "$(SYSROOT_INC)"
+	cp -p -r "$(LIBC_BOTTOM_HALF_HEADERS_PUBLIC)"/* "$(SYSROOT_INC)"
+
+	# Copy in the bulk of musl's public header files.
+	cp -p -r "$(LIBC_TOP_HALF_MUSL_INC)"/* "$(SYSROOT_INC)"
+	# Copy in the musl's "bits" header files.
+	cp -p -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/generic/bits/* "$(SYSROOT_INC)/bits"
+	cp -p -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/wasm32/bits/* "$(SYSROOT_INC)/bits"
+
+	cp -p -r "$(MUSL_FTS_SRC_DIR)/fts.h" "$(SYSROOT_INC)/fts.h"
+
+	# Remove selected header files.
+	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
 
 startup_files: include_dirs $(LIBC_BOTTOM_HALF_CRT_OBJS)
 	#
@@ -1035,7 +1042,7 @@ check-symbols: startup_files libc
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"
-	cp -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"
+	cp -p -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"
 
 $(BINDING_WORK_DIR)/wasi-cli:
 	mkdir -p "$(BINDING_WORK_DIR)"

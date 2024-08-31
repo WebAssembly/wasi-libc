@@ -27,6 +27,7 @@ static int map_error(ip_name_lookup_error_code_t error)
 
 static int add_addr(ip_name_lookup_option_ip_address_t address,
 		    in_port_t port,
+			int socktype,
 		    const struct addrinfo *restrict hint,
 		    struct addrinfo **restrict current,
 		    struct addrinfo **restrict res)
@@ -117,7 +118,7 @@ static int add_addr(ip_name_lookup_option_ip_address_t address,
 	*result = (struct addrinfo){
 		.ai_family = family,
 		.ai_flags = 0,
-		.ai_socktype = SOCK_STREAM,
+		.ai_socktype = socktype,
 		.ai_protocol = 0,
 		.ai_addrlen = addrlen,
 		.ai_addr = addr,
@@ -155,16 +156,19 @@ int getaddrinfo(const char *restrict host, const char *restrict serv,
 		ip_name_lookup_borrow_resolve_address_stream_t stream_borrow =
 			ip_name_lookup_borrow_resolve_address_stream(stream);
 		// The 'serv' parameter can be either a port number or a service name.
-		//
-		// TODO wasi-sockets: If the conversion of 'serv' to a valid port
-		// number fails, use getservbyname() to resolve the service name to
-		// its corresponding port number. This can be done after the
-		// getservbyname function is implemented.)
 		int port = 0;
+		uint16_t protocol = SERVICE_PROTOCOL_TCP;
 		if (serv != NULL) {
 			port = __wasi_sockets_utils__parse_port(serv);
 			if (port < 0) {
-				return EAI_NONAME;
+				const service_entry_t *service = __wasi_sockets_utils__get_service_entry_by_name(serv);
+				if (service) {
+					port = service->port;
+					protocol = service->protocol;
+				}
+				else {
+					return EAI_NONAME;
+				}
 			}
 		}
 		while (true) {
@@ -172,10 +176,19 @@ int getaddrinfo(const char *restrict host, const char *restrict serv,
 			if (ip_name_lookup_method_resolve_address_stream_resolve_next_address(
 				    stream_borrow, &address, &error)) {
 				if (address.is_some) {
-					int error = add_addr(address, htons(port), hint,
-							     &current, res);
-					if (error) {
-						return error;
+					if (protocol & SERVICE_PROTOCOL_TCP) {
+						int error = add_addr(address, htons(port), SOCK_STREAM,
+										hint, &current, res);
+						if (error) {
+							return error;
+						}
+					}
+					if (protocol & SERVICE_PROTOCOL_UDP) {
+						int error = add_addr(address, htons(port), SOCK_DGRAM,
+										hint, &current, res);
+						if (error) {
+							return error;
+						}
 					}
 				} else {
 					return 0;

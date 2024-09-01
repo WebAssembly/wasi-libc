@@ -7,6 +7,8 @@
 
 _Thread_local int h_errno = 0;
 
+static struct servent global_serv = { 0 };
+
 static int map_error(ip_name_lookup_error_code_t error)
 {
 	switch (error) {
@@ -137,6 +139,29 @@ static int add_addr(ip_name_lookup_option_ip_address_t address,
         return 0;
 }
 
+static bool set_global_serv_entry(const service_entry_t *entry, const char *proto) {
+	if (!entry) {
+		return false; // Service not found
+	}
+
+	global_serv.s_name = entry->s_name;
+	global_serv.s_port = htons(entry->port);
+	global_serv.s_aliases = NULL;
+
+	// If proto is NULL then any protocol is matched
+	if ((!proto || strcmp(proto, "tcp") == 0) && entry->protocol & SERVICE_PROTOCOL_TCP) {
+		global_serv.s_proto = "tcp";
+	}
+	else if ((!proto || strcmp(proto, "udp") == 0) && entry->protocol & SERVICE_PROTOCOL_UDP) {
+		global_serv.s_proto = "udp";
+	}
+	else {
+		return false; // Protocol not supported
+	}
+
+	return true;
+}
+
 int getaddrinfo(const char *restrict host, const char *restrict serv,
 		const struct addrinfo *restrict hint,
 		struct addrinfo **restrict res)
@@ -249,14 +274,20 @@ const char *hstrerror(int err)
 
 struct servent *getservbyname(const char *name, const char *proto)
 {
-	// TODO wasi-sockets
-	return NULL;
+	const service_entry_t *entry = __wasi_sockets_utils__get_service_entry_by_name(name);
+	if (!set_global_serv_entry(entry, proto)) {
+		return NULL;
+	}
+	return &global_serv;
 }
 
 struct servent *getservbyport(int port, const char *proto)
 {
-	// TODO wasi-sockets
-	return NULL;
+	const service_entry_t *entry = __wasi_sockets_utils__get_service_entry_by_port(htons(port));
+	if (!set_global_serv_entry(entry, proto)) {
+		return NULL;
+	}
+	return &global_serv;
 }
 
 struct protoent *getprotobyname(const char *name)

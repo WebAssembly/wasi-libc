@@ -171,6 +171,7 @@
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc-nocwd.h>
 #include <wasi/libc.h>
+#include <wasi/version.h>
 #include <wasi/wasip2.h>
 #include <wchar.h>
 #include <wctype.h>

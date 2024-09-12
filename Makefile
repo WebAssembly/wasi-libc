@@ -68,6 +68,8 @@ endif
 
 BUILTINS_LIB ?= $(shell ${CC} ${CFLAGS} --print-libgcc-file-name)
 
+LIBC_GIT_REF := $(shell git describe --tags --dirty)
+
 # These variables describe the locations of various files and directories in
 # the source tree.
 DLMALLOC_DIR = dlmalloc
@@ -771,6 +773,12 @@ include_dirs:
 	mkdir -p "$(SYSROOT_INC)"
 	cp -r "$(LIBC_BOTTOM_HALF_HEADERS_PUBLIC)"/* "$(SYSROOT_INC)"
 
+	# Generate the version.h header (and remove the template).
+	rm -f "$(SYSROOT_INC)/wasi/version.h.in"
+	sed 's/{{VERSION}}/$(LIBC_GIT_REF)/' \
+		$(LIBC_BOTTOM_HALF_HEADERS_PUBLIC)/wasi/version.h.in \
+		> "$(SYSROOT_INC)/wasi/version.h"
+
 	# Generate musl's bits/alltypes.h header.
 	mkdir -p "$(SYSROOT_INC)/bits"
 	sed -f $(LIBC_TOP_HALF_MUSL_DIR)/tools/mkalltypes.sed \
@@ -973,6 +981,7 @@ check-symbols: startup_files libc
 	    | grep -v '^#define __OPTIMIZE__' \
 	    | grep -v '^#define assert' \
 	    | grep -v '^#define __NO_INLINE__' \
+	    | grep -v '^#define WASI_LIBC_VERSION' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
 
 	# Check that the computed metadata matches the expected metadata.

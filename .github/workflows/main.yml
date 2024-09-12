@@ -29,7 +29,7 @@ jobs:
           - os: windows-latest
             clang_version: 16.0.0
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4.1.7
       with:
         submodules: true
 
@@ -135,7 +135,7 @@ jobs:
       # which is required by our malloc implementation.
       if: matrix.os == 'ubuntu-latest' && matrix.clang_version != '10.0.0'
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4.4.0
       with:
         # Upload the sysroot folder. Give it a name according to the OS it was built for.
         name: ${{ format( 'sysroot-{0}.tgz', matrix.os) }}
@@ -152,7 +152,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4.1.7
       with:
         submodules: true
     - name: Install Rust (rustup)
@@ -175,7 +175,7 @@ jobs:
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4.1.7
       with:
         submodules: true
     - name: Install Rust

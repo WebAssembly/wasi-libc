@@ -143,6 +143,8 @@ LIBWASI_EMULATED_SIGNAL_SOURCES = \
 LIBWASI_EMULATED_SIGNAL_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/signal/psignal.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/string/strsignal.c
+LIBWASI_EMULATED_PTHREAD_SOURCES = \
+    $(STUB_PTHREADS_DIR)/stub-pthreads-emulated.c
 LIBDL_SOURCES = $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/dl.c
 LIBSETJMP_SOURCES = $(LIBC_TOP_HALF_MUSL_SRC_DIR)/setjmp/wasm32/rt.c
 LIBC_BOTTOM_HALF_CRT_SOURCES = $(wildcard $(LIBC_BOTTOM_HALF_DIR)/crt/*.c)
@@ -506,6 +508,7 @@ LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS = $(call objs,$(LIBWASI_EMULATED_PROCESS_CL
 LIBWASI_EMULATED_GETPID_OBJS = $(call objs,$(LIBWASI_EMULATED_GETPID_SOURCES))
 LIBWASI_EMULATED_SIGNAL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_SOURCES))
 LIBWASI_EMULATED_SIGNAL_MUSL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_MUSL_SOURCES))
+LIBWASI_EMULATED_PTHREAD_OBJS = $(call objs,$(LIBWASI_EMULATED_PTHREAD_SOURCES))
 LIBDL_OBJS = $(call objs,$(LIBDL_SOURCES))
 LIBSETJMP_OBJS = $(call objs,$(LIBSETJMP_SOURCES))
 LIBC_BOTTOM_HALF_CRT_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_CRT_SOURCES))
@@ -609,6 +612,7 @@ LIBWASI_EMULATED_PROCESS_CLOCKS_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULA
 LIBWASI_EMULATED_GETPID_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_GETPID_OBJS))
 LIBWASI_EMULATED_SIGNAL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_SIGNAL_OBJS))
 LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS))
+LIBWASI_EMULATED_PTHREAD_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_PTHREAD_OBJS))
 LIBDL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBDL_OBJS))
 LIBSETJMP_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBSETJMP_OBJS))
 BULK_MEMORY_SO_OBJS = $(patsubst %.o,%.pic.o,$(BULK_MEMORY_OBJS))
@@ -624,6 +628,7 @@ PIC_OBJS = \
 	$(LIBWASI_EMULATED_GETPID_SO_OBJS) \
 	$(LIBWASI_EMULATED_SIGNAL_SO_OBJS) \
 	$(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS) \
+	$(LIBWASI_EMULATED_PTHREAD_SO_OBJS) \
 	$(LIBDL_SO_OBJS) \
 	$(LIBSETJMP_SO_OBJS) \
 	$(BULK_MEMORY_SO_OBJS) \
@@ -665,6 +670,8 @@ $(OBJDIR)/libwasi-emulated-getpid.so.a: $(LIBWASI_EMULATED_GETPID_SO_OBJS)
 
 $(OBJDIR)/libwasi-emulated-signal.so.a: $(LIBWASI_EMULATED_SIGNAL_SO_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS)
 
+$(OBJDIR)/libwasi-emulated-pthread.so.a: $(LIBWASI_EMULATED_PTHREAD_SO_OBJS)
+
 $(OBJDIR)/libdl.so.a: $(LIBDL_SO_OBJS)
 
 $(OBJDIR)/libsetjmp.so.a: $(LIBSETJMP_SO_OBJS)
@@ -682,6 +689,8 @@ $(SYSROOT_LIB)/libwasi-emulated-process-clocks.a: $(LIBWASI_EMULATED_PROCESS_CLO
 $(SYSROOT_LIB)/libwasi-emulated-getpid.a: $(LIBWASI_EMULATED_GETPID_OBJS)
 
 $(SYSROOT_LIB)/libwasi-emulated-signal.a: $(LIBWASI_EMULATED_SIGNAL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS)
+
+$(SYSROOT_LIB)/libwasi-emulated-pthread.a: $(LIBWASI_EMULATED_PTHREAD_OBJS)
 
 $(SYSROOT_LIB)/libdl.a: $(LIBDL_OBJS)
 
@@ -785,6 +794,11 @@ $(FTS_OBJS): CFLAGS += \
 $(LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS) $(LIBWASI_EMULATED_PROCESS_CLOCKS_SO_OBJS): CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 
+$(LIBWASI_EMULATED_PTHREAD_OBJS) $(LIBWASI_EMULATED_PTHREAD_SO_OBJS): CFLAGS += \
+    -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/include \
+    -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal \
+    -I$(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm32
+
 # emmalloc uses a lot of pointer type-punning, which is UB under strict aliasing,
 # and this was found to have real miscompilations in wasi-libc#421.
 $(EMMALLOC_OBJS): CFLAGS += \
@@ -836,6 +850,7 @@ LIBC_SO = \
 	$(SYSROOT_LIB)/libwasi-emulated-process-clocks.so \
 	$(SYSROOT_LIB)/libwasi-emulated-getpid.so \
 	$(SYSROOT_LIB)/libwasi-emulated-signal.so \
+	$(SYSROOT_LIB)/libwasi-emulated-pthread.so \
 	$(SYSROOT_LIB)/libdl.so
 ifeq ($(BUILD_LIBSETJMP),yes)
 LIBC_SO += \
@@ -854,6 +869,10 @@ STATIC_LIBS = \
     $(SYSROOT_LIB)/libwasi-emulated-getpid.a \
     $(SYSROOT_LIB)/libwasi-emulated-signal.a \
     $(SYSROOT_LIB)/libdl.a
+ifneq ($(THREAD_MODEL), posix)
+    STATIC_LIBS += \
+        $(SYSROOT_LIB)/libwasi-emulated-pthread.a
+endif
 ifeq ($(BUILD_LIBSETJMP),yes)
 STATIC_LIBS += \
 	$(SYSROOT_LIB)/libsetjmp.a

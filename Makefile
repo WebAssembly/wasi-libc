@@ -384,6 +384,10 @@ LIBC_TOP_HALF_ALL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SOURCES) \
     $(sort $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.[cs]))
 
+FTS_SRC_DIR = fts
+MUSL_FTS_SRC_DIR = $(FTS_SRC_DIR)/musl-fts
+FTS_SOURCES = $(MUSL_FTS_SRC_DIR)/fts.c
+
 # Add any extra flags
 CFLAGS = $(EXTRA_CFLAGS)
 # Set the target.
@@ -457,6 +461,7 @@ DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 EMMALLOC_OBJS = $(call objs,$(EMMALLOC_SOURCES))
 LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 LIBC_TOP_HALF_ALL_OBJS = $(call asmobjs,$(call objs,$(LIBC_TOP_HALF_ALL_SOURCES)))
+FTS_OBJS = $(call objs,$(FTS_SOURCES))
 ifeq ($(WASI_SNAPSHOT), p2)
 LIBC_OBJS += $(OBJDIR)/wasip2_component_type.o
 endif
@@ -475,6 +480,7 @@ ifeq ($(BUILD_LIBC_TOP_HALF),yes)
 # libc-top-half is musl.
 LIBC_OBJS += $(LIBC_TOP_HALF_ALL_OBJS)
 endif
+LIBC_OBJS += $(FTS_OBJS)
 MUSL_PRINTSCAN_OBJS = $(call objs,$(MUSL_PRINTSCAN_SOURCES))
 MUSL_PRINTSCAN_LONG_DOUBLE_OBJS = $(patsubst %.o,%.long-double.o,$(MUSL_PRINTSCAN_OBJS))
 MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS = $(patsubst %.o,%.no-floating-point.o,$(MUSL_PRINTSCAN_OBJS))
@@ -756,6 +762,10 @@ $(LIBC_TOP_HALF_ALL_OBJS) $(LIBC_TOP_HALF_ALL_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOU
     -Wno-dangling-else \
     -Wno-unknown-pragmas
 
+$(FTS_OBJS): CFLAGS += \
+    -I$(MUSL_FTS_SRC_DIR) \
+    -I$(FTS_SRC_DIR) # for config.h
+
 $(LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS) $(LIBWASI_EMULATED_PROCESS_CLOCKS_SO_OBJS): CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 
@@ -783,6 +793,8 @@ include_dirs:
 	# Copy in the musl's "bits" header files.
 	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/generic/bits/* "$(SYSROOT_INC)/bits"
 	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/wasm32/bits/* "$(SYSROOT_INC)/bits"
+
+	cp "$(MUSL_FTS_SRC_DIR)/fts.h" "$(SYSROOT_INC)/fts.h"
 
 	# Remove selected header files.
 	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))

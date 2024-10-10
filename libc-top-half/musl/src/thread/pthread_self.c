@@ -1,8 +1,7 @@
 #include "pthread_impl.h"
 #include <threads.h>
 
-#if !defined(__wasilibc_unmodified_upstream) && defined(__wasm__) &&           \
-    defined(_REENTRANT)
+#if !defined(__wasilibc_unmodified_upstream) && defined(__wasm__)
 _Thread_local struct pthread __wasilibc_pthread_self;
 #endif
 

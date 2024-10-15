@@ -101,7 +101,7 @@ jobs:
       run: |
         make -j4 TARGET_TRIPLE=wasm32-wasi $MAKE_TARGETS
         make -j4 TARGET_TRIPLE=wasm32-wasip1 $MAKE_TARGETS
-        make -j4 TARGET_TRIPLE=wasm32-wasip2 $MAKE_TARGETS
+        make -j4 TARGET_TRIPLE=wasm32-wasip2 WASI_SNAPSHOT=p2 $MAKE_TARGETS
 
     - name: Build libc + threads
       # Only build the thread-capable wasi-libc in the latest supported Clang

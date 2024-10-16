@@ -619,6 +619,7 @@ BULK_MEMORY_SO_OBJS = $(patsubst %.o,%.pic.o,$(BULK_MEMORY_OBJS))
 DLMALLOC_SO_OBJS = $(patsubst %.o,%.pic.o,$(DLMALLOC_OBJS))
 LIBC_BOTTOM_HALF_ALL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBC_BOTTOM_HALF_ALL_OBJS))
 LIBC_TOP_HALF_ALL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBC_TOP_HALF_ALL_OBJS))
+FTS_SO_OBJS = $(patsubst %.o,%.pic.o,$(FTS_OBJS))
 
 PIC_OBJS = \
 	$(LIBC_SO_OBJS) \
@@ -635,7 +636,8 @@ PIC_OBJS = \
 	$(DLMALLOC_SO_OBJS) \
 	$(LIBC_BOTTOM_HALF_ALL_SO_OBJS) \
 	$(LIBC_TOP_HALF_ALL_SO_OBJS) \
-	$(LIBC_BOTTOM_HALF_CRT_OBJS)
+	$(LIBC_BOTTOM_HALF_CRT_OBJS) \
+	$(FTS_SO_OBJS)
 
 # TODO: Specify SDK version, e.g. libc.so.wasi-sdk-21, as SO_NAME once `wasm-ld`
 # supports it.
@@ -787,7 +789,7 @@ $(LIBC_TOP_HALF_ALL_OBJS) $(LIBC_TOP_HALF_ALL_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOU
     -Wno-dangling-else \
     -Wno-unknown-pragmas
 
-$(FTS_OBJS): CFLAGS += \
+$(FTS_OBJS) $(FTS_SO_OBJS): CFLAGS += \
     -I$(MUSL_FTS_SRC_DIR) \
     -I$(FTS_SRC_DIR) # for config.h
 

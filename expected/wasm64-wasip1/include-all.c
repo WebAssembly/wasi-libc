@@ -86,6 +86,7 @@
 #include <float.h>
 #include <fmtmsg.h>
 #include <fnmatch.h>
+#include <fts.h>
 #include <ftw.h>
 #include <getopt.h>
 #include <glob.h>
@@ -114,6 +115,7 @@
 #include <netpacket/packet.h>
 #include <nl_types.h>
 #include <poll.h>
+#include <pthread.h>
 #include <regex.h>
 #include <sched.h>
 #include <search.h>

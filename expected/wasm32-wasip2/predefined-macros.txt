@@ -2570,6 +2570,7 @@
 #define _UTIME_H 
 #define _VALUES_H 
 #define _VA_LIST 
+#define _WASI_EMULATED_PTHREAD 
 #define _WCHAR_H 
 #define _WCHAR_T 
 #define _WCTYPE_H 
@@ -3545,12 +3546,7 @@
 #define preadv64 preadv
 #define pthread_cleanup_pop(r) _pthread_cleanup_pop(&__cb, (r)); } while(0)
 #define pthread_cleanup_push(f,x) do { struct __ptcb __cb; _pthread_cleanup_push(&__cb, f, x);
-#define pthread_create(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
-#define pthread_detach(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
 #define pthread_equal(x,y) ((x)==(y))
-#define pthread_join(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
-#define pthread_timedjoin_np(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
-#define pthread_tryjoin_np(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
 #define pwrite64 pwrite
 #define pwritev64 pwritev
 #define readdir64 readdir

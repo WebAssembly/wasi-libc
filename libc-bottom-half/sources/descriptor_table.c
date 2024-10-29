@@ -24,10 +24,12 @@
 
 #include <wasi/descriptor_table.h>
 
+#ifndef IMPORT_NAME
 #ifdef __wasm64__
 #define IMPORT_NAME(x) __import_name__(x "_wasm64")
 #else
 #define IMPORT_NAME(x) __import_name__(x)
+#endif
 #endif
 
 __attribute__((__import_module__("wasi_snapshot_preview1"),

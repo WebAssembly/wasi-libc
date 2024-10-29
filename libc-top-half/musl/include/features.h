@@ -36,5 +36,8 @@
 #endif
 
 #define __REDIR(x,y) __typeof__(x) x __asm__(#y)
+#if !defined(_REENTRANT) && !defined(_WASI_EMULATED_PTHREAD)
+#define _WASI_EMULATED_PTHREAD
+#endif
 
 #endif

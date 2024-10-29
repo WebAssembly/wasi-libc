@@ -1,4 +1,6 @@
 #include <errno.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 #include <wasi/sockets_utils.h>
 
@@ -459,4 +461,24 @@ bool __wasi_sockets_utils__stream(
 	}
 
 	return true;
+}
+
+int __wasi_sockets_utils__parse_port(const char *restrict port_str)
+{
+    char *end = NULL;
+    errno = 0;
+    long port = strtol(port_str, &end, 10);
+
+    // Check for various possible errors:
+    //   - the input is not a valid number
+    //   - the entire input string is not consumed
+    //   - the number is not within the valid port range
+    //   - the input does not start with a digit (strtol allows leading
+    //     whitespace and optional sign)
+    if (errno != 0 || end == NULL || *end != '\0' || port < 0
+            || port > 65535 || !isdigit(*port_str)) {
+        return -1;
+    }
+
+    return (int)port;
 }

@@ -1,0 +1,102 @@
+From 878675b2299c23593a9adee25d5c828fb760819e Mon Sep 17 00:00:00 2001
+From: Yuta Saito <kateinoigakukun@gmail.com>
+Date: Thu, 1 Aug 2024 01:50:49 +0000
+Subject: [PATCH] Add conditional handling for fchdir and chdir functions
+
+Define preprocessor conditions for `HAVE_FCHDIR` to handle platforms without
+fchdir. On these platforms, pretend that `FTS_NOCHDIR` is always set.
+
+This change is necessary to build the `fts` module on the top of the WASI and
+wasi-libc, which doesn't provide the `fchdir`.
+
+Upstream pull request: https://github.com/void-linux/musl-fts/pull/14
+---
+ fts.c | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/fts.c b/fts.c
+index 0f8d05b..da4bc08 100644
+--- a/fts.c
++++ b/fts.c
+@@ -112,8 +112,15 @@ static int	 fts_safe_changedir(const FTS *, const FTSENT *, int,
+ #define	ISSET(opt)	(sp->fts_options & (opt))
+ #define	SET(opt)	(sp->fts_options |= (opt))
+ 
++#if HAVE_FCHDIR
+ #define	CHDIR(sp, path)	(!ISSET(FTS_NOCHDIR) && chdir(path))
+ #define	FCHDIR(sp, fd)	(!ISSET(FTS_NOCHDIR) && fchdir(fd))
++#else
++/* If we don't have fchdir, pretend that !ISSET(FTS_NOCHDIR) is always false in
++ * the above macros, and do not reference chdir or fchdir. */
++#define	CHDIR(sp, path)	0
++#define	FCHDIR(sp, fd)	0
++#endif
+ 
+ /* fts_build flags */
+ #define	BCHILD		1		/* fts_children */
+@@ -136,6 +143,11 @@ fts_open(char * const *argv, int options,
+ 
+ 	_DIAGASSERT(argv != NULL);
+ 
++#if !HAVE_FCHDIR
++        /* If we don't have fchdir, pretend that FTS_NOCHDIR is always set. */
++        options |= FTS_NOCHDIR;
++#endif
++
+ 	/* Options check. */
+ 	if (options & ~FTS_OPTIONMASK) {
+ 		errno = EINVAL;
+@@ -299,12 +311,14 @@ fts_close(FTS *sp)
+ 		free(sp->fts_array);
+ 	free(sp->fts_path);
+ 
++	#if HAVE_FCHDIR
+ 	/* Return to original directory, save errno if necessary. */
+ 	if (!ISSET(FTS_NOCHDIR)) {
+ 		if (fchdir(sp->fts_rfd) == -1)
+ 			saved_errno = errno;
+ 		(void)close(sp->fts_rfd);
+ 	}
++	#endif
+ 
+ 	/* Free up the stream pointer. */
+ 	free(sp);
+@@ -611,6 +625,7 @@ fts_children(FTS *sp, int instr)
+ 	} else
+ 		instr = BCHILD;
+ 
++	#if HAVE_FCHDIR
+ 	/*
+ 	 * If using chdir on a relative path and called BEFORE fts_read does
+ 	 * its chdir to the root of a traversal, we can lose -- we need to
+@@ -631,6 +646,10 @@ fts_children(FTS *sp, int instr)
+ 	}
+ 	(void)close(fd);
+ 	return (sp->fts_child);
++	#else
++	/* If not using chdir, just build the list. */
++	return (sp->fts_child = fts_build(sp, instr));
++	#endif
+ }
+ 
+ /*
+@@ -1226,6 +1245,7 @@ fts_maxarglen(char * const *argv)
+ static int
+ fts_safe_changedir(const FTS *sp, const FTSENT *p, int fd, const char *path)
+ {
++#if HAVE_FCHDIR
+ 	int oldfd = fd, ret = -1;
+ 	__fts_stat_t sb;
+ 
+@@ -1252,4 +1272,8 @@ bail:
+ 		errno = save_errno;
+ 	}
+ 	return ret;
++#else
++	/* If we can't do fchdir, pretend as if ISSET(FTS_NOCHDIR) is set. */
++	return 0;
++#endif
+ }
+-- 
+2.43.2
+

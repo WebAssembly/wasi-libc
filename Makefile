@@ -27,6 +27,16 @@ BUILD_LIBSETJMP ?= yes
 OBJDIR ?= build/$(TARGET_TRIPLE)
 # 64 bit wasm?
 WASM64 ?= no
+
+# LTO; no, full, or thin
+# Note: thin LTO here is just for experimentation. It has known issues:
+# - https://github.com/llvm/llvm-project/issues/91700
+# - https://github.com/llvm/llvm-project/issues/91711
+LTO ?= no
+ifneq ($(LTO),no)
+CLANG_VERSION ?= $(shell ${CC} -dumpversion)
+override OBJDIR := $(OBJDIR)/llvm-lto/$(CLANG_VERSION)
+endif
 # The directory where we store files and tools for generating WASIp2 bindings
 BINDING_WORK_DIR ?= build/bindings
 # URL from which to retrieve the WIT files used to generate the WASIp2 bindings
@@ -76,7 +86,7 @@ endif
 
 EXPECTED_TARGET_DIR = expected/${EXPECTED_TARGET_TRIPLE}
 
-BUILTINS_LIB ?= $(shell ${CC} --print-libgcc-file-name)
+BUILTINS_LIB ?= $(shell ${CC} ${CFLAGS} --print-libgcc-file-name)
 
 # These variables describe the locations of various files and directories in
 # the source tree.
@@ -86,6 +96,7 @@ DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/dlmalloc.c
 DLMALLOC_INC = $(DLMALLOC_DIR)/include
 EMMALLOC_DIR = emmalloc
 EMMALLOC_SOURCES = $(EMMALLOC_DIR)/emmalloc.c
+STUB_PTHREADS_DIR = stub-pthreads
 LIBC_BOTTOM_HALF_DIR = libc-bottom-half
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC = $(LIBC_BOTTOM_HALF_DIR)/cloudlibc/src
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC = $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)/include
@@ -152,6 +163,8 @@ LIBWASI_EMULATED_SIGNAL_SOURCES = \
 LIBWASI_EMULATED_SIGNAL_MUSL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/signal/psignal.c \
     $(LIBC_TOP_HALF_MUSL_SRC_DIR)/string/strsignal.c
+LIBWASI_EMULATED_PTHREAD_SOURCES = \
+    $(STUB_PTHREADS_DIR)/stub-pthreads-emulated.c
 LIBDL_SOURCES = $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/dl.c
 LIBSETJMP_SOURCES = $(LIBC_TOP_HALF_MUSL_SRC_DIR)/setjmp/wasm32/rt.c
 LIBC_BOTTOM_HALF_CRT_SOURCES = $(wildcard $(LIBC_BOTTOM_HALF_DIR)/crt/*.c)
@@ -271,6 +284,12 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
 
+LIBC_NONLTO_SOURCES = \
+    $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
+        exit/atexit.c \
+        setjmp/wasm32/rt.c \
+    )
+
 ifeq ($(WASI_SNAPSHOT), p2)
 LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
@@ -278,9 +297,53 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
     )
 endif
 
+# pthreads functions (possibly stub) for either thread model
+LIBC_TOP_HALF_MUSL_SOURCES += \
+    $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
+        thread/default_attr.c \
+        thread/pthread_attr_destroy.c \
+        thread/pthread_attr_get.c \
+        thread/pthread_attr_init.c \
+        thread/pthread_attr_setdetachstate.c \
+        thread/pthread_attr_setguardsize.c \
+        thread/pthread_attr_setschedparam.c \
+        thread/pthread_attr_setstack.c \
+        thread/pthread_attr_setstacksize.c \
+        thread/pthread_barrierattr_destroy.c \
+        thread/pthread_barrierattr_init.c \
+        thread/pthread_barrierattr_setpshared.c \
+        thread/pthread_cancel.c \
+        thread/pthread_cleanup_push.c \
+        thread/pthread_condattr_destroy.c \
+        thread/pthread_condattr_init.c \
+        thread/pthread_condattr_setclock.c \
+        thread/pthread_condattr_setpshared.c \
+        thread/pthread_equal.c \
+        thread/pthread_getspecific.c \
+        thread/pthread_key_create.c \
+        thread/pthread_mutex_destroy.c \
+        thread/pthread_mutex_init.c \
+        thread/pthread_mutexattr_destroy.c \
+        thread/pthread_mutexattr_init.c \
+        thread/pthread_mutexattr_setprotocol.c \
+        thread/pthread_mutexattr_setpshared.c \
+        thread/pthread_mutexattr_setrobust.c \
+        thread/pthread_mutexattr_settype.c \
+        thread/pthread_rwlock_destroy.c \
+        thread/pthread_rwlock_init.c \
+        thread/pthread_rwlockattr_destroy.c \
+        thread/pthread_rwlockattr_init.c \
+        thread/pthread_rwlockattr_setpshared.c \
+        thread/pthread_self.c \
+        thread/pthread_setcancelstate.c \
+        thread/pthread_setcanceltype.c \
+        thread/pthread_setspecific.c \
+        thread/pthread_spin_destroy.c \
+        thread/pthread_spin_init.c \
+        thread/pthread_testcancel.c \
+    )
 ifeq ($(THREAD_MODEL), posix)
-
-
+# pthreads functions needed for actual thread support
 LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
         env/__init_tls.c \
@@ -291,51 +354,26 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/__lock.c \
         thread/__wait.c \
         thread/__timedwait.c \
-        thread/default_attr.c \
-        thread/pthread_attr_destroy.c \
-        thread/pthread_attr_get.c \
-        thread/pthread_attr_init.c \
-        thread/pthread_attr_setstack.c \
-        thread/pthread_attr_setdetachstate.c \
-        thread/pthread_attr_setstacksize.c \
         thread/pthread_barrier_destroy.c \
         thread/pthread_barrier_init.c \
         thread/pthread_barrier_wait.c \
-        thread/pthread_cleanup_push.c \
         thread/pthread_cond_broadcast.c \
         thread/pthread_cond_destroy.c \
         thread/pthread_cond_init.c \
         thread/pthread_cond_signal.c \
         thread/pthread_cond_timedwait.c \
         thread/pthread_cond_wait.c \
-        thread/pthread_condattr_destroy.c \
-        thread/pthread_condattr_init.c \
-        thread/pthread_condattr_setclock.c \
-        thread/pthread_condattr_setpshared.c \
         thread/pthread_create.c \
         thread/pthread_detach.c \
-        thread/pthread_equal.c \
         thread/pthread_getattr_np.c \
-        thread/pthread_getspecific.c \
         thread/pthread_join.c \
-        thread/pthread_key_create.c \
         thread/pthread_mutex_consistent.c \
-        thread/pthread_mutex_destroy.c \
-        thread/pthread_mutex_init.c \
         thread/pthread_mutex_getprioceiling.c \
         thread/pthread_mutex_lock.c \
         thread/pthread_mutex_timedlock.c \
         thread/pthread_mutex_trylock.c \
         thread/pthread_mutex_unlock.c \
-        thread/pthread_mutexattr_destroy.c \
-        thread/pthread_mutexattr_init.c \
-        thread/pthread_mutexattr_setprotocol.c \
-        thread/pthread_mutexattr_setpshared.c \
-        thread/pthread_mutexattr_setrobust.c \
-        thread/pthread_mutexattr_settype.c \
         thread/pthread_once.c \
-        thread/pthread_rwlock_destroy.c \
-        thread/pthread_rwlock_init.c \
         thread/pthread_rwlock_rdlock.c \
         thread/pthread_rwlock_timedrdlock.c \
         thread/pthread_rwlock_timedwrlock.c \
@@ -343,18 +381,9 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_rwlock_trywrlock.c \
         thread/pthread_rwlock_unlock.c \
         thread/pthread_rwlock_wrlock.c \
-        thread/pthread_rwlockattr_destroy.c \
-        thread/pthread_rwlockattr_init.c \
-        thread/pthread_rwlockattr_setpshared.c \
-        thread/pthread_setcancelstate.c \
-        thread/pthread_setspecific.c \
-        thread/pthread_self.c \
-        thread/pthread_spin_destroy.c \
-        thread/pthread_spin_init.c \
         thread/pthread_spin_lock.c \
         thread/pthread_spin_trylock.c \
         thread/pthread_spin_unlock.c \
-        thread/pthread_testcancel.c \
         thread/sem_destroy.c \
         thread/sem_getvalue.c \
         thread/sem_init.c \
@@ -364,6 +393,16 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/sem_wait.c \
         thread/wasm/wasi_thread_start.S \
     )
+endif
+ifeq ($(THREAD_MODEL), single)
+# pthreads stubs for single-threaded environment
+LIBC_TOP_HALF_MUSL_SOURCES += \
+    $(STUB_PTHREADS_DIR)/barrier.c \
+    $(STUB_PTHREADS_DIR)/condvar.c \
+    $(STUB_PTHREADS_DIR)/mutex.c \
+    $(STUB_PTHREADS_DIR)/rwlock.c \
+    $(STUB_PTHREADS_DIR)/spinlock.c \
+    $(STUB_PTHREADS_DIR)/stub-pthreads-good.c
 endif
 
 MUSL_PRINTSCAN_SOURCES = \
@@ -382,6 +421,10 @@ LIBC_TOP_HALF_SOURCES = $(LIBC_TOP_HALF_DIR)/sources
 LIBC_TOP_HALF_ALL_SOURCES = \
     $(LIBC_TOP_HALF_MUSL_SOURCES) \
     $(sort $(shell find $(LIBC_TOP_HALF_SOURCES) -name \*.[cs]))
+
+FTS_SRC_DIR = fts
+MUSL_FTS_SRC_DIR = $(FTS_SRC_DIR)/musl-fts
+FTS_SOURCES = $(MUSL_FTS_SRC_DIR)/fts.c
 
 # Add any extra flags
 CFLAGS = $(EXTRA_CFLAGS)
@@ -414,9 +457,21 @@ ifeq ($(THREAD_MODEL), posix)
 CFLAGS += -mthread-model posix -pthread -ftls-model=local-exec
 
 ASMFLAGS += -matomics
+endif
 
 # Include cloudlib's directory to access the structure definition of clockid_t
 CFLAGS += -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
+
+ifneq ($(LTO),no)
+ifeq ($(LTO),full)
+CFLAGS += -flto=full
+else
+ifeq ($(LTO),thin)
+CFLAGS += -flto=thin
+else
+$(error unknown LTO value: $(LTO))
+endif
+endif
 endif
 
 ifeq ($(WASI_SNAPSHOT), p2)
@@ -445,6 +500,7 @@ DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 EMMALLOC_OBJS = $(call objs,$(EMMALLOC_SOURCES))
 LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 LIBC_TOP_HALF_ALL_OBJS = $(call asmobjs,$(call objs,$(LIBC_TOP_HALF_ALL_SOURCES)))
+FTS_OBJS = $(call objs,$(FTS_SOURCES))
 ifeq ($(WASI_SNAPSHOT), p2)
 LIBC_OBJS += $(OBJDIR)/wasip2_component_type.o
 endif
@@ -463,6 +519,7 @@ ifeq ($(BUILD_LIBC_TOP_HALF),yes)
 # libc-top-half is musl.
 LIBC_OBJS += $(LIBC_TOP_HALF_ALL_OBJS)
 endif
+LIBC_OBJS += $(FTS_OBJS)
 MUSL_PRINTSCAN_OBJS = $(call objs,$(MUSL_PRINTSCAN_SOURCES))
 MUSL_PRINTSCAN_LONG_DOUBLE_OBJS = $(patsubst %.o,%.long-double.o,$(MUSL_PRINTSCAN_OBJS))
 MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS = $(patsubst %.o,%.no-floating-point.o,$(MUSL_PRINTSCAN_OBJS))
@@ -472,13 +529,18 @@ LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS = $(call objs,$(LIBWASI_EMULATED_PROCESS_CL
 LIBWASI_EMULATED_GETPID_OBJS = $(call objs,$(LIBWASI_EMULATED_GETPID_SOURCES))
 LIBWASI_EMULATED_SIGNAL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_SOURCES))
 LIBWASI_EMULATED_SIGNAL_MUSL_OBJS = $(call objs,$(LIBWASI_EMULATED_SIGNAL_MUSL_SOURCES))
+LIBWASI_EMULATED_PTHREAD_OBJS = $(call objs,$(LIBWASI_EMULATED_PTHREAD_SOURCES))
 LIBDL_OBJS = $(call objs,$(LIBDL_SOURCES))
 LIBSETJMP_OBJS = $(call objs,$(LIBSETJMP_SOURCES))
 LIBC_BOTTOM_HALF_CRT_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_CRT_SOURCES))
+LIBC_NONLTO_OBJS = $(call objs,$(LIBC_NONLTO_SOURCES))
 
 # These variables describe the locations of various files and
 # directories in the generated sysroot tree.
 SYSROOT_LIB := $(SYSROOT)/lib/$(TARGET_TRIPLE)
+ifneq ($(LTO),no)
+override SYSROOT_LIB := $(SYSROOT_LIB)/llvm-lto/$(CLANG_VERSION)
+endif
 SYSROOT_INC = $(SYSROOT)/include/$(TARGET_TRIPLE)
 SYSROOT_SHARE = $(SYSROOT)/share/$(TARGET_TRIPLE)
 
@@ -571,12 +633,14 @@ LIBWASI_EMULATED_PROCESS_CLOCKS_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULA
 LIBWASI_EMULATED_GETPID_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_GETPID_OBJS))
 LIBWASI_EMULATED_SIGNAL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_SIGNAL_OBJS))
 LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS))
+LIBWASI_EMULATED_PTHREAD_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBWASI_EMULATED_PTHREAD_OBJS))
 LIBDL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBDL_OBJS))
 LIBSETJMP_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBSETJMP_OBJS))
 BULK_MEMORY_SO_OBJS = $(patsubst %.o,%.pic.o,$(BULK_MEMORY_OBJS))
 DLMALLOC_SO_OBJS = $(patsubst %.o,%.pic.o,$(DLMALLOC_OBJS))
 LIBC_BOTTOM_HALF_ALL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBC_BOTTOM_HALF_ALL_OBJS))
 LIBC_TOP_HALF_ALL_SO_OBJS = $(patsubst %.o,%.pic.o,$(LIBC_TOP_HALF_ALL_OBJS))
+FTS_SO_OBJS = $(patsubst %.o,%.pic.o,$(FTS_OBJS))
 
 PIC_OBJS = \
 	$(LIBC_SO_OBJS) \
@@ -586,13 +650,15 @@ PIC_OBJS = \
 	$(LIBWASI_EMULATED_GETPID_SO_OBJS) \
 	$(LIBWASI_EMULATED_SIGNAL_SO_OBJS) \
 	$(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS) \
+	$(LIBWASI_EMULATED_PTHREAD_SO_OBJS) \
 	$(LIBDL_SO_OBJS) \
 	$(LIBSETJMP_SO_OBJS) \
 	$(BULK_MEMORY_SO_OBJS) \
 	$(DLMALLOC_SO_OBJS) \
 	$(LIBC_BOTTOM_HALF_ALL_SO_OBJS) \
 	$(LIBC_TOP_HALF_ALL_SO_OBJS) \
-	$(LIBC_BOTTOM_HALF_CRT_OBJS)
+	$(LIBC_BOTTOM_HALF_CRT_OBJS) \
+	$(FTS_SO_OBJS)
 
 # TODO: Specify SDK version, e.g. libc.so.wasi-sdk-21, as SO_NAME once `wasm-ld`
 # supports it.
@@ -601,9 +667,21 @@ PIC_OBJS = \
 # link that using `--whole-archive` rather than pass the object files directly
 # to CC.  This is a workaround for a Windows command line size limitation.  See
 # the `%.a` rule below for details.
-$(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(BUILTINS_LIB)
-	$(CC) --target=$(TARGET_TRIPLE) -nodefaultlibs -shared --sysroot=$(SYSROOT) \
-	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB)
+
+# Note: libc.so is special because it shouldn't link to libc.so.
+# Note: --allow-undefined-file=linker-provided-symbols.txt is
+# a workaround for https://github.com/llvm/llvm-project/issues/103592
+$(SYSROOT_LIB)/libc.so: $(OBJDIR)/libc.so.a $(BUILTINS_LIB)
+	$(CC) $(EXTRA_CFLAGS) --target=${TARGET_TRIPLE} -nodefaultlibs \
+	-shared --sysroot=$(SYSROOT) \
+	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB) \
+	-Wl,--allow-undefined-file=linker-provided-symbols.txt
+
+$(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(SYSROOT_LIB)/libc.so
+	$(CC) $(EXTRA_CFLAGS) --target=${TARGET_TRIPLE} \
+	-shared --sysroot=$(SYSROOT) \
+	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive \
+	-Wl,--allow-undefined-file=linker-provided-symbols.txt
 
 $(OBJDIR)/libc.so.a: $(LIBC_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS)
 
@@ -614,6 +692,8 @@ $(OBJDIR)/libwasi-emulated-process-clocks.so.a: $(LIBWASI_EMULATED_PROCESS_CLOCK
 $(OBJDIR)/libwasi-emulated-getpid.so.a: $(LIBWASI_EMULATED_GETPID_SO_OBJS)
 
 $(OBJDIR)/libwasi-emulated-signal.so.a: $(LIBWASI_EMULATED_SIGNAL_SO_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS)
+
+$(OBJDIR)/libwasi-emulated-pthread.so.a: $(LIBWASI_EMULATED_PTHREAD_SO_OBJS)
 
 $(OBJDIR)/libdl.so.a: $(LIBDL_SO_OBJS)
 
@@ -633,6 +713,8 @@ $(SYSROOT_LIB)/libwasi-emulated-getpid.a: $(LIBWASI_EMULATED_GETPID_OBJS)
 
 $(SYSROOT_LIB)/libwasi-emulated-signal.a: $(LIBWASI_EMULATED_SIGNAL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS)
 
+$(SYSROOT_LIB)/libwasi-emulated-pthread.a: $(LIBWASI_EMULATED_PTHREAD_OBJS)
+
 $(SYSROOT_LIB)/libdl.a: $(LIBDL_OBJS)
 
 $(SYSROOT_LIB)/libsetjmp.a: $(LIBSETJMP_OBJS)
@@ -649,6 +731,8 @@ $(SYSROOT_LIB)/libsetjmp.a: $(LIBSETJMP_OBJS)
 	$(AR) crs $@ $(wordlist 800, 100000, $(sort $^))
 
 $(PIC_OBJS): CFLAGS += -fPIC -fvisibility=default
+
+$(LIBC_NONLTO_OBJS): CFLAGS := $(filter-out -flto% -fno-lto, $(CFLAGS)) -fno-lto
 
 $(MUSL_PRINTSCAN_OBJS): CFLAGS += \
 	    -D__wasilibc_printscan_no_long_double \
@@ -726,8 +810,18 @@ $(LIBC_TOP_HALF_ALL_OBJS) $(LIBC_TOP_HALF_ALL_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOU
     -Wno-dangling-else \
     -Wno-unknown-pragmas
 
+$(FTS_OBJS) $(FTS_SO_OBJS): CFLAGS += \
+    -I$(MUSL_FTS_SRC_DIR) \
+    -I$(FTS_SRC_DIR) # for config.h
+
 $(LIBWASI_EMULATED_PROCESS_CLOCKS_OBJS) $(LIBWASI_EMULATED_PROCESS_CLOCKS_SO_OBJS): CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
+
+$(LIBWASI_EMULATED_PTHREAD_OBJS) $(LIBWASI_EMULATED_PTHREAD_SO_OBJS): CFLAGS += \
+    -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/include \
+    -I$(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal \
+    -I$(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm \
+    -D_WASI_EMULATED_PTHREAD
 
 # emmalloc uses a lot of pointer type-punning, which is UB under strict aliasing,
 # and this was found to have real miscompilations in wasi-libc#421.
@@ -754,6 +848,8 @@ include_dirs:
 	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/generic/bits/* "$(SYSROOT_INC)/bits"
 	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/wasm/bits/* "$(SYSROOT_INC)/bits"
 
+	cp "$(MUSL_FTS_SRC_DIR)/fts.h" "$(SYSROOT_INC)/fts.h"
+
 	# Remove selected header files.
 	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
 ifeq ($(WASI_SNAPSHOT), p2)
@@ -778,6 +874,7 @@ LIBC_SO = \
 	$(SYSROOT_LIB)/libwasi-emulated-process-clocks.so \
 	$(SYSROOT_LIB)/libwasi-emulated-getpid.so \
 	$(SYSROOT_LIB)/libwasi-emulated-signal.so \
+	$(SYSROOT_LIB)/libwasi-emulated-pthread.so \
 	$(SYSROOT_LIB)/libdl.so
 ifeq ($(BUILD_LIBSETJMP),yes)
 LIBC_SO += \
@@ -796,6 +893,10 @@ STATIC_LIBS = \
     $(SYSROOT_LIB)/libwasi-emulated-getpid.a \
     $(SYSROOT_LIB)/libwasi-emulated-signal.a \
     $(SYSROOT_LIB)/libdl.a
+ifneq ($(THREAD_MODEL), posix)
+    STATIC_LIBS += \
+        $(SYSROOT_LIB)/libwasi-emulated-pthread.a
+endif
 ifeq ($(BUILD_LIBSETJMP),yes)
 STATIC_LIBS += \
 	$(SYSROOT_LIB)/libsetjmp.a
@@ -817,11 +918,13 @@ finish: startup_files libc dummy_libs
 	# The build succeeded! The generated sysroot is in $(SYSROOT).
 	#
 
+ifeq ($(LTO),no)
 # The check for defined and undefined symbols expects there to be a heap
 # alloctor (providing malloc, calloc, free, etc). Skip this step if the build
 # is done without a malloc implementation.
 ifneq ($(MALLOC_IMPL),none)
 finish: check-symbols
+endif
 endif
 
 DEFINED_SYMBOLS = $(SYSROOT_SHARE)/defined-symbols.txt
@@ -883,6 +986,8 @@ check-symbols: startup_files libc
 	@# TODO: Filter out __FLT128_* that are new to clang 18.
 	@# TODO: Filter out __MEMORY_SCOPE_* that are new to clang 18.
 	@# TODO: Filter out __GCC_(CON|DE)STRUCTIVE_SIZE that are new to clang 19.
+	@# TODO: Filter out __STDC_EMBED_* that are new to clang 19.
+	@# TODO: Filter out __*_NORM_MAX__ that are new to clang 19.
 	@# TODO: clang defined __FLT_EVAL_METHOD__ until clang 15, so we force-undefine it
 	@# for older versions.
 	@# TODO: Undefine __wasm_mutable_globals__ and __wasm_sign_ext__, that are new to
@@ -922,6 +1027,8 @@ check-symbols: startup_files libc
 	    | grep -v '^#define __FLT128_' \
 	    | grep -v '^#define __MEMORY_SCOPE_' \
 	    | grep -v '^#define __GCC_\(CON\|DE\)STRUCTIVE_SIZE' \
+	    | grep -v '^#define __STDC_EMBED_' \
+	    | grep -v '^#define __\(DBL\|FLT\|LDBL\)_NORM_MAX__' \
 	    | grep -v '^#define NDEBUG' \
 	    | grep -v '^#define __OPTIMIZE__' \
 	    | grep -v '^#define assert' \

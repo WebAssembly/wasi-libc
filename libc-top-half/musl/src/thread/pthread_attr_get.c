@@ -1,5 +1,9 @@
 #include "pthread_impl.h"
 
+#ifndef __wasilibc_unmodified_upstream
+#include <common/clock.h>
+#endif
+
 int pthread_attr_getdetachstate(const pthread_attr_t *a, int *state)
 {
 	*state = a->_a_detach;
@@ -11,13 +15,13 @@ int pthread_attr_getguardsize(const pthread_attr_t *restrict a, size_t *restrict
 	return 0;
 }
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no CPU scheduling support. */
 int pthread_attr_getinheritsched(const pthread_attr_t *restrict a, int *restrict inherit)
 {
 	*inherit = a->_a_sched;
 	return 0;
 }
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no CPU scheduling support. */
 int pthread_attr_getschedparam(const pthread_attr_t *restrict a, struct sched_param *restrict param)
 {
 	param->sched_priority = a->_a_prio;
@@ -29,13 +33,19 @@ int pthread_attr_getschedpolicy(const pthread_attr_t *restrict a, int *restrict 
 	*policy = a->_a_policy;
 	return 0;
 }
-#endif
 
 int pthread_attr_getscope(const pthread_attr_t *restrict a, int *restrict scope)
 {
 	*scope = PTHREAD_SCOPE_SYSTEM;
 	return 0;
 }
+#else
+int pthread_attr_getschedparam(const pthread_attr_t *restrict a, struct sched_param *restrict param)
+{
+	param->sched_priority = 0;
+	return 0;
+}
+#endif
 
 int pthread_attr_getstack(const pthread_attr_t *restrict a, void **restrict addr, size_t *restrict size)
 {
@@ -62,6 +72,15 @@ int pthread_barrierattr_getpshared(const pthread_barrierattr_t *restrict a, int 
 int pthread_condattr_getclock(const pthread_condattr_t *restrict a, clockid_t *restrict clk)
 {
 	*clk = a->__attr & 0x7fffffff;
+	return 0;
+}
+#else
+int pthread_condattr_getclock(const pthread_condattr_t *restrict a, clockid_t *restrict clk)
+{
+	if (a->__attr & 0x7fffffff == __WASI_CLOCKID_REALTIME)
+		*clk = CLOCK_REALTIME;
+	if (a->__attr & 0x7fffffff == __WASI_CLOCKID_MONOTONIC)
+		*clk = CLOCK_MONOTONIC;
 	return 0;
 }
 #endif

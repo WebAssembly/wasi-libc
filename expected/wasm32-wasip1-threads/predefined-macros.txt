@@ -384,6 +384,40 @@
 #define FSETLOCKING_BYCALLER 2
 #define FSETLOCKING_INTERNAL 1
 #define FSETLOCKING_QUERY 0
+#define FTS_AGAIN 1
+#define FTS_COMFOLLOW 0x001
+#define FTS_D 1
+#define FTS_DC 2
+#define FTS_DEFAULT 3
+#define FTS_DNR 4
+#define FTS_DONTCHDIR 0x01
+#define FTS_DOT 5
+#define FTS_DP 6
+#define FTS_ERR 7
+#define FTS_F 8
+#define FTS_FOLLOW 2
+#define FTS_INIT 9
+#define FTS_ISW 0x04
+#define FTS_LOGICAL 0x002
+#define FTS_NAMEONLY 0x100
+#define FTS_NOCHDIR 0x004
+#define FTS_NOINSTR 3
+#define FTS_NOSTAT 0x008
+#define FTS_NS 10
+#define FTS_NSOK 11
+#define FTS_OPTIONMASK 0x0ff
+#define FTS_PHYSICAL 0x010
+#define FTS_ROOTLEVEL 0
+#define FTS_ROOTPARENTLEVEL -1
+#define FTS_SEEDOT 0x020
+#define FTS_SKIP 4
+#define FTS_SL 12
+#define FTS_SLNONE 13
+#define FTS_STOP 0x200
+#define FTS_SYMFOLLOW 0x02
+#define FTS_W 14
+#define FTS_WHITEOUT 0x080
+#define FTS_XDEV 0x040
 #define FTW_CHDIR 4
 #define FTW_D 2
 #define FTW_DEPTH 8
@@ -2075,6 +2109,7 @@
 #define _FLOAT_H 
 #define _FMTMSG_H 
 #define _FNMATCH_H 
+#define _FTS_H_ 
 #define _FTW_H 
 #define _GETOPT_H 
 #define _GLOB_H 
@@ -3032,6 +3067,13 @@
 #define __alignof_is_defined 1
 #define __bitop(x,i,o) ((x)[(i)/8] o (1<<(i)%8))
 #define __bool_true_false_are_defined 1
+#define __fts_dev_t dev_t
+#define __fts_ino_t ino_t
+#define __fts_length_t unsigned int
+#define __fts_level_t int
+#define __fts_nlink_t nlink_t
+#define __fts_number_t int64_t
+#define __fts_stat_t struct stat
 #define __inline inline
 #define __restrict restrict
 #define __tg_complex(fun,x) (__RETCAST_CX(x)( __FLTCX((x)+I) && __IS_FP(x) ? fun ## f (x) : __LDBLCX((x)+I) ? fun ## l (x) : fun(x) ))

@@ -24,18 +24,24 @@
 
 #include <wasi/descriptor_table.h>
 
+#ifdef __wasm64__
+#define IMPORT_NAME(x) __import_name__(x "_wasm64")
+#else
+#define IMPORT_NAME(x) __import_name__(x)
+#endif
+
 __attribute__((__import_module__("wasi_snapshot_preview1"),
-	       __import_name__("adapter_open_badfd"))) extern int32_t
+	       IMPORT_NAME("adapter_open_badfd"))) extern int32_t
 	__wasi_preview1_adapter_open_badfd(int32_t);
 
 static bool wasi_preview1_adapter_open_badfd(int *fd)
 {
-	return __wasi_preview1_adapter_open_badfd((int32_t)fd) == 0;
+	return __wasi_preview1_adapter_open_badfd((intptr_t)fd) == 0;
 }
 
 __attribute__((__import_module__("wasi_snapshot_preview1"),
-	       __import_name__("adapter_close_badfd"))) extern int32_t
-	__wasi_preview1_adapter_close_badfd(int32_t);
+	       IMPORT_NAME("adapter_close_badfd"))) extern int32_t
+	__wasi_preview1_adapter_close_badfd(intptr_t);
 
 static bool wasi_preview1_adapter_close_badfd(int fd)
 {

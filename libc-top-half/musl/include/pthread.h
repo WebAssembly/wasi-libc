@@ -83,7 +83,7 @@ int pthread_detach(pthread_t);
 _Noreturn void pthread_exit(void *);
 int pthread_join(pthread_t, void **);
 #else
-#if defined(_WASI_EMULATED_PTHREAD) || defined(_REENTRANT)
+#if defined(_REENTRANT)
 int pthread_create(pthread_t *__restrict, const pthread_attr_t *__restrict, void *(*)(void *), void *__restrict);
 int pthread_detach(pthread_t);
 int pthread_join(pthread_t, void **);

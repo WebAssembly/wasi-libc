@@ -89,7 +89,7 @@ jobs:
           TOOLCHAIN=/opt/wasix-sysroot/clang-wasix.cmake_toolchain ./test/wasix/run_tests.sh
 
       - name: Upload sysroot
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: wasix-sysroot
           path: /opt/wasix-sysroot

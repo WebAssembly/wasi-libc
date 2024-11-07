@@ -63,11 +63,12 @@ int chdir_legacy(const char *path)
     __wasilibc_cwd_lock();
     char *prev_cwd = __wasilibc_cwd;
     __wasilibc_cwd = new_cwd;
-    __wasilibc_cwd_unlock();
 
     if (__wasilibc_cwd_mallocd)
         free(prev_cwd);
+
     __wasilibc_cwd_mallocd = 1;
+    __wasilibc_cwd_unlock();
     return 0;
 }
 
@@ -84,13 +85,13 @@ static const char *make_absolute(const char *path) {
             __wasilibc_cwd_lock();
             char *prev_cwd = __wasilibc_cwd;
             __wasilibc_cwd = new_cwd;
-            __wasilibc_cwd_unlock();
 
             if (__wasilibc_cwd_mallocd)
                 free(prev_cwd);
 
             __wasilibc_cwd_is_synced = 1; // we synced the cwd
             __wasilibc_cwd_mallocd = 1; // we allocated so next time, prev_cwd must be freed.
+            __wasilibc_cwd_unlock();
         } else {
             return NULL;
         }
@@ -123,7 +124,6 @@ static const char *make_absolute(const char *path) {
     __wasilibc_cwd_lock();
     size_t cwd_len = strlen(__wasilibc_cwd);
     size_t path_len = path ? strlen(path) : 0;
-    __wasilibc_cwd_unlock();
     int need_slash = __wasilibc_cwd[cwd_len - 1] == '/' ? 0 : 1;
     size_t alloc_len = cwd_len + path_len + 1 + need_slash;
     if (alloc_len > make_absolute_len) {

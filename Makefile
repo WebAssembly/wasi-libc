@@ -984,6 +984,8 @@ check-symbols: startup_files libc
 	@# clang 16 for -mcpu=generic.
 	@# TODO: Undefine __wasm_multivalue__ and __wasm_reference_types__, that are new to
 	@# clang 19 for -mcpu=generic.
+	@# TODO: Undefine __wasm_nontrapping_fptoint__ and __wasm_bulk_memory__, that are
+	@# new to clang 20.
 	@# TODO: As of clang 16, __GNUC_VA_LIST is #defined without a value.
 	$(CC) $(CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -isystem $(SYSROOT_INC) \
@@ -1002,6 +1004,8 @@ check-symbols: startup_files libc
 	    -U__wasm_sign_ext__ \
 	    -U__wasm_multivalue__ \
 	    -U__wasm_reference_types__ \
+	    -U__wasm_nontrapping_fptoint__ \
+	    $(if $(filter-out expected/wasm32-wasip1-threads,$(EXPECTED_TARGET_DIR)),-U__wasm_bulk_memory__) \
 	    -U__GNUC__ \
 	    -U__GNUC_MINOR__ \
 	    -U__GNUC_PATCHLEVEL__ \

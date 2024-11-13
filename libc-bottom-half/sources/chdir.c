@@ -17,6 +17,7 @@ void __wasilibc_cwd_unlock(void);
 #endif
 extern char *__wasilibc_cwd;
 static int __wasilibc_cwd_mallocd = 0;
+static int __wasilibc_cwd_is_synced = 0;
 
 int chdir_legacy(const char *path)
 {
@@ -62,15 +63,41 @@ int chdir_legacy(const char *path)
     __wasilibc_cwd_lock();
     char *prev_cwd = __wasilibc_cwd;
     __wasilibc_cwd = new_cwd;
-    __wasilibc_cwd_unlock();
 
     if (__wasilibc_cwd_mallocd)
         free(prev_cwd);
+
     __wasilibc_cwd_mallocd = 1;
+    __wasilibc_cwd_unlock();
     return 0;
 }
 
 static const char *make_absolute(const char *path) {
+    // if the libc has not synced with the runtime yet, call into the runtime to get the cwd
+    if (!__wasilibc_cwd_is_synced) {
+        char cwd[256];
+        if (getcwd(cwd, sizeof(cwd)) != NULL) {
+            char *new_cwd = malloc(strlen(cwd) + 1);
+            if (new_cwd != NULL) {
+                strcpy(new_cwd, cwd);
+            }
+
+            __wasilibc_cwd_lock();
+            char *prev_cwd = __wasilibc_cwd;
+            __wasilibc_cwd = new_cwd;
+
+            if (__wasilibc_cwd_mallocd)
+                free(prev_cwd);
+
+            __wasilibc_cwd_is_synced = 1; // we synced the cwd
+            __wasilibc_cwd_mallocd = 1; // we allocated so next time, prev_cwd must be freed.
+            __wasilibc_cwd_unlock();
+        } else {
+            return NULL;
+        }
+    }
+
+    
     static char *make_absolute_buf = NULL;
     static size_t make_absolute_len = 0;
 
@@ -97,7 +124,6 @@ static const char *make_absolute(const char *path) {
     __wasilibc_cwd_lock();
     size_t cwd_len = strlen(__wasilibc_cwd);
     size_t path_len = path ? strlen(path) : 0;
-    __wasilibc_cwd_unlock();
     int need_slash = __wasilibc_cwd[cwd_len - 1] == '/' ? 0 : 1;
     size_t alloc_len = cwd_len + path_len + 1 + need_slash;
     if (alloc_len > make_absolute_len) {

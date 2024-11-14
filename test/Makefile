@@ -22,13 +22,13 @@ TARGET_TRIPLE ?= wasm32-wasi
 
 LIBC_TEST_URL ?= https://github.com/bytecodealliance/libc-test
 LIBC_TEST = $(DOWNDIR)/libc-test
-LIBRT_URL ?= https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/libclang_rt.builtins-wasm32-wasi-16.0.tar.gz
+LIBRT_URL ?= https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-24/libclang_rt.builtins-wasm32-wasi-24.0.tar.gz
 LIBRT = $(DOWNDIR)/lib/wasi/libclang_rt.builtins-wasm32.a
-WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v17.0.0/wasmtime-v17.0.0-x86_64-linux.tar.xz
+WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v26.0.1/wasmtime-v26.0.1-x86_64-linux.tar.xz
 WASMTIME = $(DOWNDIR)/$(shell basename $(WASMTIME_URL) .tar.xz)/wasmtime
-WASM_TOOLS_URL ?= https://github.com/bytecodealliance/wasm-tools/releases/download/wasm-tools-1.0.54/wasm-tools-1.0.54-x86_64-linux.tar.gz
+WASM_TOOLS_URL ?= https://github.com/bytecodealliance/wasm-tools/releases/download/wasm-tools-1.220.0/wasm-tools-1.220.0-x86_64-linux.tar.gz
 WASM_TOOLS = $(DOWNDIR)/$(shell basename $(WASM_TOOLS_URL) .tar.gz)/wasm-tools
-ADAPTER_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v17.0.0/wasi_snapshot_preview1.command.wasm
+ADAPTER_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v26.0.1/wasi_snapshot_preview1.command.wasm
 ADAPTER = $(DOWNDIR)/wasi_snapshot_preview1.command.wasm
 
 TO_DOWNLOAD = $(LIBC_TEST) $(LIBRT) $(WASMTIME)

@@ -125,9 +125,9 @@ jobs:
         export WASIP1_DIR=$(realpath $($CLANG_DIR/clang -print-resource-dir)/lib/wasip1/)
         export WASIP2_DIR=$(realpath $($CLANG_DIR/clang -print-resource-dir)/lib/wasip2/)
         mkdir -p $WASI_DIR $WASIP1_DIR $WASIP2_DIR
-        cp download/lib/wasi/libclang_rt.builtins-wasm32.a $WASI_DIR
-        cp download/lib/wasi/libclang_rt.builtins-wasm32.a $WASIP1_DIR
-        cp download/lib/wasi/libclang_rt.builtins-wasm32.a $WASIP2_DIR
+        cp download/libclang_rt.builtins-wasm32.a $WASI_DIR
+        cp download/libclang_rt.builtins-wasm32.a $WASIP1_DIR
+        cp download/libclang_rt.builtins-wasm32.a $WASIP2_DIR
         TARGET_TRIPLE=wasm32-wasi make test
         rm -r build
         TARGET_TRIPLE=wasm32-wasip1 make test

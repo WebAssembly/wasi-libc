@@ -115,7 +115,7 @@ LIBC_BOTTOM_HALF_OMIT_SOURCES := \
 LIBC_BOTTOM_HALF_ALL_SOURCES := $(filter-out $(LIBC_BOTTOM_HALF_OMIT_SOURCES),$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 # Omit p2-specific headers from include-all.c test.
 # for exception-handling.
-INCLUDE_ALL_CLAUSES := -not -name wasip2.h -not -name descriptor_table.h
+INCLUDE_ALL_CLAUSES += -not -name wasip2.h -not -name descriptor_table.h
 endif
 
 ifeq ($(WASI_SNAPSHOT), p2)
@@ -921,58 +921,57 @@ finish: check-symbols
 endif
 endif
 
-DEFINED_SYMBOLS = $(SYSROOT_SHARE)/defined-symbols.txt
-UNDEFINED_SYMBOLS = $(SYSROOT_SHARE)/undefined-symbols.txt
-
-ifeq ($(WASI_SNAPSHOT),p2)
-EXPECTED_TARGET_DIR = expected/wasm32-wasip2
-else
-ifeq ($(THREAD_MODEL),posix)
-EXPECTED_TARGET_DIR = expected/wasm32-wasip1-threads
-else
-EXPECTED_TARGET_DIR = expected/wasm32-wasip1
-endif
-endif
+install: finish
+	mkdir -p "$(INSTALL_DIR)"
+	cp -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"
 
 
-check-symbols: startup_files libc
-	#
-	# Collect metadata on the sysroot and perform sanity checks.
-	#
+##### CHECK ####################################################################
+# The `check-symbols` target builds up a set of text files in `<sysroot>/share`
+# which are compared with known-good output in the `expected` directory.
+################################################################################
+
+$(SYSROOT_SHARE)/defined-symbols.txt: startup_files libc
 	mkdir -p "$(SYSROOT_SHARE)"
+	"$(NM)" --defined-only \
+	    $(SYSROOT_LIB)/libc.a $(SYSROOT_LIB)/libwasi-emulated-*.a $(SYSROOT_LIB)/*.o \
+	    |grep ' [[:upper:]] ' \
+	    |sed 's/.* [[:upper:]] //' \
+	    |LC_ALL=C sort \
+	    |uniq \
+	    > "$@"
 
-	#
-	# Collect symbol information.
-	#
+$(SYSROOT_SHARE)/undefined-symbols.txt: $(SYSROOT_SHARE)/defined-symbols.txt
 	@# TODO: Use llvm-nm --extern-only instead of grep. This is blocked on
 	@# LLVM PR40497, which is fixed in 9.0, but not in 8.0.
 	@# Ignore certain llvm builtin symbols such as those starting with __mul
 	@# since these dependencies can vary between llvm versions.
-	"$(NM)" --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libwasi-emulated-*.a "$(SYSROOT_LIB)"/*.o \
-	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_ALL=C sort |uniq > "$(DEFINED_SYMBOLS)"
-	for undef_sym in $$("$(NM)" --undefined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/libc-*.a "$(SYSROOT_LIB)"/*.o \
-	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
-	    grep -q '\<'$$undef_sym'\>' "$(DEFINED_SYMBOLS)" || echo $$undef_sym; \
-	done | grep -E -v "^__mul|__memory_base|__indirect_function_table|__tls_base" > "$(UNDEFINED_SYMBOLS)"
-	grep '^_*imported_wasi_' "$(UNDEFINED_SYMBOLS)" \
-	    > "$(SYSROOT_LIB)/libc.imports"
+	for undef_sym in $$("$(NM)" --undefined-only $(SYSROOT_LIB)/libc.a $(SYSROOT_LIB)/libc-*.a $(SYSROOT_LIB)/*.o |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
+	    grep -q '\<'$$undef_sym'\>' "$<" || echo $$undef_sym; \
+	done | grep -E -v "^__mul|__memory_base|__indirect_function_table|__tls_base" > "$@"
 
+$(SYSROOT_LIB)/libc.imports: $(SYSROOT_SHARE)/undefined-symbols.txt
+	grep '^_*imported_wasi_' $< > $@
+
+INCLUDE_ALL_CLAUSES += -not -name mman.h -not -name signal.h -not -name times.h -not -name resource.h -not -name setjmp.h
+$(SYSROOT_SHARE)/include-all.c: $(INCLUDE_DIRS)
+	mkdir -p "$(SYSROOT_SHARE)"
 	#
 	# Generate a test file that includes all public C header files.
 	#
 	# setjmp.h is excluded because it requires a different compiler option
 	#
 	cd "$(SYSROOT_INC)" && \
-	  for header in $$(find . -type f -not -name mman.h -not -name signal.h -not -name times.h -not -name resource.h -not -name setjmp.h $(INCLUDE_ALL_CLAUSES) |grep -v /bits/ |grep -v /c++/); do \
+	  for header in $$(find . -type f $(INCLUDE_ALL_CLAUSES) |grep -v /bits/ |grep -v /c++/); do \
 	      echo '#include <'$$header'>' | sed 's/\.\///' ; \
-	done |LC_ALL=C sort >$(SYSROOT_SHARE)/include-all.c ; \
+	  done |LC_ALL=C sort > $@; \
 	cd - >/dev/null
-
 	#
-	# Test that it compiles.
+	# Test that all public C headers compile.
 	#
-	$(CC) $(CFLAGS) -fsyntax-only "$(SYSROOT_SHARE)/include-all.c" -Wno-\#warnings
+	$(CC) $(CFLAGS) -fsyntax-only "$@" -Wno-\#warnings
 
+$(SYSROOT_SHARE)/predefined-macros.txt: $(SYSROOT_SHARE)/include-all.c
 	#
 	# Collect all the predefined macros, except for compiler version macros
 	# which we don't need to track here.
@@ -1002,7 +1001,7 @@ check-symbols: startup_files libc
 	@# TODO: Undefine __wasm_nontrapping_fptoint__ and __wasm_bulk_memory__, that are
 	@# new to clang 20.
 	@# TODO: As of clang 16, __GNUC_VA_LIST is #defined without a value.
-	$(CC) $(CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
+	$(CC) $(CFLAGS) "$<" \
 	    -isystem $(SYSROOT_INC) \
 	    -std=gnu17 \
 	    -E -dM -Wno-\#warnings \
@@ -1042,15 +1041,23 @@ check-symbols: startup_files libc
 	    | grep -v '^#define __OPTIMIZE__' \
 	    | grep -v '^#define assert' \
 	    | grep -v '^#define __NO_INLINE__' \
-	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
+	    > "$@"
 
+# Pick which `expected` target to compare against.
+ifeq ($(WASI_SNAPSHOT),p2)
+EXPECTED_TARGET_DIR = expected/wasm32-wasip2
+else
+ifeq ($(THREAD_MODEL),posix)
+EXPECTED_TARGET_DIR = expected/wasm32-wasip1-threads
+else
+EXPECTED_TARGET_DIR = expected/wasm32-wasip1
+endif
+endif
+
+check-symbols: $(SYSROOT_SHARE)/defined-symbols.txt $(SYSROOT_SHARE)/undefined-symbols.txt $(SYSROOT_SHARE)/include-all.c $(SYSROOT_SHARE)/predefined-macros.txt $(SYSROOT_LIB)/libc.imports
 	# Check that the computed metadata matches the expected metadata.
 	# This ignores whitespace because on Windows the output has CRLF line endings.
-	diff -wur "$(EXPECTED_TARGET_DIR)" "$(SYSROOT_SHARE)"
-
-install: finish
-	mkdir -p "$(INSTALL_DIR)"
-	cp -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"
+	diff -wur $(EXPECTED_TARGET_DIR) $(SYSROOT_SHARE)
 
 $(BINDING_WORK_DIR)/wasi-cli:
 	mkdir -p "$(BINDING_WORK_DIR)"

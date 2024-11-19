@@ -35,13 +35,6 @@ ifneq ($(LTO),no)
 CLANG_VERSION ?= $(shell ${CC} -dumpversion)
 override OBJDIR := $(OBJDIR)/llvm-lto/$(CLANG_VERSION)
 endif
-# The directory where we store files and tools for generating WASIp2 bindings
-BINDING_WORK_DIR ?= build/bindings
-# URL from which to retrieve the WIT files used to generate the WASIp2 bindings
-WASI_CLI_URL ?= https://github.com/WebAssembly/wasi-cli/archive/refs/tags/v0.2.0.tar.gz
-# URL from which to retrieve the `wit-bindgen` command used to generate the
-# WASIp2 bindings.
-WIT_BINDGEN_URL ?= https://github.com/bytecodealliance/wit-bindgen/releases/download/wit-bindgen-cli-0.17.0/wit-bindgen-v0.17.0-x86_64-linux.tar.gz
 
 # When the length is no larger than this threshold, we consider the
 # overhead of bulk memory opcodes to outweigh the performance benefit,
@@ -921,6 +914,10 @@ finish: check-symbols
 endif
 endif
 
+install: finish
+	mkdir -p "$(INSTALL_DIR)"
+	cp -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"
+
 DEFINED_SYMBOLS = $(SYSROOT_SHARE)/defined-symbols.txt
 UNDEFINED_SYMBOLS = $(SYSROOT_SHARE)/undefined-symbols.txt
 
@@ -1048,9 +1045,19 @@ check-symbols: startup_files libc
 	# This ignores whitespace because on Windows the output has CRLF line endings.
 	diff -wur "$(EXPECTED_TARGET_DIR)" "$(SYSROOT_SHARE)"
 
-install: finish
-	mkdir -p "$(INSTALL_DIR)"
-	cp -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"
+
+##### BINDINGS #################################################################
+# The `bindings` target retrieves the necessary WIT files for the wasi-cli world
+# and generates a header file used by the wasip2 target.
+################################################################################
+
+# The directory where we store files and tools for generating WASIp2 bindings
+BINDING_WORK_DIR ?= build/bindings
+# URL from which to retrieve the WIT files used to generate the WASIp2 bindings
+WASI_CLI_URL ?= https://github.com/WebAssembly/wasi-cli/archive/refs/tags/v0.2.0.tar.gz
+# URL from which to retrieve the `wit-bindgen` command used to generate the
+# WASIp2 bindings.
+WIT_BINDGEN_URL ?= https://github.com/bytecodealliance/wit-bindgen/releases/download/wit-bindgen-cli-0.17.0/wit-bindgen-v0.17.0-x86_64-linux.tar.gz
 
 $(BINDING_WORK_DIR)/wasi-cli:
 	mkdir -p "$(BINDING_WORK_DIR)"

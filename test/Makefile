@@ -22,13 +22,13 @@ TARGET_TRIPLE ?= wasm32-wasi
 
 LIBC_TEST_URL ?= https://github.com/bytecodealliance/libc-test
 LIBC_TEST = $(DOWNDIR)/libc-test
-LIBRT_URL ?= https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-16/libclang_rt.builtins-wasm32-wasi-16.0.tar.gz
-LIBRT = $(DOWNDIR)/lib/wasi/libclang_rt.builtins-wasm32.a
-WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v17.0.0/wasmtime-v17.0.0-x86_64-linux.tar.xz
+LIBRT_URL ?= https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-24/libclang_rt.builtins-wasm32-wasi-24.0.tar.gz
+LIBRT = $(DOWNDIR)/libclang_rt.builtins-wasm32.a
+WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v26.0.1/wasmtime-v26.0.1-x86_64-linux.tar.xz
 WASMTIME = $(DOWNDIR)/$(shell basename $(WASMTIME_URL) .tar.xz)/wasmtime
-WASM_TOOLS_URL ?= https://github.com/bytecodealliance/wasm-tools/releases/download/wasm-tools-1.0.54/wasm-tools-1.0.54-x86_64-linux.tar.gz
+WASM_TOOLS_URL ?= https://github.com/bytecodealliance/wasm-tools/releases/download/v1.220.0/wasm-tools-1.220.0-x86_64-linux.tar.gz
 WASM_TOOLS = $(DOWNDIR)/$(shell basename $(WASM_TOOLS_URL) .tar.gz)/wasm-tools
-ADAPTER_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v17.0.0/wasi_snapshot_preview1.command.wasm
+ADAPTER_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v26.0.1/wasi_snapshot_preview1.command.wasm
 ADAPTER = $(DOWNDIR)/wasi_snapshot_preview1.command.wasm
 
 TO_DOWNLOAD = $(LIBC_TEST) $(LIBRT) $(WASMTIME)
@@ -44,10 +44,11 @@ $(DOWNDIR):
 $(LIBC_TEST): | $(DOWNDIR)
 	git clone --depth 1 $(LIBC_TEST_URL) $@
 
-# TODO install target to place into...
+# TODO: add install target to copy builtins library directly into a Clang
+# installation.
 $(LIBRT): | $(DOWNDIR)
 	wget --no-clobber --directory-prefix=$(DOWNDIR) $(LIBRT_URL)
-	tar --extract --file=$(DOWNDIR)/$(shell basename $(LIBRT_URL)) --directory=$(DOWNDIR)/
+	tar --extract --file=$(DOWNDIR)/$(shell basename $(LIBRT_URL)) --strip-components=1 --directory=$(DOWNDIR)/
 
 $(WASMTIME): | $(DOWNDIR)
 	wget --no-clobber --directory-prefix=$(DOWNDIR) $(WASMTIME_URL)
@@ -61,7 +62,7 @@ $(ADAPTER): | $(DOWNDIR)
 	wget --no-clobber --directory-prefix=$(DOWNDIR) $(ADAPTER_URL)
 
 clean::
-	rm -rf download
+	rm -rf $(DOWNDIR)
 
 ##### BUILD ####################################################################
 
@@ -145,7 +146,7 @@ endif
 # due to a missing `libclang_rt.builtins-wasm32.a` in the Clang lib directory.
 # This location is system-dependent, but could be fixed by something like:
 #  $ sudo mkdir /usr/lib64/clang/14.0.5/lib/wasi
-#  $ sudo cp download/lib/wasi/libclang_rt.builtins-wasm32.a /usr/lib64/clang/14.0.5/lib/wasi/
+#  $ sudo cp download/libclang_rt.builtins-wasm32.a /usr/lib64/clang/14.0.5/lib/wasi/
 build: download $(WASMS)
 
 $(WASMS): | $(OBJDIRS)

@@ -772,7 +772,7 @@ $(OBJDIR)/%.o: %.s $(INCLUDE_DIRS)
 $(DLMALLOC_OBJS) $(DLMALLOC_SO_OBJS): CFLAGS += \
     -I$(DLMALLOC_INC)
 
-startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS) $(LIBC_BOTTOM_HALF_ALL_SO_OBJS): CFLAGS += \
+$(STARTUP_FILES) $(LIBC_BOTTOM_HALF_ALL_OBJS) $(LIBC_BOTTOM_HALF_ALL_SO_OBJS): CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_HEADERS_PRIVATE) \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC) \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) \
@@ -849,12 +849,17 @@ endif
 	@mkdir -p $(@D)
 	touch $@
 
-startup_files: $(INCLUDE_DIRS) $(LIBC_BOTTOM_HALF_CRT_OBJS)
+STARTUP_FILES := $(OBJDIR)/copy-startup-files.stamp
+$(STARTUP_FILES): $(INCLUDE_DIRS) $(LIBC_BOTTOM_HALF_CRT_OBJS) 
 	#
-	# Install the startup files (crt1.o etc).
+	# Install the startup files (crt1.o, etc.).
 	#
-	mkdir -p "$(SYSROOT_LIB)" && \
+	mkdir -p "$(SYSROOT_LIB)"
 	cp $(LIBC_BOTTOM_HALF_CRT_OBJS) "$(SYSROOT_LIB)"
+
+	# Stamp the startup file installation.
+	@mkdir -p $(@D)
+	touch $@
 
 # TODO: As of this writing, wasi_thread_start.s uses non-position-independent
 # code, and I'm not sure how to make it position-independent.  Once we've done
@@ -907,7 +912,7 @@ $(DUMMY_LIBS):
 	    $(AR) crs "$$lib"; \
 	done
 
-finish: startup_files libc $(DUMMY_LIBS)
+finish: $(STARTUP_FILES) libc $(DUMMY_LIBS)
 	#
 	# The build succeeded! The generated sysroot is in $(SYSROOT).
 	#
@@ -935,7 +940,7 @@ endif
 endif
 
 
-check-symbols: startup_files libc
+check-symbols: $(STARTUP_FILES) libc
 	#
 	# Collect metadata on the sysroot and perform sanity checks.
 	#
@@ -1114,4 +1119,4 @@ clean:
 	$(RM) -r "$(OBJDIR)"
 	$(RM) -r "$(SYSROOT)"
 
-.PHONY: default startup_files libc libc_so finish install clean check-symbols bindings
+.PHONY: default libc libc_so finish install clean check-symbols bindings

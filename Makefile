@@ -934,7 +934,7 @@ install: finish
 $(SYSROOT_SHARE)/defined-symbols.txt: startup_files libc
 	mkdir -p "$(SYSROOT_SHARE)"
 	"$(NM)" --defined-only \
-	    $(SYSROOT_LIB)/libc.a $(SYSROOT_LIB)/libwasi-emulated-*.a $(SYSROOT_LIB)/*.o \
+	    $(SYSROOT_LIB)/*.a $(SYSROOT_LIB)/*.o \
 	    |grep ' [[:upper:]] ' \
 	    |sed 's/.* [[:upper:]] //' \
 	    |LC_ALL=C sort \
@@ -946,7 +946,7 @@ $(SYSROOT_SHARE)/undefined-symbols.txt: $(SYSROOT_SHARE)/defined-symbols.txt
 	@# LLVM PR40497, which is fixed in 9.0, but not in 8.0.
 	@# Ignore certain llvm builtin symbols such as those starting with __mul
 	@# since these dependencies can vary between llvm versions.
-	for undef_sym in $$("$(NM)" --undefined-only $(SYSROOT_LIB)/libc.a $(SYSROOT_LIB)/libc-*.a $(SYSROOT_LIB)/*.o |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
+	for undef_sym in $$("$(NM)" --undefined-only $(SYSROOT_LIB)/*.a $(SYSROOT_LIB)/*.o |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$<" || echo $$undef_sym; \
 	done | grep -E -v "^__mul|__memory_base|__indirect_function_table|__tls_base" > "$@"
 

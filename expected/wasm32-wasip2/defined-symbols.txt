@@ -18,6 +18,7 @@ __assert_fail
 __c_dot_utf8
 __c_dot_utf8_locale
 __c_locale
+__c_longjmp
 __clock
 __clock_gettime
 __clock_nanosleep
@@ -389,6 +390,9 @@ __wasilibc_tell
 __wasilibc_unlinkat
 __wasilibc_utimens
 __wasm_call_dtors
+__wasm_longjmp
+__wasm_setjmp
+__wasm_setjmp_test
 __wcscoll_l
 __wcsftime_l
 __wcsxfrm_l
@@ -568,6 +572,10 @@ difftime
 dirfd
 dirname
 div
+dlclose
+dlerror
+dlopen
+dlsym
 dprintf
 drand48
 drem

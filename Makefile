@@ -883,23 +883,25 @@ endif
 
 libc: include_dirs $(STATIC_LIBS)
 
-dummy_libs:
+DUMMY := m rt pthread crypt util xnet resolv
+DUMMY_LIBS := $(patsubst %,$(SYSROOT_LIB)/lib%.a,$(DUMMY))
+$(DUMMY_LIBS):
 	#
 	# Create empty placeholder libraries.
 	#
-	mkdir -p "$(SYSROOT_LIB)" && \
-	for name in m rt pthread crypt util xnet resolv; do \
-	    $(AR) crs "$(SYSROOT_LIB)/lib$${name}.a"; \
+	mkdir -p "$(SYSROOT_LIB)"
+	for lib in $@; do \
+	    $(AR) crs "$$lib"; \
 	done
 
-finish: startup_files libc dummy_libs
+finish: startup_files libc $(DUMMY_LIBS)
 	#
 	# The build succeeded! The generated sysroot is in $(SYSROOT).
 	#
 
 ifeq ($(LTO),no)
 # The check for defined and undefined symbols expects there to be a heap
-# alloctor (providing malloc, calloc, free, etc). Skip this step if the build
+# allocator (providing malloc, calloc, free, etc). Skip this step if the build
 # is done without a malloc implementation.
 ifneq ($(MALLOC_IMPL),none)
 finish: check-symbols
@@ -1099,4 +1101,4 @@ clean:
 	$(RM) -r "$(OBJDIR)"
 	$(RM) -r "$(SYSROOT)"
 
-.PHONY: default startup_files libc libc_so dummy_libs finish install include_dirs clean check-symbols bindings
+.PHONY: default startup_files libc libc_so finish install include_dirs clean check-symbols bindings

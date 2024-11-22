@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # This script checks for failed tests in the given directory. Failed tests will
-# include text in a *.err file.
+# include text in a *.log file.
 #
 # Usage: failed-tests.sh [TESTDIR]
 #

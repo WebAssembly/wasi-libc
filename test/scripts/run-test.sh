@@ -12,11 +12,9 @@ ENGINE="${ENGINE:-wasmtime}"
 [ -n "$WASM" ] || (echo "missing WASM variable" && exit 1)
 [ -n "$DIR" ] || (echo "missing DIR variable" && exit 1)
 
-pushd $DIR > /dev/null
-    mkdir -p fs
-    echo "$ENGINE $WASM" > cmd.sh
-    chmod +x cmd.sh
-    ./cmd.sh &> output.log
-    [ $? -eq 0 ] || echo "Test failed" >> output.log
-popd > /dev/null
-
+cd $DIR
+mkdir -p fs
+echo "$ENGINE $WASM" > cmd.sh
+chmod +x cmd.sh
+./cmd.sh &> output.log
+[ $? -eq 0 ] || echo "Test failed" >> output.log

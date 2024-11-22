@@ -3,7 +3,7 @@
 # Filter out test files that do not match a configuration variable.
 #
 # This script accepts a list of files as arguments and looks for a comment like
-# the following in each: `// filter.py(<VARIABLE>): <EXPRESSION>`. The
+# the following in each: `//! filter.py(<VARIABLE>): <EXPRESSION>`. The
 # `VARIABLE` value is looked up in the environment and compared with the
 # expression. An `EXPRESSION` is a comma-separated list of terms: either
 # `<string>` or `!<string>`. If the `VARIABLE` value matches the expression, the
@@ -12,9 +12,9 @@
 # Example:
 # ```
 # $ head one.c
-# // filter.py(FOO): bar
+# //! filter.py(FOO): bar
 # $ head two.c
-# // filter.py(FOO):!bar, baz
+# //! filter.py(FOO):!bar, baz
 # $ FOO=bar ./filter.py one.c two.c
 # one.c
 # $ FOO=baz ./filter.py one.c two.c
@@ -55,9 +55,9 @@ def matches_expression(value, expr, pos):
 
 
 """
-Match a C comment like the following: `// filter.py(<VARIABLE>): <EXPRESSION>`.
+Match a C comment like the following: `//! filter.py(<VARIABLE>): <EXPRESSION>`.
 """
-PATTERN = re.compile('\\s*//\\s*filter\\.py\\(([^)]+)\\):\\s*(.*)')
+PATTERN = re.compile('\\s*//\\!\\s*filter\\.py\\(([^)]+)\\):\\s*(.*)')
 
 
 def line_matches(line, env, pos):

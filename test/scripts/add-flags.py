@@ -9,7 +9,7 @@
 # Example:
 # ```
 # $ head one.c
-# // add-flags.py(CFLAGS): -DFOO
+# //! add-flags.py(CFLAGS): -DFOO
 # $ ./add-flags.py CFLAGS one.c
 # -DFOO
 
@@ -19,17 +19,17 @@ import re
 import logging
 
 """
-Match a C comment like the following: `// add-flags.py: <FLAGS>`.
+Match a C comment like the following: `//! add-flags.py: <FLAGS>`.
 """
-PATTERN = re.compile('\\s*//\\s*add-flags\\.py\\(([^)]+)\\):\\s*(.*)')
+PATTERN = re.compile('\\s*//\\!\\s*add-flags\\.py\\(([^)]+)\\):\\s*(.*)')
 
 
 def find_flags(name, file):
     with open(file, 'r') as f:
         for lineno, line in enumerate(f, start=1):
             match = PATTERN.match(line)
-            pos = f'[{file}:{lineno}]'
             if match and match[1] == name:
+                pos = f'[{file}:{lineno}]'
                 logging.debug(f'{pos} found flags')
                 return match[2].strip()
 

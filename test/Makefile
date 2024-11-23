@@ -110,9 +110,14 @@ $(INFRA_HEADERS): $(DOWNLOADED)
 # the $(WASMS) tests.
 ALL_TESTS := $(shell find $(SRCDIR) -name '*.c')
 TESTS := $(shell TARGET_TRIPLE=$(TARGET_TRIPLE) scripts/filter.py $(ALL_TESTS))
-WASMS := $(TESTS:$(SRCDIR)/%.c=$(OBJDIR)/%.core.wasm)
 WASM_OBJS := $(TESTS:$(SRCDIR)/%.c=$(OBJDIR)/%.wasm.o)
 WASM_OBJS += $(INFRA_WASM_OBJS)
+ifeq ($(TARGET_TRIPLE), wasm32-wasip2)
+WASMS := $(TESTS:$(SRCDIR)/%.c=$(OBJDIR)/%.component.wasm)
+else
+WASMS := $(TESTS:$(SRCDIR)/%.c=$(OBJDIR)/%.core.wasm)
+endif
+
 
 # Setup the compiler. We allow $(CC) to be set from the command line; ?= doesn't
 # work for CC because make has a default value for it.
@@ -135,7 +140,6 @@ $(OBJDIR)/%.wasm.o: $(SRCDIR)/%.c $(DOWNLOADED) $(SYSROOT)
 	$(CC) $(CFLAGS) $(shell scripts/add-flags.py CFLAGS $<) -c $< -o $@
 
 # Build up all the `*.wasm` files.
-#$(WASMS): $(WASM_OBJS)
 obj_to_c = $(patsubst $(OBJDIR)/%.wasm.o,$(SRCDIR)/%.c,$1)
 $(OBJDIR)/%.core.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS)
 	@mkdir -p $(@D)
@@ -143,10 +147,8 @@ $(OBJDIR)/%.core.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS)
 
 # For wasip2, we include an additional step to wrap up the core module into
 # a component.
-ifeq ($(TARGET_TRIPLE), wasm32-wasip2)
 $(OBJDIR)/%.component.wasm: $(OBJDIR)/%.core.wasm
 	$(WASM_TOOLS) component new --adapt $(ADAPTER) $< -o $@
-endif
 
 # Compile each selected test using Clang. Note that failures here are likely
 # due to a missing `libclang_rt.builtins-wasm32.a` in the Clang lib directory.
@@ -175,7 +177,7 @@ generate-stubs:
 ENGINE ?= $(WASMTIME) run
 ifeq ($(TARGET_TRIPLE), wasm32-wasip2)
 ENGINE += --wasm component-model
-OBJPAT := $(OBJDIR)%.component.wasm
+OBJPAT := $(OBJDIR)/%.component.wasm
 else
 OBJPAT := $(OBJDIR)/%.core.wasm
 endif
@@ -184,7 +186,7 @@ endif
 # script and an `output.log` file (see `scripts/run-test.sh` for details). The
 # `success` file is never generated, which means the test will rerun every time.
 # To ignore a test temporarily, `touch .../success:`.
-RUNTESTS:=$(WASMS:$(OBJDIR)%.core.wasm=$(RUNDIR)%.c/success)
+RUNTESTS:=$(WASMS:$(OBJPAT)=$(RUNDIR)/%/success)
 wasm_to_c = $(patsubst $(OBJPAT),$(SRCDIR)/%.c,$1)
 $(RUNDIR)/%.c/success: $(OBJPAT)
 	@mkdir -p $(@D)

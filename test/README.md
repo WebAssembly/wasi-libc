@@ -29,7 +29,7 @@ Note that `wasm-ld` must be available, so an additional
 looks like (see [`run-test.sh`]):
 
 ```sh
-$ ls run/$TARGET_TRIPLE/misc/some-test.c
+$ ls run/$TARGET_TRIPLE/misc/some-test
 cmd.sh      # the exact command used to run the test
 fs          # a directory containing any test-created files
 output.log  # the captured printed output--only for errors

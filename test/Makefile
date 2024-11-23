@@ -188,7 +188,7 @@ endif
 # To ignore a test temporarily, `touch .../success:`.
 RUNTESTS:=$(WASMS:$(OBJPAT)=$(RUNDIR)/%/success)
 wasm_to_c = $(patsubst $(OBJPAT),$(SRCDIR)/%.c,$1)
-$(RUNDIR)/%.c/success: $(OBJPAT)
+$(RUNDIR)/%/success: $(OBJPAT)
 	@mkdir -p $(@D)
 	@DIR="$(abspath $(@D))" \
 	  WASM="$(abspath $<)" \

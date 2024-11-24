@@ -85,6 +85,9 @@ EXPECTED_TARGET_TRIPLE = ${TARGET_TRIPLE}
 endif
 
 EXPECTED_TARGET_DIR = expected/${EXPECTED_TARGET_TRIPLE}
+# These artifacts are "stamps" that we use to mark that some task (e.g., copying
+# files) has been completed.
+INCLUDE_DIRS := $(OBJDIR)/copy-include-headers.stamp
 
 BUILTINS_LIB ?= $(shell ${CC} ${CFLAGS} --print-libgcc-file-name)
 
@@ -459,6 +462,10 @@ CFLAGS += -mthread-model posix -pthread -ftls-model=local-exec
 ASMFLAGS += -matomics
 endif
 
+ifeq ($(WASM64), yes)
+ASMFLAGS += -D__wasm64__=1
+endif
+
 # Include cloudlib's directory to access the structure definition of clockid_t
 CFLAGS += -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 
@@ -756,7 +763,7 @@ $(LIBSETJMP_OBJS) $(LIBSETJMP_SO_OBJS): CFLAGS += \
 $(LIBWASI_EMULATED_SIGNAL_MUSL_OBJS) $(LIBWASI_EMULATED_SIGNAL_MUSL_SO_OBJS): CFLAGS += \
 	    -D_WASI_EMULATED_SIGNAL
 
-$(OBJDIR)/%.long-double.pic.o: %.c include_dirs
+$(OBJDIR)/%.long-double.pic.o: %.c $(INCLUDE_DIRS)
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
@@ -764,23 +771,23 @@ $(OBJDIR)/wasip2_component_type.pic.o $(OBJDIR)/wasip2_component_type.o: $(LIBC_
 	@mkdir -p "$(@D)"
 	cp $< $@
 
-$(OBJDIR)/%.pic.o: %.c include_dirs
+$(OBJDIR)/%.pic.o: %.c $(INCLUDE_DIRS)
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
-$(OBJDIR)/%.long-double.o: %.c include_dirs
+$(OBJDIR)/%.long-double.o: %.c $(INCLUDE_DIRS)
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
-$(OBJDIR)/%.no-floating-point.o: %.c include_dirs
+$(OBJDIR)/%.no-floating-point.o: %.c $(INCLUDE_DIRS)
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
-$(OBJDIR)/%.o: %.c include_dirs
+$(OBJDIR)/%.o: %.c $(INCLUDE_DIRS)
 	@mkdir -p "$(@D)"
 	$(CC) $(CFLAGS) -MD -MP -o $@ -c $<
 
-$(OBJDIR)/%.o: %.S include_dirs
+$(OBJDIR)/%.o: %.s $(INCLUDE_DIRS)
 	@mkdir -p "$(@D)"
 	$(CC) $(ASMFLAGS) -o $@ -c $<
 
@@ -828,7 +835,10 @@ $(LIBWASI_EMULATED_PTHREAD_OBJS) $(LIBWASI_EMULATED_PTHREAD_SO_OBJS): CFLAGS += 
 $(EMMALLOC_OBJS): CFLAGS += \
     -fno-strict-aliasing
 
-include_dirs:
+ALL_POSSIBLE_HEADERS += $(shell find $(LIBC_TOP_HALF_MUSL_DIR) -name \*.h)
+ALL_POSSIBLE_HEADERS += $(shell find $(LIBC_BOTTOM_HALF_HEADERS_PUBLIC) -name \*.h)
+ALL_POSSIBLE_HEADERS += $(shell find $(MUSL_FTS_SRC_DIR) -name \*.h)
+$(INCLUDE_DIRS): $(ALL_POSSIBLE_HEADERS)
 	#
 	# Install the include files.
 	#
@@ -844,10 +854,12 @@ include_dirs:
 
 	# Copy in the bulk of musl's public header files.
 	cp -r "$(LIBC_TOP_HALF_MUSL_INC)"/* "$(SYSROOT_INC)"
+
 	# Copy in the musl's "bits" header files.
 	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/generic/bits/* "$(SYSROOT_INC)/bits"
 	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/wasm/bits/* "$(SYSROOT_INC)/bits"
 
+	# Copy in the fts header files.
 	cp "$(MUSL_FTS_SRC_DIR)/fts.h" "$(SYSROOT_INC)/fts.h"
 
 	# Remove selected header files.
@@ -857,7 +869,11 @@ ifeq ($(WASI_SNAPSHOT), p2)
 		> "$(SYSROOT_INC)/__wasi_snapshot.h"
 endif
 
-startup_files: include_dirs $(LIBC_BOTTOM_HALF_CRT_OBJS)
+	# Stamp the include installation.
+	@mkdir -p $(@D)
+	touch $@
+
+startup_files: $(INCLUDE_DIRS) $(LIBC_BOTTOM_HALF_CRT_OBJS)
 	#
 	# Install the startup files (crt1.o etc).
 	#
@@ -882,7 +898,7 @@ LIBC_SO += \
 endif
 endif
 
-libc_so: include_dirs $(LIBC_SO)
+libc_so: $(INCLUDE_DIRS) $(LIBC_SO)
 
 STATIC_LIBS = \
     $(SYSROOT_LIB)/libc.a \
@@ -902,25 +918,27 @@ STATIC_LIBS += \
 	$(SYSROOT_LIB)/libsetjmp.a
 endif
 
-libc: include_dirs $(STATIC_LIBS)
+libc: $(INCLUDE_DIRS) $(STATIC_LIBS)
 
-dummy_libs:
+DUMMY := m rt pthread crypt util xnet resolv
+DUMMY_LIBS := $(patsubst %,$(SYSROOT_LIB)/lib%.a,$(DUMMY))
+$(DUMMY_LIBS):
 	#
 	# Create empty placeholder libraries.
 	#
-	mkdir -p "$(SYSROOT_LIB)" && \
-	for name in m rt pthread crypt util xnet resolv; do \
-	    $(AR) crs "$(SYSROOT_LIB)/lib$${name}.a"; \
+	mkdir -p "$(SYSROOT_LIB)"
+	for lib in $@; do \
+	    $(AR) crs "$$lib"; \
 	done
 
-finish: startup_files libc dummy_libs
+finish: startup_files libc $(DUMMY_LIBS)
 	#
 	# The build succeeded! The generated sysroot is in $(SYSROOT).
 	#
 
 ifeq ($(LTO),no)
 # The check for defined and undefined symbols expects there to be a heap
-# alloctor (providing malloc, calloc, free, etc). Skip this step if the build
+# allocator (providing malloc, calloc, free, etc). Skip this step if the build
 # is done without a malloc implementation.
 ifneq ($(MALLOC_IMPL),none)
 finish: check-symbols
@@ -994,6 +1012,8 @@ check-symbols: startup_files libc
 	@# clang 16 for -mcpu=generic.
 	@# TODO: Undefine __wasm_multivalue__ and __wasm_reference_types__, that are new to
 	@# clang 19 for -mcpu=generic.
+	@# TODO: Undefine __wasm_nontrapping_fptoint__ and __wasm_bulk_memory__, that are
+	@# new to clang 20.
 	@# TODO: As of clang 16, __GNUC_VA_LIST is #defined without a value.
 	$(CC) $(CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -isystem $(SYSROOT_INC) \
@@ -1012,6 +1032,8 @@ check-symbols: startup_files libc
 	    -U__wasm_sign_ext__ \
 	    -U__wasm_multivalue__ \
 	    -U__wasm_reference_types__ \
+	    -U__wasm_nontrapping_fptoint__ \
+	    $(if $(filter-out expected/wasm32-wasip1-threads,$(EXPECTED_TARGET_DIR)),-U__wasm_bulk_memory__) \
 	    -U__GNUC__ \
 	    -U__GNUC_MINOR__ \
 	    -U__GNUC_PATCHLEVEL__ \
@@ -1105,4 +1127,4 @@ clean:
 	$(RM) -r "$(OBJDIR)"
 	$(RM) -r "$(SYSROOT)"
 
-.PHONY: default startup_files libc libc_so dummy_libs finish install include_dirs clean check-symbols bindings
+.PHONY: default startup_files libc libc_so finish install clean check-symbols bindings

@@ -73,3 +73,4 @@ __trunctfsf2
 __unordtf2
 __wasm_call_ctors
 __wasm_init_tls
+wasi_thread_start

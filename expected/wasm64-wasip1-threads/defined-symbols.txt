@@ -1314,7 +1314,6 @@ vswprintf
 vswscanf
 vwprintf
 vwscanf
-wasi_thread_start
 wcpcpy
 wcpncpy
 wcrtomb

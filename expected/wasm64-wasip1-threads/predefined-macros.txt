@@ -3163,7 +3163,6 @@
 #define __wasm64__ 1
 #define __wasm__ 1
 #define __wasm_atomics__ 1
-#define __wasm_bulk_memory__ 1
 #define _tolower(a) ((a)|0x20)
 #define _toupper(a) ((a)&0x5f)
 #define acos(x) __tg_real_complex(acos, (x))

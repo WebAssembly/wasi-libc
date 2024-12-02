@@ -7,7 +7,7 @@
 #
 # Usage: SYSROOT_INC=... TARGET_TRIPLE=... ./install-include-headers.sh
 
-set -e
+set -euo pipefail
 
 PARENT_DIR=$(dirname $(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd))
 WASI_LIBC="${WASI_LIBC:-$PARENT_DIR}"
@@ -15,19 +15,11 @@ if [[ -z "${SYSROOT_INC}" || -z "${TARGET_TRIPLE}" ]]; then
     echo "usage: SYSROOT_INC=... TARGET_TRIPLE=... ./install-include-headers.sh"
     exit 1
 fi
-
-# If DRY_RUN is set, then don't actually touch any files.
-if [[ -z "${DRY_RUN}" ]]; then
-    CP="cp -v"
-    RM="rm -v"
-    MKDIR="mkdir"
-    SED="sed"
-else
-    CP="echo cp"
-    RM="echo rm"
-    MKDIR="echo mkdir" 
-    SED="echo sed" 
-fi
+# The commands are available for override to allow dry runs.
+CP="${CP:-cp -v}"
+RM="${RM:-rm -v}"
+MKDIR="${MKDIR:-mkdir}"
+SED="${SED:-sed}"
 
 # Copy in the bottom half's public headers.
 $MKDIR -p $SYSROOT_INC

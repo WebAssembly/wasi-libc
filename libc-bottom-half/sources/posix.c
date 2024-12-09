@@ -17,11 +17,8 @@ static int find_relpath2(
     char **relative,
     size_t *relative_len
 ) {
-    // See comments in `preopens.c` for what this trick is doing.
     const char *abs;
-    if (__wasilibc_find_relpath_alloc)
-        return __wasilibc_find_relpath_alloc(path, &abs, relative, relative_len, 1);
-    return __wasilibc_find_relpath(path, &abs, relative, *relative_len);
+    return __wasilibc_find_relpath_alloc(path, &abs, relative, relative_len, 1);
 }
 
 // Helper to call `__wasilibc_find_relpath` and return an already-managed

@@ -197,7 +197,10 @@ int chdir(const char *path)
 {
     // we run the legacy chdir function that emulates real
     // current directory functionality for backwards compatibility reasons
-    chdir_legacy(path);
+    if (chdir_legacy(path) != 0) {
+        // chdir_legacy already sets errno
+        return -1;
+    }
 
     // otherwise we let the operating system know we are changing the current path
     __wasi_errno_t error = __wasi_chdir(path);

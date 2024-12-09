@@ -57,6 +57,10 @@ int __wasilibc_find_abspath(const char *abspath,
  * `relative` as a malloc'd buffer that will be `realloc`'d to the appropriate
  * size to contain the relative path.
  *
+ * This used to be a weak function for WASI, but since WASIX has a host-side
+ * CWD that can be set, we always need this. The rest of this comment block is
+ * the documentation for the original weak WASI version of it.
+ * 
  * Note that this is a weak symbol and if it's not defined you can use
  * `__wasilibc_find_relpath`. The weak-nature of this symbols means that if it's
  * not otherwise included in the compilation then `chdir` wasn't used an there's
@@ -70,7 +74,7 @@ int __wasilibc_find_relpath_alloc(
     char **relative,
     size_t *relative_len,
     int can_realloc
-) __attribute__((__weak__));
+);
 
 #ifdef __cplusplus
 }

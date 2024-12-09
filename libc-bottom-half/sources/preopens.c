@@ -160,12 +160,7 @@ int __wasilibc_find_relpath(const char *path,
                             const char **abs_prefix,
                             char **relative_path,
                             size_t relative_path_len) {
-    // If `chdir` is linked, whose object file defines this symbol, then we
-    // call that. Otherwise if the program can't `chdir` then `path` is
-    // absolute (or relative to the root dir), so we delegate to `find_abspath`
-    if (__wasilibc_find_relpath_alloc)
-        return __wasilibc_find_relpath_alloc(path, abs_prefix, relative_path, &relative_path_len, 0);
-    return __wasilibc_find_abspath(path, abs_prefix, (const char**) relative_path);
+    return __wasilibc_find_relpath_alloc(path, abs_prefix, relative_path, &relative_path_len, 0);
 }
 
 // See the documentation in libc-find-relpath.h.

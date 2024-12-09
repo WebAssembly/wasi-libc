@@ -1,3 +1,5 @@
+//! add-flags.py(RUN): --dir fs::/
+
 /*
  * We modified musl-fts not to use fchdir() and we made FTS_NOCHDIR
  * the default behavior. This test is to make sure that the modified

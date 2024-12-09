@@ -84,7 +84,7 @@ clean::
 
 INFRA_OBJDIR := $(OBJDIR)/common
 $(INFRA_OBJDIR):
-	mkdir -p $@
+	@mkdir -p $@
 
 # Build the common test infrastructure. Part of the problem including more tests
 # is that the `libc-test` infrastructure code is not all Wasm-compilable. As we

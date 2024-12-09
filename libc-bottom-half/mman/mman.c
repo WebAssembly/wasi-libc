@@ -133,9 +133,6 @@ int munmap(void *addr, size_t length) {
         return -1;
     }
 
-    // Release the memory.
-    free(map);
-
     // Write the data back to the backing file and close
     // the file handle
     if (map->fd > 0) {
@@ -145,6 +142,9 @@ int munmap(void *addr, size_t length) {
 
         close(map->fd);
     }
+
+    // Release the memory.
+    free(map);
 
     // Success!
     return 0;

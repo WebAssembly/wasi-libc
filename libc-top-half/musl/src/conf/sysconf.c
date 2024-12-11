@@ -8,8 +8,8 @@
 #include <signal.h>
 #endif
 #include <sys/sysinfo.h>
-#include <sys/auxv.h>
 #ifdef __wasilibc_unmodified_upstream
+#include <sys/auxv.h>
 #include "syscall.h"
 #endif
 #include "libc.h"
@@ -284,6 +284,7 @@ long sysconf(int name)
 	case JT_ZERO & 255:
 		return 0;
 	}
+#ifdef __wasilibc_unmodified_upstream // WASI has no auxv
 	case JT_MINSIGSTKSZ & 255:
 	case JT_SIGSTKSZ & 255: ;
 		long val = __getauxval(AT_MINSIGSTKSZ);
@@ -291,5 +292,6 @@ long sysconf(int name)
 		if (values[name] == JT_SIGSTKSZ)
 			val += SIGSTKSZ - MINSIGSTKSZ;
 		return val;
+#endif
 	return values[name];
 }

@@ -3201,6 +3201,7 @@
 #define alignas _Alignas
 #define alignof _Alignof
 #define alloca __builtin_alloca
+#define alphasort64 alphasort
 #define and &&
 #define and_eq &=
 #define asin(x) __tg_real_complex(asin, (x))
@@ -3216,6 +3217,7 @@
 #define betoh64(x) __bswap64(x)
 #define bitand &
 #define bitor |
+#define blkcnt64_t blkcnt_t
 #define bool _Bool
 #define bswap_16(x) __bswap_16(x)
 #define bswap_32(x) __bswap_32(x)
@@ -3240,6 +3242,7 @@
 #define creat64 creat
 #define d_fileno d_ino
 #define direct dirent
+#define dirent64 dirent
 #define erf(x) __tg_real(erf, (x))
 #define erfc(x) __tg_real(erfc, (x))
 #define errno errno
@@ -3249,13 +3252,30 @@
 #define fabs(x) __tg_real_complex_fabs(x)
 #define false 0
 #define fdim(x,y) __tg_real_2(fdim, (x), (y))
+#define fgetpos64 fgetpos
 #define floor(x) __tg_real(floor, (x))
 #define fma(x,y,z) __tg_real_fma((x), (y), (z))
 #define fmax(x,y) __tg_real_2(fmax, (x), (y))
 #define fmin(x,y) __tg_real_2(fmin, (x), (y))
 #define fmod(x,y) __tg_real_2(fmod, (x), (y))
+#define fopen64 fopen
 #define fpclassify(x) (__builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, x))
+#define fpos64_t fpos_t
+#define freopen64 freopen
 #define frexp(x,y) __tg_real_2_1(frexp, (x), (y))
+#define fsblkcnt64_t fsblkcnt_t
+#define fseeko64 fseeko
+#define fsetpos64 fsetpos
+#define fsfilcnt64_t fsfilcnt_t
+#define fstat64 fstat
+#define fstatat64 fstatat
+#define fstatvfs64 fstatvfs
+#define ftello64 ftello
+#define ftruncate64 ftruncate
+#define getdents64 getdents
+#define glob64 glob
+#define glob64_t glob_t
+#define globfree64 globfree
 #define howmany(n,d) (((n)+((d)-1))/(d))
 #define htobe16(x) __bswap16(x)
 #define htobe32(x) __bswap32(x)
@@ -3292,6 +3312,7 @@
 #define ifa_broadaddr ifa_ifu.ifu_broadaddr
 #define ifa_dstaddr ifa_ifu.ifu_dstaddr
 #define ilogb(x) __tg_real_nocast(ilogb, (x))
+#define ino64_t ino_t
 #define ip6_flow ip6_ctlun.ip6_un1.ip6_un1_flow
 #define ip6_hlim ip6_ctlun.ip6_un1.ip6_un1_hlim
 #define ip6_hops ip6_ctlun.ip6_un1.ip6_un1_hlim
@@ -3338,6 +3359,8 @@
 #define lrint(x) __tg_real_nocast(lrint, (x))
 #define lround(x) __tg_real_nocast(lround, (x))
 #define lseek(fd,offset,whence) ({ off_t __f = (fd); off_t __o = (offset); off_t __w = (whence); __builtin_constant_p((offset)) && __builtin_constant_p((whence)) && __o == 0 && __w == SEEK_CUR ? __wasilibc_tell(__f) : lseek(__f, __o, __w); })
+#define lseek64 lseek
+#define lstat64 lstat
 #define math_errhandling 2
 #define mld_cksum mld_icmp6_hdr.icmp6_cksum
 #define mld_code mld_icmp6_hdr.icmp6_code
@@ -3369,6 +3392,7 @@
 #define nearbyint(x) __tg_real(nearbyint, (x))
 #define nextafter(x,y) __tg_real_2(nextafter, (x), (y))
 #define nexttoward(x,y) __tg_real_2(nexttoward, (x), (y))
+#define nftw64 nftw
 #define no_argument 0
 #define noreturn _Noreturn
 #define not !
@@ -3398,8 +3422,11 @@
 #define or ||
 #define or_eq |=
 #define posix_fadvise64 posix_fadvise
+#define posix_fallocate64 posix_fallocate
 #define pow(x,y) __tg_real_complex_pow((x), (y))
 #define powerof2(n) !(((n)-1) & (n))
+#define pread64 pread
+#define preadv64 preadv
 #define pthread_cleanup_pop(r) _pthread_cleanup_pop(&__cb, (r)); } while(0)
 #define pthread_cleanup_push(f,x) do { struct __ptcb __cb; _pthread_cleanup_push(&__cb, f, x);
 #define pthread_create(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
@@ -3408,6 +3435,9 @@
 #define pthread_join(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
 #define pthread_timedjoin_np(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
 #define pthread_tryjoin_np(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
+#define pwrite64 pwrite
+#define pwritev64 pwritev
+#define readdir64 readdir
 #define remainder(x,y) __tg_real_2(remainder, (x), (y))
 #define remquo(x,y,z) __tg_real_remquo((x), (y), (z))
 #define required_argument 1
@@ -3420,6 +3450,7 @@
 #define rr_type rr_hdr.icmp6_type
 #define scalbln(x,y) __tg_real_2_1(scalbln, (x), (y))
 #define scalbn(x,y) __tg_real_2_1(scalbn, (x), (y))
+#define scandir64 scandir
 #define setbit(x,i) __bitop(x,i,|=)
 #define signbit(x) (__builtin_signbit(x))
 #define sin(x) __tg_real_complex(sin, (x))
@@ -3428,7 +3459,9 @@
 #define st_atime st_atim.tv_sec
 #define st_ctime st_ctim.tv_sec
 #define st_mtime st_mtim.tv_sec
+#define stat64 stat
 #define static_assert _Static_assert
+#define statvfs64 statvfs
 #define stderr (stderr)
 #define stdin (stdin)
 #define stdout (stdout)
@@ -3458,6 +3491,7 @@
 #define va_copy(dest,src) __builtin_va_copy(dest, src)
 #define va_end(ap) __builtin_va_end(ap)
 #define va_start(ap,param) __builtin_va_start(ap, param)
+#define versionsort64 versionsort
 #define xEOF 236
 #define xor ^
 #define xor_eq ^=

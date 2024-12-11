@@ -68,7 +68,7 @@ int getdents(int, struct dirent *, size_t);
 int versionsort(const struct dirent **, const struct dirent **);
 #endif
 
-#if defined(_LARGEFILE64_SOURCE) || defined(_GNU_SOURCE)
+#if defined(_LARGEFILE64_SOURCE)
 #define dirent64 dirent
 #define readdir64 readdir
 #ifdef __wasilibc_unmodified_upstream /* readdir_r is obsolete */

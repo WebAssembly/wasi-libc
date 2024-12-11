@@ -41,7 +41,9 @@ typedef struct mcontext_t {
 #define REG_SP 2
 #define REG_TP 4
 #define REG_S0 8
+#define REG_S1 9
 #define REG_A0 10
+#define REG_S2 18
 #endif
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
@@ -76,7 +78,6 @@ typedef struct __ucontext
 #define SA_RESTART   0x10000000
 #define SA_NODEFER   0x40000000
 #define SA_RESETHAND 0x80000000
-#define SA_RESTORER  0x04000000
 
 #endif
 

@@ -233,7 +233,7 @@ typedef struct _IO_cookie_io_functions_t {
 FILE *fopencookie(void *, const char *, cookie_io_functions_t);
 #endif
 
-#if defined(_LARGEFILE64_SOURCE) || defined(_GNU_SOURCE)
+#if defined(_LARGEFILE64_SOURCE)
 #ifdef __wasilibc_unmodified_upstream /* WASI has no temp directories */
 #define tmpfile64 tmpfile
 #endif

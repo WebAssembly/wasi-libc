@@ -67,6 +67,8 @@ FILE *freopen(const char *restrict filename, const char *restrict mode, FILE *re
 		fclose(f2);
 	}
 
+	f->mode = 0;
+	f->locale = 0;
 	FUNLOCK(f);
 	return f;
 
@@ -76,5 +78,3 @@ fail:
 	fclose(f);
 	return NULL;
 }
-
-weak_alias(freopen, freopen64);

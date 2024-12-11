@@ -48,7 +48,9 @@ trap 'rm -f "$tmp"' EXIT INT QUIT TERM HUP
 umask 077
 
 if test "$symlink" ; then
+umask 000
 ln -s "$1" "$tmp"
+umask 077
 else
 cat < "$1" > "$tmp"
 chmod "$mode" "$tmp"

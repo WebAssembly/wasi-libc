@@ -203,7 +203,6 @@ struct f_owner_ex {
 #endif
 #ifdef __wasilibc_unmodified_upstream /* WASI has no fallocate */
 int fallocate(int, int, off_t, off_t);
-#define fallocate64 fallocate
 #endif
 #ifdef __wasilibc_unmodified_upstream /* WASI has no name_to_handle_at */
 int name_to_handle_at(int, const char *, struct file_handle *, int *, int);
@@ -235,8 +234,13 @@ ssize_t tee(int, int, size_t, unsigned);
 #define lockf64 lockf
 #endif
 #define posix_fadvise64 posix_fadvise
+#ifdef __wasilibc_unmodified_upstream /* WASI has no fallocate */
 #define posix_fallocate64 posix_fallocate
+#endif
 #define off64_t off_t
+#if defined(_GNU_SOURCE)
+#define fallocate64 fallocate
+#endif
 #endif
 
 #ifdef __cplusplus

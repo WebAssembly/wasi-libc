@@ -187,7 +187,6 @@ __pthread_cond_timedwait
 __pthread_create
 __pthread_detach
 __pthread_join
-__pthread_key_atfork
 __pthread_key_create
 __pthread_key_delete
 __pthread_mutex_consistent

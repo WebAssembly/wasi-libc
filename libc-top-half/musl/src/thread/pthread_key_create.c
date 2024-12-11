@@ -21,12 +21,14 @@ static void dummy_0(void)
 weak_alias(dummy_0, __tl_lock);
 weak_alias(dummy_0, __tl_unlock);
 
+#ifdef __wasilibc_unmodified_upstream // WASI lacks fork
 void __pthread_key_atfork(int who)
 {
 	if (who<0) __pthread_rwlock_rdlock(&key_lock);
 	else if (!who) __pthread_rwlock_unlock(&key_lock);
 	else key_lock = (pthread_rwlock_t)PTHREAD_RWLOCK_INITIALIZER;
 }
+#endif
 
 int __pthread_key_create(pthread_key_t *k, void (*dtor)(void *))
 {

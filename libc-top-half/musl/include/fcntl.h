@@ -238,8 +238,10 @@ ssize_t tee(int, int, size_t, unsigned);
 #define posix_fallocate64 posix_fallocate
 #endif
 #define off64_t off_t
+#ifdef __wasilibc_unmodified_upstream /* WASI has no fallocate */
 #if defined(_GNU_SOURCE)
 #define fallocate64 fallocate
+#endif
 #endif
 #endif
 

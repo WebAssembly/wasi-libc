@@ -184,6 +184,7 @@ __pthread_cond_timedwait
 __pthread_create
 __pthread_detach
 __pthread_join
+__pthread_key_atfork
 __pthread_key_create
 __pthread_key_delete
 __pthread_mutex_consistent
@@ -402,7 +403,6 @@ acoshl
 acosl
 aligned_alloc
 alphasort
-alphasort64
 arc4random
 arc4random_buf
 arc4random_uniform
@@ -522,7 +522,6 @@ creal
 crealf
 creall
 creat
-creat64
 crypt
 crypt_r
 csin
@@ -616,7 +615,6 @@ fgetc
 fgetc_unlocked
 fgetln
 fgetpos
-fgetpos64
 fgets
 fgets_unlocked
 fgetwc
@@ -646,7 +644,6 @@ fmodl
 fmtmsg
 fnmatch
 fopen
-fopen64
 fopencookie
 fpathconf
 fprintf
@@ -664,23 +661,19 @@ fread_unlocked
 free
 freelocale
 freopen
-freopen64
 frexp
 frexpf
 frexpl
 fscanf
 fseek
 fseeko
-fseeko64
 fsetpos
-fsetpos64
 fstat
 fstatat
 fstatvfs
 fsync
 ftell
 ftello
-ftello64
 ftime
 ftruncate
 fts_children
@@ -728,9 +721,7 @@ getwc_unlocked
 getwchar
 getwchar_unlocked
 glob
-glob64
 globfree
-globfree64
 gmtime
 gmtime_r
 hcreate
@@ -919,7 +910,6 @@ nexttoward
 nexttowardf
 nexttowardl
 nftw
-nftw64
 nl_langinfo
 nl_langinfo_l
 nrand48
@@ -1259,7 +1249,6 @@ utimes
 vasprintf
 vdprintf
 versionsort
-versionsort64
 vfprintf
 vfscanf
 vfwprintf

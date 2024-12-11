@@ -1948,18 +1948,35 @@
 #define T_AFSDB ns_t_afsdb
 #define T_ANY ns_t_any
 #define T_ATMA ns_t_atma
+#define T_AVC ns_t_avc
 #define T_AXFR ns_t_axfr
+#define T_CAA ns_t_caa
+#define T_CDNSKEY ns_t_cdnskey
+#define T_CDS ns_t_cds
 #define T_CNAME ns_t_cname
+#define T_CSYNC ns_t_csync
+#define T_DHCID ns_t_dhcid
+#define T_DLV ns_t_dlv
 #define T_DNAME ns_t_dname
+#define T_DNSKEY ns_t_dnskey
+#define T_DS ns_t_ds
 #define T_EID ns_t_eid
+#define T_EUI48 ns_t_eui48
+#define T_EUI64 ns_t_eui64
 #define T_FMT 0x2002A
 #define T_FMT_AMPM 0x2002B
+#define T_GID ns_t_gid
 #define T_GPOS ns_t_gpos
 #define T_HINFO ns_t_hinfo
+#define T_HIP ns_t_hip
+#define T_IPSECKEY ns_t_ipseckey
 #define T_ISDN ns_t_isdn
 #define T_IXFR ns_t_ixfr
 #define T_KEY ns_t_key
+#define T_L32 ns_t_l32
+#define T_L64 ns_t_l64
 #define T_LOC ns_t_loc
+#define T_LP ns_t_lp
 #define T_MAILA ns_t_maila
 #define T_MAILB ns_t_mailb
 #define T_MB ns_t_mb
@@ -1970,21 +1987,40 @@
 #define T_MR ns_t_mr
 #define T_MX ns_t_mx
 #define T_NAPTR ns_t_naptr
+#define T_NID ns_t_nid
 #define T_NIMLOC ns_t_nimloc
+#define T_NINFO ns_t_ninfo
 #define T_NS ns_t_ns
 #define T_NSAP ns_t_nsap
 #define T_NSAP_PTR ns_t_nsap_ptr
+#define T_NSEC ns_t_nsec
+#define T_NSEC3 ns_t_nsec3
+#define T_NSEC3PARAM ns_t_nsec3param
 #define T_NULL ns_t_null
 #define T_NXT ns_t_nxt
+#define T_OPENPGPKEY ns_t_openpgpkey
 #define T_PTR ns_t_ptr
 #define T_PX ns_t_px
+#define T_RKEY ns_t_rkey
 #define T_RP ns_t_rp
+#define T_RRSIG ns_t_rrsig
 #define T_RT ns_t_rt
 #define T_SIG ns_t_sig
+#define T_SMIMEA ns_t_smimea
 #define T_SOA ns_t_soa
+#define T_SPF ns_t_spf
 #define T_SRV ns_t_srv
+#define T_SSHFP ns_t_sshfp
+#define T_TA ns_t_ta
+#define T_TALINK ns_t_talink
+#define T_TKEY ns_t_tkey
+#define T_TLSA ns_t_tlsa
 #define T_TSIG ns_t_tsig
 #define T_TXT ns_t_txt
+#define T_UID ns_t_uid
+#define T_UINFO ns_t_uinfo
+#define T_UNSPEC ns_t_unspec
+#define T_URI ns_t_uri
 #define T_WKS ns_t_wks
 #define T_X25 ns_t_x25
 #define UCHAR_MAX 255
@@ -2090,6 +2126,8 @@
 #define _CS_POSIX_V7_LPBIG_OFFBIG_LDFLAGS 1145
 #define _CS_POSIX_V7_LPBIG_OFFBIG_LIBS 1146
 #define _CS_POSIX_V7_LPBIG_OFFBIG_LINTFLAGS 1147
+#define _CS_POSIX_V7_THREADS_CFLAGS 1150
+#define _CS_POSIX_V7_THREADS_LDFLAGS 1151
 #define _CS_POSIX_V7_WIDTH_RESTRICTED_ENVS 5
 #define _CS_V6_ENV 1148
 #define _CS_V7_ENV 1149
@@ -2283,6 +2321,7 @@
 #define _SC_MEMLOCK_RANGE 18
 #define _SC_MEMORY_PROTECTION 19
 #define _SC_MESSAGE_PASSING 20
+#define _SC_MINSIGSTKSZ 249
 #define _SC_MONOTONIC_CLOCK 149
 #define _SC_MQ_OPEN_MAX 27
 #define _SC_MQ_PRIO_MAX 28
@@ -2310,6 +2349,7 @@
 #define _SC_SHARED_MEMORY_OBJECTS 22
 #define _SC_SHELL 157
 #define _SC_SIGQUEUE_MAX 34
+#define _SC_SIGSTKSZ 250
 #define _SC_SPAWN 159
 #define _SC_SPIN_LOCKS 154
 #define _SC_SPORADIC_SERVER 160
@@ -3161,7 +3201,6 @@
 #define alignas _Alignas
 #define alignof _Alignof
 #define alloca __builtin_alloca
-#define alphasort64 alphasort
 #define and &&
 #define and_eq &=
 #define asin(x) __tg_real_complex(asin, (x))
@@ -3177,7 +3216,6 @@
 #define betoh64(x) __bswap64(x)
 #define bitand &
 #define bitor |
-#define blkcnt64_t blkcnt_t
 #define bool _Bool
 #define bswap_16(x) __bswap_16(x)
 #define bswap_32(x) __bswap_32(x)
@@ -3202,7 +3240,6 @@
 #define creat64 creat
 #define d_fileno d_ino
 #define direct dirent
-#define dirent64 dirent
 #define erf(x) __tg_real(erf, (x))
 #define erfc(x) __tg_real(erfc, (x))
 #define errno errno
@@ -3212,30 +3249,13 @@
 #define fabs(x) __tg_real_complex_fabs(x)
 #define false 0
 #define fdim(x,y) __tg_real_2(fdim, (x), (y))
-#define fgetpos64 fgetpos
 #define floor(x) __tg_real(floor, (x))
 #define fma(x,y,z) __tg_real_fma((x), (y), (z))
 #define fmax(x,y) __tg_real_2(fmax, (x), (y))
 #define fmin(x,y) __tg_real_2(fmin, (x), (y))
 #define fmod(x,y) __tg_real_2(fmod, (x), (y))
-#define fopen64 fopen
 #define fpclassify(x) (__builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, x))
-#define fpos64_t fpos_t
-#define freopen64 freopen
 #define frexp(x,y) __tg_real_2_1(frexp, (x), (y))
-#define fsblkcnt64_t fsblkcnt_t
-#define fseeko64 fseeko
-#define fsetpos64 fsetpos
-#define fsfilcnt64_t fsfilcnt_t
-#define fstat64 fstat
-#define fstatat64 fstatat
-#define fstatvfs64 fstatvfs
-#define ftello64 ftello
-#define ftruncate64 ftruncate
-#define getdents64 getdents
-#define glob64 glob
-#define glob64_t glob_t
-#define globfree64 globfree
 #define howmany(n,d) (((n)+((d)-1))/(d))
 #define htobe16(x) __bswap16(x)
 #define htobe32(x) __bswap32(x)
@@ -3272,7 +3292,6 @@
 #define ifa_broadaddr ifa_ifu.ifu_broadaddr
 #define ifa_dstaddr ifa_ifu.ifu_dstaddr
 #define ilogb(x) __tg_real_nocast(ilogb, (x))
-#define ino64_t ino_t
 #define ip6_flow ip6_ctlun.ip6_un1.ip6_un1_flow
 #define ip6_hlim ip6_ctlun.ip6_un1.ip6_un1_hlim
 #define ip6_hops ip6_ctlun.ip6_un1.ip6_un1_hlim
@@ -3319,8 +3338,6 @@
 #define lrint(x) __tg_real_nocast(lrint, (x))
 #define lround(x) __tg_real_nocast(lround, (x))
 #define lseek(fd,offset,whence) ({ off_t __f = (fd); off_t __o = (offset); off_t __w = (whence); __builtin_constant_p((offset)) && __builtin_constant_p((whence)) && __o == 0 && __w == SEEK_CUR ? __wasilibc_tell(__f) : lseek(__f, __o, __w); })
-#define lseek64 lseek
-#define lstat64 lstat
 #define math_errhandling 2
 #define mld_cksum mld_icmp6_hdr.icmp6_cksum
 #define mld_code mld_icmp6_hdr.icmp6_code
@@ -3352,7 +3369,6 @@
 #define nearbyint(x) __tg_real(nearbyint, (x))
 #define nextafter(x,y) __tg_real_2(nextafter, (x), (y))
 #define nexttoward(x,y) __tg_real_2(nexttoward, (x), (y))
-#define nftw64 nftw
 #define no_argument 0
 #define noreturn _Noreturn
 #define not !
@@ -3382,11 +3398,8 @@
 #define or ||
 #define or_eq |=
 #define posix_fadvise64 posix_fadvise
-#define posix_fallocate64 posix_fallocate
 #define pow(x,y) __tg_real_complex_pow((x), (y))
 #define powerof2(n) !(((n)-1) & (n))
-#define pread64 pread
-#define preadv64 preadv
 #define pthread_cleanup_pop(r) _pthread_cleanup_pop(&__cb, (r)); } while(0)
 #define pthread_cleanup_push(f,x) do { struct __ptcb __cb; _pthread_cleanup_push(&__cb, f, x);
 #define pthread_create(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
@@ -3395,9 +3408,6 @@
 #define pthread_join(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
 #define pthread_timedjoin_np(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
 #define pthread_tryjoin_np(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
-#define pwrite64 pwrite
-#define pwritev64 pwritev
-#define readdir64 readdir
 #define remainder(x,y) __tg_real_2(remainder, (x), (y))
 #define remquo(x,y,z) __tg_real_remquo((x), (y), (z))
 #define required_argument 1
@@ -3410,7 +3420,6 @@
 #define rr_type rr_hdr.icmp6_type
 #define scalbln(x,y) __tg_real_2_1(scalbln, (x), (y))
 #define scalbn(x,y) __tg_real_2_1(scalbn, (x), (y))
-#define scandir64 scandir
 #define setbit(x,i) __bitop(x,i,|=)
 #define signbit(x) (__builtin_signbit(x))
 #define sin(x) __tg_real_complex(sin, (x))
@@ -3419,9 +3428,7 @@
 #define st_atime st_atim.tv_sec
 #define st_ctime st_ctim.tv_sec
 #define st_mtime st_mtim.tv_sec
-#define stat64 stat
 #define static_assert _Static_assert
-#define statvfs64 statvfs
 #define stderr (stderr)
 #define stdin (stdin)
 #define stdout (stdout)
@@ -3451,7 +3458,6 @@
 #define va_copy(dest,src) __builtin_va_copy(dest, src)
 #define va_end(ap) __builtin_va_end(ap)
 #define va_start(ap,param) __builtin_va_start(ap, param)
-#define versionsort64 versionsort
 #define xEOF 236
 #define xor ^
 #define xor_eq ^=

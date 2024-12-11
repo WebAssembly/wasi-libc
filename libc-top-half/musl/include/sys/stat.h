@@ -169,7 +169,7 @@ int statx(int, const char *__restrict, int, unsigned, struct statx *__restrict);
 #endif
 #endif
 
-#if defined(_LARGEFILE64_SOURCE)
+#if defined(_LARGEFILE64_SOURCE) || defined(_GNU_SOURCE)
 #define stat64 stat
 #define fstat64 fstat
 #define lstat64 lstat

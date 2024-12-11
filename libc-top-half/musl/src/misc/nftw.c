@@ -146,3 +146,5 @@ int nftw(const char *path, int (*fn)(const char *, const struct stat *, int, str
 #endif
 	return r;
 }
+
+weak_alias(nftw, nftw64);

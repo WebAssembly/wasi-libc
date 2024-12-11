@@ -25,3 +25,5 @@ int readdir_r(DIR *restrict dir, struct dirent *restrict buf, struct dirent **re
 	*result = buf;
 	return 0;
 }
+
+weak_alias(readdir_r, readdir64_r);

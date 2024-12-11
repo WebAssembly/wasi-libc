@@ -47,3 +47,5 @@ FILE *fopen(const char *restrict filename, const char *restrict mode)
 #endif
 	return 0;
 }
+
+weak_alias(fopen, fopen64);

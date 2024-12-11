@@ -139,3 +139,5 @@ int lio_listio(int mode, struct aiocb *restrict const *restrict cbs, int cnt, st
 
 	return 0;
 }
+
+weak_alias(lio_listio, lio_listio64);

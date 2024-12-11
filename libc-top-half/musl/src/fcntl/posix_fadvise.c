@@ -14,3 +14,5 @@ int posix_fadvise(int fd, off_t base, off_t len, int advice)
 		__SYSCALL_LL_E(len), advice);
 #endif
 }
+
+weak_alias(posix_fadvise, posix_fadvise64);

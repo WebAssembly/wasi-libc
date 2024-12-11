@@ -25,3 +25,5 @@ struct dirent *readdir(DIR *dir)
 	dir->tell = de->d_off;
 	return de;
 }
+
+weak_alias(readdir, readdir64);

@@ -27,6 +27,11 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
   if (!timespec_to_timestamp_exact(rqtp, &sub.u.u.clock.timeout))
     return EINVAL;
 
+  // a zero timeout is an infinite wait, while 1 is used to
+  // wait 0 seconds
+  if (sub.u.u.clock.timeout == 0)
+    sub.u.u.clock.timeout = 1;
+
   // Block until polling event is triggered.
   __wasi_size_t nevents;
   __wasi_event_t ev;

@@ -1,6 +1,7 @@
 .ccls*
 sysroot
 sysroot32
+sysroot32-eh
 sysroot64
 build
 .vscode

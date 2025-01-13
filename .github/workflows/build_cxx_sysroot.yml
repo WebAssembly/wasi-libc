@@ -12,6 +12,88 @@ permissions:
   checks: write
 
 jobs:
+  build_cxx_sysroot_eh:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+      options: --user root --workdir /
+    steps:
+      - name: Update and install dependencies
+        run: |
+          pacman -Syu --noconfirm
+          pacman -Sy --noconfirm coreutils nodejs npm wget git cmake ninja llvm14 clang14 rsync make lld wasmer cargo python3
+          ln -s /usr/lib/llvm14/bin/clang-14 /usr/bin/clang
+          ln -s /usr/lib/llvm14/bin/clang++ /usr/bin/clang++
+          ln -s /usr/bin/llvm-ar-14 /usr/bin/llvm-ar
+          ln -s /usr/bin/llvm-nm-14 /usr/bin/llvm-nm
+          ln -s /usr/bin/llvm-ranlib-14 /usr/bin/llvm-ranlib
+
+      - name: Log tool versions
+        run: |
+          echo git
+          git --version
+          echo "##########################"
+          echo wasmer
+          wasmer -V
+          echo "##########################"
+          echo clang
+          clang -v
+          echo "##########################"
+          echo llvm-ar
+          llvm-ar -V
+          echo "##########################"
+          echo llvm-nm
+          llvm-nm -V
+          echo "##########################"
+          echo nodejs
+          node -v
+          echo "##########################"
+          echo npm
+          npm -v
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Build
+        run: |
+          git config --global --add safe.directory $(pwd)
+          ./build32-eh.sh
+          rm -rf /opt/wasix-sysroot
+          cp -r sysroot /opt/wasix-sysroot
+          cp tools/clang-wasix-eh.cmake_toolchain /opt/wasix-sysroot/clang-wasix.cmake_toolchain
+
+      - name: Build and install compiler_rt builtins
+        run: |
+          mkdir -p build-compiler-rt-builtins
+          cd build-compiler-rt-builtins
+          cmake --fresh \
+            -DCOMPILER_RT_BAREMETAL_BUILD=On \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCOMPILER_RT_OS_DIR=wasm32-wasi \
+            -DCOMPILER_RT_DEFAULT_TARGET_ONLY:BOOL=ON \
+            -DCMAKE_TOOLCHAIN_FILE=/opt/wasix-sysroot/clang-wasix.cmake_toolchain \
+            -DCMAKE_SYSROOT=/opt/wasix-sysroot \
+            -DCMAKE_INSTALL_PREFIX=/opt/wasix-sysroot \
+            ../tools/llvm-project/compiler-rt/lib/builtins
+          cmake --build . --target install --parallel 4
+          llvm-ranlib /opt/wasix-sysroot/lib/wasm32-wasi/libclang_rt.builtins-wasm32.a
+
+      - name: Run WASIX tests
+        run: |
+          export CLANG_VERSION=$(clang --version | grep -i "clang version" | sed -n 's/.*version \([0-9.]*\).*/\1/p')
+          echo Detected clang version $CLANG_VERSION
+          mkdir -p /usr/lib/llvm14/lib/clang/$CLANG_VERSION/lib/wasi 
+          cp /opt/wasix-sysroot/lib/wasm32-wasi/libclang_rt.builtins-wasm32.a /usr/lib/llvm14/lib/clang/$CLANG_VERSION/lib/wasi/libclang_rt.builtins-wasm32.a
+          TOOLCHAIN=/opt/wasix-sysroot/clang-wasix.cmake_toolchain ./test/wasix/run_tests.sh
+
+      - name: Upload sysroot
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasix-sysroot-eh
+          path: /opt/wasix-sysroot
+
   build_cxx_sysroot:
     runs-on: ubuntu-latest
     container:

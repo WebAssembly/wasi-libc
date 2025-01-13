@@ -24,10 +24,17 @@ jobs:
           name: wasix-sysroot
           path: wasix-sysroot
 
+      - name: Download EH artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: wasix-sysroot-eh
+          path: wasix-sysroot-eh
+
       - name: Create published artifacts
         run: |
           mkdir publish
           tar -czf publish/sysroot.tar.gz wasix-sysroot
+          tar -czf publish/sysroot-eh.tar.gz wasix-sysroot-eh
 
       - name: Publish
         uses: "marvinpinto/action-automatic-releases@latest"

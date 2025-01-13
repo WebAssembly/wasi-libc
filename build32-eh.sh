@@ -23,14 +23,14 @@ cat > libc-bottom-half/headers/public/wasi/api.h<<EOF
 #include "api_poly.h"
 EOF
 
-make -j 14
+make -j 16 -f Makefile-eh
 rm -f sysroot/lib/wasm32-wasi/libc-printscan-long-double.a
 
 # Build C++ sysroot
 mkdir -p build/libcxx
 cd build/libcxx
 cmake \
-    -DCMAKE_TOOLCHAIN_FILE=$(pwd)/../../tools/clang-wasix.cmake_toolchain \
+    -DCMAKE_TOOLCHAIN_FILE=$(pwd)/../../tools/clang-wasix-eh.cmake_toolchain \
     -DCMAKE_SYSROOT=$(pwd)/../../sysroot \
     -DCMAKE_INSTALL_PREFIX=$(pwd)/../../sysroot \
     -DCXX_SUPPORTS_CXX23=ON \
@@ -67,4 +67,4 @@ cmake \
 cmake --build . --target install --parallel 16
 cd ../..
 
-rsync -Lrtv --delete ./sysroot/ ./sysroot32/
+rsync -Lrtv --delete ./sysroot/ ./sysroot32-eh/

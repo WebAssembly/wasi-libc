@@ -6520,10 +6520,8 @@
 #define __wasm__ 1
 #define __wasm_atomics__ 1
 #define __wasm_bulk_memory__ 1
-#define __wasm_bulk_memory_opt__ 1
 #define __wasm_exception_handling__ 1
 #define __wasm_multivalue__ 1
-#define __wasm_nontrapping_fptoint__ 1
 #define __wasm_reference_types__ 1
 #define _tolower(a) ((a)|0x20)
 #define _toupper(a) ((a)&0x5f)

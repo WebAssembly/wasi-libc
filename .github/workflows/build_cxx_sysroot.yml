@@ -21,12 +21,7 @@ jobs:
       - name: Update and install dependencies
         run: |
           pacman -Syu --noconfirm
-          pacman -Sy --noconfirm coreutils nodejs npm wget git cmake ninja llvm14 clang14 rsync make lld wasmer cargo python3
-          ln -s /usr/lib/llvm14/bin/clang-14 /usr/bin/clang
-          ln -s /usr/lib/llvm14/bin/clang++ /usr/bin/clang++
-          ln -s /usr/bin/llvm-ar-14 /usr/bin/llvm-ar
-          ln -s /usr/bin/llvm-nm-14 /usr/bin/llvm-nm
-          ln -s /usr/bin/llvm-ranlib-14 /usr/bin/llvm-ranlib
+          pacman -Sy --noconfirm --needed coreutils nodejs npm wget git cmake ninja llvm clang rsync make lld wasmer cargo python3
 
       - name: Log tool versions
         run: |
@@ -84,8 +79,8 @@ jobs:
         run: |
           export CLANG_VERSION=$(clang --version | grep -i "clang version" | sed -n 's/.*version \([0-9.]*\).*/\1/p')
           echo Detected clang version $CLANG_VERSION
-          mkdir -p /usr/lib/llvm14/lib/clang/$CLANG_VERSION/lib/wasi 
-          cp /opt/wasix-sysroot/lib/wasm32-wasi/libclang_rt.builtins-wasm32.a /usr/lib/llvm14/lib/clang/$CLANG_VERSION/lib/wasi/libclang_rt.builtins-wasm32.a
+          mkdir -p /usr/lib/clang/19/lib/wasm32-wasmer-wasi 
+          cp /opt/wasix-sysroot/lib/wasm32-wasi/libclang_rt.builtins-wasm32.a /usr/lib/clang/19/lib/wasm32-wasmer-wasi/libclang_rt.builtins.a
           TOOLCHAIN=/opt/wasix-sysroot/clang-wasix.cmake_toolchain ./test/wasix/run_tests.sh
 
       - name: Upload sysroot
@@ -103,12 +98,7 @@ jobs:
       - name: Update and install dependencies
         run: |
           pacman -Syu --noconfirm
-          pacman -Sy --noconfirm --needed coreutils nodejs npm wget git cmake ninja llvm18 clang18 rsync make lld wasmer cargo python3
-          ln -s /usr/lib/llvm18/bin/clang /usr/bin/clang
-          ln -s /usr/lib/llvm18/bin/clang++ /usr/bin/clang++
-          ln -s /usr/lib/llvm18/bin/llvm-ar /usr/bin/llvm-ar
-          ln -s /usr/lib/llvm18/bin/llvm-nm /usr/bin/llvm-nm
-          ln -s /usr/lib/llvm18/bin/llvm-ranlib /usr/bin/llvm-ranlib
+          pacman -Sy --noconfirm --needed coreutils nodejs npm wget git cmake ninja llvm clang rsync make lld wasmer cargo python3
 
       - name: Log tool versions
         run: |
@@ -166,8 +156,8 @@ jobs:
         run: |
           export CLANG_VERSION=$(clang --version | grep -i "clang version" | sed -n 's/.*version \([0-9.]*\).*/\1/p')
           echo Detected clang version $CLANG_VERSION
-          mkdir -p /usr/lib/llvm14/lib/clang/$CLANG_VERSION/lib/wasi 
-          cp /opt/wasix-sysroot/lib/wasm32-wasi/libclang_rt.builtins-wasm32.a /usr/lib/llvm14/lib/clang/$CLANG_VERSION/lib/wasi/libclang_rt.builtins-wasm32.a
+          mkdir -p /usr/lib/clang/19/lib/wasm32-wasmer-wasi 
+          cp /opt/wasix-sysroot/lib/wasm32-wasi/libclang_rt.builtins-wasm32.a /usr/lib/clang/19/lib/wasm32-wasmer-wasi/libclang_rt.builtins.a
           TOOLCHAIN=/opt/wasix-sysroot/clang-wasix.cmake_toolchain ./test/wasix/run_tests.sh
 
       - name: Upload sysroot

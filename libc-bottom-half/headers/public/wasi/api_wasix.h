@@ -4020,6 +4020,13 @@ __wasi_errno_t __wasi_proc_signal(
     __wasi_signal_t signal
 ) __attribute__((__warn_unused_result__));
 /**
+ * Explicitly requests for the runtime to create a
+ * snapshot of the guest module's state.
+ */
+__wasi_errno_t __wasi_proc_snapshot(
+    void
+) __attribute__((__warn_unused_result__));
+/**
  * Securely connects to a particular remote network
  */
 __wasi_errno_t __wasi_port_bridge(

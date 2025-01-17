@@ -412,6 +412,18 @@ __wasi_errno_t __wasi_proc_signal(
     return (uint16_t) ret;
 }
 
+int32_t __imported_wasix_32v1_proc_snapshot() __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("proc_snapshot")
+));
+
+__wasi_errno_t __wasi_proc_snapshot(
+    void
+){
+    int32_t ret = __imported_wasix_32v1_proc_snapshot();
+    return (uint16_t) ret;
+}
+
 int32_t __imported_wasix_32v1_port_bridge(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4) __attribute__((
     __import_module__("wasix_32v1"),
     __import_name__("port_bridge")

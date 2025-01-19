@@ -7,12 +7,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-22.04, macos-latest, windows-latest]
         clang_version: [10.0.0]
         # use different LLVM versions among oses because of the lack of
         # official assets on github.
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             clang_version: 10.0.0
             llvm_asset_suffix: x86_64-linux-gnu-ubuntu-18.04
           - os: macos-latest
@@ -20,7 +20,7 @@ jobs:
             llvm_asset_suffix: x86_64-apple-darwin
           - os: windows-latest
             clang_version: 10.0.0
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             clang_version: 16.0.0
             llvm_asset_suffix: x86_64-linux-gnu-ubuntu-18.04
             enable_pic: true
@@ -40,7 +40,7 @@ jobs:
         set -ex
         sudo apt-get update
         sudo apt-get install -y libtinfo5
-      if: matrix.os == 'ubuntu-latest'
+      if: startsWith(matrix.os, 'ubuntu-')
 
     - name: Install LLVM tools (Windows)
       shell: bash
@@ -82,7 +82,7 @@ jobs:
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
         echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
-      if: matrix.os == 'ubuntu-latest'
+      if: startsWith(matrix.os, 'ubuntu-')
 
     - name: Disable libsetjmp for old LLVM
       shell: bash
@@ -137,7 +137,7 @@ jobs:
       # test entrypoints: `undefined symbol: __main_argc_argv`.
       # The older (<15.0.7) version of wasm-ld does not provide `__heap_end`,
       # which is required by our malloc implementation.
-      if: matrix.os == 'ubuntu-latest' && matrix.clang_version != '10.0.0'
+      if: startsWith(matrix.os, 'ubuntu-') && matrix.clang_version != '10.0.0'
 
     - uses: actions/upload-artifact@v4.4.0
       with:

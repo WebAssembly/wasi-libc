@@ -439,6 +439,7 @@ __wasi_proc_parent
 __wasi_proc_raise
 __wasi_proc_raise_interval
 __wasi_proc_signal
+__wasi_proc_snapshot
 __wasi_proc_spawn
 __wasi_random_get
 __wasi_resolve

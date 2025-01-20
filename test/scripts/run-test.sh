@@ -1,4 +1,4 @@
-#/usr/bin/env bash
+#!/usr/bin/env bash
 
 # Run a previously built test, generating in `$DIR`:
 # - a `cmd.sh` script containing the actual command used to run the test in an

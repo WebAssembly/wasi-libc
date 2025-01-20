@@ -1717,6 +1717,7 @@ wait3
 wait4
 waitpid
 wasi_thread_start
+wasix_proc_snapshot
 wcpcpy
 wcpncpy
 wcrtomb

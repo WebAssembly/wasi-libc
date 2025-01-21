@@ -35,6 +35,16 @@ fs          # a directory containing any test-created files
 output.log  # the captured printed output--only for errors
 ```
 
+### Running tests in the browser
+
+To run a test in the browser, use the `scripts/browser-test/harness.mjs` as `ENGINE`
+
+```sh
+$ npm -C scripts/browser-test install
+$ npx -C scripts/browser-test playwright install chromium-headless-shell
+$ make ENGINE="$PWD/scripts/browser-test/harness.mjs" TARGET_TRIPLE=...
+```
+
 ### Adding tests
 
 To add a test, create a new C file in [`src/misc`]:

@@ -3091,6 +3091,7 @@
 #define __va_copy(d,s) __builtin_va_copy(d,s)
 #define __wasi__ 1
 #define __wasi_api_h 
+#define __wasi_libc_busywait_h
 #define __wasi_libc_environ_h 
 #define __wasi_libc_find_relpath_h 
 #define __wasi_libc_h 

@@ -890,6 +890,7 @@ check-symbols: $(STARTUP_FILES) libc
 	@# TODO: Filter out __GCC_(CON|DE)STRUCTIVE_SIZE that are new to clang 19.
 	@# TODO: Filter out __STDC_EMBED_* that are new to clang 19.
 	@# TODO: Filter out __*_NORM_MAX__ that are new to clang 19.
+	@# TODO: Filter out __INT*_C() that are new to clang 20.
 	@# TODO: clang defined __FLT_EVAL_METHOD__ until clang 15, so we force-undefine it
 	@# for older versions.
 	@# TODO: Undefine __wasm_mutable_globals__ and __wasm_sign_ext__, that are new to
@@ -940,6 +941,7 @@ check-symbols: $(STARTUP_FILES) libc
 	    | grep -v '^#define __OPTIMIZE__' \
 	    | grep -v '^#define assert' \
 	    | grep -v '^#define __NO_INLINE__' \
+	    | grep -v '^#define __U\?INT.*_C(' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
 
 	# Check that the computed metadata matches the expected metadata.

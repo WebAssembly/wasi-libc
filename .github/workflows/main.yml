@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-latest, windows-latest]
+        os: [ubuntu-24.04, macos-latest, windows-2025]
         clang_version: [10.0.0]
         # use different LLVM versions among oses because of the lack of
         # official assets on github.
@@ -18,7 +18,7 @@ jobs:
           - os: macos-latest
             clang_version: 10.0.0
             llvm_asset_suffix: x86_64-apple-darwin
-          - os: windows-latest
+          - os: windows-2025
             clang_version: 10.0.0
           - os: ubuntu-24.04
             clang_version: 16.0.0
@@ -27,7 +27,7 @@ jobs:
           - os: macos-latest
             clang_version: 15.0.7
             llvm_asset_suffix: x86_64-apple-darwin21.0
-          - os: windows-latest
+          - os: windows-2025
             clang_version: 16.0.0
             enable_pic: true
     steps:
@@ -51,7 +51,7 @@ jobs:
         echo "CC=$(pwd)/llvm/bin/clang.exe" >> $GITHUB_ENV
         echo "AR=$(pwd)/llvm/bin/llvm-ar.exe" >> $GITHUB_ENV
         echo "NM=$(pwd)/llvm/bin/llvm-nm.exe" >> $GITHUB_ENV
-      if: matrix.os == 'windows-latest'
+      if: matrix.os == 'windows-2025'
 
     - name: Override llvm-nm with one from rustup (Windows)
       run: |
@@ -59,7 +59,7 @@ jobs:
         rustup default stable
         rustup component add llvm-tools-preview
         echo "NM=$(rustc --print sysroot|sed 's|C:|/c|'|sed 's|\\|/|g')/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-nm.exe" >> $GITHUB_ENV
-      if: matrix.os == 'windows-latest'
+      if: matrix.os == 'windows-2025'
 
     - name: Install LLVM tools (MacOS)
       shell: bash
@@ -156,7 +156,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-2025]
     steps:
     - uses: actions/checkout@v4.1.7
       with:

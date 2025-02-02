@@ -31,9 +31,6 @@ jobs:
             clang_version: 16.0.0
             enable_pic: true
           - os: ubuntu-24.04-arm
-            clang_version: 10.0.0
-            llvm_asset_suffix: x86_64-linux-gnu-ubuntu-18.04
-          - os: ubuntu-24.04-arm
             clang_version: 16.0.0
             llvm_asset_suffix: x86_64-linux-gnu-ubuntu-18.04
             enable_pic: true

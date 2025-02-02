@@ -47,8 +47,8 @@ jobs:
         # Workaround to get libtinfo5 installed on Ubuntu 24.04 taken from 
         # https://askubuntu.com/questions/1531760/how-to-install-libtinfo5-on-ubuntu24-04
         if [[ "${{ matrix.os }}" == *"24"* ]]; then
-          wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
-          sudo apt install ./libtinfo5_6.3-2ubuntu0.1_amd64.deb
+          wget https://static.opendev.org/mirror/ubuntu-ports/pool/universe/n/ncurses/libncurses5_6.2-0ubuntu2.1_arm64.deb
+          sudo apt install ./libncurses5_6.2-0ubuntu2.1_arm64.deb
         else
           sudo apt-get install -y libtinfo5
         fi

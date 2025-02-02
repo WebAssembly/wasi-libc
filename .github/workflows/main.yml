@@ -7,12 +7,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-latest, windows-latest]
+        os: [ubuntu-24.04, macos-latest, windows-latest]
         clang_version: [10.0.0]
         # use different LLVM versions among oses because of the lack of
         # official assets on github.
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             clang_version: 10.0.0
             llvm_asset_suffix: x86_64-linux-gnu-ubuntu-18.04
           - os: macos-latest
@@ -20,7 +20,7 @@ jobs:
             llvm_asset_suffix: x86_64-apple-darwin
           - os: windows-latest
             clang_version: 10.0.0
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             clang_version: 16.0.0
             llvm_asset_suffix: x86_64-linux-gnu-ubuntu-18.04
             enable_pic: true

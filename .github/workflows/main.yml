@@ -34,6 +34,11 @@ jobs:
           - os: windows-2025
             clang_version: 16.0.0
             enable_pic: true
+          - os: ubuntu-24.04-arm
+            clang_version: 16.0.0
+            llvm_asset_suffix: aarch64-linux-gnu
+            enable_pic: true
+            
     steps:
     - uses: actions/checkout@v4.1.7
       with:
@@ -44,7 +49,7 @@ jobs:
         set -ex
         sudo apt-get update
         sudo apt-get install -y libtinfo5
-      if: startsWith(matrix.os, 'ubuntu-')
+      if: startsWith(matrix.os, 'ubuntu-22')
 
     - name: Install LLVM tools (Windows)
       shell: bash

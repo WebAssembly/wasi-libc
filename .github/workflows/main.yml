@@ -142,6 +142,11 @@ jobs:
         TARGET_TRIPLE=wasm32-wasip2 make test
         TARGET_TRIPLE=wasm32-wasi-threads make test
         TARGET_TRIPLE=wasm32-wasip1-threads make test
+
+        npm -C scripts/browser-test install
+        npx -C scripts/browser-test playwright install chromium-headless-shell
+        ENGINE="$PWD/scripts/browser-test/harness.mjs" TARGET_TRIPLE=wasm32-wasip1 make test
+        ENGINE="$PWD/scripts/browser-test/harness.mjs" TARGET_TRIPLE=wasm32-wasip1-threads make test
       # The older version of Clang does not provide the expected symbol for the
       # test entrypoints: `undefined symbol: __main_argc_argv`.
       # The older (<15.0.7) version of wasm-ld does not provide `__heap_end`,

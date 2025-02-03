@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-15, windows-2025,ubuntu-24.04-arm]
+        os: [ubuntu-22.04, macos-15, windows-2025]
         clang_version: [10.0.0]
         # use different LLVM versions among oses because of the lack of
         # official assets on github.
@@ -32,7 +32,7 @@ jobs:
             enable_pic: true
           - os: ubuntu-24.04-arm
             clang_version: 16.0.0
-            llvm_asset_suffix: x86_64-linux-gnu-ubuntu-18.04
+            llvm_asset_suffix: aarch64-linux-gnu
             enable_pic: true
             
     steps:
@@ -75,7 +75,11 @@ jobs:
     - name: Install LLVM tools (MacOS)
       shell: bash
       run: |
-        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/clang+llvm-${{ matrix.clang_version }}-${{ matrix.llvm_asset_suffix }}.tar.xz | tar xJf -
+        if [[ "${{ matrix.os }}" == *"arm"* ]]; then
+          curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/clang+llvm-${{ matrix.clang_version }}-${{ matrix.llvm_asset_suffix }}.tar.xz | tar xJf -
+        else
+          curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/clang+llvm-${{ matrix.clang_version }}-${{ matrix.llvm_asset_suffix }}.tar.xz | tar xJf -
+        fi
         export CLANG_DIR=`pwd`/clang+llvm-${{ matrix.clang_version }}-${{ matrix.llvm_asset_suffix }}/bin
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV

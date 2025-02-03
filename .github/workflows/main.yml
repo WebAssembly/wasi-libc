@@ -40,16 +40,12 @@ jobs:
       with:
         submodules: true
 
-    - name: Install libtinfo
+    - name: Install libtinfo5
       run: |
         set -ex
         sudo apt-get update
-        if [[ "${{ matrix.os }}" == *"24"* ]]; then
-          sudo apt-get install -y libtinfo6
-        else
-          sudo apt-get install -y libtinfo5
-        fi
-      if: startsWith(matrix.os, 'ubuntu-')
+        sudo apt-get install -y libtinfo5
+      if: startsWith(matrix.os, 'ubuntu-22')
 
     - name: Install LLVM tools (Windows)
       shell: bash

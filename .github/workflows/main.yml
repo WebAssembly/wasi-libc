@@ -40,7 +40,7 @@ jobs:
       with:
         submodules: true
 
-    - name: Install libtinfo5
+    - name: Install libtinfo
       run: |
         set -ex
         sudo apt-get update
@@ -75,11 +75,7 @@ jobs:
     - name: Install LLVM tools (MacOS)
       shell: bash
       run: |
-        if [[ "${{ matrix.os }}" == *"arm"* ]]; then
-          curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/clang+llvm-${{ matrix.clang_version }}-${{ matrix.llvm_asset_suffix }}.tar.xz | tar xJf -
-        else
-          curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/clang+llvm-${{ matrix.clang_version }}-${{ matrix.llvm_asset_suffix }}.tar.xz | tar xJf -
-        fi
+        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/clang+llvm-${{ matrix.clang_version }}-${{ matrix.llvm_asset_suffix }}.tar.xz | tar xJf -
         export CLANG_DIR=`pwd`/clang+llvm-${{ matrix.clang_version }}-${{ matrix.llvm_asset_suffix }}/bin
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV

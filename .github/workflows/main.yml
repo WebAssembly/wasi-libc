@@ -25,7 +25,7 @@ jobs:
             llvm_asset_suffix: x86_64-linux-gnu-ubuntu-18.04
             enable_pic: true
           - os: macos-15
-            clang_version: 15.0.7
+            clang_version: 16.0.0
             llvm_asset_suffix: x86_64-apple-darwin21.0
           - os: windows-2025
             clang_version: 16.0.0

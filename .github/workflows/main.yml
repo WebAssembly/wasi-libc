@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-latest, windows-2025,ubuntu-24.04-arm]
+        os: [ubuntu-22.04, macos-15, windows-2025,ubuntu-24.04-arm]
         clang_version: [10.0.0]
         # use different LLVM versions among oses because of the lack of
         # official assets on github.
@@ -15,7 +15,7 @@ jobs:
           - os: ubuntu-22.04
             clang_version: 10.0.0
             llvm_asset_suffix: x86_64-linux-gnu-ubuntu-18.04
-          - os: macos-latest
+          - os: macos-15
             clang_version: 10.0.0
             llvm_asset_suffix: x86_64-apple-darwin
           - os: windows-2025
@@ -24,7 +24,7 @@ jobs:
             clang_version: 16.0.0
             llvm_asset_suffix: x86_64-linux-gnu-ubuntu-18.04
             enable_pic: true
-          - os: macos-latest
+          - os: macos-15
             clang_version: 15.0.7
             llvm_asset_suffix: x86_64-apple-darwin21.0
           - os: windows-2025
@@ -47,8 +47,7 @@ jobs:
         # Workaround to get libtinfo5 installed on Ubuntu 24.04 taken from 
         # https://askubuntu.com/questions/1531760/how-to-install-libtinfo5-on-ubuntu24-04
         if [[ "${{ matrix.os }}" == *"24"* ]]; then
-          wget https://static.opendev.org/mirror/ubuntu-ports/pool/universe/n/ncurses/libncurses5_6.2-0ubuntu2.1_arm64.deb
-          sudo apt install ./libncurses5_6.2-0ubuntu2.1_arm64.deb
+          sudo apt-get install -y libtinfo6
         else
           sudo apt-get install -y libtinfo5
         fi
@@ -82,7 +81,7 @@ jobs:
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
         echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
-      if: matrix.os == 'macos-latest'
+      if: matrix.os == 'macos-15'
 
     - name: Install LLVM tools (Linux)
       shell: bash
@@ -168,7 +167,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-2025]
+        os: [ubuntu-latest, macos-15, windows-2025]
     steps:
     - uses: actions/checkout@v4.1.7
       with:
@@ -176,12 +175,12 @@ jobs:
     - name: Install Rust (rustup)
       shell: bash
       run: rustup update stable --no-self-update && rustup default stable
-      if: matrix.os != 'macos-latest'
+      if: matrix.os != 'macos-15'
     - name: Install Rust (macos)
       run: |
         curl https://sh.rustup.rs | sh -s -- -y
         echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-      if: matrix.os == 'macos-latest'
+      if: matrix.os == 'macos-15'
     - run: cargo fetch
       working-directory: tools/wasi-headers
     - run: cargo build

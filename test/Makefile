@@ -42,7 +42,7 @@ WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v
 WASMTIME = $(abspath $(DOWNDIR)/$(shell basename $(WASMTIME_URL) .tar.xz)/wasmtime)
 WASM_TOOLS_URL ?= https://github.com/bytecodealliance/wasm-tools/releases/download/v1.224.0/wasm-tools-1.224.0-$(ARCH)-linux.tar.gz
 WASM_TOOLS = $(DOWNDIR)/$(shell basename $(WASM_TOOLS_URL) .tar.gz)/wasm-tools
-ADAPTER_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v26.0.1/wasi_snapshot_preview1.command.wasm
+ADAPTER_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v29.0.1/wasi_snapshot_preview1.command.wasm
 ADAPTER = $(DOWNDIR)/wasi_snapshot_preview1.command.wasm
 
 $(DOWNDIR):

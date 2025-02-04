@@ -37,7 +37,7 @@ output.log  # the captured printed output--only for errors
 
 ### Running tests in the browser
 
-To run a test in the browser, use the `scripts/browser-test/harness.mjs` as `ENGINE`
+To run a test in the browser, use the `scripts/browser-test/harness.mjs` as `ENGINE`. The harness uses [`bjorn3/browser_wasi_shim`](https://github.com/bjorn3/browser_wasi_shim/) as a WASI implementation on browser.
 
 ```sh
 $ npm -C scripts/browser-test install

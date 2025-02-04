@@ -35,7 +35,7 @@ $(SYSROOT):
 
 LIBC_TEST_URL ?= https://github.com/bytecodealliance/libc-test
 LIBC_TEST = $(DOWNDIR)/libc-test
-LIBRT_URL ?= https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-24/libclang_rt.builtins-wasm32-wasi-24.0.tar.gz
+LIBRT_URL ?= https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-25/libclang_rt.builtins-wasm32-wasi-25.0.tar.gz
 LIBRT = $(DOWNDIR)/libclang_rt.builtins-wasm32.a
 ARCH := $(shell uname -m)
 WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v26.0.1/wasmtime-v26.0.1-$(ARCH)-linux.tar.xz

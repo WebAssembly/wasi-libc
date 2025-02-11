@@ -20,6 +20,8 @@ static_assert(O_DIRECTORY >> 12 == __WASI_OFLAGS_DIRECTORY, "Value mismatch");
 static_assert(O_EXCL >> 12 == __WASI_OFLAGS_EXCL, "Value mismatch");
 static_assert(O_TRUNC >> 12 == __WASI_OFLAGS_TRUNC, "Value mismatch");
 
+static_assert(O_CLOEXEC >> 24 == __WASI_FDFLAGSEXT_CLOEXEC, "Value mismatch");
+
 int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
   // Compute rights corresponding with the access modes provided.
   // Attempt to obtain all rights, except the ones that contradict the
@@ -65,13 +67,14 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
 
   // Open file with appropriate rights.
   __wasi_fdflags_t fs_flags = oflag & 0xfff;
+  __wasi_fdflagsext_t fd_flags = oflag >> 24 & 0xff;
   __wasi_rights_t fs_rights_base = max & fsb_cur.fs_rights_inheriting;
   __wasi_rights_t fs_rights_inheriting = fsb_cur.fs_rights_inheriting;
   __wasi_fd_t newfd;
-  error = __wasi_path_open(fd, lookup_flags, path,
+  error = __wasi_path_open2(fd, lookup_flags, path,
                                  (oflag >> 12) & 0xfff,
                                  fs_rights_base, fs_rights_inheriting, fs_flags,
-                                 &newfd);
+                                 fd_flags, &newfd);
   if (error != 0) {
     errno = error;
     return -1;

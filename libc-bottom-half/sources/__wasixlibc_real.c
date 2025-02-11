@@ -39,6 +39,21 @@ __wasi_errno_t __wasi_fd_dup(
     return (uint16_t) ret;
 }
 
+int32_t __imported_wasix_32v1_fd_dup2(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("fd_dup2")
+));
+
+__wasi_errno_t __wasi_fd_dup2(
+    __wasi_fd_t fd,
+    __wasi_fd_t min_result_fd,
+    __wasi_bool_t cloexec,
+    __wasi_fd_t *retptr0
+){
+    int32_t ret = __imported_wasix_32v1_fd_dup2((int32_t) fd, (int32_t) min_result_fd, (int32_t) cloexec, (intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
 int32_t __imported_wasix_32v1_fd_event(int64_t arg0, int32_t arg1, int32_t arg2) __attribute__((
     __import_module__("wasix_32v1"),
     __import_name__("fd_event")
@@ -277,6 +292,53 @@ _Noreturn void __wasi_stack_restore(
     __wasi_longsize_t val
 ){
     __imported_wasix_32v1_stack_restore((int32_t) snapshot, (int64_t) val);
+}
+
+int32_t __imported_wasix_32v1_path_open2(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int64_t arg5, int64_t arg6, int32_t arg7, int32_t arg8, int32_t arg9) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("path_open2")
+));
+
+__wasi_errno_t __wasi_path_open2(
+    __wasi_fd_t fd,
+    __wasi_lookupflags_t dirflags,
+    const char *path,
+    __wasi_oflags_t oflags,
+    __wasi_rights_t fs_rights_base,
+    __wasi_rights_t fs_rights_inheriting,
+    __wasi_fdflags_t fdflags,
+    __wasi_fdflagsext_t fdflagsext,
+    __wasi_fd_t *retptr0
+){
+    size_t path_len = strlen(path);
+    int32_t ret = __imported_wasix_32v1_path_open2((int32_t) fd, dirflags, (intptr_t) path, (intptr_t) path_len, oflags, fs_rights_base, fs_rights_inheriting, fdflags, fdflagsext, (intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
+int32_t __imported_wasix_32v1_fd_fdflags_get(int32_t arg0, int32_t arg1) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("fd_fdflags_get")
+));
+
+__wasi_errno_t __wasi_fd_fdflags_get(
+    __wasi_fd_t fd,
+    __wasi_fdflagsext_t *retptr0
+){
+    int32_t ret = __imported_wasix_32v1_fd_fdflags_get((int32_t) fd, (intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
+int32_t __imported_wasix_32v1_fd_fdflags_set(int32_t arg0, int32_t arg1) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("fd_fdflags_set")
+));
+
+__wasi_errno_t __wasi_fd_fdflags_set(
+    __wasi_fd_t fd,
+    __wasi_fdflagsext_t flags
+){
+    int32_t ret = __imported_wasix_32v1_fd_fdflags_set((int32_t) fd, flags);
+    return (uint16_t) ret;
 }
 
 int32_t __imported_wasix_32v1_proc_raise_interval(int32_t arg0, int64_t arg1, int32_t arg2) __attribute__((

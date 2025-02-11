@@ -1607,6 +1607,18 @@ typedef uint16_t __wasi_eventfdflags_t;
 #define __WASI_EVENTFDFLAGS_SEMAPHORE ((__wasi_eventfdflags_t)(1 << 0))
 
 /**
+ * Actual file descriptor flags. The fdflags type from WASI corresponds to
+ * file status flags, which is why we had to come up with a weird name for
+ * this type.
+ */
+typedef uint16_t __wasi_fdflagsext_t;
+
+/**
+ * Close this file in the child process when spawning one.
+ */
+#define __WASI_FDFLAGSEXT_CLOEXEC ((__wasi_fdflagsext_t)(1 << 0))
+
+/**
  * Rect that represents the TTY.
  */
 typedef struct __wasi_tty_t {
@@ -3632,6 +3644,15 @@ __wasi_errno_t __wasi_fd_dup(
     __wasi_fd_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
+ * Atomically duplicate a file handle.
+ */
+__wasi_errno_t __wasi_fd_dup2(
+    __wasi_fd_t fd,
+    __wasi_fd_t min_result_fd,
+    __wasi_bool_t cloexec,
+    __wasi_fd_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
  * Creates a file handle for event notifications
  * 
  */
@@ -3849,6 +3870,70 @@ _Noreturn void __wasi_stack_restore(
      */
     __wasi_longsize_t val
 );
+/**
+ * Open a file or directory.
+ * The returned file descriptor is not guaranteed to be the lowest-numbered
+ * file descriptor not currently open; it is randomized to prevent
+ * applications from depending on making assumptions about indexes, since this
+ * is error-prone in multi-threaded contexts. The returned file descriptor is
+ * guaranteed to be less than 2**31.
+ * Note: This is similar to `openat` in POSIX.
+ * Recreated in WASIX from the original WASI function to add support for
+ * fdflagsext.
+ * @return
+ * The file descriptor of the file that has been opened.
+ */
+__wasi_errno_t __wasi_path_open2(
+    __wasi_fd_t fd,
+    /**
+     * Flags determining the method of how the path is resolved.
+     */
+    __wasi_lookupflags_t dirflags,
+    /**
+     * The relative path of the file or directory to open, relative to the
+     * `path_open::fd` directory.
+     */
+    const char *path,
+    /**
+     * The method by which to open the file.
+     */
+    __wasi_oflags_t oflags,
+    /**
+     * The initial rights of the newly created file descriptor. The
+     * implementation is allowed to return a file descriptor with fewer rights
+     * than specified, if and only if those rights do not apply to the type of
+     * file being opened.
+     * The *base* rights are rights that will apply to operations using the file
+     * descriptor itself, while the *inheriting* rights are rights that apply to
+     * file descriptors derived from it.
+     */
+    __wasi_rights_t fs_rights_base,
+    __wasi_rights_t fs_rights_inheriting,
+    __wasi_fdflags_t fdflags,
+    __wasi_fdflagsext_t fdflagsext,
+    __wasi_fd_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Get the FD flags of a file descriptor (fdflagsext).
+ * Note: This returns similar flags to `fsync(fd, F_GETFD)` in POSIX.
+ * @return
+ * The buffer where the file descriptor's attributes are stored.
+ */
+__wasi_errno_t __wasi_fd_fdflags_get(
+    __wasi_fd_t fd,
+    __wasi_fdflagsext_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Adjust the FD flags associated with a file descriptor.
+ * Note: This is similar to `fcntl(fd, F_SETFD, flags)` in POSIX.
+ */
+__wasi_errno_t __wasi_fd_fdflags_set(
+    __wasi_fd_t fd,
+    /**
+     * The desired values of the file descriptor flags.
+     */
+    __wasi_fdflagsext_t flags
+) __attribute__((__warn_unused_result__));
 /**
  * Send a signal to the process of the calling thread on a regular basis
  * Note: This is similar to `setitimer` in POSIX.

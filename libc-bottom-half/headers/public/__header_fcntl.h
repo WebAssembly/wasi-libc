@@ -21,10 +21,7 @@
 #define O_SEARCH   (0x08000000)
 #define O_WRONLY   (0x10000000)
 
-/*
- * O_CLOEXEC is defined to be zero, as WASI has no exec-style functions.
- */
-#define O_CLOEXEC  (0)
+#define O_CLOEXEC (__WASI_FDFLAGSEXT_CLOEXEC << 24)
 
 /*
  * O_TTY_INIT is defined to be zero, meaning that WASI implementations are

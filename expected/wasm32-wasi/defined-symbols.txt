@@ -381,7 +381,10 @@ __wasi_fd_allocate
 __wasi_fd_close
 __wasi_fd_datasync
 __wasi_fd_dup
+__wasi_fd_dup2
 __wasi_fd_event
+__wasi_fd_fdflags_get
+__wasi_fd_fdflags_set
 __wasi_fd_fdstat_get
 __wasi_fd_fdstat_set_flags
 __wasi_fd_fdstat_set_rights
@@ -410,6 +413,7 @@ __wasi_path_filestat_get
 __wasi_path_filestat_set_times
 __wasi_path_link
 __wasi_path_open
+__wasi_path_open2
 __wasi_path_readlink
 __wasi_path_remove_directory
 __wasi_path_rename

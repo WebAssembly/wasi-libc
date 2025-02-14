@@ -28,9 +28,11 @@
 
 #define SO_REUSEADDR 2
 #define SO_ERROR 4
+#define SO_BROADCAST 6
 #define SO_SNDBUF 7
 #define SO_RCVBUF 8
 #define SO_KEEPALIVE 9
+#define SO_LINGER 13
 #define SO_ACCEPTCONN 30
 #define SO_PROTOCOL 38
 #define SO_DOMAIN 39

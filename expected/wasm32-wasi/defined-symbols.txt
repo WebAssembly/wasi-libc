@@ -463,6 +463,7 @@ __wasi_sock_leave_multicast_v4
 __wasi_sock_leave_multicast_v6
 __wasi_sock_listen
 __wasi_sock_open
+__wasi_sock_pair
 __wasi_sock_recv
 __wasi_sock_recv_from
 __wasi_sock_send

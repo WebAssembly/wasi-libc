@@ -705,6 +705,22 @@ __wasi_errno_t __wasi_sock_open(
     return (uint16_t) ret;
 }
 
+int32_t __imported_wasix_32v1_sock_pair(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("sock_pair")
+));
+
+__wasi_errno_t __wasi_sock_pair(
+    __wasi_address_family_t af,
+    __wasi_sock_type_t socktype,
+    __wasi_sock_proto_t sock_proto,
+    __wasi_fd_t *retptr0,
+    __wasi_fd_t *retptr1
+){
+    int32_t ret = __imported_wasix_32v1_sock_pair((int32_t) af, (int32_t) socktype, (int32_t) sock_proto, (intptr_t) retptr0, (intptr_t) retptr1);
+    return (uint16_t) ret;
+}
+
 int32_t __imported_wasix_32v1_sock_set_opt_flag(int32_t arg0, int32_t arg1, int32_t arg2) __attribute__((
     __import_module__("wasix_32v1"),
     __import_name__("sock_set_opt_flag")

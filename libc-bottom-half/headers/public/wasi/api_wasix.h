@@ -4294,6 +4294,34 @@ __wasi_errno_t __wasi_sock_open(
     __wasi_fd_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
+ * Create a pair of interconnected sockets.
+ * 
+ * creates a pair of interconnected sockets and returns both file
+ * descriptors. The file descriptors returned by a successful
+ * call will be the lowest-numbered file descriptors not currently open
+ * for the process.
+ * 
+ * Note: This is similar to `socketpair` in POSIX using PF_INET
+ * @return
+ * The file descriptors of the sockets that have been opened.
+ */
+__wasi_errno_t __wasi_sock_pair(
+    /**
+     * Address family
+     */
+    __wasi_address_family_t af,
+    /**
+     * Socket type, either datagram or stream
+     */
+    __wasi_sock_type_t socktype,
+    /**
+     * Socket protocol
+     */
+    __wasi_sock_proto_t sock_proto,
+    __wasi_fd_t *retptr0,
+    __wasi_fd_t *retptr1
+) __attribute__((__warn_unused_result__));
+/**
  * Sets a particular socket setting
  * Note: This is similar to `setsockopt` in POSIX for SO_REUSEADDR
  */

@@ -6,6 +6,7 @@
 #include "syscall.h"
 #else
 #include <stdlib.h>
+#include <errno.h>
 #include <wasi/api.h>
 #endif
 
@@ -39,6 +40,10 @@ int execve(const char *path, char *const argv[], char *const envp[])
 	char *combined_argv = combine_strings(argv);
 	char *combined_env = combine_strings(envp);
 	
-	__wasi_proc_exec2(path, combined_argv, combined_env);
+	int e = __wasi_proc_exec3(path, combined_argv, combined_env);
+
+	// A return from proc_exec automatically means it failed
+	errno = e;
+	return -1;
 #endif
 }

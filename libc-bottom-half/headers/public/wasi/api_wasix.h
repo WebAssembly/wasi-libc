@@ -4011,6 +4011,32 @@ _Noreturn void __wasi_proc_exec2(
     const char *envs
 );
 /**
+ * execve()  executes  the  program  referred to by pathname.  This causes the
+ * program that is currently being run by the calling process to  be  replaced
+ * with  a  new  program, with newly initialized stack, heap, and (initialized
+ * and uninitialized) data segments.
+ * 
+ * If the named process does not exist an error will be returned.
+ * @return
+ * If the named process does not exist an error will be returned.
+ */
+__wasi_errno_t __wasi_proc_exec3(
+    /**
+     * Name of the process to be spawned
+     */
+    const char *name,
+    /**
+     * List of the arguments to pass the process
+     * (entries are separated by line feeds)
+     */
+    const char *args,
+    /**
+     * List of the env vars to pass the process
+     * (entries are separated by line feeds)
+     */
+    const char *envs
+) __attribute__((__warn_unused_result__));
+/**
  * Spawns a new process within the context of the parent process
  * (i.e. this process). It inherits the filesystem and sandbox
  * permissions but runs standalone.

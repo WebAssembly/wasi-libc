@@ -5,6 +5,7 @@
 extern char **__environ;
 #else
 #include <stdlib.h>
+#include <errno.h>
 #include <wasi/api.h>
 #endif
 
@@ -28,6 +29,10 @@ int execv(const char *path, char *const argv[])
 	}
 	*combined_argv_p = 0;
 	
-	__wasi_proc_exec(path, combined_argv);
+	int e = __wasi_proc_exec3(path, combined_argv, NULL);
+
+	// A return from proc_exec automatically means it failed
+	errno = e;
+	return -1;
 #endif
 }

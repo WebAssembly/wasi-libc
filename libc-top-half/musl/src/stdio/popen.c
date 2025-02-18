@@ -18,6 +18,10 @@ FILE *popen(const char *cmd, const char *mode)
 	FILE *f;
 	posix_spawn_file_actions_t fa;
 
+#ifndef __wasilibc_unmodified_upstream
+	__wasilibc_ensure_environ();
+#endif
+
 	if (*mode == 'r') {
 		op = 0;
 	} else if (*mode == 'w') {

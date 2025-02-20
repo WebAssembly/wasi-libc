@@ -491,6 +491,30 @@ __wasi_errno_t __wasi_proc_signal(
     return (uint16_t) ret;
 }
 
+int32_t __imported_wasix_32v1_proc_signals_get(int32_t arg0) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("proc_signals_get")
+));
+
+__wasi_errno_t __wasi_proc_signals_get(
+    uint8_t * buf
+){
+    int32_t ret = __imported_wasix_32v1_proc_signals_get((int32_t) buf);
+    return (uint16_t) ret;
+}
+
+int32_t __imported_wasix_32v1_proc_signals_count_get(int32_t arg0) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("proc_signals_count_get")
+));
+
+__wasi_errno_t __wasi_proc_signals_count_get(
+    __wasi_size_t *retptr0
+){
+    int32_t ret = __imported_wasix_32v1_proc_signals_count_get((intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
 int32_t __imported_wasix_32v1_proc_snapshot() __attribute__((
     __import_module__("wasix_32v1"),
     __import_name__("proc_snapshot")

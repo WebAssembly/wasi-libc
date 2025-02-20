@@ -1,6 +1,7 @@
 #include <signal.h>
 #include <errno.h>
 #include <string.h>
+#include <sysexits.h>
 #include "syscall.h"
 #include "pthread_impl.h"
 #include "libc.h"
@@ -177,6 +178,7 @@ volatile int __eintr_valid_flag;
 
 #ifdef __wasilibc_unmodified_upstream
 #else
+__attribute__((export_name("__wasm_signal")))
 void __wasm_signal(int sig) {
 	if (sig-32U < 3 || sig-1U >= _NSIG-1) {
 		return;
@@ -326,4 +328,59 @@ int __sigaction_external_default(int sig, const struct sigaction *restrict sa, s
 }
 
 weak_alias(__sigaction_external_default, sigaction_external_default);
+
+__attribute__((export_name("__wasm_sigaction")))
+int __wasm_sigaction(int sig, int action) {
+	void (*a)(int);
+
+	switch (action) {
+		case __WASI_SIG_ACTION_DEFAULT:
+			a = SIG_DFL;
+			break;
+		case __WASI_SIG_ACTION_IGNORE:
+			a = SIG_IGN;
+			break;
+		default:
+			return -1;
+	}
+
+	struct sigaction sa = { .sa_handler = a, .sa_flags = SA_RESTART };
+	if (__sigaction(sig, &sa, NULL) < 0) {
+		return -1;
+	}
+
+	return 0;
+}
+
+void __wasi_init_signals() {
+    __wasi_errno_t err;
+	int sigaction_ret;
+
+    __wasi_size_t signal_count;
+    err = __wasi_proc_signals_count_get(&signal_count);
+    if (err != __WASI_ERRNO_SUCCESS) {
+        _Exit(EX_OSERR);
+    }
+	
+	__wasi_signal_and_action_t *sig_actions = calloc(signal_count, sizeof(__wasi_signal_and_action_t));
+    if (sig_actions == NULL) {
+        _Exit(EX_SOFTWARE);
+    }
+
+    err = __wasi_proc_signals_get((uint8_t *)sig_actions);
+    if (err != __WASI_ERRNO_SUCCESS) {
+        free(sig_actions);
+        _Exit(EX_OSERR);
+    }
+
+	for (int i = 0; i < signal_count; ++i) {
+		sigaction_ret = __wasm_sigaction((int)sig_actions[i].sig, (int)sig_actions[i].act);
+		if (sigaction_ret == -1) {
+			free(sig_actions);
+			_Exit(EX_OSERR);
+		}
+	}
+
+	free(sig_actions);
+}
 #endif

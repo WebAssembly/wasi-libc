@@ -961,6 +961,39 @@ _Static_assert(sizeof(__wasi_signal_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_signal_t) == 1, "witx calculated align");
 
 /**
+ * Signal action.
+ */
+typedef uint8_t __wasi_sig_action_t;
+
+/**
+ * Default action.
+ */
+#define __WASI_SIG_ACTION_DEFAULT (UINT8_C(0))
+
+/**
+ * Ignore the signal.
+ */
+#define __WASI_SIG_ACTION_IGNORE (UINT8_C(1))
+
+_Static_assert(sizeof(__wasi_sig_action_t) == 1, "witx calculated size");
+_Static_assert(_Alignof(__wasi_sig_action_t) == 1, "witx calculated align");
+
+/**
+ * A signal and its corresponding action.
+ */
+typedef struct __wasi_signal_and_action_t {
+    __wasi_signal_t sig;
+
+    __wasi_sig_action_t act;
+
+} __wasi_signal_and_action_t;
+
+_Static_assert(sizeof(__wasi_signal_and_action_t) == 2, "witx calculated size");
+_Static_assert(_Alignof(__wasi_signal_and_action_t) == 1, "witx calculated align");
+_Static_assert(offsetof(__wasi_signal_and_action_t, sig) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_signal_and_action_t, act) == 1, "witx calculated offset");
+
+/**
  * A region of memory for scatter/gather reads.
  */
 /**
@@ -4129,6 +4162,21 @@ __wasi_errno_t __wasi_proc_signal(
      * Signal to send to the thread
      */
     __wasi_signal_t signal
+) __attribute__((__warn_unused_result__));
+/**
+ * Read host-provided signal actions.
+ * The size of the array should match that returned by `proc_signals_count_get`.
+ */
+__wasi_errno_t __wasi_proc_signals_get(
+    uint8_t * buf
+) __attribute__((__warn_unused_result__));
+/**
+ * Return host-provided signal count.
+ * @return
+ * Returns the number of signal actions, or an error.
+ */
+__wasi_errno_t __wasi_proc_signals_count_get(
+    __wasi_size_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Explicitly requests for the runtime to create a

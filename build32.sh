@@ -4,10 +4,6 @@ set -Eeuxo pipefail
 
 export TARGET_ARCH=wasm32
 export TARGET_OS=wasix
-cd tools/wasix-headers/WASI
-git reset --hard
-git pull origin main || true
-cd ../../..
 
 # Build the extensions
 cargo run --manifest-path tools/wasix-headers/Cargo.toml generate-libc

@@ -14,7 +14,11 @@ extern char **__environ;
 
 hidden int __dup3(int, int, int);
 hidden int __mkostemps(char *, int, int);
+#ifdef __wasilibc_unmodified_upstream
 hidden int __execvpe(const char *, char *const *, char *const *);
+#else
+hidden int __execvpe(const char *path, char *const argv[], char *const envp[], uint8_t use_path);
+#endif
 hidden off_t __lseek(int, off_t, int);
 
 #endif

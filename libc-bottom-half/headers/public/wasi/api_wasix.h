@@ -3649,6 +3649,82 @@ _Static_assert(offsetof(__wasi_epoll_event_t, events) == 0, "witx calculated off
 _Static_assert(offsetof(__wasi_epoll_event_t, data) == 8, "witx calculated offset");
 
 /**
+ * Names of FD operations performed during proc_spawn2.
+ */
+typedef uint8_t __wasi_proc_spawn_fd_op_name_t;
+
+/**
+ * Close an FD.
+ */
+#define __WASI_PROC_SPAWN_FD_OP_NAME_CLOSE (UINT8_C(0))
+
+/**
+ * Duplicate (i.e. renumber) an FD.
+ */
+#define __WASI_PROC_SPAWN_FD_OP_NAME_DUP2 (UINT8_C(1))
+
+/**
+ * Open a file.
+ */
+#define __WASI_PROC_SPAWN_FD_OP_NAME_OPEN (UINT8_C(2))
+
+/**
+ * Change directory to a path.
+ */
+#define __WASI_PROC_SPAWN_FD_OP_NAME_CHDIR (UINT8_C(3))
+
+/**
+ * Change directory to an FD.
+ */
+#define __WASI_PROC_SPAWN_FD_OP_NAME_FCHDIR (UINT8_C(4))
+
+_Static_assert(sizeof(__wasi_proc_spawn_fd_op_name_t) == 1, "witx calculated size");
+_Static_assert(_Alignof(__wasi_proc_spawn_fd_op_name_t) == 1, "witx calculated align");
+
+/**
+ * An FD operation performed during proc_spawn2,
+ * which is the backing syscall for posix_spawn.
+ */
+typedef struct __wasi_proc_spawn_fd_op_t {
+    __wasi_proc_spawn_fd_op_name_t cmd;
+
+    __wasi_fd_t fd;
+
+    __wasi_fd_t src_fd;
+
+    uint8_t * path;
+
+    __wasi_pointersize_t path_len;
+
+    __wasi_lookupflags_t dirflags;
+
+    __wasi_oflags_t oflags;
+
+    __wasi_rights_t fs_rights_base;
+
+    __wasi_rights_t fs_rights_inheriting;
+
+    __wasi_fdflags_t fdflags;
+
+    __wasi_fdflagsext_t fdflagsext;
+
+} __wasi_proc_spawn_fd_op_t;
+
+_Static_assert(sizeof(__wasi_proc_spawn_fd_op_t) == 56, "witx calculated size");
+_Static_assert(_Alignof(__wasi_proc_spawn_fd_op_t) == 8, "witx calculated align");
+_Static_assert(offsetof(__wasi_proc_spawn_fd_op_t, cmd) == 0, "witx calculated offset");
+_Static_assert(offsetof(__wasi_proc_spawn_fd_op_t, fd) == 4, "witx calculated offset");
+_Static_assert(offsetof(__wasi_proc_spawn_fd_op_t, src_fd) == 8, "witx calculated offset");
+_Static_assert(offsetof(__wasi_proc_spawn_fd_op_t, path) == 12, "witx calculated offset");
+_Static_assert(offsetof(__wasi_proc_spawn_fd_op_t, path_len) == 16, "witx calculated offset");
+_Static_assert(offsetof(__wasi_proc_spawn_fd_op_t, dirflags) == 20, "witx calculated offset");
+_Static_assert(offsetof(__wasi_proc_spawn_fd_op_t, oflags) == 24, "witx calculated offset");
+_Static_assert(offsetof(__wasi_proc_spawn_fd_op_t, fs_rights_base) == 32, "witx calculated offset");
+_Static_assert(offsetof(__wasi_proc_spawn_fd_op_t, fs_rights_inheriting) == 40, "witx calculated offset");
+_Static_assert(offsetof(__wasi_proc_spawn_fd_op_t, fdflags) == 48, "witx calculated offset");
+_Static_assert(offsetof(__wasi_proc_spawn_fd_op_t, fdflagsext) == 50, "witx calculated offset");
+
+/**
  * @defgroup wasix_32v1
  * @{
  */
@@ -4067,7 +4143,15 @@ __wasi_errno_t __wasi_proc_exec3(
      * List of the env vars to pass the process
      * (entries are separated by line feeds)
      */
-    const char *envs
+    const char *envs,
+    /**
+     * Whether to search for the file in PATH.
+     */
+    __wasi_bool_t search_path,
+    /**
+     * The current value of the PATH env var.
+     */
+    const char *path
 ) __attribute__((__warn_unused_result__));
 /**
  * Spawns a new process within the context of the parent process
@@ -4113,6 +4197,56 @@ __wasi_errno_t __wasi_proc_spawn(
      */
     const char *working_dir,
     __wasi_process_handles_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Spawns a new process within the context of the parent process
+ * (i.e. this process). It inherits the filesystem and sandbox
+ * permissions but runs standalone.
+ * @return
+ * If the named process does not exist an error will be returned.
+ */
+__wasi_errno_t __wasi_proc_spawn2(
+    /**
+     * Name of the process to be spawned
+     */
+    const char *name,
+    /**
+     * List of the arguments to pass the process
+     * (entries are separated by line feeds)
+     */
+    const char *args,
+    /**
+     * List of the env vars to pass the process
+     * (entries are separated by line feeds)
+     */
+    const char *envs,
+    /**
+     * List of FD operations to perform before
+     * spawning the new process.
+     */
+    const __wasi_proc_spawn_fd_op_t *fd_ops,
+    /**
+     * The length of the array pointed to by `fd_ops`.
+     */
+    size_t fd_ops_len,
+    /**
+     * List of signal-action pairs to override
+     * for the new process.
+     */
+    const __wasi_signal_and_action_t *signal_actions,
+    /**
+     * The length of the array pointed to by `signal_actions`.
+     */
+    size_t signal_actions_len,
+    /**
+     * Whether to search for the file in PATH.
+     */
+    __wasi_bool_t search_path,
+    /**
+     * The current value of the PATH env var.
+     */
+    const char *path,
+    __wasi_pid_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /**
  * Returns the handle of the current process

@@ -382,5 +382,11 @@ void __wasi_init_signals() {
 	}
 
 	free(sig_actions);
+
+	// Unconditionally register the signal handler at startup - otherwise, the host will
+	// eat up signals that are sent before the first sigaction call.
+	if (a_cas(&__eintr_callback_registered, 0, 1) == 0) {
+		__wasi_callback_signal("__wasm_signal");
+	}
 }
 #endif

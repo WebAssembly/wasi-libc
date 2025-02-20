@@ -398,7 +398,7 @@ _Noreturn void __wasi_proc_exec2(
     __imported_wasix_32v1_proc_exec2((intptr_t) name, (intptr_t) name_len, (intptr_t) args, (intptr_t) args_len, (intptr_t) envs, (intptr_t) envs_len);
 }
 
-int32_t __imported_wasix_32v1_proc_exec3(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5) __attribute__((
+int32_t __imported_wasix_32v1_proc_exec3(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5, int32_t arg6, int32_t arg7, int32_t arg8) __attribute__((
     __import_module__("wasix_32v1"),
     __import_name__("proc_exec3")
 ));
@@ -406,12 +406,15 @@ int32_t __imported_wasix_32v1_proc_exec3(int32_t arg0, int32_t arg1, int32_t arg
 __wasi_errno_t __wasi_proc_exec3(
     const char *name,
     const char *args,
-    const char *envs
+    const char *envs,
+    __wasi_bool_t search_path,
+    const char *path
 ){
     size_t name_len = strlen(name);
     size_t args_len = strlen(args);
     size_t envs_len = strlen(envs);
-    int32_t ret = __imported_wasix_32v1_proc_exec3((intptr_t) name, (intptr_t) name_len, (intptr_t) args, (intptr_t) args_len, (intptr_t) envs, (intptr_t) envs_len);
+    size_t path_len = strlen(path);
+    int32_t ret = __imported_wasix_32v1_proc_exec3((intptr_t) name, (intptr_t) name_len, (intptr_t) args, (intptr_t) args_len, (intptr_t) envs, (intptr_t) envs_len, (int32_t) search_path, (intptr_t) path, (intptr_t) path_len);
     return (uint16_t) ret;
 }
 
@@ -436,6 +439,31 @@ __wasi_errno_t __wasi_proc_spawn(
     size_t preopen_len = strlen(preopen);
     size_t working_dir_len = strlen(working_dir);
     int32_t ret = __imported_wasix_32v1_proc_spawn((intptr_t) name, (intptr_t) name_len, (int32_t) chroot, (intptr_t) args, (intptr_t) args_len, (intptr_t) preopen, (intptr_t) preopen_len, (int32_t) stdin, (int32_t) stdout, (int32_t) stderr, (intptr_t) working_dir, (intptr_t) working_dir_len, (intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
+int32_t __imported_wasix_32v1_proc_spawn2(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5, int32_t arg6, int32_t arg7, int32_t arg8, int32_t arg9, int32_t arg10, int32_t arg11, int32_t arg12, int32_t arg13) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("proc_spawn2")
+));
+
+__wasi_errno_t __wasi_proc_spawn2(
+    const char *name,
+    const char *args,
+    const char *envs,
+    const __wasi_proc_spawn_fd_op_t *fd_ops,
+    size_t fd_ops_len,
+    const __wasi_signal_and_action_t *signal_actions,
+    size_t signal_actions_len,
+    __wasi_bool_t search_path,
+    const char *path,
+    __wasi_pid_t *retptr0
+){
+    size_t name_len = strlen(name);
+    size_t args_len = strlen(args);
+    size_t envs_len = strlen(envs);
+    size_t path_len = strlen(path);
+    int32_t ret = __imported_wasix_32v1_proc_spawn2((intptr_t) name, (intptr_t) name_len, (intptr_t) args, (intptr_t) args_len, (intptr_t) envs, (intptr_t) envs_len, (intptr_t) fd_ops, (intptr_t) fd_ops_len, (intptr_t) signal_actions, (intptr_t) signal_actions_len, (int32_t) search_path, (intptr_t) path, (intptr_t) path_len, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 

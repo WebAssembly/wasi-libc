@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <string.h>
+#include <stdlib.h>
 #ifdef __wasilibc_unmodified_upstream
 #include <sys/wait.h>
 #include "syscall.h"
@@ -13,12 +16,15 @@
 #include "lock.h"
 #include "pthread_impl.h"
 #include "fdop.h"
+#include "libc.h"
 
 #ifdef __wasilibc_unmodified_upstream
 #else
 pid_t waitpid(pid_t pid, int *status, int options);
 #endif
 
+#ifdef __wasilibc_unmodified_upstream
+#elif defined(__wasilibc_fork_based_posix_spawn)
 struct args {
 	int p[2];
 	sigset_t oldmask;
@@ -38,11 +44,11 @@ static int __sys_dup2(int old, int new)
 #endif
 #else
 	__wasi_errno_t error = __wasi_fd_renumber(old, new);
-    if (error != 0) {
-        errno = error;
-        return -1;
-    }
-    return 0;
+	if (error != 0) {
+		errno = error;
+		return -1;
+	}
+	return 0;
 #endif
 }
 
@@ -67,7 +73,7 @@ static int child(void *args_vp)
 	__get_handler_set(&hset);
 	for (i=1; i<_NSIG; i++) {
 		if ((attr->__flags & POSIX_SPAWN_SETSIGDEF)
-		     && sigismember(&attr->__def, i)) {
+&& sigismember(&attr->__def, i)) {
 			sa.sa_handler = SIG_DFL;
 		} else if (sigismember(&hset, i)) {
 			if (i-32<3U) {
@@ -105,7 +111,7 @@ static int child(void *args_vp)
 	 * trash the parent's state. */
 	if (attr->__flags & POSIX_SPAWN_RESETIDS)
 		if ((ret=__syscall(SYS_setgid, __syscall(SYS_getgid))) ||
-		    (ret=__syscall(SYS_setuid, __syscall(SYS_getuid))) )
+			(ret=__syscall(SYS_setuid, __syscall(SYS_getuid))) )
 			goto fail;
 #endif
 
@@ -147,7 +153,7 @@ static int child(void *args_vp)
 					ret = -EBADF;
 					goto fail;
 				}
-				
+
 				if (fd != op->fd) {
 #ifdef __wasilibc_unmodified_upstream
 					if ((ret=__sys_dup2(fd, op->fd))<0)
@@ -160,7 +166,7 @@ static int child(void *args_vp)
 #ifdef __wasilibc_unmodified_upstream
 					ret = __syscall(SYS_fcntl, fd, F_GETFD);
 					ret = __syscall(SYS_fcntl, fd, F_SETFD,
-					                ret & ~FD_CLOEXEC);
+									ret & ~FD_CLOEXEC);
 					if (ret<0)
 						goto fail;
 #else
@@ -220,7 +226,7 @@ static int child(void *args_vp)
 #endif
 
 	pthread_sigmask(SIG_SETMASK, (attr->__flags & POSIX_SPAWN_SETSIGMASK)
-		? &attr->__mask : &args->oldmask, 0);
+? &attr->__mask : &args->oldmask, 0);
 
 	int (*exec)(const char *, char *const *, char *const *) =
 		attr->__fn ? (int (*)())attr->__fn : execve;
@@ -241,9 +247,9 @@ fail:
 
 
 int posix_spawn(pid_t *restrict res, const char *restrict path,
-	const posix_spawn_file_actions_t *fa,
-	const posix_spawnattr_t *restrict attr,
-	char *const argv[restrict], char *const envp[restrict])
+				const posix_spawn_file_actions_t *fa,
+				const posix_spawnattr_t *restrict attr,
+				char *const argv[restrict], char *const envp[restrict])
 {
 	pid_t pid;
 	char stack[1024+PATH_MAX];
@@ -270,7 +276,7 @@ int posix_spawn(pid_t *restrict res, const char *restrict path,
 	}
 
 	pid = __clone(child, stack+sizeof stack,
-		CLONE_VM|CLONE_VFORK|SIGCHLD, &args);
+				  CLONE_VM|CLONE_VFORK|SIGCHLD, &args);
 	close(args.p[1]);
 	UNLOCK(__abort_lock);
 
@@ -291,3 +297,175 @@ fail:
 
 	return ec;
 }
+#else
+char *__wasilibc_exec_combine_strings(char *const strings[]);
+
+int __posix_spawn(pid_t *restrict res, const char *restrict path,
+				  const posix_spawn_file_actions_t *fa,
+				  const posix_spawnattr_t *restrict attr,
+				  char *const argv[restrict], char *const envp[restrict],
+				  uint8_t use_path)
+{
+	int nfdops = 0;
+	__wasi_proc_spawn_fd_op_t *fdops = NULL;
+
+	if (fa && fa->__actions)
+	{
+		struct fdop *op;
+		__wasi_proc_spawn_fd_op_t *wop;
+		__wasi_proc_spawn_fd_op_name_t op_name;
+
+		for (op = fa->__actions; op->next; op = op->next)
+		{
+			++nfdops;
+		}
+		// If op is null, there were zero ops. But if it's not, we counted one less
+		// due to the op->next condition; compensate now.
+		if (op) ++nfdops;
+		wop = fdops = calloc(nfdops, sizeof(*fdops));
+
+		for (; op; op = op->prev)
+		{
+			switch (op->cmd)
+			{
+			case FDOP_OPEN:
+				op_name = __WASI_PROC_SPAWN_FD_OP_NAME_OPEN;
+				break;
+			case FDOP_CLOSE:
+				op_name = __WASI_PROC_SPAWN_FD_OP_NAME_CLOSE;
+				break;
+			case FDOP_DUP2:
+				op_name = __WASI_PROC_SPAWN_FD_OP_NAME_DUP2;
+				break;
+			case FDOP_CHDIR:
+				op_name = __WASI_PROC_SPAWN_FD_OP_NAME_CHDIR;
+				break;
+			case FDOP_FCHDIR:
+				op_name = __WASI_PROC_SPAWN_FD_OP_NAME_FCHDIR;
+				break;
+			default:
+				free(fdops);
+				return EINVAL;
+			}
+
+			__wasi_lookupflags_t lookup_flags = 0;
+			if ((op->oflag & O_NOFOLLOW) == 0)
+				lookup_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
+
+			// Open file with appropriate rights.
+			__wasi_fdflags_t fs_flags = op->oflag & 0xfff;
+			__wasi_oflags_t oflags = (op->oflag >> 12) & 0xfff;
+			__wasi_fdflagsext_t fd_flags = (op->oflag >> 30) & 0x03;
+
+			__wasi_rights_t rights =
+				~(__WASI_RIGHTS_FD_DATASYNC | __WASI_RIGHTS_FD_READ |
+				  __WASI_RIGHTS_FD_WRITE | __WASI_RIGHTS_FD_ALLOCATE |
+				  __WASI_RIGHTS_FD_READDIR | __WASI_RIGHTS_FD_FILESTAT_SET_SIZE);
+			switch (op->oflag & O_ACCMODE)
+			{
+			case O_RDONLY:
+			case O_RDWR:
+			case O_WRONLY:
+				if ((op->oflag & O_RDONLY) != 0)
+				{
+					rights |= __WASI_RIGHTS_FD_READ | __WASI_RIGHTS_FD_READDIR;
+				}
+				if ((op->oflag & O_WRONLY) != 0)
+				{
+					rights |= __WASI_RIGHTS_FD_DATASYNC | __WASI_RIGHTS_FD_WRITE |
+							  __WASI_RIGHTS_FD_ALLOCATE |
+							  __WASI_RIGHTS_FD_FILESTAT_SET_SIZE;
+				}
+				break;
+			default:
+				break;
+			}
+
+			uint8_t *path =
+				op->cmd == FDOP_OPEN || op->cmd == FDOP_CHDIR ? (uint8_t *)op->path : NULL;
+
+			*(wop++) = (__wasi_proc_spawn_fd_op_t){
+				.cmd = op_name,
+				.fd = op->fd,
+				.src_fd = op->srcfd,
+				.path_len = path ? strlen(op->path) : 0,
+				.path = path,
+
+				.oflags = oflags,
+				.fdflags = fs_flags,
+				.fdflagsext = fd_flags,
+				.dirflags = lookup_flags,
+
+				// Just give it every permission, since
+				.fs_rights_base = rights,
+				.fs_rights_inheriting = rights,
+			};
+		}
+	}
+
+	int nsignals = 0;
+	// There can be at most twice as many entries as there are signals, since
+	// we look through current signal handlers for SIG_IGN first and then
+	// add entried from attr->__def on top of those. This is safe to do even
+	// in the presence of duplicate signals, since the entries are processed
+	// in order and later entries take precedence over earlier ones.
+	__wasi_signal_and_action_t *signals = calloc(_NSIG * 2, sizeof(*signals));
+
+	for (int sig = 1; sig < _NSIG; sig++)
+	{
+		struct sigaction old;
+		if (sigaction(sig, NULL, &old) == 0)
+		{
+			if (old.sa_handler == SIG_IGN)
+			{
+				signals[nsignals++] = (__wasi_signal_and_action_t){
+					.sig = sig,
+					.act = __WASI_SIG_ACTION_IGNORE,
+				};
+			}
+		}
+	}
+
+	if (attr->__flags & POSIX_SPAWN_SETSIGDEF)
+	{
+		for (int sig = 1; sig < _NSIG; sig++)
+		{
+			if (sigismember(&attr->__def, sig))
+			{
+				signals[nsignals++] = (__wasi_signal_and_action_t){
+					.sig = sig,
+					.act = __WASI_SIG_ACTION_DEFAULT,
+				};
+			}
+		}
+	}
+
+	char *combined_argv = __wasilibc_exec_combine_strings(argv);
+	char *combined_env = __wasilibc_exec_combine_strings(envp);
+
+	__wasi_pid_t ret_pid;
+	int err = __wasi_proc_spawn2(
+		path, combined_argv, combined_env, fdops, nfdops, signals, nsignals,
+		use_path ? __WASI_BOOL_TRUE : __WASI_BOOL_FALSE, getenv("PATH"), &ret_pid);
+
+	free(combined_argv);
+	free(combined_env);
+	free(signals);
+	if (fdops)
+		free(fdops);
+
+	if (err == 0 && res) {
+		*res = ret_pid;
+	}
+
+	return err;
+}
+
+int posix_spawn(pid_t *restrict res, const char *restrict path,
+				const posix_spawn_file_actions_t *fa,
+				const posix_spawnattr_t *restrict attr,
+				char *const argv[restrict], char *const envp[restrict])
+{
+	return __posix_spawn(res, path, fa, attr, argv, envp, 0);
+}
+#endif

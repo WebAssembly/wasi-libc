@@ -29,7 +29,7 @@ int execv(const char *path, char *const argv[])
 	}
 	*combined_argv_p = 0;
 	
-	int e = __wasi_proc_exec3(path, combined_argv, NULL);
+	int e = __wasi_proc_exec3(path, combined_argv, NULL, 0, NULL);
 
 	// A return from proc_exec automatically means it failed
 	errno = e;

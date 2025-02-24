@@ -2316,7 +2316,7 @@
 #define OPOST 0000001
 #define O_ACCMODE (O_EXEC | O_RDWR | O_SEARCH)
 #define O_APPEND __WASI_FDFLAGS_APPEND
-#define O_CLOEXEC (__WASI_FDFLAGSEXT_CLOEXEC << 24)
+#define O_CLOEXEC (__WASI_FDFLAGSEXT_CLOEXEC << 30)
 #define O_CREAT (__WASI_OFLAGS_CREAT << 12)
 #define O_DIRECTORY (__WASI_OFLAGS_DIRECTORY << 12)
 #define O_DSYNC __WASI_FDFLAGS_DSYNC
@@ -5484,6 +5484,16 @@
 #define __FLT_MIN_EXP__ (-125)
 #define __FLT_MIN__ 1.17549435e-38F
 #define __FLT_RADIX__ 2
+#define __FPCLASS_NEGINF 0x0004
+#define __FPCLASS_NEGNORMAL 0x0008
+#define __FPCLASS_NEGSUBNORMAL 0x0010
+#define __FPCLASS_NEGZERO 0x0020
+#define __FPCLASS_POSINF 0x0200
+#define __FPCLASS_POSNORMAL 0x0100
+#define __FPCLASS_POSSUBNORMAL 0x0080
+#define __FPCLASS_POSZERO 0x0040
+#define __FPCLASS_QNAN 0x0002
+#define __FPCLASS_SNAN 0x0001
 #define __compiler_ATOMIC_BOOL_LOCK_FREE 2
 #define __compiler_ATOMIC_CHAR16_T_LOCK_FREE 2
 #define __compiler_ATOMIC_CHAR32_T_LOCK_FREE 2
@@ -5495,6 +5505,8 @@
 #define __compiler_ATOMIC_SHORT_LOCK_FREE 2
 #define __GCC_ATOMIC_TEST_AND_SET_TRUEVAL 1
 #define __compiler_ATOMIC_WCHAR_T_LOCK_FREE 2
+#define __GCC_CONSTRUCTIVE_SIZE 64
+#define __GCC_DESTRUCTIVE_SIZE 64
 #define __GNUC_STDC_INLINE__ 1
 #define __GNUC_VA_LIST 1
 #define __GNU_GETTEXT_SUPPORTED_REVISION(major) ((major) == 0 ? 1 : -1)
@@ -5588,6 +5600,11 @@
 #define __LONG_LONG_MAX__ 9223372036854775807LL
 #define __LONG_MAX __LONG_MAX__
 #define __LONG_MAX__ 2147483647L
+#define __MEMORY_SCOPE_DEVICE 1
+#define __MEMORY_SCOPE_SINGLE 4
+#define __MEMORY_SCOPE_SYSTEM 0
+#define __MEMORY_SCOPE_WRKGRP 2
+#define __MEMORY_SCOPE_WVFRNT 3
 #define __NAMESER 19991006
 #define __NEED_FILE 
 #define __NEED___isoc_va_list 
@@ -5983,6 +6000,11 @@
 #define __WASI_OPTION_NONE (UINT8_C(0))
 #define __WASI_OPTION_SOME (UINT8_C(1))
 #define __WASI_PREOPENTYPE_DIR (UINT8_C(0))
+#define __WASI_PROC_SPAWN_FD_OP_NAME_CHDIR (UINT8_C(3))
+#define __WASI_PROC_SPAWN_FD_OP_NAME_CLOSE (UINT8_C(0))
+#define __WASI_PROC_SPAWN_FD_OP_NAME_DUP2 (UINT8_C(1))
+#define __WASI_PROC_SPAWN_FD_OP_NAME_FCHDIR (UINT8_C(4))
+#define __WASI_PROC_SPAWN_FD_OP_NAME_OPEN (UINT8_C(2))
 #define __WASI_RIFLAGS_RECV_DATA_TRUNCATED ((__wasi_riflags_t)(1 << 2))
 #define __WASI_RIFLAGS_RECV_PEEK ((__wasi_riflags_t)(1 << 0))
 #define __WASI_RIFLAGS_RECV_WAITALL ((__wasi_riflags_t)(1 << 1))
@@ -6060,6 +6082,8 @@
 #define __WASI_SIGNAL_WINCH (UINT8_C(28))
 #define __WASI_SIGNAL_XCPU (UINT8_C(24))
 #define __WASI_SIGNAL_XFSZ (UINT8_C(25))
+#define __WASI_SIG_ACTION_DEFAULT (UINT8_C(0))
+#define __WASI_SIG_ACTION_IGNORE (UINT8_C(1))
 #define __WASI_SOCK_OPTION_ACCEPT_TIMEOUT (UINT8_C(22))
 #define __WASI_SOCK_OPTION_BROADCAST (UINT8_C(6))
 #define __WASI_SOCK_OPTION_CONNECT_TIMEOUT (UINT8_C(21))
@@ -6391,6 +6415,7 @@
 #define __bitop(x,i,o) ((x)[(i)/8] o (1<<(i)%8))
 #define __bool_true_false_are_defined 1
 #define __inline inline
+#define __need_STDDEF_H_misc
 #define __restrict restrict
 #define __tg_complex(fun,x) (__RETCAST_CX(x)( __FLTCX((x)+I) && __IS_FP(x) ? fun ## f (x) : __LDBLCX((x)+I) ? fun ## l (x) : fun(x) ))
 #define __tg_complex_retreal(fun,x) (__RETCAST_REAL(x)( __FLTCX((x)+I) && __IS_FP(x) ? fun ## f (x) : __LDBLCX((x)+I) ? fun ## l (x) : fun(x) ))

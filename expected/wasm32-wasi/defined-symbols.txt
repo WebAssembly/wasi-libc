@@ -225,6 +225,7 @@ __pio2_lo
 __pleval
 __polevll
 __posix_getopt
+__posix_spawn
 __pow_log_data
 __powf_log2_data
 __private_cond_signal
@@ -407,6 +408,7 @@ __wasi_futex_wait
 __wasi_futex_wake
 __wasi_futex_wake_all
 __wasi_getcwd
+__wasi_init_signals
 __wasi_init_tp
 __wasi_path_create_directory
 __wasi_path_filestat_get
@@ -444,8 +446,11 @@ __wasi_proc_parent
 __wasi_proc_raise
 __wasi_proc_raise_interval
 __wasi_proc_signal
+__wasi_proc_signals_count_get
+__wasi_proc_signals_get
 __wasi_proc_snapshot
 __wasi_proc_spawn
+__wasi_proc_spawn2
 __wasi_random_get
 __wasi_resolve
 __wasi_sched_yield
@@ -497,6 +502,7 @@ __wasilibc_dttoif
 __wasilibc_ensure_environ
 __wasilibc_environ
 __wasilibc_environ_init
+__wasilibc_exec_combine_strings
 __wasilibc_fd_renumber
 __wasilibc_find_abspath
 __wasilibc_find_relpath
@@ -546,6 +552,7 @@ __wasilibc_tls_size
 __wasilibc_unlinkat
 __wasilibc_utimens
 __wasm_call_dtors
+__wasm_sigaction
 __wasm_signal
 __wcscoll_l
 __wcsftime_l

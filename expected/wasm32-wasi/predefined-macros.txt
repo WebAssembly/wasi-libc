@@ -5484,16 +5484,6 @@
 #define __FLT_MIN_EXP__ (-125)
 #define __FLT_MIN__ 1.17549435e-38F
 #define __FLT_RADIX__ 2
-#define __FPCLASS_NEGINF 0x0004
-#define __FPCLASS_NEGNORMAL 0x0008
-#define __FPCLASS_NEGSUBNORMAL 0x0010
-#define __FPCLASS_NEGZERO 0x0020
-#define __FPCLASS_POSINF 0x0200
-#define __FPCLASS_POSNORMAL 0x0100
-#define __FPCLASS_POSSUBNORMAL 0x0080
-#define __FPCLASS_POSZERO 0x0040
-#define __FPCLASS_QNAN 0x0002
-#define __FPCLASS_SNAN 0x0001
 #define __compiler_ATOMIC_BOOL_LOCK_FREE 2
 #define __compiler_ATOMIC_CHAR16_T_LOCK_FREE 2
 #define __compiler_ATOMIC_CHAR32_T_LOCK_FREE 2
@@ -5505,8 +5495,6 @@
 #define __compiler_ATOMIC_SHORT_LOCK_FREE 2
 #define __GCC_ATOMIC_TEST_AND_SET_TRUEVAL 1
 #define __compiler_ATOMIC_WCHAR_T_LOCK_FREE 2
-#define __GCC_CONSTRUCTIVE_SIZE 64
-#define __GCC_DESTRUCTIVE_SIZE 64
 #define __GNUC_STDC_INLINE__ 1
 #define __GNUC_VA_LIST 1
 #define __GNU_GETTEXT_SUPPORTED_REVISION(major) ((major) == 0 ? 1 : -1)
@@ -5600,11 +5588,6 @@
 #define __LONG_LONG_MAX__ 9223372036854775807LL
 #define __LONG_MAX __LONG_MAX__
 #define __LONG_MAX__ 2147483647L
-#define __MEMORY_SCOPE_DEVICE 1
-#define __MEMORY_SCOPE_SINGLE 4
-#define __MEMORY_SCOPE_SYSTEM 0
-#define __MEMORY_SCOPE_WRKGRP 2
-#define __MEMORY_SCOPE_WVFRNT 3
 #define __NAMESER 19991006
 #define __NEED_FILE 
 #define __NEED___isoc_va_list 
@@ -6415,7 +6398,6 @@
 #define __bitop(x,i,o) ((x)[(i)/8] o (1<<(i)%8))
 #define __bool_true_false_are_defined 1
 #define __inline inline
-#define __need_STDDEF_H_misc
 #define __restrict restrict
 #define __tg_complex(fun,x) (__RETCAST_CX(x)( __FLTCX((x)+I) && __IS_FP(x) ? fun ## f (x) : __LDBLCX((x)+I) ? fun ## l (x) : fun(x) ))
 #define __tg_complex_retreal(fun,x) (__RETCAST_REAL(x)( __FLTCX((x)+I) && __IS_FP(x) ? fun ## f (x) : __LDBLCX((x)+I) ? fun ## l (x) : fun(x) ))

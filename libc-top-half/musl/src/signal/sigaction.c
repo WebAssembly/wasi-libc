@@ -243,7 +243,9 @@ int __libc_sigaction(int sig, const struct sigaction *restrict sa, struct sigact
 	} else {
 		LOCK(__eintr_handler_lock);
 		ksa_old = __eintr_handler_callbacks[sig];
-		__eintr_handler_callbacks[sig] = ksa;
+		if (sa) {
+			__eintr_handler_callbacks[sig] = ksa;
+		}
 		UNLOCK(__eintr_handler_lock);
 		r = 0;
 	}

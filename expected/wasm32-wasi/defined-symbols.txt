@@ -446,8 +446,8 @@ __wasi_proc_parent
 __wasi_proc_raise
 __wasi_proc_raise_interval
 __wasi_proc_signal
-__wasi_proc_signals_count_get
 __wasi_proc_signals_get
+__wasi_proc_signals_sizes_get
 __wasi_proc_snapshot
 __wasi_proc_spawn
 __wasi_proc_spawn2

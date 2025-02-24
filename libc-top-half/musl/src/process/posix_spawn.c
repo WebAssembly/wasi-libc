@@ -409,7 +409,7 @@ int __posix_spawn(pid_t *restrict res, const char *restrict path,
 	// add entried from attr->__def on top of those. This is safe to do even
 	// in the presence of duplicate signals, since the entries are processed
 	// in order and later entries take precedence over earlier ones.
-	__wasi_signal_and_action_t *signals = calloc(_NSIG * 2, sizeof(*signals));
+	__wasi_signal_disposition_t *signals = calloc(_NSIG * 2, sizeof(*signals));
 
 	for (int sig = 1; sig < _NSIG; sig++)
 	{
@@ -418,9 +418,9 @@ int __posix_spawn(pid_t *restrict res, const char *restrict path,
 		{
 			if (old.sa_handler == SIG_IGN)
 			{
-				signals[nsignals++] = (__wasi_signal_and_action_t){
+				signals[nsignals++] = (__wasi_signal_disposition_t){
 					.sig = sig,
-					.act = __WASI_SIG_ACTION_IGNORE,
+					.disp = __WASI_DISPOSITION_IGNORE,
 				};
 			}
 		}
@@ -432,9 +432,9 @@ int __posix_spawn(pid_t *restrict res, const char *restrict path,
 		{
 			if (sigismember(&attr->__def, sig))
 			{
-				signals[nsignals++] = (__wasi_signal_and_action_t){
+				signals[nsignals++] = (__wasi_signal_disposition_t){
 					.sig = sig,
-					.act = __WASI_SIG_ACTION_DEFAULT,
+					.disp = __WASI_DISPOSITION_DEFAULT,
 				};
 			}
 		}

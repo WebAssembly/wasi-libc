@@ -453,8 +453,8 @@ __wasi_errno_t __wasi_proc_spawn2(
     const char *envs,
     const __wasi_proc_spawn_fd_op_t *fd_ops,
     size_t fd_ops_len,
-    const __wasi_signal_and_action_t *signal_actions,
-    size_t signal_actions_len,
+    const __wasi_signal_disposition_t *signal_dispositions,
+    size_t signal_dispositions_len,
     __wasi_bool_t search_path,
     const char *path,
     __wasi_pid_t *retptr0
@@ -463,7 +463,7 @@ __wasi_errno_t __wasi_proc_spawn2(
     size_t args_len = strlen(args);
     size_t envs_len = strlen(envs);
     size_t path_len = strlen(path);
-    int32_t ret = __imported_wasix_32v1_proc_spawn2((intptr_t) name, (intptr_t) name_len, (intptr_t) args, (intptr_t) args_len, (intptr_t) envs, (intptr_t) envs_len, (intptr_t) fd_ops, (intptr_t) fd_ops_len, (intptr_t) signal_actions, (intptr_t) signal_actions_len, (int32_t) search_path, (intptr_t) path, (intptr_t) path_len, (intptr_t) retptr0);
+    int32_t ret = __imported_wasix_32v1_proc_spawn2((intptr_t) name, (intptr_t) name_len, (intptr_t) args, (intptr_t) args_len, (intptr_t) envs, (intptr_t) envs_len, (intptr_t) fd_ops, (intptr_t) fd_ops_len, (intptr_t) signal_dispositions, (intptr_t) signal_dispositions_len, (int32_t) search_path, (intptr_t) path, (intptr_t) path_len, (intptr_t) retptr0);
     return (uint16_t) ret;
 }
 
@@ -531,15 +531,15 @@ __wasi_errno_t __wasi_proc_signals_get(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_32v1_proc_signals_count_get(int32_t arg0) __attribute__((
+int32_t __imported_wasix_32v1_proc_signals_sizes_get(int32_t arg0) __attribute__((
     __import_module__("wasix_32v1"),
-    __import_name__("proc_signals_count_get")
+    __import_name__("proc_signals_sizes_get")
 ));
 
-__wasi_errno_t __wasi_proc_signals_count_get(
+__wasi_errno_t __wasi_proc_signals_sizes_get(
     __wasi_size_t *retptr0
 ){
-    int32_t ret = __imported_wasix_32v1_proc_signals_count_get((intptr_t) retptr0);
+    int32_t ret = __imported_wasix_32v1_proc_signals_sizes_get((intptr_t) retptr0);
     return (uint16_t) ret;
 }
 

@@ -336,10 +336,10 @@ int __wasm_sigaction(int sig, int action) {
 	void (*a)(int);
 
 	switch (action) {
-		case __WASI_SIG_ACTION_DEFAULT:
+		case __WASI_DISPOSITION_DEFAULT:
 			a = SIG_DFL;
 			break;
-		case __WASI_SIG_ACTION_IGNORE:
+		case __WASI_DISPOSITION_IGNORE:
 			a = SIG_IGN;
 			break;
 		default:
@@ -359,31 +359,31 @@ void __wasi_init_signals() {
 	int sigaction_ret;
 
     __wasi_size_t signal_count;
-    err = __wasi_proc_signals_count_get(&signal_count);
+    err = __wasi_proc_signals_sizes_get(&signal_count);
     if (err != __WASI_ERRNO_SUCCESS) {
         _Exit(EX_OSERR);
     }
 	
-	__wasi_signal_and_action_t *sig_actions = calloc(signal_count, sizeof(__wasi_signal_and_action_t));
-    if (sig_actions == NULL) {
+	__wasi_signal_disposition_t *sig_dispositions = calloc(signal_count, sizeof(__wasi_signal_disposition_t));
+    if (sig_dispositions == NULL) {
         _Exit(EX_SOFTWARE);
     }
 
-    err = __wasi_proc_signals_get((uint8_t *)sig_actions);
+    err = __wasi_proc_signals_get((uint8_t *)sig_dispositions);
     if (err != __WASI_ERRNO_SUCCESS) {
-        free(sig_actions);
+        free(sig_dispositions);
         _Exit(EX_OSERR);
     }
 
 	for (int i = 0; i < signal_count; ++i) {
-		sigaction_ret = __wasm_sigaction((int)sig_actions[i].sig, (int)sig_actions[i].act);
+		sigaction_ret = __wasm_sigaction((int)sig_dispositions[i].sig, (int)sig_dispositions[i].disp);
 		if (sigaction_ret == -1) {
-			free(sig_actions);
+			free(sig_dispositions);
 			_Exit(EX_OSERR);
 		}
 	}
 
-	free(sig_actions);
+	free(sig_dispositions);
 
 	// Unconditionally register the signal handler at startup - otherwise, the host will
 	// eat up signals that are sent before the first sigaction call.

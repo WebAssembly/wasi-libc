@@ -57,11 +57,17 @@ int epoll_pwait(int fd, struct epoll_event *ev, int cnt, int to, const sigset_t 
     (void)sigs;
     __wasi_size_t ret_val;
     struct __wasi_epoll_event_t ev2[64];
+    __wasi_timestamp_t timeout;
+    if (to < 0) {
+        timeout = 0xffffffffffffffff;
+    } else {
+        timeout = (__wasi_timestamp_t)to * 1000000;
+    }
     if (cnt > 64)
     {
         cnt = 64;
     }
-    int error = __wasi_epoll_wait(fd, &ev2[0], cnt, to, &ret_val);
+    int error = __wasi_epoll_wait(fd, &ev2[0], cnt, timeout, &ret_val);
     if (error == 0)
     {
         cnt = ret_val;

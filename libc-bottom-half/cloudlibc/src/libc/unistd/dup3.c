@@ -9,5 +9,5 @@ int dup3(int fd, int newfd, int flags) {
         errno = error;
         return -1;
     }
-    return 0;
+    return newfd;
 }

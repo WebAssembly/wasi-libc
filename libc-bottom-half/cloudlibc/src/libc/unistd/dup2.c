@@ -9,5 +9,5 @@ int dup2(int fd, int newfd) {
         errno = error;
         return -1;
     }
-    return 0;
+    return newfd;
 }

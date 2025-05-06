@@ -21,6 +21,8 @@ MALLOC_IMPL ?= dlmalloc
 BUILD_LIBC_TOP_HALF ?= yes
 # The directory where we will store intermediate artifacts.
 OBJDIR ?= build/$(TARGET_TRIPLE)
+# Whether to compile with PIC (needed for shared libs and dynamic linking)
+PIC ?= no
 
 # When the length is no larger than this threshold, we consider the
 # overhead of bulk memory opcodes to outweigh the performance benefit,
@@ -197,6 +199,11 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         linux/epoll.c \
         linux/eventfd.c \
         linux/setgroups.c \
+        ldso/dlclose.c \
+        ldso/dlerror.c \
+        ldso/dlinfo.c \
+        ldso/dlopen.c \
+        ldso/dlsym.c \
         stat/futimesat.c \
         legacy/getpagesize.c \
         thread/thrd_sleep.c \
@@ -381,6 +388,11 @@ CFLAGS += -mthread-model posix -pthread -ftls-model=local-exec
 CFLAGS += -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
 endif
 
+# Configure PIC.
+ifeq ($(PIC), yes)
+CFLAGS += -fPIC
+endif
+
 # Expose the public headers to the implementation. We use `-isystem` for
 # purpose for two reasons:
 #
@@ -488,7 +500,6 @@ MUSL_OMIT_HEADERS += \
     "mntent.h" \
     "resolv.h" \
     "pty.h" \
-    "dlfcn.h" \
     "ulimit.h" \
     "sys/xattr.h" \
     "wordexp.h" \

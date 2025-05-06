@@ -97,7 +97,7 @@ struct fdpic_dummy_loadmap {
 
 typedef void (*stage2_func)(unsigned char *, size_t *);
 
-hidden void *__dlsym(void *restrict, const char *restrict, void *restrict);
+// hidden void *__dlsym(void *restrict, const char *restrict, void *restrict);
 
 hidden void __dl_seterr(const char *, ...);
 hidden int __dl_invalid_handle(void *);

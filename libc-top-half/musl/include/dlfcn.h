@@ -6,18 +6,19 @@ extern "C" {
 #endif
 
 #include <features.h>
+#include <wasi/api.h>
 
-#define RTLD_LAZY   1
-#define RTLD_NOW    2
-#define RTLD_NOLOAD 4
-#define RTLD_NODELETE 4096
-#define RTLD_GLOBAL 256
-#define RTLD_LOCAL  0
+#define RTLD_LAZY   __WASI_DL_FLAGS_LAZY
+#define RTLD_NOW    __WASI_DL_FLAGS_NOW
+#define RTLD_NOLOAD __WASI_DL_FLAGS_NOLOAD
+#define RTLD_NODELETE __WASI_DL_FLAGS_NODELETE
+#define RTLD_GLOBAL __WASI_DL_FLAGS_GLOBAL
+#define RTLD_LOCAL  __WASI_DL_FLAGS_LOCAL
 
-#define RTLD_NEXT    ((void *)-1)
+// #define RTLD_NEXT    ((void *)-1)
 #define RTLD_DEFAULT ((void *)0)
 
-#define RTLD_DI_LINKMAP 2
+// #define RTLD_DI_LINKMAP 2
 
 int    dlclose(void *);
 char  *dlerror(void);

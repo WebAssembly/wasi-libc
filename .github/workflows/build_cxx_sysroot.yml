@@ -100,7 +100,8 @@ jobs:
       - name: Update and install dependencies
         run: |
           pacman -Syu --noconfirm
-          pacman -Sy --noconfirm --needed coreutils nodejs npm wget git cmake ninja llvm clang rsync make lld wasmer cargo python3
+          pacman -Sy --noconfirm --needed coreutils nodejs npm wget git cmake ninja llvm clang rsync make lld cargo python3 jq
+          curl https://get.wasmer.io -sSfL | sh -s "prerelease"
 
       - name: Log tool versions
         run: |

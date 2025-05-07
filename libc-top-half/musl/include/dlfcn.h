@@ -13,7 +13,7 @@ extern "C" {
 #define RTLD_NOLOAD __WASI_DL_FLAGS_NOLOAD
 #define RTLD_NODELETE __WASI_DL_FLAGS_NODELETE
 #define RTLD_GLOBAL __WASI_DL_FLAGS_GLOBAL
-#define RTLD_LOCAL  __WASI_DL_FLAGS_LOCAL
+#define RTLD_LOCAL  0
 
 // #define RTLD_NEXT    ((void *)-1)
 #define RTLD_DEFAULT ((void *)0)

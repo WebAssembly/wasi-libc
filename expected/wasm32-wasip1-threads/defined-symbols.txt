@@ -362,6 +362,7 @@ __wasilibc_cwd_lock
 __wasilibc_cwd_unlock
 __wasilibc_deinitialize_environ
 __wasilibc_dttoif
+__wasilibc_enable_futex_busywait_on_current_thread
 __wasilibc_ensure_environ
 __wasilibc_environ
 __wasilibc_fd_renumber
@@ -369,6 +370,8 @@ __wasilibc_find_abspath
 __wasilibc_find_relpath
 __wasilibc_find_relpath_alloc
 __wasilibc_futex_wait
+__wasilibc_futex_wait_atomic_wait
+__wasilibc_futex_wait_maybe_busy
 __wasilibc_get_environ
 __wasilibc_iftodt
 __wasilibc_initialize_environ
@@ -400,6 +403,7 @@ __wasilibc_rmdirat
 __wasilibc_stat
 __wasilibc_tell
 __wasilibc_unlinkat
+__wasilibc_use_busy_futex
 __wasilibc_utimens
 __wasm_call_dtors
 __wcscoll_l

@@ -308,6 +308,12 @@
 #define __NR_landlock_create_ruleset	(0x40000000 + 444)
 #define __NR_landlock_add_rule	(0x40000000 + 445)
 #define __NR_landlock_restrict_self	(0x40000000 + 446)
+#define __NR_memfd_secret	(0x40000000 + 447)
+#define __NR_process_mrelease	(0x40000000 + 448)
+#define __NR_futex_waitv	(0x40000000 + 449)
+#define __NR_set_mempolicy_home_node	(0x40000000 + 450)
+#define __NR_cachestat		(0x40000000 + 451)
+#define __NR_fchmodat2		(0x40000000 + 452)
 
 
 #define __NR_rt_sigaction (0x40000000 + 512)

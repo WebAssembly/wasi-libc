@@ -548,7 +548,7 @@ post-finish: finish
 ifeq ($(TARGET_TRIPLE), wasm32-wasi)
 	cd $(SYSROOT_LIB) && \
 	mv libc.a libc-old.a && \
-    cp $(CURDIR)/libclang_rt.builtins-wasm32.a . && \
+	cp $(CURDIR)/libclang_rt.builtins-wasm32.a . && \
 	$(AR) -M < $(CURDIR)/tools/append-builtins/$(TARGET_TRIPLE).mri && \
 	rm libc-old.a libclang_rt.builtins-wasm32.a
 endif

@@ -52,6 +52,10 @@ __daylight
 __default_guardsize
 __default_stacksize
 __des_setkey
+__dl_invalid_handle
+__dl_seterr
+__dl_thread_cleanup
+__dl_vseterr
 __dlerror_lockptr
 __do_cleanup_pop
 __do_cleanup_push
@@ -756,6 +760,11 @@ difftime
 dirfd
 dirname
 div
+dlclose
+dlerror
+dlinfo
+dlopen
+dlsym
 dngettext
 dprintf
 drand48

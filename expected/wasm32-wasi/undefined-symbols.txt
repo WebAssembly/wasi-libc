@@ -1,5 +1,4 @@
 __addtf3
-__data_end
 __divtf3
 __eqtf2
 __extenddftf2
@@ -10,9 +9,7 @@ __fixunstfsi
 __floatsitf
 __floatunsitf
 __getf2
-__global_base
 __gttf2
-__heap_base
 __imported_wasi_snapshot_preview1_args_get
 __imported_wasi_snapshot_preview1_args_sizes_get
 __imported_wasi_snapshot_preview1_clock_res_get
@@ -145,9 +142,11 @@ __indirect_function_table
 __letf2
 __lttf2
 __main_argc_argv
+__memory_base
 __netf2
 __stack_pointer
 __subtf3
+__table_base
 __tls_align
 __tls_base
 __tls_size

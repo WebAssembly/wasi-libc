@@ -1,5 +1,5 @@
 create libc.a
 addlib libc-old.a
-addlib ../../../libclang_rt.builtins-wasm32.a
+addlib libclang_rt.builtins-wasm32.a
 save
 end

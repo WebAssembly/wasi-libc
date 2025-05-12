@@ -523,7 +523,7 @@ endif
 default: prepare finish post-finish
 
 prepare:
-	rm $(SYSROOT)/lib/$(TARGET_TRIPLE)/libc.a || true
+	rm $(SYSROOT_LIB)/libc.a || true
 
 wasix-headers:
 	git submodule init
@@ -532,14 +532,15 @@ wasix-headers:
 
 post-finish: finish
 ifeq ($(TARGET_TRIPLE), wasm32-wasi)
-	cd $(SYSROOT)/lib/$(TARGET_TRIPLE) && \
+	cd $(SYSROOT_LIB) && \
 	mv libc.a libc-old.a && \
-	$(AR) -M < ../../../tools/append-builtins/$(TARGET_TRIPLE).mri && \
-	rm libc-old.a
+    cp $(CURDIR)/libclang_rt.builtins-wasm32.a . && \
+	$(AR) -M < $(CURDIR)/tools/append-builtins/$(TARGET_TRIPLE).mri && \
+	rm libc-old.a libclang_rt.builtins-wasm32.a
 endif
 
 	rm -f sysroot/lib/wasm32-wasi/libc-printscan-log-double.a
-	rsync -rtvu --delete ./sysroot/ ./sysroot32/
+# sh -c 'rm -rf ./sysroot32/ && mkdir -p ./sysroot32/ && cp -r --preserve=timestamps ./sysroot/. ./sysroot32/' || true
 
 $(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
 

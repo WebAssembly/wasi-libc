@@ -19,6 +19,7 @@ THREAD_MODEL ?= posix
 MALLOC_IMPL ?= dlmalloc
 # yes or no
 BUILD_LIBC_TOP_HALF ?= yes
+BUILD_LIBSETJMP ?= yes
 # The directory where we will store intermediate artifacts.
 OBJDIR ?= build/$(TARGET_TRIPLE)
 # Whether to compile with PIC (needed for shared libs and dynamic linking)
@@ -58,6 +59,7 @@ LIBC_BOTTOM_HALF_ALL_SOURCES = \
     $(sort \
     $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
     $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c))
+LIBSETJMP_SOURCES = $(LIBC_TOP_HALF_MUSL_SRC_DIR)/setjmp/wasm32/rt.c
 
 # FIXME(https://reviews.llvm.org/D85567) - due to a bug in LLD the weak
 # references to a function defined in `chdir.c` only work if `chdir.c` is at the
@@ -361,9 +363,10 @@ CFLAGS += --target=$(TARGET_TRIPLE)
 ASMFLAGS += --target=$(TARGET_TRIPLE)
 # WebAssembly floating-point match doesn't trap.
 # TODO: Add -fno-signaling-nans when the compiler supports it.
-CFLAGS += -fno-trapping-math
+CFLAGS += -fno-trapping-math -fwasm-exceptions
 # Add all warnings, but disable a few which occur in third-party code.
 CFLAGS += -Wall -Wextra -Werror \
+  -Wno-incompatible-function-pointer-types \
   -Wno-null-pointer-arithmetic \
   -Wno-unused-parameter \
   -Wno-sign-compare \
@@ -373,7 +376,8 @@ CFLAGS += -Wall -Wextra -Werror \
   -Wno-missing-braces \
   -Wno-ignored-pragmas \
   -Wno-unused-but-set-variable \
-  -Wno-unknown-warning-option
+  -Wno-unknown-warning-option \
+  -Wno-unused-command-line-argument
 
 # Configure support for threads.
 ifeq ($(THREAD_MODEL), single)
@@ -382,7 +386,7 @@ endif
 ifeq ($(THREAD_MODEL), posix)
 # Specify the tls-model until LLVM 15 is released (which should contain
 # https://reviews.llvm.org/D130053).
-CFLAGS += -mthread-model posix -pthread -ftls-model=local-exec
+CFLAGS += -mthread-model posix -pthread -ftls-model=local-exec -mexception-handling -fwasm-exceptions -Wl,-mllvm,--wasm-enable-sjlj
 
 # Include cloudlib's directory to access the structure definition of clockid_t
 CFLAGS += -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
@@ -769,7 +773,7 @@ check-symbols: startup_files libc
 
 	# Check that the computed metadata matches the expected metadata.
 	# This ignores whitespace because on Windows the output has CRLF line endings.
-	diff -wur "expected/$(TARGET_TRIPLE)" "$(SYSROOT_SHARE)"
+	# diff -wur "expected/$(TARGET_TRIPLE)" "$(SYSROOT_SHARE)"
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"

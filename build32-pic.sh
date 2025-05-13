@@ -61,8 +61,8 @@ cmake \
     -DCMAKE_CXX_COMPILER_WORKS=ON \
     -DLLVM_COMPILER_CHECKED=ON \
     -DUNIX:BOOL=ON \
-    -DLIBCXX_LIBDIR_SUFFIX=/wasm32-wasi \
-    -DLIBCXXABI_LIBDIR_SUFFIX=/wasm32-wasi \
+    -DLIBCXX_LIBDIR_SUFFIX=/wasm32-wasix \
+    -DLIBCXXABI_LIBDIR_SUFFIX=/wasm32-wasix \
     -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" \
     ../../tools/llvm-project/runtimes
 cmake --build . --target install --parallel 16

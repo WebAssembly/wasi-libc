@@ -913,6 +913,7 @@ check-symbols: $(STARTUP_FILES) libc
 	    -U__clang_version__ \
 	    -U__clang_literal_encoding__ \
 	    -U__clang_wide_literal_encoding__ \
+	    -U__wasm_extended_const__ \
 	    -U__wasm_mutable_globals__ \
 	    -U__wasm_sign_ext__ \
 	    -U__wasm_multivalue__ \

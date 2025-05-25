@@ -422,7 +422,8 @@ CFLAGS += -Wall -Wextra -Werror \
   -Wno-missing-braces \
   -Wno-ignored-pragmas \
   -Wno-unused-but-set-variable \
-  -Wno-unknown-warning-option
+  -Wno-unknown-warning-option \
+  -Wno-unterminated-string-initialization
 
 # Configure support for threads.
 ifeq ($(THREAD_MODEL), single)
@@ -738,7 +739,7 @@ $(INCLUDE_DIRS): $(ALL_POSSIBLE_HEADERS)
 	touch $@
 
 STARTUP_FILES := $(OBJDIR)/copy-startup-files.stamp
-$(STARTUP_FILES): $(INCLUDE_DIRS) $(LIBC_BOTTOM_HALF_CRT_OBJS) 
+$(STARTUP_FILES): $(INCLUDE_DIRS) $(LIBC_BOTTOM_HALF_CRT_OBJS)
 	#
 	# Install the startup files (crt1.o, etc.).
 	#

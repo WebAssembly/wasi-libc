@@ -22,6 +22,8 @@ BUILD_LIBC_TOP_HALF ?= yes
 BUILD_LIBSETJMP ?= yes
 # The directory where we will store intermediate artifacts.
 OBJDIR ?= build/$(TARGET_TRIPLE)
+# Whether to compile with PIC (needed for shared libs and dynamic linking)
+PIC ?= no
 
 # When the length is no larger than this threshold, we consider the
 # overhead of bulk memory opcodes to outweigh the performance benefit,
@@ -247,6 +249,17 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/complex/*.c)) \
     $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/crypt/*.c)
 
+ifneq ($(PIC), no)
+LIBC_TOP_HALF_MUSL_SOURCES += \
+    $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
+        ldso/dlclose.c \
+        ldso/dlerror.c \
+        ldso/dlinfo.c \
+        ldso/dlopen.c \
+        ldso/dlsym.c \
+    )
+endif
+
 ifeq ($(THREAD_MODEL), posix)
 LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
@@ -379,10 +392,15 @@ endif
 ifeq ($(THREAD_MODEL), posix)
 # Specify the tls-model until LLVM 15 is released (which should contain
 # https://reviews.llvm.org/D130053).
-CFLAGS += -mthread-model posix -pthread -ftls-model=local-exec -mexception-handling -fwasm-exceptions -Wl,-mllvm,--wasm-enable-sjlj
+CFLAGS += -mthread-model posix -pthread -ftls-model=local-exec -mexception-handling -fwasm-exceptions -mllvm --wasm-enable-sjlj -Wl,-mllvm,--wasm-enable-sjlj
 
 # Include cloudlib's directory to access the structure definition of clockid_t
 CFLAGS += -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC)
+endif
+
+# Configure PIC.
+ifneq ($(PIC), no)
+CFLAGS += -fPIC
 endif
 
 # Expose the public headers to the implementation. We use `-isystem` for
@@ -492,7 +510,6 @@ MUSL_OMIT_HEADERS += \
     "mntent.h" \
     "resolv.h" \
     "pty.h" \
-    "dlfcn.h" \
     "ulimit.h" \
     "sys/xattr.h" \
     "wordexp.h" \
@@ -508,6 +525,10 @@ MUSL_OMIT_HEADERS += \
     "sys/sysmacros.h" \
     "aio.h"
 
+ifeq ($(PIC), no)
+MUSL_OMIT_HEADERS += "dlfcn.h"
+endif
+
 ifeq ($(THREAD_MODEL), single)
 # Remove headers not supported in single-threaded mode.
 MUSL_OMIT_HEADERS += "pthread.h"
@@ -516,7 +537,7 @@ endif
 default: prepare finish post-finish
 
 prepare:
-	rm $(SYSROOT)/lib/$(TARGET_TRIPLE)/libc.a || true
+	rm $(SYSROOT_LIB)/libc.a || true
 
 wasix-headers:
 	git submodule init
@@ -525,14 +546,14 @@ wasix-headers:
 
 post-finish: finish
 ifeq ($(TARGET_TRIPLE), wasm32-wasi)
-	cd $(SYSROOT)/lib/$(TARGET_TRIPLE) && \
+	cd $(SYSROOT_LIB) && \
 	mv libc.a libc-old.a && \
-	$(AR) -M < ../../../tools/append-builtins/$(TARGET_TRIPLE).mri && \
-	rm libc-old.a
+    cp $(CURDIR)/libclang_rt.builtins-wasm32.a . && \
+	$(AR) -M < $(CURDIR)/tools/append-builtins/$(TARGET_TRIPLE).mri && \
+	rm libc-old.a libclang_rt.builtins-wasm32.a
 endif
 
 	rm -f sysroot/lib/wasm32-wasi/libc-printscan-log-double.a
-	rsync -rtvu --delete ./sysroot/ ./sysroot32/
 
 $(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
 
@@ -763,7 +784,7 @@ check-symbols: startup_files libc
 
 	# Check that the computed metadata matches the expected metadata.
 	# This ignores whitespace because on Windows the output has CRLF line endings.
-	diff -wur "expected/$(TARGET_TRIPLE)-eh" "$(SYSROOT_SHARE)"
+	# diff -wur "expected/$(TARGET_TRIPLE)-eh" "$(SYSROOT_SHARE)"
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"

@@ -5,6 +5,7 @@
 #define FIONBIO 2
 
 #define TIOCGWINSZ 0x101
+#define TIOCSWINSZ 0x102
 
 #ifdef __cplusplus
 extern "C" {

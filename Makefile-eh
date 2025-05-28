@@ -569,6 +569,10 @@ $(SYSROOT_LIB)/libwasi-emulated-getpid.a: $(LIBWASI_EMULATED_GETPID_OBJS)
 
 $(SYSROOT_LIB)/libsetjmp.a: $(LIBSETJMP_OBJS)
 
+$(SYSROOT_LIB)/libcommon-tag-stubs.a: libcommon-tag-stubs.a
+	mkdir -p "$(SYSROOT_LIB)"
+	cp libcommon-tag-stubs.a $@
+
 %.a:
 	@mkdir -p "$(@D)"
 	# On Windows, the commandline for the ar invocation got too long, so it needs to be split up.
@@ -675,7 +679,8 @@ libc: include_dirs \
     $(SYSROOT_LIB)/libc-printscan-no-floating-point.a \
     $(SYSROOT_LIB)/libwasi-emulated-mman.a \
     $(SYSROOT_LIB)/libwasi-emulated-process-clocks.a \
-    $(SYSROOT_LIB)/libwasi-emulated-getpid.a
+    $(SYSROOT_LIB)/libwasi-emulated-getpid.a \
+    $(SYSROOT_LIB)/libcommon-tag-stubs.a
 
 finish: startup_files libc
 	#

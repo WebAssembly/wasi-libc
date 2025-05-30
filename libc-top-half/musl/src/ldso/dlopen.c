@@ -2,6 +2,7 @@
 #include "dynlink.h"
 #include "wasi/api.h"
 #include "string.h"
+#include "stdlib.h"
 
 void *dlopen(const char *file, int mode)
 {
@@ -9,7 +10,9 @@ void *dlopen(const char *file, int mode)
 	char err_buf[256];
 	err_buf[0] = '\0';
 
-	int err = __wasi_dlopen(file, mode, (uint8_t *)err_buf, sizeof(err_buf), &ret);
+	char *ld_library_path = getenv("LD_LIBRARY_PATH");
+
+	int err = __wasi_dlopen(file, mode, (uint8_t *)err_buf, sizeof(err_buf), ld_library_path, &ret);
 
 	if (err != 0)
 	{

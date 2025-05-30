@@ -15,7 +15,7 @@ void __wasi_thread_exit(
      */
     int rval);
 
-__attribute__((export_name("__wasix_init_tls"))) void __wasix_init_tls(void)
+__attribute__((export_name("__wasix_init_tls"))) size_t __wasix_init_tls(void)
 {
     int size = __builtin_wasm_tls_size();
     int align = __builtin_wasm_tls_align();
@@ -26,4 +26,5 @@ __attribute__((export_name("__wasix_init_tls"))) void __wasix_init_tls(void)
         __builtin_trap();
     }
     __wasm_init_tls(tls);
+    return (size_t)tls;
 }

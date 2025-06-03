@@ -535,6 +535,8 @@ pid_t gettid(void);
 #define _SC_XOPEN_STREAMS	246
 #define _SC_THREAD_ROBUST_PRIO_INHERIT	247
 #define _SC_THREAD_ROBUST_PRIO_PROTECT	248
+#define _SC_MINSIGSTKSZ	249
+#define _SC_SIGSTKSZ	250
 
 #define _CS_PATH	0
 #define _CS_POSIX_V6_WIDTH_RESTRICTED_ENVS	1
@@ -577,6 +579,8 @@ pid_t gettid(void);
 #define _CS_POSIX_V7_LPBIG_OFFBIG_LINTFLAGS	1147
 #define _CS_V6_ENV	1148
 #define _CS_V7_ENV	1149
+#define _CS_POSIX_V7_THREADS_CFLAGS	1150
+#define _CS_POSIX_V7_THREADS_LDFLAGS	1151
 
 #ifdef __cplusplus
 }

@@ -32,8 +32,7 @@ volatile int __thread_list_lock;
  * Note: when linking a shared library, none of these symbols are available.
  * This shouldn't matter in practice, since shared libs don't get a _start(),
  * which is where this is called from. The main module can set
- * __default_stacksize up and the side modules will (hopefully?) end up using
- * that.
+ * __default_stacksize up and the side modules will end up using that.
  */
 extern weak unsigned char __heap_base;
 extern weak unsigned char __data_end;
@@ -75,9 +74,14 @@ static inline void setup_default_stack_size()
 			stack_size < DEFAULT_STACK_MAX ? stack_size : DEFAULT_STACK_MAX;
 }
 
+extern void __set_tp(uintptr_t p);
+
 void __wasi_init_tp()
 {
-	__init_tp((void *)__get_tp());
+	// See comments on start_args.pthread_self_ptr in pthread_create.c for how TLS is handled in WASIX threads.
+	void *tp = aligned_alloc(_Alignof(struct pthread), sizeof(struct pthread));
+	__set_tp((uintptr_t)tp);
+	__init_tp(tp);
 }
 #endif
 
@@ -128,10 +132,6 @@ static struct builtin_tls
 static struct tls_module main_tls;
 #endif
 
-#ifndef __wasilibc_unmodified_upstream
-extern void __wasm_init_tls(void *);
-#endif
-
 void *__copy_tls(unsigned char *mem)
 {
 #ifdef __wasilibc_unmodified_upstream
@@ -169,14 +169,8 @@ void *__copy_tls(unsigned char *mem)
 	td->dtv = dtv;
 	return td;
 #else
-	size_t tls_align = __builtin_wasm_tls_align();
-	volatile void *tls_base = __builtin_wasm_tls_base();
-	mem += tls_align;
-	mem -= (uintptr_t)mem & (tls_align - 1);
-	__wasm_init_tls(mem);
-	__asm__("local.get %0\n"
-			"global.set __tls_base\n" ::"r"(tls_base));
-	return mem;
+	// This is impossible for WASIX with non-local-exec TLS model, so just trap
+	__builtin_trap();
 #endif
 }
 

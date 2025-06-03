@@ -244,7 +244,37 @@ struct start_args {
 	void *(*start_func)(void *);
 	void *start_arg;
 
-	void *reserved[10];	// this is reserved for future WASI changes, makes the struct 64 bytes or 128 bytes on 64bit
+	/*
+	 * When generating PIC code, clang generates an "internal GOT" (Global Offset
+	 * Table), which includes TLS symbols as well. Each TLS symbol gets its own global,
+	 * which is filled in according to the value of __tls_base, within the
+	 * __wasm_init_tls function that clang also generates.
+	 *
+	 * Previously, pthread_create would use __copy_tls, which would assume that
+	 * the only global that's modified by __wasm_init_tls is __tls_base, so it would
+	 * back __tls_base up and restore it afterwards. This can't happen with the
+	 * internal GOT since we can't know what other globals there are and so we can't
+	 * restore them. Even if we did, the new thread would need to get its globals
+	 * initialized anyway, and that's also impossible without a call to __wasm_init_tls.
+	 * The only option is thus to defer initialization of TLS to the new thread itself.
+	 * This happens in the wasi_thread_start function.
+	 *
+	 * Now, this creates a second problem: The pthread struct for the new thread is
+	 * initialized by the parent thread in pthread_create. Even if we were to put enough
+	 * data into start_args for the new thread to initialize its own pthread struct,
+	 * as long as the struct lives in the TLS area, __wasm_init_tls will write to it
+	 * with non-atomic writes. This breaks pthread_join, which expects the detach_state
+	 * member of pthread to only ever be accessed atomically.
+	 *
+	 * As such, the only real way to solve this is to make sure the pthread struct for
+	 * a thread does not live in the TLS section. Instead, we keep a pointer to a
+	 * separately-allocated pthread struct (the corresponding code is in pthread_arch.h).
+	 * The pointer is then passed to the new thread, so it can be put in place after
+	 * the call to __wasm_init_tls.
+	 */
+	void *pthread_self_ptr;
+
+	void *reserved[9];	// this is reserved for future WASI changes, makes the struct 64 bytes or 128 bytes on 64bit
 	size_t stack_size;
 	size_t guard_size;
 #endif
@@ -290,10 +320,15 @@ static int start_c11(void *p)
 void wasi_thread_start(int tid, void *p);
 hidden void *__dummy_reference = wasi_thread_start;
 
+extern void __set_tp(uintptr_t p);
+
 hidden void __wasi_thread_start_C(int tid, void *p)
 {
 	struct start_args *args = p;
-	pthread_t self = __pthread_self();
+
+	pthread_t self = args->pthread_self_ptr;
+	__set_tp((uintptr_t)self);
+
 	// Set the thread ID (TID) on the pthread structure. The TID is stored
 	// atomically since it is also stored by the parent thread; this way,
 	// whichever thread (parent or child) reaches this point first can proceed
@@ -455,9 +490,12 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 #ifdef __wasilibc_unmodified_upstream
 	new = __copy_tls(tsd - libc.tls_size);
 #else
-	new_tls_base = __copy_tls(tsd - tls_size);
-	tls_offset = new_tls_base - tls_base;
-	new = (void*)((uintptr_t)self + tls_offset);
+	// See comments on start_args.pthread_self_ptr for how TLS is handled in WASIX threads.
+	new_tls_base = tsd - tls_size;
+	new_tls_base += tls_align;
+	new_tls_base -= (uintptr_t)new_tls_base & (tls_align - 1);
+
+	new = aligned_alloc(_Alignof(struct pthread), sizeof(struct pthread));
 #endif
 	new->map_base = map;
 	new->map_size = size;
@@ -496,7 +534,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	 * working with a copy of the set so we can restore the
 	 * original mask in the calling thread. */
 	memcpy(&args->sig_mask, &set, sizeof args->sig_mask);
-	args->sig_mask[(SIGCANCEL-1)/8/sizeof(long)] &=
+	args->sig_mask[(SIGCANCEL- 1) /8/sizeof(long)] &=
 		~(1UL<<((SIGCANCEL-1)%(8*sizeof(long))));
 #else
 	/* Align the stack to struct start_args */
@@ -513,6 +551,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	args->start_func = entry;
 	args->start_arg = arg;
 	args->tls_base = (void*)new_tls_base;
+	args->pthread_self_ptr = (void *)new;
 	args->stack_size = new->stack_size;		// used by WASIX for stack migration and asyncify support
 	args->guard_size = new->guard_size;		// used by WASIX for stack overflow guards using mmap
 #endif

@@ -167,6 +167,7 @@
 #include <utime.h>
 #include <values.h>
 #include <wasi/api.h>
+#include <wasi/libc-busywait.h>
 #include <wasi/libc-environ.h>
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc-nocwd.h>

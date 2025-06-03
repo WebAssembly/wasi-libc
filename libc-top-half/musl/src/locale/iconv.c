@@ -538,6 +538,10 @@ size_t iconv(iconv_t cd, char **restrict in, size_t *restrict inb, char **restri
 				if (*outb < k) goto toobig;
 				memcpy(*out, tmp, k);
 			} else k = wctomb_utf8(*out, c);
+			/* This failure condition should be unreachable, but
+			 * is included to prevent decoder bugs from translating
+			 * into advancement outside the output buffer range. */
+			if (k>4) goto ilseq;
 			*out += k;
 			*outb -= k;
 			break;

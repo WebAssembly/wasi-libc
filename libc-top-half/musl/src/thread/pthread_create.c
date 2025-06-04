@@ -386,9 +386,13 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	size_t tls_size = __builtin_wasm_tls_size();
 	size_t tls_align = __builtin_wasm_tls_align();
 	void* tls_base = __builtin_wasm_tls_base();
+	size_t pthread_size = sizeof(struct pthread);
+	size_t pthread_align = _Alignof(struct pthread);
 	void* new_tls_base;
+	void* new_pthread;
 	size_t tls_offset;
 	tls_size += tls_align;
+	pthread_size += pthread_align;
 #endif
 
 #ifdef __wasilibc_unmodified_upstream
@@ -423,7 +427,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 #ifdef __wasilibc_unmodified_upstream
 		size_t need = libc.tls_size + __pthread_tsd_size;
 #else
-		size_t need = tls_size + __pthread_tsd_size;
+		size_t need = tls_size + pthread_size + __pthread_tsd_size;
 #endif
 		size = attr._a_stacksize;
 		stack = (void *)(attr._a_stackaddr & -16);
@@ -436,7 +440,8 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 #ifdef __wasilibc_unmodified_upstream
 			stack = tsd - libc.tls_size;
 #else
-			stack = tsd - tls_size;
+			new_pthread = tsd - pthread_size;
+			stack = new_pthread - tls_size;
 #endif
 			memset(stack, 0, need);
 		} else {
@@ -449,7 +454,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 #ifdef __wasilibc_unmodified_upstream
 			+ libc.tls_size +  __pthread_tsd_size);
 #else
-			+ tls_size +  __pthread_tsd_size);
+			+ tls_size + pthread_size +  __pthread_tsd_size);
 #endif
 	}
 
@@ -477,11 +482,12 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 		}
 #endif
 		tsd = map + size - __pthread_tsd_size;
+		new_pthread = tsd - pthread_size;
 		if (!stack) {
 #ifdef __wasilibc_unmodified_upstream
 			stack = tsd - libc.tls_size;
 #else
-			stack = tsd - tls_size;
+			stack = new_pthread - tls_size;
 #endif
 			stack_limit = map + guard;
 		}
@@ -491,11 +497,14 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 	new = __copy_tls(tsd - libc.tls_size);
 #else
 	// See comments on start_args.pthread_self_ptr for how TLS is handled in WASIX threads.
-	new_tls_base = tsd - tls_size;
+	new_tls_base = new_pthread - tls_size;
 	new_tls_base += tls_align;
 	new_tls_base -= (uintptr_t)new_tls_base & (tls_align - 1);
 
-	new = aligned_alloc(_Alignof(struct pthread), sizeof(struct pthread));
+	new = new_pthread;
+	new += pthread_align;
+	new -= (uintptr_t)new & (pthread_align - 1);
+	
 #endif
 	new->map_base = map;
 	new->map_size = size;

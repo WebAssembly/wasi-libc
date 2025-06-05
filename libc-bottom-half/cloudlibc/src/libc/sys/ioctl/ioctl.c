@@ -98,6 +98,26 @@ int ioctl(int fildes, int request, ...) {
       wsz->ws_ypixel = tty.height;
       return 0;
     }
+    case TIOCSWINSZ: {
+      va_list ap;
+      va_start(ap, request);
+      const struct winsize *wsz = va_arg(ap, const struct winsize *);
+      va_end(ap);
+
+      __wasi_tty_t tty;
+      tty.cols = wsz->ws_col;
+      tty.rows = wsz->ws_row;
+      tty.width = wsz->ws_xpixel;
+      tty.height = wsz->ws_ypixel;
+      
+      // Set the updated TTY settings
+      int r = __wasi_tty_set(&tty);
+      if (r != 0) {
+        errno = r;
+        return -1;
+      }
+      return 0;
+    }
     default:
       // Invalid request.
       errno = EINVAL;

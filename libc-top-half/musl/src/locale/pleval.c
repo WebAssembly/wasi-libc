@@ -87,8 +87,8 @@ static int binop(struct st *st, int op, unsigned long left)
 
 static const char *parseop(struct st *st, const char *s)
 {
-	static const char opch[11] = "|&=!><+-*%/";
-	static const char opch2[6] = "|&====";
+	static const char opch[11] = {'|', '&', '=', '!', '>', '<', '+', '-', '*', '%', '/'};
+	static const char opch2[6] = {'|', '&', '=', '=', '=', '='};
 	int i;
 	for (i=0; i<11; i++)
 		if (*s == opch[i]) {

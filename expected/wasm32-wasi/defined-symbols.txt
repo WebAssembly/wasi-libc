@@ -1047,6 +1047,7 @@ inet_ntoa
 inet_ntop
 inet_pton
 init_services
+initgroups
 initstate
 insque
 ioctl

@@ -5515,26 +5515,31 @@
 #define __GNU_GETTEXT_SUPPORTED_REVISION(major) ((major) == 0 ? 1 : -1)
 #define __GXX_ABI_VERSION 1002
 #define __ILP32__ 1
+#define __INT16_C(c) c
 #define __INT16_C_SUFFIX__ 
 #define __INT16_FMTd__ "hd"
 #define __INT16_FMTi__ "hi"
 #define __INT16_MAX__ 32767
 #define __INT16_TYPE__ short
+#define __INT32_C(c) c
 #define __INT32_C_SUFFIX__ 
 #define __INT32_FMTd__ "d"
 #define __INT32_FMTi__ "i"
 #define __INT32_MAX__ 2147483647
 #define __INT32_TYPE__ int
+#define __INT64_C(c) c##LL
 #define __INT64_C_SUFFIX__ LL
 #define __INT64_FMTd__ "lld"
 #define __INT64_FMTi__ "lli"
 #define __INT64_MAX__ 9223372036854775807LL
 #define __INT64_TYPE__ long long int
+#define __INT8_C(c) c
 #define __INT8_C_SUFFIX__ 
 #define __INT8_FMTd__ "hhd"
 #define __INT8_FMTi__ "hhi"
 #define __INT8_MAX__ 127
 #define __INT8_TYPE__ signed char
+#define __INTMAX_C(c) c##LL
 #define __INTMAX_C_SUFFIX__ LL
 #define __INTMAX_FMTd__ "lld"
 #define __INTMAX_FMTi__ "lli"
@@ -5761,6 +5766,7 @@
 #define __UAPI_DEF_IP_MREQ 0
 #define __UAPI_DEF_SOCKADDR_IN 0
 #define __UAPI_DEF_SOCKADDR_IN6 0
+#define __UINT16_C(c) c
 #define __UINT16_C_SUFFIX__ 
 #define __UINT16_FMTX__ "hX"
 #define __UINT16_FMTo__ "ho"
@@ -5768,6 +5774,7 @@
 #define __UINT16_FMTx__ "hx"
 #define __UINT16_MAX__ 65535
 #define __UINT16_TYPE__ unsigned short
+#define __UINT32_C(c) c##U
 #define __UINT32_C_SUFFIX__ U
 #define __UINT32_FMTX__ "X"
 #define __UINT32_FMTo__ "o"
@@ -5775,6 +5782,7 @@
 #define __UINT32_FMTx__ "x"
 #define __UINT32_MAX__ 4294967295U
 #define __UINT32_TYPE__ unsigned int
+#define __UINT64_C(c) c##ULL
 #define __UINT64_C_SUFFIX__ ULL
 #define __UINT64_FMTX__ "llX"
 #define __UINT64_FMTo__ "llo"
@@ -5782,6 +5790,7 @@
 #define __UINT64_FMTx__ "llx"
 #define __UINT64_MAX__ 18446744073709551615ULL
 #define __UINT64_TYPE__ long long unsigned int
+#define __UINT8_C(c) c
 #define __UINT8_C_SUFFIX__ 
 #define __UINT8_FMTX__ "hhX"
 #define __UINT8_FMTo__ "hho"
@@ -5789,6 +5798,7 @@
 #define __UINT8_FMTx__ "hhx"
 #define __UINT8_MAX__ 255
 #define __UINT8_TYPE__ unsigned char
+#define __UINTMAX_C(c) c##ULL
 #define __UINTMAX_C_SUFFIX__ ULL
 #define __UINTMAX_FMTX__ "llX"
 #define __UINTMAX_FMTo__ "llo"
@@ -5878,6 +5888,12 @@
 #define __WASI_DIRCOOKIE_START (UINT64_C(0))
 #define __WASI_DISPOSITION_DEFAULT (UINT8_C(0))
 #define __WASI_DISPOSITION_IGNORE (UINT8_C(1))
+#define __WASI_DL_FLAGS_DEEPBIND ((__wasi_dl_flags_t)(1 << 5))
+#define __WASI_DL_FLAGS_GLOBAL ((__wasi_dl_flags_t)(1 << 2))
+#define __WASI_DL_FLAGS_LAZY ((__wasi_dl_flags_t)(1 << 0))
+#define __WASI_DL_FLAGS_NODELETE ((__wasi_dl_flags_t)(1 << 4))
+#define __WASI_DL_FLAGS_NOLOAD ((__wasi_dl_flags_t)(1 << 3))
+#define __WASI_DL_FLAGS_NOW ((__wasi_dl_flags_t)(1 << 1))
 #define __WASI_EPOLL_CTL_ADD (UINT32_C(0))
 #define __WASI_EPOLL_CTL_DEL (UINT32_C(2))
 #define __WASI_EPOLL_CTL_MOD (UINT32_C(1))
@@ -6015,9 +6031,9 @@
 #define __WASI_PROC_SPAWN_FD_OP_NAME_FCHDIR (UINT8_C(4))
 #define __WASI_PROC_SPAWN_FD_OP_NAME_OPEN (UINT8_C(2))
 #define __WASI_RIFLAGS_RECV_DATA_TRUNCATED ((__wasi_riflags_t)(1 << 2))
+#define __WASI_RIFLAGS_RECV_DONT_WAIT ((__wasi_riflags_t)(1 << 3))
 #define __WASI_RIFLAGS_RECV_PEEK ((__wasi_riflags_t)(1 << 0))
 #define __WASI_RIFLAGS_RECV_WAITALL ((__wasi_riflags_t)(1 << 1))
-#define __WASI_RIFLAGS_RECV_DONT_WAIT ((__wasi_riflags_t)(1 << 3))
 #define __WASI_RIGHTS_FD_ADVISE ((__wasi_rights_t)(1 << 7))
 #define __WASI_RIGHTS_FD_ALLOCATE ((__wasi_rights_t)(1 << 8))
 #define __WASI_RIGHTS_FD_DATASYNC ((__wasi_rights_t)(1 << 0))
@@ -6530,7 +6546,9 @@
 #define __wasm__ 1
 #define __wasm_atomics__ 1
 #define __wasm_bulk_memory__ 1
+#define __wasm_bulk_memory_opt__ 1
 #define __wasm_multivalue__ 1
+#define __wasm_nontrapping_fptoint__ 1
 #define __wasm_reference_types__ 1
 #define _tolower(a) ((a)|0x20)
 #define _toupper(a) ((a)&0x5f)

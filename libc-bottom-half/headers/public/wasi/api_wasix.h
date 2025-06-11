@@ -761,6 +761,11 @@ typedef uint16_t __wasi_riflags_t;
 #define __WASI_RIFLAGS_RECV_DATA_TRUNCATED ((__wasi_riflags_t)(1 << 2))
 
 /**
+ * Return immediately if the read would block.
+ */
+#define __WASI_RIFLAGS_RECV_DONT_WAIT ((__wasi_riflags_t)(1 << 3))
+
+/**
  * Signal condition.
  */
 typedef uint8_t __wasi_signal_t;
@@ -1400,13 +1405,15 @@ typedef uint16_t __wasi_roflags_t;
 
  */
 /**
-*** Hidden type
+ * Flags provided to sock_send.
+ */
 typedef uint16_t __wasi_siflags_t;
 
-_Static_assert(sizeof(__wasi_siflags_t) == 2, "witx calculated size");
-_Static_assert(_Alignof(__wasi_siflags_t) == 2, "witx calculated align");
-
+/**
+ * Return immediately if the write would block.
  */
+#define __WASI_SIFLAGS_SEND_DONT_WAIT ((__wasi_siflags_t)(1 << 0))
+
 /**
 *** Hidden type
 typedef uint8_t __wasi_sdflags_t;
@@ -3725,6 +3732,31 @@ _Static_assert(offsetof(__wasi_proc_spawn_fd_op_t, fdflags) == 48, "witx calcula
 _Static_assert(offsetof(__wasi_proc_spawn_fd_op_t, fdflagsext) == 50, "witx calculated offset");
 
 /**
+ * A handle to a dynamically-loaded library.
+ */
+typedef uint32_t __wasi_dl_handle_t;
+
+_Static_assert(sizeof(__wasi_dl_handle_t) == 4, "witx calculated size");
+_Static_assert(_Alignof(__wasi_dl_handle_t) == 4, "witx calculated align");
+
+/**
+ * Dynamic loading flags
+ */
+typedef uint32_t __wasi_dl_flags_t;
+
+#define __WASI_DL_FLAGS_LAZY ((__wasi_dl_flags_t)(1 << 0))
+
+#define __WASI_DL_FLAGS_NOW ((__wasi_dl_flags_t)(1 << 1))
+
+#define __WASI_DL_FLAGS_GLOBAL ((__wasi_dl_flags_t)(1 << 2))
+
+#define __WASI_DL_FLAGS_NOLOAD ((__wasi_dl_flags_t)(1 << 3))
+
+#define __WASI_DL_FLAGS_NODELETE ((__wasi_dl_flags_t)(1 << 4))
+
+#define __WASI_DL_FLAGS_DEEPBIND ((__wasi_dl_flags_t)(1 << 5))
+
+/**
  * @defgroup wasix_32v1
  * @{
  */
@@ -4918,6 +4950,36 @@ __wasi_errno_t __wasi_epoll_wait(
      * Timeout for the wait event
      */
     __wasi_timestamp_t timeout,
+    __wasi_size_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Close a dynamically-linked module.
+ * 
+ */
+__wasi_errno_t __wasi_dl_invalid_handle(
+    __wasi_dl_handle_t handle
+) __attribute__((__warn_unused_result__));
+/**
+ * Open a dynamically-linked module.
+ * 
+ */
+__wasi_errno_t __wasi_dlopen(
+    const char *path,
+    __wasi_dl_flags_t flags,
+    uint8_t * err_buf,
+    __wasi_size_t err_buf_len,
+    const char *ld_library_path,
+    __wasi_dl_handle_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Load a symbol from a dynamically-linked module.
+ * 
+ */
+__wasi_errno_t __wasi_dlsym(
+    __wasi_dl_handle_t handle,
+    const char *symbol,
+    uint8_t * err_buf,
+    __wasi_size_t err_buf_len,
     __wasi_size_t *retptr0
 ) __attribute__((__warn_unused_result__));
 /** @} */

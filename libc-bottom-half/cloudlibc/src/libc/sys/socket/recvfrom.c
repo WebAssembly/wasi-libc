@@ -19,16 +19,17 @@ ssize_t recvfrom(int socket, void* buffer, size_t length, int flags, struct sock
   if ((flags & MSG_PEEK) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_PEEK; }
   if ((flags & MSG_WAITALL) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_WAITALL; }
   if ((flags & MSG_TRUNC) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_DATA_TRUNCATED; }
+  if ((flags & MSG_DONTWAIT) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_DONT_WAIT; }
 
   // Perform system call.
   __wasi_size_t ro_datalen;
   __wasi_roflags_t ro_flags;
   __wasi_addr_port_t peer_addr;
   __wasi_errno_t error = __wasi_sock_recv_from(socket,
-                                          ri_data, ri_data_len, ri_flags,
-                                          &ro_datalen,
-                                          &ro_flags,
-										  &peer_addr);
+                                               ri_data, ri_data_len, ri_flags,
+                                               &ro_datalen,
+                                               &ro_flags,
+                                               &peer_addr);
   if (error != 0) {
     errno = error;
     return -1;

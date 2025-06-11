@@ -17,6 +17,7 @@ ssize_t recvmsg(int socket, struct msghdr *restrict msg, int flags) {
   if ((flags & MSG_PEEK) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_PEEK; }
   if ((flags & MSG_WAITALL) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_WAITALL; }
   if ((flags & MSG_TRUNC) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_DATA_TRUNCATED; }
+  if ((flags & MSG_DONTWAIT) != 0) { ri_flags |= __WASI_RIFLAGS_RECV_DONT_WAIT; }
 
   __wasi_size_t ro_datalen;
   __wasi_roflags_t ro_flags;
@@ -27,20 +28,20 @@ ssize_t recvmsg(int socket, struct msghdr *restrict msg, int flags) {
 								&ro_datalen,
 								&ro_flags);
   } else {
-	__wasi_addr_port_t peer_addr;
+    __wasi_addr_port_t peer_addr;
     error = __wasi_sock_recv_from(socket,
 								ri_data, ri_data_len, ri_flags,
 								&ro_datalen,
 								&ro_flags,
 								&peer_addr);
-	if (error != 0) {
+    if (error != 0) {
       errno = error;
       return -1;
     }
-	
-	struct sockaddr *addr = (struct sockaddr *)msg->msg_name;
-	socklen_t *addrlen = &msg->msg_namelen;
-	error = wasi_to_sockaddr(&peer_addr, addr, addrlen);
+    
+    struct sockaddr *addr = (struct sockaddr *)msg->msg_name;
+    socklen_t *addrlen = &msg->msg_namelen;
+    error = wasi_to_sockaddr(&peer_addr, addr, addrlen);
   }
   msg->msg_flags = ro_flags;
   

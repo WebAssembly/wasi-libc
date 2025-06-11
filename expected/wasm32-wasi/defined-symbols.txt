@@ -372,6 +372,9 @@ __wasi_chdir
 __wasi_clock_res_get
 __wasi_clock_time_get
 __wasi_clock_time_set
+__wasi_dl_invalid_handle
+__wasi_dlopen
+__wasi_dlsym
 __wasi_environ_get
 __wasi_environ_sizes_get
 __wasi_epoll_create

@@ -1,35 +1,46 @@
 name: CI
 on: [push, pull_request]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   buildlibc:
     name: Build libc
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-22.04, macos-15, windows-2025]
         clang_version: [10.0.0]
         # use different LLVM versions among oses because of the lack of
         # official assets on github.
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             clang_version: 10.0.0
             llvm_asset_suffix: x86_64-linux-gnu-ubuntu-18.04
-          - os: macos-latest
+          - os: macos-15
             clang_version: 10.0.0
             llvm_asset_suffix: x86_64-apple-darwin
-          - os: windows-latest
+          - os: windows-2025
             clang_version: 10.0.0
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             clang_version: 16.0.0
             llvm_asset_suffix: x86_64-linux-gnu-ubuntu-18.04
-          - os: macos-latest
+            enable_pic: true
+          - os: macos-15
             clang_version: 15.0.7
             llvm_asset_suffix: x86_64-apple-darwin21.0
-          - os: windows-latest
+          - os: windows-2025
             clang_version: 16.0.0
+            enable_pic: true
+          - os: ubuntu-24.04-arm
+            clang_version: 16.0.0
+            llvm_asset_suffix: aarch64-linux-gnu
+            enable_pic: true
+            
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4.1.7
       with:
         submodules: true
 
@@ -38,7 +49,7 @@ jobs:
         set -ex
         sudo apt-get update
         sudo apt-get install -y libtinfo5
-      if: matrix.os == 'ubuntu-latest'
+      if: startsWith(matrix.os, 'ubuntu-22')
 
     - name: Install LLVM tools (Windows)
       shell: bash
@@ -49,7 +60,7 @@ jobs:
         echo "CC=$(pwd)/llvm/bin/clang.exe" >> $GITHUB_ENV
         echo "AR=$(pwd)/llvm/bin/llvm-ar.exe" >> $GITHUB_ENV
         echo "NM=$(pwd)/llvm/bin/llvm-nm.exe" >> $GITHUB_ENV
-      if: matrix.os == 'windows-latest'
+      if: matrix.os == 'windows-2025'
 
     - name: Override llvm-nm with one from rustup (Windows)
       run: |
@@ -57,7 +68,7 @@ jobs:
         rustup default stable
         rustup component add llvm-tools-preview
         echo "NM=$(rustc --print sysroot|sed 's|C:|/c|'|sed 's|\\|/|g')/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-nm.exe" >> $GITHUB_ENV
-      if: matrix.os == 'windows-latest'
+      if: matrix.os == 'windows-2025'
 
     - name: Install LLVM tools (MacOS)
       shell: bash
@@ -68,7 +79,7 @@ jobs:
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
         echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
-      if: matrix.os == 'macos-latest'
+      if: matrix.os == 'macos-15'
 
     - name: Install LLVM tools (Linux)
       shell: bash
@@ -80,7 +91,7 @@ jobs:
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
         echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
-      if: matrix.os == 'ubuntu-latest'
+      if: startsWith(matrix.os, 'ubuntu-')
 
     - name: Disable libsetjmp for old LLVM
       shell: bash
@@ -88,12 +99,18 @@ jobs:
         echo "BUILD_LIBSETJMP=no" >> $GITHUB_ENV
       if: matrix.clang_version == '10.0.0'
 
+    - name: Enable PIC build for new LLVM
+      shell: bash
+      run: |
+        echo "MAKE_TARGETS=default libc_so" >> $GITHUB_ENV
+      if: matrix.enable_pic
+
     - name: Build libc
       shell: bash
       run: |
-        make -j4 TARGET_TRIPLE=wasm32-wasi
-        make -j4 TARGET_TRIPLE=wasm32-wasip1
-        make -j4 TARGET_TRIPLE=wasm32-wasip2 WASI_SNAPSHOT=p2
+        make -j4 TARGET_TRIPLE=wasm32-wasi $MAKE_TARGETS
+        make -j4 TARGET_TRIPLE=wasm32-wasip1 $MAKE_TARGETS
+        make -j4 TARGET_TRIPLE=wasm32-wasip2 WASI_SNAPSHOT=p2 $MAKE_TARGETS
 
     - name: Build libc + threads
       # Only build the thread-capable wasi-libc in the latest supported Clang
@@ -117,28 +134,31 @@ jobs:
         export WASIP1_DIR=$(realpath $($CLANG_DIR/clang -print-resource-dir)/lib/wasip1/)
         export WASIP2_DIR=$(realpath $($CLANG_DIR/clang -print-resource-dir)/lib/wasip2/)
         mkdir -p $WASI_DIR $WASIP1_DIR $WASIP2_DIR
-        cp download/lib/wasi/libclang_rt.builtins-wasm32.a $WASI_DIR
-        cp download/lib/wasi/libclang_rt.builtins-wasm32.a $WASIP1_DIR
-        cp download/lib/wasi/libclang_rt.builtins-wasm32.a $WASIP2_DIR
+        cp build/download/libclang_rt.builtins-wasm32.a $WASI_DIR
+        cp build/download/libclang_rt.builtins-wasm32.a $WASIP1_DIR
+        cp build/download/libclang_rt.builtins-wasm32.a $WASIP2_DIR
         TARGET_TRIPLE=wasm32-wasi make test
-        rm -r build
         TARGET_TRIPLE=wasm32-wasip1 make test
-        rm -r build
         TARGET_TRIPLE=wasm32-wasip2 make test
-        rm -r build
         TARGET_TRIPLE=wasm32-wasi-threads make test
-        rm -r build
         TARGET_TRIPLE=wasm32-wasip1-threads make test
+
+        npm -C scripts/browser-test install
+        npx -C scripts/browser-test playwright install chromium-headless-shell
+        ENGINE="$PWD/scripts/browser-test/harness.mjs" TARGET_TRIPLE=wasm32-wasip1 make test
+        ENGINE="$PWD/scripts/browser-test/harness.mjs" TARGET_TRIPLE=wasm32-wasip1-threads make test
       # The older version of Clang does not provide the expected symbol for the
       # test entrypoints: `undefined symbol: __main_argc_argv`.
       # The older (<15.0.7) version of wasm-ld does not provide `__heap_end`,
       # which is required by our malloc implementation.
-      if: matrix.os == 'ubuntu-latest' && matrix.clang_version != '10.0.0'
+      if: startsWith(matrix.os, 'ubuntu-') && matrix.clang_version != '10.0.0'
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4.4.0
       with:
-        # Upload the sysroot folder. Give it a name according to the OS it was built for.
-        name: ${{ format( 'sysroot-{0}.tgz', matrix.os) }}
+        # Upload the sysroot folder. To avoid action erros, we give it a unique
+        # name using the OS it was built for and the Clang version it was built
+        # with.
+        name: ${{ format( 'sysroot-{0}-clang-{1}.tgz', matrix.os, matrix.clang_version) }}
         path: sysroot
 
   # Disable the headerstest job for now, while WASI transitions from the
@@ -150,20 +170,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-15, windows-2025]
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4.1.7
       with:
         submodules: true
     - name: Install Rust (rustup)
       shell: bash
       run: rustup update stable --no-self-update && rustup default stable
-      if: matrix.os != 'macos-latest'
+      if: matrix.os != 'macos-15'
     - name: Install Rust (macos)
       run: |
         curl https://sh.rustup.rs | sh -s -- -y
         echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-      if: matrix.os == 'macos-latest'
+      if: matrix.os == 'macos-15'
     - run: cargo fetch
       working-directory: tools/wasi-headers
     - run: cargo build
@@ -175,7 +195,7 @@ jobs:
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4.1.7
       with:
         submodules: true
     - name: Install Rust

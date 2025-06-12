@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>wasi-libc Browser Tests</title>
+</head>
+
+<body>
+    <h1>wasi-libc Browser Tests</h1>
+    <div id="results"></div>
+    <script type="module">
+        import { runWasmTest } from "./run-test.mjs";
+        function exitTest(result) {
+            if (typeof window.exitTest === 'function') {
+                window.exitTest(result);
+            }
+        }
+        async function runTests() {
+            const resultsDiv = document.getElementById('results');
+
+            try {
+                const passed = await runWasmTest("target.wasm");
+                resultsDiv.innerHTML = passed ?
+                    '<p style="color: green">Test passed</p>' :
+                    '<p style="color: red">Test failed</p>';
+                exitTest({ passed });
+            } catch (error) {
+                console.error(error);
+                resultsDiv.innerHTML = `<p style="color: red">Error: ${error.message}</p>`;
+                exitTest({ passed: false, error: error.message });
+            }
+        }
+
+        runTests();
+    </script>
+</body>
+
+</html>

@@ -49,5 +49,6 @@ bool __wasi_sockets_utils__stream(udp_socket_t *socket,
 				  udp_socket_streams_t *result,
 				  network_error_code_t *error);
 void __wasi_sockets_utils__drop_streams(udp_socket_streams_t streams);
+int __wasi_sockets_utils__parse_port(const char *port);
 
 #endif

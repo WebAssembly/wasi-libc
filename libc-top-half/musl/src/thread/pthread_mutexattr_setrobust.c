@@ -22,6 +22,7 @@ int pthread_mutexattr_setrobust(pthread_mutexattr_t *a, int robust)
 	a->__attr &= ~4;
 	return 0;
 #else
-	return EINVAL;
+	if (robust) return EINVAL;
+	return 0;
 #endif
 }

@@ -1,3 +1,7 @@
+#if !defined(__wasm_simd128__) || !defined(__wasilibc_simd_string) || \
+	__clang_major__ == 19 || __clang_major__ == 20
+// The SIMD implementation is in strspn_simd.c
+
 #include <string.h>
 
 #define BITOP(a,b,op) \
@@ -18,3 +22,5 @@ size_t strspn(const char *s, const char *c)
 	for (; *s && BITOP(byteset, *(unsigned char *)s, &); s++);
 	return s-a;
 }
+
+#endif

@@ -2,6 +2,10 @@
 #include <stdint.h>
 #include <limits.h>
 
+#ifdef __wasm_simd128__
+#include <wasm_simd128.h>
+#endif
+
 #define SS (sizeof(size_t))
 #define ALIGN (sizeof(size_t)-1)
 #define ONES ((size_t)-1/UCHAR_MAX)
@@ -10,6 +14,52 @@
 
 void *memchr(const void *src, int c, size_t n)
 {
+#if defined(__wasm_simd128__) && defined(__wasilibc_simd_string)
+	// When n is zero, a function that locates a character finds no occurrence.
+	// Otherwise, decrement n to ensure sub_overflow overflows
+	// when n would go equal-to-or-below zero.
+	if (!n--) {
+		return NULL;
+	}
+
+	// memchr must behave as if it reads characters sequentially
+	// and stops as soon as a match is found.
+	// Aligning ensures loads beyond the first match are safe.
+	// Casting through uintptr_t makes this implementation-defined,
+	// rather than undefined behavior.
+	uintptr_t align = (uintptr_t)src % sizeof(v128_t);
+	const v128_t *v = (v128_t *)((uintptr_t)src - align);
+	const v128_t vc = wasm_i8x16_splat(c);
+
+	for (;;) {
+		const v128_t cmp = wasm_i8x16_eq(*v, vc);
+		// Bitmask is slow on AArch64, any_true is much faster.
+		if (wasm_v128_any_true(cmp)) {
+			// Clear the bits corresponding to align (little-endian)
+			// so we can count trailing zeros.
+			int mask = wasm_i8x16_bitmask(cmp) >> align << align;
+			// At least one bit will be set, unless align cleared them.
+			// Knowing this helps the compiler if it unrolls the loop.
+			__builtin_assume(mask || align);
+			// If the mask became zero because of align,
+			// it's as if we didn't find anything.
+			if (mask) {
+				// Find the offset of the first one bit (little-endian).
+				// That's a match, unless it is beyond the end of the object.
+				// Recall that we decremented n, so less-than-or-equal-to is correct.
+				size_t ctz = __builtin_ctz(mask);
+				return ctz - align <= n ? (char *)v + ctz : NULL;
+			}
+		}
+		// Decrement n; if it overflows we're done.
+		if (__builtin_sub_overflow(n, sizeof(v128_t) - align, &n)) {
+			return NULL;
+		}
+		align = 0;
+		v++;
+	}
+#endif
+
 	const unsigned char *s = src;
 	c = (unsigned char)c;
 #ifdef __GNUC__

@@ -26,6 +26,8 @@ size_t strlen(const char *s)
 			// At least one bit will be set, unless we cleared them.
 			// Knowing this helps the compiler.
 			__builtin_assume(mask || align);
+			// If the mask is zero because of alignment,
+			// it's as if we didn't find anything.
 			if (mask) {
 				// Find the offset of the first one bit (little-endian).
 				return (char *)v - s + __builtin_ctz(mask);

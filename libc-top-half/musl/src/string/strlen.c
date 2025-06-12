@@ -11,29 +11,29 @@
 size_t strlen(const char *s)
 {
 #if defined(__wasm_simd128__) && defined(__wasilibc_simd_string)
-  // strlen must stop as soon as it finds the terminator.
-  // Aligning ensures loads beyond the terminator are safe.
-  uintptr_t align = (uintptr_t)s % sizeof(v128_t);
-  const v128_t *v = (v128_t *)(s - align);
+	// strlen must stop as soon as it finds the terminator.
+	// Aligning ensures loads beyond the terminator are safe.
+	uintptr_t align = (uintptr_t)s % sizeof(v128_t);
+	const v128_t *v = (v128_t *)(s - align);
 
-  for (;;) {
-    // Bitmask is slow on AArch64, all_true is much faster.
-    if (!wasm_i8x16_all_true(*v)) {
-      const v128_t cmp = wasm_i8x16_eq(*v, (v128_t){});
-      // Clear the bits corresponding to alignment (little-endian)
-      // so we can count trailing zeros.
-      int mask = wasm_i8x16_bitmask(cmp) >> align << align;
-      // At least one bit will be set, unless we cleared them.
-      // Knowing this helps the compiler.
-      __builtin_assume(mask || align);
-      if (mask) {
-        // Find the offset of the first one bit (little-endian).
-        return (char *)v - s + __builtin_ctz(mask);
-      }
-    }
-    align = 0;
-    v++;
-  }
+	for (;;) {
+		// Bitmask is slow on AArch64, all_true is much faster.
+		if (!wasm_i8x16_all_true(*v)) {
+			const v128_t cmp = wasm_i8x16_eq(*v, (v128_t){});
+			// Clear the bits corresponding to alignment (little-endian)
+			// so we can count trailing zeros.
+			int mask = wasm_i8x16_bitmask(cmp) >> align << align;
+			// At least one bit will be set, unless we cleared them.
+			// Knowing this helps the compiler.
+			__builtin_assume(mask || align);
+			if (mask) {
+				// Find the offset of the first one bit (little-endian).
+				return (char *)v - s + __builtin_ctz(mask);
+			}
+		}
+		align = 0;
+		v++;
+	}
 #endif
 
 	const char *a = s;

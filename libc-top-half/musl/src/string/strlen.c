@@ -1,7 +1,10 @@
 #include <string.h>
 #include <stdint.h>
 #include <limits.h>
+
+#ifdef __wasm_simd128__
 #include <wasm_simd128.h>
+#endif
 
 #define ALIGN (sizeof(size_t))
 #define ONES ((size_t)-1/UCHAR_MAX)

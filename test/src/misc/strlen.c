@@ -1,7 +1,5 @@
 //! add-flags.py(LDFLAGS): -Wl,--stack-first -Wl,--initial-memory=327680
 
-static char *const LIMIT = (char *)327680;
-
 #include <__macro_PAGESIZE.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -15,6 +13,8 @@ void test(char *ptr, size_t want) {
 }
 
 int main(void) {
+  char *const LIMIT = (char *)(__builtin_wasm_memory_size(0) * PAGESIZE);
+
   for (size_t length = 0; length < 64; length++) {
     for (size_t alignment = 0; alignment < 24; alignment++) {
       char *ptr = LIMIT - PAGESIZE + alignment;

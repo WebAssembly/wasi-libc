@@ -110,6 +110,15 @@ jobs:
               TARGET_TRIPLE: wasm32-wasip1-threads
               THREAD_MODEL: posix
 
+          - name: Test SIMD
+            os: ubuntu-24.04
+            clang_version: 16
+            test: true
+            upload: wasm32-wasi
+            env:
+              MAKE_TARGETS: "no-check-symbols"
+              EXTRA_CFLAGS: "-O2 -DNDEBUG -msimd128 -mrelaxed-simd -mbulk-memory -D__wasilibc_simd_string"
+
     steps:
     - uses: actions/checkout@v4.1.7
       with:

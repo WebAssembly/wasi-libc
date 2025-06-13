@@ -808,10 +808,12 @@ $(DUMMY_LIBS):
 	    $(AR) crs "$$lib"; \
 	done
 
-finish: $(STARTUP_FILES) libc $(DUMMY_LIBS)
+no-check-symbols: $(STARTUP_FILES) libc $(DUMMY_LIBS)
 	#
 	# The build succeeded! The generated sysroot is in $(SYSROOT).
 	#
+
+finish: no-check-symbols
 
 ifeq ($(LTO),no)
 # The check for defined and undefined symbols expects there to be a heap
@@ -1033,4 +1035,4 @@ clean:
 	$(RM) -r "$(OBJDIR)"
 	$(RM) -r "$(SYSROOT)"
 
-.PHONY: default libc libc_so finish install clean check-symbols bindings
+.PHONY: default libc libc_so finish install clean check-symbols no-check-symbols bindings

@@ -17,7 +17,7 @@ int main(void) {
 
   for (size_t length = 0; length < 64; length++) {
     for (size_t alignment = 0; alignment < 24; alignment++) {
-      char *ptr = LIMIT - PAGESIZE + alignment;
+      char *ptr = LIMIT - PAGESIZE - 8 + alignment;
       memset(LIMIT - 2 * PAGESIZE, 0, 2 * PAGESIZE);
       memset(ptr, 5, length);
       test(ptr, length);

@@ -1143,3 +1143,59 @@ __wasi_errno_t __wasi_dlsym(
     return (uint16_t) ret;
 }
 
+int32_t __imported_wasix_32v1_call_dynamic(int32_t arg0, int32_t arg1, int32_t arg2) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("call_dynamic")
+));
+
+__wasi_errno_t __wasi_call_dynamic(
+    __wasi_function_pointer_t function_id,
+    uint8_t * values,
+    uint8_t * results
+){
+    int32_t ret = __imported_wasix_32v1_call_dynamic((int32_t) function_id, (int32_t) values, (int32_t) results);
+    return (uint16_t) ret;
+}
+
+int32_t __imported_wasix_32v1_closure_prepare(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4, int32_t arg5, int32_t arg6) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("closure_prepare")
+));
+
+__wasi_errno_t __wasi_closure_prepare(
+    __wasi_function_pointer_t backing_function_id,
+    __wasi_function_pointer_t closure_id,
+    const __wasi_wasm_parameter_type_t *argument_types,
+    size_t argument_types_len,
+    const __wasi_wasm_parameter_type_t *result_types,
+    size_t result_types_len,
+    uint8_t * user_data_ptr
+){
+    int32_t ret = __imported_wasix_32v1_closure_prepare((int32_t) backing_function_id, (int32_t) closure_id, (intptr_t) argument_types, (intptr_t) argument_types_len, (intptr_t) result_types, (intptr_t) result_types_len, (int32_t) user_data_ptr);
+    return (uint16_t) ret;
+}
+
+int32_t __imported_wasix_32v1_closure_allocate(int32_t arg0) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("closure_allocate")
+));
+
+__wasi_errno_t __wasi_closure_allocate(
+    __wasi_function_pointer_t *retptr0
+){
+    int32_t ret = __imported_wasix_32v1_closure_allocate((intptr_t) retptr0);
+    return (uint16_t) ret;
+}
+
+int32_t __imported_wasix_32v1_closure_free(int32_t arg0) __attribute__((
+    __import_module__("wasix_32v1"),
+    __import_name__("closure_free")
+));
+
+__wasi_errno_t __wasi_closure_free(
+    __wasi_function_pointer_t closure_id
+){
+    int32_t ret = __imported_wasix_32v1_closure_free((int32_t) closure_id);
+    return (uint16_t) ret;
+}
+

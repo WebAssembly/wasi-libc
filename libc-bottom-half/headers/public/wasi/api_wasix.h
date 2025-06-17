@@ -3757,6 +3757,45 @@ typedef uint32_t __wasi_dl_flags_t;
 #define __WASI_DL_FLAGS_DEEPBIND ((__wasi_dl_flags_t)+(1 << 5))
 
 /**
+ * A function pointer into the __indirect function table.
+ */
+typedef __wasi_uint_t __wasi_function_pointer_t;
+
+_Static_assert(sizeof(__wasi_function_pointer_t) == 4, "witx calculated size");
+_Static_assert(_Alignof(__wasi_function_pointer_t) == 4, "witx calculated align");
+
+/**
+ * The parameters of a function
+ */
+typedef uint8_t __wasi_wasm_parameter_type_t;
+
+/**
+ * A i32 parameter.
+ */
+#define __WASI_WASM_PARAMETER_TYPE_I32 (UINT8_C(0))
+
+/**
+ * A i64 parameter.
+ */
+#define __WASI_WASM_PARAMETER_TYPE_I64 (UINT8_C(1))
+
+/**
+ * A f32 parameter.
+ */
+#define __WASI_WASM_PARAMETER_TYPE_F32 (UINT8_C(2))
+
+/**
+ * A f64 parameter.
+ */
+#define __WASI_WASM_PARAMETER_TYPE_F64 (UINT8_C(3))
+
+_Static_assert(sizeof(__wasi_wasm_parameter_type_t) == 1, "witx calculated size");
+_Static_assert(_Alignof(__wasi_wasm_parameter_type_t) == 1, "witx calculated align");
+
+/**
+ * A list of WASM parameter types.
+ */
+/**
  * @defgroup wasix_32v1
  * @{
  */
@@ -4981,6 +5020,94 @@ __wasi_errno_t __wasi_dlsym(
     uint8_t * err_buf,
     __wasi_size_t err_buf_len,
     __wasi_size_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Call a function pointer with dynamic parameters.
+ */
+__wasi_errno_t __wasi_call_dynamic(
+    /**
+     * An index into the __indirect_function_table
+     * 
+     * Your module needs to either import or export the table to be able
+     * to call this function.
+     */
+    __wasi_function_pointer_t function_id,
+    /**
+     * A buffer with the parameters to pass to the function.
+     * This buffer is expected to contain all parameters sequentially
+     * 
+     * For example if the function takes an i32 and an i64, the
+     * buffer will be 12 bytes long, with the first 4 bytes
+     * being the i32 and the next 8 bytes being the i64.
+     */
+    uint8_t * values,
+    /**
+     * A pointer to a buffer for the results of the function call.
+     * 
+     * In most cases this will be a single value, but it could also
+     * contain multiple values. The same rules apply as for the
+     * parameters, i.e. the buffer needs to be large enough
+     * to hold all the results sequentially.
+     */
+    uint8_t * results
+) __attribute__((__warn_unused_result__));
+/**
+ * Prepare a closure for execution.
+ */
+__wasi_errno_t __wasi_closure_prepare(
+    /**
+     * A index into the indirect function table that points to the function that will be called when the closure is executed.
+     * 
+     * That function needs to conform to the following signature:
+     *   uint8_t* values - a pointer to a buffer containing the arguments. See call_dynamic for more details.
+     *   uint8_t* results - a pointer to a buffer where the results will be written. See call_dynamic for more details.
+     *   void* user_data_ptr - the user_data_ptr that was passed to closure_prepare
+     */
+    __wasi_function_pointer_t backing_function_id,
+    /**
+     * An index into the indirect function table that was previously allocated with closure_alloc
+     * 
+     * After closure_prepare the slot in the indirect function table will contain a funcref to a closure with the requested signature.
+     * Every call to the closure will be translated to a call to the backing function.
+     */
+    __wasi_function_pointer_t closure_id,
+    /**
+     * A list of types of the arguments that the closure will take.
+     */
+    const __wasi_wasm_parameter_type_t *argument_types,
+    /**
+     * The length of the array pointed to by `argument_types`.
+     */
+    size_t argument_types_len,
+    /**
+     * A list of types that the closure will return.
+     */
+    const __wasi_wasm_parameter_type_t *result_types,
+    /**
+     * The length of the array pointed to by `result_types`.
+     */
+    size_t result_types_len,
+    /**
+     * A pointer to a buffer that will be passed to the closure when it is executed.
+     */
+    uint8_t * user_data_ptr
+) __attribute__((__warn_unused_result__));
+/**
+ * Allocate a closure for use with the closure_prepare function.
+ */
+__wasi_errno_t __wasi_closure_allocate(
+    __wasi_function_pointer_t *retptr0
+) __attribute__((__warn_unused_result__));
+/**
+ * Free a closure that was previously allocated with closure_allocate.
+ * 
+ * After this call it is undefined what happens when you call the funcref at the index specified by closure_id.
+ */
+__wasi_errno_t __wasi_closure_free(
+    /**
+     * An index into the indirect function table that was previously allocated with closure_allocate
+     */
+    __wasi_function_pointer_t closure_id
 ) __attribute__((__warn_unused_result__));
 /** @} */
 

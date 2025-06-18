@@ -538,9 +538,8 @@ post-finish: finish
 ifeq ($(TARGET_TRIPLE), wasm32-wasi)
 	cd $(SYSROOT_LIB) && \
 	mv libc.a libc-old.a && \
-    cp $(CURDIR)/libclang_rt.builtins-wasm32.a . && \
 	$(AR) -M < $(CURDIR)/tools/append-builtins/$(TARGET_TRIPLE).mri && \
-	rm libc-old.a libclang_rt.builtins-wasm32.a
+	rm libc-old.a
 endif
 
 	rm -f sysroot/lib/wasm32-wasi/libc-printscan-log-double.a
@@ -558,9 +557,11 @@ $(SYSROOT_LIB)/libwasi-emulated-process-clocks.a: $(LIBWASI_EMULATED_PROCESS_CLO
 
 $(SYSROOT_LIB)/libwasi-emulated-getpid.a: $(LIBWASI_EMULATED_GETPID_OBJS)
 
+ifeq ($(PIC), yes)
 $(SYSROOT_LIB)/libcommon-tag-stubs.a: libcommon-tag-stubs.a
 	mkdir -p "$(SYSROOT_LIB)"
 	cp libcommon-tag-stubs.a $@
+endif
 
 %.a:
 	@mkdir -p "$(@D)"
@@ -785,9 +786,10 @@ install: finish
 	cp -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"
 
 clean:
-	$(RM) -r "$(OBJDIR)"
+	$(RM) -r build
 	$(RM) -r "$(SYSROOT)"
-	$(RM) -r "$(SYSROOT)32"
-	$(RM) -r "$(SYSROOT)64"
+
+clean-all: clean
+	$(RM) -r "$(SYSROOT)"*
 
 .PHONY: default startup_files libc finish install include_dirs clean

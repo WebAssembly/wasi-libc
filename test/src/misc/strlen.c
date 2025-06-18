@@ -17,15 +17,20 @@ int main(void) {
 
   for (size_t length = 0; length < 64; length++) {
     for (size_t alignment = 0; alignment < 24; alignment++) {
+      // Create a string with the given length, at a pointer with the given
+      // aligment. Using the offset LIMIT - PAGESIZE - 8 means many strings will
+      // straddle a (Wasm, and likely OS) page boundary.
       char *ptr = LIMIT - PAGESIZE - 8 + alignment;
       memset(LIMIT - 2 * PAGESIZE, 0, 2 * PAGESIZE);
       memset(ptr, 5, length);
       test(ptr, length);
 
+      // Make sure we're not fooled by non-zero characters prior to the string.
       ptr[-1] = 5;
       test(ptr, length);
     }
 
+    // Ensure we never read past the end of memory.
     char *ptr = LIMIT - length - 1;
     memset(LIMIT - 2 * PAGESIZE, 0, 2 * PAGESIZE);
     memset(ptr, 5, length);

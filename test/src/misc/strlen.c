@@ -1,7 +1,6 @@
 //! add-flags.py(LDFLAGS): -Wl,--stack-first -Wl,--initial-memory=327680
 
 #include <__macro_PAGESIZE.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -18,8 +17,8 @@ int main(void) {
   for (size_t length = 0; length < 64; length++) {
     for (size_t alignment = 0; alignment < 24; alignment++) {
       // Create a string with the given length, at a pointer with the given
-      // aligment. Using the offset LIMIT - PAGESIZE - 8 means many strings will
-      // straddle a (Wasm, and likely OS) page boundary.
+      // alignment. Using the offset LIMIT - PAGESIZE - 8 means many strings
+      // will straddle a (Wasm, and likely OS) page boundary.
       char *ptr = LIMIT - PAGESIZE - 8 + alignment;
       memset(LIMIT - 2 * PAGESIZE, 0, 2 * PAGESIZE);
       memset(ptr, 5, length);

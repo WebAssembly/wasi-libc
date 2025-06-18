@@ -142,14 +142,6 @@ jobs:
         export LDFLAGS="-resource-dir $(pwd)/resource-dir"
         make test
 
-    # - uses: actions/upload-artifact@v4.4.0
-    #   with:
-    #     # Upload the sysroot folder. To avoid action erros, we give it a unique
-    #     # name using the OS it was built for and the Clang version it was built
-    #     # with.
-    #     name: ${{ format( 'sysroot-{0}-clang-{1}.tgz', matrix.os, matrix.clang_version) }}
-    #     path: sysroot
-
   # Disable the headerstest job for now, while WASI transitions from the
   # witx snapshots to wit proposals, and we have a few manual edits to the
   # generated header to make life easier for folks.

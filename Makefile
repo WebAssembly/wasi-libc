@@ -47,23 +47,21 @@ BULK_MEMORY_THRESHOLD ?= 32
 # make command-line.
 
 # Set the default WASI target triple.
-TARGET_TRIPLE = wasm32-wasi
+TARGET_TRIPLE ?= wasm32-wasi
 
 # Threaded version necessitates a different target, as objects from different
 # targets can't be mixed together while linking.
 ifeq ($(THREAD_MODEL), posix)
-TARGET_TRIPLE = wasm32-wasi-threads
+TARGET_TRIPLE ?= wasm32-wasi-threads
 endif
 
 ifeq ($(WASI_SNAPSHOT), p2)
-TARGET_TRIPLE = wasm32-wasip2
+TARGET_TRIPLE ?= wasm32-wasip2
 endif
 
 # These artifacts are "stamps" that we use to mark that some task (e.g., copying
 # files) has been completed.
 INCLUDE_DIRS := $(OBJDIR)/copy-include-headers.stamp
-
-BUILTINS_LIB ?= $(shell ${CC} ${CFLAGS} --print-libgcc-file-name)
 
 # These variables describe the locations of various files and directories in
 # the source tree.
@@ -557,6 +555,12 @@ PIC_OBJS = \
 	$(LIBC_BOTTOM_HALF_CRT_OBJS) \
 	$(FTS_SO_OBJS)
 
+SYSTEM_BUILTINS_LIB := $(shell ${CC} ${CFLAGS} --print-libgcc-file-name)
+SYSTEM_RESOURCE_DIR := $(shell ${CC} ${CFLAGS} -print-resource-dir)
+BUILTINS_LIB_REL := $(subst $(SYSTEM_RESOURCE_DIR),,$(SYSTEM_BUILTINS_LIB))
+RESOURCE_DIR := $(OBJDIR)/resource-dir
+BUILTINS_LIB ?= $(RESOURCE_DIR)/$(BUILTINS_LIB_REL)
+
 # TODO: Specify SDK version, e.g. libc.so.wasi-sdk-21, as SO_NAME once `wasm-ld`
 # supports it.
 #
@@ -572,13 +576,15 @@ $(SYSROOT_LIB)/libc.so: $(OBJDIR)/libc.so.a $(BUILTINS_LIB)
 	$(CC) $(EXTRA_CFLAGS) --target=${TARGET_TRIPLE} -nodefaultlibs \
 	-shared --sysroot=$(SYSROOT) \
 	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB) \
-	-Wl,--allow-undefined-file=linker-provided-symbols.txt
+	-Wl,--allow-undefined-file=linker-provided-symbols.txt \
+	-resource-dir $(RESOURCE_DIR)
 
 $(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(SYSROOT_LIB)/libc.so
 	$(CC) $(EXTRA_CFLAGS) --target=${TARGET_TRIPLE} \
 	-shared --sysroot=$(SYSROOT) \
 	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive \
-	-Wl,--allow-undefined-file=linker-provided-symbols.txt
+	-Wl,--allow-undefined-file=linker-provided-symbols.txt \
+	-resource-dir $(RESOURCE_DIR)
 
 $(OBJDIR)/libc.so.a: $(LIBC_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS)
 

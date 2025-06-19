@@ -64,6 +64,9 @@ int __wasilibc_rename_oldat(int olddirfd, const char *oldpath, const char *newpa
 int __wasilibc_rename_newat(const char *oldpath, int newdirfd, const char *newpath)
     __attribute__((__warn_unused_result__));
 
+/// Enable busywait in futex on current thread.
+void __wasilibc_enable_futex_busywait_on_current_thread(void);
+
 #ifdef __cplusplus
 }
 #endif

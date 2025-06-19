@@ -4,6 +4,9 @@
 #endif
 
 #ifndef __wasilibc_unmodified_upstream
+
+weak int __wasilibc_futex_wait_maybe_busy(volatile void *addr, int op, int val, int64_t max_wait_ns);
+
 // Use WebAssembly's `wait` instruction to implement a futex. Note that `op` is
 // unused but retained as a parameter to match the original signature of the
 // syscall and that, for `max_wait_ns`, -1 (or any negative number) means wait
@@ -11,12 +14,8 @@
 //
 // Adapted from Emscripten: see
 // https://github.com/emscripten-core/emscripten/blob/058a9fff/system/lib/pthread/emscripten_futex_wait.c#L111-L150.
-int __wasilibc_futex_wait(volatile void *addr, int op, int val, int64_t max_wait_ns)
+int __wasilibc_futex_wait_atomic_wait(volatile void *addr, int op, int val, int64_t max_wait_ns)
 {
-    if ((((intptr_t)addr) & 3) != 0) {
-        return -EINVAL;
-    }
-
     int ret = __builtin_wasm_memory_atomic_wait32((int *)addr, val, max_wait_ns);
 
     // memory.atomic.wait32 returns:
@@ -31,6 +30,18 @@ int __wasilibc_futex_wait(volatile void *addr, int op, int val, int64_t max_wait
     }
     assert(ret == 0);
     return 0;
+}
+
+int __wasilibc_futex_wait(volatile void *addr, int op, int val, int64_t max_wait_ns)
+{
+    if ((((intptr_t)addr) & 3) != 0) {
+        return -EINVAL;
+    }
+
+    if (__wasilibc_futex_wait_maybe_busy) {
+        return __wasilibc_futex_wait_maybe_busy(addr, op, val, max_wait_ns);
+    }
+    return __wasilibc_futex_wait_atomic_wait(addr, op, val, max_wait_ns);
 }
 #endif
 

@@ -2,164 +2,162 @@ name: CI
 on: [push, pull_request]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   buildlibc:
-    name: Build libc
+    name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    env: ${{ matrix.env || fromJSON('{}') }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-15, windows-2025]
-        clang_version: [10.0.0]
-        # use different LLVM versions among oses because of the lack of
-        # official assets on github.
         include:
-          - os: ubuntu-22.04
-            clang_version: 10.0.0
-            llvm_asset_suffix: x86_64-linux-gnu-ubuntu-18.04
-          - os: macos-15
-            clang_version: 10.0.0
-            llvm_asset_suffix: x86_64-apple-darwin
-          - os: windows-2025
-            clang_version: 10.0.0
-          - os: ubuntu-22.04
-            clang_version: 16.0.0
-            llvm_asset_suffix: x86_64-linux-gnu-ubuntu-18.04
-            enable_pic: true
-          - os: macos-15
+          # Test a number of operating systems and architectures to make sure
+          # wasi-libc builds on these platforms by default.
+          - name: Build on Linux x86_64
+            os: ubuntu-24.04
+            clang_version: 16
+            upload: linux-x86_64-clang-16
+          - name: Build on Linux aarch64
+            os: ubuntu-24.04-arm
+            clang_version: 16
+            upload: linux-aarch64-clang-16
+          - name: Build on macOS aarch64
+            os: macos-15
             clang_version: 15.0.7
-            llvm_asset_suffix: x86_64-apple-darwin21.0
-          - os: windows-2025
+            llvm_asset_suffix: arm64-apple-darwin22.0
+            upload: macos-clang-15
+          - name: Build on Windows x86_64
+            os: windows-2025
             clang_version: 16.0.0
-            enable_pic: true
-          - os: ubuntu-24.04-arm
-            clang_version: 16.0.0
-            llvm_asset_suffix: aarch64-linux-gnu
-            enable_pic: true
-            
+            upload: windows-clang-16
+
+          # Historical versions of LLVM (11.0.0 currently)
+          - name: Build with LLVM 11
+            os: ubuntu-22.04
+            clang_version: 11
+            upload: linux-x86_64-clang-11
+            env:
+              BUILD_LIBSETJMP: no
+
+          # Test various combinations of targets triples.
+          #
+          # Configuration here can happen through `env` which is inherited to
+          # jobs below. For now this only runs tests on Linux with Clang 16,
+          # but that can be expanded as necessary in the future too. Note that
+          # some targets run the build for the `libc_so` makefile target to
+          # ensure the PIC build works.
+          - name: Test wasm32-wasi
+            os: ubuntu-24.04
+            clang_version: 16
+            test: true
+            upload: wasm32-wasi
+            env:
+              TARGET_TRIPLE: wasm32-wasi
+              MAKE_TARGETS: "default libc_so"
+          - name: Test wasm32-wasip1
+            os: ubuntu-24.04
+            clang_version: 16
+            test: true
+            upload: wasm32-wasip1
+            env:
+              TARGET_TRIPLE: wasm32-wasip1
+              MAKE_TARGETS: "default libc_so"
+          - name: Test wasm32-wasip2
+            os: ubuntu-24.04
+            clang_version: 16
+            test: true
+            upload: wasm32-wasip2
+            env:
+              TARGET_TRIPLE: wasm32-wasip2
+              WASI_SNAPSHOT: p2
+              MAKE_TARGETS: "default libc_so"
+          - name: Test wasm32-wasi-threads
+            os: ubuntu-24.04
+            clang_version: 16
+            test: true
+            upload: wasm32-wasi-threads
+            env:
+              TARGET_TRIPLE: wasm32-wasi-threads
+              THREAD_MODEL: posix
+          - name: Test wasm32-wasip1-threads
+            os: ubuntu-24.04
+            clang_version: 16
+            test: true
+            upload: wasm32-wasip1-threads
+            env:
+              TARGET_TRIPLE: wasm32-wasip1-threads
+              THREAD_MODEL: posix
+          - name: Test wasm32-wasip1 in V8
+            os: ubuntu-24.04
+            clang_version: 16
+            test: true
+            test_with_v8: true
+            env:
+              TARGET_TRIPLE: wasm32-wasip1
+          - name: Test wasm32-wasip1-threads in V8
+            os: ubuntu-24.04
+            clang_version: 16
+            test: true
+            test_with_v8: true
+            env:
+              TARGET_TRIPLE: wasm32-wasip1-threads
+              THREAD_MODEL: posix
+
     steps:
     - uses: actions/checkout@v4.1.7
       with:
         submodules: true
 
-    - name: Install libtinfo5
-      run: |
-        set -ex
-        sudo apt-get update
-        sudo apt-get install -y libtinfo5
-      if: startsWith(matrix.os, 'ubuntu-22')
-
-    - name: Install LLVM tools (Windows)
-      shell: bash
-      run: |
-        curl -fsSLO https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/LLVM-${{ matrix.clang_version }}-win64.exe
-        7z x LLVM-${{ matrix.clang_version }}-win64.exe -y -o"llvm"
-        echo "$(pwd)/llvm/bin" >> $GITHUB_PATH
-        echo "CC=$(pwd)/llvm/bin/clang.exe" >> $GITHUB_ENV
-        echo "AR=$(pwd)/llvm/bin/llvm-ar.exe" >> $GITHUB_ENV
-        echo "NM=$(pwd)/llvm/bin/llvm-nm.exe" >> $GITHUB_ENV
-      if: matrix.os == 'windows-2025'
-
-    - name: Override llvm-nm with one from rustup (Windows)
-      run: |
-        rustup update stable
-        rustup default stable
-        rustup component add llvm-tools-preview
-        echo "NM=$(rustc --print sysroot|sed 's|C:|/c|'|sed 's|\\|/|g')/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-nm.exe" >> $GITHUB_ENV
-      if: matrix.os == 'windows-2025'
-
-    - name: Install LLVM tools (MacOS)
-      shell: bash
-      run: |
-        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/clang+llvm-${{ matrix.clang_version }}-${{ matrix.llvm_asset_suffix }}.tar.xz | tar xJf -
-        export CLANG_DIR=`pwd`/clang+llvm-${{ matrix.clang_version }}-${{ matrix.llvm_asset_suffix }}/bin
-        echo "$CLANG_DIR" >> $GITHUB_PATH
-        echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
-        echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
-        echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
-      if: matrix.os == 'macos-15'
-
-    - name: Install LLVM tools (Linux)
-      shell: bash
-      run: |
-        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ matrix.clang_version }}/clang+llvm-${{ matrix.clang_version }}-${{ matrix.llvm_asset_suffix }}.tar.xz | tar xJf -
-        export CLANG_DIR=`pwd`/clang+llvm-${{ matrix.clang_version }}-${{ matrix.llvm_asset_suffix }}/bin
-        echo "$CLANG_DIR" >> $GITHUB_PATH
-        echo "CLANG_DIR=$CLANG_DIR" >> $GITHUB_ENV
-        echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
-        echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
-        echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
-      if: startsWith(matrix.os, 'ubuntu-')
-
-    - name: Disable libsetjmp for old LLVM
-      shell: bash
-      run: |
-        echo "BUILD_LIBSETJMP=no" >> $GITHUB_ENV
-      if: matrix.clang_version == '10.0.0'
-
-    - name: Enable PIC build for new LLVM
-      shell: bash
-      run: |
-        echo "MAKE_TARGETS=default libc_so" >> $GITHUB_ENV
-      if: matrix.enable_pic
+    - uses: ./.github/actions/setup
+      with:
+        clang_version: ${{ matrix.clang_version }}
+        llvm_asset_suffix: ${{ matrix.llvm_asset_suffix }}
 
     - name: Build libc
-      shell: bash
-      run: |
-        make -j4 TARGET_TRIPLE=wasm32-wasi $MAKE_TARGETS
-        make -j4 TARGET_TRIPLE=wasm32-wasip1 $MAKE_TARGETS
-        make -j4 TARGET_TRIPLE=wasm32-wasip2 WASI_SNAPSHOT=p2 $MAKE_TARGETS
+      run: make -j4 $MAKE_TARGETS
 
-    - name: Build libc + threads
-      # Only build the thread-capable wasi-libc in the latest supported Clang
-      # version; the earliest version does not have all necessary builtins
-      # (e.g., `__builtin_wasm_memory_atomic_notify`).
-      if: matrix.clang_version != '10.0.0'
-      shell: bash
+    - name: Download Test dependencies
+      if: matrix.test
+      run: cd test && make download
+
+    - name: Install V8 dependencies
+      if: matrix.test_with_v8
       run: |
-        make -j4 THREAD_MODEL=posix TARGET_TRIPLE=wasm32-wasi-threads
-        make -j4 THREAD_MODEL=posix TARGET_TRIPLE=wasm32-wasip1-threads
+        npm -C test/scripts/browser-test install
+        npx -C test/scripts/browser-test playwright install chromium-headless-shell
+        echo ENGINE="$PWD/test/scripts/browser-test/harness.mjs" >> $GITHUB_ENV
 
     - name: Test
-      shell: bash
+      if: matrix.test
       # For Clang linking to work correctly, we need to place Clang's runtime
       # library for `wasm32-wasi` in the right location (i.e., the `mkdir` and
       # `cp` below).
       run: |
         cd test
-        make download
-        export WASI_DIR=$(realpath $($CLANG_DIR/clang -print-resource-dir)/lib/wasi/)
-        export WASIP1_DIR=$(realpath $($CLANG_DIR/clang -print-resource-dir)/lib/wasip1/)
-        export WASIP2_DIR=$(realpath $($CLANG_DIR/clang -print-resource-dir)/lib/wasip2/)
+        mkdir resource-dir
+        export WASI_DIR=./resource-dir/lib/wasi/
+        export WASIP1_DIR=./resource-dir/lib/wasip1/
+        export WASIP2_DIR=./resource-dir/lib/wasip2/
         mkdir -p $WASI_DIR $WASIP1_DIR $WASIP2_DIR
         cp build/download/libclang_rt.builtins-wasm32.a $WASI_DIR
         cp build/download/libclang_rt.builtins-wasm32.a $WASIP1_DIR
         cp build/download/libclang_rt.builtins-wasm32.a $WASIP2_DIR
-        TARGET_TRIPLE=wasm32-wasi make test
-        TARGET_TRIPLE=wasm32-wasip1 make test
-        TARGET_TRIPLE=wasm32-wasip2 make test
-        TARGET_TRIPLE=wasm32-wasi-threads make test
-        TARGET_TRIPLE=wasm32-wasip1-threads make test
-
-        npm -C scripts/browser-test install
-        npx -C scripts/browser-test playwright install chromium-headless-shell
-        ENGINE="$PWD/scripts/browser-test/harness.mjs" TARGET_TRIPLE=wasm32-wasip1 make test
-        ENGINE="$PWD/scripts/browser-test/harness.mjs" TARGET_TRIPLE=wasm32-wasip1-threads make test
-      # The older version of Clang does not provide the expected symbol for the
-      # test entrypoints: `undefined symbol: __main_argc_argv`.
-      # The older (<15.0.7) version of wasm-ld does not provide `__heap_end`,
-      # which is required by our malloc implementation.
-      if: startsWith(matrix.os, 'ubuntu-') && matrix.clang_version != '10.0.0'
+        export LDFLAGS="-resource-dir $(pwd)/resource-dir"
+        make test
 
     - uses: actions/upload-artifact@v4.4.0
+      if: matrix.upload
       with:
-        # Upload the sysroot folder. To avoid action erros, we give it a unique
-        # name using the OS it was built for and the Clang version it was built
-        # with.
-        name: ${{ format( 'sysroot-{0}-clang-{1}.tgz', matrix.os, matrix.clang_version) }}
+        name: ${{ format( 'sysroot-{0}.tgz', matrix.upload) }}
         path: sysroot
+
 
   # Disable the headerstest job for now, while WASI transitions from the
   # witx snapshots to wit proposals, and we have a few manual edits to the
@@ -176,7 +174,6 @@ jobs:
       with:
         submodules: true
     - name: Install Rust (rustup)
-      shell: bash
       run: rustup update stable --no-self-update && rustup default stable
       if: matrix.os != 'macos-15'
     - name: Install Rust (macos)

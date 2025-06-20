@@ -16,8 +16,10 @@ size_t strlen(const char *s)
 #if defined(__wasm_simd128__) && defined(__wasilibc_simd_string)
 	// strlen must stop as soon as it finds the terminator.
 	// Aligning ensures loads beyond the terminator are safe.
+	// Casting through uintptr_t makes this implementation-defined,
+	// rather than undefined behavior.
 	uintptr_t align = (uintptr_t)s % sizeof(v128_t);
-	const v128_t *v = (v128_t *)(s - align);
+	const v128_t *v = (v128_t *)((uintptr_t)s - align);
 
 	for (;;) {
 		// Bitmask is slow on AArch64, all_true is much faster.

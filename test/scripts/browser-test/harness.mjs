@@ -21,7 +21,6 @@ import { chromium } from 'playwright';
 const SKIP_TESTS = [
     // "poll_oneoff" can't be implemented in the browser
     "libc-test/functional/pthread_cond",
-    "libc-test/functional/pthread_cond_busywait",
     // atomic.wait32 can't be executed on the main thread
     "libc-test/functional/pthread_mutex",
     "libc-test/functional/pthread_tsd",

@@ -3765,35 +3765,42 @@ _Static_assert(sizeof(__wasi_function_pointer_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_function_pointer_t) == 4, "witx calculated align");
 
 /**
- * The parameters of a function
+ * The type of a WASM value represented at runtime for use with the wasix closures API.
+ * 
+ * For now only number types are supported, but this may be extended in the future to include references
  */
-typedef uint8_t __wasi_wasm_parameter_type_t;
+typedef uint8_t __wasi_wasm_value_type_t;
 
 /**
- * A i32 parameter.
+ * A i32 value.
  */
-#define __WASI_WASM_PARAMETER_TYPE_I32 (UINT8_C(0))
+#define __WASI_WASM_VALUE_TYPE_I32 (UINT8_C(0))
 
 /**
- * A i64 parameter.
+ * A i64 value.
  */
-#define __WASI_WASM_PARAMETER_TYPE_I64 (UINT8_C(1))
+#define __WASI_WASM_VALUE_TYPE_I64 (UINT8_C(1))
 
 /**
- * A f32 parameter.
+ * A f32 value.
  */
-#define __WASI_WASM_PARAMETER_TYPE_F32 (UINT8_C(2))
+#define __WASI_WASM_VALUE_TYPE_F32 (UINT8_C(2))
 
 /**
- * A f64 parameter.
+ * A f64 value.
  */
-#define __WASI_WASM_PARAMETER_TYPE_F64 (UINT8_C(3))
-
-_Static_assert(sizeof(__wasi_wasm_parameter_type_t) == 1, "witx calculated size");
-_Static_assert(_Alignof(__wasi_wasm_parameter_type_t) == 1, "witx calculated align");
+#define __WASI_WASM_VALUE_TYPE_F64 (UINT8_C(3))
 
 /**
- * A list of WASM parameter types.
+ * A v128 value.
+ */
+#define __WASI_WASM_VALUE_TYPE_V128 (UINT8_C(4))
+
+_Static_assert(sizeof(__wasi_wasm_value_type_t) == 1, "witx calculated size");
+_Static_assert(_Alignof(__wasi_wasm_value_type_t) == 1, "witx calculated align");
+
+/**
+ * A list of WASM value types.
  */
 /**
  * @defgroup wasix_32v1
@@ -5074,7 +5081,7 @@ __wasi_errno_t __wasi_closure_prepare(
     /**
      * A list of types of the arguments that the closure will take.
      */
-    const __wasi_wasm_parameter_type_t *argument_types,
+    const __wasi_wasm_value_type_t *argument_types,
     /**
      * The length of the array pointed to by `argument_types`.
      */
@@ -5082,7 +5089,7 @@ __wasi_errno_t __wasi_closure_prepare(
     /**
      * A list of types that the closure will return.
      */
-    const __wasi_wasm_parameter_type_t *result_types,
+    const __wasi_wasm_value_type_t *result_types,
     /**
      * The length of the array pointed to by `result_types`.
      */

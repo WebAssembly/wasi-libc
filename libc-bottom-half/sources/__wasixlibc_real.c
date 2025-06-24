@@ -1165,9 +1165,9 @@ int32_t __imported_wasix_32v1_closure_prepare(int32_t arg0, int32_t arg1, int32_
 __wasi_errno_t __wasi_closure_prepare(
     __wasi_function_pointer_t backing_function_id,
     __wasi_function_pointer_t closure_id,
-    const __wasi_wasm_parameter_type_t *argument_types,
+    const __wasi_wasm_value_type_t *argument_types,
     size_t argument_types_len,
-    const __wasi_wasm_parameter_type_t *result_types,
+    const __wasi_wasm_value_type_t *result_types,
     size_t result_types_len,
     uint8_t * user_data_ptr
 ){

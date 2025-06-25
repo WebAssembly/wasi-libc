@@ -114,7 +114,7 @@ jobs:
             os: ubuntu-24.04
             clang_version: 16
             test: true
-            upload: wasm32-wasi
+            upload: wasm32-wasi-simd
             env:
               MAKE_TARGETS: "no-check-symbols"
               EXTRA_CFLAGS: "-O2 -DNDEBUG -msimd128 -mrelaxed-simd -mbulk-memory -D__wasilibc_simd_string"

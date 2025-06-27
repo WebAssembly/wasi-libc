@@ -1,6 +1,7 @@
 #ifndef __wasilibc_unmodified_upstream
-#  ifdef __wasm_exception_handling__
+#include <setjmp.h>
 
+#  ifdef __wasm_exception_handling__
 /*
  * function prototypes
  */
@@ -80,7 +81,6 @@ __wasm_longjmp(void *env, int val)
 
 #  else
 
-#include <setjmp.h>
 #include <wasi/libc.h>
 
 _Noreturn void longjmp (jmp_buf buf, int val) {
@@ -91,10 +91,11 @@ int setjmp (jmp_buf buf) {
     return __wasilibc_setjmp(buf);
 }
 
-// ignoring signal masking for now
+#  endif
+
+// TODO: ignoring signal masking for now
 int sigsetjmp(jmp_buf  buf, int savesigs) {
-    return __wasilibc_setjmp(buf);
+    return setjmp(buf);
 }
 
-#  endif
 #endif

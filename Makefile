@@ -592,7 +592,6 @@ $(BUILTINS_LIB_PATH):
 	mkdir -p $(BUILTINS_LIB_DIR)
 	curl -sSfL $(BUILTINS_URL) | \
 		tar xzf - -C $(BUILTINS_LIB_DIR) --strip-components 1
-	mv $(BUILTINS_LIB_DIR)/*.a $(BUILTINS_LIB_PATH)
 endif
 
 # TODO: Specify SDK version, e.g. libc.so.wasi-sdk-21, as SO_NAME once `wasm-ld`

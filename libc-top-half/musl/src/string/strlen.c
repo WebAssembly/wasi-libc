@@ -25,13 +25,13 @@ size_t strlen(const char *s)
 		// Bitmask is slow on AArch64, all_true is much faster.
 		if (!wasm_i8x16_all_true(*v)) {
 			const v128_t cmp = wasm_i8x16_eq(*v, (v128_t){});
-			// Clear the bits corresponding to alignment (little-endian)
+			// Clear the bits corresponding to align (little-endian)
 			// so we can count trailing zeros.
 			int mask = wasm_i8x16_bitmask(cmp) >> align << align;
-			// At least one bit will be set, unless we cleared them.
-			// Knowing this helps the compiler.
+			// At least one bit will be set, unless align cleared them.
+			// Knowing this helps the compiler if it unrolls the loop.
 			__builtin_assume(mask || align);
-			// If the mask is zero because of alignment,
+			// If the mask became zero because of align,
 			// it's as if we didn't find anything.
 			if (mask) {
 				// Find the offset of the first one bit (little-endian).

@@ -110,7 +110,7 @@ jobs:
               TARGET_TRIPLE: wasm32-wasip1-threads
               THREAD_MODEL: posix
 
-          - name: Test SIMD
+          - name: Test wasm32-wasi-simd
             os: ubuntu-24.04
             clang_version: 16
             test: true

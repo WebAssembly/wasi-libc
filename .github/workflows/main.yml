@@ -38,13 +38,25 @@ jobs:
             clang_version: 16.0.0
             upload: windows-clang-16
 
-          # Historical versions of LLVM (11.0.0 currently)
+          # Other versions of LLVM
           - name: Build with LLVM 11
             os: ubuntu-22.04
             clang_version: 11
             upload: linux-x86_64-clang-11
             env:
               BUILD_LIBSETJMP: no
+          - name: Build with LLVM 19
+            os: ubuntu-24.04
+            clang_version: 19
+            upload: linux-x86_64-clang-19
+            env:
+              MAKE_TARGETS: "default libc_so"
+          - name: Build with LLVM 18
+            os: ubuntu-24.04
+            clang_version: 18
+            upload: linux-x86_64-clang-18
+            env:
+              MAKE_TARGETS: "default libc_so"
 
           # Test various combinations of targets triples.
           #

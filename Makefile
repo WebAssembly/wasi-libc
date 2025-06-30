@@ -556,11 +556,44 @@ PIC_OBJS = \
 	$(LIBC_BOTTOM_HALF_CRT_OBJS) \
 	$(FTS_SO_OBJS)
 
+# Figure out what to do about compiler-rt.
+#
+# The compiler-rt library is not built here in the wasi-libc repository, but it
+# is required to link artifacts. Notably `libc.so` and test and such all require
+# it to exist. Currently the ways this is handled are:
+#
+# * If `BUILTINS_LIB` is defined at build time then that's assumed to be a path
+#   to the libcompiler-rt.a. That's then ingested into the build here and copied
+#   around to special locations to get the `*.so` rules below to work (see docs
+#   there).
+#
+# * If `BUILTINS_LIB` is not defined then a known-good copy is downloaded from
+#   wasi-sdk CI and used instead.
+#
+# In the future this may also want some form of configuration to support
+# assuming the system compiler has a compiler-rt, e.g. if $(SYSTEM_BUILTINS_LIB)
+# exists that should be used instead.
 SYSTEM_BUILTINS_LIB := $(shell ${CC} ${CFLAGS} --print-libgcc-file-name)
 SYSTEM_RESOURCE_DIR := $(shell ${CC} ${CFLAGS} -print-resource-dir)
 BUILTINS_LIB_REL := $(subst $(SYSTEM_RESOURCE_DIR),,$(SYSTEM_BUILTINS_LIB))
-RESOURCE_DIR := $(OBJDIR)/resource-dir
-BUILTINS_LIB ?= $(RESOURCE_DIR)/$(BUILTINS_LIB_REL)
+TMP_RESOURCE_DIR := $(OBJDIR)/resource-dir
+BUILTINS_LIB_PATH := $(TMP_RESOURCE_DIR)/$(BUILTINS_LIB_REL)
+BUILTINS_LIB_DIR := $(dir $(BUILTINS_LIB_PATH))
+
+ifneq ($(BUILTINS_LIB),)
+$(BUILTINS_LIB_PATH): $(BUILTINS_LIB)
+	mkdir -p $(BUILTINS_LIB_DIR)
+	cp $(BUILTINS_LIB) $(BUILTINS_LIB_PATH)
+else
+
+BUILTINS_URL := https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-25/libclang_rt.builtins-wasm32-wasi-25.0.tar.gz
+
+$(BUILTINS_LIB_PATH):
+	mkdir -p $(BUILTINS_LIB_DIR)
+	curl -sSfL $(BUILTINS_URL) | \
+		tar xzf - -C $(BUILTINS_LIB_DIR) --strip-components 1
+	mv $(BUILTINS_LIB_DIR)/*.a $(BUILTINS_LIB_PATH)
+endif
 
 # TODO: Specify SDK version, e.g. libc.so.wasi-sdk-21, as SO_NAME once `wasm-ld`
 # supports it.
@@ -570,22 +603,34 @@ BUILTINS_LIB ?= $(RESOURCE_DIR)/$(BUILTINS_LIB_REL)
 # to CC.  This is a workaround for a Windows command line size limitation.  See
 # the `%.a` rule below for details.
 
-# Note: libc.so is special because it shouldn't link to libc.so.
+# Note: libc.so is special because it shouldn't link to libc.so, and the
+# -nodefaultlibs flag here disables the default `-lc` logic that clang
+# has. Note though that this also disables linking of compiler-rt
+# libraries so that is explicitly passed in via `$(BUILTINS_LIB_PATH)`
+#
 # Note: --allow-undefined-file=linker-provided-symbols.txt is
 # a workaround for https://github.com/llvm/llvm-project/issues/103592
-$(SYSROOT_LIB)/libc.so: $(OBJDIR)/libc.so.a $(BUILTINS_LIB)
-	$(CC) $(EXTRA_CFLAGS) --target=${TARGET_TRIPLE} -nodefaultlibs \
-	-shared --sysroot=$(SYSROOT) \
-	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB) \
-	-Wl,--allow-undefined-file=linker-provided-symbols.txt \
-	-resource-dir $(RESOURCE_DIR)
-
-$(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(SYSROOT_LIB)/libc.so
-	$(CC) $(EXTRA_CFLAGS) --target=${TARGET_TRIPLE} \
+$(SYSROOT_LIB)/libc.so: $(OBJDIR)/libc.so.a $(BUILTINS_LIB_PATH)
+	$(CC) --target=${TARGET_TRIPLE} -nodefaultlibs \
 	-shared --sysroot=$(SYSROOT) \
 	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive \
 	-Wl,--allow-undefined-file=linker-provided-symbols.txt \
-	-resource-dir $(RESOURCE_DIR)
+	$(BUILTINS_LIB_PATH) \
+	$(EXTRA_CFLAGS) $(LDFLAGS)
+
+# Note that unlike `libc.so` above this rule does not pass `-nodefaultlibs`
+# which means that libc will be linked by default. Additionally clang will try
+# to find, locate, and link compiler-rt. To get compiler-rt to work a
+# `-resource-dir` argument is passed to ensure that our custom
+# `TMP_RESOURCE_DIR` built here locally is used instead of the system directory
+# which may or may not already have compiler-rt.
+$(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(SYSROOT_LIB)/libc.so
+	$(CC) --target=${TARGET_TRIPLE} \
+	-shared --sysroot=$(SYSROOT) \
+	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive \
+	-Wl,--allow-undefined-file=linker-provided-symbols.txt \
+	-resource-dir $(TMP_RESOURCE_DIR) \
+	$(EXTRA_CFLAGS) $(LDFLAGS)
 
 $(OBJDIR)/libc.so.a: $(LIBC_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS)
 

@@ -157,21 +157,7 @@ jobs:
 
     - name: Test
       if: matrix.test
-      # For Clang linking to work correctly, we need to place Clang's runtime
-      # library for `wasm32-wasi` in the right location (i.e., the `mkdir` and
-      # `cp` below).
-      run: |
-        cd test
-        mkdir resource-dir
-        export WASI_DIR=./resource-dir/lib/wasi/
-        export WASIP1_DIR=./resource-dir/lib/wasip1/
-        export WASIP2_DIR=./resource-dir/lib/wasip2/
-        mkdir -p $WASI_DIR $WASIP1_DIR $WASIP2_DIR
-        cp build/download/libclang_rt.builtins-wasm32.a $WASI_DIR
-        cp build/download/libclang_rt.builtins-wasm32.a $WASIP1_DIR
-        cp build/download/libclang_rt.builtins-wasm32.a $WASIP2_DIR
-        export LDFLAGS="-resource-dir $(pwd)/resource-dir"
-        make test
+      run: make -C test test
 
     - uses: actions/upload-artifact@v4.4.0
       if: matrix.upload

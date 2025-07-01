@@ -597,6 +597,8 @@ $(BUILTINS_LIB_PATH):
 	fi
 endif
 
+builtins: $(BUILTINS_LIB_PATH)
+
 # TODO: Specify SDK version, e.g. libc.so.wasi-sdk-21, as SO_NAME once `wasm-ld`
 # supports it.
 #

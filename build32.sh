@@ -43,6 +43,7 @@ cmake \
     -DUNIX:BOOL=ON \
     ../../tools/llvm-project/compiler-rt
 cmake --build . --target install --parallel 16
+llvm-ranlib ../../sysroot/lib/wasm32-wasi/libclang_rt.builtins-wasm32.a
 cd ../..
 
 # Build the extensions

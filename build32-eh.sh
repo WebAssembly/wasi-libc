@@ -40,8 +40,6 @@ cmake \
     -DCMAKE_TOOLCHAIN_FILE=$(pwd)/../../tools/clang-wasix.cmake_toolchain \
     -DCMAKE_SYSROOT=$(pwd)/../../sysroot \
     -DCMAKE_INSTALL_PREFIX=$(pwd)/../../sysroot \
-    -DCXX_SUPPORTS_CXX23=ON \
-    -DLLVM_COMPILER_CHECKED=ON \
     -DUNIX:BOOL=ON \
     ../../tools/llvm-project/compiler-rt
 cmake --build . --target install --parallel 16

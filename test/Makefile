@@ -144,7 +144,7 @@ $(OBJDIR)/%.wasm.o: $(SRCDIR)/%.c $(DOWNLOADED) $(SYSROOT)
 
 # Build up all the `*.wasm` files.
 obj_to_c = $(patsubst $(OBJDIR)/%.wasm.o,$(SRCDIR)/%.c,$1)
-$(OBJDIR)/%.core.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS) $(BUILTINS_STAMP)
+$(OBJDIR)/%.core.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS) | $(BUILTINS_STAMP)
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(shell scripts/add-flags.py LDFLAGS $(call obj_to_c,$<)) $^ -o $@
 

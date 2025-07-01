@@ -20,7 +20,7 @@ cmake \
     -DCOMPILER_RT_BAREMETAL_BUILD=ON \
     -DCOMPILER_RT_BUILD_XRAY=OFF \
     -DCOMPILER_RT_INCLUDE_TESTS=OFF \
-    -DCOMPILER_RT_HAS_FPIC_FLAG=OFF \
+    -DCOMPILER_RT_HAS_FPIC_FLAG=ON \
     -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
     -DCOMPILER_RT_BUILD_SANITIZERS=OFF \
     -DCOMPILER_RT_BUILD_XRAY=OFF \
@@ -31,6 +31,7 @@ cmake \
     -DCOMPILER_RT_BUILD_ORC=OFF \
     -DCOMPILER_RT_BUILD_GWP_ASAN=OFF \
     -DCOMPILER_RT_USE_LLVM_UNWINDER=OFF \
+    -DCOMPILER_RT_BUILTINS_ENABLE_PIC=ON \
     -DSANITIZER_USE_STATIC_LLVM_UNWINDER=OFF \
     -DCOMPILER_RT_ENABLE_STATIC_UNWINDER=OFF \
     -DHAVE_UNWIND_H=OFF \
@@ -64,13 +65,14 @@ cat > libc-bottom-half/headers/public/wasi/api.h<<EOF
 #include "api_poly.h"
 EOF
 
-make -j 16 -f Makefile-eh
+make PIC=yes -j 16 -f Makefile-eh
 rm -f sysroot/lib/wasm32-wasi/libc-printscan-long-double.a
 
 # Build C++ sysroot
 mkdir -p build/libcxx
 cd build/libcxx
 cmake \
+    -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
     -DCMAKE_TOOLCHAIN_FILE=$(pwd)/../../tools/clang-wasix-eh.cmake_toolchain \
     -DCMAKE_SYSROOT=$(pwd)/../../sysroot \
     -DCMAKE_INSTALL_PREFIX=$(pwd)/../../sysroot \
@@ -96,7 +98,7 @@ cmake \
     -DLIBCXXABI_HAS_EXTERNAL_THREAD_API:BOOL=OFF \
     -DLIBCXXABI_BUILD_EXTERNAL_THREAD_LIBRARY:BOOL=OFF \
     -DLIBCXXABI_HAS_WIN32_THREAD_API:BOOL=OFF \
-    -DLIBCXXABI_ENABLE_PIC:BOOL=OFF \
+    -DLIBCXXABI_ENABLE_PIC:BOOL=ON \
     -DLIBCXXABI_USE_LLVM_UNWINDER:BOOL=OFF \
     -DCMAKE_C_COMPILER_WORKS=ON \
     -DCMAKE_CXX_COMPILER_WORKS=ON \
@@ -109,4 +111,4 @@ cmake \
 cmake --build . --target install --parallel 16
 cd ../..
 
-rsync -Lrtv --delete ./sysroot/ ./sysroot32-eh/
+rsync -Lrtv --delete ./sysroot/ ./sysroot32-ehpic/

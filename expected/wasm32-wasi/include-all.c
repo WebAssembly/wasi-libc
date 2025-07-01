@@ -88,6 +88,7 @@
 #include <crypt.h>
 #include <ctype.h>
 #include <dirent.h>
+#include <dlfcn.h>
 #include <elf.h>
 #include <endian.h>
 #include <err.h>

@@ -28,10 +28,15 @@ volatile int __thread_list_lock;
  *
  * TODO: remove usage of __heap_base/__data_end for stack size calculation
  * once we drop support for LLVM v15 and older.
+ *
+ * Note: when linking a shared library, none of these symbols are available.
+ * This shouldn't matter in practice, since shared libs don't get a _start(),
+ * which is where this is called from. The main module can set
+ * __default_stacksize up and the side modules will end up using that.
  */
-extern unsigned char __heap_base;
-extern unsigned char __data_end;
-extern unsigned char __global_base;
+extern weak unsigned char __heap_base;
+extern weak unsigned char __data_end;
+extern weak unsigned char __global_base;
 extern weak unsigned char __stack_high;
 extern weak unsigned char __stack_low;
 
@@ -41,32 +46,42 @@ static inline void setup_default_stack_size()
 
 	if (&__stack_high)
 		stack_size = &__stack_high - &__stack_low;
-	else {
-		unsigned char *sp;
-#if defined(__wasm64__)
-		__asm__(
-			".globaltype __stack_pointer, i64\n"
-			"global.get __stack_pointer\n"
-			"local.set %0\n"
-			: "=r"(sp));
-#else
-		__asm__(
-			".globaltype __stack_pointer, i32\n"
-			"global.get __stack_pointer\n"
-			"local.set %0\n"
-			: "=r"(sp));
-#endif
-		stack_size = sp > &__global_base ? &__heap_base - &__data_end : (ptrdiff_t)&__global_base;
+// 	else if (&__heap_base)
+// 	{
+// 		unsigned char *sp;
+// #if defined(__wasm64__)
+// 		__asm__(
+// 			".globaltype __stack_pointer, i64\n"
+// 			"global.get __stack_pointer\n"
+// 			"local.set %0\n"
+// 			: "=r"(sp));
+// #else
+// 		__asm__(
+// 			".globaltype __stack_pointer, i32\n"
+// 			"global.get __stack_pointer\n"
+// 			"local.set %0\n"
+// 			: "=r"(sp));
+// #endif
+// 		stack_size = sp > &__global_base ? &__heap_base - &__data_end : (ptrdiff_t)&__global_base;
+// 	}
+	else
+	{
+		return;
 	}
 
 	if (stack_size > __default_stacksize)
 		__default_stacksize =
-			stack_size < DEFAULT_STACK_MAX ?
-			stack_size : DEFAULT_STACK_MAX;
+			stack_size < DEFAULT_STACK_MAX ? stack_size : DEFAULT_STACK_MAX;
 }
 
-void __wasi_init_tp() {
-	__init_tp((void *)__get_tp());
+extern void __set_tp(uintptr_t p);
+
+void __wasi_init_tp()
+{
+	// See comments on start_args.pthread_self_ptr in pthread_create.c for how TLS is handled in WASIX threads.
+	void *tp = aligned_alloc(_Alignof(struct pthread), sizeof(struct pthread));
+	__set_tp((uintptr_t)tp);
+	__init_tp(tp);
 }
 #endif
 
@@ -76,8 +91,10 @@ int __init_tp(void *p)
 	td->self = td;
 #ifdef __wasilibc_unmodified_upstream
 	int r = __set_thread_area(TP_ADJ(p));
-	if (r < 0) return -1;
-	if (!r) libc.can_do_threads = 1;
+	if (r < 0)
+		return -1;
+	if (!r)
+		libc.can_do_threads = 1;
 	td->detach_state = DT_JOINABLE;
 	td->tid = __syscall(SYS_set_tid_address, &__thread_list_lock);
 #else
@@ -104,7 +121,8 @@ int __init_tp(void *p)
 
 #ifdef __wasilibc_unmodified_upstream
 
-static struct builtin_tls {
+static struct builtin_tls
+{
 	char c;
 	struct pthread pt;
 	void *space[16];
@@ -112,10 +130,6 @@ static struct builtin_tls {
 #define MIN_TLS_ALIGN offsetof(struct builtin_tls, pt)
 
 static struct tls_module main_tls;
-#endif
-
-#ifndef __wasilibc_unmodified_upstream
-extern void __wasm_init_tls(void*);
 #endif
 
 void *__copy_tls(unsigned char *mem)
@@ -127,13 +141,14 @@ void *__copy_tls(unsigned char *mem)
 	uintptr_t *dtv;
 
 #ifdef TLS_ABOVE_TP
-	dtv = (uintptr_t*)(mem + libc.tls_size) - (libc.tls_cnt + 1);
+	dtv = (uintptr_t *)(mem + libc.tls_size) - (libc.tls_cnt + 1);
 
-	mem += -((uintptr_t)mem + sizeof(struct pthread)) & (libc.tls_align-1);
+	mem += -((uintptr_t)mem + sizeof(struct pthread)) & (libc.tls_align - 1);
 	td = (pthread_t)mem;
 	mem += sizeof(struct pthread);
 
-	for (i=1, p=libc.tls_head; p; i++, p=p->next) {
+	for (i = 1, p = libc.tls_head; p; i++, p = p->next)
+	{
 		dtv[i] = (uintptr_t)(mem + p->offset) + DTP_OFFSET;
 		memcpy(mem + p->offset, p->image, p->len);
 	}
@@ -141,10 +156,11 @@ void *__copy_tls(unsigned char *mem)
 	dtv = (uintptr_t *)mem;
 
 	mem += libc.tls_size - sizeof(struct pthread);
-	mem -= (uintptr_t)mem & (libc.tls_align-1);
+	mem -= (uintptr_t)mem & (libc.tls_align - 1);
 	td = (pthread_t)mem;
 
-	for (i=1, p=libc.tls_head; p; i++, p=p->next) {
+	for (i = 1, p = libc.tls_head; p; i++, p = p->next)
+	{
 		dtv[i] = (uintptr_t)(mem - p->offset) + DTP_OFFSET;
 		memcpy(mem - p->offset, p->image, p->len);
 	}
@@ -153,15 +169,8 @@ void *__copy_tls(unsigned char *mem)
 	td->dtv = dtv;
 	return td;
 #else
-	size_t tls_align = __builtin_wasm_tls_align();
-	volatile void* tls_base = __builtin_wasm_tls_base();
-	mem += tls_align;
-	mem -= (uintptr_t)mem & (tls_align-1);
-	__wasm_init_tls(mem);
-  	__asm__("local.get %0\n"
-			"global.set __tls_base\n"
-			:: "r"(tls_base));
-	return mem;
+	// This is impossible for WASIX with non-local-exec TLS model, so just trap
+	__builtin_trap();
 #endif
 }
 
@@ -178,11 +187,12 @@ void __init_tls(size_t *aux)
 {
 	unsigned char *p;
 	size_t n;
-	Phdr *phdr, *tls_phdr=0;
+	Phdr *phdr, *tls_phdr = 0;
 	size_t base = 0;
 	void *mem;
 
-	for (p=(void *)aux[AT_PHDR],n=aux[AT_PHNUM]; n; n--,p+=aux[AT_PHENT]) {
+	for (p = (void *)aux[AT_PHDR], n = aux[AT_PHNUM]; n; n--, p += aux[AT_PHENT])
+	{
 		phdr = (void *)p;
 		if (phdr->p_type == PT_PHDR)
 			base = aux[AT_PHDR] - phdr->p_vaddr;
@@ -191,13 +201,13 @@ void __init_tls(size_t *aux)
 		if (phdr->p_type == PT_TLS)
 			tls_phdr = phdr;
 		if (phdr->p_type == PT_GNU_STACK &&
-		    phdr->p_memsz > __default_stacksize)
+			phdr->p_memsz > __default_stacksize)
 			__default_stacksize =
-				phdr->p_memsz < DEFAULT_STACK_MAX ?
-				phdr->p_memsz : DEFAULT_STACK_MAX;
+				phdr->p_memsz < DEFAULT_STACK_MAX ? phdr->p_memsz : DEFAULT_STACK_MAX;
 	}
 
-	if (tls_phdr) {
+	if (tls_phdr)
+	{
 		main_tls.image = (void *)(base + tls_phdr->p_vaddr);
 		main_tls.len = tls_phdr->p_filesz;
 		main_tls.size = tls_phdr->p_memsz;
@@ -206,41 +216,43 @@ void __init_tls(size_t *aux)
 		libc.tls_head = &main_tls;
 	}
 
-	main_tls.size += (-main_tls.size - (uintptr_t)main_tls.image)
-		& (main_tls.align-1);
+	main_tls.size += (-main_tls.size - (uintptr_t)main_tls.image) & (main_tls.align - 1);
 #ifdef TLS_ABOVE_TP
 	main_tls.offset = GAP_ABOVE_TP;
-	main_tls.offset += (-GAP_ABOVE_TP + (uintptr_t)main_tls.image)
-		& (main_tls.align-1);
+	main_tls.offset += (-GAP_ABOVE_TP + (uintptr_t)main_tls.image) & (main_tls.align - 1);
 #else
 	main_tls.offset = main_tls.size;
 #endif
-	if (main_tls.align < MIN_TLS_ALIGN) main_tls.align = MIN_TLS_ALIGN;
+	if (main_tls.align < MIN_TLS_ALIGN)
+		main_tls.align = MIN_TLS_ALIGN;
 
 	libc.tls_align = main_tls.align;
-	libc.tls_size = 2*sizeof(void *) + sizeof(struct pthread)
+	libc.tls_size = 2 * sizeof(void *) + sizeof(struct pthread)
 #ifdef TLS_ABOVE_TP
-		+ main_tls.offset
+						+ main_tls.offset
 #endif
-		+ main_tls.size + main_tls.align
-		+ MIN_TLS_ALIGN-1 & -MIN_TLS_ALIGN;
+						+ main_tls.size + main_tls.align + MIN_TLS_ALIGN - 1 &
+					-MIN_TLS_ALIGN;
 
-	if (libc.tls_size > sizeof builtin_tls) {
+	if (libc.tls_size > sizeof builtin_tls)
+	{
 #ifndef SYS_mmap2
 #define SYS_mmap2 SYS_mmap
 #endif
 #ifdef __wasilibc_unmodified_upstream
 		mem = (void *)__syscall(
 			SYS_mmap2,
-			0, libc.tls_size, PROT_READ|PROT_WRITE,
-			MAP_ANONYMOUS|MAP_PRIVATE, -1, 0);
+			0, libc.tls_size, PROT_READ | PROT_WRITE,
+			MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 #else
 		a_crash();
 #endif
 		/* -4095...-1 cast to void * will crash on dereference anyway,
 		 * so don't bloat the init code checking for error codes and
 		 * explicitly calling a_crash(). */
-	} else {
+	}
+	else
+	{
 		mem = builtin_tls;
 	}
 

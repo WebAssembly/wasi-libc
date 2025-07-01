@@ -5,6 +5,7 @@
 	.globaltype	__stack_pointer, i64
 	.globaltype	__tls_base, i64
 	.functype	__wasi_thread_start_C (i64, i64) -> ()
+	.functype	__wasm_init_tls (i64) -> ()
 
 	.hidden	wasi_thread_start
 	.globl	wasi_thread_start
@@ -19,9 +20,10 @@ wasi_thread_start:
 	i64.load    0  # stack
 	global.set  __stack_pointer
 
+	# Set up the TLS area
 	local.get   1  # start_arg
-	i64.load    8  # tls_base
-	global.set  __tls_base
+	i32.load    8  # tls_base
+	call __wasm_init_tls
 
 	# Make the C function do the rest of work.
 	local.get   0  # tid

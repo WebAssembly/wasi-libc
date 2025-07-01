@@ -5,6 +5,47 @@ set -Eeuxo pipefail
 export TARGET_ARCH=wasm32
 export TARGET_OS=wasix
 
+# Build the compiler runtime lib
+mkdir -p build/compiler-rt
+cd build/compiler-rt
+cmake \
+    -DCMAKE_SYSTEM_NAME=WASI \
+    -DCMAKE_SYSTEM_VERSION=1 \
+    -DCMAKE_SYSTEM_PROCESSOR=wasm32 \
+    -DCMAKE_BUILD_TYPE=RelWithDebugInfo \
+    -DCMAKE_C_COMPILER_WORKS=ON \
+    -DCMAKE_CXX_COMPILER_WORKS=ON \
+    -DCMAKE_C_LINKER_DEPFILE_SUPPORTED=OFF \
+    -DCMAKE_CXX_LINKER_DEPFILE_SUPPORTED=OFF \
+    -DCOMPILER_RT_BAREMETAL_BUILD=ON \
+    -DCOMPILER_RT_BUILD_XRAY=OFF \
+    -DCOMPILER_RT_INCLUDE_TESTS=OFF \
+    -DCOMPILER_RT_HAS_FPIC_FLAG=OFF \
+    -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
+    -DCOMPILER_RT_BUILD_SANITIZERS=OFF \
+    -DCOMPILER_RT_BUILD_XRAY=OFF \
+    -DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
+    -DCOMPILER_RT_BUILD_PROFILE=OFF \
+    -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF \
+    -DCOMPILER_RT_BUILD_MEMPROF=OFF \
+    -DCOMPILER_RT_BUILD_ORC=OFF \
+    -DCOMPILER_RT_BUILD_GWP_ASAN=OFF \
+    -DCOMPILER_RT_USE_LLVM_UNWINDER=OFF \
+    -DSANITIZER_USE_STATIC_LLVM_UNWINDER=OFF \
+    -DCOMPILER_RT_ENABLE_STATIC_UNWINDER=OFF \
+    -DHAVE_UNWIND_H=OFF \
+    -DCOMPILER_RT_HAS_FUNWIND_TABLES_FLAG=OFF \
+    -DCMAKE_C_COMPILER_TARGET=wasm32-wasi \
+    -DCOMPILER_RT_OS_DIR=wasm32-wasi \
+    -DCMAKE_TOOLCHAIN_FILE=$(pwd)/../../tools/clang-wasix.cmake_toolchain \
+    -DCMAKE_SYSROOT=$(pwd)/../../sysroot \
+    -DCMAKE_INSTALL_PREFIX=$(pwd)/../../sysroot \
+    -DUNIX:BOOL=ON \
+    ../../tools/llvm-project/compiler-rt
+cmake --build . --target install --parallel 16
+llvm-ranlib ../../sysroot/lib/wasm32-wasi/libclang_rt.builtins-wasm32.a
+cd ../..
+
 # Build the extensions
 cargo run --manifest-path tools/wasix-headers/Cargo.toml generate-libc
 cp -f libc-bottom-half/headers/public/wasi/api.h libc-bottom-half/headers/public/wasi/api_wasix.h
@@ -23,7 +64,7 @@ cat > libc-bottom-half/headers/public/wasi/api.h<<EOF
 #include "api_poly.h"
 EOF
 
-make -j 14
+make -j 16
 rm -f sysroot/lib/wasm32-wasi/libc-printscan-long-double.a
 
 # Build C++ sysroot

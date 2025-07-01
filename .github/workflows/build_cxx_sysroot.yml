@@ -12,7 +12,7 @@ permissions:
   checks: write
 
 jobs:
-  build_cxx_sysroot_eh:
+  build_cxx_sysroot_ehpic:
     runs-on: ubuntu-latest
     container:
       image: archlinux:base-devel
@@ -21,16 +21,17 @@ jobs:
       - name: Update and install dependencies
         run: |
           pacman -Syu --noconfirm
-          pacman -Sy --noconfirm --needed coreutils nodejs npm wget git cmake ninja llvm clang rsync make lld wasmer cargo python3
+          pacman -Sy --noconfirm --needed coreutils nodejs npm wget git cmake ninja llvm clang rsync make lld cargo python3 jq
+          # curl https://get.wasmer.io -sSfL | sh -s "prerelease"
 
       - name: Log tool versions
         run: |
           echo git
           git --version
           echo "##########################"
-          echo wasmer
-          wasmer -V
-          echo "##########################"
+          # echo wasmer
+          # wasmer -V
+          # echo "##########################"
           echo clang
           clang -v
           echo "##########################"
@@ -51,29 +52,73 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Build and install compiler_rt builtins
+      - name: Build
         run: |
+          git config --global --add safe.directory $(pwd)
           rm -rf /opt/wasix-sysroot
           mkdir /opt/wasix-sysroot
-          cp tools/clang-wasix-eh.cmake_toolchain /opt/wasix-sysroot/clang-wasix.cmake_toolchain
-          mkdir -p build-compiler-rt-builtins
-          cd build-compiler-rt-builtins
-          cmake --fresh \
-            -DCOMPILER_RT_BAREMETAL_BUILD=On \
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DCOMPILER_RT_OS_DIR=wasm32-wasi \
-            -DCOMPILER_RT_DEFAULT_TARGET_ONLY:BOOL=ON \
-            -DCMAKE_TOOLCHAIN_FILE=/opt/wasix-sysroot/clang-wasix.cmake_toolchain \
-            -DCMAKE_SYSROOT=/opt/wasix-sysroot \
-            -DCMAKE_INSTALL_PREFIX=/opt/wasix-sysroot \
-            ../tools/llvm-project/compiler-rt/lib/builtins
-          cmake --build . --target install --parallel 4
-          llvm-ranlib /opt/wasix-sysroot/lib/wasm32-wasi/libclang_rt.builtins-wasm32.a
+          ./build32-ehpic.sh
+          cp -r sysroot /opt/wasix-sysroot
+
+      # - name: Run WASIX tests
+      #   run: |
+      #     export CLANG_VERSION=$(clang --version | grep -i "clang version" | sed -n 's/.*version \([0-9.]*\).*/\1/p')
+      #     echo Detected clang version $CLANG_VERSION
+      #     mkdir -p /usr/lib/clang/19/lib/wasm32-wasmer-wasi
+      #     cp /opt/wasix-sysroot/lib/wasm32-wasi/libclang_rt.builtins-wasm32.a /usr/lib/clang/19/lib/wasm32-wasmer-wasi/libclang_rt.builtins.a
+      #     TOOLCHAIN=/opt/wasix-sysroot/clang-wasix.cmake_toolchain ./test/wasix/run_tests.sh
+
+      - name: Upload sysroot
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasix-sysroot-ehpic
+          path: /opt/wasix-sysroot
+
+  build_cxx_sysroot_eh:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+      options: --user root --workdir /
+    steps:
+      - name: Update and install dependencies
+        run: |
+          pacman -Syu --noconfirm
+          pacman -Sy --noconfirm --needed coreutils nodejs npm wget git cmake ninja llvm clang rsync make lld cargo python3 jq
+          # curl https://get.wasmer.io -sSfL | sh -s "prerelease"
+
+      - name: Log tool versions
+        run: |
+          echo git
+          git --version
+          echo "##########################"
+          # echo wasmer
+          # wasmer -V
+          # echo "##########################"
+          echo clang
+          clang -v
+          echo "##########################"
+          echo llvm-ar
+          llvm-ar -V
+          echo "##########################"
+          echo llvm-nm
+          llvm-nm -V
+          echo "##########################"
+          echo nodejs
+          node -v
+          echo "##########################"
+          echo npm
+          npm -v
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Build
         run: |
           git config --global --add safe.directory $(pwd)
-          cp /opt/wasix-sysroot/lib/wasm32-wasi/libclang_rt.builtins-wasm32.a .
+          rm -rf /opt/wasix-sysroot
+          mkdir /opt/wasix-sysroot
           ./build32-eh.sh
           cp -r sysroot /opt/wasix-sysroot
 
@@ -100,15 +145,16 @@ jobs:
       - name: Update and install dependencies
         run: |
           pacman -Syu --noconfirm
-          pacman -Sy --noconfirm --needed coreutils nodejs npm wget git cmake ninja llvm clang rsync make lld wasmer cargo python3
+          pacman -Sy --noconfirm --needed coreutils nodejs npm wget git cmake ninja llvm clang rsync make lld cargo python3 jq
+          # curl https://get.wasmer.io -sSfL | sh -s "prerelease"
 
       - name: Log tool versions
         run: |
           echo git
           git --version
-          echo "##########################"
-          echo wasmer
-          wasmer -V
+          # echo "##########################"
+          # echo wasmer
+          # wasmer -V
           echo "##########################"
           echo clang
           clang -v
@@ -130,29 +176,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Build and install compiler_rt builtins
-        run: |
-          rm -rf /opt/wasix-sysroot
-          mkdir /opt/wasix-sysroot
-          cp tools/clang-wasix-eh.cmake_toolchain /opt/wasix-sysroot/clang-wasix.cmake_toolchain
-          mkdir -p build-compiler-rt-builtins
-          cd build-compiler-rt-builtins
-          cmake --fresh \
-            -DCOMPILER_RT_BAREMETAL_BUILD=On \
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DCOMPILER_RT_OS_DIR=wasm32-wasi \
-            -DCOMPILER_RT_DEFAULT_TARGET_ONLY:BOOL=ON \
-            -DCMAKE_TOOLCHAIN_FILE=/opt/wasix-sysroot/clang-wasix.cmake_toolchain \
-            -DCMAKE_SYSROOT=/opt/wasix-sysroot \
-            -DCMAKE_INSTALL_PREFIX=/opt/wasix-sysroot \
-            ../tools/llvm-project/compiler-rt/lib/builtins
-          cmake --build . --target install --parallel 4
-          llvm-ranlib /opt/wasix-sysroot/lib/wasm32-wasi/libclang_rt.builtins-wasm32.a
-
       - name: Build
         run: |
           git config --global --add safe.directory $(pwd)
-          cp /opt/wasix-sysroot/lib/wasm32-wasi/libclang_rt.builtins-wasm32.a .
+          rm -rf /opt/wasix-sysroot
+          mkdir /opt/wasix-sysroot
           ./build32.sh
           cp -r sysroot /opt/wasix-sysroot
 

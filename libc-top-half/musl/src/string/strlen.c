@@ -31,7 +31,8 @@ size_t strlen(const char *s)
 			"v128.load 0\n"
 			"local.set %0\n"
 			: "=r"(chunk)
-                        : "r"(v));
+                        : "r"(v)
+                        : "memory");
 		// Bitmask is slow on AArch64, all_true is much faster.
 		if (!wasm_i8x16_all_true(chunk)) {
 			const v128_t cmp = wasm_i8x16_eq(chunk, (v128_t){});

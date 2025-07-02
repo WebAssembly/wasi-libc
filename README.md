@@ -40,11 +40,25 @@ To use the sysroot, use the `--sysroot=` option:
 
 to run the compiler using the newly built sysroot.
 
+## Other default libraries
+
 Note that Clang packages typically don't include cross-compiled builds of
 compiler-rt, libcxx, or libcxxabi, for `libclang_rt.builtins-wasm32.a`,
-`libc++.a`, or `libc++abi.a`, respectively, so they may not be usable without
-extra setup. This is one of the things [wasi-sdk] simplifies, as it includes
-cross-compiled builds of compiler-rt, `libc++.a`, and `libc++abi.a`.
+`libc++.a`, or `libc++abi.a`, respectively. This means that by default just
+passing `--sysroot` may not be enough as Clang will also look for some of these
+libraries, notably `libclang_rt.builtins-wasm32.a`, by default. This is one of
+the things [wasi-sdk] simplifies, as it includes cross-compiled builds of
+compiler-rt, `libc++.a`, and `libc++abi.a`.
+
+The build of wasi-libc itself may depend on compiler-rt, or
+`libclang_rt.builtins-wasm32.a`. This manifests in error messages such as
+`undefined symbol: __muloti4` for example. Specifically the PIC build of
+wasi-libc will require that Clang can locate `libclang_rt.builtins-wasm32.a`,
+meaning that `libc.so` requires this library to be present. To handle this the
+default behavior of the build system is to download the latest version of
+compiler-rt from [wasi-sdk] and use that for the build of `libc.so`. You can
+also set `BUILTINS_LIB` as a path to `libclang_rt.builtins-wasm32.a` as well to
+use that instead of downloading a version.
 
 ## Building in pthread support
 

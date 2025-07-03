@@ -14,28 +14,28 @@
 size_t strlen(const char *s)
 {
 #if defined(__wasm_simd128__) && defined(__wasilibc_simd_string)
-// Skip Clang 19 and Clang 20 which have a bug (llvm/llvm-project#146574) which
-// results in an ICE when inline assembly is used with a vector result.
+	// Skip Clang 19 and Clang 20 which have a bug (llvm/llvm-project#146574)
+	// which results in an ICE when inline assembly is used with a vector result.
 #if __clang_major__ != 19 && __clang_major__ != 20
-        // Note that reading before/after the allocation of a pointer is UB in
-        // C, so inline assembly is used to generate the exact machine
-        // instruction we want with opaque semantics to the compiler to avoid
-        // the UB.
+	// Note that reading before/after the allocation of a pointer is UB in
+	// C, so inline assembly is used to generate the exact machine
+	// instruction we want with opaque semantics to the compiler to avoid
+	// the UB.
 	uintptr_t align = (uintptr_t)s % sizeof(v128_t);
-	uintptr_t v = (uintptr_t)s - align;
+	uintptr_t addr = (uintptr_t)s - align;
 
 	for (;;) {
-                v128_t chunk;
+		v128_t v;
 		__asm__ (
 			"local.get %1\n"
 			"v128.load 0\n"
 			"local.set %0\n"
-			: "=r"(chunk)
-                        : "r"(v)
-                        : "memory");
+			: "=r"(v)
+			: "r"(addr)
+			: "memory");
 		// Bitmask is slow on AArch64, all_true is much faster.
-		if (!wasm_i8x16_all_true(chunk)) {
-			const v128_t cmp = wasm_i8x16_eq(chunk, (v128_t){});
+		if (!wasm_i8x16_all_true(v)) {
+			const v128_t cmp = wasm_i8x16_eq(v, (v128_t){});
 			// Clear the bits corresponding to align (little-endian)
 			// so we can count trailing zeros.
 			int mask = wasm_i8x16_bitmask(cmp) >> align << align;
@@ -46,11 +46,11 @@ size_t strlen(const char *s)
 			// it's as if we didn't find anything.
 			if (mask) {
 				// Find the offset of the first one bit (little-endian).
-				return v - (uintptr_t)s + __builtin_ctz(mask);
+				return addr - (uintptr_t)s + __builtin_ctz(mask);
 			}
 		}
 		align = 0;
-		v += sizeof(v128_t);
+		addr += sizeof(v128_t);
 	}
 #endif
 #endif

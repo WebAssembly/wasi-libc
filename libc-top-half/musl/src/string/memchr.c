@@ -15,6 +15,9 @@
 void *memchr(const void *src, int c, size_t n)
 {
 #if defined(__wasm_simd128__) && defined(__wasilibc_simd_string)
+	// Skip Clang 19 and Clang 20 which have a bug (llvm/llvm-project#146574)
+	// which results in an ICE when inline assembly is used with a vector result.
+#if __clang_major__ != 19 && __clang_major__ != 20
 	// When n is zero, a function that locates a character finds no occurrence.
 	// Otherwise, decrement n to ensure sub_overflow overflows
 	// when n would go equal-to-or-below zero.
@@ -22,17 +25,24 @@ void *memchr(const void *src, int c, size_t n)
 		return NULL;
 	}
 
-	// memchr must behave as if it reads characters sequentially
-	// and stops as soon as a match is found.
-	// Aligning ensures loads beyond the first match are safe.
-	// Casting through uintptr_t makes this implementation-defined,
-	// rather than undefined behavior.
+	// Note that reading before/after the allocation of a pointer is UB in
+	// C, so inline assembly is used to generate the exact machine
+	// instruction we want with opaque semantics to the compiler to avoid
+	// the UB.
 	uintptr_t align = (uintptr_t)src % sizeof(v128_t);
-	const v128_t *v = (v128_t *)((uintptr_t)src - align);
-	const v128_t vc = wasm_i8x16_splat(c);
+	uintptr_t addr = (uintptr_t)src - align;
+	v128_t vc = wasm_i8x16_splat(c);
 
 	for (;;) {
-		const v128_t cmp = wasm_i8x16_eq(*v, vc);
+		v128_t v;
+		__asm__ (
+			"local.get %1\n"
+			"v128.load 0\n"
+			"local.set %0\n"
+			: "=r"(v)
+			: "r"(addr)
+			: "memory");
+		v128_t cmp = wasm_i8x16_eq(v, vc);
 		// Bitmask is slow on AArch64, any_true is much faster.
 		if (wasm_v128_any_true(cmp)) {
 			// Clear the bits corresponding to align (little-endian)
@@ -48,7 +58,8 @@ void *memchr(const void *src, int c, size_t n)
 				// That's a match, unless it is beyond the end of the object.
 				// Recall that we decremented n, so less-than-or-equal-to is correct.
 				size_t ctz = __builtin_ctz(mask);
-				return ctz - align <= n ? (char *)v + ctz : NULL;
+				return ctz - align <= n ? (char *)src + (addr + ctz - (uintptr_t)src)
+				                        : NULL;
 			}
 		}
 		// Decrement n; if it overflows we're done.
@@ -56,8 +67,9 @@ void *memchr(const void *src, int c, size_t n)
 			return NULL;
 		}
 		align = 0;
-		v++;
+		addr += sizeof(v128_t);
 	}
+#endif
 #endif
 
 	const unsigned char *s = src;

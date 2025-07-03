@@ -14,15 +14,15 @@
 #define IFTODT(x) (__wasilibc_iftodt(x))
 #define DTTOIF(x) (__wasilibc_dttoif(x))
 
-int __wasilibc_iftodt(int x);
-int __wasilibc_dttoif(int x);
-
 #include <__struct_dirent.h>
 #include <__typedef_DIR.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+int __wasilibc_iftodt(int x);
+int __wasilibc_dttoif(int x);
 
 int closedir(DIR *);
 DIR *opendir(const char *);

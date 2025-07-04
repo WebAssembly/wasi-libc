@@ -9,6 +9,10 @@
 #define DT_FIFO __WASI_FILETYPE_SOCKET_STREAM
 #define DT_LNK __WASI_FILETYPE_SYMBOLIC_LINK
 #define DT_REG __WASI_FILETYPE_REGULAR_FILE
+// Since WASI(X) has more than one socket filetype, we need to use a different
+// value for DT_SOCK. The value 255 is chosen to avoid conflicts with the
+// values of __WASI_FILETYPE_*.
+#define DT_SOCK (UINT8_C(255))
 #define DT_UNKNOWN __WASI_FILETYPE_UNKNOWN
 
 #define IFTODT(x) (__wasilibc_iftodt(x))

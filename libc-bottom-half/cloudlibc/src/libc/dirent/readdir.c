@@ -80,7 +80,17 @@ struct dirent *readdir(DIR *dirp) {
     GROW(dirp->dirent, dirp->dirent_size,
          offsetof(struct dirent, d_name) + entry.d_namlen + 1);
     struct dirent *dirent = dirp->dirent;
-    dirent->d_type = entry.d_type;
+    switch (entry.d_type) {
+      case __WASI_FILETYPE_SOCKET_DGRAM:
+      case __WASI_FILETYPE_SOCKET_RAW:
+      case __WASI_FILETYPE_SOCKET_SEQPACKET:
+      case __WASI_FILETYPE_SOCKET_STREAM:
+        dirent->d_type = DT_SOCK;
+        break;
+      default:
+        dirent->d_type = entry.d_type;
+        break;
+    }
     memcpy(dirent->d_name, name, entry.d_namlen);
     dirent->d_name[entry.d_namlen] = '\0';
 

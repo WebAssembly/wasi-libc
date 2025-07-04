@@ -480,7 +480,6 @@ MUSL_OMIT_HEADERS += \
     "bits/shm.h" "bits/msg.h" "bits/ipc.h" "bits/ptrace.h" \
     "bits/statfs.h" \
     "sys/vfs.h" \
-    "sys/statvfs.h" \
     "sys/syslog.h" \
     "ucontext.h" "sys/ucontext.h" \
     "utmp.h" "utmpx.h" \

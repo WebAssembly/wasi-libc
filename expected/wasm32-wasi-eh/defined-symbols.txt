@@ -555,6 +555,7 @@ __wasilibc_tls_align
 __wasilibc_tls_size
 __wasilibc_unlinkat
 __wasilibc_utimens
+__wasix_init_tls
 __wasm_call_dtors
 __wasm_longjmp
 __wasm_setjmp
@@ -921,6 +922,7 @@ fsetpos
 fsetpos64
 fstat
 fstatat
+fstatvfs
 fsync
 ftell
 ftello
@@ -1567,6 +1569,7 @@ srand48
 srandom
 sscanf
 stat
+statvfs
 stderr
 stdin
 stdout

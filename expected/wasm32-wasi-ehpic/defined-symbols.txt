@@ -560,6 +560,9 @@ __wasilibc_unlinkat
 __wasilibc_utimens
 __wasix_init_tls
 __wasm_call_dtors
+__wasm_longjmp
+__wasm_setjmp
+__wasm_setjmp_test
 __wasm_sigaction
 __wasm_signal
 __wcscoll_l
@@ -1168,7 +1171,6 @@ logbf
 logbl
 logf
 logl
-longjmp
 lrand48
 lrint
 lrintf
@@ -1507,7 +1509,6 @@ setgid
 setgrent
 setgroups
 setitimer
-setjmp
 setkey
 setlinebuf
 setlocale
@@ -1550,7 +1551,6 @@ sigprocmask
 sigqueue
 sigrelse
 sigset
-sigsetjmp
 sigsuspend
 sigtimedwait
 sigwait

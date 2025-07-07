@@ -495,6 +495,7 @@
 #define DT_RELSZ 18
 #define DT_RPATH 15
 #define DT_RUNPATH 29
+#define DT_SOCK (UINT8_C(255))
 #define DT_SONAME 14
 #define DT_SPARC_NUM 2
 #define DT_SPARC_REGISTER 0x70000001
@@ -4508,6 +4509,18 @@
 #define STV_HIDDEN 2
 #define STV_INTERNAL 1
 #define STV_PROTECTED 3
+#define ST_APPEND 256
+#define ST_IMMUTABLE 512
+#define ST_MANDLOCK 64
+#define ST_NOATIME 1024
+#define ST_NODEV 4
+#define ST_NODIRATIME 2048
+#define ST_NOEXEC 8
+#define ST_NOSUID 2
+#define ST_RDONLY 1
+#define ST_RELATIME 4096
+#define ST_SYNCHRONOUS 16
+#define ST_WRITE 128
 #define SUN_LEN(s) (2+strlen((s)->sun_path))
 #define SUSP 237
 #define SYMINFO_BT_LOWRESERVE 0xff00
@@ -4536,7 +4549,7 @@
 #define S_IFLNK (0xa000)
 #define S_IFMT (S_IFBLK | S_IFCHR | S_IFDIR | S_IFIFO | S_IFLNK | S_IFREG | S_IFSOCK)
 #define S_IFREG (0x8000)
-#define S_IFSOCK (0xc000)
+#define S_IFSOCK (0xe000)
 #define S_INPUT 0x0001
 #define S_IREAD S_IRUSR
 #define S_IRGRP (0x20)
@@ -5320,6 +5333,7 @@
 #define _SYS_SELECT_H 
 #define _SYS_SENDFILE_H 
 #define _SYS_SOCKET_H 
+#define _SYS_STATVFS_H
 #define _SYS_STAT_H 
 #define _SYS_SYSCALL_H 
 #define _SYS_SYSINFO_H 
@@ -6628,6 +6642,7 @@
 #define fsfilcnt64_t fsfilcnt_t
 #define fstat64 fstat
 #define fstatat64 fstatat
+#define fstatvfs64 fstatvfs
 #define ftello64 ftello
 #define ftruncate64 ftruncate
 #define getdents64 getdents
@@ -6836,6 +6851,7 @@
 #define st_mtime st_mtim.tv_sec
 #define stat64 stat
 #define static_assert _Static_assert
+#define statvfs64 statvfs
 #define stderr (stderr)
 #define stdin (stdin)
 #define stdout (stdout)

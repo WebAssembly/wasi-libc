@@ -1,4 +1,5 @@
 __addtf3
+__c_longjmp
 __divtf3
 __eqtf2
 __extenddftf2
@@ -142,9 +143,11 @@ __indirect_function_table
 __letf2
 __lttf2
 __main_argc_argv
+__memory_base
 __netf2
 __stack_pointer
 __subtf3
+__table_base
 __tls_align
 __tls_base
 __tls_size

@@ -19,11 +19,16 @@ THREAD_MODEL ?= posix
 MALLOC_IMPL ?= dlmalloc
 # yes or no
 BUILD_LIBC_TOP_HALF ?= yes
-BUILD_LIBSETJMP ?= yes
 # The directory where we will store intermediate artifacts.
 OBJDIR ?= build/$(TARGET_TRIPLE)
 # Whether to compile with PIC (needed for shared libs and dynamic linking)
 PIC ?= no
+
+ifeq ($(PIC), no)
+EXPECTED_SYMBOLS_DIR=expected/$(TARGET_TRIPLE)-eh
+else
+EXPECTED_SYMBOLS_DIR=expected/$(TARGET_TRIPLE)-ehpic
+endif
 
 # When the length is no larger than this threshold, we consider the
 # overhead of bulk memory opcodes to outweigh the performance benefit,
@@ -59,7 +64,6 @@ LIBC_BOTTOM_HALF_ALL_SOURCES = \
     $(sort \
     $(shell find $(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) -name \*.c) \
     $(shell find $(LIBC_BOTTOM_HALF_SOURCES) -name \*.c))
-LIBSETJMP_SOURCES = $(LIBC_TOP_HALF_MUSL_SRC_DIR)/setjmp/wasm32/rt.c
 
 # FIXME(https://reviews.llvm.org/D85567) - due to a bug in LLD the weak
 # references to a function defined in `chdir.c` only work if `chdir.c` is at the
@@ -565,8 +569,6 @@ $(SYSROOT_LIB)/libwasi-emulated-process-clocks.a: $(LIBWASI_EMULATED_PROCESS_CLO
 
 $(SYSROOT_LIB)/libwasi-emulated-getpid.a: $(LIBWASI_EMULATED_GETPID_OBJS)
 
-$(SYSROOT_LIB)/libsetjmp.a: $(LIBSETJMP_OBJS)
-
 ifeq ($(PIC), yes)
 $(SYSROOT_LIB)/libcommon-tag-stubs.a: libcommon-tag-stubs.a
 	mkdir -p "$(SYSROOT_LIB)"
@@ -789,7 +791,7 @@ check-symbols: startup_files libc
 
 	# Check that the computed metadata matches the expected metadata.
 	# This ignores whitespace because on Windows the output has CRLF line endings.
-	# diff -wur "expected/$(TARGET_TRIPLE)-eh" "$(SYSROOT_SHARE)"
+	diff -wur "$(EXPECTED_SYMBOLS_DIR)" "$(SYSROOT_SHARE)"
 
 install: finish
 	mkdir -p "$(INSTALL_DIR)"

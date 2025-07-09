@@ -231,7 +231,7 @@ fn print_constant(ret: &mut String, const_: &Constant) {
         ret.push_str(" */\n");
     }
     ret.push_str(&format!(
-        "#define __WASI_{}_{} ((__wasi_{}_t){})\n",
+        "#define __WASI_{}_{} ((__wasi_{}_t)+({}))\n",
         ident_name(&const_.ty).to_shouty_snake_case(),
         ident_name(&const_.name).to_shouty_snake_case(),
         ident_name(&const_.ty),
@@ -256,7 +256,7 @@ fn print_record(ret: &mut String, name: &Id, s: &RecordDatatype) {
                 ret.push_str(" */\n");
             }
             ret.push_str(&format!(
-                "#define __WASI_{}_{} ((__wasi_{}_t)(1 << {}))\n",
+                "#define __WASI_{}_{} ((__wasi_{}_t)+(1 << {}))\n",
                 ident_name(name).to_shouty_snake_case(),
                 ident_name(&member.name).to_shouty_snake_case(),
                 ident_name(name),

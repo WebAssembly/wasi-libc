@@ -509,162 +509,162 @@ typedef uint64_t __wasi_rights_t;
  * If `path_open` is set, includes the right to invoke
  * `path_open` with `fdflags::dsync`.
  */
-#define __WASI_RIGHTS_FD_DATASYNC ((__wasi_rights_t)(1 << 0))
+#define __WASI_RIGHTS_FD_DATASYNC ((__wasi_rights_t)+(1 << 0))
 
 /**
  * The right to invoke `fd_read` and `sock_recv`.
  * If `rights::fd_seek` is set, includes the right to invoke `fd_pread`.
  */
-#define __WASI_RIGHTS_FD_READ ((__wasi_rights_t)(1 << 1))
+#define __WASI_RIGHTS_FD_READ ((__wasi_rights_t)+(1 << 1))
 
 /**
  * The right to invoke `fd_seek`. This flag implies `rights::fd_tell`.
  */
-#define __WASI_RIGHTS_FD_SEEK ((__wasi_rights_t)(1 << 2))
+#define __WASI_RIGHTS_FD_SEEK ((__wasi_rights_t)+(1 << 2))
 
 /**
  * The right to invoke `fd_fdstat_set_flags`.
  */
-#define __WASI_RIGHTS_FD_FDSTAT_SET_FLAGS ((__wasi_rights_t)(1 << 3))
+#define __WASI_RIGHTS_FD_FDSTAT_SET_FLAGS ((__wasi_rights_t)+(1 << 3))
 
 /**
  * The right to invoke `fd_sync`.
  * If `path_open` is set, includes the right to invoke
  * `path_open` with `fdflags::rsync` and `fdflags::dsync`.
  */
-#define __WASI_RIGHTS_FD_SYNC ((__wasi_rights_t)(1 << 4))
+#define __WASI_RIGHTS_FD_SYNC ((__wasi_rights_t)+(1 << 4))
 
 /**
  * The right to invoke `fd_seek` in such a way that the file offset
  * remains unaltered (i.e., `whence::cur` with offset zero), or to
  * invoke `fd_tell`.
  */
-#define __WASI_RIGHTS_FD_TELL ((__wasi_rights_t)(1 << 5))
+#define __WASI_RIGHTS_FD_TELL ((__wasi_rights_t)+(1 << 5))
 
 /**
  * The right to invoke `fd_write` and `sock_send`.
  * If `rights::fd_seek` is set, includes the right to invoke `fd_pwrite`.
  */
-#define __WASI_RIGHTS_FD_WRITE ((__wasi_rights_t)(1 << 6))
+#define __WASI_RIGHTS_FD_WRITE ((__wasi_rights_t)+(1 << 6))
 
 /**
  * The right to invoke `fd_advise`.
  */
-#define __WASI_RIGHTS_FD_ADVISE ((__wasi_rights_t)(1 << 7))
+#define __WASI_RIGHTS_FD_ADVISE ((__wasi_rights_t)+(1 << 7))
 
 /**
  * The right to invoke `fd_allocate`.
  */
-#define __WASI_RIGHTS_FD_ALLOCATE ((__wasi_rights_t)(1 << 8))
+#define __WASI_RIGHTS_FD_ALLOCATE ((__wasi_rights_t)+(1 << 8))
 
 /**
  * The right to invoke `path_create_directory`.
  */
-#define __WASI_RIGHTS_PATH_CREATE_DIRECTORY ((__wasi_rights_t)(1 << 9))
+#define __WASI_RIGHTS_PATH_CREATE_DIRECTORY ((__wasi_rights_t)+(1 << 9))
 
 /**
  * If `path_open` is set, the right to invoke `path_open` with `oflags::creat`.
  */
-#define __WASI_RIGHTS_PATH_CREATE_FILE ((__wasi_rights_t)(1 << 10))
+#define __WASI_RIGHTS_PATH_CREATE_FILE ((__wasi_rights_t)+(1 << 10))
 
 /**
  * The right to invoke `path_link` with the file descriptor as the
  * source directory.
  */
-#define __WASI_RIGHTS_PATH_LINK_SOURCE ((__wasi_rights_t)(1 << 11))
+#define __WASI_RIGHTS_PATH_LINK_SOURCE ((__wasi_rights_t)+(1 << 11))
 
 /**
  * The right to invoke `path_link` with the file descriptor as the
  * target directory.
  */
-#define __WASI_RIGHTS_PATH_LINK_TARGET ((__wasi_rights_t)(1 << 12))
+#define __WASI_RIGHTS_PATH_LINK_TARGET ((__wasi_rights_t)+(1 << 12))
 
 /**
  * The right to invoke `path_open`.
  */
-#define __WASI_RIGHTS_PATH_OPEN ((__wasi_rights_t)(1 << 13))
+#define __WASI_RIGHTS_PATH_OPEN ((__wasi_rights_t)+(1 << 13))
 
 /**
  * The right to invoke `fd_readdir`.
  */
-#define __WASI_RIGHTS_FD_READDIR ((__wasi_rights_t)(1 << 14))
+#define __WASI_RIGHTS_FD_READDIR ((__wasi_rights_t)+(1 << 14))
 
 /**
  * The right to invoke `path_readlink`.
  */
-#define __WASI_RIGHTS_PATH_READLINK ((__wasi_rights_t)(1 << 15))
+#define __WASI_RIGHTS_PATH_READLINK ((__wasi_rights_t)+(1 << 15))
 
 /**
  * The right to invoke `path_rename` with the file descriptor as the source directory.
  */
-#define __WASI_RIGHTS_PATH_RENAME_SOURCE ((__wasi_rights_t)(1 << 16))
+#define __WASI_RIGHTS_PATH_RENAME_SOURCE ((__wasi_rights_t)+(1 << 16))
 
 /**
  * The right to invoke `path_rename` with the file descriptor as the target directory.
  */
-#define __WASI_RIGHTS_PATH_RENAME_TARGET ((__wasi_rights_t)(1 << 17))
+#define __WASI_RIGHTS_PATH_RENAME_TARGET ((__wasi_rights_t)+(1 << 17))
 
 /**
  * The right to invoke `path_filestat_get`.
  */
-#define __WASI_RIGHTS_PATH_FILESTAT_GET ((__wasi_rights_t)(1 << 18))
+#define __WASI_RIGHTS_PATH_FILESTAT_GET ((__wasi_rights_t)+(1 << 18))
 
 /**
  * The right to change a file's size (there is no `path_filestat_set_size`).
  * If `path_open` is set, includes the right to invoke `path_open` with `oflags::trunc`.
  */
-#define __WASI_RIGHTS_PATH_FILESTAT_SET_SIZE ((__wasi_rights_t)(1 << 19))
+#define __WASI_RIGHTS_PATH_FILESTAT_SET_SIZE ((__wasi_rights_t)+(1 << 19))
 
 /**
  * The right to invoke `path_filestat_set_times`.
  */
-#define __WASI_RIGHTS_PATH_FILESTAT_SET_TIMES ((__wasi_rights_t)(1 << 20))
+#define __WASI_RIGHTS_PATH_FILESTAT_SET_TIMES ((__wasi_rights_t)+(1 << 20))
 
 /**
  * The right to invoke `fd_filestat_get`.
  */
-#define __WASI_RIGHTS_FD_FILESTAT_GET ((__wasi_rights_t)(1 << 21))
+#define __WASI_RIGHTS_FD_FILESTAT_GET ((__wasi_rights_t)+(1 << 21))
 
 /**
  * The right to invoke `fd_filestat_set_size`.
  */
-#define __WASI_RIGHTS_FD_FILESTAT_SET_SIZE ((__wasi_rights_t)(1 << 22))
+#define __WASI_RIGHTS_FD_FILESTAT_SET_SIZE ((__wasi_rights_t)+(1 << 22))
 
 /**
  * The right to invoke `fd_filestat_set_times`.
  */
-#define __WASI_RIGHTS_FD_FILESTAT_SET_TIMES ((__wasi_rights_t)(1 << 23))
+#define __WASI_RIGHTS_FD_FILESTAT_SET_TIMES ((__wasi_rights_t)+(1 << 23))
 
 /**
  * The right to invoke `path_symlink`.
  */
-#define __WASI_RIGHTS_PATH_SYMLINK ((__wasi_rights_t)(1 << 24))
+#define __WASI_RIGHTS_PATH_SYMLINK ((__wasi_rights_t)+(1 << 24))
 
 /**
  * The right to invoke `path_remove_directory`.
  */
-#define __WASI_RIGHTS_PATH_REMOVE_DIRECTORY ((__wasi_rights_t)(1 << 25))
+#define __WASI_RIGHTS_PATH_REMOVE_DIRECTORY ((__wasi_rights_t)+(1 << 25))
 
 /**
  * The right to invoke `path_unlink_file`.
  */
-#define __WASI_RIGHTS_PATH_UNLINK_FILE ((__wasi_rights_t)(1 << 26))
+#define __WASI_RIGHTS_PATH_UNLINK_FILE ((__wasi_rights_t)+(1 << 26))
 
 /**
  * If `rights::fd_read` is set, includes the right to invoke `poll_oneoff` to subscribe to `eventtype::fd_read`.
  * If `rights::fd_write` is set, includes the right to invoke `poll_oneoff` to subscribe to `eventtype::fd_write`.
  */
-#define __WASI_RIGHTS_POLL_FD_READWRITE ((__wasi_rights_t)(1 << 27))
+#define __WASI_RIGHTS_POLL_FD_READWRITE ((__wasi_rights_t)+(1 << 27))
 
 /**
  * The right to invoke `sock_shutdown`.
  */
-#define __WASI_RIGHTS_SOCK_SHUTDOWN ((__wasi_rights_t)(1 << 28))
+#define __WASI_RIGHTS_SOCK_SHUTDOWN ((__wasi_rights_t)+(1 << 28))
 
 /**
  * The right to invoke `sock_accept`.
  */
-#define __WASI_RIGHTS_SOCK_ACCEPT ((__wasi_rights_t)(1 << 29))
+#define __WASI_RIGHTS_SOCK_ACCEPT ((__wasi_rights_t)+(1 << 29))
 
 /**
  * A file descriptor handle.
@@ -900,29 +900,29 @@ typedef uint16_t __wasi_fdflags_t;
 /**
  * Append mode: Data written to the file is always appended to the file's end.
  */
-#define __WASI_FDFLAGS_APPEND ((__wasi_fdflags_t)(1 << 0))
+#define __WASI_FDFLAGS_APPEND ((__wasi_fdflags_t)+(1 << 0))
 
 /**
  * Write according to synchronized I/O data integrity completion. Only the data stored in the file is synchronized.
  */
-#define __WASI_FDFLAGS_DSYNC ((__wasi_fdflags_t)(1 << 1))
+#define __WASI_FDFLAGS_DSYNC ((__wasi_fdflags_t)+(1 << 1))
 
 /**
  * Non-blocking mode.
  */
-#define __WASI_FDFLAGS_NONBLOCK ((__wasi_fdflags_t)(1 << 2))
+#define __WASI_FDFLAGS_NONBLOCK ((__wasi_fdflags_t)+(1 << 2))
 
 /**
  * Synchronized read I/O operations.
  */
-#define __WASI_FDFLAGS_RSYNC ((__wasi_fdflags_t)(1 << 3))
+#define __WASI_FDFLAGS_RSYNC ((__wasi_fdflags_t)+(1 << 3))
 
 /**
  * Write according to synchronized I/O file integrity completion. In
  * addition to synchronizing the data stored in the file, the implementation
  * may also synchronously update the file's metadata.
  */
-#define __WASI_FDFLAGS_SYNC ((__wasi_fdflags_t)(1 << 4))
+#define __WASI_FDFLAGS_SYNC ((__wasi_fdflags_t)+(1 << 4))
 
 /**
  * File descriptor attributes.
@@ -975,22 +975,22 @@ typedef uint16_t __wasi_fstflags_t;
 /**
  * Adjust the last data access timestamp to the value stored in `filestat::atim`.
  */
-#define __WASI_FSTFLAGS_ATIM ((__wasi_fstflags_t)(1 << 0))
+#define __WASI_FSTFLAGS_ATIM ((__wasi_fstflags_t)+(1 << 0))
 
 /**
  * Adjust the last data access timestamp to the time of clock `clockid::realtime`.
  */
-#define __WASI_FSTFLAGS_ATIM_NOW ((__wasi_fstflags_t)(1 << 1))
+#define __WASI_FSTFLAGS_ATIM_NOW ((__wasi_fstflags_t)+(1 << 1))
 
 /**
  * Adjust the last data modification timestamp to the value stored in `filestat::mtim`.
  */
-#define __WASI_FSTFLAGS_MTIM ((__wasi_fstflags_t)(1 << 2))
+#define __WASI_FSTFLAGS_MTIM ((__wasi_fstflags_t)+(1 << 2))
 
 /**
  * Adjust the last data modification timestamp to the time of clock `clockid::realtime`.
  */
-#define __WASI_FSTFLAGS_MTIM_NOW ((__wasi_fstflags_t)(1 << 3))
+#define __WASI_FSTFLAGS_MTIM_NOW ((__wasi_fstflags_t)+(1 << 3))
 
 /**
  * Flags determining the method of how paths are resolved.
@@ -1000,7 +1000,7 @@ typedef uint32_t __wasi_lookupflags_t;
 /**
  * As long as the resolved path corresponds to a symbolic link, it is expanded.
  */
-#define __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW ((__wasi_lookupflags_t)(1 << 0))
+#define __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW ((__wasi_lookupflags_t)+(1 << 0))
 
 /**
  * Open flags used by `path_open`.
@@ -1010,22 +1010,22 @@ typedef uint16_t __wasi_oflags_t;
 /**
  * Create file if it does not exist.
  */
-#define __WASI_OFLAGS_CREAT ((__wasi_oflags_t)(1 << 0))
+#define __WASI_OFLAGS_CREAT ((__wasi_oflags_t)+(1 << 0))
 
 /**
  * Fail if not a directory.
  */
-#define __WASI_OFLAGS_DIRECTORY ((__wasi_oflags_t)(1 << 1))
+#define __WASI_OFLAGS_DIRECTORY ((__wasi_oflags_t)+(1 << 1))
 
 /**
  * Fail if file already exists.
  */
-#define __WASI_OFLAGS_EXCL ((__wasi_oflags_t)(1 << 2))
+#define __WASI_OFLAGS_EXCL ((__wasi_oflags_t)+(1 << 2))
 
 /**
  * Truncate file to size 0.
  */
-#define __WASI_OFLAGS_TRUNC ((__wasi_oflags_t)(1 << 3))
+#define __WASI_OFLAGS_TRUNC ((__wasi_oflags_t)+(1 << 3))
 
 /**
  * Number of hard links to an inode.
@@ -1136,7 +1136,7 @@ typedef uint16_t __wasi_eventrwflags_t;
 /**
  * The peer of this socket has closed or disconnected.
  */
-#define __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP ((__wasi_eventrwflags_t)(1 << 0))
+#define __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP ((__wasi_eventrwflags_t)+(1 << 0))
 
 /**
  * The contents of an `event` when type is `eventtype::fd_read` or
@@ -1207,7 +1207,7 @@ typedef uint16_t __wasi_subclockflags_t;
  * provided in `subscription_clock::timeout` relative to the
  * current time value of clock `subscription_clock::id`.
  */
-#define __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME ((__wasi_subclockflags_t)(1 << 0))
+#define __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME ((__wasi_subclockflags_t)+(1 << 0))
 
 /**
  * The contents of a `subscription` when type is `eventtype::clock`.
@@ -1507,12 +1507,12 @@ typedef uint16_t __wasi_riflags_t;
 /**
  * Returns the message without removing it from the socket's receive queue.
  */
-#define __WASI_RIFLAGS_RECV_PEEK ((__wasi_riflags_t)(1 << 0))
+#define __WASI_RIFLAGS_RECV_PEEK ((__wasi_riflags_t)+(1 << 0))
 
 /**
  * On byte-stream sockets, block until the full amount of data can be returned.
  */
-#define __WASI_RIFLAGS_RECV_WAITALL ((__wasi_riflags_t)(1 << 1))
+#define __WASI_RIFLAGS_RECV_WAITALL ((__wasi_riflags_t)+(1 << 1))
 
 /**
  * Flags returned by `sock_recv`.
@@ -1522,7 +1522,7 @@ typedef uint16_t __wasi_roflags_t;
 /**
  * Returned by `sock_recv`: Message data has been truncated.
  */
-#define __WASI_ROFLAGS_RECV_DATA_TRUNCATED ((__wasi_roflags_t)(1 << 0))
+#define __WASI_ROFLAGS_RECV_DATA_TRUNCATED ((__wasi_roflags_t)+(1 << 0))
 
 /**
  * Flags provided to `sock_send`. As there are currently no flags
@@ -1541,12 +1541,12 @@ typedef uint8_t __wasi_sdflags_t;
 /**
  * Disables further receive operations.
  */
-#define __WASI_SDFLAGS_RD ((__wasi_sdflags_t)(1 << 0))
+#define __WASI_SDFLAGS_RD ((__wasi_sdflags_t)+(1 << 0))
 
 /**
  * Disables further send operations.
  */
-#define __WASI_SDFLAGS_WR ((__wasi_sdflags_t)(1 << 1))
+#define __WASI_SDFLAGS_WR ((__wasi_sdflags_t)+(1 << 1))
 
 /**
  * Identifiers for preopened capabilities.

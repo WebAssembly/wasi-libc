@@ -1543,6 +1543,7 @@ sigprocmask
 sigqueue
 sigrelse
 sigset
+sigsetjmp
 sigsuspend
 sigtimedwait
 sigwait

@@ -262,11 +262,11 @@ static const struct policy {
 	unsigned char len, mask;
 	unsigned char prec, label;
 } defpolicy[] = {
-	{ "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\1", 15, 0xff, 50, 0 },
-	{ "\0\0\0\0\0\0\0\0\0\0\xff\xff", 11, 0xff, 35, 4 },
-	{ "\x20\2", 1, 0xff, 30, 2 },
-	{ "\x20\1", 3, 0xff, 5, 5 },
-	{ "\xfc", 0, 0xfe, 3, 13 },
+	{ {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, 15, 0xff, 50, 0 },
+	{ {0,0,0,0,0,0,0,0,0,0,0xff,0xff,0,0,0,0}, 11, 0xff, 35, 4 },
+	{ {0x20,0x02,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 1, 0xff, 30, 2 },
+	{ {0x20,0x01,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 3, 0xff, 5, 5 },
+	{ {0xfc,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 0, 0xfe, 3, 13 },
 #if 0
 	/* These are deprecated and/or returned to the address
 	 * pool, so despite the RFC, treating them as special
@@ -276,7 +276,7 @@ static const struct policy {
 	{ "\x3f\xfe", 1, 0xff, 1, 12 },
 #endif
 	/* Last rule must match all addresses to stop loop. */
-	{ "", 0, 0, 40, 1 },
+	{ {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, 0, 0, 40, 1 },
 };
 
 static const struct policy *policyof(const struct in6_addr *a)

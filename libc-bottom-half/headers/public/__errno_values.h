@@ -83,7 +83,66 @@
 #define EMEMVIOLATION __WASI_ERRNO_MEMVIOLATION
 #define EUNKNOWN __WASI_ERRNO_UNKNOWN
 
+#define EPENDING __WASI_ERRNO_PENDING
 #define EOPNOTSUPP ENOTSUP
 #define EWOULDBLOCK EAGAIN
+
+// The defines below are unused and only provided for compatibility with the error codes defined in common libc implementations.
+// If we start using an errorcode, it will be changed to an actual error code.
+#define ENOTBLK 200
+#define ECHRNG 201
+#define EL2NSYNC 202
+#define EL3HLT 203
+#define EL3RST 204
+#define ELNRNG 205
+#define EUNATCH 206
+#define ENOCSI 207
+#define EL2HLT 208
+#define EBADE 209
+#define EBADR 210
+#define EXFULL 211
+#define ENOANO 212
+#define EBADRQC 213
+#define EBADSLT 214
+#define EBFONT 215
+#define ENOSTR 216
+#define ENODATA 217
+#define ETIME 218
+#define ENOSR 219
+#define ENONET 220
+#define ENOPKG 221
+#define EREMOTE 222
+#define EADV 223
+#define ESRMNT 224
+#define ECOMM 225
+#define EDOTDOT 226
+#define ENOTUNIQ 227
+#define EBADFD 228
+#define EREMCHG 229
+#define ELIBACC 230
+#define ELIBBAD 231
+#define ELIBSCN 232
+#define ELIBMAX 233
+#define ELIBEXEC 234
+#define ERESTART 235
+#define ESTRPIPE 236
+#define EUSERS 237
+#define ESOCKTNOSUPPORT 238
+#define EPFNOSUPPORT 239
+#define ETOOMANYREFS 240
+#define EHOSTDOWN 241
+#define EUCLEAN 242
+#define ENOTNAM 243
+#define ENAVAIL 244
+#define EISNAM 245
+#define EREMOTEIO 246
+#define ENOMEDIUM 247
+#define EMEDIUMTYPE 248
+#define ENOKEY 249
+#define EKEYEXPIRED 250
+#define EKEYREVOKED 251
+#define EKEYREJECTED 252
+#define ERFKILL 253
+#define EHWPOISON 254
 
 #endif

@@ -1143,7 +1143,7 @@ __wasi_errno_t __wasi_dlsym(
     return (uint16_t) ret;
 }
 
-int32_t __imported_wasix_32v1_call_dynamic(int32_t arg0, int32_t arg1, int32_t arg2) __attribute__((
+int32_t __imported_wasix_32v1_call_dynamic(int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4) __attribute__((
     __import_module__("wasix_32v1"),
     __import_name__("call_dynamic")
 ));
@@ -1151,9 +1151,11 @@ int32_t __imported_wasix_32v1_call_dynamic(int32_t arg0, int32_t arg1, int32_t a
 __wasi_errno_t __wasi_call_dynamic(
     __wasi_function_pointer_t function_id,
     uint8_t * values,
-    uint8_t * results
+    __wasi_pointersize_t values_len,
+    uint8_t * results,
+    __wasi_pointersize_t results_len
 ){
-    int32_t ret = __imported_wasix_32v1_call_dynamic((int32_t) function_id, (int32_t) values, (int32_t) results);
+    int32_t ret = __imported_wasix_32v1_call_dynamic((int32_t) function_id, (int32_t) values, (int32_t) values_len, (int32_t) results, (int32_t) results_len);
     return (uint16_t) ret;
 }
 

@@ -5048,6 +5048,7 @@ __wasi_errno_t __wasi_call_dynamic(
      * being the i32 and the next 8 bytes being the i64.
      */
     uint8_t * values,
+    __wasi_pointersize_t values_len,
     /**
      * A pointer to a buffer for the results of the function call.
      * 
@@ -5056,7 +5057,8 @@ __wasi_errno_t __wasi_call_dynamic(
      * parameters, i.e. the buffer needs to be large enough
      * to hold all the results sequentially.
      */
-    uint8_t * results
+    uint8_t * results,
+    __wasi_pointersize_t results_len
 ) __attribute__((__warn_unused_result__));
 /**
  * Prepare a closure for execution.

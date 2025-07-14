@@ -200,9 +200,6 @@
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc-nocwd.h>
 #include <wasi/libc.h>
-#include <wasix/call_dynamic.h>
-#include <wasix/closure.h>
-#include <wasix/function_pointer.h>
-#include <wasix/value_type.h>
+#include <wasix/dyncall.h>
 #include <wchar.h>
 #include <wctype.h>

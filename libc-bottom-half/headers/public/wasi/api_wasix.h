@@ -5047,8 +5047,11 @@ __wasi_errno_t __wasi_call_dynamic(
      * buffer will be 12 bytes long, with the first 4 bytes
      * being the i32 and the next 8 bytes being the i64.
      */
-    uint8_t * values,
-    __wasi_pointersize_t values_len,
+    const uint8_t *values,
+    /**
+     * The length of the array pointed to by `values`.
+     */
+    size_t values_len,
     /**
      * A pointer to a buffer for the results of the function call.
      * 
@@ -5058,7 +5061,18 @@ __wasi_errno_t __wasi_call_dynamic(
      * to hold all the results sequentially.
      */
     uint8_t * results,
-    __wasi_pointersize_t results_len
+    __wasi_pointersize_t results_len,
+    /**
+     * 
+     * If this is set to true, the function will return an error if the
+     * length and types of the parameters and results do not match the
+     * function signature.
+     * 
+     * If this is set to false, the function will not perform any checks.
+     * Any missing bytes will be assumed to be zero and any extra bytes
+     * will be ignored.
+     */
+    __wasi_bool_t strict
 ) __attribute__((__warn_unused_result__));
 /**
  * Prepare a closure for execution.

@@ -201,5 +201,6 @@
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc-nocwd.h>
 #include <wasi/libc.h>
+#include <wasix/dyncall.h>
 #include <wchar.h>
 #include <wctype.h>

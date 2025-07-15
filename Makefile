@@ -207,6 +207,10 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         stat/futimesat.c \
         legacy/getpagesize.c \
         thread/thrd_sleep.c \
+        wasix/call_dynamic.c \
+        wasix/closure_allocate.c \
+        wasix/closure_free.c \
+        wasix/closure_prepare.c \
     ) \
     $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/*.c)) \

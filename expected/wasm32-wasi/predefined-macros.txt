@@ -4954,6 +4954,11 @@
 #define VTDLY 0040000
 #define VTIME 5
 #define VWERASE 14
+#define WASIX_VALUE_TYPE_F32 __WASI_WASM_VALUE_TYPE_F32
+#define WASIX_VALUE_TYPE_F64 __WASI_WASM_VALUE_TYPE_F64
+#define WASIX_VALUE_TYPE_I32 __WASI_WASM_VALUE_TYPE_I32
+#define WASIX_VALUE_TYPE_I64 __WASI_WASM_VALUE_TYPE_I64
+#define WASIX_VALUE_TYPE_V128 __WASI_WASM_VALUE_TYPE_V128
 #define WCHAR_MAX (0x7fffffff+L'\0')
 #define WCHAR_MIN (-1-0x7fffffff+L'\0')
 #define WCONTINUED 8
@@ -6498,6 +6503,11 @@
 #define __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME ((__wasi_subclockflags_t)+(1 << 0))
 #define __WASI_THREAD_FLAGS_DLERROR_FLAG ((__wasi_thread_flags_t)+(1 << 1))
 #define __WASI_THREAD_FLAGS_TSD_USED ((__wasi_thread_flags_t)+(1 << 0))
+#define __WASI_WASM_VALUE_TYPE_F32 (UINT8_C(2))
+#define __WASI_WASM_VALUE_TYPE_F64 (UINT8_C(3))
+#define __WASI_WASM_VALUE_TYPE_I32 (UINT8_C(0))
+#define __WASI_WASM_VALUE_TYPE_I64 (UINT8_C(1))
+#define __WASI_WASM_VALUE_TYPE_V128 (UINT8_C(4))
 #define __WASI_WHENCE_CUR (UINT8_C(1))
 #define __WASI_WHENCE_END (UINT8_C(2))
 #define __WASI_WHENCE_SET (UINT8_C(0))
@@ -6944,6 +6954,9 @@
 #define va_end(ap) __builtin_va_end(ap)
 #define va_start(ap,param) __builtin_va_start(ap, param)
 #define versionsort64 versionsort
+#define wasix_call_dynamic_h 
+#define wasix_function_pointer_t __wasi_function_pointer_t
+#define wasix_value_type_t __wasi_wasm_value_type_t
 #define xEOF 236
 #define xor ^
 #define xor_eq ^=

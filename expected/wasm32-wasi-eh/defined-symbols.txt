@@ -368,11 +368,15 @@ __vmlock_lockptr
 __wait
 __wasi_args_get
 __wasi_args_sizes_get
+__wasi_call_dynamic
 __wasi_callback_signal
 __wasi_chdir
 __wasi_clock_res_get
 __wasi_clock_time_get
 __wasi_clock_time_set
+__wasi_closure_allocate
+__wasi_closure_free
+__wasi_closure_prepare
 __wasi_dl_invalid_handle
 __wasi_dlopen
 __wasi_dlsym
@@ -1739,6 +1743,10 @@ wait3
 wait4
 waitpid
 wasi_thread_start
+wasix_call_dynamic
+wasix_closure_allocate
+wasix_closure_free
+wasix_closure_prepare
 wasix_proc_snapshot
 wcpcpy
 wcpncpy

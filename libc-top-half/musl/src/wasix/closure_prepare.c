@@ -1,12 +1,12 @@
-#include <wasix/dyncall.h>
+#include <wasix/closure.h>
 #include <errno.h>
 
 int wasix_closure_prepare(
-    wasix_function_pointer_t backing_function_id,
-    wasix_function_pointer_t closure_id,
-    const wasix_value_type_t *argument_types,
+    wasix_function_pointer backing_function_id,
+    wasix_function_pointer closure_id,
+    const wasix_value_type *argument_types,
     size_t argument_types_len,
-    const wasix_value_type_t *result_types,
+    const wasix_value_type *result_types,
     size_t result_types_len,
     void *user_data_ptr)
 {

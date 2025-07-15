@@ -1,7 +1,10 @@
-#include <wasix/dyncall.h>
+#include <wasix/closure.h>
 #include <errno.h>
 
-int wasix_closure_allocate(wasix_function_pointer_t *ret_closure)
+/**
+ * Allocate a closure for use with the closure_prepare function.
+ */
+int wasix_closure_allocate(wasix_function_pointer *ret_closure)
 {
     int err = __wasi_closure_allocate(ret_closure);
 

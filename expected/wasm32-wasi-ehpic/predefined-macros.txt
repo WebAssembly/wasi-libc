@@ -6960,10 +6960,10 @@
 #define versionsort64 versionsort
 #define wasix_call_dynamic_h 
 #define wasix_closure_h 
-#define wasix_function_pointer __wasi_function_pointer_t
 #define wasix_function_pointer_h 
-#define wasix_value_type __wasi_wasm_value_type_t
+#define wasix_function_pointer_t __wasi_function_pointer_t
 #define wasix_value_type_h 
+#define wasix_value_type_t __wasi_wasm_value_type_t
 #define xEOF 236
 #define xor ^
 #define xor_eq ^=

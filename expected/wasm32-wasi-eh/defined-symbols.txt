@@ -1743,6 +1743,10 @@ wait3
 wait4
 waitpid
 wasi_thread_start
+wasix_call_dynamic
+wasix_closure_allocate
+wasix_closure_free
+wasix_closure_prepare
 wasix_proc_snapshot
 wcpcpy
 wcpncpy

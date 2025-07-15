@@ -535,15 +535,7 @@ wasix-headers:
 	cargo run --manifest-path tools/wasix-headers/Cargo.toml generate-libc
 
 post-finish: finish
-ifeq ($(TARGET_TRIPLE), wasm32-wasi)
-	cd $(SYSROOT_LIB) && \
-	mv libc.a libc-old.a && \
-	$(AR) -M < $(CURDIR)/tools/append-builtins/$(TARGET_TRIPLE).mri && \
-	rm libc-old.a
-endif
-
 	rm -f sysroot/lib/wasm32-wasi/libc-printscan-log-double.a
-# sh -c 'rm -rf ./sysroot32/ && mkdir -p ./sysroot32/ && cp -r --preserve=timestamps ./sysroot/. ./sysroot32/' || true
 
 $(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
 

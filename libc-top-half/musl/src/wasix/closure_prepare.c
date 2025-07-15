@@ -1,4 +1,4 @@
-#include <wasix/dyncall.h>
+#include <wasix/closure.h>
 #include <errno.h>
 
 int wasix_closure_prepare(

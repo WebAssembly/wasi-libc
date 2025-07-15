@@ -693,6 +693,7 @@ cfsetspeed
 chdir
 chdir_legacy
 chmod
+chown
 cimag
 cimagf
 cimagl
@@ -832,6 +833,8 @@ fabsl
 faccessat
 fchmod
 fchmodat
+fchown
+fchownat
 fclose
 fcntl
 fcvt
@@ -1133,6 +1136,7 @@ kill
 killpg
 l64a
 labs
+lchown
 lckpwdf
 lcong48
 ldexp

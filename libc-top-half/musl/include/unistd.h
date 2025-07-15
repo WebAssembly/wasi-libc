@@ -89,12 +89,16 @@ ssize_t write(int, const void *, size_t);
 ssize_t pread(int, void *, size_t, off_t);
 ssize_t pwrite(int, const void *, size_t, off_t);
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no chown */
+// TODO: Actually implement ownership in WASIX
+
+// Only mocked in WASIX. Trying to change ownership to anyone but 0:0 will return ENOSYS.
 int chown(const char *, uid_t, gid_t);
+// Only mocked in WASIX. Trying to change ownership to anyone but 0:0 will return ENOSYS.
 int fchown(int, uid_t, gid_t);
+// Only mocked in WASIX. Trying to change ownership to anyone but 0:0 will return ENOSYS.
 int lchown(const char *, uid_t, gid_t);
+// Only mocked in WASIX. Trying to change ownership to anyone but 0:0 will return ENOSYS.
 int fchownat(int, const char *, uid_t, gid_t, int);
-#endif
 
 int link(const char *, const char *);
 int linkat(int, const char *, int, const char *, int);

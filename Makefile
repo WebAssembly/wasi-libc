@@ -199,6 +199,10 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         unistd/ualarm.c \
         unistd/ttyname.c \
         unistd/ttyname_r.c \
+        unistd/chown.c \
+        unistd/fchown.c \
+        unistd/fchownat.c \
+        unistd/lchown.c \
         linux/wait3.c \
         linux/wait4.c \
         linux/epoll.c \

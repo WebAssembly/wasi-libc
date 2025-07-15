@@ -15,8 +15,8 @@ void test(char *ptr, size_t length, void *want) {
 int main(void) {
   char *const LIMIT = (char *)(__builtin_wasm_memory_size(0) * PAGESIZE);
 
-  for (size_t length = 0; length < 64; length++) {
-    for (size_t alignment = 0; alignment < 24; alignment++) {
+  for (ptrdiff_t length = 0; length < 64; length++) {
+    for (ptrdiff_t alignment = 0; alignment < 24; alignment++) {
       for (ptrdiff_t pos = -2; pos < length + 2; pos++) {
         // Create a buffer with the given length, at a pointer with the given
         // alignment. Using the offset LIMIT - PAGESIZE - 8 means many buffers
@@ -26,10 +26,10 @@ int main(void) {
         char *ptr = LIMIT - PAGESIZE - 8 + alignment;
         memset(LIMIT - 2 * PAGESIZE, 0, 2 * PAGESIZE);
         memset(ptr, 5, length);
-        ptr[pos] = 7;
 
         // The first instance of the character is found.
         if (pos >= 0) ptr[pos + 2] = 7;
+        ptr[pos] = 7;
 
         // The character is found if it's within range.
         test(ptr, length, 0 <= pos && pos < length ? &ptr[pos] : NULL);

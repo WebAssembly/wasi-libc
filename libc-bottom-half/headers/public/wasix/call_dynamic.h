@@ -30,7 +30,7 @@ int wasix_call_dynamic(
      * Your module needs to either import or export the table to be able
      * to call this function.
      */
-    wasix_function_pointer function_id,
+    wasix_function_pointer_t function_id,
     /**
      * A buffer with the parameters to pass to the function.
      * This buffer is expected to contain all parameters sequentially

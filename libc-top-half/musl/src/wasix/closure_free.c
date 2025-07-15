@@ -1,7 +1,7 @@
 #include <wasix/closure.h>
 #include <errno.h>
 
-int wasix_closure_free(wasix_function_pointer closure)
+int wasix_closure_free(wasix_function_pointer_t closure)
 {
     int err = __wasi_closure_free(closure);
 

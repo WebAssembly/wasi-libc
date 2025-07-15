@@ -10,7 +10,7 @@ extern "C"
 {
 #endif
 
-#define wasix_function_pointer __wasi_function_pointer_t
+#define wasix_function_pointer_t __wasi_function_pointer_t
 
 #ifdef __cplusplus
 }

@@ -16,7 +16,7 @@ extern "C"
 #define WASIX_VALUE_TYPE_F64 __WASI_WASM_VALUE_TYPE_F64
 #define WASIX_VALUE_TYPE_V128 __WASI_WASM_VALUE_TYPE_V128
 
-#define wasix_value_type __wasi_wasm_value_type_t
+#define wasix_value_type_t __wasi_wasm_value_type_t
 
 #ifdef __cplusplus
 }

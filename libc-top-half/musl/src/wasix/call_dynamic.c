@@ -2,7 +2,7 @@
 #include <errno.h>
 
 int wasix_call_dynamic(
-    wasix_function_pointer function_id,
+    wasix_function_pointer_t function_id,
     void *values,
     size_t values_len,
     void *results,

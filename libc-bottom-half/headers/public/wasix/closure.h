@@ -27,18 +27,18 @@ int wasix_closure_prepare(
      *   uint8_t* results - a pointer to a buffer where the results will be written. See call_dynamic for more details.
      *   void* user_data_ptr - the user_data_ptr that was passed to closure_prepare
      */
-    wasix_function_pointer backing_function_id,
+    wasix_function_pointer_t backing_function_id,
     /**
      * An index into the indirect function table that was previously allocated with closure_alloc
      *
      * After closure_prepare the slot in the indirect function table will contain a funcref to a closure with the requested signature.
      * Every call to the closure will be translated to a call to the backing function.
      */
-    wasix_function_pointer closure_id,
+    wasix_function_pointer_t closure_id,
     /**
      * A list of types of the arguments that the closure will take.
      */
-    const wasix_value_type *argument_types,
+    const wasix_value_type_t *argument_types,
     /**
      * The length of the array pointed to by `argument_types`.
      */
@@ -46,7 +46,7 @@ int wasix_closure_prepare(
     /**
      * A list of types that the closure will return.
      */
-    const wasix_value_type *result_types,
+    const wasix_value_type_t *result_types,
     /**
      * The length of the array pointed to by `result_types`.
      */
@@ -60,7 +60,7 @@ int wasix_closure_prepare(
  * Allocate a closure for use with the closure_prepare function.
  */
 int wasix_closure_allocate(
-    wasix_function_pointer *ret_closure);
+    wasix_function_pointer_t *ret_closure);
 
 /**
  * Free a closure that was previously allocated with closure_allocate.
@@ -71,7 +71,7 @@ int wasix_closure_free(
     /**
      * An index into the indirect function table that was previously allocated with closure_allocate
      */
-    wasix_function_pointer closure);
+    wasix_function_pointer_t closure);
 
 #ifdef __cplusplus
 }

@@ -5,6 +5,8 @@ set -Eeuxo pipefail
 export TARGET_ARCH=wasm32
 export TARGET_OS=wasix
 
+CHECK_SYMBOLS=${CHECK_SYMBOLS:-yes}
+
 # Build the compiler runtime lib
 mkdir -p build/compiler-rt
 cd build/compiler-rt
@@ -65,7 +67,7 @@ cat > libc-bottom-half/headers/public/wasi/api.h<<EOF
 #include "api_poly.h"
 EOF
 
-make PIC=yes -j 16 -f Makefile-eh
+make PIC=yes CHECK_SYMBOLS=$CHECK_SYMBOLS -j 16 -f Makefile-eh
 rm -f sysroot/lib/wasm32-wasi/libc-printscan-long-double.a
 
 # Build C++ sysroot

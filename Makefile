@@ -23,6 +23,11 @@ BUILD_LIBC_TOP_HALF ?= yes
 OBJDIR ?= build/$(TARGET_TRIPLE)
 # Whether to compile with PIC (needed for shared libs and dynamic linking)
 PIC ?= no
+# Whether to verify the build symbols against the expected symbol list.
+# Disabling this is useful for development, where differences in the
+# exact version of clang can cause some symbols (especially macros) to
+# be added or removed.
+CHECK_SYMBOLS ?= yes
 
 # When the length is no larger than this threshold, we consider the
 # overhead of bulk memory opcodes to outweigh the performance benefit,
@@ -680,7 +685,9 @@ finish: startup_files libc
 # alloctor (providing malloc, calloc, free, etc). Skip this step if the build
 # is done without a malloc implementation.
 ifneq ($(MALLOC_IMPL),none)
+ifneq ($(CHECK_SYMBOLS),no)
 finish: check-symbols
+endif
 endif
 
 DEFINED_SYMBOLS = $(SYSROOT_SHARE)/defined-symbols.txt

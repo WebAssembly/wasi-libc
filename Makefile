@@ -23,10 +23,40 @@ MALLOC_IMPL ?= dlmalloc
 BUILD_LIBC_TOP_HALF ?= yes
 # yes or no
 BUILD_LIBSETJMP ?= yes
-# The directory where we will store intermediate artifacts.
-OBJDIR ?= build/$(TARGET_TRIPLE)
 # 64 bit wasm?
 WASM64 ?= no
+
+# Threaded version necessitates a different target, as objects from different
+# targets can't be mixed together while linking.
+
+ifeq ($(THREAD_MODEL), posix)
+THREADS_SUFFIX=-threads
+else
+THREADS_SUFFIX=
+endif
+
+ifeq ($(WASM64), yes)
+WASM_SUFFIX=64
+else
+WASM_SUFFIX=32
+endif
+
+TARGET_TRIPLE ?= wasm${WASM_SUFFIX}-wasi$(WASI_SNAPSHOT)${THREADS_SUFFIX}
+
+ifeq ($(TARGET_TRIPLE), wasm32-wasi)
+EXPECTED_TARGET_TRIPLE = wasm32-wasip1
+else ifeq ($(TARGET_TRIPLE), wasm32-wasi-threads)
+EXPECTED_TARGET_TRIPLE = wasm32-wasip1-threads
+else ifeq ($(TARGET_TRIPLE), wasm64-wasi)
+EXPECTED_TARGET_TRIPLE = wasm64-wasip1
+else ifeq ($(TARGET_TRIPLE), wasm64-wasi-threads)
+EXPECTED_TARGET_TRIPLE = wasm64-wasip1-threads
+else
+EXPECTED_TARGET_TRIPLE = ${TARGET_TRIPLE}
+endif
+
+# The directory where we will store intermediate artifacts.
+OBJDIR ?= build/$(TARGET_TRIPLE)
 
 # LTO; no, full, or thin
 # Note: thin LTO here is just for experimentation. It has known issues:
@@ -47,35 +77,6 @@ BULK_MEMORY_THRESHOLD ?= 32
 
 # Variables from this point on are not meant to be overridable via the
 # make command-line.
-
-# Threaded version necessitates a different target, as objects from different
-# targets can't be mixed together while linking.
-
-ifeq ($(THREAD_MODEL), posix)
-THREADS_SUFFIX=-threads
-else
-THREADS_SUFFIX=
-endif
-
-ifeq ($(WASM64), yes)
-WASM_SUFFIX=64
-else
-WASM_SUFFIX=32
-endif
-
-TARGET_TRIPLE = wasm${WASM_SUFFIX}-wasi$(WASI_SNAPSHOT)${THREADS_SUFFIX}
-
-ifeq ($(TARGET_TRIPLE), wasm32-wasi)
-EXPECTED_TARGET_TRIPLE = wasm32-wasip1
-else ifeq ($(TARGET_TRIPLE), wasm32-wasi-threads)
-EXPECTED_TARGET_TRIPLE = wasm32-wasip1-threads
-else ifeq ($(TARGET_TRIPLE), wasm64-wasi)
-EXPECTED_TARGET_TRIPLE = wasm64-wasip1
-else ifeq ($(TARGET_TRIPLE), wasm64-wasi-threads)
-EXPECTED_TARGET_TRIPLE = wasm64-wasip1-threads
-else
-EXPECTED_TARGET_TRIPLE = ${TARGET_TRIPLE}
-endif
 
 EXPECTED_TARGET_DIR = expected/${EXPECTED_TARGET_TRIPLE}
 # These artifacts are "stamps" that we use to mark that some task (e.g., copying

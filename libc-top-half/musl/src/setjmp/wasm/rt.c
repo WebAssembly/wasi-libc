@@ -48,7 +48,7 @@ __wasm_setjmp(void *env, size_t label, void *func_invocation_id)
         jb->label = label;
 }
 
-uint32_t
+size_t
 __wasm_setjmp_test(void *env, void *func_invocation_id)
 {
         struct jmp_buf_impl *jb = env;

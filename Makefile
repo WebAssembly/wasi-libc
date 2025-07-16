@@ -37,13 +37,6 @@ ifneq ($(LTO),no)
 CLANG_VERSION ?= $(shell ${CC} -dumpversion)
 override OBJDIR := $(OBJDIR)/llvm-lto/$(CLANG_VERSION)
 endif
-# The directory where we store files and tools for generating WASIp2 bindings
-BINDING_WORK_DIR ?= build/bindings
-# URL from which to retrieve the WIT files used to generate the WASIp2 bindings
-WASI_CLI_URL ?= https://github.com/WebAssembly/wasi-cli/archive/refs/tags/v0.2.0.tar.gz
-# URL from which to retrieve the `wit-bindgen` command used to generate the
-# WASIp2 bindings.
-WIT_BINDGEN_URL ?= https://github.com/bytecodealliance/wit-bindgen/releases/download/wit-bindgen-cli-0.17.0/wit-bindgen-v0.17.0-x86_64-linux.tar.gz
 
 # When the length is no larger than this threshold, we consider the
 # overhead of bulk memory opcodes to outweigh the performance benefit,
@@ -88,8 +81,6 @@ EXPECTED_TARGET_DIR = expected/${EXPECTED_TARGET_TRIPLE}
 # These artifacts are "stamps" that we use to mark that some task (e.g., copying
 # files) has been completed.
 INCLUDE_DIRS := $(OBJDIR)/copy-include-headers.stamp
-
-BUILTINS_LIB ?= $(shell ${CC} ${CFLAGS} --print-libgcc-file-name)
 
 # These variables describe the locations of various files and directories in
 # the source tree.
@@ -169,7 +160,7 @@ LIBWASI_EMULATED_SIGNAL_MUSL_SOURCES = \
 LIBWASI_EMULATED_PTHREAD_SOURCES = \
     $(STUB_PTHREADS_DIR)/stub-pthreads-emulated.c
 LIBDL_SOURCES = $(LIBC_TOP_HALF_MUSL_SRC_DIR)/misc/dl.c
-LIBSETJMP_SOURCES = $(LIBC_TOP_HALF_MUSL_SRC_DIR)/setjmp/wasm32/rt.c
+LIBSETJMP_SOURCES = $(LIBC_TOP_HALF_MUSL_SRC_DIR)/setjmp/wasm/rt.c
 LIBC_BOTTOM_HALF_CRT_SOURCES = $(wildcard $(LIBC_BOTTOM_HALF_DIR)/crt/*.c)
 LIBC_TOP_HALF_DIR = libc-top-half
 LIBC_TOP_HALF_MUSL_DIR = $(LIBC_TOP_HALF_DIR)/musl
@@ -249,7 +240,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         legacy/getpagesize.c \
         thread/thrd_sleep.c \
     ) \
-    $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c, \
+    $(filter-out %/procfdname.c %/syscall.c %/syscall_ret.c %/vdso.c %/version.c %/emulate_wait4.c, \
                  $(wildcard $(LIBC_TOP_HALF_MUSL_SRC_DIR)/internal/*.c)) \
     $(filter-out %/flockfile.c %/funlockfile.c %/__lockfile.c %/ftrylockfile.c \
                  %/rename.c \
@@ -290,7 +281,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
 LIBC_NONLTO_SOURCES = \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
         exit/atexit.c \
-        setjmp/wasm32/rt.c \
+        setjmp/wasm/rt.c \
     )
 
 ifeq ($(WASI_SNAPSHOT), p2)
@@ -395,6 +386,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/sem_trywait.c \
         thread/sem_wait.c \
         thread/wasm/wasi_thread_start.s \
+        thread/wasm/__wasilibc_busywait.c \
     )
 endif
 ifeq ($(THREAD_MODEL), single)
@@ -448,7 +440,8 @@ CFLAGS += -Wall -Wextra -Werror \
   -Wno-missing-braces \
   -Wno-ignored-pragmas \
   -Wno-unused-but-set-variable \
-  -Wno-unknown-warning-option
+  -Wno-unknown-warning-option \
+  -Wno-unterminated-string-initialization
 
 # Configure support for threads.
 ifeq ($(THREAD_MODEL), single)
@@ -547,86 +540,6 @@ endif
 SYSROOT_INC = $(SYSROOT)/include/$(TARGET_TRIPLE)
 SYSROOT_SHARE = $(SYSROOT)/share/$(TARGET_TRIPLE)
 
-# Files from musl's include directory that we don't want to install in the
-# sysroot's include directory.
-MUSL_OMIT_HEADERS :=
-
-# Remove files which aren't headers (we generate alltypes.h below).
-MUSL_OMIT_HEADERS += \
-    "bits/syscall.h.in" \
-    "bits/alltypes.h.in" \
-    "alltypes.h.in"
-
-# Use the compiler's version of these headers.
-MUSL_OMIT_HEADERS += \
-    "stdarg.h" \
-    "stddef.h"
-
-# Use the WASI errno definitions.
-MUSL_OMIT_HEADERS += \
-    "bits/errno.h"
-
-# Remove headers that aren't supported yet or that aren't relevant for WASI.
-MUSL_OMIT_HEADERS += \
-    "sys/procfs.h" \
-    "sys/user.h" \
-    "sys/kd.h" "sys/vt.h" "sys/soundcard.h" "sys/sem.h" \
-    "sys/shm.h" "sys/msg.h" "sys/ipc.h" "sys/ptrace.h" \
-    "sys/statfs.h" \
-    "bits/kd.h" "bits/vt.h" "bits/soundcard.h" "bits/sem.h" \
-    "bits/shm.h" "bits/msg.h" "bits/ipc.h" "bits/ptrace.h" \
-    "bits/statfs.h" \
-    "sys/vfs.h" \
-    "syslog.h" "sys/syslog.h" \
-    "wait.h" "sys/wait.h" \
-    "ucontext.h" "sys/ucontext.h" \
-    "paths.h" \
-    "utmp.h" "utmpx.h" \
-    "lastlog.h" \
-    "sys/acct.h" \
-    "sys/cachectl.h" \
-    "sys/epoll.h" "sys/reboot.h" "sys/swap.h" \
-    "sys/sendfile.h" "sys/inotify.h" \
-    "sys/quota.h" \
-    "sys/klog.h" \
-    "sys/fsuid.h" \
-    "sys/io.h" \
-    "sys/prctl.h" \
-    "sys/mtio.h" \
-    "sys/mount.h" \
-    "sys/fanotify.h" \
-    "sys/personality.h" \
-    "elf.h" "link.h" "bits/link.h" \
-    "scsi/scsi.h" "scsi/scsi_ioctl.h" "scsi/sg.h" \
-    "sys/auxv.h" \
-    "pwd.h" "shadow.h" "grp.h" \
-    "mntent.h" \
-    "resolv.h" \
-    "pty.h" \
-    "ulimit.h" \
-    "sys/xattr.h" \
-    "wordexp.h" \
-    "spawn.h" \
-    "sys/membarrier.h" \
-    "sys/signalfd.h" \
-    "termios.h" \
-    "sys/termios.h" \
-    "bits/termios.h" \
-    "net/if.h" \
-    "net/if_arp.h" \
-    "net/ethernet.h" \
-    "net/route.h" \
-    "netinet/if_ether.h" \
-    "netinet/ether.h" \
-    "sys/timerfd.h" \
-    "libintl.h" \
-    "sys/sysmacros.h" \
-    "aio.h"
-
-ifeq ($(WASI_SNAPSHOT), p1)
-MUSL_OMIT_HEADERS += "netdb.h"
-endif
-
 default: finish
 
 LIBC_SO_OBJS = $(patsubst %.o,%.pic.o,$(filter-out $(MUSL_PRINTSCAN_OBJS),$(LIBC_OBJS)))
@@ -663,6 +576,49 @@ PIC_OBJS = \
 	$(LIBC_BOTTOM_HALF_CRT_OBJS) \
 	$(FTS_SO_OBJS)
 
+# Figure out what to do about compiler-rt.
+#
+# The compiler-rt library is not built here in the wasi-libc repository, but it
+# is required to link artifacts. Notably `libc.so` and test and such all require
+# it to exist. Currently the ways this is handled are:
+#
+# * If `BUILTINS_LIB` is defined at build time then that's assumed to be a path
+#   to the libcompiler-rt.a. That's then ingested into the build here and copied
+#   around to special locations to get the `*.so` rules below to work (see docs
+#   there).
+#
+# * If `BUILTINS_LIB` is not defined then a known-good copy is downloaded from
+#   wasi-sdk CI and used instead.
+#
+# In the future this may also want some form of configuration to support
+# assuming the system compiler has a compiler-rt, e.g. if $(SYSTEM_BUILTINS_LIB)
+# exists that should be used instead.
+SYSTEM_BUILTINS_LIB := $(shell ${CC} ${CFLAGS} --print-libgcc-file-name)
+SYSTEM_RESOURCE_DIR := $(shell ${CC} ${CFLAGS} -print-resource-dir)
+BUILTINS_LIB_REL := $(subst $(SYSTEM_RESOURCE_DIR),,$(SYSTEM_BUILTINS_LIB))
+TMP_RESOURCE_DIR := $(OBJDIR)/resource-dir
+BUILTINS_LIB_PATH := $(TMP_RESOURCE_DIR)/$(BUILTINS_LIB_REL)
+BUILTINS_LIB_DIR := $(dir $(BUILTINS_LIB_PATH))
+
+ifneq ($(BUILTINS_LIB),)
+$(BUILTINS_LIB_PATH): $(BUILTINS_LIB)
+	mkdir -p $(BUILTINS_LIB_DIR)
+	cp $(BUILTINS_LIB) $(BUILTINS_LIB_PATH)
+else
+
+BUILTINS_URL := https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-25/libclang_rt.builtins-wasm32-wasi-25.0.tar.gz
+
+$(BUILTINS_LIB_PATH):
+	mkdir -p $(BUILTINS_LIB_DIR)
+	curl -sSfL $(BUILTINS_URL) | \
+		tar xzf - -C $(BUILTINS_LIB_DIR) --strip-components 1
+	if [ ! -f $(BUILTINS_LIB_PATH) ]; then \
+	  mv $(BUILTINS_LIB_DIR)/*.a $(BUILTINS_LIB_PATH); \
+	fi
+endif
+
+builtins: $(BUILTINS_LIB_PATH)
+
 # TODO: Specify SDK version, e.g. libc.so.wasi-sdk-21, as SO_NAME once `wasm-ld`
 # supports it.
 #
@@ -671,20 +627,34 @@ PIC_OBJS = \
 # to CC.  This is a workaround for a Windows command line size limitation.  See
 # the `%.a` rule below for details.
 
-# Note: libc.so is special because it shouldn't link to libc.so.
+# Note: libc.so is special because it shouldn't link to libc.so, and the
+# -nodefaultlibs flag here disables the default `-lc` logic that clang
+# has. Note though that this also disables linking of compiler-rt
+# libraries so that is explicitly passed in via `$(BUILTINS_LIB_PATH)`
+#
 # Note: --allow-undefined-file=linker-provided-symbols.txt is
 # a workaround for https://github.com/llvm/llvm-project/issues/103592
-$(SYSROOT_LIB)/libc.so: $(OBJDIR)/libc.so.a $(BUILTINS_LIB)
-	$(CC) $(EXTRA_CFLAGS) --target=${TARGET_TRIPLE} -nodefaultlibs \
-	-shared --sysroot=$(SYSROOT) \
-	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive $(BUILTINS_LIB) \
-	-Wl,--allow-undefined-file=linker-provided-symbols.txt
-
-$(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(SYSROOT_LIB)/libc.so
-	$(CC) $(EXTRA_CFLAGS) --target=${TARGET_TRIPLE} \
+$(SYSROOT_LIB)/libc.so: $(OBJDIR)/libc.so.a $(BUILTINS_LIB_PATH)
+	$(CC) --target=${TARGET_TRIPLE} -nodefaultlibs \
 	-shared --sysroot=$(SYSROOT) \
 	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive \
-	-Wl,--allow-undefined-file=linker-provided-symbols.txt
+	-Wl,--allow-undefined-file=linker-provided-symbols.txt \
+	$(BUILTINS_LIB_PATH) \
+	$(EXTRA_CFLAGS) $(LDFLAGS)
+
+# Note that unlike `libc.so` above this rule does not pass `-nodefaultlibs`
+# which means that libc will be linked by default. Additionally clang will try
+# to find, locate, and link compiler-rt. To get compiler-rt to work a
+# `-resource-dir` argument is passed to ensure that our custom
+# `TMP_RESOURCE_DIR` built here locally is used instead of the system directory
+# which may or may not already have compiler-rt.
+$(SYSROOT_LIB)/%.so: $(OBJDIR)/%.so.a $(SYSROOT_LIB)/libc.so
+	$(CC) --target=${TARGET_TRIPLE} \
+	-shared --sysroot=$(SYSROOT) \
+	-o $@ -Wl,--whole-archive $< -Wl,--no-whole-archive \
+	-Wl,--allow-undefined-file=linker-provided-symbols.txt \
+	-resource-dir $(TMP_RESOURCE_DIR) \
+	$(EXTRA_CFLAGS) $(LDFLAGS)
 
 $(OBJDIR)/libc.so.a: $(LIBC_SO_OBJS) $(MUSL_PRINTSCAN_LONG_DOUBLE_SO_OBJS)
 
@@ -792,7 +762,7 @@ $(OBJDIR)/%.o: %.s $(INCLUDE_DIRS)
 $(DLMALLOC_OBJS) $(DLMALLOC_SO_OBJS): CFLAGS += \
     -I$(DLMALLOC_INC)
 
-startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS) $(LIBC_BOTTOM_HALF_ALL_SO_OBJS): CFLAGS += \
+$(STARTUP_FILES) $(LIBC_BOTTOM_HALF_ALL_OBJS) $(LIBC_BOTTOM_HALF_ALL_SO_OBJS): CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_HEADERS_PRIVATE) \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC_INC) \
     -I$(LIBC_BOTTOM_HALF_CLOUDLIBC_SRC) \
@@ -838,43 +808,23 @@ $(INCLUDE_DIRS): $(ALL_POSSIBLE_HEADERS)
 	#
 	# Install the include files.
 	#
-	mkdir -p "$(SYSROOT_INC)"
-	cp -r "$(LIBC_BOTTOM_HALF_HEADERS_PUBLIC)"/* "$(SYSROOT_INC)"
-
-	# Generate musl's bits/alltypes.h header.
-	mkdir -p "$(SYSROOT_INC)/bits"
-	sed -f $(LIBC_TOP_HALF_MUSL_DIR)/tools/mkalltypes.sed \
-	    $(LIBC_TOP_HALF_MUSL_DIR)/arch/wasm/bits/alltypes.h.in \
-	    $(LIBC_TOP_HALF_MUSL_DIR)/include/alltypes.h.in \
-	    > "$(SYSROOT_INC)/bits/alltypes.h"
-
-	# Copy in the bulk of musl's public header files.
-	cp -r "$(LIBC_TOP_HALF_MUSL_INC)"/* "$(SYSROOT_INC)"
-
-	# Copy in the musl's "bits" header files.
-	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/generic/bits/* "$(SYSROOT_INC)/bits"
-	cp -r "$(LIBC_TOP_HALF_MUSL_DIR)"/arch/wasm/bits/* "$(SYSROOT_INC)/bits"
-
-	# Copy in the fts header files.
-	cp "$(MUSL_FTS_SRC_DIR)/fts.h" "$(SYSROOT_INC)/fts.h"
-
-	# Remove selected header files.
-	$(RM) $(patsubst %,$(SYSROOT_INC)/%,$(MUSL_OMIT_HEADERS))
-ifeq ($(WASI_SNAPSHOT), p2)
-	printf '#ifndef __wasilibc_use_wasip2\n#define __wasilibc_use_wasip2\n#endif\n' \
-		> "$(SYSROOT_INC)/__wasi_snapshot.h"
-endif
-
+	SYSROOT_INC=$(SYSROOT_INC) TARGET_TRIPLE=$(TARGET_TRIPLE) \
+	    $(CURDIR)/scripts/install-include-headers.sh
 	# Stamp the include installation.
 	@mkdir -p $(@D)
 	touch $@
 
-startup_files: $(INCLUDE_DIRS) $(LIBC_BOTTOM_HALF_CRT_OBJS)
+STARTUP_FILES := $(OBJDIR)/copy-startup-files.stamp
+$(STARTUP_FILES): $(INCLUDE_DIRS) $(LIBC_BOTTOM_HALF_CRT_OBJS)
 	#
-	# Install the startup files (crt1.o etc).
+	# Install the startup files (crt1.o, etc.).
 	#
-	mkdir -p "$(SYSROOT_LIB)" && \
+	mkdir -p "$(SYSROOT_LIB)"
 	cp $(LIBC_BOTTOM_HALF_CRT_OBJS) "$(SYSROOT_LIB)"
+
+	# Stamp the startup file installation.
+	@mkdir -p $(@D)
+	touch $@
 
 # TODO: As of this writing, wasi_thread_start.s uses non-position-independent
 # code, and I'm not sure how to make it position-independent.  Once we've done
@@ -927,10 +877,12 @@ $(DUMMY_LIBS):
 	    $(AR) crs "$$lib"; \
 	done
 
-finish: startup_files libc $(DUMMY_LIBS)
+no-check-symbols: $(STARTUP_FILES) libc $(DUMMY_LIBS)
 	#
 	# The build succeeded! The generated sysroot is in $(SYSROOT).
 	#
+
+finish: no-check-symbols
 
 ifeq ($(LTO),no)
 # The check for defined and undefined symbols expects there to be a heap
@@ -941,10 +893,14 @@ finish: check-symbols
 endif
 endif
 
+install: finish
+	mkdir -p "$(INSTALL_DIR)"
+	cp -p -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"
+
 DEFINED_SYMBOLS = $(SYSROOT_SHARE)/defined-symbols.txt
 UNDEFINED_SYMBOLS = $(SYSROOT_SHARE)/undefined-symbols.txt
 
-check-symbols: startup_files libc
+check-symbols: $(STARTUP_FILES) libc
 	#
 	# Collect metadata on the sysroot and perform sanity checks.
 	#
@@ -1002,14 +958,15 @@ check-symbols: startup_files libc
 	@# TODO: Filter out __GCC_(CON|DE)STRUCTIVE_SIZE that are new to clang 19.
 	@# TODO: Filter out __STDC_EMBED_* that are new to clang 19.
 	@# TODO: Filter out __*_NORM_MAX__ that are new to clang 19.
+	@# TODO: Filter out __INT*_C() that are new to clang 20.
 	@# TODO: clang defined __FLT_EVAL_METHOD__ until clang 15, so we force-undefine it
 	@# for older versions.
 	@# TODO: Undefine __wasm_mutable_globals__ and __wasm_sign_ext__, that are new to
 	@# clang 16 for -mcpu=generic.
 	@# TODO: Undefine __wasm_multivalue__ and __wasm_reference_types__, that are new to
 	@# clang 19 for -mcpu=generic.
-	@# TODO: Undefine __wasm_nontrapping_fptoint__ and __wasm_bulk_memory__, that are
-	@# new to clang 20.
+	@# TODO: Undefine __wasm_nontrapping_fptoint__, __wasm_bulk_memory__ and
+	@# __wasm_bulk_memory_opt__, that are new to clang 20.
 	@# TODO: As of clang 16, __GNUC_VA_LIST is #defined without a value.
 	$(CC) $(CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
 	    -isystem $(SYSROOT_INC) \
@@ -1024,12 +981,14 @@ check-symbols: startup_files libc
 	    -U__clang_version__ \
 	    -U__clang_literal_encoding__ \
 	    -U__clang_wide_literal_encoding__ \
+	    -U__wasm_extended_const__ \
 	    -U__wasm_mutable_globals__ \
 	    -U__wasm_sign_ext__ \
 	    -U__wasm_multivalue__ \
 	    -U__wasm_reference_types__ \
 	    -U__wasm_nontrapping_fptoint__ \
 	    $(if $(filter-out expected/wasm32-wasip1-threads,$(EXPECTED_TARGET_DIR)),-U__wasm_bulk_memory__) \
+	    -U__wasm_bulk_memory_opt__ \
 	    -U__GNUC__ \
 	    -U__GNUC_MINOR__ \
 	    -U__GNUC_PATCHLEVEL__ \
@@ -1051,15 +1010,26 @@ check-symbols: startup_files libc
 	    | grep -v '^#define __OPTIMIZE__' \
 	    | grep -v '^#define assert' \
 	    | grep -v '^#define __NO_INLINE__' \
+	    | grep -v '^#define __U\?INT.*_C(' \
 	    > "$(SYSROOT_SHARE)/predefined-macros.txt"
 
 	# Check that the computed metadata matches the expected metadata.
 	# This ignores whitespace because on Windows the output has CRLF line endings.
 	diff -wur "$(EXPECTED_TARGET_DIR)" "$(SYSROOT_SHARE)"
 
-install: finish
-	mkdir -p "$(INSTALL_DIR)"
-	cp -r "$(SYSROOT)/lib" "$(SYSROOT)/share" "$(SYSROOT)/include" "$(INSTALL_DIR)"
+
+##### BINDINGS #################################################################
+# The `bindings` target retrieves the necessary WIT files for the wasi-cli world
+# and generates a header file used by the wasip2 target.
+################################################################################
+
+# The directory where we store files and tools for generating WASIp2 bindings
+BINDING_WORK_DIR ?= build/bindings
+# URL from which to retrieve the WIT files used to generate the WASIp2 bindings
+WASI_CLI_URL ?= https://github.com/WebAssembly/wasi-cli/archive/refs/tags/v0.2.0.tar.gz
+# URL from which to retrieve the `wit-bindgen` command used to generate the
+# WASIp2 bindings.
+WIT_BINDGEN_URL ?= https://github.com/bytecodealliance/wit-bindgen/releases/download/wit-bindgen-cli-0.17.0/wit-bindgen-v0.17.0-x86_64-linux.tar.gz
 
 $(BINDING_WORK_DIR)/wasi-cli:
 	mkdir -p "$(BINDING_WORK_DIR)"
@@ -1123,4 +1093,4 @@ clean:
 	$(RM) -r "$(OBJDIR)"
 	$(RM) -r "$(SYSROOT)"
 
-.PHONY: default startup_files libc libc_so finish install clean check-symbols bindings
+.PHONY: default libc libc_so finish install clean check-symbols no-check-symbols bindings

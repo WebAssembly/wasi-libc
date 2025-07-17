@@ -1,14 +1,16 @@
 //! add-flags.py(LDFLAGS): -Wl,--stack-first -Wl,--initial-memory=327680
 
+#define _GNU_SOURCE
+
 #include <__macro_PAGESIZE.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
-void test(char *ptr, size_t length, void *want) {
-  void *got = memchr(ptr, 7, length);
+void test(char *ptr, char *want) {
+  char *got = strchrnul(ptr, 7);
   if (got != want) {
-    printf("memchr(%p, 7, %lu) = %p, want %p\n", ptr, length, got, want);
+    printf("strchrnul(%p, 7) = %p, want %p\n", ptr, got, want);
   }
 }
 
@@ -30,23 +32,26 @@ int main(void) {
         // The first instance of the character is found.
         if (pos >= 0) ptr[pos + 2] = 7;
         ptr[pos] = 7;
+        ptr[length] = 0;
 
         // The character is found if it's within range.
-        test(ptr, length, 0 <= pos && pos < length ? &ptr[pos] : NULL);
+        test(ptr, 0 <= pos && pos < length ? &ptr[pos] : &ptr[length]);
       }
     }
+
+    // We need space for the terminator.
+    if (length == 0) continue;
 
     // Ensure we never read past the end of memory.
     char *ptr = LIMIT - length;
     memset(LIMIT - 2 * PAGESIZE, 0, 2 * PAGESIZE);
     memset(ptr, 5, length);
+
     ptr[length - 1] = 7;
+    test(ptr, &ptr[length - 1]);
 
-    // Nothing found on an empty buffer.
-    test(ptr, length, length != 0 ? &ptr[length - 1] : NULL);
-
-    // Test for length overflow.
-    if (length > 0) test(ptr, SIZE_MAX, &ptr[length - 1]);
+    ptr[length - 1] = 0;
+    test(ptr, &ptr[length - 1]);
   }
 
   return 0;

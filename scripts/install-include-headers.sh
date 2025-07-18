@@ -31,11 +31,11 @@ $CP -r $WASI_LIBC/libc-top-half/musl/include/* $SYSROOT_INC
 # Copy in the musl's "bits" header files.
 $MKDIR -p $SYSROOT_INC/bits
 $CP -r $WASI_LIBC/libc-top-half/musl/arch/generic/bits/* $SYSROOT_INC/bits
-$CP -r $WASI_LIBC/libc-top-half/musl/arch/wasm32/bits/* $SYSROOT_INC/bits
+$CP -r $WASI_LIBC/libc-top-half/musl/arch/wasm/bits/* $SYSROOT_INC/bits
 
 # Generate musl's bits/alltypes.h header.
 (set -x; $SED -f $WASI_LIBC/libc-top-half/musl/tools/mkalltypes.sed \
-    $WASI_LIBC/libc-top-half/musl/arch/wasm32/bits/alltypes.h.in \
+    $WASI_LIBC/libc-top-half/musl/arch/wasm/bits/alltypes.h.in \
     $WASI_LIBC/libc-top-half/musl/include/alltypes.h.in \
     > $SYSROOT_INC/bits/alltypes.h)
 

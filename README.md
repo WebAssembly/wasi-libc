@@ -13,6 +13,8 @@ additional extensions:
     - Multicast, Anycast
     - RAW sockets
 - current directory support (`chdir`) integrated with the runtime
+- `libffi` support
+- `dlopen` / `dlsym` / `dlopen` support
 - `setjmp` / `longjmp` support (used extensively in `libc` ) via `asyncify`
 - process forking (`fork` and `vfork` )
 - subprocess spawning and waiting (`exec` , `wait` )

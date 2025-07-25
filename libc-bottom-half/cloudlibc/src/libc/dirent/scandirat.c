@@ -2,7 +2,13 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
+#ifdef __wasilibc_use_wasip2
+#include <wasi/wasip2.h>
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#else
 #include <wasi/api.h>
+#endif
 #include <wasi/libc.h>
 #include <wasi/libc-nocwd.h>
 #include <dirent.h>
@@ -28,6 +34,96 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***name
   if (sel == NULL)
     sel = sel_true;
 
+#ifdef __wasilibc_use_wasip2
+  // Open the directory.
+  int fd = __wasilibc_nocwd_openat_nomode(dirfd, dir, O_RDONLY | O_NONBLOCK | O_DIRECTORY);
+  if (fd == -1)
+    return -1;
+  DIR *dirp = fdopendir(fd);
+  if (!dirp)
+    return -1;
+  fd = dirp->fd;
+
+  // Translate the file descriptor to an internal handle
+  filesystem_borrow_directory_entry_stream_t stream;
+  filesystem_borrow_descriptor_t parent_file_handle;
+  if (!fd_to_directory_stream(fd, &stream, &parent_file_handle)) {
+    errno = EBADF;
+    return -1;
+  }
+
+  // Space for the array to return to the caller.
+  struct dirent **dirents = NULL;
+  size_t dirents_size = 0;
+  size_t dirents_used = 0;
+
+  bool ok = true;
+  filesystem_option_directory_entry_t dir_entry_optional;
+  filesystem_error_code_t error_code;
+  while (true) {
+    ok = filesystem_method_directory_entry_stream_read_directory_entry(stream,
+                                                                       &dir_entry_optional,
+                                                                       &error_code);
+    if (!ok) {
+      translate_error(error_code);
+      return -1;
+    }
+    if (!dir_entry_optional.is_some) {
+      // All directory entries have been read
+        break;
+    }
+
+    // Create the new directory entry
+    struct dirent *dirent =
+      malloc(offsetof(struct dirent, d_name) + dir_entry_optional.val.name.len + 1);
+    if (dirent == NULL) {
+      errno = EINVAL;
+      return -1;
+    }
+    dirent->d_type = dir_entry_optional.val.type;
+    memcpy(dirent->d_name, dir_entry_optional.val.name.ptr, dir_entry_optional.val.name.len);
+    dirent->d_name[dir_entry_optional.val.name.len] = '\0';
+
+    // Do an `fstatat` to get the inode number.
+    if (fstatat(fd, dirent->d_name, &statbuf, AT_SYMLINK_NOFOLLOW) != 0) {
+      errno = EBADF;
+      return -1;
+    }
+    // Fill in the inode.
+    dirent->d_ino = statbuf.st_ino;
+
+    // In case someone raced with us and replaced the object with this name
+    // with another of a different type, update the type too.
+    dirent->d_type = __wasilibc_iftodt(statbuf.st_mode & S_IFMT);
+
+    if (sel(dirent)) {
+      // Add the entry to the results
+        if (dirents_used == dirents_size) {
+          dirents_size = dirents_size < 8 ? 8 : dirents_size * 2;
+          struct dirent **new_dirents =
+            realloc(dirents, dirents_size * sizeof(*dirents));
+          if (new_dirents == NULL) {
+            free(dirent);
+            free(dirents);
+            errno = EBADF;
+            return -1;
+          }
+          dirents = new_dirents;
+        }
+        dirents[dirents_used++] = dirent;
+    } else {
+      // Discard the entry.
+        free(dirent);
+    }
+  }
+
+  // Sort results and return them
+  filesystem_directory_entry_stream_drop_borrow(stream);
+  (qsort)(dirents, dirents_used, sizeof(*dirents),
+          (int (*)(const void *, const void *))compar);
+  *namelist = dirents;
+  return dirents_used;
+#else
   // Open the directory.
   int fd = __wasilibc_nocwd_openat_nomode(dirfd, dir, O_RDONLY | O_NONBLOCK | O_DIRECTORY);
   if (fd == -1)
@@ -165,4 +261,6 @@ bad:
   free(buffer);
   close(fd);
   return -1;
+#endif
+
 }

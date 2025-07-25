@@ -180,7 +180,7 @@ int __wasilibc_find_abspath(const char *path,
                             const char **relative_path) {
     __wasilibc_populate_preopens();
 
-    // Strip leading `/` characters, the prefixes we're mataching won't have
+    // Strip leading `/` characters, the prefixes we're matching won't have
     // them.
     while (*path == '/')
         path++;

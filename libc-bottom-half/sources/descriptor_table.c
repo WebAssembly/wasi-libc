@@ -123,7 +123,8 @@ static descriptor_table_item_t *lookup(int key, size_t hash,
 }
 
 static bool insert(descriptor_table_entry_t entry, int fd,
-		   descriptor_table_t *table)
+		   descriptor_table_t *table,
+                   bool overwrite)
 {
 	if (!table->entries) {
 		if (!resize(MINSIZE, table)) {
@@ -135,7 +136,7 @@ static bool insert(descriptor_table_entry_t entry, int fd,
 	descriptor_table_item_t *e = lookup(fd, hash, table);
 
 	e->entry = entry;
-	if (!e->occupied) {
+	if (!e->occupied || overwrite) {
 		e->key = fd;
 		e->occupied = true;
 		if (++table->used > table->mask - table->mask / 4) {
@@ -223,7 +224,7 @@ static bool remove(int fd, descriptor_table_entry_t *entry,
 bool descriptor_table_insert(descriptor_table_entry_t entry, int *fd)
 {
 	if (wasi_preview1_adapter_open_badfd(fd)) {
-		if (insert(entry, *fd, &global_table)) {
+		if (insert(entry, *fd, &global_table, false)) {
 			return true;
 		} else {
 			if (!wasi_preview1_adapter_close_badfd(*fd)) {
@@ -240,6 +241,21 @@ bool descriptor_table_insert(descriptor_table_entry_t entry, int *fd)
 bool descriptor_table_get_ref(int fd, descriptor_table_entry_t **entry)
 {
 	return get(fd, entry, &global_table);
+}
+
+bool descriptor_table_update(int fd, descriptor_table_entry_t entry) {
+    if (!global_table.entries)
+        return false;
+
+    size_t hash = keyhash(fd);
+    descriptor_table_item_t *e = lookup(fd, hash, &global_table);
+    if (e->occupied) {
+        insert(entry, fd, &global_table, true);
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 bool descriptor_table_remove(int fd, descriptor_table_entry_t *entry)

@@ -106,17 +106,52 @@ typedef struct {
 	udp_socket_state_t state;
 } udp_socket_t;
 
+typedef struct {
+// Stream for contents of directory
+        filesystem_own_directory_entry_stream_t directory_stream;
+// File handle for the directory being listed
+// (so that metadata hashes can be accessed).
+        filesystem_borrow_descriptor_t directory_file_handle;
+} directory_stream_entry_t;
+
+// Stream representing an open file.
+typedef struct {
+// File was opened for reading
+         bool readable;
+// File was opened for writing
+         bool writable;
+         filesystem_borrow_descriptor_t file_handle;
+} file_t;
+
+typedef struct {
+        streams_borrow_input_stream_t read_stream;
+        streams_borrow_output_stream_t write_stream;
+        // Current position in stream, relative to the beginning of the *file*, measured in bytes
+        off_t offset;
+        // When the stream is closed, the caller should
+        // replace this entry in the table with the file handle
+        file_t file_info;
+} file_stream_t;
+
 // This is a tagged union. When adding/removing/renaming cases, be sure to keep the tag and union definitions in sync.
 typedef struct {
 	enum {
 		DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET,
 		DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET,
+                DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE,
+                DESCRIPTOR_TABLE_ENTRY_DIRECTORY_STREAM,
+                DESCRIPTOR_TABLE_ENTRY_FILE_STREAM
 	} tag;
 	union {
 		tcp_socket_t tcp_socket;
 		udp_socket_t udp_socket;
+                file_t file;
+                directory_stream_entry_t directory_stream_info;
+                file_stream_t stream;
 	};
 } descriptor_table_entry_t;
+
+bool descriptor_table_update(int fd, descriptor_table_entry_t entry);
 
 bool descriptor_table_insert(descriptor_table_entry_t entry, int *fd);
 

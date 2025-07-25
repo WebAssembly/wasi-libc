@@ -10,7 +10,11 @@
 #include <__struct_tm.h>
 #include <__typedef_clockid_t.h>
 
+#ifdef __wasilibc_use_wasip2
+#include <wasi/wasip2.h>
+#else
 #include <wasi/api.h>
+#endif
 
 #define TIMER_ABSTIME __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME
 

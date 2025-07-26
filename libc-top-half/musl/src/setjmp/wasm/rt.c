@@ -10,8 +10,8 @@
 /*
  * function prototypes
  */
-void __wasm_setjmp(void *env, uint32_t label, void *func_invocation_id);
-uint32_t __wasm_setjmp_test(void *env, void *func_invocation_id);
+void __wasm_setjmp(void *env, size_t label, void *func_invocation_id);
+size_t __wasm_setjmp_test(void *env, void *func_invocation_id);
 void __wasm_longjmp(void *env, int val);
 
 /*
@@ -20,7 +20,7 @@ void __wasm_longjmp(void *env, int val);
  */
 struct jmp_buf_impl {
         void *func_invocation_id;
-        uint32_t label;
+        size_t label;
 
         /*
          * this is a temorary storage used by the communication between
@@ -35,7 +35,7 @@ struct jmp_buf_impl {
 };
 
 void
-__wasm_setjmp(void *env, uint32_t label, void *func_invocation_id)
+__wasm_setjmp(void *env, size_t label, void *func_invocation_id)
 {
         struct jmp_buf_impl *jb = env;
         if (label == 0) { /* ABI contract */
@@ -48,7 +48,7 @@ __wasm_setjmp(void *env, uint32_t label, void *func_invocation_id)
         jb->label = label;
 }
 
-uint32_t
+size_t
 __wasm_setjmp_test(void *env, void *func_invocation_id)
 {
         struct jmp_buf_impl *jb = env;

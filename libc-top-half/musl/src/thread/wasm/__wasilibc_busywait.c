@@ -30,7 +30,11 @@
     DEFINE_GLOBAL_GETTER(name, core_type, c_type) \
     DEFINE_GLOBAL_SETTER(name, core_type, c_type)
 
+#ifdef __wasm64__
+DEFINE_RW_GLOBAL(__wasilibc_use_busy_futex, i64, int64_t)
+#else
 DEFINE_RW_GLOBAL(__wasilibc_use_busy_futex, i32, int32_t)
+#endif
 
 void __wasilibc_enable_futex_busywait_on_current_thread(void)
 {

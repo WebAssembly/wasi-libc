@@ -1,5 +1,4 @@
 __addtf3
-__data_end
 __divtf3
 __eqtf2
 __extenddftf2
@@ -7,10 +6,10 @@ __extendsftf2
 __fixtfdi
 __fixtfsi
 __fixunstfsi
+__floatditf
 __floatsitf
 __floatunsitf
 __getf2
-__global_base
 __gttf2
 __heap_base
 __heap_end
@@ -59,17 +58,12 @@ __imported_wasi_snapshot_preview1_sock_accept
 __imported_wasi_snapshot_preview1_sock_recv
 __imported_wasi_snapshot_preview1_sock_send
 __imported_wasi_snapshot_preview1_sock_shutdown
-__imported_wasi_thread_spawn
 __letf2
 __lttf2
 __netf2
 __stack_pointer
 __subtf3
-__tls_align
-__tls_size
 __trunctfdf2
 __trunctfsf2
 __unordtf2
 __wasm_call_ctors
-__wasm_init_tls
-wasi_thread_start

@@ -644,7 +644,7 @@
 #define INT32_C(c) c
 #define INT32_MAX (0x7fffffff)
 #define INT32_MIN (-1-0x7fffffff)
-#define INT64_C(c) c ## LL
+#define INT64_C(c) c ## L
 #define INT64_MAX (0x7fffffffffffffff)
 #define INT64_MIN (-1-0x7fffffffffffffff)
 #define INT8SZ NS_INT8SZ
@@ -652,11 +652,11 @@
 #define INT8_MAX (0x7f)
 #define INT8_MIN (-1-0x7f)
 #define INTBITS (sizeof(int) * 8)
-#define INTMAX_C(c) c ## LL
+#define INTMAX_C(c) c ## L
 #define INTMAX_MAX INT64_MAX
 #define INTMAX_MIN INT64_MIN
-#define INTPTR_MAX INT32_MAX
-#define INTPTR_MIN INT32_MIN
+#define INTPTR_MAX INT64_MAX
+#define INTPTR_MIN INT64_MIN
 #define INT_FAST16_MAX INT16_MAX
 #define INT_FAST16_MIN INT16_MIN
 #define INT_FAST32_MAX INT32_MAX
@@ -1018,7 +1018,7 @@
 #define LOCK_SH 1
 #define LOCK_UN 8
 #define LONGBITS (sizeof(long) * 8)
-#define LONG_BIT 32
+#define LONG_BIT 64
 #define LONG_MAX __LONG_MAX
 #define LONG_MIN (-LONG_MAX-1)
 #define L_INCR 1
@@ -1486,8 +1486,8 @@
 #define PTHREAD_SCOPE_SYSTEM 0
 #define PTHREAD_STACK_MIN 2048
 #define PTRBITS (sizeof(char *) * 8)
-#define PTRDIFF_MAX INT32_MAX
-#define PTRDIFF_MIN INT32_MIN
+#define PTRDIFF_MAX INT64_MAX
+#define PTRDIFF_MIN INT64_MIN
 #define PUTLONG NS_PUT32
 #define PUTSHORT NS_PUT16
 #define QFIXEDSZ NS_QFIXEDSZ
@@ -1625,8 +1625,6 @@
 #define SEEK_SET __WASI_WHENCE_SET
 #define SEGSIZE 512
 #define SEM_FAILED ((sem_t *)0)
-#define SEM_NSEMS_MAX 256
-#define SEM_VALUE_MAX 0x7fffffff
 #define SERVFAIL ns_r_servfail
 #define SHORTBITS (sizeof(short) * 8)
 #define SHRT_MAX 0x7fff
@@ -1636,7 +1634,7 @@
 #define SHUT_WR __WASI_SDFLAGS_WR
 #define SIG_ATOMIC_MAX INT32_MAX
 #define SIG_ATOMIC_MIN INT32_MIN
-#define SIZE_MAX UINT32_MAX
+#define SIZE_MAX UINT64_MAX
 #define SI_LOAD_SHIFT 16
 #define SLC_ABORT 7
 #define SLC_ACK 0x80
@@ -2042,13 +2040,13 @@
 #define UINT16_MAX (0xffff)
 #define UINT32_C(c) c ## U
 #define UINT32_MAX (0xffffffffu)
-#define UINT64_C(c) c ## ULL
+#define UINT64_C(c) c ## UL
 #define UINT64_MAX (0xffffffffffffffffu)
 #define UINT8_C(c) c
 #define UINT8_MAX (0xff)
-#define UINTMAX_C(c) c ## ULL
+#define UINTMAX_C(c) c ## UL
 #define UINTMAX_MAX UINT64_MAX
-#define UINTPTR_MAX UINT32_MAX
+#define UINTPTR_MAX UINT64_MAX
 #define UINT_FAST16_MAX UINT16_MAX
 #define UINT_FAST32_MAX UINT32_MAX
 #define UINT_FAST64_MAX UINT64_MAX
@@ -2154,7 +2152,6 @@
 #define _GNU_SOURCE 1
 #define _ICONV_H 
 #define _IFADDRS_H 
-#define _ILP32 1
 #define _INTTYPES_H 
 #define _IOFBF 0
 #define _IOLBF 1
@@ -2164,6 +2161,7 @@
 #define _LIBGEN_H 
 #define _LIMITS_H 
 #define _LOCALE_H 
+#define _LP64 1
 #define _MALLOC_H 
 #define _MATH_H 
 #define _MONETARY_H 
@@ -2254,12 +2252,8 @@
 #define _POSIX_STREAM_MAX 8
 #define _POSIX_SYMLINK_MAX 255
 #define _POSIX_SYMLOOP_MAX 8
-#define _POSIX_THREADS _POSIX_VERSION
-#define _POSIX_THREAD_ATTR_STACKSIZE _POSIX_VERSION
 #define _POSIX_THREAD_DESTRUCTOR_ITERATIONS 4
 #define _POSIX_THREAD_KEYS_MAX 128
-#define _POSIX_THREAD_PROCESS_SHARED _POSIX_VERSION
-#define _POSIX_THREAD_SAFE_FUNCTIONS _POSIX_VERSION
 #define _POSIX_THREAD_THREADS_MAX 64
 #define _POSIX_TIMEOUTS _POSIX_VERSION
 #define _POSIX_TIMERS _POSIX_VERSION
@@ -2276,7 +2270,6 @@
 #define _POSIX_VERSION 200809L
 #define _PTHREAD_H 
 #define _PTRDIFF_T 
-#define _REENTRANT 1
 #define _REGEX_H 
 #define _SCHED_H 
 #define _SC_2_CHAR_TERM 95
@@ -2466,6 +2459,7 @@
 #define _UTIME_H 
 #define _VALUES_H 
 #define _VA_LIST 
+#define _WASI_EMULATED_PTHREAD 
 #define _WCHAR_H 
 #define _WCHAR_T 
 #define _WCTYPE_H 
@@ -2618,7 +2612,6 @@
 #define __GNUC_STDC_INLINE__ 1
 #define __GNUC_VA_LIST 1
 #define __GXX_ABI_VERSION 1002
-#define __ILP32__ 1
 #define __INT16_C_SUFFIX__ 
 #define __INT16_FMTd__ "hd"
 #define __INT16_FMTi__ "hi"
@@ -2647,9 +2640,9 @@
 #define __INTMAX_WIDTH__ 64
 #define __INTPTR_FMTd__ "ld"
 #define __INTPTR_FMTi__ "li"
-#define __INTPTR_MAX__ 2147483647L
+#define __INTPTR_MAX__ 9223372036854775807L
 #define __INTPTR_TYPE__ long int
-#define __INTPTR_WIDTH__ 32
+#define __INTPTR_WIDTH__ 64
 #define __INT_FAST16_FMTd__ "hd"
 #define __INT_FAST16_FMTi__ "hi"
 #define __INT_FAST16_MAX__ 32767
@@ -2706,7 +2699,8 @@
 #define __LITTLE_ENDIAN__ 1
 #define __LONG_LONG_MAX__ 9223372036854775807LL
 #define __LONG_MAX __LONG_MAX__
-#define __LONG_MAX__ 2147483647L
+#define __LONG_MAX__ 9223372036854775807L
+#define __LP64__ 1
 #define __NAMESER 19991006
 #define __NEED_FILE 
 #define __NEED___isoc_va_list 
@@ -2786,13 +2780,13 @@
 #define __ORDER_LITTLE_ENDIAN__ 1234
 #define __ORDER_PDP_ENDIAN__ 3412
 #define __PDP_ENDIAN 3412
-#define __POINTER_WIDTH__ 32
+#define __POINTER_WIDTH__ 64
 #define __PRAGMA_REDEFINE_EXTNAME 1
 #define __PTRDIFF_FMTd__ "ld"
 #define __PTRDIFF_FMTi__ "li"
-#define __PTRDIFF_MAX__ 2147483647L
+#define __PTRDIFF_MAX__ 9223372036854775807L
 #define __PTRDIFF_TYPE__ long int
-#define __PTRDIFF_WIDTH__ 32
+#define __PTRDIFF_WIDTH__ 64
 #define __REDIR(x,y) __typeof__(x) x __asm__(#y)
 #define __RETCAST(x) 
 #define __RETCAST_2(x,y) 
@@ -2802,28 +2796,28 @@
 #define __SCHAR_MAX__ 127
 #define __SHRT_MAX__ 32767
 #define __SID ('S' << 8)
-#define __SIG_ATOMIC_MAX__ 2147483647L
-#define __SIG_ATOMIC_WIDTH__ 32
+#define __SIG_ATOMIC_MAX__ 9223372036854775807L
+#define __SIG_ATOMIC_WIDTH__ 64
 #define __SIZEOF_DOUBLE__ 8
 #define __SIZEOF_FLOAT__ 4
 #define __SIZEOF_INT128__ 16
 #define __SIZEOF_INT__ 4
 #define __SIZEOF_LONG_DOUBLE__ 16
 #define __SIZEOF_LONG_LONG__ 8
-#define __SIZEOF_LONG__ 4
-#define __SIZEOF_POINTER__ 4
-#define __SIZEOF_PTRDIFF_T__ 4
+#define __SIZEOF_LONG__ 8
+#define __SIZEOF_POINTER__ 8
+#define __SIZEOF_PTRDIFF_T__ 8
 #define __SIZEOF_SHORT__ 2
-#define __SIZEOF_SIZE_T__ 4
+#define __SIZEOF_SIZE_T__ 8
 #define __SIZEOF_WCHAR_T__ 4
 #define __SIZEOF_WINT_T__ 4
 #define __SIZE_FMTX__ "lX"
 #define __SIZE_FMTo__ "lo"
 #define __SIZE_FMTu__ "lu"
 #define __SIZE_FMTx__ "lx"
-#define __SIZE_MAX__ 4294967295UL
+#define __SIZE_MAX__ 18446744073709551615UL
 #define __SIZE_TYPE__ long unsigned int
-#define __SIZE_WIDTH__ 32
+#define __SIZE_WIDTH__ 64
 #define __STDARG_H 
 #define __STDC_HOSTED__ 1
 #define __STDC_IEC_559__ 1
@@ -2888,9 +2882,9 @@
 #define __UINTPTR_FMTo__ "lo"
 #define __UINTPTR_FMTu__ "lu"
 #define __UINTPTR_FMTx__ "lx"
-#define __UINTPTR_MAX__ 4294967295UL
+#define __UINTPTR_MAX__ 18446744073709551615UL
 #define __UINTPTR_TYPE__ long unsigned int
-#define __UINTPTR_WIDTH__ 32
+#define __UINTPTR_WIDTH__ 64
 #define __UINT_FAST16_FMTX__ "hX"
 #define __UINT_FAST16_FMTo__ "ho"
 #define __UINT_FAST16_FMTu__ "hu"
@@ -3132,7 +3126,7 @@
 #define __va_copy(d,s) __builtin_va_copy(d, s)
 #define __wasi__ 1
 #define __wasi_api_h 
-#define __wasi_libc_busywait_h
+#define __wasi_libc_busywait_h 
 #define __wasi_libc_environ_h 
 #define __wasi_libc_find_relpath_h 
 #define __wasi_libc_h 
@@ -3200,11 +3194,9 @@
 #define __wasilibc___typedef_time_t_h 
 #define __wasilibc___typedef_uid_t_h 
 #define __wasm 1
-#define __wasm32 1
-#define __wasm32__ 1
+#define __wasm64 1
+#define __wasm64__ 1
 #define __wasm__ 1
-#define __wasm_atomics__ 1
-#define __wasm_bulk_memory__ 1
 #define _tolower(a) ((a)|0x20)
 #define _toupper(a) ((a)&0x5f)
 #define acos(x) __tg_real_complex(acos, (x))

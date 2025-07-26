@@ -159,6 +159,26 @@ jobs:
       if: matrix.test
       run: make -C test test
 
+    - name: Build libc + threads
+      # Only build the thread-capable wasi-libc in the latest supported Clang
+      # version; the earliest version does not have all necessary builtins
+      # (e.g., `__builtin_wasm_memory_atomic_notify`).
+      if: matrix.clang_version != '10.0.0'
+      shell: bash
+      run: make -j4 THREAD_MODEL=posix
+
+    - name: Build wasm64 + libc
+      # Build wasm64
+      if: matrix.clang_version != '10.0.0'
+      shell: bash
+      run: make -j4 WASM64=yes
+
+    - name: Build wasm64 + libc + threads
+      # Build wasm64 with thread support
+      if: matrix.clang_version != '10.0.0'
+      shell: bash
+      run: make -j4 WASM64=yes THREAD_MODEL=posix
+
     - uses: actions/upload-artifact@v4.4.0
       if: matrix.upload
       with:

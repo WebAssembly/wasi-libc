@@ -336,7 +336,7 @@ pid_t gettid(void);
 #endif
 #define _POSIX_VDISABLE         0
 
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT) || !defined(_WASI_STRICT_PTHREAD)
 #define _POSIX_THREADS          _POSIX_VERSION
 #define _POSIX_THREAD_PROCESS_SHARED _POSIX_VERSION
 #define _POSIX_THREAD_SAFE_FUNCTIONS _POSIX_VERSION
@@ -344,7 +344,7 @@ pid_t gettid(void);
 #if defined(__wasilibc_unmodified_upstream) /* wasi-libc doesn't provide pthread_attr_{get,set}stackaddr */
 #define _POSIX_THREAD_ATTR_STACKADDR _POSIX_VERSION
 #endif
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT) || !defined(_WASI_STRICT_PTHREAD)
 #define _POSIX_THREAD_ATTR_STACKSIZE _POSIX_VERSION
 #endif
 #if defined(__wasilibc_unmodified_upstream) /* WASI has no scheduling control, and wasi-libc doesn't provide pthread_getcpuclockid */

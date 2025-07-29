@@ -14,6 +14,15 @@ test: run
 # Decide which target to build for and which libc to use.
 TARGET_TRIPLE ?= wasm32-wasi
 
+# See comment in ../Makefile
+ifeq ($(THREAD_MODEL), posix)
+TARGET_TRIPLE = wasm32-wasip1-threads
+endif
+
+ifeq ($(WASI_SNAPSHOT), p2)
+TARGET_TRIPLE = wasm32-wasip2
+endif
+
 # Setup various paths used by the tests.
 OBJDIR ?= build/$(TARGET_TRIPLE)
 DOWNDIR ?= build/download
@@ -134,6 +143,13 @@ BUILTINS_STAMP := $(OBJDIR)/builtins.stamp
 $(BUILTINS_STAMP):
 	make -C .. builtins
 	touch $@
+
+# For wasip2, we want clang to generate a core module rather than a component,
+# because `wasm-tools component new` is called subsequently and it expects
+# a core module.
+ifeq ($(TARGET_TRIPLE), wasm32-wasip2)
+LDFLAGS += -Wl,--skip-wit-component
+endif
 
 # Build up all the `*.wasm.o` object files; these are the same regardless of
 # whether we're building core modules or components.

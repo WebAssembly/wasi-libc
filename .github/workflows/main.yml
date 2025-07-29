@@ -22,12 +22,12 @@ jobs:
           # wasi-libc builds on these platforms by default.
           - name: Build on Linux x86_64
             os: ubuntu-24.04
-            clang_version: 16
-            upload: linux-x86_64-clang-16
+            clang_version: 19
+            upload: linux-x86_64-clang-19
           - name: Build on Linux aarch64
             os: ubuntu-24.04-arm
-            clang_version: 16
-            upload: linux-aarch64-clang-16
+            clang_version: 19
+            upload: linux-aarch64-clang-19
           - name: Build on macOS aarch64
             os: macos-15
             clang_version: 15.0.7
@@ -35,8 +35,8 @@ jobs:
             upload: macos-clang-15
           - name: Build on Windows x86_64
             os: windows-2025
-            clang_version: 16.0.0
-            upload: windows-clang-16
+            clang_version: 20.1.8
+            upload: windows-clang-20
 
           # Other versions of LLVM
           - name: Build with LLVM 11
@@ -45,12 +45,6 @@ jobs:
             upload: linux-x86_64-clang-11
             env:
               BUILD_LIBSETJMP: no
-          - name: Build with LLVM 19
-            os: ubuntu-24.04
-            clang_version: 19
-            upload: linux-x86_64-clang-19
-            env:
-              MAKE_TARGETS: "default libc_so"
           - name: Build with LLVM 18
             os: ubuntu-24.04
             clang_version: 18
@@ -58,7 +52,7 @@ jobs:
             env:
               MAKE_TARGETS: "default libc_so"
 
-          # Test various combinations of targets triples.
+          # Test various combinations of target triples.
           #
           # Configuration here can happen through `env` which is inherited to
           # jobs below. For now this only runs tests on Linux with Clang 16,
@@ -67,7 +61,7 @@ jobs:
           # ensure the PIC build works.
           - name: Test wasm32-wasi
             os: ubuntu-24.04
-            clang_version: 16
+            clang_version: 19
             test: true
             upload: wasm32-wasi
             env:
@@ -75,7 +69,7 @@ jobs:
               MAKE_TARGETS: "default libc_so"
           - name: Test wasm32-wasip1
             os: ubuntu-24.04
-            clang_version: 16
+            clang_version: 19
             test: true
             upload: wasm32-wasip1
             env:
@@ -83,7 +77,7 @@ jobs:
               MAKE_TARGETS: "default libc_so"
           - name: Test wasm32-wasip2
             os: ubuntu-24.04
-            clang_version: 16
+            clang_version: 19
             test: true
             upload: wasm32-wasip2
             env:
@@ -92,7 +86,7 @@ jobs:
               MAKE_TARGETS: "default libc_so"
           - name: Test wasm32-wasi-threads
             os: ubuntu-24.04
-            clang_version: 16
+            clang_version: 19
             test: true
             upload: wasm32-wasi-threads
             env:
@@ -100,7 +94,7 @@ jobs:
               THREAD_MODEL: posix
           - name: Test wasm32-wasip1-threads
             os: ubuntu-24.04
-            clang_version: 16
+            clang_version: 19
             test: true
             upload: wasm32-wasip1-threads
             env:
@@ -108,14 +102,14 @@ jobs:
               THREAD_MODEL: posix
           - name: Test wasm32-wasip1 in V8
             os: ubuntu-24.04
-            clang_version: 16
+            clang_version: 19
             test: true
             test_with_v8: true
             env:
               TARGET_TRIPLE: wasm32-wasip1
           - name: Test wasm32-wasip1-threads in V8
             os: ubuntu-24.04
-            clang_version: 16
+            clang_version: 19
             test: true
             test_with_v8: true
             env:
@@ -124,7 +118,7 @@ jobs:
 
           - name: Test wasm32-wasi-simd
             os: ubuntu-24.04
-            clang_version: 16
+            clang_version: 19
             test: true
             upload: wasm32-wasi-simd
             env:

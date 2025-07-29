@@ -23,6 +23,20 @@ MALLOC_IMPL ?= dlmalloc
 BUILD_LIBC_TOP_HALF ?= yes
 # yes or no
 BUILD_LIBSETJMP ?= yes
+
+# Set the default WASI target triple.
+TARGET_TRIPLE ?= wasm32-wasi
+
+# Threaded version necessitates a different target, as objects from different
+# targets can't be mixed together while linking.
+ifeq ($(THREAD_MODEL), posix)
+TARGET_TRIPLE = wasm32-wasip1-threads
+endif
+
+ifeq ($(WASI_SNAPSHOT), p2)
+TARGET_TRIPLE = wasm32-wasip2
+endif
+
 # The directory where we will store intermediate artifacts.
 OBJDIR ?= build/$(TARGET_TRIPLE)
 
@@ -45,19 +59,6 @@ BULK_MEMORY_THRESHOLD ?= 32
 
 # Variables from this point on are not meant to be overridable via the
 # make command-line.
-
-# Set the default WASI target triple.
-TARGET_TRIPLE ?= wasm32-wasi
-
-# Threaded version necessitates a different target, as objects from different
-# targets can't be mixed together while linking.
-ifeq ($(THREAD_MODEL), posix)
-TARGET_TRIPLE ?= wasm32-wasi-threads
-endif
-
-ifeq ($(WASI_SNAPSHOT), p2)
-TARGET_TRIPLE ?= wasm32-wasip2
-endif
 
 # These artifacts are "stamps" that we use to mark that some task (e.g., copying
 # files) has been completed.
@@ -596,7 +597,9 @@ PIC_OBJS = \
 # exists that should be used instead.
 SYSTEM_BUILTINS_LIB := $(shell ${CC} ${CFLAGS} --print-libgcc-file-name)
 SYSTEM_RESOURCE_DIR := $(shell ${CC} ${CFLAGS} -print-resource-dir)
-BUILTINS_LIB_REL := $(subst $(SYSTEM_RESOURCE_DIR),,$(SYSTEM_BUILTINS_LIB))
+BUILTINS_LIB_REL_1 := $(subst $(SYSTEM_RESOURCE_DIR),,$(SYSTEM_BUILTINS_LIB))
+# Substitute '/' for '\' so Windows paths work
+BUILTINS_LIB_REL := $(subst \,/,$(BUILTINS_LIB_REL_1))
 TMP_RESOURCE_DIR := $(OBJDIR)/resource-dir
 BUILTINS_LIB_PATH := $(TMP_RESOURCE_DIR)/$(BUILTINS_LIB_REL)
 BUILTINS_LIB_DIR := $(dir $(BUILTINS_LIB_PATH))
@@ -610,7 +613,10 @@ else
 BUILTINS_URL := https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-25/libclang_rt.builtins-wasm32-wasi-25.0.tar.gz
 
 $(BUILTINS_LIB_PATH):
-	mkdir -p $(BUILTINS_LIB_DIR)
+# mkdir on Windows will error if the directory already exists
+ifeq ("$(wildcard $(BUILTINS_LIB_DIR))","")
+	mkdir -p "$(BUILTINS_LIB_DIR)"
+endif
 	curl -sSfL $(BUILTINS_URL) | \
 		tar xzf - -C $(BUILTINS_LIB_DIR) --strip-components 1
 	if [ ! -f $(BUILTINS_LIB_PATH) ]; then \
@@ -850,7 +856,7 @@ STATIC_LIBS += \
 	$(SYSROOT_LIB)/libsetjmp.a
 endif
 
-libc: $(INCLUDE_DIRS) $(STATIC_LIBS)
+libc: $(INCLUDE_DIRS) $(STATIC_LIBS) builtins
 
 DUMMY := m rt pthread crypt util xnet resolv
 DUMMY_LIBS := $(patsubst %,$(SYSROOT_LIB)/lib%.a,$(DUMMY))

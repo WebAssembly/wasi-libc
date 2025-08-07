@@ -53,11 +53,11 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
       return -1;
     }
     output_stream = entry->stream.write_stream;
-    if (!entry->stream.pollable_is_initialized) {
-      pollable = entry->stream.pollable = streams_method_output_stream_subscribe(output_stream);
-      entry->stream.pollable_is_initialized = true;
+    if (!entry->stream.write_pollable_is_initialized) {
+      pollable = entry->stream.write_pollable = streams_method_output_stream_subscribe(output_stream);
+      entry->stream.write_pollable_is_initialized = true;
     } else
-      pollable = entry->stream.pollable;
+      pollable = entry->stream.write_pollable;
   } else {
       errno = EBADF;
       return -1;
@@ -114,8 +114,9 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
       }
       new_entry.stream.read_stream = streams_borrow_input_stream(read_stream);
     }
-    new_entry.stream.pollable = pollable;
-    new_entry.stream.pollable_is_initialized = true;
+    new_entry.stream.write_pollable = pollable;
+    new_entry.stream.read_pollable_is_initialized = false;
+    new_entry.stream.write_pollable_is_initialized = true;
     new_entry.stream.write_stream = output_stream;
     new_entry.stream.offset = contents.len;
     new_entry.stream.file_info.readable = entry->file.readable;

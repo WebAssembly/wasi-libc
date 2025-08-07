@@ -23,24 +23,22 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
   if ((flags & ~TIMER_ABSTIME) != 0)
     return EINVAL;
 
-  // Prepare polling subscription.
-  __wasi_subscription_t sub = {
-    .u.tag = __WASI_EVENTTYPE_CLOCK,
-    .u.u.clock.id = clock_id->id,
-    .u.u.clock.flags = flags,
-  };
-  // Convert to wall_clock_datetime_t
-  wall_clock_datetime_t timeout;
-  if (!timespec_to_timestamp_clamp(rqtp, &timeout))
-    return EINVAL;
-  sub.u.u.clock.timeout = (timeout.seconds * NSEC_PER_SEC)
-      + timeout.nanoseconds;
+  // Note: rmtp is ignored
+
+  if (clock_id != CLOCK_MONOTONIC) {
+    // wasip2 only provides a pollable for monotonic clocks
+    return ENOTSUP;
+  }
+
+  // Prepare pollable
+  int64_t duration = (rqtp->tv_sec * NSEC_PER_SEC) + rqtp->tv_nsec;
+  monotonic_clock_own_pollable_t pollable = monotonic_clock_subscribe_duration(duration);
 
   // Block until polling event is triggered.
-  size_t nevents;
-  __wasi_event_t ev;
-  __wasi_errno_t error = __wasi_poll_oneoff(&sub, &ev, 1, &nevents);
-  return error == 0 && ev.error == 0 ? 0 : ENOTSUP;
+  poll_method_pollable_block(poll_borrow_pollable(pollable));
+
+  poll_pollable_drop_own(pollable);
+  return 0;
 }
 #else
 int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,

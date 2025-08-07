@@ -212,6 +212,7 @@ $(RUNDIR)/%/success: $(OBJPAT)
 	@DIR="$(abspath $(@D))" \
 	  WASM="$(abspath $<)" \
 	  ENGINE="$(ENGINE) $(shell scripts/add-flags.py RUN $(call wasm_to_c,$<))" \
+          ARGS="$(shell scripts/add-flags.py ARGS $(call wasm_to_c,$<))" \
 	    scripts/run-test.sh
 
 # Use the provided Wasm engine to execute each test, emitting its output into

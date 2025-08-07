@@ -6,7 +6,7 @@
 # - a `fs` directory which the test may have used for file IO
 # - an `output.log` file containing the output of the test
 #
-# Usage: DIR=... WASM=... ENGINE=... ./run-test.sh
+# Usage: DIR=... WASM=... ENGINE=... ARGS="..." ./run-test.sh
 
 ENGINE="${ENGINE:-wasmtime}"
 [ -n "$WASM" ] || (echo "missing WASM variable" && exit 1)
@@ -14,7 +14,7 @@ ENGINE="${ENGINE:-wasmtime}"
 
 cd $DIR
 mkdir -p fs
-echo "$ENGINE $WASM" > cmd.sh
+echo "$ENGINE $WASM $ARGS" > cmd.sh
 chmod +x cmd.sh
 ./cmd.sh &> output.log
 [ $? -eq 0 ] || echo "Test failed" >> output.log

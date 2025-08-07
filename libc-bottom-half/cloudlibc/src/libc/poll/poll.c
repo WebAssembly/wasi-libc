@@ -140,7 +140,11 @@ int poll(struct pollfd* fds, nfds_t nfds, int timeout)
     for (size_t i = 0; i < nfds; ++i) {
         descriptor_table_entry_t* entry;
         if (descriptor_table_get_ref(fds[i].fd, &entry)) {
-            found_socket = true;
+            if (entry->tag == DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET
+                || entry->tag == DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET)
+                found_socket = true;
+            else
+                found_non_socket = true;
         } else {
             found_non_socket = true;
         }
@@ -155,16 +159,8 @@ int poll(struct pollfd* fds, nfds_t nfds, int timeout)
             errno = ENOTSUP;
             return -1;
         }
-
-        return poll_wasip2(fds, nfds, timeout);
-    } else if (found_non_socket) {
-        return poll_wasip1(fds, nfds, timeout);
-    } else if (timeout >= 0) {
-        return poll_wasip2(fds, nfds, timeout);
-    } else {
-        errno = ENOTSUP;
-        return -1;
     }
+    return poll_wasip2(fds, nfds, timeout);
 }
 #else // not __wasilibc_use_wasip2
 int poll(struct pollfd* fds, nfds_t nfds, int timeout)

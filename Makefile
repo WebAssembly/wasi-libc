@@ -475,6 +475,7 @@ endif
 endif
 endif
 
+CFLAGS += -D_BUILDING_WASI_LIBC
 ifeq ($(WASI_SNAPSHOT), p2)
 CFLAGS += -D__wasilibc_use_wasip2
 endif
@@ -971,7 +972,7 @@ check-symbols: $(STARTUP_FILES) libc
 	@# TODO: Undefine __wasm_nontrapping_fptoint__, __wasm_bulk_memory__ and
 	@# __wasm_bulk_memory_opt__, that are new to clang 20.
 	@# TODO: As of clang 16, __GNUC_VA_LIST is #defined without a value.
-	$(CC) $(CFLAGS) "$(SYSROOT_SHARE)/include-all.c" \
+	$(CC) $(CFLAGS) -U_BUILDING_WASI_LIBC "$(SYSROOT_SHARE)/include-all.c" \
 	    -isystem $(SYSROOT_INC) \
 	    -std=gnu17 \
 	    -E -dM -Wno-\#warnings \

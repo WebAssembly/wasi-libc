@@ -3250,7 +3250,7 @@
 #define dirent64 dirent
 #define erf(x) __tg_real(erf, (x))
 #define erfc(x) __tg_real(erfc, (x))
-#define errno errno
+#define errno (*__errno_location())
 #define exp(x) __tg_real_complex(exp, (x))
 #define exp2(x) __tg_real(exp2, (x))
 #define expm1(x) __tg_real(expm1, (x))

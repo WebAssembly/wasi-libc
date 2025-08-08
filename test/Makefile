@@ -210,8 +210,10 @@ wasm_to_c = $(patsubst $(OBJPAT),$(SRCDIR)/%.c,$1)
 $(RUNDIR)/%/success: $(OBJPAT)
 	@mkdir -p $(@D)
 	@DIR="$(abspath $(@D))" \
+	  ENV="$(shell scripts/add-flags.py ENV $(call wasm_to_c,$<))" \
 	  WASM="$(abspath $<)" \
-	  ENGINE="$(ENGINE) $(shell scripts/add-flags.py RUN $(call wasm_to_c,$<))" \
+	  ENGINE="$(ENGINE)" \
+          RUN="$(shell scripts/add-flags.py RUN $(call wasm_to_c,$<))" \
           ARGS="$(shell scripts/add-flags.py ARGS $(call wasm_to_c,$<))" \
 	    scripts/run-test.sh
 

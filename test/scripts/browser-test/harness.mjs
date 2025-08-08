@@ -24,6 +24,8 @@ const SKIP_TESTS = [
     // atomic.wait32 can't be executed on the main thread
     "libc-test/functional/pthread_mutex",
     "libc-test/functional/pthread_tsd",
+    // Skip test that uses command-line arguments
+    "misc/argv_two_args",
     // XFAIL: @bjorn3/browser_wasi_shim doesn't support symlinks for now
     "misc/fts",
 ];

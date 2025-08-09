@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#include <__wasi_snapshot.h>
 #include <features.h>
 
 #define __NEED_FILE

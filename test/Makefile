@@ -134,6 +134,10 @@ ifneq ($(findstring -threads,$(TARGET_TRIPLE)),)
 CFLAGS += -pthread
 endif
 
+ifeq ($(DEBUG), true)
+CFLAGS += -g -O0
+endif
+
 # Handle compiler-rt which is required for tests. This is done by requesting
 # that the parent directory, the main wasi-libc directory, fetch its compiler-rt
 # which will create a `resource-dir` argument which we can then add to LDFLAGS

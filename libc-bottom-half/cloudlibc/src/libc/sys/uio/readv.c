@@ -30,11 +30,15 @@ ssize_t readv(int fildes, const struct iovec *iov, int iovcnt) {
     return -1;
   }
   size_t bytes_read;
+#ifdef __wasilibc_use_wasip2
+  return preadv(fildes, iov, iovcnt, 0);
+#else
   __wasi_errno_t error = __wasi_fd_read(
       fildes, (const __wasi_iovec_t *)iov, iovcnt, &bytes_read);
   if (error != 0) {
     errno = error;
     return -1;
   }
+#endif
   return bytes_read;
 }

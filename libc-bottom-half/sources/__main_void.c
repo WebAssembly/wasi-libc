@@ -1,5 +1,6 @@
 #ifdef __wasilibc_use_wasip2
 #include <wasi/wasip2.h>
+#include <wasi/libc-environ.h>
 #else
 #include <wasi/api.h>
 #endif
@@ -108,3 +109,11 @@ int __main_void(void) {
     return __main_argc_argv(argc, argv);
 #endif
 }
+
+#ifdef __wasilibc_use_wasip2
+bool exports_wasi_cli_run_run(void) {
+    // TODO: this is supposed to be unnecessary, but functional/env.c fails without it
+    __wasilibc_initialize_environ();
+    return __main_void() == 0;
+}
+#endif

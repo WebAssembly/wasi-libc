@@ -137,13 +137,13 @@ int close(int fd) {
 
         return 0;
     }
-#endif // __wasilibc_use_wasip2
-
+#else
     __wasi_errno_t error = __wasi_fd_close(fd);
     if (error != 0) {
         errno = error;
         return -1;
     }
+#endif // __wasilibc_use_wasip2
 
     return 0;
 }

@@ -12,7 +12,7 @@ __attribute__((__import_module__("wasi:cli/environment@0.2.0"), __import_name__(
 extern void __wasm_import_environment_initial_cwd(int32_t);
 
 __attribute__((__import_module__("wasi:cli/exit@0.2.0"), __import_name__("exit")))
-extern void __wasm_import_exit_exit(int32_t);
+_Noreturn extern void __wasm_import_exit_exit(int32_t);
 
 __attribute__((__import_module__("wasi:io/error@0.2.0"), __import_name__("[method]error.to-debug-string")))
 extern void __wasm_import_io_error_method_error_to_debug_string(int32_t, int32_t);
@@ -1068,7 +1068,7 @@ bool environment_initial_cwd(wasip2_string_t *ret) {
   return option.is_some;
 }
 
-void exit_exit(exit_result_void_void_t *status) {
+_Noreturn void exit_exit(exit_result_void_void_t *status) {
   int32_t result;
   if ((*status).is_err) {
     result = 1;

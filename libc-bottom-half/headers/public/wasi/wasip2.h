@@ -1084,6 +1084,9 @@ extern bool environment_initial_cwd(wasip2_string_t *ret);
 
 // Imported Functions from `wasi:cli/exit@0.2.0`
 // Exit the current instance and any linked instances.
+// NOTE: This file has been manually edited to add the _Noreturn
+// annotation on exit_exit(). If the file is re-generated, this
+// annotation will have to be re-added.
 _Noreturn extern void exit_exit(exit_result_void_void_t *status);
 
 // Imported Functions from `wasi:io/error@0.2.0`

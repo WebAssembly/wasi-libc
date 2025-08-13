@@ -11,6 +11,9 @@ extern void __wasm_import_environment_get_arguments(int32_t);
 __attribute__((__import_module__("wasi:cli/environment@0.2.0"), __import_name__("initial-cwd")))
 extern void __wasm_import_environment_initial_cwd(int32_t);
 
+// NOTE: This file has been manually edited to add the _Noreturn
+// annotation on __wasm_import_exit_exit(). If the file is re-generated, this
+// annotation will have to be re-added.
 __attribute__((__import_module__("wasi:cli/exit@0.2.0"), __import_name__("exit")))
 _Noreturn extern void __wasm_import_exit_exit(int32_t);
 

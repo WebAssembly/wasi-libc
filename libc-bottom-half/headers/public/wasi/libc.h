@@ -3,6 +3,7 @@
 
 #include <__typedef_off_t.h>
 #include <__struct_timespec.h>
+#include <unistd.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,6 +67,10 @@ int __wasilibc_rename_newat(const char *oldpath, int newdirfd, const char *newpa
 
 /// Enable busywait in futex on current thread.
 void __wasilibc_enable_futex_busywait_on_current_thread(void);
+
+/// Fill a buffer with random bytes
+int __wasilibc_random(void* buffer, size_t len)
+   __attribute__((__warn_unused_result__));
 
 #ifdef __cplusplus
 }

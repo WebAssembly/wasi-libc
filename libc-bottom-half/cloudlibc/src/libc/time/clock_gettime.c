@@ -26,8 +26,8 @@ int __clock_gettime(clockid_t clock_id, struct timespec *tp) {
     wall_clock_now(&time_result);
     *tp = timestamp_to_timespec(&time_result);
   } else {
-    errno = __WASI_ERRNO_BADF;
-    return -1;
+    errno = EINVAL;
+    return -1; // wasip2 only supports wall and monotonic clocks
   }
 #else
   __wasi_timestamp_t ts;

@@ -14,13 +14,13 @@ _Static_assert(
 
 #ifdef __wasilibc_use_wasip2
 // Snapshot of the monotonic clock at the start of the program.
-static wall_clock_datetime_t start;
+static monotonic_clock_instant_t start;
 
 // Use a priority of 10 to run fairly early in the implementation-reserved
 // constructor priority range.
 __attribute__((constructor(10)))
 static void init(void) {
-    wall_clock_now(&start);
+    start = monotonic_clock_now();
 }
 
 // Define the libc symbol as `__clock` so that we can reliably call it
@@ -30,11 +30,8 @@ clock_t __clock(void) {
     // an inherent concept of a process. Note that this means we'll incorrectly
     // include time from other processes, so this function is only declared by
     // the headers if `_WASI_EMULATED_PROCESS_CLOCKS` is defined.
-    wall_clock_datetime_t now;
-    wall_clock_now(&now);
-    now.seconds -= start.seconds;
-    now.nanoseconds -= start.nanoseconds;
-    return (now.seconds + (now.nanoseconds * NSEC_PER_SEC));
+    monotonic_clock_instant_t now = monotonic_clock_now();
+    return now - start;
 }
 #else
 

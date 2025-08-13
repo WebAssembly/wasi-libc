@@ -100,7 +100,7 @@ static inline struct timeval instant_to_timeval(
   monotonic_clock_instant_t ns) {
     // Decompose instant into seconds and microoseconds
   return (struct timeval){.tv_sec = ns / NSEC_PER_SEC,
-                            .tv_usec = ns % 1000};
+                            .tv_usec = (ns % NSEC_PER_SEC) / 1000};
 }
 
 static inline struct timeval timestamp_to_timeval(

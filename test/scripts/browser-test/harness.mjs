@@ -26,6 +26,8 @@ const SKIP_TESTS = [
     "libc-test/functional/pthread_tsd",
     // Skip test that uses command-line arguments
     "misc/argv_two_args",
+    // Skip test that uses environment variables
+    "misc/external_env",
     // XFAIL: @bjorn3/browser_wasi_shim doesn't support symlinks for now
     "misc/fts",
 ];

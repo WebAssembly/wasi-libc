@@ -823,6 +823,8 @@ $(STARTUP_FILES): $(INCLUDE_DIRS) $(LIBC_BOTTOM_HALF_CRT_OBJS)
 	@mkdir -p $(@D)
 	touch $@
 
+startup_files: $(STARTUP_FILES)
+
 # TODO: As of this writing, wasi_thread_start.s uses non-position-independent
 # code, and I'm not sure how to make it position-independent.  Once we've done
 # that, we can enable libc.so for the wasi-threads build.
@@ -1096,4 +1098,4 @@ clean:
 	$(RM) -r "$(OBJDIR)"
 	$(RM) -r "$(SYSROOT)"
 
-.PHONY: default libc libc_so finish install clean check-symbols no-check-symbols bindings
+.PHONY: default libc libc_so finish install clean check-symbols no-check-symbols bindings startup_files

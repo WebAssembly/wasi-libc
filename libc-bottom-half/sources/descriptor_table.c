@@ -207,13 +207,8 @@ static bool remove(int fd, descriptor_table_entry_t *entry,
 
 bool descriptor_table_insert(descriptor_table_entry_t entry, int *fd)
 {
-        *fd = ++next_fd;
-        if (insert(entry, *fd, &global_table, false)) {
-                return true;
-        } else {
-                *fd = -1;
-                return false;
-        }
+       *fd = ++next_fd;
+       return insert(entry, *fd, &global_table, false);
 }
 
 bool descriptor_table_get_ref(int fd, descriptor_table_entry_t **entry)
@@ -222,18 +217,10 @@ bool descriptor_table_get_ref(int fd, descriptor_table_entry_t **entry)
 }
 
 bool descriptor_table_update(int fd, descriptor_table_entry_t entry) {
-    if (!global_table.entries)
-        return false;
+        if (!global_table.entries)
+            return false;
 
-    size_t hash = keyhash(fd);
-    descriptor_table_item_t *e = lookup(fd, hash, &global_table);
-    if (e->occupied) {
-        insert(entry, fd, &global_table, true);
-        return true;
-    }
-    else {
-        return false;
-    }
+        return insert(entry, fd, &global_table, true);
 }
 
 bool descriptor_table_remove(int fd, descriptor_table_entry_t *entry)

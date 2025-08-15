@@ -56,7 +56,7 @@ DIR *fdopendir(int fd) {
   stream_info.directory_file_handle = file_handle;
   new_entry.directory_stream_info = stream_info;
   int new_fd = -1;
-  descriptor_table_insert(new_entry, &dirp->fd);
+  descriptor_table_update(dirp->fd, new_entry);
 
   dirp->cookie = __WASI_DIRCOOKIE_START;
   dirp->buffer_processed = 0;

@@ -4,6 +4,9 @@
 #include <__typedef_off_t.h>
 #include <__struct_timespec.h>
 #include <unistd.h>
+#ifdef __wasilibc_use_wasip2
+#include <wasi/wasip2.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,9 +22,13 @@ struct timespec;
 void __wasilibc_populate_preopens(void);
 
 /// Register the given pre-opened file descriptor under the given path.
-///
-/// This function does not take ownership of `prefix` (it makes its own copy).
-int __wasilibc_register_preopened_fd(int fd, const char *prefix);
+#ifdef __wasilibc_use_wasip2
+int __wasilibc_register_preopened_fd(filesystem_preopens_own_descriptor_t fd,
+                                     wasip2_string_t relprefix);
+#else
+int __wasilibc_register_preopened_fd(int fd,
+                                     const char* prefix);
+#endif
 
 /// Renumber `fd` to `newfd`; similar to `dup2` but does a move rather than a
 /// copy.

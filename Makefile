@@ -8,7 +8,11 @@ NM ?= $(patsubst %clang,%llvm-nm,$(filter-out ccache sccache,$(CC)))
 ifeq ($(origin AR), default)
 AR = $(patsubst %clang,%llvm-ar,$(filter-out ccache sccache,$(CC)))
 endif
+ifeq ($(DEBUG), true)
+EXTRA_CFLAGS ?= -O0 -g
+else
 EXTRA_CFLAGS ?= -O2 -DNDEBUG
+endif
 # The directory where we build the sysroot.
 SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
@@ -924,8 +928,10 @@ check-symbols: $(STARTUP_FILES) libc
 	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
 	    grep -q '\<'$$undef_sym'\>' "$(DEFINED_SYMBOLS)" || echo $$undef_sym; \
 	done | grep -E -v "^__mul|__memory_base|__indirect_function_table|__tls_base" > "$(UNDEFINED_SYMBOLS)"
+ifneq ($(WASI_SNAPSHOT), p2)
 	grep '^_*imported_wasi_' "$(UNDEFINED_SYMBOLS)" \
 	    > "$(SYSROOT_LIB)/libc.imports"
+endif
 
 	#
 	# Generate a test file that includes all public C header files.
@@ -1056,7 +1062,7 @@ bindings: $(BINDING_WORK_DIR)/wasi-cli $(BINDING_WORK_DIR)/wit-bindgen
 			--autodrop-borrows yes \
 			--rename-world wasip2 \
 			--type-section-suffix __wasi_libc \
-			--world wasi:cli/imports@0.2.0 \
+			--world wasi:cli/command@0.2.0 \
 			--rename wasi:clocks/monotonic-clock@0.2.0=monotonic_clock \
 			--rename wasi:clocks/wall-clock@0.2.0=wall_clock \
 			--rename wasi:filesystem/preopens@0.2.0=filesystem_preopens \

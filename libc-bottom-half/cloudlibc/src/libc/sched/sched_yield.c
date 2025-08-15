@@ -2,10 +2,13 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
+#ifndef __wasilibc_use_wasip2
 #include <wasi/api.h>
+#endif
 #include <errno.h>
 #include <sched.h>
 
+#ifndef __wasilibc_use_wasip2
 int sched_yield(void) {
   __wasi_errno_t error = __wasi_sched_yield();
   if (error != 0) {
@@ -14,3 +17,4 @@ int sched_yield(void) {
   }
   return 0;
 }
+#endif

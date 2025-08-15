@@ -24,24 +24,6 @@
 
 #include <wasi/descriptor_table.h>
 
-__attribute__((__import_module__("wasi_snapshot_preview1"),
-	       __import_name__("adapter_open_badfd"))) extern int32_t
-	__wasi_preview1_adapter_open_badfd(int32_t);
-
-static bool wasi_preview1_adapter_open_badfd(int *fd)
-{
-	return __wasi_preview1_adapter_open_badfd((int32_t)fd) == 0;
-}
-
-__attribute__((__import_module__("wasi_snapshot_preview1"),
-	       __import_name__("adapter_close_badfd"))) extern int32_t
-	__wasi_preview1_adapter_close_badfd(int32_t);
-
-static bool wasi_preview1_adapter_close_badfd(int fd)
-{
-	return __wasi_preview1_adapter_close_badfd(fd) == 0;
-}
-
 /*
  * This hash table is based on the one in musl/src/search/hsearch.c, but uses
  * integer keys and supports a `remove` operation.  Note that I've switched from
@@ -68,6 +50,8 @@ typedef struct {
 static descriptor_table_t global_table = { .entries = NULL,
 					   .mask = 0,
 					   .used = 0 };
+
+static int next_fd = 3;
 
 static size_t keyhash(int key)
 {
@@ -123,7 +107,8 @@ static descriptor_table_item_t *lookup(int key, size_t hash,
 }
 
 static bool insert(descriptor_table_entry_t entry, int fd,
-		   descriptor_table_t *table)
+		   descriptor_table_t *table,
+                   bool overwrite)
 {
 	if (!table->entries) {
 		if (!resize(MINSIZE, table)) {
@@ -135,7 +120,7 @@ static bool insert(descriptor_table_entry_t entry, int fd,
 	descriptor_table_item_t *e = lookup(fd, hash, table);
 
 	e->entry = entry;
-	if (!e->occupied) {
+	if (!e->occupied || overwrite) {
 		e->key = fd;
 		e->occupied = true;
 		if (++table->used > table->mask - table->mask / 4) {
@@ -222,19 +207,8 @@ static bool remove(int fd, descriptor_table_entry_t *entry,
 
 bool descriptor_table_insert(descriptor_table_entry_t entry, int *fd)
 {
-	if (wasi_preview1_adapter_open_badfd(fd)) {
-		if (insert(entry, *fd, &global_table)) {
-			return true;
-		} else {
-			if (!wasi_preview1_adapter_close_badfd(*fd)) {
-				abort();
-			}
-			*fd = -1;
-			return false;
-		}
-	} else {
-		return false;
-	}
+       *fd = ++next_fd;
+       return insert(entry, *fd, &global_table, false);
 }
 
 bool descriptor_table_get_ref(int fd, descriptor_table_entry_t **entry)
@@ -242,14 +216,14 @@ bool descriptor_table_get_ref(int fd, descriptor_table_entry_t **entry)
 	return get(fd, entry, &global_table);
 }
 
+bool descriptor_table_update(int fd, descriptor_table_entry_t entry) {
+        if (!global_table.entries)
+            return false;
+
+        return insert(entry, fd, &global_table, true);
+}
+
 bool descriptor_table_remove(int fd, descriptor_table_entry_t *entry)
 {
-	if (remove(fd, entry, &global_table)) {
-		if (!wasi_preview1_adapter_close_badfd(fd)) {
-			abort();
-		}
-		return true;
-	} else {
-		return false;
-	}
+        return remove(fd, entry, &global_table);
 }

@@ -8,7 +8,13 @@
 #include <fcntl.h>
 
 #include <assert.h>
+#ifdef __wasilibc_use_wasip2
+#include <wasi/wasip2.h>
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#else
 #include <wasi/api.h>
+#endif
 #include <dirent.h>
 #include <errno.h>
 #include <stddef.h>
@@ -40,6 +46,59 @@ static_assert(DT_UNKNOWN == __WASI_FILETYPE_UNKNOWN, "Value mismatch");
     }                                               \
   } while (0)
 
+#ifdef __wasilibc_use_wasip2
+struct dirent *readdir(DIR *dirp) {
+  // Translate the file descriptor to an internal handle
+  filesystem_borrow_directory_entry_stream_t stream;
+  filesystem_borrow_descriptor_t parent_handle;
+  if (!fd_to_directory_stream(dirp->fd, &stream, &parent_handle)) {
+    errno = EBADF;
+    return NULL;
+  }
+
+  filesystem_option_directory_entry_t dir_entry_optional;
+  filesystem_error_code_t error_code;
+  bool ok = filesystem_method_directory_entry_stream_read_directory_entry(stream,
+                                                                          &dir_entry_optional,
+                                                                          &error_code);
+  if (!ok) {
+    translate_error(error_code);
+    return NULL;
+  }
+
+  if (!dir_entry_optional.is_some) {
+    // End-of-file
+    return NULL;
+  }
+
+  filesystem_directory_entry_t dir_entry = dir_entry_optional.val;
+
+  // Ensure that the dirent is large enough to fit the filename
+  size_t the_size = offsetof(struct dirent, d_name);
+  GROW(dirp->dirent, dirp->dirent_size,
+       the_size + dir_entry.name.len + 1);
+  struct dirent *dirent = dirp->dirent;
+
+  // Get the inode number
+  filesystem_path_flags_t path_flags = 0; // Don't follow symlinks
+  filesystem_metadata_hash_value_t metadata;
+  ok = filesystem_method_descriptor_metadata_hash_at(parent_handle,
+                                                     path_flags,
+                                                     &dir_entry.name,
+                                                     &metadata,
+                                                     &error_code);
+  if (!ok) {
+    translate_error(error_code);
+    return NULL;
+  }
+  dirent->d_ino = metadata.lower;
+  dirent->d_type = dir_entry.type;
+  memcpy(dirent->d_name, dir_entry.name.ptr, dir_entry.name.len);
+  dirent->d_name[dir_entry.name.len] = '\0';
+
+  return dirent;
+}
+#else
 struct dirent *readdir(DIR *dirp) {
   for (;;) {
     // Extract the next dirent header.
@@ -130,3 +189,4 @@ struct dirent *readdir(DIR *dirp) {
     dirp->buffer_processed = 0;
   }
 }
+#endif

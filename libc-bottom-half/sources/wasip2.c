@@ -1013,6 +1013,11 @@ void ip_name_lookup_result_option_ip_address_error_code_free(ip_name_lookup_resu
   }
 }
 
+void exports_wasi_cli_run_result_void_void_free(exports_wasi_cli_run_result_void_void_t *ptr) {
+  if (!ptr->is_err) {
+  }
+}
+
 void wasip2_string_set(wasip2_string_t *ret, char*s) {
   ret->ptr = (uint8_t*) s;
   ret->len = strlen(s);
@@ -1071,7 +1076,7 @@ bool environment_initial_cwd(wasip2_string_t *ret) {
   return option.is_some;
 }
 
-_Noreturn void exit_exit(exit_result_void_void_t *status) {
+void exit_exit(exit_result_void_void_t *status) {
   int32_t result;
   if ((*status).is_err) {
     result = 1;
@@ -4321,6 +4326,19 @@ void random_insecure_seed_insecure_seed(wasip2_tuple2_u64_u64_t *ret) {
     (uint64_t) (*((int64_t*) (ptr + 0))),
     (uint64_t) (*((int64_t*) (ptr + 8))),
   };
+}
+
+__attribute__((__export_name__("wasi:cli/run@0.2.0#run")))
+int32_t __wasm_export_exports_wasi_cli_run_run(void) {
+  exports_wasi_cli_run_result_void_void_t ret;
+  ret.is_err = !exports_wasi_cli_run_run();
+  int32_t result;
+  if ((ret).is_err) {
+    result = 1;
+  } else {
+    result = 0;
+  }
+  return result;
 }
 
 extern void __component_type_object_force_link_wasip2(void);

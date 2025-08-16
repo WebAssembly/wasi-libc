@@ -141,7 +141,42 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
 				}
 				break;
 			}
-
+                        case DESCRIPTOR_TABLE_ENTRY_FILE_STREAM: {
+                            file_stream_t stream = entry->stream;
+                            if ((pollfd->events & POLLRDNORM) != 0) {
+                                if (!stream.file_info.readable) {
+                                    errno = EBADF;
+                                    return -1;
+                                }
+                                streams_own_pollable_t input_stream_pollable =
+                                    streams_method_input_stream_subscribe(stream.read_stream);
+                                states[state_index++] = (state_t) {
+                                    .pollable = input_stream_pollable,
+                                    .pollfd = pollfd,
+                                    .entry = entry,
+                                    .events = pollfd->events
+                                };
+                            }
+                            if ((pollfd->events & POLLWRNORM) != 0) {
+                                if (!stream.file_info.writable) {
+                                    errno = EBADF;
+                                    return -1;
+                                }
+                                streams_own_pollable_t output_stream_pollable =
+                                    streams_method_output_stream_subscribe(stream.write_stream);
+                                states[state_index++] = (state_t){
+                                    .pollable = output_stream_pollable,
+                                    .pollfd = pollfd,
+                                    .entry = entry,
+                                    .events = pollfd->events
+                                };
+                            }
+                            break;
+                        }
+                        // File must be open
+                        case DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE:
+                                errno = EBADF;
+                                return -1;
 			default:
 				errno = ENOTSUP;
 				return -1;
@@ -238,7 +273,14 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
 					}
 					state->pollfd->revents |= state->events;
 				}
-			} else {
+			} else if (state->entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_STREAM) {
+                                poll_pollable_drop_own(state->pollable);
+				if (state->pollfd->revents == 0) {
+					++event_count;
+				}
+				state->pollfd->revents |= state->events;
+                        }
+                        else {
 				if (state->pollfd->revents == 0) {
 					++event_count;
 				}

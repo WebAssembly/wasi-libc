@@ -8,7 +8,7 @@
 FROM_DIR="${FROM_DIR:-build/download/libc-test}"
 TO_DIR="${TO_DIR:-src/libc-test}"
 # For now, only retrieve the functional tests.
-FUNCTIONAL_TESTS=$(find $FROM_DIR/src/math -name '*.c')
+FUNCTIONAL_TESTS=$(find $FROM_DIR/src/functional -name '*.c')
 
 for from in $FUNCTIONAL_TESTS; do
     to="${from/"$FROM_DIR/src"/"$TO_DIR"}"

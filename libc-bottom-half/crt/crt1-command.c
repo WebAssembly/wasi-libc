@@ -1,7 +1,7 @@
 #ifdef _REENTRANT
 #include <stdatomic.h>
-extern void __wasi_init_tp(void);
 #endif
+extern void __wasi_init_tp(void);
 #ifdef __wasilibc_use_wasip2
 #include <wasi/wasip2.h>
 #else
@@ -34,9 +34,7 @@ void _start(void) {
     started = 1;
 #endif
 
-#ifdef _REENTRANT
     __wasi_init_tp();
-#endif
 
     // The linker synthesizes this to call constructors.
     __wasm_call_ctors();

@@ -274,6 +274,7 @@ endif
 # pthreads functions (possibly stub) for either thread model
 LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
+        env/__init_tls.c \
         thread/default_attr.c \
         thread/pthread_attr_destroy.c \
         thread/pthread_attr_get.c \
@@ -293,6 +294,7 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_condattr_setclock.c \
         thread/pthread_condattr_setpshared.c \
         thread/pthread_equal.c \
+        thread/pthread_getattr_np.c \
         thread/pthread_getspecific.c \
         thread/pthread_key_create.c \
         thread/pthread_mutex_destroy.c \
@@ -320,7 +322,6 @@ ifeq ($(THREAD_MODEL), posix)
 # pthreads functions needed for actual thread support
 LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
-        env/__init_tls.c \
         stdio/__lockfile.c \
         stdio/flockfile.c \
         stdio/ftrylockfile.c \
@@ -339,7 +340,6 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         thread/pthread_cond_wait.c \
         thread/pthread_create.c \
         thread/pthread_detach.c \
-        thread/pthread_getattr_np.c \
         thread/pthread_join.c \
         thread/pthread_mutex_consistent.c \
         thread/pthread_mutex_getprioceiling.c \
@@ -384,7 +384,6 @@ LIBC_TOP_HALF_MUSL_SOURCES += \
         pthread_cond_wait.c \
         pthread_create.c \
         pthread_detach.c \
-        pthread_getattr_np.c \
         pthread_join.c \
         pthread_mutex_consistent.c \
         pthread_mutex_getprioceiling.c \

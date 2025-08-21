@@ -13,7 +13,9 @@
 #include "atomic.h"
 #include "syscall.h"
 
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 volatile int __thread_list_lock;
+#endif
 
 #ifndef __wasilibc_unmodified_upstream
 
@@ -25,9 +27,11 @@ volatile int __thread_list_lock;
  * TODO: remove usage of __heap_base/__data_end for stack size calculation
  * once we drop support for LLVM v15 and older.
  */
+#if !defined(__pic__)
 extern unsigned char __heap_base;
 extern unsigned char __data_end;
 extern unsigned char __global_base;
+#endif
 extern weak unsigned char __stack_high;
 extern weak unsigned char __stack_low;
 
@@ -44,6 +48,10 @@ static inline struct stack_bounds get_stack_bounds()
 		bounds.base = &__stack_high;
 		bounds.size = &__stack_high - &__stack_low;
 	} else {
+		/* For non-pic, make a guess using the knowledge about
+		 * how wasm-ld lays out things. For pic, just give up.
+		 */
+#if !defined(__pic__)
 		unsigned char *sp;
 		__asm__(
 			".globaltype __stack_pointer, i32\n"
@@ -57,6 +65,10 @@ static inline struct stack_bounds get_stack_bounds()
 			bounds.base = &__global_base;
 			bounds.size = (size_t)&__global_base;
 		}
+#else
+		bounds.base = 0;
+		bounds.size = 0;
+#endif
 	}
 
 	return bounds;
@@ -82,10 +94,11 @@ int __init_tp(void *p)
 	__default_stacksize =
 		bounds.size < DEFAULT_STACK_MAX ?
 		bounds.size : DEFAULT_STACK_MAX;
-	td->detach_state = DT_JOINABLE;
 	td->stack = bounds.base;
 	td->stack_size = bounds.size;
 	td->guard_size = 0;
+#ifdef _REENTRANT
+	td->detach_state = DT_JOINABLE;
 	/*
 	 * Initialize the TID to a value which doesn't conflict with
 	 * host-allocated TIDs, so that TID-based locks can work.
@@ -98,8 +111,11 @@ int __init_tp(void *p)
 	 */
 	td->tid = 0x3fffffff;
 #endif
+#endif
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	td->locale = &libc.global_locale;
 	td->robust_list.head = &td->robust_list.head;
+#endif
 	td->sysinfo = __sysinfo;
 	td->next = td->prev = td;
 	return 0;
@@ -121,6 +137,7 @@ static struct tls_module main_tls;
 extern void __wasm_init_tls(void*);
 #endif
 
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 void *__copy_tls(unsigned char *mem)
 {
 #ifdef __wasilibc_unmodified_upstream
@@ -167,6 +184,7 @@ void *__copy_tls(unsigned char *mem)
 	return mem;
 #endif
 }
+#endif /* defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT) */
 
 #ifdef __wasilibc_unmodified_upstream
 #if ULONG_MAX == 0xffffffff

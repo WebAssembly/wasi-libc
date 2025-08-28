@@ -569,6 +569,7 @@ ctime_r
 descriptor_table_get_ref
 descriptor_table_insert
 descriptor_table_remove
+descriptor_table_update
 difftime
 dirfd
 dirname
@@ -577,6 +578,8 @@ dprintf
 drand48
 drem
 dremf
+drop_directory_stream
+drop_file_handle
 drop_tcp_socket
 drop_udp_socket
 drop_udp_socket_streams

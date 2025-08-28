@@ -7,9 +7,10 @@
 #include <errno.h>
 #include <stdarg.h>
 
-#include <wasi/api.h>
 #ifdef __wasilibc_use_wasip2
 #include <wasi/descriptor_table.h>
+#else
+#include <wasi/api.h>
 #endif
 
 int ioctl(int fildes, int request, ...) {
@@ -56,7 +57,8 @@ int ioctl(int fildes, int request, ...) {
 				return -1;
 			}
 		}
-
+                // TODO: In particular, this doesn't support using FIONREAD
+                // with file descriptors
 		default:
 			errno = ENOPROTOOPT;
 			return -1;

@@ -128,6 +128,8 @@ typedef struct {
         streams_borrow_output_stream_t write_stream;
         // Current position in stream, relative to the beginning of the *file*, measured in bytes
         off_t offset;
+        // Used for checking readiness to write to stream
+        streams_own_pollable_t pollable;
         // When the stream is closed, the caller should
         // replace this entry in the table with the file handle
         file_t file_info;

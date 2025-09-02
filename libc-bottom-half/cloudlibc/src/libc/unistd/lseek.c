@@ -71,8 +71,10 @@ off_t __lseek(int fildes, off_t offset, int whence) {
     // Drop the existing streams
     if (entry->stream.file_info.readable)
       streams_input_stream_drop_borrow(entry->stream.read_stream);
-    if (entry->stream.file_info.writable)
+    if (entry->stream.file_info.writable) {
+      poll_pollable_drop_own(entry->stream.pollable);
       streams_output_stream_drop_borrow(entry->stream.write_stream);
+    }
 
     // Open a new stream with the right offset
     if (entry->stream.file_info.readable) {
@@ -103,6 +105,7 @@ off_t __lseek(int fildes, off_t offset, int whence) {
 
       // Update output_stream.stream with the new stream
       entry->stream.write_stream = streams_borrow_output_stream(new_stream);
+      entry->stream.pollable = streams_method_output_stream_subscribe(entry->stream.write_stream);
     }
 
     // Update offset

@@ -120,8 +120,10 @@ int close(int fd) {
         case DESCRIPTOR_TABLE_ENTRY_FILE_STREAM:
             if (entry.stream.file_info.readable)
                 streams_input_stream_drop_borrow(entry.stream.read_stream);
-            if (entry.stream.file_info.writable)
+            if (entry.stream.file_info.writable) {
+                poll_pollable_drop_own(entry.stream.pollable);
                 streams_output_stream_drop_borrow(entry.stream.write_stream);
+            }
             drop_file_handle(entry.stream.file_info.file_handle);
             break;
         default: /* unreachable */ abort();

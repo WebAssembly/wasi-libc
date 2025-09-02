@@ -17,16 +17,24 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
 #ifdef __wasilibc_use_wasip2
   streams_borrow_output_stream_t output_stream;
   filesystem_own_input_stream_t input_stream;
+  streams_own_pollable_t pollable;
   bool ok = false;
   bool create_new_stream = false;
   filesystem_error_code_t error_code;
   descriptor_table_entry_t* entry = 0;
+  bool drop_pollable = false;
 
   // Check for stdin/stdout/stderr
-  if (fildes == 1)
+  if (fildes == 1) {
     output_stream = streams_borrow_output_stream(stdout_get_stdout());
-  else if (fildes == 2)
+    pollable = streams_method_output_stream_subscribe(output_stream);
+    drop_pollable = true;
+  }
+  else if (fildes == 2) {
     output_stream = streams_borrow_output_stream(stderr_get_stderr());
+    pollable = streams_method_output_stream_subscribe(output_stream);
+    drop_pollable = true;
+  }
   else {
     // Translate the file descriptor to an internal handle
     descriptor_table_get_ref(fildes, &entry);
@@ -44,11 +52,13 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
         return -1;
       }
       output_stream = streams_borrow_output_stream(stream_owned);
+      pollable = streams_method_output_stream_subscribe(output_stream);
     } else if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_STREAM) {
       if (!entry->stream.file_info.writable) {
         errno = EBADF;
         return -1;
       }
+      pollable = entry->stream.pollable;
       output_stream = entry->stream.write_stream;
     } else {
       errno = EBADF;
@@ -64,13 +74,16 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
                                                 &stream_error);
   if (!ok) {
     errno = EIO;
+    if (drop_pollable)
+      poll_pollable_drop_own(pollable);
     return -1;
   }
 
-  if (num_bytes_permitted < nbyte) {
-    streams_own_pollable_t pollable = streams_method_output_stream_subscribe(output_stream);
+  if (num_bytes_permitted < nbyte)
     poll_method_pollable_block(poll_borrow_pollable(pollable));
-  }
+
+  if (drop_pollable)
+    poll_pollable_drop_own(pollable);
 
   // Convert the buffer to a WASI list of bytes
   wasip2_list_u8_t contents;
@@ -109,6 +122,7 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
       }
       new_entry.stream.read_stream = streams_borrow_input_stream(read_stream);
     }
+    new_entry.stream.pollable = pollable;
     new_entry.stream.write_stream = output_stream;
     new_entry.stream.offset = contents.len;
     new_entry.stream.file_info.readable = entry->file.readable;

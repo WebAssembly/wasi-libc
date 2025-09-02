@@ -5,6 +5,7 @@
 #ifdef __wasilibc_use_wasip2
 #include <wasi/wasip2.h>
 #include <wasi/descriptor_table.h>
+#include <wasi/file_utils.h>
 #include <common/errors.h>
 #else
 #include <wasi/api.h>
@@ -15,6 +16,10 @@
 ssize_t read(int fildes, void *buf, size_t nbyte) {
 #ifdef __wasilibc_use_wasip2
   bool ok = false;
+
+  // Check for stdin
+  if (fildes == 0)
+      init_stdin();
 
   // Translate the file descriptor to an internal handle
   descriptor_table_entry_t* entry = 0;

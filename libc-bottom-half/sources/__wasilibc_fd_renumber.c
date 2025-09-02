@@ -100,6 +100,12 @@ int close(int fd) {
     __wasilibc_populate_preopens();
 
 #ifdef __wasilibc_use_wasip2
+    // It's an error to close stdin/stdout/stderr
+    if (fd <= 2) {
+        errno = EBADF;
+        return -1;
+    }
+
     descriptor_table_entry_t entry;
     if (descriptor_table_remove(fd, &entry)) {
 

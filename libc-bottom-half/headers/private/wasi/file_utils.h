@@ -59,6 +59,53 @@ static void remove_and_drop_directory_stream(int fd) {
   }
 }
 
+// The following three functions are used for lazily initializing stdin/stdout/stderr in
+// the descriptor table. These file descriptors never need to be removed from the
+// descriptor table.
+static bool init_stdin() {
+  descriptor_table_entry_t entry;
+
+  entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
+  entry.stream.read_stream = streams_borrow_input_stream(stdin_get_stdin());
+  entry.stream.offset = 0;
+  entry.stream.file_info.readable = true;
+  entry.stream.file_info.writable = false;
+  // entry.stream.file_info.file_handle is uninitialized, but it will never be used
+
+  int fd = 0;
+  return descriptor_table_insert(entry, &fd);
+}
+
+static bool init_stdout() {
+  descriptor_table_entry_t entry;
+
+  entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
+  entry.stream.write_stream = streams_borrow_output_stream(stdout_get_stdout());
+  entry.stream.offset = 0;
+  entry.stream.pollable = streams_method_output_stream_subscribe(entry.stream.write_stream);
+  entry.stream.file_info.readable = false;
+  entry.stream.file_info.writable = true;
+  // entry.stream.file_info.file_handle is uninitialized, but it will never be used
+
+  int fd = 1;
+  return descriptor_table_insert(entry, &fd);
+}
+
+static bool init_stderr() {
+  descriptor_table_entry_t entry;
+
+  entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
+  entry.stream.write_stream = streams_borrow_output_stream(stderr_get_stderr());
+  entry.stream.offset = 0;
+  entry.stream.pollable = streams_method_output_stream_subscribe(entry.stream.write_stream);
+  entry.stream.file_info.readable = false;
+  entry.stream.file_info.writable = true;
+  // entry.stream.file_info.file_handle is uninitialized, but it will never be used
+
+  int fd = 2;
+  return descriptor_table_insert(entry, &fd);
+}
+
 #endif
 
 #endif

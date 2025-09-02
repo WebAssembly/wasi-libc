@@ -5,6 +5,7 @@
 #ifdef __wasilibc_use_wasip2
 #include <wasi/wasip2.h>
 #include <wasi/descriptor_table.h>
+#include <wasi/file_utils.h>
 #include <common/errors.h>
 #include <time.h>
 #else
@@ -22,48 +23,40 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
   bool create_new_stream = false;
   filesystem_error_code_t error_code;
   descriptor_table_entry_t* entry = 0;
-  bool drop_pollable = false;
 
-  // Check for stdin/stdout/stderr
-  if (fildes == 1) {
-    output_stream = streams_borrow_output_stream(stdout_get_stdout());
-    pollable = streams_method_output_stream_subscribe(output_stream);
-    drop_pollable = true;
-  }
-  else if (fildes == 2) {
-    output_stream = streams_borrow_output_stream(stderr_get_stderr());
-    pollable = streams_method_output_stream_subscribe(output_stream);
-    drop_pollable = true;
-  }
-  else {
-    // Translate the file descriptor to an internal handle
-    descriptor_table_get_ref(fildes, &entry);
-    if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE) {
-      create_new_stream = true;
+  // Check for stdout/stderr
+  if (fildes == 1)
+    init_stdout();
+  else if (fildes == 2)
+    init_stderr();
 
-      // Get the output stream
-      filesystem_own_output_stream_t stream_owned;
-      ok = filesystem_method_descriptor_write_via_stream(entry->file.file_handle,
-                                                         0,
-                                                         &stream_owned,
-                                                         &error_code);
-      if (!ok) {
-        translate_error(error_code);
-        return -1;
-      }
-      output_stream = streams_borrow_output_stream(stream_owned);
-      pollable = streams_method_output_stream_subscribe(output_stream);
-    } else if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_STREAM) {
-      if (!entry->stream.file_info.writable) {
-        errno = EBADF;
-        return -1;
-      }
-      pollable = entry->stream.pollable;
-      output_stream = entry->stream.write_stream;
-    } else {
+  // Translate the file descriptor to an internal handle
+  descriptor_table_get_ref(fildes, &entry);
+  if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE) {
+    create_new_stream = true;
+
+    // Get the output stream
+    filesystem_own_output_stream_t stream_owned;
+    ok = filesystem_method_descriptor_write_via_stream(entry->file.file_handle,
+                                                       0,
+                                                       &stream_owned,
+                                                       &error_code);
+    if (!ok) {
+      translate_error(error_code);
+      return -1;
+    }
+    output_stream = streams_borrow_output_stream(stream_owned);
+    pollable = streams_method_output_stream_subscribe(output_stream);
+  } else if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_STREAM) {
+    if (!entry->stream.file_info.writable) {
       errno = EBADF;
       return -1;
     }
+    pollable = entry->stream.pollable;
+    output_stream = entry->stream.write_stream;
+  } else {
+      errno = EBADF;
+      return -1;
   }
 
   // Check readiness for writing
@@ -74,16 +67,11 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
                                                 &stream_error);
   if (!ok) {
     errno = EIO;
-    if (drop_pollable)
-      poll_pollable_drop_own(pollable);
     return -1;
   }
 
   if (num_bytes_permitted < nbyte)
     poll_method_pollable_block(poll_borrow_pollable(pollable));
-
-  if (drop_pollable)
-    poll_pollable_drop_own(pollable);
 
   // Convert the buffer to a WASI list of bytes
   wasip2_list_u8_t contents;

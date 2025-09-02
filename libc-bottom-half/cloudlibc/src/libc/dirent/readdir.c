@@ -68,6 +68,7 @@ struct dirent *readdir(DIR *dirp) {
 
   if (!dir_entry_optional.is_some) {
     // End-of-file
+    remove_and_drop_directory_stream(dirp->fd);
     return NULL;
   }
 
@@ -89,6 +90,7 @@ struct dirent *readdir(DIR *dirp) {
                                                      &error_code);
   if (!ok) {
     translate_error(error_code);
+    remove_and_drop_directory_stream(dirp->fd);
     return NULL;
   }
   dirent->d_ino = metadata.lower;

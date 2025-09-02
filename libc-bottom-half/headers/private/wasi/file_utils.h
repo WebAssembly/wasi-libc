@@ -47,6 +47,18 @@ static bool fd_to_directory_stream(int fd, filesystem_borrow_directory_entry_str
   return true;
 }
 
+// Does nothing if fd is not in the descriptor table or is not bound to a directory stream
+static void remove_and_drop_directory_stream(int fd) {
+  descriptor_table_entry_t *entry = 0;
+  if (!descriptor_table_get_ref(fd, &entry))
+    return;
+
+  if (entry->tag == DESCRIPTOR_TABLE_ENTRY_DIRECTORY_STREAM) {
+    filesystem_directory_entry_stream_drop_own(entry->directory_stream_info.directory_stream);
+    descriptor_table_remove(fd, entry);
+  }
+}
+
 #endif
 
 #endif

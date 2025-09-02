@@ -18,21 +18,8 @@ ssize_t preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
     errno = EINVAL;
     return -1;
   }
-  size_t bytes_read;
+  size_t bytes_read = 0;
 #ifdef __wasilibc_use_wasip2
-  // Find the first non-empty iov
-  int32_t i = 0;
-  while (i < iovcnt) {
-    if (iov[i].iov_len != 0)
-      break;
-    i++;
-  }
-
-  // If there is none, return
-  if (i >= iovcnt) {
-    return 0;
-  }
-
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (!fd_to_file_handle_allow_open(fildes, &file_handle)) {
@@ -42,24 +29,36 @@ ssize_t preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
 
   // Create a WASI buffer to receive the contents
   wasip2_tuple2_list_u8_bool_t buffer;
-
-  // Read the data
   filesystem_error_code_t error_code;
-  bool ok = filesystem_method_descriptor_read(file_handle,
-                                              iov[i].iov_len,
-                                              offset,
-                                              &buffer,
-                                              &error_code);
-  if (buffer.f0.len > INT32_MAX) {
-    // In this case, the number of bytes read can't
-    // be represented by an ssize_t
-    errno = EINVAL;
-    return -1;
+  bool ok = true;
+  bool free_buffer = false;
+
+  // Differently from the behavior of the preview1 component adapter,
+  // read into all non-empty iovecs
+  for (size_t i = 0; i < iovcnt; i++) {
+    if (iov[i].iov_len == 0)
+      continue;
+
+    // Read the data
+    ok = filesystem_method_descriptor_read(file_handle,
+                                           iov[i].iov_len,
+                                           offset,
+                                           &buffer,
+                                           &error_code);
+    free_buffer = true;
+    if (buffer.f0.len > INT32_MAX) {
+      // In this case, the number of bytes read can't
+      // be represented by an ssize_t
+      errno = EINVAL;
+      wasip2_list_u8_free(&buffer.f0);
+      return -1;
+    }
+    bytes_read += buffer.f0.len;
+    // Copy the contents of the buffer into the iov
+    memcpy(iov[i].iov_base, buffer.f0.ptr, buffer.f0.len);
   }
-  bytes_read = buffer.f0.len;
-  // Copy the contents of the buffer into the iov
-  memcpy(iov[i].iov_base, buffer.f0.ptr, buffer.f0.len);
-  wasip2_list_u8_free(&buffer.f0);
+  if (free_buffer)
+    wasip2_list_u8_free(&buffer.f0);
 
   if (!ok) {
     translate_error(error_code);

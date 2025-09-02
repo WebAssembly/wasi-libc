@@ -57,8 +57,7 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
         fs_flags |= FILESYSTEM_DESCRIPTOR_FLAGS_READ;
       }
       if ((oflag & O_WRONLY) != 0) {
-          // Sync flags are not supported yet
-          fs_flags |= FILESYSTEM_DESCRIPTOR_FLAGS_WRITE | FILESYSTEM_DESCRIPTOR_FLAGS_MUTATE_DIRECTORY;
+        fs_flags |= FILESYSTEM_DESCRIPTOR_FLAGS_WRITE | FILESYSTEM_DESCRIPTOR_FLAGS_MUTATE_DIRECTORY;
       }
       break;
     case O_EXEC:
@@ -69,6 +68,13 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
       errno = EINVAL;
       return -1;
   }
+
+  if ((oflag & O_SYNC) != 0)
+    fs_flags |= FILESYSTEM_DESCRIPTOR_FLAGS_FILE_INTEGRITY_SYNC;
+  if ((oflag & O_DSYNC) != 0)
+    fs_flags |= FILESYSTEM_DESCRIPTOR_FLAGS_DATA_INTEGRITY_SYNC;
+  if ((oflag & O_RSYNC) != 0)
+    fs_flags |= FILESYSTEM_DESCRIPTOR_FLAGS_REQUESTED_WRITE_SYNC;
 
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;

@@ -1,4 +1,8 @@
+#ifdef __wasilibc_use_wasip2
+#include <wasi/descriptor_table.h>
+#else
 #include <wasi/api.h>
+#endif
 #include <wasi/libc.h>
 #include <errno.h>
 #include <unistd.h>
@@ -7,16 +11,27 @@ int __wasilibc_fd_renumber(int fd, int newfd) {
     // Scan the preopen fds before making any changes.
     __wasilibc_populate_preopens();
 
+#ifdef __wasilibc_use_wasip2
+    descriptor_table_entry_t* entry;
+    if (!descriptor_table_get_ref(fd, &entry)) {
+        errno = EBADF;
+        return -1;
+    }
+    if (!descriptor_table_update(newfd, *entry)) {
+        errno = EBADF;
+        return -1;
+    }
+#else
     __wasi_errno_t error = __wasi_fd_renumber(fd, newfd);
     if (error != 0) {
         errno = error;
         return -1;
     }
+#endif
     return 0;
 }
 
 #ifdef __wasilibc_use_wasip2
-#include <wasi/descriptor_table.h>
 
 void drop_tcp_socket(tcp_socket_t socket) {
     switch (socket.state.tag) {

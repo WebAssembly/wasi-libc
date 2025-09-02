@@ -65,8 +65,6 @@ __subtf3
 __trunctfdf2
 __trunctfsf2
 __unordtf2
-__wasi_preview1_adapter_close_badfd
-__wasi_preview1_adapter_open_badfd
 __wasm_call_ctors
 __wasm_import_environment_get_arguments
 __wasm_import_environment_get_environment

@@ -36,173 +36,173 @@
 #define MAXSIZE ((size_t)-1 / 2 + 1)
 
 typedef struct {
-	bool occupied;
-	int key;
-	descriptor_table_entry_t entry;
+        bool occupied;
+        int key;
+        descriptor_table_entry_t entry;
 } descriptor_table_item_t;
 
 typedef struct {
-	descriptor_table_item_t *entries;
-	size_t mask;
-	size_t used;
+        descriptor_table_item_t *entries;
+        size_t mask;
+        size_t used;
 } descriptor_table_t;
 
 static descriptor_table_t global_table = { .entries = NULL,
-					   .mask = 0,
-					   .used = 0 };
+                                           .mask = 0,
+                                           .used = 0 };
 
 static int next_fd = 3;
 
 static size_t keyhash(int key)
 {
-	// TODO: use a hash function here
-	return key;
+        // TODO: use a hash function here
+        return key;
 }
 
 static int resize(size_t nel, descriptor_table_t *table)
 {
-	size_t newsize;
-	size_t i;
-	descriptor_table_item_t *e, *newe;
-	descriptor_table_item_t *oldtab = table->entries;
-	descriptor_table_item_t *oldend = table->entries + table->mask + 1;
+        size_t newsize;
+        size_t i;
+        descriptor_table_item_t *e, *newe;
+        descriptor_table_item_t *oldtab = table->entries;
+        descriptor_table_item_t *oldend = table->entries + table->mask + 1;
 
-	if (nel > MAXSIZE)
-		nel = MAXSIZE;
-	for (newsize = MINSIZE; newsize < nel; newsize *= 2)
-		;
-	table->entries = calloc(newsize, sizeof *table->entries);
-	if (!table->entries) {
-		table->entries = oldtab;
-		return 0;
-	}
-	table->mask = newsize - 1;
-	if (!oldtab)
-		return 1;
-	for (e = oldtab; e < oldend; e++)
-		if (e->occupied) {
-			for (i = keyhash(e->key);; ++i) {
-				newe = table->entries + (i & table->mask);
-				if (!newe->occupied)
-					break;
-			}
-			*newe = *e;
-		}
-	free(oldtab);
-	return 1;
+        if (nel > MAXSIZE)
+                nel = MAXSIZE;
+        for (newsize = MINSIZE; newsize < nel; newsize *= 2)
+                ;
+        table->entries = calloc(newsize, sizeof *table->entries);
+        if (!table->entries) {
+                table->entries = oldtab;
+                return 0;
+        }
+        table->mask = newsize - 1;
+        if (!oldtab)
+                return 1;
+        for (e = oldtab; e < oldend; e++)
+                if (e->occupied) {
+                        for (i = keyhash(e->key);; ++i) {
+                                newe = table->entries + (i & table->mask);
+                                if (!newe->occupied)
+                                        break;
+                        }
+                        *newe = *e;
+                }
+        free(oldtab);
+        return 1;
 }
 
 static descriptor_table_item_t *lookup(int key, size_t hash,
-				       descriptor_table_t *table)
+                                       descriptor_table_t *table)
 {
-	size_t i;
-	descriptor_table_item_t *e;
+        size_t i;
+        descriptor_table_item_t *e;
 
-	for (i = hash;; ++i) {
-		e = table->entries + (i & table->mask);
-		if (!e->occupied || e->key == key)
-			break;
-	}
-	return e;
+        for (i = hash;; ++i) {
+                e = table->entries + (i & table->mask);
+                if (!e->occupied || e->key == key)
+                        break;
+        }
+        return e;
 }
 
 static bool insert(descriptor_table_entry_t entry, int fd,
-		   descriptor_table_t *table,
+                   descriptor_table_t *table,
                    bool overwrite)
 {
-	if (!table->entries) {
-		if (!resize(MINSIZE, table)) {
-			return false;
-		}
-	}
+        if (!table->entries) {
+                if (!resize(MINSIZE, table)) {
+                        return false;
+                }
+        }
 
-	size_t hash = keyhash(fd);
-	descriptor_table_item_t *e = lookup(fd, hash, table);
+        size_t hash = keyhash(fd);
+        descriptor_table_item_t *e = lookup(fd, hash, table);
 
-	e->entry = entry;
-	if (!e->occupied || overwrite) {
-		e->key = fd;
-		e->occupied = true;
-		if (++table->used > table->mask - table->mask / 4) {
-			if (!resize(2 * table->used, table)) {
-				table->used--;
-				e->occupied = false;
-				return false;
-			}
-		}
-	}
-	return true;
+        e->entry = entry;
+        if (!e->occupied || overwrite) {
+                e->key = fd;
+                e->occupied = true;
+                if (++table->used > table->mask - table->mask / 4) {
+                        if (!resize(2 * table->used, table)) {
+                                table->used--;
+                                e->occupied = false;
+                                return false;
+                        }
+                }
+        }
+        return true;
 }
 
 static bool get(int fd, descriptor_table_entry_t **entry,
-		descriptor_table_t *table)
+                descriptor_table_t *table)
 {
-	if (!table->entries) {
-		return false;
-	}
+        if (!table->entries) {
+                return false;
+        }
 
-	size_t hash = keyhash(fd);
-	descriptor_table_item_t *e = lookup(fd, hash, table);
-	if (e->occupied) {
-		*entry = &e->entry;
-		return true;
-	} else {
-		return false;
-	}
+        size_t hash = keyhash(fd);
+        descriptor_table_item_t *e = lookup(fd, hash, table);
+        if (e->occupied) {
+                *entry = &e->entry;
+                return true;
+        } else {
+                return false;
+        }
 }
 
 static bool remove(int fd, descriptor_table_entry_t *entry,
-		   descriptor_table_t *table)
+                   descriptor_table_t *table)
 {
-	if (!table->entries) {
-		return false;
-	}
+        if (!table->entries) {
+                return false;
+        }
 
-	size_t hash = keyhash(fd);
-	size_t i;
-	descriptor_table_item_t *e;
-	for (i = hash;; ++i) {
-		e = table->entries + (i & table->mask);
-		if (!e->occupied || e->key == fd)
-			break;
-	}
+        size_t hash = keyhash(fd);
+        size_t i;
+        descriptor_table_item_t *e;
+        for (i = hash;; ++i) {
+                e = table->entries + (i & table->mask);
+                if (!e->occupied || e->key == fd)
+                        break;
+        }
 
-	if (e->occupied) {
-		*entry = e->entry;
-		e->occupied = false;
+        if (e->occupied) {
+                *entry = e->entry;
+                e->occupied = false;
 
-		// Search for any occupied entries which would be lost (due to
-		// an interrupted linear probe) if we left this one unoccupied
-		// and move them as necessary.
-		i = i & table->mask;
-		size_t j = i;
-		while (true) {
-			j = (j + 1) & table->mask;
-			e = table->entries + j;
-			if (!e->occupied)
-				break;
-			size_t k = keyhash(e->key) & table->mask;
-			if (i <= j) {
-				if ((i < k) && (k <= j))
-					continue;
-			} else if ((i < k) || (k <= j)) {
-				continue;
-			}
-			table->entries[i] = *e;
-			e->occupied = false;
-			i = j;
-		}
+                // Search for any occupied entries which would be lost (due to
+                // an interrupted linear probe) if we left this one unoccupied
+                // and move them as necessary.
+                i = i & table->mask;
+                size_t j = i;
+                while (true) {
+                        j = (j + 1) & table->mask;
+                        e = table->entries + j;
+                        if (!e->occupied)
+                                break;
+                        size_t k = keyhash(e->key) & table->mask;
+                        if (i <= j) {
+                                if ((i < k) && (k <= j))
+                                        continue;
+                        } else if ((i < k) || (k <= j)) {
+                                continue;
+                        }
+                        table->entries[i] = *e;
+                        e->occupied = false;
+                        i = j;
+                }
 
-		// If the load factor has dropped below 25%, shrink the table to
-		// reduce memory footprint.
-		if (--table->used < table->mask / 4) {
-			resize(table->mask / 2, table);
-		}
+                // If the load factor has dropped below 25%, shrink the table to
+                // reduce memory footprint.
+                if (--table->used < table->mask / 4) {
+                        resize(table->mask / 2, table);
+                }
 
-		return true;
-	} else {
-		return false;
-	}
+                return true;
+        } else {
+                return false;
+        }
 }
 
 bool descriptor_table_insert(descriptor_table_entry_t entry, int *fd)
@@ -213,7 +213,7 @@ bool descriptor_table_insert(descriptor_table_entry_t entry, int *fd)
 
 bool descriptor_table_get_ref(int fd, descriptor_table_entry_t **entry)
 {
-	return get(fd, entry, &global_table);
+        return get(fd, entry, &global_table);
 }
 
 bool descriptor_table_update(int fd, descriptor_table_entry_t entry) {

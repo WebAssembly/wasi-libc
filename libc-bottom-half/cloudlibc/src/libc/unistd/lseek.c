@@ -18,30 +18,16 @@ static_assert(SEEK_END == __WASI_WHENCE_END, "Value mismatch");
 static_assert(SEEK_SET == __WASI_WHENCE_SET, "Value mismatch");
 
 #ifdef __wasilibc_use_wasip2
-static off_t last_offset(streams_borrow_input_stream_t input_stream) {
-  // Not ideal, but I'm not sure how else to find the last offset
-  // in the current stream
-  uint64_t total_bytes_skipped = 0;
-  uint64_t bytes_skipped = 0;
-  streams_stream_error_t stream_error;
-  bool ok = false;
-  while (true) {
-    ok = streams_method_input_stream_blocking_skip(input_stream, 1024, &bytes_skipped, &stream_error);
-    if (!ok) {
-      break;
-    }
-    total_bytes_skipped += bytes_skipped;
-    if (bytes_skipped < 1024) {
-      break;
-    }
-  }
-  if (!ok) {
-    if (stream_error.tag != STREAMS_STREAM_ERROR_CLOSED) {
-      errno = EIO;
-      return -1;
-    }
-  }
-  return bytes_skipped;
+static bool get_file_size(filesystem_borrow_descriptor_t handle,
+                          filesystem_filesize_t* size) {
+  filesystem_descriptor_stat_t stat;
+  filesystem_error_code_t error_code;
+
+  if (!filesystem_method_descriptor_stat(handle, &stat, &error_code))
+    return false;
+
+  *size = stat.size;
+  return true;
 }
 #endif
 
@@ -66,12 +52,12 @@ off_t __lseek(int fildes, off_t offset, int whence) {
     case SEEK_END: {
       // Find the end of the stream (is there a better way to do this?)
       if (entry->stream.file_info.readable) {
-        off_t eof_offset = last_offset(entry->stream.read_stream);
-        if (eof_offset < 0) {
+        filesystem_filesize_t file_size = 0;
+        if (!get_file_size(entry->stream.file_info.file_handle, &file_size)) {
           errno = EINVAL;
           return -1;
         }
-        offset_to_use = (eof_offset + entry->stream.offset) + offset;
+        offset_to_use = ((off_t) file_size) + offset;
       } else {
         offset_to_use = entry->stream.offset + offset;
       }

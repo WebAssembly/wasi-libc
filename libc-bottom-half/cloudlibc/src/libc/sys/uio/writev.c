@@ -39,14 +39,13 @@ ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
   size_t bytes_written = 0;
 
 #ifdef __wasilibc_use_wasip2
-  // Following the behavior of the preview1 component adapter,
-  // only write the first non-empty iov
+  // Differently from the behavior of the preview1 component adapter,
+  // write all non-empty iovecs
 
   for (size_t i = 0; i < iovcnt; i++) {
     if (iov[i].iov_len == 0)
       continue;
-    bytes_written = write(fildes, iov[i].iov_base, iov[i].iov_len);
-    break;
+    bytes_written += write(fildes, iov[i].iov_base, iov[i].iov_len);
   }
 #else
   __wasi_errno_t error = __wasi_fd_write(

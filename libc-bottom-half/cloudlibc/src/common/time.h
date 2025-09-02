@@ -96,6 +96,23 @@ static inline struct timespec instant_to_timespec(
                            .tv_nsec = ns % NSEC_PER_SEC};
 }
 
+static inline bool timespec_to_instant_clamp(
+  const struct timespec* timespec, monotonic_clock_instant_t* instant) {
+
+  // Invalid nanoseconds field
+  if (timespec->tv_nsec < 0 || timespec->tv_nsec >= NSEC_PER_SEC)
+    return false;
+  if (timespec->tv_sec < 0) {
+    // Timestamps before the Epoch are not supported
+    *instant = 0;
+  } else if (__builtin_mul_overflow(timespec->tv_sec, NSEC_PER_SEC, instant) ||
+             __builtin_add_overflow(*instant, timespec->tv_nsec, instant)) {
+   // Make sure our timestamp does not overflow
+   *instant = NUMERIC_MAX(monotonic_clock_instant_t);
+  }
+  return true;
+}
+
 static inline struct timeval instant_to_timeval(
   monotonic_clock_instant_t ns) {
     // Decompose instant into seconds and microoseconds

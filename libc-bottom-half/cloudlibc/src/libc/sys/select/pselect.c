@@ -62,8 +62,8 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
   int poll_timeout;
   if (timeout) {
 #ifdef __wasilibc_use_wasip2
-    wall_clock_datetime_t timestamp;
-    if (!timespec_to_timestamp_clamp(timeout, &timestamp) ) {
+    monotonic_clock_instant_t timestamp;
+    if (!timespec_to_instant_clamp(timeout, &timestamp) ) {
 #else
     uint64_t timeout_u64;
     if (!timespec_to_timestamp_clamp(timeout, &timeout_u64) ) {
@@ -74,8 +74,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
 
     // Convert nanoseconds to milliseconds:
 #ifdef __wasilibc_use_wasip2
-    uint64_t timeout_u64 = timestamp.nanoseconds /= 1000000;
-    timeout_u64 += timestamp.seconds * 1000;
+    uint64_t timeout_u64 = timestamp /= 1000000;
 #else
     timeout_u64 /= 1000000;
 #endif

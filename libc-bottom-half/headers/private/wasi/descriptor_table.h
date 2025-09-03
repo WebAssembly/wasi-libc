@@ -128,8 +128,9 @@ typedef struct {
         streams_borrow_output_stream_t write_stream;
         // Current position in stream, relative to the beginning of the *file*, measured in bytes
         off_t offset;
-        // Used for checking readiness to write to stream
+        // Used for checking readiness to write to stream. Lazily initialized.
         streams_own_pollable_t pollable;
+        bool pollable_is_initialized;
         // When the stream is closed, the caller should
         // replace this entry in the table with the file handle
         file_t file_info;

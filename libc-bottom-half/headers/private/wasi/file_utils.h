@@ -72,8 +72,7 @@ static bool init_stdin() {
   entry.stream.file_info.writable = false;
   // entry.stream.file_info.file_handle is uninitialized, but it will never be used
 
-  int fd = 0;
-  return descriptor_table_insert(entry, &fd);
+  return descriptor_table_update(0, entry);
 }
 
 static bool init_stdout() {
@@ -87,8 +86,7 @@ static bool init_stdout() {
   entry.stream.file_info.writable = true;
   // entry.stream.file_info.file_handle is uninitialized, but it will never be used
 
-  int fd = 1;
-  return descriptor_table_insert(entry, &fd);
+  return descriptor_table_update(1, entry);
 }
 
 static bool init_stderr() {
@@ -102,8 +100,7 @@ static bool init_stderr() {
   entry.stream.file_info.writable = true;
   // entry.stream.file_info.file_handle is uninitialized, but it will never be used
 
-  int fd = 2;
-  return descriptor_table_insert(entry, &fd);
+  return descriptor_table_update(2, entry);
 }
 
 #endif

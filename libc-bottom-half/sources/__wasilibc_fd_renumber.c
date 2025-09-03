@@ -124,12 +124,12 @@ int close(int fd) {
             drop_directory_stream(entry.directory_stream_info.directory_stream);
             break;
         case DESCRIPTOR_TABLE_ENTRY_FILE_STREAM:
+            if (entry.stream.pollable_is_initialized)
+                poll_pollable_drop_own(entry.stream.pollable);
             if (entry.stream.file_info.readable)
                 streams_input_stream_drop_borrow(entry.stream.read_stream);
-            if (entry.stream.file_info.writable) {
-                poll_pollable_drop_own(entry.stream.pollable);
+            if (entry.stream.file_info.writable)
                 streams_output_stream_drop_borrow(entry.stream.write_stream);
-            }
             drop_file_handle(entry.stream.file_info.file_handle);
             break;
         default: /* unreachable */ abort();

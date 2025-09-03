@@ -62,6 +62,7 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
     // for this file
     new_entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
     new_entry.stream.read_stream = input_stream;
+    new_entry.stream.pollable_is_initialized = false;
     new_entry.stream.offset = 0;
     new_entry.stream.file_info.readable = entry->file.readable;
     new_entry.stream.file_info.writable = entry->file.writable;

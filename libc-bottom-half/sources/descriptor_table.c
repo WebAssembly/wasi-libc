@@ -207,8 +207,7 @@ static bool remove(int fd, descriptor_table_entry_t *entry,
 
 bool descriptor_table_insert(descriptor_table_entry_t entry, int *fd)
 {
-       if (*fd < 0 || *fd > 2)
-               *fd = ++next_fd;
+       *fd = ++next_fd;
        return insert(entry, *fd, &global_table, false);
 }
 

@@ -100,11 +100,9 @@ int close(int fd) {
     __wasilibc_populate_preopens();
 
 #ifdef __wasilibc_use_wasip2
-    // It's an error to close stdin/stdout/stderr
-    if (fd <= 2) {
-        errno = EBADF;
-        return -1;
-    }
+    // For stdin/stdout/stderr, keep the pollables/streams around for reuse
+    if (fd <= 2)
+        return 0;
 
     descriptor_table_entry_t entry;
     if (descriptor_table_remove(fd, &entry)) {

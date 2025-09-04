@@ -17,11 +17,11 @@
 
 int main(void)
 {
-        // Test that closing stdin/stdout/stderr is an error
+        // Test that closing stdin/stdout/stderr is not an error
 
-        TEST(close(0) == -1);
-        TEST(close(1) == -1);
-        TEST(close(2) == -1);
+        TEST(close(0) == 0);
+        TEST(close(1) == 0);
+        TEST(close(2) == 0);
 
 	return t_status;
 }

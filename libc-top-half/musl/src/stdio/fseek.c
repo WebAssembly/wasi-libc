@@ -14,7 +14,7 @@ int __fseeko_unlocked(FILE *f, off_t off, int whence)
 
 	/* Flush write buffer, and report error on failure. */
 	if (f->wpos != f->wbase) {
-		f->write(f, 0, 0);
+                f->write(f, 0, 0);
 		if (!f->wpos) return -1;
 	}
 
@@ -27,7 +27,7 @@ int __fseeko_unlocked(FILE *f, off_t off, int whence)
 	/* If seek succeeded, file is seekable and we discard read buffer. */
 	f->rpos = f->rend = 0;
 	f->flags &= ~F_EOF;
-	
+
 	return 0;
 }
 

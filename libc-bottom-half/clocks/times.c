@@ -1,7 +1,11 @@
 #define _WASI_EMULATED_PROCESS_CLOCKS
 #include <time.h>
 #include <sys/times.h>
+#ifdef __wasilibc_use_wasip2
+#include <wasi/wasip2.h>
+#else
 #include <wasi/api.h>
+#endif
 #include <common/time.h>
 
 _Static_assert(
@@ -14,6 +18,17 @@ _Static_assert(
 clock_t __clock(void);
 
 clock_t times(struct tms *buffer) {
+#ifdef __wasilibc_use_wasip2
+    clock_t user = __clock();
+    *buffer = (struct tms){
+        .tms_utime = user,
+        // WASI doesn't provide a way to spawn a new process, so always 0.
+        .tms_cutime = 0
+    };
+
+    monotonic_clock_instant_t realtime = monotonic_clock_now();
+#else
+
     __wasi_timestamp_t user = __clock();
     *buffer = (struct tms){
         .tms_utime = user,
@@ -23,5 +38,6 @@ clock_t times(struct tms *buffer) {
 
     __wasi_timestamp_t realtime = 0;
     (void)__wasi_clock_time_get(__WASI_CLOCKID_MONOTONIC, 0, &realtime);
+#endif
     return realtime;
 }

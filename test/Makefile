@@ -49,8 +49,6 @@ WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v
 WASMTIME = $(abspath $(DOWNDIR)/$(shell basename $(WASMTIME_URL) .tar.xz)/wasmtime)
 WASM_TOOLS_URL ?= https://github.com/bytecodealliance/wasm-tools/releases/download/v1.224.0/wasm-tools-1.224.0-$(ARCH)-linux.tar.gz
 WASM_TOOLS = $(DOWNDIR)/$(shell basename $(WASM_TOOLS_URL) .tar.gz)/wasm-tools
-ADAPTER_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v29.0.1/wasi_snapshot_preview1.command.wasm
-ADAPTER = $(DOWNDIR)/wasi_snapshot_preview1.command.wasm
 
 $(DOWNDIR):
 	@mkdir -p $@
@@ -66,13 +64,10 @@ $(WASM_TOOLS): | $(DOWNDIR)
 	wget --no-clobber --directory-prefix=$(DOWNDIR) $(WASM_TOOLS_URL)
 	tar --extract --file=$(DOWNDIR)/$(shell basename $(WASM_TOOLS_URL)) --directory=$(DOWNDIR)/
 
-$(ADAPTER): | $(DOWNDIR)
-	wget --no-clobber --directory-prefix=$(DOWNDIR) $(ADAPTER_URL)
-
 # Target to download all necessary dependencies.
 TO_DOWNLOAD = $(LIBC_TEST) $(WASMTIME)
 ifeq ($(TARGET_TRIPLE), wasm32-wasip2)
-TO_DOWNLOAD += $(ADAPTER) $(WASM_TOOLS)
+TO_DOWNLOAD += $(WASM_TOOLS)
 endif
 DOWNLOADED := $(DOWNDIR)/downloaded.stamp
 $(DOWNLOADED): $(TO_DOWNLOAD)
@@ -171,7 +166,7 @@ $(OBJDIR)/%.core.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS) | $(BUILTINS_STAMP)
 # For wasip2, we include an additional step to wrap up the core module into
 # a component.
 $(OBJDIR)/%.component.wasm: $(OBJDIR)/%.core.wasm
-	$(WASM_TOOLS) component new --adapt $(ADAPTER) $< -o $@
+	$(WASM_TOOLS) component new $< -o $@
 
 # Compile each selected test using Clang. Note that failures here are likely
 # due to a missing `libclang_rt.builtins-wasm32.a` in the Clang lib directory.

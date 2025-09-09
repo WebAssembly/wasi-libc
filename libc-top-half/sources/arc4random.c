@@ -3,6 +3,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#ifdef __wasilibc_use_wasip2
+#include <wasi/libc.h>
+#endif
 
 void arc4random_buf(void* buffer, size_t len)
 {
@@ -13,7 +16,11 @@ void arc4random_buf(void* buffer, size_t len)
     // We therefore effectively expect that `__wasi_random_get` is "fast",
     // presumably using a PRNG-style implementation rather than a slower
     // raw-entropy-style implementation.
+#ifdef __wasilibc_use_wasip2
+    int r = __wasilibc_random(buffer, len);
+#else
     int r = __wasi_random_get(buffer, len);
+#endif
 
     // `__wasi_random_get` should always succeed.
     if (r != __WASI_ERRNO_SUCCESS) {

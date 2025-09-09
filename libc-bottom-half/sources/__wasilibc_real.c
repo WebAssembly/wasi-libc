@@ -674,5 +674,5 @@ int32_t __wasi_thread_spawn(void* start_arg) {
 
 #else
 // Suppress the "no symbols" linker error
-void __wasi_noop() {}
+static void __wasi_noop() {}
 #endif // __wasilibc_use_wasip2

@@ -881,13 +881,8 @@ no-check-symbols: $(STARTUP_FILES) libc $(DUMMY_LIBS)
 
 finish: no-check-symbols
 
-ifeq ($(LTO),no)
-# The check for defined and undefined symbols expects there to be a heap
-# allocator (providing malloc, calloc, free, etc). Skip this step if the build
-# is done without a malloc implementation.
-ifneq ($(MALLOC_IMPL),none)
+ifeq ($(CHECK_SYMBOLS),yes)
 finish: check-symbols
-endif
 endif
 
 install: finish

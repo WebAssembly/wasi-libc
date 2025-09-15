@@ -136,7 +136,7 @@ jobs:
         llvm_asset_suffix: ${{ matrix.llvm_asset_suffix }}
 
     - name: Build libc
-      run: make -j4 $MAKE_TARGETS
+      run: make -j4 $MAKE_TARGETS CHECK_SYMBOLS=yes
 
     - name: Download Test dependencies
       if: matrix.test

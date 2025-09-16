@@ -18,8 +18,12 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
   bool ok = false;
 
   // Check for stdin
-  if (fildes == 0)
-      init_stdin();
+  if (fildes == 0) {
+      if (!init_stdin()) {
+        errno = EINVAL;
+        return -1;
+      }
+  }
 
   // Translate the file descriptor to an internal handle
   descriptor_table_entry_t* entry = 0;

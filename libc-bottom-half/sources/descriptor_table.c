@@ -55,8 +55,7 @@ static int next_fd = 3;
 
 static size_t keyhash(int key)
 {
-        // TODO: use a hash function here
-        return key;
+        return (size_t)key * 2654435769U;
 }
 
 static int resize(size_t nel, descriptor_table_t *table)

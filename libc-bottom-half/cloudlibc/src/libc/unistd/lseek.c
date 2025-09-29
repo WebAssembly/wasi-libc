@@ -37,7 +37,10 @@ off_t __lseek(int fildes, off_t offset, int whence) {
   off_t offset_to_use = 0;
   // Look up a stream for fildes
   descriptor_table_entry_t *entry;
-  descriptor_table_get_ref(fildes, &entry);
+  if (!descriptor_table_get_ref(fildes, &entry)) {
+    errno = EBADF;
+    return -1;
+  }
   if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_STREAM) {
     // Find the offset relative to the beginning of the file
     // The offset is always *added*: either to 0, the current

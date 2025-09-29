@@ -55,7 +55,8 @@ static void remove_and_drop_directory_stream(int fd) {
 
   if (entry->tag == DESCRIPTOR_TABLE_ENTRY_DIRECTORY_STREAM) {
     filesystem_directory_entry_stream_drop_own(entry->directory_stream_info.directory_stream);
-    descriptor_table_remove(fd, entry);
+    if (!descriptor_table_remove(fd, entry))
+      return;
   }
 }
 

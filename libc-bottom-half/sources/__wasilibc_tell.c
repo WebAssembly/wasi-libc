@@ -11,7 +11,10 @@ off_t __wasilibc_tell(int fildes) {
 #ifdef __wasilibc_use_wasip2
   // Look up a stream for fildes
   descriptor_table_entry_t *entry;
-  descriptor_table_get_ref(fildes, &entry);
+  if (!descriptor_table_get_ref(fildes, &entry)) {
+    errno = EBADF;
+    return -1;
+  }
 
   // Return the current offset in the stream
   if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_STREAM) {

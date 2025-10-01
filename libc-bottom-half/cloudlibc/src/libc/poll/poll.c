@@ -39,7 +39,8 @@ static int poll_wasip1(struct pollfd *fds, size_t nfds, int timeout) {
     // As entries are decomposed into separate read/write subscriptions,
     // we cannot detect POLLERR, POLLHUP and POLLNVAL if POLLRDNORM and
     // POLLWRNORM are not specified. Disallow this for now.
-    if (!created_events) {
+    // Ignore fd entries that have no events requested.
+    if (!created_events && pollfd->events != 0) {
       errno = ENOSYS;
       return -1;
     }

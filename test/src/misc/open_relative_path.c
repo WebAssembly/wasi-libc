@@ -20,25 +20,31 @@ int main(int argc, char **argv)
 {
     TEST(argc == 2);
 
-    char *filename;
-    TEST(asprintf(&filename, "%s/input.txt", argv[1]) != -1);
+    char *filename1, *filename2, *filename3, *filename4, *filename5;;
+    TEST(asprintf(&filename1, "%s/input.txt", argv[1]) != -1);
 
-    int fd = open(filename, O_WRONLY | O_CREAT);
+    int fd = open(filename1, O_WRONLY | O_CREAT);
     TEST(fd > 2);
     close(fd);
 
-    TEST(asprintf(&filename, "%s/dir1", argv[1]) != -1);
-    TEST(mkdir(filename, 0755) != 0);
-    TEST(asprintf(&filename, "%s/dir1/dir2", argv[1]) != -1);
-    TEST(mkdir(filename, 0755) != 0);
-    TEST(asprintf(&filename, "%s/dir1/dir2/dir3", argv[1]) != -1);
-    TEST(mkdir(filename, 0755) != 0);
+    TEST(asprintf(&filename2, "%s/dir1", argv[1]) != -1);
+    TEST(mkdir(filename2, 0755) != 0);
+    TEST(asprintf(&filename3, "%s/dir1/dir2", argv[1]) != -1);
+    TEST(mkdir(filename3, 0755) != 0);
+    TEST(asprintf(&filename4, "%s/dir1/dir2/dir3", argv[1]) != -1);
+    TEST(mkdir(filename4, 0755) != 0);
 
-    TEST(asprintf(&filename, "%s/input.txt", filename) != -1);
+    TEST(asprintf(&filename5, "%s/input.txt", filename4) != -1);
 
-    fd = open(filename, O_WRONLY | O_CREAT);
+    fd = open(filename5, O_WRONLY | O_CREAT);
     TEST(fd > 2);
     close(fd);
+
+    TEST(unlink(filename5)==0);
+    TEST(rmdir(filename4)==0);
+    TEST(rmdir(filename3)==0);
+    TEST(rmdir(filename2)==0);
+    TEST(unlink(filename1)==0);
 
     return t_status;
 }

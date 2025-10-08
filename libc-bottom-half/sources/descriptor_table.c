@@ -216,10 +216,8 @@ bool descriptor_table_get_ref(int fd, descriptor_table_entry_t **entry)
         return get(fd, entry, &global_table);
 }
 
-bool descriptor_table_update(int fd, descriptor_table_entry_t entry) {
-        if (!global_table.entries)
-            return false;
-
+bool descriptor_table_update(int fd, descriptor_table_entry_t entry)
+{
         return insert(entry, fd, &global_table, true);
 }
 

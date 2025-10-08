@@ -18,12 +18,19 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
   bool ok = false;
 
   // Check for stdin
-  if (fildes == 0)
-      init_stdin();
+  if (fildes == 0) {
+      if (!init_stdin()) {
+        errno = EINVAL;
+        return -1;
+      }
+  }
 
   // Translate the file descriptor to an internal handle
   descriptor_table_entry_t* entry = 0;
-  descriptor_table_get_ref(fildes, &entry);
+  if (!descriptor_table_get_ref(fildes, &entry)) {
+    errno = EBADF;
+    return -1;
+  }
   streams_borrow_input_stream_t input_stream;
   if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE) {
     // File's input stream hasn't been opened yet
@@ -69,7 +76,10 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
     new_entry.stream.file_info.readable = entry->file.readable;
     new_entry.stream.file_info.writable = entry->file.writable;
     new_entry.stream.file_info.file_handle = entry->file.file_handle;
-    descriptor_table_update(fildes, new_entry);
+    if (!descriptor_table_update(fildes, new_entry)) {
+      errno = ENOMEM;
+      return -1;
+    }
   } else if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_STREAM) {
       if (!entry->stream.file_info.readable) {
         errno = EBADF;
@@ -108,7 +118,10 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
   wasip2_list_u8_free(&contents);
 
   // Update the offset
-  descriptor_table_get_ref(fildes, &entry);
+  if (!descriptor_table_get_ref(fildes, &entry)) {
+    errno = EBADF;
+    return -1;
+  }
   if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_STREAM) {
     entry->stream.offset += contents.len;
   } else {

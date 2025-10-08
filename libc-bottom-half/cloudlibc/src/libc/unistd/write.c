@@ -25,13 +25,24 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
   descriptor_table_entry_t* entry = 0;
 
   // Check for stdout/stderr
-  if (fildes == 1)
-    init_stdout();
-  else if (fildes == 2)
-    init_stderr();
+  if (fildes == 1) {
+    if (!init_stdout()) {
+      errno = EINVAL;
+      return -1;
+    }
+  }
+  else if (fildes == 2) {
+    if (!init_stderr()) {
+      errno = EINVAL;
+      return -1;
+    }
+  }
 
   // Translate the file descriptor to an internal handle
-  descriptor_table_get_ref(fildes, &entry);
+  if (!descriptor_table_get_ref(fildes, &entry)) {
+      errno = EBADF;
+      return -1;
+  }
   if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE) {
     create_new_stream = true;
 
@@ -123,7 +134,10 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
     new_entry.stream.file_info.writable = entry->file.writable;
     new_entry.stream.file_info.file_handle = entry->file.file_handle;
     new_entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
-    descriptor_table_update(fildes, new_entry);
+    if (!descriptor_table_update(fildes, new_entry)) {
+      errno = ENOMEM;
+      return -1;
+    }
   }
 
   ok = streams_method_output_stream_blocking_flush(output_stream,

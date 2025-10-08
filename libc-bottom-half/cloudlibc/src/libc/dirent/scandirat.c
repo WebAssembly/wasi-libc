@@ -47,7 +47,8 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***name
   // Translate the file descriptor to an internal handle
   filesystem_borrow_directory_entry_stream_t stream;
   filesystem_borrow_descriptor_t parent_file_handle;
-  if (!fd_to_directory_stream(fd, &stream, &parent_file_handle)) {
+  read_directory_state_t state;
+  if (!fd_to_directory_stream(fd, &stream, &parent_file_handle, &state)) {
     errno = EBADF;
     return -1;
   }
@@ -60,6 +61,8 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***name
   bool ok = true;
   filesystem_option_directory_entry_t dir_entry_optional;
   filesystem_error_code_t error_code;
+  bool handle_dot = false;
+  bool handle_dot_dot = false;
   while (true) {
     ok = filesystem_method_directory_entry_stream_read_directory_entry(stream,
                                                                        &dir_entry_optional,
@@ -69,32 +72,48 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***name
       return -1;
     }
     if (!dir_entry_optional.is_some) {
-      // All directory entries have been read
+      // All directory entries have been read; handle . and ..
+      if (!handle_dot && !handle_dot_dot) {
+        handle_dot = true;
+      } else if (handle_dot && !handle_dot_dot) {
+        handle_dot_dot = true;
+        handle_dot = false;
+      } else
         break;
     }
 
     // Create the new directory entry
+    size_t name_len = handle_dot ? 1 : handle_dot_dot ? 2 : dir_entry_optional.val.name.len;
     struct dirent *dirent =
-      malloc(offsetof(struct dirent, d_name) + dir_entry_optional.val.name.len + 1);
+      malloc(offsetof(struct dirent, d_name) + name_len + 1);
     if (dirent == NULL) {
       errno = EINVAL;
       return -1;
     }
-    dirent->d_type = dir_entry_optional.val.type;
-    memcpy(dirent->d_name, dir_entry_optional.val.name.ptr, dir_entry_optional.val.name.len);
-    dirent->d_name[dir_entry_optional.val.name.len] = '\0';
+    dirent->d_type = (handle_dot || handle_dot_dot) ? DT_DIR : dir_entry_type_to_d_type(dir_entry_optional.val.type);
+    if (handle_dot)
+      memcpy(dirent->d_name, ".", name_len);
+    else if (handle_dot_dot)
+      memcpy(dirent->d_name, "..", name_len);
+    else
+      memcpy(dirent->d_name, dir_entry_optional.val.name.ptr, name_len);
+    dirent->d_name[name_len] = '\0';
 
-    // Do an `fstatat` to get the inode number.
-    if (fstatat(fd, dirent->d_name, &statbuf, AT_SYMLINK_NOFOLLOW) != 0) {
-      errno = EBADF;
-      return -1;
+    if (!(handle_dot || handle_dot_dot)) {
+      // Do an `fstatat` to get the inode number.
+      if (fstatat(fd, dirent->d_name, &statbuf, AT_SYMLINK_NOFOLLOW) != 0) {
+        errno = EBADF;
+        return -1;
+      }
+      // Fill in the inode.
+      dirent->d_ino = statbuf.st_ino;
+
+      // In case someone raced with us and replaced the object with this name
+      // with another of a different type, update the type too.
+      dirent->d_type = __wasilibc_iftodt(statbuf.st_mode & S_IFMT);
+    } else {
+      dirent->d_ino = -1;
     }
-    // Fill in the inode.
-    dirent->d_ino = statbuf.st_ino;
-
-    // In case someone raced with us and replaced the object with this name
-    // with another of a different type, update the type too.
-    dirent->d_type = __wasilibc_iftodt(statbuf.st_mode & S_IFMT);
 
     if (sel(dirent)) {
       // Add the entry to the results

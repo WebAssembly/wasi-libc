@@ -54,6 +54,7 @@ DIR *fdopendir(int fd) {
   directory_stream_entry_t stream_info;
   stream_info.directory_stream = result;
   stream_info.directory_file_handle = file_handle;
+  stream_info.directory_state = DIRECTORY_STATE_FILE;
   new_entry.directory_stream_info = stream_info;
   int new_fd = -1;
   if (!descriptor_table_update(dirp->fd, new_entry)) {

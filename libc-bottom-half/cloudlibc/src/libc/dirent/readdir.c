@@ -51,7 +51,8 @@ struct dirent *readdir(DIR *dirp) {
   // Translate the file descriptor to an internal handle
   filesystem_borrow_directory_entry_stream_t stream;
   filesystem_borrow_descriptor_t parent_handle;
-  if (!fd_to_directory_stream(dirp->fd, &stream, &parent_handle)) {
+  read_directory_state_t state;
+  if (!fd_to_directory_stream(dirp->fd, &stream, &parent_handle, &state)) {
     errno = EBADF;
     return NULL;
   }
@@ -66,37 +67,69 @@ struct dirent *readdir(DIR *dirp) {
     return NULL;
   }
 
+  bool return_dot = false;
+  bool return_dot_dot = false;
   if (!dir_entry_optional.is_some) {
-    // End-of-file
-    remove_and_drop_directory_stream(dirp->fd);
-    return NULL;
+    // End-of-file; check if we should return '.' or '..'
+    if (state == DIRECTORY_STATE_FILE) {
+      return_dot = true;
+      directory_stream_enter_state(dirp->fd, DIRECTORY_STATE_RETURNED_DOT);
+    }
+    else if (state == DIRECTORY_STATE_RETURNED_DOT) {
+      return_dot_dot = true;
+      directory_stream_enter_state(dirp->fd, DIRECTORY_STATE_RETURNED_DOT_DOT);
+    }
+    else {
+      remove_and_drop_directory_stream(dirp->fd);
+      return NULL;
+    }
   }
 
   filesystem_directory_entry_t dir_entry = dir_entry_optional.val;
 
-  // Ensure that the dirent is large enough to fit the filename
-  size_t the_size = offsetof(struct dirent, d_name);
-  GROW(dirp->dirent, dirp->dirent_size,
-       the_size + dir_entry.name.len + 1);
-  struct dirent *dirent = dirp->dirent;
-
-  // Get the inode number
-  filesystem_path_flags_t path_flags = 0; // Don't follow symlinks
-  filesystem_metadata_hash_value_t metadata;
-  ok = filesystem_method_descriptor_metadata_hash_at(parent_handle,
-                                                     path_flags,
-                                                     &dir_entry.name,
-                                                     &metadata,
-                                                     &error_code);
-  if (!ok) {
-    translate_error(error_code);
-    remove_and_drop_directory_stream(dirp->fd);
-    return NULL;
+  struct dirent *dirent;
+  if (!(return_dot || return_dot_dot)) {
+    // Ensure that the dirent is large enough to fit the filename
+    size_t the_size = offsetof(struct dirent, d_name);
+    GROW(dirp->dirent, dirp->dirent_size,
+         the_size + dir_entry.name.len + 1);
+    dirent = dirp->dirent;
+  } else {
+    dirent = malloc(sizeof(dirent));
+    if (dirent == NULL) {
+      errno = ENOMEM;
+      return NULL;
+    }
+    size_t the_size = offsetof(struct dirent, d_name);
+    int name_len = return_dot ? 1 : 2;
+    int32_t dirent_size = sizeof(dirent);
+    GROW(dirent, dirent_size, the_size + name_len + 1);
+    strcpy(dirent->d_name, return_dot ? "." : "..");
+    dirent->d_type = DT_DIR;
   }
-  dirent->d_ino = metadata.lower;
-  dirent->d_type = dir_entry.type;
-  memcpy(dirent->d_name, dir_entry.name.ptr, dir_entry.name.len);
-  dirent->d_name[dir_entry.name.len] = '\0';
+
+ // Get the inode number
+  if (return_dot || return_dot_dot)
+    dirent->d_ino = -1;
+  else {
+    filesystem_path_flags_t path_flags = 0; // Don't follow symlinks
+    filesystem_metadata_hash_value_t metadata;
+    wasip2_string_t name_to_use;
+    ok = filesystem_method_descriptor_metadata_hash_at(parent_handle,
+                                                       path_flags,
+                                                       &dir_entry.name,
+                                                       &metadata,
+                                                       &error_code);
+    if (!ok) {
+      translate_error(error_code);
+      remove_and_drop_directory_stream(dirp->fd);
+      return NULL;
+    }
+    dirent->d_ino = metadata.lower;
+    dirent->d_type = dir_entry_type_to_d_type(dir_entry.type);
+    memcpy(dirent->d_name, dir_entry.name.ptr, dir_entry.name.len);
+    dirent->d_name[dir_entry.name.len] = '\0';
+  }
 
   return dirent;
 }

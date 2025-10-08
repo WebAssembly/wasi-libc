@@ -3,6 +3,7 @@
 
 #ifdef __wasilibc_use_wasip2
 #include <wasi/descriptor_table.h>
+#include <dirent.h>
 
 // Succeed only if fd is bound to a file handle in the descriptor table
 static bool fd_to_file_handle(int fd, filesystem_borrow_descriptor_t* result) {
@@ -35,7 +36,8 @@ static bool fd_to_file_handle_allow_open(int fd, filesystem_borrow_descriptor_t*
 
 // Succeed only if fd is bound to a directory stream in the descriptor table
 static bool fd_to_directory_stream(int fd, filesystem_borrow_directory_entry_stream_t* result_stream,
-                            filesystem_borrow_descriptor_t* result_fd) {
+                                   filesystem_borrow_descriptor_t* result_fd,
+                                   read_directory_state_t* result_state) {
   descriptor_table_entry_t *entry = 0;
   if (!descriptor_table_get_ref(fd, &entry))
     return false;
@@ -44,7 +46,18 @@ static bool fd_to_directory_stream(int fd, filesystem_borrow_directory_entry_str
   }
   *result_stream = filesystem_borrow_directory_entry_stream(entry->directory_stream_info.directory_stream);
   *result_fd = entry->directory_stream_info.directory_file_handle;
+  *result_state = entry->directory_stream_info.directory_state;
   return true;
+}
+
+// Does nothing if fd is not in the descriptor table or is not bound to a directory stream
+static void directory_stream_enter_state(int fd, read_directory_state_t state) {
+  descriptor_table_entry_t *entry = 0;
+  if (!descriptor_table_get_ref(fd, &entry))
+    return;
+
+  if (entry->tag == DESCRIPTOR_TABLE_ENTRY_DIRECTORY_STREAM)
+    entry->directory_stream_info.directory_state = state;
 }
 
 // Does nothing if fd is not in the descriptor table or is not bound to a directory stream
@@ -106,6 +119,29 @@ static bool init_stderr() {
   // entry.stream.file_info.file_handle is uninitialized, but it will never be used
 
   return descriptor_table_update(2, entry);
+}
+
+static unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
+  switch(ty) {
+  case FILESYSTEM_DESCRIPTOR_TYPE_UNKNOWN:
+    return DT_UNKNOWN;
+  case FILESYSTEM_DESCRIPTOR_TYPE_BLOCK_DEVICE:
+    return DT_BLK;
+  case FILESYSTEM_DESCRIPTOR_TYPE_CHARACTER_DEVICE:
+    return DT_CHR;
+  case FILESYSTEM_DESCRIPTOR_TYPE_DIRECTORY:
+    return DT_DIR;
+  case FILESYSTEM_DESCRIPTOR_TYPE_FIFO:
+    return DT_FIFO;
+  case FILESYSTEM_DESCRIPTOR_TYPE_SYMBOLIC_LINK:
+    return DT_LNK;
+  case FILESYSTEM_DESCRIPTOR_TYPE_REGULAR_FILE:
+    return DT_REG;
+  case FILESYSTEM_DESCRIPTOR_TYPE_SOCKET:
+    return DT_SOCK;
+  default:
+    return DT_UNKNOWN;
+  }
 }
 
 #endif

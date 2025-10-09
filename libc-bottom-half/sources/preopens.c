@@ -131,7 +131,11 @@ static int internal_register_preopened_fd(filesystem_preopens_own_descriptor_t f
 /// Are the `prefix_len` bytes pointed to by `prefix` a prefix of `path`?
 static bool prefix_matches(const uint8_t *prefix, size_t prefix_len, const char *path) {
     // Allow an empty string as a prefix of any relative path.
-    if (path[0] != '/' /* && prefix_len == 0 */)
+    if (path[0] != '/' && prefix_len == 0)
+        return true;
+
+    // Allow a '/' as a prefix of any relative path.
+    if (path[0] != '/' && prefix_len == 1 && prefix[0] == '/')
         return true;
 
     // Check whether any bytes of the prefix differ.
@@ -212,6 +216,10 @@ int __wasilibc_find_abspath(const char *path,
 
     // The relative path is the substring after the portion that was matched.
     const char *computed = path;
+    if (prefix_matches((const uint8_t*) *abs_prefix, match_len, path)
+        && !((*abs_prefix[0] == '/') && (path[0] != '/')))
+        computed = path + match_len;
+
     if (path[0] == '/')
         computed = path + match_len;
 

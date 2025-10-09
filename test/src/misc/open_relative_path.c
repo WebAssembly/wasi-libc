@@ -28,11 +28,11 @@ int main(int argc, char **argv)
     close(fd);
 
     TEST(asprintf(&filename2, "%s/dir1", argv[1]) != -1);
-    TEST(mkdir(filename2, 0755) != 0);
+    TEST(mkdir(filename2, 0755) == 0);
     TEST(asprintf(&filename3, "%s/dir1/dir2", argv[1]) != -1);
-    TEST(mkdir(filename3, 0755) != 0);
+    TEST(mkdir(filename3, 0755) == 0);
     TEST(asprintf(&filename4, "%s/dir1/dir2/dir3", argv[1]) != -1);
-    TEST(mkdir(filename4, 0755) != 0);
+    TEST(mkdir(filename4, 0755) == 0);
 
     TEST(asprintf(&filename5, "%s/input.txt", filename4) != -1);
 

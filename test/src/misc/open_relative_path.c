@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 {
     TEST(argc == 2);
 
-    char *filename1, *filename2, *filename3, *filename4, *filename5;;
+    char *filename1, *filename2, *filename3, *filename4, *filename5;
     TEST(asprintf(&filename1, "%s/input.txt", argv[1]) != -1);
 
     int fd = open(filename1, O_WRONLY | O_CREAT);

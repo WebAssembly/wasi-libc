@@ -14,10 +14,11 @@ ENGINE="${ENGINE:-wasmtime}"
 
 # Run the client/server sockets test, which requires a client and server
 # running in separate processes
-run_sockets_test_simple() {
+# Takes the name of the .wasm file for the server as an argument
+run_sockets_test() {
     # Args are the same for client and server
     cd $DIR
-    server_wasm=`echo $WASM | sed -e 's/client/server/g'`
+    server_wasm=$1
     echo "$ENV $ENGINE $RUN $server_wasm $ARGS" > server_cmd.sh
     chmod +x server_cmd.sh
     # Start the server
@@ -44,7 +45,7 @@ CLIENTS=10
 run_sockets_test_multiple() {
     # Args are the same for client and server
     cd $DIR
-    server_wasm=`echo $WASM | sed -e 's/client/server/g'`
+    server_wasm=$1
     echo "$ENV $ENGINE $RUN $server_wasm $ARGS" > server_cmd.sh
     chmod +x server_cmd.sh
     # Start the server
@@ -76,6 +77,7 @@ run_sockets_test_multiple() {
 }
 
 testname=$(basename $WASM)
+parent=$(dirname $WASM)
 if [ $testname == "sockets-server.component.wasm" ]; then
     exit 0
 fi
@@ -83,12 +85,51 @@ if [ $testname == "sockets-multiple-server.component.wasm" ]; then
     exit 0
 fi
 if [ $testname == "sockets-client.component.wasm" ]; then
-    run_sockets_test_simple
+    run_sockets_test $parent/"sockets-server.component.wasm"
     exit $?
 fi
 if [ $testname == "sockets-multiple-client.component.wasm" ]; then
-    run_sockets_test_multiple
+    run_sockets_test_multiple $parent/"sockets-multiple-server.component.wasm"
     exit $?
+fi
+if [ $testname = "sockets-client-hangup-after-connect.component.wasm" ]; then
+    run_sockets_test $parent/"sockets-server-handle-hangups.component.wasm"
+    exit $?
+fi
+if [ $testname = "sockets-client-hangup-while-sending.component.wasm" ]; then
+    run_sockets_test $parent/"sockets-server-handle-hangups.component.wasm"
+    exit $?
+fi
+if [ $testname = "sockets-client-hangup-after-sending.component.wasm" ]; then
+    run_sockets_test $parent/"sockets-server-handle-hangups.component.wasm"
+    exit $?
+fi
+if [ $testname = "sockets-client-hangup-while-receiving.component.wasm" ]; then
+    run_sockets_test $parent/"sockets-server-handle-hangups.component.wasm"
+    exit $?
+fi
+if [ $testname == "sockets-server-hangup-before-send.component.wasm" ]; then
+    exit 0
+fi
+if [ $testname == "sockets-server-hangup-during-send.component.wasm" ]; then
+    exit 0
+fi
+if [ $testname == "sockets-server-hangup-before-recv.component.wasm" ]; then
+    exit 0
+fi
+if [ $testname == "sockets-server-hangup-during-recv.component.wasm" ]; then
+    exit 0
+fi
+if [ $testname == "sockets-server-handle-hangups.component.wasm" ]; then
+    exit 0
+fi
+if [ $testname == "sockets-client-handle-hangups.component.wasm" ]; then
+    run_sockets_test $parent/"sockets-server-hangup-before-send.component.wasm"
+    run_sockets_test $parent/"sockets-server-hangup-during-send.component.wasm"
+    run_sockets_test $parent/"sockets-server-hangup-before-recv.component.wasm"
+    run_sockets_test $parent/"sockets-server-hangup-during-recv.component.wasm"
+    # Deliberately fall through so that we can run this test without a server
+    # (to test the behavior when connect() fails)
 fi
 cd $DIR
 mkdir -p fs

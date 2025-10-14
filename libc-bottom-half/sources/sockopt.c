@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <string.h>
+#include "common/time.h"
 
 #include <wasi/api.h>
 #include <wasi/descriptor_table.h>
@@ -104,8 +105,18 @@ int tcp_getsockopt(tcp_socket_t *socket, int level, int optname,
 			value = socket->fake_reuseaddr;
 			break;
 		}
-		case SO_RCVTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
-		case SO_SNDTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
+		case SO_RCVTIMEO: {
+                        struct timeval tv = duration_to_timeval(socket->recv_timeout);
+                        memcpy(optval, &tv, *optlen < sizeof(struct timeval) ? *optlen : sizeof(struct timeval));
+                        *optlen = sizeof(struct timeval);
+                        return 0;
+                }
+		case SO_SNDTIMEO: {
+                        struct timeval tv = duration_to_timeval(socket->send_timeout);
+                        memcpy(optval, &tv, *optlen < sizeof(struct timeval) ? *optlen : sizeof(struct timeval));
+                        *optlen = sizeof(struct timeval);
+                        return 0;
+                }
 		default:
 			errno = ENOPROTOOPT;
 			return -1;
@@ -288,8 +299,22 @@ int tcp_setsockopt(tcp_socket_t *socket, int level, int optname,
 			socket->fake_reuseaddr = (intval != 0);
 			return 0;
 		}
-		case SO_RCVTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
-		case SO_SNDTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
+		case SO_RCVTIMEO:  {
+                        struct timeval* tv = (struct timeval*) optval;
+                        if (!timeval_to_duration(tv, &socket->recv_timeout)) {
+                            errno = EINVAL;
+                            return -1;
+                        }
+                        return 0;
+                }
+		case SO_SNDTIMEO: {
+                        struct timeval* tv = (struct timeval*) optval;
+                        if (!timeval_to_duration(tv, &socket->send_timeout)) {
+                            errno = EINVAL;
+                            return -1;
+                        }
+                        return 0;
+                }
 		default:
 			errno = ENOPROTOOPT;
 			return -1;

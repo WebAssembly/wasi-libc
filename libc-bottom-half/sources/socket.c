@@ -28,6 +28,8 @@ static int tcp_socket(network_ip_address_family_t family, bool blocking)
 				  .state = { .tag = TCP_SOCKET_STATE_UNBOUND,
 					     .unbound = {
 						     /* No additional state. */ } },
+                                  .send_timeout = 0, // Use 0 to represent no timeout
+                                  .recv_timeout = 0,
 			  } };
 
 	int fd;

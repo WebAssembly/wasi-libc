@@ -92,6 +92,8 @@ int tcp_accept(tcp_socket_t *socket, bool client_blocking,
             .output = output,
             .output_pollable = output_pollable,
         } },
+        .send_timeout = 0, // Use 0 to represent no timeout
+        .recv_timeout = 0,
     } };
 
 	int client_fd;

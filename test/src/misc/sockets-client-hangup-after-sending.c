@@ -20,7 +20,7 @@
 
 int BUFSIZE = 256;
 
-// See sockets-multiple-server.c -- must be running already as a separate executable
+// See sockets-server.c -- must be running already as a separate executable
 void test_tcp_client() {
     // Prepare server socket
     int server_port = 4001;
@@ -37,12 +37,7 @@ void test_tcp_client() {
     sockaddr_in.sin_port = htons(server_port);
 
     // Connect from client
-    // Generate a random number to test that multiple clients each receive
-    // the correct response
-    int32_t number = 0;
-    getentropy(&number, sizeof(int32_t));
-    char message[BUFSIZE];
-    sprintf(message, "%d", number);
+    char message[] = "There's gonna be a party when the wolf comes home";
     int len = strlen(message);
     char client_buffer[BUFSIZE];
 
@@ -50,14 +45,6 @@ void test_tcp_client() {
 
     // Client writes a message to server
     TEST(send(socket_fd, message, len, 0) == len);
-
-    // Client reads from server
-    int32_t bytes_received = recv(socket_fd, client_buffer, len, 0);
-    TEST(bytes_received == len);
-    client_buffer[len] = 0;
-
-    // Message received should be the same as message sent
-    TEST(strcmp(message, client_buffer) == 0);
 
     // Shut down client
     close(socket_fd);

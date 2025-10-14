@@ -20,7 +20,8 @@
 
 int BUFSIZE = 256;
 
-// See sockets-multiple-server.c -- must be running already as a separate executable
+// Server must be running already as a separate executable
+// (except when testing the case where connect() fails)
 void test_tcp_client() {
     // Prepare server socket
     int server_port = 4001;
@@ -37,27 +38,33 @@ void test_tcp_client() {
     sockaddr_in.sin_port = htons(server_port);
 
     // Connect from client
-    // Generate a random number to test that multiple clients each receive
-    // the correct response
-    int32_t number = 0;
-    getentropy(&number, sizeof(int32_t));
-    char message[BUFSIZE];
-    sprintf(message, "%d", number);
+    char message[] = "There's gonna be a party when the wolf comes home";
     int len = strlen(message);
     char client_buffer[BUFSIZE];
 
-    TEST(connect(socket_fd, (struct sockaddr*)&sockaddr_in, sizeof(sockaddr_in)) != -1);
+    int connect_result = connect(socket_fd, (struct sockaddr*)&sockaddr_in, sizeof(sockaddr_in));
+    if (connect_result == -1) {
+        close(socket_fd);
+        return;
+    }
 
     // Client writes a message to server
+    // This should succeed even in the presence of hangups,
+    // since send() only fails if there's a local error
     TEST(send(socket_fd, message, len, 0) == len);
+
+    // Set timeout for recv
+    struct timeval tv;
+    tv.tv_sec = 3;
+    tv.tv_usec = 0;
+    setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv));
 
     // Client reads from server
     int32_t bytes_received = recv(socket_fd, client_buffer, len, 0);
-    TEST(bytes_received == len);
-    client_buffer[len] = 0;
-
-    // Message received should be the same as message sent
-    TEST(strcmp(message, client_buffer) == 0);
+    if (bytes_received == len) {
+        // Message received should be the same as message sent
+        TEST(strcmp(message, client_buffer) == 0);
+    }
 
     // Shut down client
     close(socket_fd);

@@ -40,8 +40,10 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***name
   if (fd == -1)
     return -1;
   DIR *dirp = fdopendir(fd);
-  if (!dirp)
+  if (!dirp) {
+    close(fd);
     return -1;
+  }
   fd = dirp->fd;
 
   // Translate the file descriptor to an internal handle
@@ -50,6 +52,7 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***name
   read_directory_state_t state;
   if (!fd_to_directory_stream(fd, &stream, &parent_file_handle, &state)) {
     errno = EBADF;
+    close(fd);
     return -1;
   }
 
@@ -88,6 +91,8 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***name
       malloc(offsetof(struct dirent, d_name) + name_len + 1);
     if (dirent == NULL) {
       errno = EINVAL;
+      remove_and_drop_directory_stream(fd);
+      close(fd);
       return -1;
     }
     dirent->d_type = (handle_dot || handle_dot_dot) ? DT_DIR : dir_entry_type_to_d_type(dir_entry_optional.val.type);
@@ -103,6 +108,8 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***name
       // Do an `fstatat` to get the inode number.
       if (fstatat(fd, dirent->d_name, &statbuf, AT_SYMLINK_NOFOLLOW) != 0) {
         errno = EBADF;
+        remove_and_drop_directory_stream(fd);
+        close(fd);
         return -1;
       }
       // Fill in the inode.
@@ -124,6 +131,8 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***name
           if (new_dirents == NULL) {
             free(dirent);
             free(dirents);
+            remove_and_drop_directory_stream(fd);
+            close(fd);
             errno = EBADF;
             return -1;
           }
@@ -137,10 +146,11 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***name
   }
 
   // Sort results and return them
-  filesystem_directory_entry_stream_drop_borrow(stream);
+  remove_and_drop_directory_stream(fd);
   (qsort)(dirents, dirents_used, sizeof(*dirents),
           (int (*)(const void *, const void *))compar);
   *namelist = dirents;
+  close(fd);
   return dirents_used;
 #else
   // Open the directory.

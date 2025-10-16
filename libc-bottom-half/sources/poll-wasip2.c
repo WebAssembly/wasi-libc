@@ -23,6 +23,8 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
         for (size_t i = 0; i < nfds; ++i) {
                 struct pollfd *pollfd = fds + i;
                 descriptor_table_entry_t *entry;
+                if (pollfd->fd < 0)
+                    continue;
                 if (descriptor_table_get_ref(pollfd->fd, &entry)) {
                         switch (entry->tag) {
                         case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET: {

@@ -18,6 +18,7 @@
 #include <time.h>
 
 #define NSEC_PER_SEC 1000000000
+#define USEC_PER_SEC 1000000
 
 static inline bool timespec_to_timestamp_exact(
 #ifdef __wasilibc_use_wasip2
@@ -117,7 +118,30 @@ static inline struct timeval instant_to_timeval(
   monotonic_clock_instant_t ns) {
     // Decompose instant into seconds and microoseconds
   return (struct timeval){.tv_sec = ns / NSEC_PER_SEC,
-                            .tv_usec = (ns % NSEC_PER_SEC) / 1000};
+                          .tv_usec = (ns % NSEC_PER_SEC) / 1000};
+}
+
+static inline struct timeval duration_to_timeval(
+  monotonic_clock_duration_t ns) {
+    // Decompose duration into seconds and microoseconds
+  return (struct timeval){.tv_sec = ns / NSEC_PER_SEC,
+                          .tv_usec = (ns % NSEC_PER_SEC) / 1000};
+}
+
+static inline bool timeval_to_duration(
+  struct timeval* timeval, monotonic_clock_duration_t* duration) {
+    // Invalid microseconds field
+    if (timeval->tv_usec < 0 || timeval->tv_usec >= USEC_PER_SEC)
+      return false;
+    if (timeval->tv_sec < 0) {
+      // Timestamps before the Epoch are not supported
+      *duration = 0;
+    } else if (__builtin_mul_overflow(timeval->tv_sec, NSEC_PER_SEC, duration) ||
+               __builtin_add_overflow(*duration, timeval->tv_usec * 1000, duration)) {
+      // Make sure our duration does not overflow
+      *duration = NUMERIC_MAX(monotonic_clock_instant_t);
+    }
+    return true;
 }
 
 static inline struct timeval timestamp_to_timeval(

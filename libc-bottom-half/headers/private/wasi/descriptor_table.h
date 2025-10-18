@@ -55,6 +55,8 @@ typedef struct {
         bool fake_reuseaddr;
         network_ip_address_family_t family;
         tcp_socket_state_t state;
+        monotonic_clock_duration_t send_timeout;
+        monotonic_clock_duration_t recv_timeout;
 } tcp_socket_t;
 
 typedef struct {

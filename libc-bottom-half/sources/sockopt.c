@@ -44,7 +44,11 @@ int tcp_getsockopt(tcp_socket_t *socket, int level, int optname,
 				value = __wasi_sockets_utils__map_error(
 					socket->state.connect_failed.error_code);
 				socket->state.connect_failed.error_code = 0;
-			} else {
+			} else if (socket->state.tag ==
+                            TCP_SOCKET_STATE_CONNECTING) {
+                                value = EINPROGRESS;
+                        }
+                        else {
 				value = 0;
 			}
 			break;

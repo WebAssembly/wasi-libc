@@ -45,7 +45,7 @@ $(SYSROOT):
 LIBC_TEST_URL ?= https://github.com/bytecodealliance/libc-test
 LIBC_TEST = $(DOWNDIR)/libc-test
 ARCH := $(shell uname -m)
-WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v29.0.1/wasmtime-v29.0.1-$(ARCH)-linux.tar.xz
+WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v38.0.2/wasmtime-v38.0.2-$(ARCH)-linux.tar.xz
 WASMTIME = $(abspath $(DOWNDIR)/$(shell basename $(WASMTIME_URL) .tar.xz)/wasmtime)
 WASM_TOOLS_URL ?= https://github.com/bytecodealliance/wasm-tools/releases/download/v1.224.0/wasm-tools-1.224.0-$(ARCH)-linux.tar.gz
 WASM_TOOLS = $(DOWNDIR)/$(shell basename $(WASM_TOOLS_URL) .tar.gz)/wasm-tools

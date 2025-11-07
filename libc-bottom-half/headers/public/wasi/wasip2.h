@@ -1084,7 +1084,7 @@ extern bool environment_initial_cwd(wasip2_string_t *ret);
 
 // Imported Functions from `wasi:cli/exit@0.2.0`
 // Exit the current instance and any linked instances.
-extern _Noreturn void exit_exit(exit_result_void_void_t *status);
+_Noreturn extern void exit_exit(exit_result_void_void_t *status);
 
 // Imported Functions from `wasi:io/error@0.2.0`
 // Returns a string that is suitable to assist humans in debugging

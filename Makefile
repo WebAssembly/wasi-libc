@@ -1091,7 +1091,7 @@ bindings: $(BINDING_WORK_DIR)/wasi-cli $(BINDING_WORK_DIR)/wit-bindgen
 			< wasip2.c \
 			> ../../libc-bottom-half/sources/wasip2.c && \
 		rm wasip2.c
-	sed -i 's/void exit_exit/_Noreturn void exit_exit/' libc-bottom-half/headers/public/wasi/wasip2.h
+	sed -i 's/extern void exit_exit/_Noreturn extern void exit_exit/' libc-bottom-half/headers/public/wasi/wasip2.h
 	sed -i 's/extern void __wasm_import_exit_exit/_Noreturn extern void __wasm_import_exit_exit/' libc-bottom-half/sources/wasip2.c
 
 

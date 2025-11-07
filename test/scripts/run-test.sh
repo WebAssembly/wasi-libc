@@ -78,63 +78,63 @@ run_sockets_test_multiple() {
 
 testname=$(basename $WASM)
 parent=$(dirname $WASM)
-if [ $testname == "sockets-server.component.wasm" ]; then
+if [ $testname == "sockets-server.wasm" ]; then
     exit 0
 fi
-if [ $testname == "sockets-multiple-server.component.wasm" ]; then
+if [ $testname == "sockets-multiple-server.wasm" ]; then
     exit 0
 fi
-if [ $testname == "sockets-server-udp-blocking.component.wasm" ]; then
+if [ $testname == "sockets-server-udp-blocking.wasm" ]; then
     exit 0
 fi
-if [ $testname == "sockets-client.component.wasm" ]; then
-    run_sockets_test $parent/"sockets-server.component.wasm"
+if [ $testname == "sockets-client.wasm" ]; then
+    run_sockets_test $parent/"sockets-server.wasm"
     exit $?
 fi
-if [ $testname == "sockets-client-udp-blocking.component.wasm" ]; then
-    run_sockets_test $parent/"sockets-server-udp-blocking.component.wasm"
+if [ $testname == "sockets-client-udp-blocking.wasm" ]; then
+    run_sockets_test $parent/"sockets-server-udp-blocking.wasm"
     exit $?
 fi
-if [ $testname == "sockets-multiple-client.component.wasm" ]; then
-    run_sockets_test_multiple $parent/"sockets-multiple-server.component.wasm"
+if [ $testname == "sockets-multiple-client.wasm" ]; then
+    run_sockets_test_multiple $parent/"sockets-multiple-server.wasm"
     exit $?
 fi
-if [ $testname = "sockets-client-hangup-after-connect.component.wasm" ]; then
-    run_sockets_test $parent/"sockets-server-handle-hangups.component.wasm"
+if [ $testname = "sockets-client-hangup-after-connect.wasm" ]; then
+    run_sockets_test $parent/"sockets-server-handle-hangups.wasm"
     exit $?
 fi
-if [ $testname = "sockets-client-hangup-while-sending.component.wasm" ]; then
-    run_sockets_test $parent/"sockets-server-handle-hangups.component.wasm"
+if [ $testname = "sockets-client-hangup-while-sending.wasm" ]; then
+    run_sockets_test $parent/"sockets-server-handle-hangups.wasm"
     exit $?
 fi
-if [ $testname = "sockets-client-hangup-after-sending.component.wasm" ]; then
-    run_sockets_test $parent/"sockets-server-handle-hangups.component.wasm"
+if [ $testname = "sockets-client-hangup-after-sending.wasm" ]; then
+    run_sockets_test $parent/"sockets-server-handle-hangups.wasm"
     exit $?
 fi
-if [ $testname = "sockets-client-hangup-while-receiving.component.wasm" ]; then
-    run_sockets_test $parent/"sockets-server-handle-hangups.component.wasm"
+if [ $testname = "sockets-client-hangup-while-receiving.wasm" ]; then
+    run_sockets_test $parent/"sockets-server-handle-hangups.wasm"
     exit $?
 fi
-if [ $testname == "sockets-server-hangup-before-send.component.wasm" ]; then
+if [ $testname == "sockets-server-hangup-before-send.wasm" ]; then
     exit 0
 fi
-if [ $testname == "sockets-server-hangup-during-send.component.wasm" ]; then
+if [ $testname == "sockets-server-hangup-during-send.wasm" ]; then
     exit 0
 fi
-if [ $testname == "sockets-server-hangup-before-recv.component.wasm" ]; then
+if [ $testname == "sockets-server-hangup-before-recv.wasm" ]; then
     exit 0
 fi
-if [ $testname == "sockets-server-hangup-during-recv.component.wasm" ]; then
+if [ $testname == "sockets-server-hangup-during-recv.wasm" ]; then
     exit 0
 fi
-if [ $testname == "sockets-server-handle-hangups.component.wasm" ]; then
+if [ $testname == "sockets-server-handle-hangups.wasm" ]; then
     exit 0
 fi
-if [ $testname == "sockets-client-handle-hangups.component.wasm" ]; then
-    run_sockets_test $parent/"sockets-server-hangup-before-send.component.wasm"
-    run_sockets_test $parent/"sockets-server-hangup-during-send.component.wasm"
-    run_sockets_test $parent/"sockets-server-hangup-before-recv.component.wasm"
-    run_sockets_test $parent/"sockets-server-hangup-during-recv.component.wasm"
+if [ $testname == "sockets-client-handle-hangups.wasm" ]; then
+    run_sockets_test $parent/"sockets-server-hangup-before-send.wasm"
+    run_sockets_test $parent/"sockets-server-hangup-during-send.wasm"
+    run_sockets_test $parent/"sockets-server-hangup-before-recv.wasm"
+    run_sockets_test $parent/"sockets-server-hangup-during-recv.wasm"
     # Deliberately fall through so that we can run this test without a server
     # (to test the behavior when connect() fails)
 fi

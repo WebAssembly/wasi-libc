@@ -1056,7 +1056,7 @@ bindings: $(BINDING_WORK_DIR)/wasi-cli $(BINDING_WORK_DIR)/wit-bindgen
 			--autodrop-borrows yes \
 			--rename-world wasip2 \
 			--type-section-suffix __wasi_libc \
-			--world wasi:cli/command@0.2.0 \
+			--world wasi:cli/imports@0.2.0 \
 			--rename wasi:clocks/monotonic-clock@0.2.0=monotonic_clock \
 			--rename wasi:clocks/wall-clock@0.2.0=wall_clock \
 			--rename wasi:filesystem/preopens@0.2.0=filesystem_preopens \
@@ -1091,6 +1091,8 @@ bindings: $(BINDING_WORK_DIR)/wasi-cli $(BINDING_WORK_DIR)/wit-bindgen
 			< wasip2.c \
 			> ../../libc-bottom-half/sources/wasip2.c && \
 		rm wasip2.c
+	sed -i 's/void exit_exit/_Noreturn void exit_exit/' libc-bottom-half/headers/public/wasi/wasip2.h
+	sed -i 's/extern void __wasm_import_exit_exit/_Noreturn extern void __wasm_import_exit_exit/' libc-bottom-half/sources/wasip2.c
 
 
 clean:

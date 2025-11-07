@@ -11,9 +11,6 @@ extern void __wasm_import_environment_get_arguments(int32_t);
 __attribute__((__import_module__("wasi:cli/environment@0.2.0"), __import_name__("initial-cwd")))
 extern void __wasm_import_environment_initial_cwd(int32_t);
 
-// NOTE: This file has been manually edited to add the _Noreturn
-// annotation on __wasm_import_exit_exit(). If the file is re-generated, this
-// annotation will have to be re-added.
 __attribute__((__import_module__("wasi:cli/exit@0.2.0"), __import_name__("exit")))
 _Noreturn extern void __wasm_import_exit_exit(int32_t);
 
@@ -1010,11 +1007,6 @@ void ip_name_lookup_result_option_ip_address_error_code_free(ip_name_lookup_resu
   if (!ptr->is_err) {
     ip_name_lookup_option_ip_address_free(&ptr->val.ok);
   } else {
-  }
-}
-
-void exports_wasi_cli_run_result_void_void_free(exports_wasi_cli_run_result_void_void_t *ptr) {
-  if (!ptr->is_err) {
   }
 }
 
@@ -4326,19 +4318,6 @@ void random_insecure_seed_insecure_seed(wasip2_tuple2_u64_u64_t *ret) {
     (uint64_t) (*((int64_t*) (ptr + 0))),
     (uint64_t) (*((int64_t*) (ptr + 8))),
   };
-}
-
-__attribute__((__export_name__("wasi:cli/run@0.2.0#run")))
-int32_t __wasm_export_exports_wasi_cli_run_run(void) {
-  exports_wasi_cli_run_result_void_void_t ret;
-  ret.is_err = !exports_wasi_cli_run_run();
-  int32_t result;
-  if ((ret).is_err) {
-    result = 1;
-  } else {
-    result = 0;
-  }
-  return result;
 }
 
 extern void __component_type_object_force_link_wasip2(void);

@@ -87,8 +87,6 @@ static bool init_stdin() {
       entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
       entry.stream.read_stream = streams_borrow_input_stream(stdin_get_stdin());
       entry.stream.offset = 0;
-      entry.stream.read_pollable_is_initialized = false;
-      entry.stream.write_pollable_is_initialized = false;
       entry.stream.file_info.readable = true;
       entry.stream.file_info.writable = false;
       // entry.stream.file_info.file_handle is uninitialized, but it will never be used
@@ -106,8 +104,6 @@ static bool init_stdout() {
       entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
       entry.stream.write_stream = streams_borrow_output_stream(stdout_get_stdout());
       entry.stream.offset = 0;
-      entry.stream.read_pollable_is_initialized = false;
-      entry.stream.write_pollable_is_initialized = false;
       entry.stream.file_info.readable = false;
       entry.stream.file_info.writable = true;
       // entry.stream.file_info.file_handle is uninitialized, but it will never be used
@@ -125,8 +121,6 @@ static bool init_stderr() {
       entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
       entry.stream.write_stream = streams_borrow_output_stream(stderr_get_stderr());
       entry.stream.offset = 0;
-      entry.stream.read_pollable_is_initialized = false;
-      entry.stream.write_pollable_is_initialized = false;
       entry.stream.file_info.readable = false;
       entry.stream.file_info.writable = true;
       // entry.stream.file_info.file_handle is uninitialized, but it will never be used

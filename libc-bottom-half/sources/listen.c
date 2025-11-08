@@ -61,14 +61,8 @@ int tcp_listen(tcp_socket_t *socket, int backlog)
 
 	// Listen has successfully started. Attempt to finish it:
 	while (!tcp_method_tcp_socket_finish_listen(socket_borrow, &error)) {
-		if (error == NETWORK_ERROR_CODE_WOULD_BLOCK) {
-			poll_borrow_pollable_t pollable_borrow =
-				poll_borrow_pollable(socket->socket_pollable);
-			poll_method_pollable_block(pollable_borrow);
-		} else {
-			errno = __wasi_sockets_utils__map_error(error);
-			return -1;
-		}
+                if (tcp_socket_handle_error(socket, error) < 0)
+                        return -1;
 	}
 
 	// Listen successful.

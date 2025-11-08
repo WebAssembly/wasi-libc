@@ -18,9 +18,7 @@ typedef struct {
 
 typedef struct {
         streams_own_input_stream_t input;
-        poll_own_pollable_t input_pollable;
         streams_own_output_stream_t output;
-        poll_own_pollable_t output_pollable;
 } tcp_socket_state_connected_t;
 
 typedef struct {
@@ -49,7 +47,6 @@ typedef struct {
 
 typedef struct {
         tcp_own_tcp_socket_t socket;
-        poll_own_pollable_t socket_pollable;
         bool blocking;
         bool fake_nodelay;
         bool fake_reuseaddr;
@@ -61,9 +58,7 @@ typedef struct {
 
 typedef struct {
         udp_own_incoming_datagram_stream_t incoming;
-        poll_own_pollable_t incoming_pollable;
         udp_own_outgoing_datagram_stream_t outgoing;
-        poll_own_pollable_t outgoing_pollable;
 } udp_socket_streams_t;
 
 typedef struct {
@@ -102,7 +97,6 @@ typedef struct {
 
 typedef struct {
         udp_own_udp_socket_t socket;
-        poll_own_pollable_t socket_pollable;
         bool blocking;
         network_ip_address_family_t family;
         udp_socket_state_t state;
@@ -141,11 +135,6 @@ typedef struct {
         streams_borrow_output_stream_t write_stream;
         // Current position in stream, relative to the beginning of the *file*, measured in bytes
         off_t offset;
-        // Used for checking readiness to read/write to stream. Lazily initialized
-        streams_own_pollable_t read_pollable;
-        streams_own_pollable_t write_pollable;
-        bool read_pollable_is_initialized;
-        bool write_pollable_is_initialized;
         // When the stream is closed, the caller should
         // replace this entry in the table with the file handle
         file_t file_info;

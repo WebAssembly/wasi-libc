@@ -61,24 +61,21 @@ static ssize_t tcp_recvfrom(tcp_socket_t *socket, uint8_t *buffer,
 			wasip2_list_u8_free(&result);
 			return result.len;
 		} else if (should_block) {
-                        poll_borrow_pollable_t pollable_borrow =
-                            poll_borrow_pollable(connection.input_pollable);
+                        poll_own_pollable_t pollable =
+                            streams_method_input_stream_subscribe(rx_borrow);
                         if (socket->recv_timeout != 0) {
                             monotonic_clock_own_pollable_t timeout_pollable =
                                 monotonic_clock_subscribe_duration(socket->recv_timeout);
                             poll_list_borrow_pollable_t pollables;
-                            pollables.ptr = malloc(sizeof(poll_borrow_pollable_t) * 2);
-                            if (!pollables.ptr) {
-                                errno = ENOMEM;
-                                return -1;
-                            }
-                            pollables.ptr[0] = pollable_borrow;
+                            poll_borrow_pollable_t pollables_ptr[2];
+                            pollables.ptr = pollables_ptr;
+                            pollables.ptr[0] = poll_borrow_pollable(pollable);
                             pollables.ptr[1] = poll_borrow_pollable(timeout_pollable);
                             pollables.len = 2;
                             wasip2_list_u32_t ret;
                             poll_poll(&pollables, &ret);
                             poll_pollable_drop_own(timeout_pollable);
-                            poll_list_borrow_pollable_free(&pollables);
+                            poll_pollable_drop_own(pollable);
                             for (size_t i = 0; i < ret.len; i++) {
                                 if (ret.ptr[i] == 1) {
                                     // Timed out
@@ -88,8 +85,10 @@ static ssize_t tcp_recvfrom(tcp_socket_t *socket, uint8_t *buffer,
                                 }
                             }
                             wasip2_list_u32_free(&ret);
-                        } else
-                            poll_method_pollable_block(pollable_borrow);
+                        } else {
+                            poll_method_pollable_block(poll_borrow_pollable(pollable));
+                            poll_pollable_drop_own(pollable);
+                        }
 		} else {
 			errno = EWOULDBLOCK;
 			return -1;
@@ -180,9 +179,10 @@ static ssize_t udp_recvfrom(udp_socket_t *socket, uint8_t *buffer,
 			return return_real_size ? datagram_size : bytes_to_copy;
 
 		} else if (should_block) {
-			poll_borrow_pollable_t pollable_borrow =
-				poll_borrow_pollable(streams.incoming_pollable);
-			poll_method_pollable_block(pollable_borrow);
+                        poll_own_pollable_t pollable =
+                            udp_method_incoming_datagram_stream_subscribe(incoming_borrow);
+			poll_method_pollable_block(poll_borrow_pollable(pollable));
+                        poll_pollable_drop_own(pollable);
 		} else {
 			errno = EWOULDBLOCK;
 			return -1;

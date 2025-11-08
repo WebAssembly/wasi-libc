@@ -18,7 +18,6 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
 #ifdef __wasilibc_use_wasip2
   streams_borrow_output_stream_t output_stream;
   filesystem_own_input_stream_t input_stream;
-  streams_own_pollable_t pollable;
   bool ok = false;
   bool create_new_stream = false;
   filesystem_error_code_t error_code;
@@ -57,18 +56,12 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
       return -1;
     }
     output_stream = streams_borrow_output_stream(stream_owned);
-    pollable = streams_method_output_stream_subscribe(output_stream);
   } else if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_STREAM) {
     if (!entry->stream.file_info.writable) {
       errno = EBADF;
       return -1;
     }
     output_stream = entry->stream.write_stream;
-    if (!entry->stream.write_pollable_is_initialized) {
-      pollable = entry->stream.write_pollable = streams_method_output_stream_subscribe(output_stream);
-      entry->stream.write_pollable_is_initialized = true;
-    } else
-      pollable = entry->stream.write_pollable;
   } else {
       errno = EBADF;
       return -1;
@@ -85,8 +78,11 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
     return -1;
   }
 
-  if (num_bytes_permitted < nbyte)
+  if (num_bytes_permitted < nbyte) {
+    streams_own_pollable_t pollable = streams_method_output_stream_subscribe(output_stream);
     poll_method_pollable_block(poll_borrow_pollable(pollable));
+    poll_pollable_drop_own(pollable);
+  }
 
   // Convert the buffer to a WASI list of bytes
   wasip2_list_u8_t contents;
@@ -125,9 +121,6 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
       }
       new_entry.stream.read_stream = streams_borrow_input_stream(read_stream);
     }
-    new_entry.stream.write_pollable = pollable;
-    new_entry.stream.read_pollable_is_initialized = false;
-    new_entry.stream.write_pollable_is_initialized = true;
     new_entry.stream.write_stream = output_stream;
     new_entry.stream.offset = contents.len;
     new_entry.stream.file_info.readable = entry->file.readable;

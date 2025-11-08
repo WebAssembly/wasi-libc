@@ -64,4 +64,36 @@ int __wasi_sockets_utils__parse_port(const char *port);
 const service_entry_t *__wasi_sockets_utils__get_service_entry_by_name(const char *name);
 const service_entry_t *__wasi_sockets_utils__get_service_entry_by_port(const uint16_t port);
 
+// Handles an `error` that came from an operation on `socket`.
+//
+// If it's "would block" and the socket is in blocking mode, the current thread
+// is blocked until the socket is ready. Otherwise errno is set.
+//
+// Returns 0 if the error was handled and returns -1 otherwise.
+static int tcp_socket_handle_error(tcp_socket_t *socket, network_error_code_t error) {
+  if (error == NETWORK_ERROR_CODE_WOULD_BLOCK && socket->blocking) {
+    poll_own_pollable_t pollable =
+      tcp_method_tcp_socket_subscribe(tcp_borrow_tcp_socket(socket->socket));
+    poll_method_pollable_block(poll_borrow_pollable(pollable));
+    poll_pollable_drop_own(pollable);
+    return 0;
+  }
+
+  errno = __wasi_sockets_utils__map_error(error);
+  return -1;
+}
+
+static int udp_socket_handle_error(udp_socket_t *socket, network_error_code_t error) {
+  if (error == NETWORK_ERROR_CODE_WOULD_BLOCK && socket->blocking) {
+    poll_own_pollable_t pollable =
+      udp_method_udp_socket_subscribe(udp_borrow_udp_socket(socket->socket));
+    poll_method_pollable_block(poll_borrow_pollable(pollable));
+    poll_pollable_drop_own(pollable);
+    return 0;
+  }
+
+  errno = __wasi_sockets_utils__map_error(error);
+  return -1;
+}
+
 #endif

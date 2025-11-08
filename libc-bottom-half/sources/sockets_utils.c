@@ -343,14 +343,8 @@ int __wasi_sockets_utils__tcp_bind(tcp_socket_t *socket,
 
 	// Bind has successfully started. Attempt to finish it:
 	while (!tcp_method_tcp_socket_finish_bind(socket_borrow, &error)) {
-		if (error == NETWORK_ERROR_CODE_WOULD_BLOCK) {
-			poll_borrow_pollable_t pollable_borrow =
-				poll_borrow_pollable(socket->socket_pollable);
-			poll_method_pollable_block(pollable_borrow);
-		} else {
-			errno = __wasi_sockets_utils__map_error(error);
-			return -1;
-		}
+                if (tcp_socket_handle_error(socket, error) < 0)
+                        return -1;
 	}
 
 	// Bind successful.
@@ -386,14 +380,8 @@ int __wasi_sockets_utils__udp_bind(udp_socket_t *socket,
 
 	// Bind has successfully started. Attempt to finish it:
 	while (!udp_method_udp_socket_finish_bind(socket_borrow, &error)) {
-		if (error == NETWORK_ERROR_CODE_WOULD_BLOCK) {
-			poll_borrow_pollable_t pollable_borrow =
-				poll_borrow_pollable(socket->socket_pollable);
-			poll_method_pollable_block(pollable_borrow);
-		} else {
-			errno = __wasi_sockets_utils__map_error(error);
-			return -1;
-		}
+                if (udp_socket_handle_error(socket, error) < 0)
+                        return -1;
 	}
 
 	// Bind successful.
@@ -417,30 +405,17 @@ bool __wasi_sockets_utils__create_streams(
 	}
 
 	udp_own_incoming_datagram_stream_t incoming = io.f0;
-	udp_borrow_incoming_datagram_stream_t incoming_borrow =
-		udp_borrow_incoming_datagram_stream(incoming);
-	poll_own_pollable_t incoming_pollable =
-		udp_method_incoming_datagram_stream_subscribe(incoming_borrow);
-
 	udp_own_outgoing_datagram_stream_t outgoing = io.f1;
-	udp_borrow_outgoing_datagram_stream_t outgoing_borrow =
-		udp_borrow_outgoing_datagram_stream(outgoing);
-	poll_own_pollable_t outgoing_pollable =
-		udp_method_outgoing_datagram_stream_subscribe(outgoing_borrow);
 
 	*result = (udp_socket_streams_t){
 		.incoming = incoming,
-		.incoming_pollable = incoming_pollable,
 		.outgoing = outgoing,
-		.outgoing_pollable = outgoing_pollable,
 	};
 	return true;
 }
 
 void __wasi_sockets_utils__drop_streams(udp_socket_streams_t streams)
 {
-	poll_pollable_drop_own(streams.incoming_pollable);
-	poll_pollable_drop_own(streams.outgoing_pollable);
 	udp_incoming_datagram_stream_drop_own(streams.incoming);
 	udp_outgoing_datagram_stream_drop_own(streams.outgoing);
 }

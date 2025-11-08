@@ -41,8 +41,8 @@ static int tcp_connect(tcp_socket_t *socket, const struct sockaddr *addr,
 
 	if (!tcp_method_tcp_socket_start_connect(socket_borrow, network_borrow,
 						 &remote_address, &error)) {
-		errno = __wasi_sockets_utils__map_error(error);
-		return -1;
+                if (tcp_socket_handle_error(socket, error) < 0)
+                        return -1;
 	}
 
 	// Connect has successfully started.
@@ -55,17 +55,9 @@ static int tcp_connect(tcp_socket_t *socket, const struct sockaddr *addr,
 	tcp_tuple2_own_input_stream_own_output_stream_t io;
 	while (!tcp_method_tcp_socket_finish_connect(socket_borrow, &io,
 						     &error)) {
-		if (error == NETWORK_ERROR_CODE_WOULD_BLOCK) {
-			if (socket->blocking) {
-				poll_borrow_pollable_t pollable_borrow =
-					poll_borrow_pollable(
-						socket->socket_pollable);
-				poll_method_pollable_block(pollable_borrow);
-			} else {
-				errno = EINPROGRESS;
-				return -1;
-			}
-		} else {
+                if (tcp_socket_handle_error(socket, error) == 0)
+                        continue;
+		if (error != NETWORK_ERROR_CODE_WOULD_BLOCK) {
 			socket->state =
 				(tcp_socket_state_t){ .tag = TCP_SOCKET_STATE_CONNECT_FAILED,
 						      .connect_failed = {
@@ -73,9 +65,10 @@ static int tcp_connect(tcp_socket_t *socket, const struct sockaddr *addr,
 								      error,
 						      } };
 
-			errno = __wasi_sockets_utils__map_error(error);
-			return -1;
-		}
+		} else {
+                        errno = EINPROGRESS;
+                }
+		return -1;
 	}
 
 	// Connect successful.
@@ -83,23 +76,16 @@ static int tcp_connect(tcp_socket_t *socket, const struct sockaddr *addr,
 	streams_own_input_stream_t input = io.f0;
 	streams_borrow_input_stream_t input_borrow =
 		streams_borrow_input_stream(input);
-	poll_own_pollable_t input_pollable =
-		streams_method_input_stream_subscribe(input_borrow);
 
 	streams_own_output_stream_t output = io.f1;
 	streams_borrow_output_stream_t output_borrow =
 		streams_borrow_output_stream(output);
-	poll_own_pollable_t output_pollable =
-		streams_method_output_stream_subscribe(output_borrow);
 
 	socket->state =
 		(tcp_socket_state_t){ .tag = TCP_SOCKET_STATE_CONNECTED,
 				      .connected = {
 					      .input = input,
-					      .input_pollable = input_pollable,
 					      .output = output,
-					      .output_pollable =
-						      output_pollable,
 				      } };
 	return 0;
 }

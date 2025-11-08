@@ -45,8 +45,6 @@ void drop_tcp_socket(tcp_socket_t socket) {
     case TCP_SOCKET_STATE_CONNECTED: {
         tcp_socket_state_connected_t connection = socket.state.connected;
 
-        poll_pollable_drop_own(connection.input_pollable);
-        poll_pollable_drop_own(connection.output_pollable);
         streams_input_stream_drop_own(connection.input);
         streams_output_stream_drop_own(connection.output);
         break;
@@ -54,13 +52,10 @@ void drop_tcp_socket(tcp_socket_t socket) {
     default: /* unreachable */ abort();
     }
 
-    poll_pollable_drop_own(socket.socket_pollable);
     tcp_tcp_socket_drop_own(socket.socket);
 }
 
 void drop_udp_socket_streams(udp_socket_streams_t streams) {
-    poll_pollable_drop_own(streams.incoming_pollable);
-    poll_pollable_drop_own(streams.outgoing_pollable);
     udp_incoming_datagram_stream_drop_own(streams.incoming);
     udp_outgoing_datagram_stream_drop_own(streams.outgoing);
 }
@@ -81,7 +76,6 @@ void drop_udp_socket(udp_socket_t socket) {
     default: /* unreachable */ abort();
     }
 
-    poll_pollable_drop_own(socket.socket_pollable);
     udp_udp_socket_drop_own(socket.socket);
 }
 
@@ -122,10 +116,6 @@ int close(int fd) {
             drop_directory_stream(entry.directory_stream_info.directory_stream);
             break;
         case DESCRIPTOR_TABLE_ENTRY_FILE_STREAM:
-            if (entry.stream.read_pollable_is_initialized)
-                poll_pollable_drop_own(entry.stream.read_pollable);
-            if (entry.stream.write_pollable_is_initialized)
-                poll_pollable_drop_own(entry.stream.write_pollable);
             if (entry.stream.file_info.readable)
                 streams_input_stream_drop_borrow(entry.stream.read_stream);
             if (entry.stream.file_info.writable)

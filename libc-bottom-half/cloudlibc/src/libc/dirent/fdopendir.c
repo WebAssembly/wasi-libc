@@ -20,16 +20,12 @@ DIR *fdopendir(int fd) {
   DIR *dirp = malloc(sizeof(*dirp));
   if (dirp == NULL)
     return NULL;
-  dirp->buffer = malloc(DIRENT_DEFAULT_BUFFER_SIZE);
-  if (dirp->buffer == NULL) {
-    free(dirp);
-    return NULL;
-  }
-
 #ifdef __wasilibc_use_wasip2
+
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (!fd_to_file_handle(fd, &file_handle)) {
+    free(dirp);
     errno = EBADF;
     return NULL;
   }
@@ -41,34 +37,26 @@ DIR *fdopendir(int fd) {
                                                         &result,
                                                         &error_code);
   if (!ok) {
-    free(dirp->buffer);
     free(dirp);
     translate_error(error_code);
     return NULL;
   }
 
   dirp->fd = fd;
-  // Add an internal handle for the buffer
-  descriptor_table_entry_t new_entry;
-  new_entry.tag = DESCRIPTOR_TABLE_ENTRY_DIRECTORY_STREAM;
-  directory_stream_entry_t stream_info;
-  stream_info.directory_stream = result;
-  stream_info.directory_file_handle = file_handle;
-  stream_info.directory_state = DIRECTORY_STATE_FILE;
-  new_entry.directory_stream_info = stream_info;
-  int new_fd = -1;
-  if (!descriptor_table_update(dirp->fd, new_entry)) {
-    errno = EBADF;
-    return NULL;
-  }
-  dirp->cookie = __WASI_DIRCOOKIE_START;
-  dirp->buffer_processed = 0;
-  dirp->buffer_size = DIRENT_DEFAULT_BUFFER_SIZE;
+  dirp->stream = result;
+  dirp->skip = 0;
+  dirp->offset = 0;
   dirp->dirent = NULL;
   dirp->dirent_size = 1;
   return dirp;
 
 #else
+  dirp->buffer = malloc(DIRENT_DEFAULT_BUFFER_SIZE);
+  if (dirp->buffer == NULL) {
+    free(dirp);
+    return NULL;
+  }
+
   // Ensure that this is really a directory by already loading the first
   // chunk of data.
   __wasi_errno_t error =

@@ -118,9 +118,6 @@ int close(int fd) {
         case DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE:
             drop_file_handle(entry.file.file_handle);
             break;
-        case DESCRIPTOR_TABLE_ENTRY_DIRECTORY_STREAM:
-            drop_directory_stream(entry.directory_stream_info.directory_stream);
-            break;
         case DESCRIPTOR_TABLE_ENTRY_FILE_STREAM:
             if (entry.stream.read_pollable.__handle != 0)
                 poll_pollable_drop_own(entry.stream.read_pollable);

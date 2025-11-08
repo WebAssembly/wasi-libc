@@ -37,53 +37,9 @@ static bool fd_to_file_handle_allow_open(int fd, filesystem_borrow_descriptor_t*
     *result = entry->stream.file_info.file_handle;
   else if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE)
     *result = entry->file.file_handle;
-  else if (entry->tag == DESCRIPTOR_TABLE_ENTRY_DIRECTORY_STREAM)
-    *result = entry->directory_stream_info.directory_file_handle;
   else
     return false;
   return true;
-}
-
-// Succeed only if fd is bound to a directory stream in the descriptor table
-static bool fd_to_directory_stream(int fd, filesystem_borrow_directory_entry_stream_t* result_stream,
-                                   filesystem_borrow_descriptor_t* result_fd,
-                                   read_directory_state_t* result_state) {
-  descriptor_table_entry_t *entry = 0;
-  if (!descriptor_table_get_ref(fd, &entry))
-    return false;
-  if (entry->tag != DESCRIPTOR_TABLE_ENTRY_DIRECTORY_STREAM) {
-    return false;
-  }
-  *result_stream = filesystem_borrow_directory_entry_stream(entry->directory_stream_info.directory_stream);
-  *result_fd = entry->directory_stream_info.directory_file_handle;
-  *result_state = entry->directory_stream_info.directory_state;
-  return true;
-}
-
-// Does nothing if fd is not in the descriptor table or is not bound to a directory stream
-static void directory_stream_enter_state(int fd, read_directory_state_t state) {
-  descriptor_table_entry_t *entry = 0;
-  if (!descriptor_table_get_ref(fd, &entry))
-    return;
-
-  if (entry->tag == DESCRIPTOR_TABLE_ENTRY_DIRECTORY_STREAM)
-    entry->directory_stream_info.directory_state = state;
-}
-
-// Does nothing if fd is not in the descriptor table or is not bound to a directory stream
-static void remove_and_drop_directory_stream(int fd) {
-  descriptor_table_entry_t *entry = 0;
-  if (!descriptor_table_get_ref(fd, &entry))
-    return;
-
-  if (entry->tag == DESCRIPTOR_TABLE_ENTRY_DIRECTORY_STREAM) {
-    filesystem_directory_entry_stream_drop_own(entry->directory_stream_info.directory_stream);
-    filesystem_borrow_descriptor_t file_handle = entry->directory_stream_info.directory_file_handle;
-    entry->tag = DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE;
-    entry->file.file_handle = file_handle;
-    entry->file.readable = true;
-    entry->file.writable = false;
-  }
 }
 
 // The following three functions are used for lazily initializing stdin/stdout/stderr in

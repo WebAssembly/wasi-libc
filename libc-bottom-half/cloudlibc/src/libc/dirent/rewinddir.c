@@ -8,8 +8,14 @@
 #include "dirent_impl.h"
 
 void rewinddir(DIR *dirp) {
+#if __wasilibc_use_wasip2
+  dirp->stream.__handle = 0;
+  dirp->skip = 0;
+  dirp->offset = 0;
+#else
   // Update cookie.
   dirp->cookie = __WASI_DIRCOOKIE_START;
   // Mark entire buffer as processed to force a read of new data.
   dirp->buffer_used = dirp->buffer_processed = dirp->buffer_size;
+#endif
 }

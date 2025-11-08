@@ -24,12 +24,10 @@ int __wasilibc_nocwd_mkdirat_nomode(int fd, const char *path) {
 
   // Create the directory
   filesystem_error_code_t error;
-  wasip2_string_t path2;
-  wasip2_string_dup(&path2, path);
+  wasip2_string_t path2 = wasip2_string_temp(path);
   bool ok = filesystem_method_descriptor_create_directory_at(file_handle,
-                                                               &path2,
-                                                               &error);
-  wasip2_string_free(&path2);
+                                                             &path2,
+                                                             &error);
   if (!ok) {
     translate_error(error);
     return -1;

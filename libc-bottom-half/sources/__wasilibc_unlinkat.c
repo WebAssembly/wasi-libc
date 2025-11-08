@@ -1,6 +1,7 @@
 #ifdef __wasilibc_use_wasip2
 #include <wasi/wasip2.h>
 #include <wasi/descriptor_table.h>
+#include <wasi/file_utils.h>
 #include <common/errors.h>
 #else
 #include <wasi/api.h>
@@ -29,15 +30,13 @@ int __wasilibc_nocwd___wasilibc_unlinkat(int fd, const char *path) {
   }
 
   // Create a Wasm string from the path
-  wasip2_string_t wasi_path;
-  wasip2_string_dup(&wasi_path, path);
+  wasip2_string_t wasi_path = wasip2_string_temp(path);
 
   // Unlink the file
   filesystem_error_code_t error_code;
   bool ok = filesystem_method_descriptor_unlink_file_at(entry->file.file_handle,
                                                         &wasi_path,
                                                         &error_code);
-  wasip2_string_free(&wasi_path);
   if (!ok) {
     translate_error(error_code);
     return -1;

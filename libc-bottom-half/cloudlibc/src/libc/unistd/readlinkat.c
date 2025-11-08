@@ -24,9 +24,10 @@ ssize_t __wasilibc_nocwd_readlinkat(int fd, const char *restrict path, char *res
     return -1;
   }
 
-  // Create wasi strings for the input and output paths
-  wasip2_string_t wasi_path, link_source;
-  wasip2_string_dup(&wasi_path, path);
+  // Convert the path into a WASI path
+  wasip2_string_t wasi_path = wasip2_string_temp(path);
+  wasip2_string_t link_source;
+
 
   // Read the link
   filesystem_error_code_t error_code;
@@ -34,9 +35,7 @@ ssize_t __wasilibc_nocwd_readlinkat(int fd, const char *restrict path, char *res
                                                      &wasi_path,
                                                      &link_source,
                                                      &error_code);
-  wasip2_string_free(&wasi_path);
   if (!ok) {
-    wasip2_string_free(&link_source);
     translate_error(error_code);
     return -1;
   }
@@ -44,6 +43,7 @@ ssize_t __wasilibc_nocwd_readlinkat(int fd, const char *restrict path, char *res
   // Copy the contents of the output path back into the buffer provided
   bufused = bufsize < link_source.len ? bufsize : link_source.len;
   memcpy(buf, link_source.ptr, bufused);
+  wasip2_string_free(&link_source);
 #else
   // TODO: Remove the cast on `buf` once the witx is updated with char8 support.
   __wasi_errno_t error = __wasi_path_readlink(fd, path,

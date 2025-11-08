@@ -23,11 +23,9 @@ int __wasilibc_nocwd_symlinkat(const char *path1, int fd, const char *path2) {
     return -1;
   }
 
-  // Construct WASI string for the paths
-  wasip2_string_t path1_wasi;
-  wasip2_string_dup(&path1_wasi, path1);
-  wasip2_string_t path2_wasi;
-  wasip2_string_dup(&path2_wasi, path2);
+  // Convert the paths into WASI paths
+  wasip2_string_t path1_wasi = wasip2_string_temp(path1);
+  wasip2_string_t path2_wasi = wasip2_string_temp(path2);
 
   // Construct the link
   filesystem_error_code_t error_code;
@@ -36,9 +34,6 @@ int __wasilibc_nocwd_symlinkat(const char *path1, int fd, const char *path2) {
                                                     &path1_wasi,
                                                     &path2_wasi,
                                                     &error_code);
-  wasip2_string_free(&path1_wasi);
-  wasip2_string_free(&path2_wasi);
-
   // Check for errors
   if (!ok) {
     translate_error(error_code);

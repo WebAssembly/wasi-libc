@@ -70,7 +70,7 @@ static int ensure_has_directory_stream(DIR *dirp, filesystem_borrow_descriptor_t
   return 0;
 }
 
-struct dirent *readdir(DIR *dirp) {
+static struct dirent *readdir_next(DIR *dirp) {
   filesystem_metadata_hash_value_t metadata;
   filesystem_error_code_t error_code;
   filesystem_borrow_descriptor_t dir_handle;
@@ -152,6 +152,16 @@ struct dirent *readdir(DIR *dirp) {
 
   return dirp->dirent;
 }
+
+struct dirent *readdir(DIR *dirp) {
+  struct dirent *result = readdir_next(dirp);
+  while (result != NULL && dirp->skip > 0) {
+    dirp->skip -= 1;
+    result = readdir_next(dirp);
+  }
+  return result;
+}
+
 #else
 struct dirent *readdir(DIR *dirp) {
   for (;;) {

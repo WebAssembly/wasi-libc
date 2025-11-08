@@ -122,9 +122,9 @@ int close(int fd) {
             drop_directory_stream(entry.directory_stream_info.directory_stream);
             break;
         case DESCRIPTOR_TABLE_ENTRY_FILE_STREAM:
-            if (entry.stream.read_pollable_is_initialized)
+            if (entry.stream.read_pollable.__handle != 0)
                 poll_pollable_drop_own(entry.stream.read_pollable);
-            if (entry.stream.write_pollable_is_initialized)
+            if (entry.stream.write_pollable.__handle != 0)
                 poll_pollable_drop_own(entry.stream.write_pollable);
             if (entry.stream.file_info.readable)
                 streams_input_stream_drop_borrow(entry.stream.read_stream);

@@ -144,8 +144,6 @@ typedef struct {
         // Used for checking readiness to read/write to stream. Lazily initialized
         streams_own_pollable_t read_pollable;
         streams_own_pollable_t write_pollable;
-        bool read_pollable_is_initialized;
-        bool write_pollable_is_initialized;
         // When the stream is closed, the caller should
         // replace this entry in the table with the file handle
         file_t file_info;

@@ -151,9 +151,8 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
                                     return -1;
                                 }
                                 streams_own_pollable_t input_stream_pollable = stream->read_pollable;
-                                if (!stream->read_pollable_is_initialized) {
+                                if (stream->read_pollable.__handle == 0) {
                                     input_stream_pollable = stream->read_pollable = streams_method_input_stream_subscribe(stream->read_stream);
-                                    stream->read_pollable_is_initialized = true;
                                 }
                                 states[state_index++] = (state_t) {
                                     .pollable = input_stream_pollable,
@@ -168,9 +167,8 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
                                     return -1;
                                 }
                                 streams_own_pollable_t output_stream_pollable = stream->write_pollable;
-                                if (!stream->write_pollable_is_initialized) {
+                                if (stream->write_pollable.__handle == 0) {
                                     output_stream_pollable = stream->write_pollable = streams_method_output_stream_subscribe(stream->write_stream);
-                                    stream->write_pollable_is_initialized = true;
                                 }
                                 states[state_index++] = (state_t){
                                     .pollable = output_stream_pollable,

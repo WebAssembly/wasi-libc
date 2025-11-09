@@ -10,9 +10,7 @@
 #include <__struct_tm.h>
 #include <__typedef_clockid_t.h>
 
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#else
+#ifndef __wasilibc_use_wasip2
 #include <wasi/api.h>
 #endif
 

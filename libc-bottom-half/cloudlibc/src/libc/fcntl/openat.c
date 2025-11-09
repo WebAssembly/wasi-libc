@@ -84,7 +84,9 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
   }
 
   // Construct a WASI string for the path
-  wasip2_string_t path2 = wasip2_string_temp(path);
+  wasip2_string_t path2;
+  if (wasip2_string_from_c(path, &path2) < 0)
+    return -1;
 
   // Open the file, yielding a new handle
   filesystem_own_descriptor_t new_handle;

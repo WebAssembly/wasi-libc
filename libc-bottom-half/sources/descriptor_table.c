@@ -205,23 +205,71 @@ static bool remove(int fd, descriptor_table_entry_t *entry,
         }
 }
 
+static bool stdio_initialized = false;
+
+static bool init_stdio() {
+  stdio_initialized = true;
+
+  descriptor_table_entry_t entry;
+
+  memset(&entry, 0, sizeof(entry));
+  entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
+  entry.stream.read_stream = streams_borrow_input_stream(stdin_get_stdin());
+  entry.stream.offset = 0;
+  entry.stream.file_info.readable = true;
+  entry.stream.file_info.writable = false;
+
+  if (!descriptor_table_update(0, entry))
+    return false;
+
+  memset(&entry, 0, sizeof(entry));
+  entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
+  entry.stream.write_stream = streams_borrow_output_stream(stdout_get_stdout());
+  entry.stream.offset = 0;
+  entry.stream.file_info.readable = false;
+  entry.stream.file_info.writable = true;
+
+  if (!descriptor_table_update(1, entry))
+    return false;
+
+  memset(&entry, 0, sizeof(entry));
+  entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
+  entry.stream.write_stream = streams_borrow_output_stream(stderr_get_stderr());
+  entry.stream.offset = 0;
+  entry.stream.file_info.readable = false;
+  entry.stream.file_info.writable = true;
+
+  if (!descriptor_table_update(2, entry))
+    return false;
+
+  return true;
+}
+
 bool descriptor_table_insert(descriptor_table_entry_t entry, int *fd)
 {
-       *fd = ++next_fd;
-       return insert(entry, *fd, &global_table, false);
+     if (!stdio_initialized && !init_stdio())
+       return false;
+     *fd = ++next_fd;
+     return insert(entry, *fd, &global_table, false);
 }
 
 bool descriptor_table_get_ref(int fd, descriptor_table_entry_t **entry)
 {
-        return get(fd, entry, &global_table);
+      if (!stdio_initialized && !init_stdio())
+        return false;
+      return get(fd, entry, &global_table);
 }
 
 bool descriptor_table_update(int fd, descriptor_table_entry_t entry)
 {
-        return insert(entry, fd, &global_table, true);
+      if (!stdio_initialized && !init_stdio())
+        return false;
+      return insert(entry, fd, &global_table, true);
 }
 
 bool descriptor_table_remove(int fd, descriptor_table_entry_t *entry)
 {
-        return remove(fd, entry, &global_table);
+      if (!stdio_initialized && !init_stdio())
+        return false;
+      return remove(fd, entry, &global_table);
 }

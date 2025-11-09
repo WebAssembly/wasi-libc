@@ -17,14 +17,6 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
 #ifdef __wasilibc_use_wasip2
   bool ok = false;
 
-  // Check for stdin
-  if (fildes == 0) {
-      if (!init_stdin()) {
-        errno = EINVAL;
-        return -1;
-      }
-  }
-
   // Translate the file descriptor to an internal handle
   descriptor_table_entry_t* entry = 0;
   if (!descriptor_table_get_ref(fildes, &entry)) {

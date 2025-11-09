@@ -33,6 +33,10 @@ int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
     errno = EBADF;
     return EBADF;
   }
+  if (file_handle.__handle == 0) {
+    errno = EBADF;
+    return EBADF;
+  }
 
   filesystem_error_code_t error_code;
   filesystem_advice_t fs_advice;

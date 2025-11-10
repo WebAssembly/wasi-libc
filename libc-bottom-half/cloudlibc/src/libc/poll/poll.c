@@ -7,6 +7,42 @@
 #include <poll.h>
 #include <stdbool.h>
 
+#ifdef __wasilibc_use_wasip2
+#include <wasi/descriptor_table.h>
+
+int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout);
+
+int poll(struct pollfd* fds, nfds_t nfds, int timeout)
+{
+    bool found_socket = false;
+    bool found_non_socket = false;
+    for (size_t i = 0; i < nfds; ++i) {
+        descriptor_table_entry_t* entry;
+        if (descriptor_table_get_ref(fds[i].fd, &entry)) {
+            if (entry->tag == DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET
+                || entry->tag == DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET)
+                found_socket = true;
+            else
+                found_non_socket = true;
+        } else {
+            found_non_socket = true;
+        }
+    }
+
+    if (found_socket) {
+        if (found_non_socket) {
+            // We currently don't support polling a mix of non-sockets and
+            // sockets here (though you can do it by using the host APIs
+            // directly), and we probably won't until we've migrated entirely to
+            // WASI 0.2.
+            errno = ENOTSUP;
+            return -1;
+        }
+    }
+    return poll_wasip2(fds, nfds, timeout);
+}
+#else // not __wasilibc_use_wasip2
+
 static int poll_wasip1(struct pollfd *fds, size_t nfds, int timeout) {
   // Construct events for poll().
   size_t maxevents = 2 * nfds + 1;
@@ -129,41 +165,6 @@ static int poll_wasip1(struct pollfd *fds, size_t nfds, int timeout) {
   return retval;
 }
 
-#ifdef __wasilibc_use_wasip2
-#include <wasi/descriptor_table.h>
-
-int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout);
-
-int poll(struct pollfd* fds, nfds_t nfds, int timeout)
-{
-    bool found_socket = false;
-    bool found_non_socket = false;
-    for (size_t i = 0; i < nfds; ++i) {
-        descriptor_table_entry_t* entry;
-        if (descriptor_table_get_ref(fds[i].fd, &entry)) {
-            if (entry->tag == DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET
-                || entry->tag == DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET)
-                found_socket = true;
-            else
-                found_non_socket = true;
-        } else {
-            found_non_socket = true;
-        }
-    }
-
-    if (found_socket) {
-        if (found_non_socket) {
-            // We currently don't support polling a mix of non-sockets and
-            // sockets here (though you can do it by using the host APIs
-            // directly), and we probably won't until we've migrated entirely to
-            // WASI 0.2.
-            errno = ENOTSUP;
-            return -1;
-        }
-    }
-    return poll_wasip2(fds, nfds, timeout);
-}
-#else // not __wasilibc_use_wasip2
 int poll(struct pollfd* fds, nfds_t nfds, int timeout)
 {
     return poll_wasip1(fds, nfds, timeout);

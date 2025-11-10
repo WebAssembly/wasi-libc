@@ -21,11 +21,8 @@ struct timespec;
 /// afterward, you should call this before doing so.
 void __wasilibc_populate_preopens(void);
 
+#ifndef __wasilibc_use_wasip2
 /// Register the given pre-opened file descriptor under the given path.
-#ifdef __wasilibc_use_wasip2
-int __wasilibc_register_preopened_fd(filesystem_preopens_own_descriptor_t fd,
-                                     wasip2_string_t relprefix);
-#else
 int __wasilibc_register_preopened_fd(int fd,
                                      const char* prefix);
 #endif

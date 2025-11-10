@@ -84,14 +84,6 @@ jobs:
               TARGET_TRIPLE: wasm32-wasip2
               WASI_SNAPSHOT: p2
               MAKE_TARGETS: "default libc_so"
-          - name: Test wasm32-wasi-threads
-            os: ubuntu-24.04
-            clang_version: 19
-            test: true
-            upload: wasm32-wasi-threads
-            env:
-              TARGET_TRIPLE: wasm32-wasi-threads
-              THREAD_MODEL: posix
           - name: Test wasm32-wasip1-threads
             os: ubuntu-24.04
             clang_version: 19
@@ -122,6 +114,7 @@ jobs:
             test: true
             upload: wasm32-wasi-simd
             env:
+              TARGET_TRIPLE: wasm32-wasip1
               MAKE_TARGETS: "no-check-symbols"
               EXTRA_CFLAGS: "-O2 -DNDEBUG -msimd128 -mrelaxed-simd -mbulk-memory -D__wasilibc_simd_string"
 
@@ -138,20 +131,30 @@ jobs:
     - name: Build libc
       run: make -j4 $MAKE_TARGETS CHECK_SYMBOLS=yes
 
-    - name: Download Test dependencies
-      if: matrix.test
-      run: cd test && make download
-
     - name: Install V8 dependencies
       if: matrix.test_with_v8
       run: |
         npm -C test/scripts/browser-test install
         npx -C test/scripts/browser-test playwright install chromium-headless-shell
         echo ENGINE="$PWD/test/scripts/browser-test/harness.mjs" >> $GITHUB_ENV
+        echo CTEST_ARGS="--label-exclude v8fail" >> $GITHUB_ENV
+
+    - name: Setup testing
+      if: matrix.test
+      run: |
+        cmake -S test -B testbuild -G Ninja \
+          -DTARGET_TRIPLE=${{ env.TARGET_TRIPLE }} \
+          -DENGINE=${{ env.ENGINE }} \
+          -DCMAKE_LINK_DEPENDS_USE_LINKER=OFF
+
+    - name: Build tests
+      if: matrix.test
+      run: ninja -C testbuild
 
     - name: Test
       if: matrix.test
-      run: make -C test test
+      run: ctest --test-dir testbuild --output-on-failure -j4 $CTEST_ARGS
+
 
     - uses: actions/upload-artifact@v4.4.0
       if: matrix.upload

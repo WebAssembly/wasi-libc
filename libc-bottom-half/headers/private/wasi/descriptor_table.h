@@ -108,25 +108,6 @@ typedef struct {
         udp_socket_state_t state;
 } udp_socket_t;
 
-typedef enum read_directory_state_t {
-        DIRECTORY_STATE_FILE,
-        DIRECTORY_STATE_RETURNED_DOT,
-        DIRECTORY_STATE_RETURNED_DOT_DOT
-} read_directory_state_t;
-
-typedef struct {
-// Stream for contents of directory
-        filesystem_own_directory_entry_stream_t directory_stream;
-// File handle for the directory being listed
-// (so that metadata hashes can be accessed).
-        filesystem_borrow_descriptor_t directory_file_handle;
-// State that reflects whether . and .. have been handled yet;
-// this is used by readdir() since each call handles a single
-// directory entry, and this state needs to be maintained across
-// calls
-        read_directory_state_t directory_state;
-} directory_stream_entry_t;
-
 // Stream representing an open file.
 typedef struct {
 // File was opened for reading
@@ -155,14 +136,12 @@ typedef struct {
                 DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET,
                 DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET,
                 DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE,
-                DESCRIPTOR_TABLE_ENTRY_DIRECTORY_STREAM,
                 DESCRIPTOR_TABLE_ENTRY_FILE_STREAM
         } tag;
         union {
                 tcp_socket_t tcp_socket;
                 udp_socket_t udp_socket;
                 file_t file;
-                directory_stream_entry_t directory_stream_info;
                 file_stream_t stream;
         };
 } descriptor_table_entry_t;

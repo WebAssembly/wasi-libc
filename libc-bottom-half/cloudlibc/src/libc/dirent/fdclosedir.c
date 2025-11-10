@@ -9,7 +9,12 @@
 
 int fdclosedir(DIR *dirp) {
   int fd = dirp->fd;
+#ifdef __wasilibc_use_wasip2
+  if (dirp->stream.__handle != 0)
+    filesystem_directory_entry_stream_drop_own(dirp->stream);
+#else
   free(dirp->buffer);
+#endif
   free(dirp->dirent);
   free(dirp);
   return fd;

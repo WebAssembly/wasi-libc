@@ -19,9 +19,7 @@ int __wasilibc_nocwd___wasilibc_rmdirat(int fd, const char *path) {
     errno = EBADF;
     return EBADF;
   }
-  if (entry->tag == DESCRIPTOR_TABLE_ENTRY_DIRECTORY_STREAM)
-    file_handle = entry->directory_stream_info.directory_file_handle;
-  else if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE)
+  if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE)
     file_handle = entry->file.file_handle;
   else {
     errno = EINVAL;

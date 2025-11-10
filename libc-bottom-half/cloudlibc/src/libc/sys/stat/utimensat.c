@@ -50,9 +50,8 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
   if ((flag & AT_SYMLINK_NOFOLLOW) == 0)
     lookup_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
 
-  // Copy the string into a Wasm string
-  wasip2_string_t path_wasm_string;
-  wasip2_string_dup(&path_wasm_string, path);
+  // Convert the string into a Wasm string
+  wasip2_string_t path_wasm_string = wasip2_string_temp(path);
 
   // Perform system call.
   filesystem_error_code_t error;
@@ -62,7 +61,6 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
                                                                     &new_timestamp_atim,
                                                                     &new_timestamp_mtim,
                                                                     &error);
-  wasip2_string_free(&path_wasm_string);
   if (!set_times_result) {
     translate_error(error);
     return -1;

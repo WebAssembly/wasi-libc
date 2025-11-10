@@ -1,6 +1,7 @@
 #ifdef __wasilibc_use_wasip2
 #include <wasi/wasip2.h>
 #include <wasi/descriptor_table.h>
+#include <wasi/file_utils.h>
 #include <common/errors.h>
 #else
 #include <wasi/api.h>
@@ -28,13 +29,11 @@ int __wasilibc_nocwd___wasilibc_rmdirat(int fd, const char *path) {
   }
 
   // Create a WASI string for the path
-  wasip2_string_t wasi_path;
-  wasip2_string_dup(&wasi_path, path);
+  wasip2_string_t wasi_path = wasip2_string_temp(path);
   filesystem_error_code_t error_code;
 
   // Remove the directory
   bool ok = filesystem_method_descriptor_remove_directory_at(file_handle, &wasi_path, &error_code);
-  wasip2_string_free(&wasi_path);
   if (!ok) {
     translate_error(error_code);
     return -1;

@@ -5,6 +5,16 @@
 #include <wasi/descriptor_table.h>
 #include <dirent.h>
 
+// Converts the C string `s` into a WASI string.
+//
+// The returned `wasip2_string_t` should not be deallocated or free'd, and it
+// can only be used while `s` is also valid.
+static wasip2_string_t wasip2_string_temp(const char *s) {
+  wasip2_string_t ret;
+  wasip2_string_set(&ret, (char*) s);
+  return ret;
+}
+
 // Succeed only if fd is bound to a file handle in the descriptor table
 static bool fd_to_file_handle(int fd, filesystem_borrow_descriptor_t* result) {
   descriptor_table_entry_t* entry = 0;

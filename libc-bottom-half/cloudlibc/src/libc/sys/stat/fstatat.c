@@ -28,9 +28,8 @@ int __wasilibc_nocwd_fstatat(int fd, const char *restrict path, struct stat *res
     return -1;
   }
 
-  // Copy the string into a Wasm string
-  wasip2_string_t path_wasm_string;
-  wasip2_string_dup(&path_wasm_string, path);
+  // Convert the string into a Wasm string
+  wasip2_string_t path_wasm_string = wasip2_string_temp(path);
 
   // Get the metadata hash for this file
   filesystem_metadata_hash_value_t metadata;
@@ -58,7 +57,6 @@ int __wasilibc_nocwd_fstatat(int fd, const char *restrict path, struct stat *res
                                                           &path_wasm_string,
                                                           &internal_stat,
                                                           &error);
-  wasip2_string_free(&path_wasm_string);
   if (!stat_result) {
     translate_error(error);
     return -1;

@@ -28,10 +28,9 @@ int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char 
     return -1;
   }
 
-  // Copy the strings into WASI strings
-  wasip2_string_t old_path, new_path;
-  wasip2_string_dup(&old_path, old);
-  wasip2_string_dup(&new_path, new);
+  // Convert the strings into WASI strings
+  wasip2_string_t old_path = wasip2_string_temp(old);
+  wasip2_string_t new_path = wasip2_string_temp(new);
 
   // Rename the file
   filesystem_error_code_t error_code;
@@ -40,8 +39,6 @@ int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char 
                                                    new_file_handle,
                                                    &new_path,
                                                    &error_code);
-  wasip2_string_free(&old_path);
-  wasip2_string_free(&new_path);
   if (!ok) {
     translate_error(error_code);
     return -1;

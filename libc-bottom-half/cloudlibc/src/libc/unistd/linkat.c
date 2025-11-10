@@ -27,10 +27,9 @@ int __wasilibc_nocwd_linkat(int fd1, const char *path1, int fd2, const char *pat
     return -1;
   }
 
-  // Create WASI strings for the paths
-  wasip2_string_t path1_wasi, path2_wasi;
-  wasip2_string_dup(&path1_wasi, path1);
-  wasip2_string_dup(&path2_wasi, path2);
+  // Convert the strings into WASI strings
+  wasip2_string_t path1_wasi = wasip2_string_temp(path1);
+  wasip2_string_t path2_wasi = wasip2_string_temp(path2);
 
   // Create the link
   filesystem_error_code_t error_code;
@@ -40,9 +39,6 @@ int __wasilibc_nocwd_linkat(int fd1, const char *path1, int fd2, const char *pat
                                                  file_handle2,
                                                  &path2_wasi,
                                                  &error_code);
-  wasip2_string_free(&path1_wasi);
-  wasip2_string_free(&path2_wasi);
-
   if (!ok) {
     translate_error(error_code);
     return -1;

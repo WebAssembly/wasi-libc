@@ -8,7 +8,7 @@
 
 long telldir(DIR *dirp) {
 #if __wasilibc_use_wasip2
-  return dirp->offset;
+  return dirp->offset + dirp->skip;
 #else
   return dirp->cookie;
 #endif

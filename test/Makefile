@@ -47,8 +47,6 @@ LIBC_TEST = $(DOWNDIR)/libc-test
 ARCH := $(shell uname -m)
 WASMTIME_URL ?= https://github.com/bytecodealliance/wasmtime/releases/download/v38.0.2/wasmtime-v38.0.2-$(ARCH)-linux.tar.xz
 WASMTIME = $(abspath $(DOWNDIR)/$(shell basename $(WASMTIME_URL) .tar.xz)/wasmtime)
-WASM_TOOLS_URL ?= https://github.com/bytecodealliance/wasm-tools/releases/download/v1.224.0/wasm-tools-1.224.0-$(ARCH)-linux.tar.gz
-WASM_TOOLS = $(DOWNDIR)/$(shell basename $(WASM_TOOLS_URL) .tar.gz)/wasm-tools
 
 $(DOWNDIR):
 	@mkdir -p $@
@@ -60,15 +58,8 @@ $(WASMTIME): | $(DOWNDIR)
 	wget --no-clobber --directory-prefix=$(DOWNDIR) $(WASMTIME_URL)
 	tar --extract --file=$(DOWNDIR)/$(shell basename $(WASMTIME_URL)) --directory=$(DOWNDIR)/
 
-$(WASM_TOOLS): | $(DOWNDIR)
-	wget --no-clobber --directory-prefix=$(DOWNDIR) $(WASM_TOOLS_URL)
-	tar --extract --file=$(DOWNDIR)/$(shell basename $(WASM_TOOLS_URL)) --directory=$(DOWNDIR)/
-
 # Target to download all necessary dependencies.
 TO_DOWNLOAD = $(LIBC_TEST) $(WASMTIME)
-ifeq ($(TARGET_TRIPLE), wasm32-wasip2)
-TO_DOWNLOAD += $(WASM_TOOLS)
-endif
 DOWNLOADED := $(DOWNDIR)/downloaded.stamp
 $(DOWNLOADED): $(TO_DOWNLOAD)
 	touch $@
@@ -109,11 +100,7 @@ ALL_TESTS := $(shell find $(SRCDIR) -name '*.c')
 TESTS := $(shell TARGET_TRIPLE=$(TARGET_TRIPLE) scripts/filter.py $(ALL_TESTS))
 WASM_OBJS := $(TESTS:$(SRCDIR)/%.c=$(OBJDIR)/%.wasm.o)
 WASM_OBJS += $(INFRA_WASM_OBJS)
-ifeq ($(TARGET_TRIPLE), wasm32-wasip2)
-WASMS := $(TESTS:$(SRCDIR)/%.c=$(OBJDIR)/%.component.wasm)
-else
-WASMS := $(TESTS:$(SRCDIR)/%.c=$(OBJDIR)/%.core.wasm)
-endif
+WASMS := $(TESTS:$(SRCDIR)/%.c=$(OBJDIR)/%.wasm)
 
 
 # Setup the compiler. We allow $(CC) to be set from the command line; ?= doesn't
@@ -143,13 +130,6 @@ $(BUILTINS_STAMP):
 	make -C .. builtins
 	touch $@
 
-# For wasip2, we want clang to generate a core module rather than a component,
-# because `wasm-tools component new` is called subsequently and it expects
-# a core module.
-ifeq ($(TARGET_TRIPLE), wasm32-wasip2)
-LDFLAGS += -Wl,--skip-wit-component
-endif
-
 # Build up all the `*.wasm.o` object files; these are the same regardless of
 # whether we're building core modules or components.
 $(WASM_OBJS): $(INFRA_HEADERS)
@@ -159,14 +139,9 @@ $(OBJDIR)/%.wasm.o: $(SRCDIR)/%.c $(DOWNLOADED) $(SYSROOT)
 
 # Build up all the `*.wasm` files.
 obj_to_c = $(patsubst $(OBJDIR)/%.wasm.o,$(SRCDIR)/%.c,$1)
-$(OBJDIR)/%.core.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS) | $(BUILTINS_STAMP)
+$(OBJDIR)/%.wasm: $(OBJDIR)/%.wasm.o $(INFRA_WASM_OBJS) | $(BUILTINS_STAMP)
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(shell scripts/add-flags.py LDFLAGS $(call obj_to_c,$<)) $^ -o $@
-
-# For wasip2, we include an additional step to wrap up the core module into
-# a component.
-$(OBJDIR)/%.component.wasm: $(OBJDIR)/%.core.wasm
-	$(WASM_TOOLS) component new $< -o $@
 
 # Compile each selected test using Clang. Note that failures here are likely
 # due to a missing `libclang_rt.builtins-wasm32.a` in the Clang lib directory.
@@ -193,12 +168,7 @@ generate-stubs:
 ##### RUN ######################################################################
 
 ENGINE ?= $(WASMTIME) run
-ifeq ($(TARGET_TRIPLE), wasm32-wasip2)
-ENGINE += --wasm component-model
-OBJPAT := $(OBJDIR)/%.component.wasm
-else
-OBJPAT := $(OBJDIR)/%.core.wasm
-endif
+OBJPAT := $(OBJDIR)/%.wasm
 
 # Each Wasm test is run every time, generating a folder containing a `cmd.sh`
 # script and an `output.log` file (see `scripts/run-test.sh` for details). The

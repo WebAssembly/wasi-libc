@@ -200,3 +200,13 @@ jobs:
       run: rustup update stable && rustup default stable && rustup component add rustfmt
     - run: cargo fmt -- --check
       working-directory: tools/wasi-headers
+
+  bindings:
+    name: Ensure wit-bingen bindings are up-to-date
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4.1.7
+      with:
+        submodules: true
+    - run: make bindings
+    - run: git diff --exit-code

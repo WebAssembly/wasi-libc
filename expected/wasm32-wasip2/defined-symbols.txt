@@ -349,7 +349,6 @@ __wasilibc_tell
 __wasilibc_unlinkat
 __wasilibc_utimens
 __wasm_call_dtors
-__wasm_export_exports_wasi_cli_run_run
 __wcscoll_l
 __wcsftime_l
 __wcsxfrm_l
@@ -570,7 +569,6 @@ explicit_bzero
 expm1
 expm1f
 expm1l
-exports_wasi_cli_run_result_void_void_free
 exports_wasi_cli_run_run
 fabs
 fabsf

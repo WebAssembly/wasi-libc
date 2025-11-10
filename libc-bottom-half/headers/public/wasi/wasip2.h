@@ -1066,10 +1066,6 @@ typedef struct {
   uint64_t f1;
 } wasip2_tuple2_u64_u64_t;
 
-typedef struct {
-  bool is_err;
-} exports_wasi_cli_run_result_void_void_t;
-
 // Imported Functions from `wasi:cli/environment@0.2.0`
 // Get the POSIX-style environment variables.
 // 
@@ -1088,9 +1084,6 @@ extern bool environment_initial_cwd(wasip2_string_t *ret);
 
 // Imported Functions from `wasi:cli/exit@0.2.0`
 // Exit the current instance and any linked instances.
-// NOTE: This file has been manually edited to add the _Noreturn
-// annotation on exit_exit(). If the file is re-generated, this
-// annotation will have to be re-added.
 _Noreturn extern void exit_exit(exit_result_void_void_t *status);
 
 // Imported Functions from `wasi:io/error@0.2.0`
@@ -2258,9 +2251,6 @@ extern uint64_t random_insecure_get_insecure_random_u64(void);
 // protection.
 extern void random_insecure_seed_insecure_seed(wasip2_tuple2_u64_u64_t *ret);
 
-// Exported Functions from `wasi:cli/run@0.2.0`
-bool exports_wasi_cli_run_run(void);
-
 // Helper Functions
 
 void wasip2_tuple2_string_string_free(wasip2_tuple2_string_string_t *ptr);
@@ -2478,8 +2468,6 @@ void ip_name_lookup_result_own_resolve_address_stream_error_code_free(ip_name_lo
 void ip_name_lookup_option_ip_address_free(ip_name_lookup_option_ip_address_t *ptr);
 
 void ip_name_lookup_result_option_ip_address_error_code_free(ip_name_lookup_result_option_ip_address_error_code_t *ptr);
-
-void exports_wasi_cli_run_result_void_void_free(exports_wasi_cli_run_result_void_void_t *ptr);
 
 // Transfers ownership of `s` into the string `ret`
 void wasip2_string_set(wasip2_string_t *ret, char*s);

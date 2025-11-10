@@ -2,6 +2,8 @@
 #include <errno.h>
 #include <stddef.h>
 
+#ifdef __wasilibc_use_wasip2
+
 /**
  * Validates that `ptr_signed` is a valid utf-8 string.
  *
@@ -77,3 +79,5 @@ int wasip2_string_from_c(const char *s, wasip2_string_t *out) {
   out->len = len;
   return 0;
 }
+
+#endif // __wasilibc_use_wasip2

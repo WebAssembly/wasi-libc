@@ -18,6 +18,19 @@
 
 int BUFSIZE = 256;
 
+static int wait_for_server(struct sockaddr_in *addr) {
+  for (int attempt = 0; attempt < 200; attempt++) {
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    TEST(fd != -1);
+    if (connect(fd, (struct sockaddr *)addr, sizeof(*addr)) != -1)
+      return fd;
+    close(fd);
+    usleep(5000); // sleep for 5ms
+  }
+  t_error("server didn't come online within 1 second (errno = %d)\n", errno); \
+  return -1;
+}
+
 // See sockets-server-udp-blocking.c -- must be running already as a separate executable
 void test_udp_client() {
     // Prepare server socket
@@ -33,6 +46,10 @@ void test_udp_client() {
     sockaddr_in.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
     sockaddr_in.sin_family = AF_INET;
     sockaddr_in.sin_port = htons(server_port);
+
+    // Synchronize the UDP port being bound by waiting for a TCP connection to
+    // go through.
+    close(wait_for_server(&sockaddr_in));
 
     // Connect from client
     char message[] = "There's gonna be a party when the wolf comes home";

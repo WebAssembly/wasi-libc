@@ -26,5 +26,14 @@ int main(void)
 
         TEST(unlink(tmp) != -1);
 
+        // make sure isatty can be called on stdio fds, but don't test what the
+        // actual value is yet.
+        isatty(0);
+        TEST(errno != EBADF);
+        isatty(1);
+        TEST(errno != EBADF);
+        isatty(2);
+        TEST(errno != EBADF);
+
 	return t_status;
 }

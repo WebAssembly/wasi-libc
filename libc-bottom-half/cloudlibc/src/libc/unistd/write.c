@@ -24,20 +24,6 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
   filesystem_error_code_t error_code;
   descriptor_table_entry_t* entry = 0;
 
-  // Check for stdout/stderr
-  if (fildes == 1) {
-    if (!init_stdout()) {
-      errno = EINVAL;
-      return -1;
-    }
-  }
-  else if (fildes == 2) {
-    if (!init_stderr()) {
-      errno = EINVAL;
-      return -1;
-    }
-  }
-
   // Translate the file descriptor to an internal handle
   if (!descriptor_table_get_ref(fildes, &entry)) {
       errno = EBADF;

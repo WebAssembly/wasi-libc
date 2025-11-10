@@ -18,6 +18,12 @@ int __isatty(int fd) {
     return 0;
   }
 
+  // TODO: handle stdio and call get-terminal functions
+  if (file_handle.__handle == 0) {
+    errno = ENOTTY;
+    return 0;
+  }
+
   // Stat the file to determine if it's a tty
   filesystem_descriptor_stat_t statbuf;
   filesystem_error_code_t error_code;

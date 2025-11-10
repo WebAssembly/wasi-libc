@@ -16,18 +16,11 @@
 #include "stat_impl.h"
 
 #ifdef __wasilibc_use_wasip2
-int fstat(int fildes, struct stat *buf) {
-  // Translate the file descriptor to an internal handle
-  filesystem_borrow_descriptor_t file_handle;
-  if (!fd_to_file_handle_allow_open(fildes, &file_handle)) {
-    errno = EBADF;
-    return -1;
-  }
-
+static int fstat_file(filesystem_borrow_descriptor_t file, struct stat *buf) {
   // Get the metadata hash for the file descriptor
   filesystem_metadata_hash_value_t metadata;
   filesystem_error_code_t error;
-  if (!filesystem_method_descriptor_metadata_hash(file_handle,
+  if (!filesystem_method_descriptor_metadata_hash(file,
                                                   &metadata,
                                                   &error)) {
     translate_error(error);
@@ -36,7 +29,7 @@ int fstat(int fildes, struct stat *buf) {
 
   // Get the file metadata
   filesystem_descriptor_stat_t internal_stat;
-  bool stat_result  = filesystem_method_descriptor_stat(file_handle,
+  bool stat_result  = filesystem_method_descriptor_stat(file,
                                                         &internal_stat,
                                                         &error);
   if (!stat_result) {
@@ -46,6 +39,37 @@ int fstat(int fildes, struct stat *buf) {
 
   // Convert the internal data to an external struct
   to_public_stat(&metadata, &internal_stat, buf);
+  return 0;
+}
+
+int fstat(int fildes, struct stat *buf) {
+  // Translate the file descriptor to an internal handle
+  descriptor_table_entry_t *entry;
+  if (!descriptor_table_get_ref(fildes, &entry)) {
+    errno = EBADF;
+    return -1;
+  }
+
+  int st_mode = 0;
+
+  switch (entry->tag) {
+    case DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE:
+      return fstat_file(entry->file.file_handle, buf);
+    case DESCRIPTOR_TABLE_ENTRY_FILE_STREAM:
+      if (entry->stream.file_info.file_handle.__handle != 0)
+        return fstat_file(entry->stream.file_info.file_handle, buf);
+      break;
+    case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
+    case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
+      st_mode = S_IFSOCK;
+      break;
+    default:
+      errno = EBADF;
+      return -1;
+  }
+
+  memset(buf, 0, sizeof(*buf));
+  buf->st_mode = st_mode;
   return 0;
 }
 #else

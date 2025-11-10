@@ -41,66 +41,6 @@ static bool fd_to_file_handle_allow_open(int fd, filesystem_borrow_descriptor_t*
   return true;
 }
 
-// The following three functions are used for lazily initializing stdin/stdout/stderr in
-// the descriptor table. These file descriptors never need to be removed from the
-// descriptor table.
-static bool init_stdin() {
-  descriptor_table_entry_t entry;
-  descriptor_table_entry_t *entry_p;
-
-  if (!descriptor_table_get_ref(0, &entry_p)) {
-      entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
-      entry.stream.read_stream = streams_borrow_input_stream(stdin_get_stdin());
-      entry.stream.offset = 0;
-      entry.stream.read_pollable.__handle = 0;
-      entry.stream.write_pollable.__handle = 0;
-      entry.stream.file_info.readable = true;
-      entry.stream.file_info.writable = false;
-      // entry.stream.file_info.file_handle is uninitialized, but it will never be used
-
-      return descriptor_table_update(0, entry);
-  }
-  return true;
-}
-
-static bool init_stdout() {
-  descriptor_table_entry_t entry;
-  descriptor_table_entry_t *entry_p;
-
-  if (!descriptor_table_get_ref(1, &entry_p)) {
-      entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
-      entry.stream.write_stream = streams_borrow_output_stream(stdout_get_stdout());
-      entry.stream.offset = 0;
-      entry.stream.read_pollable.__handle = 0;
-      entry.stream.write_pollable.__handle = 0;
-      entry.stream.file_info.readable = false;
-      entry.stream.file_info.writable = true;
-      // entry.stream.file_info.file_handle is uninitialized, but it will never be used
-
-      return descriptor_table_update(1, entry);
-  }
-  return true;
-}
-
-static bool init_stderr() {
-  descriptor_table_entry_t entry;
-  descriptor_table_entry_t *entry_p;
-
-  if (!descriptor_table_get_ref(2, &entry_p)) {
-      entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
-      entry.stream.write_stream = streams_borrow_output_stream(stderr_get_stderr());
-      entry.stream.offset = 0;
-      entry.stream.read_pollable.__handle = 0;
-      entry.stream.write_pollable.__handle = 0;
-      entry.stream.file_info.readable = false;
-      entry.stream.file_info.writable = true;
-      // entry.stream.file_info.file_handle is uninitialized, but it will never be used
-
-      return descriptor_table_update(2, entry);
-  }
-  return true;
-}
-
 static unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
   switch(ty) {
   case FILESYSTEM_DESCRIPTOR_TYPE_UNKNOWN:

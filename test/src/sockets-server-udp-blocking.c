@@ -36,6 +36,12 @@ void run_udp_server() {
     struct sockaddr_in client_address;
     socklen_t address_len = sizeof(client_address);
 
+    // Bind a TCP socket as well which the client will connect to as a
+    // synchronization mechanism to ensure the above UDP port is bound.
+    int tcp_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    TEST(bind(tcp_socket_fd, (struct sockaddr*)&server_address, sizeof(server_address)) != -1);
+    TEST(listen(tcp_socket_fd, 1) != -1);
+
     // Server waits for input and echoes message back to client
     // The server shuts down after the client closes the connection
     int bytes_read = 0;
@@ -50,6 +56,7 @@ void run_udp_server() {
     TEST(bytes_read > 0);
 
     close(server_socket_fd);
+    close(tcp_socket_fd);
 }
 
 int main()

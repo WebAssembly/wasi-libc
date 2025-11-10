@@ -9,7 +9,12 @@
 int usleep(useconds_t useconds) {
   struct timespec ts = {.tv_sec = useconds / 1000000,
                         .tv_nsec = useconds % 1000000 * 1000};
-  int error = clock_nanosleep(CLOCK_REALTIME, 0, &ts, NULL);
+#ifdef __wasilibc_use_wasip2
+  clockid_t clock_id = CLOCK_MONOTONIC;
+#else
+  clockid_t clock_id = CLOCK_REALTIME;
+#endif
+  int error = clock_nanosleep(clock_id, 0, &ts, NULL);
   if (error != 0) {
     errno = error;
     return -1;

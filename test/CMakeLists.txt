@@ -306,6 +306,7 @@ add_wasilibc_test(time.c)
 add_wasilibc_test(utime.c FS)
 add_wasilibc_test(rewinddir.c FS)
 add_wasilibc_test(seekdir.c FS)
+add_wasilibc_test(usleep.c)
 
 if (TARGET_TRIPLE MATCHES "-threads")
   add_wasilibc_test(busywait.c)

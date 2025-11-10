@@ -10,11 +10,11 @@ if (NOT NCLIENTS)
 endif()
 
 foreach(i RANGE 1 ${NCLIENTS})
-  list(APPEND CLIENTS COMMAND bash -c "${ENGINE} -Sinherit-network ${CLIENT} 1>&2")
+  list(APPEND CLIENTS COMMAND bash -c "exec ${ENGINE} -Sinherit-network ${CLIENT} 1>&2")
 endforeach()
 
 execute_process(
-  COMMAND bash -c "${ENGINE} -Sinherit-network ${SERVER} 1>&2"
+  COMMAND bash -c "exec ${ENGINE} -Sinherit-network ${SERVER} 1>&2"
   ${CLIENTS}
   TIMEOUT 5
   COMMAND_ERROR_IS_FATAL ANY

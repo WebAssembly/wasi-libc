@@ -24,8 +24,11 @@ int __wasilibc_nocwd_symlinkat(const char *path1, int fd, const char *path2) {
   }
 
   // Convert the paths into WASI paths
-  wasip2_string_t path1_wasi = wasip2_string_temp(path1);
-  wasip2_string_t path2_wasi = wasip2_string_temp(path2);
+  wasip2_string_t path1_wasi, path2_wasi;
+  if (wasip2_string_from_c(path1, &path1_wasi) < 0)
+    return -1;
+  if (wasip2_string_from_c(path2, &path2_wasi) < 0)
+    return -1;
 
   // Construct the link
   filesystem_error_code_t error_code;

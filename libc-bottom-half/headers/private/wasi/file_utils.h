@@ -5,15 +5,14 @@
 #include <wasi/descriptor_table.h>
 #include <dirent.h>
 
-// Converts the C string `s` into a WASI string.
+// Converts the C string `s` into a WASI string stored in `out`.
 //
 // The returned `wasip2_string_t` should not be deallocated or free'd, and it
 // can only be used while `s` is also valid.
-static wasip2_string_t wasip2_string_temp(const char *s) {
-  wasip2_string_t ret;
-  wasip2_string_set(&ret, (char*) s);
-  return ret;
-}
+//
+// Returns 0 if `s` is valid utf-8.
+// Returns -1 and sets errno to `ENOENT` if `s` is not valid utf-8.
+int wasip2_string_from_c(const char *s, wasip2_string_t* out);
 
 // Succeed only if fd is bound to a file handle in the descriptor table
 static bool fd_to_file_handle(int fd, filesystem_borrow_descriptor_t* result) {

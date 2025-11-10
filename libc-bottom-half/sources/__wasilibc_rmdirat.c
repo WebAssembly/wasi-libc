@@ -27,7 +27,9 @@ int __wasilibc_nocwd___wasilibc_rmdirat(int fd, const char *path) {
   }
 
   // Create a WASI string for the path
-  wasip2_string_t wasi_path = wasip2_string_temp(path);
+  wasip2_string_t wasi_path;
+  if (wasip2_string_from_c(path, &wasi_path) < 0)
+    return -1;
   filesystem_error_code_t error_code;
 
   // Remove the directory

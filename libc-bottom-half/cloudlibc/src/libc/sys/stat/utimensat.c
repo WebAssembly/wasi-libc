@@ -51,7 +51,9 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
     lookup_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
 
   // Convert the string into a Wasm string
-  wasip2_string_t path_wasm_string = wasip2_string_temp(path);
+  wasip2_string_t path_wasm_string;
+  if (wasip2_string_from_c(path, &path_wasm_string) < 0)
+    return -1;
 
   // Perform system call.
   filesystem_error_code_t error;

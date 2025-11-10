@@ -32,7 +32,9 @@ int __wasilibc_nocwd_faccessat(int fd, const char *path, int amode, int flag) {
   }
 
   // Convert the string into a WASI string
-  wasip2_string_t wasi_path = wasip2_string_temp(path);
+  wasip2_string_t wasi_path;
+  if (wasip2_string_from_c(path, &wasi_path) < 0)
+    return -1;
 
   // Call stat() to check if the file exists
   filesystem_descriptor_stat_t stat_result;

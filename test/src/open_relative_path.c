@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 {
     TEST(argc == 2);
 
-    char *filename1, *filename2, *filename3, *filename4, *filename5;
+    char *filename1, *filename2, *filename3, *filename4, *filename5, *filename6;
     TEST(asprintf(&filename1, "%s/input.txt", argv[1]) != -1);
 
     int fd = open(filename1, O_WRONLY | O_CREAT);
@@ -36,6 +36,11 @@ int main(int argc, char **argv)
     fd = open(filename5, O_WRONLY | O_CREAT);
     TEST(fd > 2);
     close(fd);
+
+    // invalid utf-8 shouldn't exist
+    TEST(asprintf(&filename6, "%s/\xff\xff", filename4) != -1);
+    fd = open(filename6, O_WRONLY | O_CREAT);
+    TEST(fd == -1);
 
     TEST(unlink(filename5)==0);
     TEST(rmdir(filename4)==0);

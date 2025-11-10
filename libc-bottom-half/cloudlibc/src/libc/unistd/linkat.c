@@ -28,8 +28,11 @@ int __wasilibc_nocwd_linkat(int fd1, const char *path1, int fd2, const char *pat
   }
 
   // Convert the strings into WASI strings
-  wasip2_string_t path1_wasi = wasip2_string_temp(path1);
-  wasip2_string_t path2_wasi = wasip2_string_temp(path2);
+  wasip2_string_t path1_wasi, path2_wasi;
+  if (wasip2_string_from_c(path1, &path1_wasi) < 0)
+    return -1;
+  if (wasip2_string_from_c(path2, &path2_wasi) < 0)
+    return -1;
 
   // Create the link
   filesystem_error_code_t error_code;

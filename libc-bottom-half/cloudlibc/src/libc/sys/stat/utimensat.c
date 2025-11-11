@@ -17,10 +17,9 @@
 
 #include "stat_impl.h"
 
-#ifdef __wasilibc_use_wasip2
 int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec times[2],
                                int flag) {
-  // Translate the file descriptor to an internal handle
+#ifdef __wasilibc_use_wasip2
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (!fd_to_file_handle_allow_open(fd, &file_handle)) {
@@ -29,21 +28,12 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
   }
 
   // Convert timestamps and extract NOW/OMIT flags.
-  filesystem_datetime_t st_atim;
-  filesystem_datetime_t st_mtim;
-  __wasi_fstflags_t flags;
-  if (!utimens_get_timestamps(times, &st_atim, &st_mtim, &flags)) {
+  filesystem_new_timestamp_t new_timestamp_atim;
+  filesystem_new_timestamp_t new_timestamp_mtim;
+  if (!utimens_get_timestamps(times, &new_timestamp_atim, &new_timestamp_mtim)) {
     errno = EINVAL;
     return -1;
   }
-
-  // Set up filesystem_new_timestamps
-  filesystem_new_timestamp_t new_timestamp_atim;
-  new_timestamp_atim.tag = FILESYSTEM_NEW_TIMESTAMP_TIMESTAMP;
-  new_timestamp_atim.val.timestamp = st_atim;
-  filesystem_new_timestamp_t new_timestamp_mtim;
-  new_timestamp_mtim.tag = FILESYSTEM_NEW_TIMESTAMP_TIMESTAMP;
-  new_timestamp_mtim.val.timestamp = st_mtim;
 
   // Create lookup properties.
   __wasi_lookupflags_t lookup_flags = 0;
@@ -68,11 +58,8 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
     return -1;
   }
 
-  return 0;
-}
 #else
-int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec times[2],
-                               int flag) {
+
   // Convert timestamps and extract NOW/OMIT flags.
   __wasi_timestamp_t st_atim;
   __wasi_timestamp_t st_mtim;
@@ -94,6 +81,6 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
     errno = error;
     return -1;
   }
+#endif
   return 0;
 }
-#endif

@@ -100,40 +100,38 @@ int close(int fd) {
     __wasilibc_populate_preopens();
 
 #ifdef __wasilibc_use_wasip2
-    // For stdin/stdout/stderr, keep the pollables/streams around for reuse
-    if (fd <= 2)
-        return 0;
-
     descriptor_table_entry_t entry;
-    if (descriptor_table_remove(fd, &entry)) {
-
-        switch (entry.tag)
-        {
-        case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
-            drop_tcp_socket(entry.tcp_socket);
-            break;
-        case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
-            drop_udp_socket(entry.udp_socket);
-            break;
-        case DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE:
-            drop_file_handle(entry.file.file_handle);
-            break;
-        case DESCRIPTOR_TABLE_ENTRY_FILE_STREAM:
-            if (entry.stream.read_pollable.__handle != 0)
-                poll_pollable_drop_own(entry.stream.read_pollable);
-            if (entry.stream.write_pollable.__handle != 0)
-                poll_pollable_drop_own(entry.stream.write_pollable);
-            if (entry.stream.file_info.readable)
-                streams_input_stream_drop_borrow(entry.stream.read_stream);
-            if (entry.stream.file_info.writable)
-                streams_output_stream_drop_borrow(entry.stream.write_stream);
-            drop_file_handle(entry.stream.file_info.file_handle);
-            break;
-        default: /* unreachable */ abort();
-        }
-
-        return 0;
+    if (!descriptor_table_remove(fd, &entry)) {
+      errno = EBADF;
+      return -1;
     }
+
+    switch (entry.tag)
+    {
+    case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
+        drop_tcp_socket(entry.tcp_socket);
+        break;
+    case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
+        drop_udp_socket(entry.udp_socket);
+        break;
+    case DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE:
+        drop_file_handle(entry.file.file_handle);
+        break;
+    case DESCRIPTOR_TABLE_ENTRY_FILE_STREAM:
+        if (entry.stream.read_pollable.__handle != 0)
+            poll_pollable_drop_own(entry.stream.read_pollable);
+        if (entry.stream.write_pollable.__handle != 0)
+            poll_pollable_drop_own(entry.stream.write_pollable);
+        if (entry.stream.file_info.readable)
+            streams_input_stream_drop_borrow(entry.stream.read_stream);
+        if (entry.stream.file_info.writable)
+            streams_output_stream_drop_borrow(entry.stream.write_stream);
+        if (entry.stream.file_info.file_handle.__handle != 0)
+            drop_file_handle(entry.stream.file_info.file_handle);
+        break;
+    default: /* unreachable */ abort();
+    }
+
 #else
     __wasi_errno_t error = __wasi_fd_close(fd);
     if (error != 0) {

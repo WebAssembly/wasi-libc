@@ -12,11 +12,8 @@ int __isatty(int fd) {
 #ifdef __wasilibc_use_wasip2
   // Translate the file descriptor into an internal handle
   filesystem_borrow_descriptor_t file_handle;
-  bool ok = fd_to_file_handle(fd, &file_handle);
-  if (!ok) {
-    errno = EBADF;
+  if (fd_to_file_handle(fd, &file_handle) < 0)
     return 0;
-  }
 
   errno = ENOTTY;
   return 0;

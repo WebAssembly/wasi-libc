@@ -19,10 +19,8 @@ ssize_t __wasilibc_nocwd_readlinkat(int fd, const char *restrict path, char *res
 #ifdef __wasilibc_use_wasip2
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
-  if (!fd_to_file_handle(fd, &file_handle)) {
-    errno = EBADF;
+  if (fd_to_file_handle(fd, &file_handle) < 0)
     return -1;
-  }
 
   // Convert the path into a WASI path
   wasip2_string_t wasi_path, link_source;

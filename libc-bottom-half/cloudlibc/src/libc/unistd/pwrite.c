@@ -21,10 +21,8 @@ ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
 #ifdef __wasilibc_use_wasip2
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
-  if (!fd_to_file_handle(fildes, &file_handle)) {
-    errno = EBADF;
+  if (fd_to_file_handle(fildes, &file_handle) < 0)
     return -1;
-  }
 
   // Convert `buf` to a WASI byte list
   wasip2_list_u8_t contents;

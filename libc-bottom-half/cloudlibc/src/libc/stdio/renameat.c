@@ -17,16 +17,12 @@ int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char 
 #ifdef __wasilibc_use_wasip2
   // Translate the file descriptors to internal handles
   filesystem_borrow_descriptor_t old_file_handle;
-  if (!fd_to_file_handle(oldfd, &old_file_handle)) {
-    errno = EBADF;
+  if (fd_to_file_handle(oldfd, &old_file_handle) < 0)
     return -1;
-  }
 
   filesystem_borrow_descriptor_t new_file_handle;
-  if (!fd_to_file_handle(newfd, &new_file_handle)) {
-    errno = EBADF;
+  if (fd_to_file_handle(newfd, &new_file_handle) < 0)
     return -1;
-  }
 
   // Convert the strings into WASI strings
   wasip2_string_t old_path, new_path;

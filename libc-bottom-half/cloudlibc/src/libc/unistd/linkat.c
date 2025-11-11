@@ -18,14 +18,10 @@ int __wasilibc_nocwd_linkat(int fd1, const char *path1, int fd2, const char *pat
 #ifdef __wasilibc_use_wasip2
   // Translate the file descriptors to internal handles
   filesystem_borrow_descriptor_t file_handle1, file_handle2;
-  if (!fd_to_file_handle(fd1, &file_handle1)) {
-    errno = EBADF;
+  if (fd_to_file_handle(fd1, &file_handle1) < 0)
     return -1;
-  }
-  if (!fd_to_file_handle(fd2, &file_handle2)) {
-    errno = EBADF;
+  if (fd_to_file_handle(fd2, &file_handle2) < 0)
     return -1;
-  }
 
   // Convert the strings into WASI strings
   wasip2_string_t path1_wasi, path2_wasi;

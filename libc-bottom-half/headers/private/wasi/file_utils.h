@@ -5,6 +5,7 @@
 #include <wasi/descriptor_table.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include <errno.h>
 
 // Converts the C string `s` into a WASI string stored in `out`.
 //
@@ -17,8 +18,8 @@ int wasip2_string_from_c(const char *s, wasip2_string_t* out);
 
 // Succeed only if fd is bound to a file handle in the descriptor table
 static bool fd_to_file_handle(int fd, filesystem_borrow_descriptor_t* result) {
-  descriptor_table_entry_t* entry = 0;
-  if (!descriptor_table_get_ref(fd, &entry))
+  descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
+  if (entry == NULL)
     return false;
   if (entry->tag != DESCRIPTOR_TABLE_ENTRY_FILE)
     return false;

@@ -62,11 +62,9 @@ int udp_shutdown(udp_socket_t *socket, int posix_how)
 
 int shutdown(int socket, int how)
 {
-	descriptor_table_entry_t *entry;
-	if (!descriptor_table_get_ref(socket, &entry)) {
-		errno = EBADF;
+	descriptor_table_entry_t *entry = descriptor_table_get_ref(socket);
+	if (!entry)
 		return -1;
-	}
 
 	switch (entry->tag) {
 	case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:

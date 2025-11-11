@@ -17,8 +17,8 @@ int poll(struct pollfd* fds, nfds_t nfds, int timeout)
     bool found_socket = false;
     bool found_non_socket = false;
     for (size_t i = 0; i < nfds; ++i) {
-        descriptor_table_entry_t* entry;
-        if (descriptor_table_get_ref(fds[i].fd, &entry)) {
+        descriptor_table_entry_t* entry = descriptor_table_get_ref(fds[i].fd);
+        if (entry) {
             if (entry->tag == DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET
                 || entry->tag == DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET)
                 found_socket = true;

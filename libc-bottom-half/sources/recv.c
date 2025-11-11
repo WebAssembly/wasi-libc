@@ -199,11 +199,9 @@ ssize_t recvfrom(int socket, void *__restrict buffer, size_t length, int flags,
 		 struct sockaddr *__restrict addr,
 		 socklen_t *__restrict addrlen)
 {
-	descriptor_table_entry_t *entry;
-	if (!descriptor_table_get_ref(socket, &entry)) {
-		errno = EBADF;
+	descriptor_table_entry_t *entry = descriptor_table_get_ref(socket);
+	if (!entry)
 		return -1;
-	}
 
 	if (buffer == NULL) {
 		errno = EINVAL;

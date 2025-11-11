@@ -258,20 +258,23 @@ int descriptor_table_insert(descriptor_table_entry_t entry)
      return fd;
 }
 
-bool descriptor_table_get_ref(int fd, descriptor_table_entry_t **entry)
+descriptor_table_entry_t *descriptor_table_get_ref(int fd)
 {
       if (!stdio_initialized && init_stdio() < 0)
-        return false;
-      return get(fd, entry, &global_table);
+        return NULL;
+      descriptor_table_entry_t *entry;
+      if (!get(fd, &entry, &global_table)) {
+        errno = EBADF;
+        return NULL;
+      }
+      return entry;
 }
 
 int descriptor_table_renumber(int fd, int newfd)
 {
-    descriptor_table_entry_t* entry;
-    if (!descriptor_table_get_ref(fd, &entry)) {
-        errno = EBADF;
+    descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
+    if (!entry)
         return -1;
-    }
     if (!insert(*entry, newfd, &global_table, true)) {
         errno = ENOMEM;
         return -1;

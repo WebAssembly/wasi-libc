@@ -658,11 +658,9 @@ int udp_setsockopt(udp_socket_t *socket, int level, int optname,
 int getsockopt(int sockfd, int level, int optname, void *restrict optval,
 	       socklen_t *restrict optlen)
 {
-	descriptor_table_entry_t *entry;
-	if (!descriptor_table_get_ref(sockfd, &entry)) {
-		errno = EBADF;
+	descriptor_table_entry_t *entry = descriptor_table_get_ref(sockfd);
+	if (!entry)
 		return -1;
-	}
 
 	if (optval == NULL || optlen == NULL || *optlen < sizeof(int)) {
 		// FYI, the protocol-specific implementations implicitly depend on these checks.
@@ -686,11 +684,9 @@ int getsockopt(int sockfd, int level, int optname, void *restrict optval,
 int setsockopt(int sockfd, int level, int optname, const void *optval,
 	       socklen_t optlen)
 {
-	descriptor_table_entry_t *entry;
-	if (!descriptor_table_get_ref(sockfd, &entry)) {
-		errno = EBADF;
+	descriptor_table_entry_t *entry = descriptor_table_get_ref(sockfd);
+	if (!entry)
 		return -1;
-	}
 
 	if (optval == NULL || optlen < sizeof(int)) {
 		// FYI, the protocol-specific implementations implicitly depend on these checks.

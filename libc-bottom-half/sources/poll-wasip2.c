@@ -22,173 +22,169 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
         size_t state_index = 0;
         for (size_t i = 0; i < nfds; ++i) {
                 struct pollfd *pollfd = fds + i;
-                descriptor_table_entry_t *entry;
-                if (pollfd->fd < 0)
+                descriptor_table_entry_t *entry = descriptor_table_get_ref(pollfd->fd);
+                if (!entry)
                     continue;
-                if (descriptor_table_get_ref(pollfd->fd, &entry)) {
-                        switch (entry->tag) {
-                        case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET: {
-                                tcp_socket_t *socket = &(entry->tcp_socket);
-                                switch (socket->state.tag) {
-                                case TCP_SOCKET_STATE_CONNECTING:
-                                case TCP_SOCKET_STATE_LISTENING: {
-                                        if ((pollfd->events &
-                                             (POLLRDNORM | POLLWRNORM)) != 0) {
-                                                states[state_index++] = (state_t){
-                                                        .pollable =
-                                                                poll_borrow_pollable(socket->socket_pollable),
-                                                        .pollfd = pollfd,
-                                                        .entry = entry,
-                                                        .events = pollfd->events
-                                                };
-                                        }
-                                        break;
-                                }
-
-                                case TCP_SOCKET_STATE_CONNECTED: {
-                                        if ((pollfd->events & POLLRDNORM) !=
-                                            0) {
-                                                states[state_index++] = (state_t){
-                                                        .pollable =
-                                                                poll_borrow_pollable(socket->state
-                                                                        .connected
-                                                                        .input_pollable),
-                                                        .pollfd = pollfd,
-                                                        .entry = entry,
-                                                        .events = POLLRDNORM
-                                                };
-                                        }
-                                        if ((pollfd->events & POLLWRNORM) !=
-                                            0) {
-                                                states[state_index++] = (state_t){
-                                                        .pollable =
-                                                                poll_borrow_pollable(socket->state
-                                                                        .connected
-                                                                        .output_pollable),
-                                                        .pollfd = pollfd,
-                                                        .entry = entry,
-                                                        .events = POLLWRNORM
-                                                };
-                                        }
-                                        break;
-                                }
-
-                                case TCP_SOCKET_STATE_CONNECT_FAILED: {
-                                        if (pollfd->revents == 0) {
-                                                ++event_count;
-                                        }
-                                        pollfd->revents |= pollfd->events;
-                                        break;
-                                }
-
-                                default:
-                                        errno = ENOTSUP;
-                                        return -1;
+                switch (entry->tag) {
+                case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET: {
+                        tcp_socket_t *socket = &(entry->tcp_socket);
+                        switch (socket->state.tag) {
+                        case TCP_SOCKET_STATE_CONNECTING:
+                        case TCP_SOCKET_STATE_LISTENING: {
+                                if ((pollfd->events &
+                                     (POLLRDNORM | POLLWRNORM)) != 0) {
+                                        states[state_index++] = (state_t){
+                                                .pollable =
+                                                        poll_borrow_pollable(socket->socket_pollable),
+                                                .pollfd = pollfd,
+                                                .entry = entry,
+                                                .events = pollfd->events
+                                        };
                                 }
                                 break;
                         }
 
-                        case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET: {
-                                udp_socket_t *socket = &(entry->udp_socket);
-                                switch (socket->state.tag) {
-                                case UDP_SOCKET_STATE_UNBOUND:
-                                case UDP_SOCKET_STATE_BOUND_NOSTREAMS: {
-                                        if (pollfd->revents == 0) {
-                                                ++event_count;
-                                        }
-                                        pollfd->revents |= pollfd->events;
-                                        break;
+                        case TCP_SOCKET_STATE_CONNECTED: {
+                                if ((pollfd->events & POLLRDNORM) !=
+                                    0) {
+                                        states[state_index++] = (state_t){
+                                                .pollable =
+                                                        poll_borrow_pollable(socket->state
+                                                                .connected
+                                                                .input_pollable),
+                                                .pollfd = pollfd,
+                                                .entry = entry,
+                                                .events = POLLRDNORM
+                                        };
                                 }
-
-                                case UDP_SOCKET_STATE_BOUND_STREAMING:
-                                case UDP_SOCKET_STATE_CONNECTED: {
-                                        udp_socket_streams_t *streams;
-                                        if (socket->state.tag ==
-                                            UDP_SOCKET_STATE_BOUND_STREAMING) {
-                                                streams = &(
-                                                        socket->state
-                                                                .bound_streaming
-                                                                .streams);
-                                        } else {
-                                                streams = &(
-                                                        socket->state.connected
-                                                                .streams);
-                                        }
-                                        if ((pollfd->events & POLLRDNORM) !=
-                                            0) {
-                                                states[state_index++] = (state_t){
-                                                        .pollable =
-                                                                poll_borrow_pollable(streams->incoming_pollable),
-                                                        .pollfd = pollfd,
-                                                        .entry = entry,
-                                                        .events = POLLRDNORM
-                                                };
-                                        }
-                                        if ((pollfd->events & POLLWRNORM) !=
-                                            0) {
-                                                states[state_index++] = (state_t){
-                                                        .pollable =
-                                                                poll_borrow_pollable(streams->outgoing_pollable),
-                                                        .pollfd = pollfd,
-                                                        .entry = entry,
-                                                        .events = POLLWRNORM
-                                                };
-                                        }
-                                        break;
-                                }
-
-                                default:
-                                        errno = ENOTSUP;
-                                        return -1;
+                                if ((pollfd->events & POLLWRNORM) !=
+                                    0) {
+                                        states[state_index++] = (state_t){
+                                                .pollable =
+                                                        poll_borrow_pollable(socket->state
+                                                                .connected
+                                                                .output_pollable),
+                                                .pollfd = pollfd,
+                                                .entry = entry,
+                                                .events = POLLWRNORM
+                                        };
                                 }
                                 break;
                         }
-                        case DESCRIPTOR_TABLE_ENTRY_FILE: {
-                            file_t *file = &entry->file;
-                            if ((pollfd->events & POLLRDNORM) != 0) {
-                                if (!file->readable) {
-                                    errno = EBADF;
-                                    return -1;
+
+                        case TCP_SOCKET_STATE_CONNECT_FAILED: {
+                                if (pollfd->revents == 0) {
+                                        ++event_count;
                                 }
-                                poll_borrow_pollable_t input_stream_pollable;
-                                if (__wasilibc_read_stream(pollfd->fd,
-                                                           NULL,
-                                                           NULL,
-                                                           &input_stream_pollable) < 0)
-                                    return -1;
-                                states[state_index++] = (state_t) {
-                                    .pollable = input_stream_pollable,
-                                    .pollfd = pollfd,
-                                    .entry = entry,
-                                    .events = pollfd->events
-                                };
-                            }
-                            if ((pollfd->events & POLLWRNORM) != 0) {
-                                if (!file->writable) {
-                                    errno = EBADF;
-                                    return -1;
-                                }
-                                poll_borrow_pollable_t output_stream_pollable;
-                                if (__wasilibc_write_stream(pollfd->fd,
-                                                            NULL,
-                                                            NULL,
-                                                            &output_stream_pollable) < 0)
-                                    return -1;
-                                states[state_index++] = (state_t){
-                                    .pollable = output_stream_pollable,
-                                    .pollfd = pollfd,
-                                    .entry = entry,
-                                    .events = pollfd->events
-                                };
-                            }
-                            break;
+                                pollfd->revents |= pollfd->events;
+                                break;
                         }
+
                         default:
                                 errno = ENOTSUP;
                                 return -1;
                         }
-                } else {
-                        abort();
+                        break;
+                }
+
+                case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET: {
+                        udp_socket_t *socket = &(entry->udp_socket);
+                        switch (socket->state.tag) {
+                        case UDP_SOCKET_STATE_UNBOUND:
+                        case UDP_SOCKET_STATE_BOUND_NOSTREAMS: {
+                                if (pollfd->revents == 0) {
+                                        ++event_count;
+                                }
+                                pollfd->revents |= pollfd->events;
+                                break;
+                        }
+
+                        case UDP_SOCKET_STATE_BOUND_STREAMING:
+                        case UDP_SOCKET_STATE_CONNECTED: {
+                                udp_socket_streams_t *streams;
+                                if (socket->state.tag ==
+                                    UDP_SOCKET_STATE_BOUND_STREAMING) {
+                                        streams = &(
+                                                socket->state
+                                                        .bound_streaming
+                                                        .streams);
+                                } else {
+                                        streams = &(
+                                                socket->state.connected
+                                                        .streams);
+                                }
+                                if ((pollfd->events & POLLRDNORM) !=
+                                    0) {
+                                        states[state_index++] = (state_t){
+                                                .pollable =
+                                                        poll_borrow_pollable(streams->incoming_pollable),
+                                                .pollfd = pollfd,
+                                                .entry = entry,
+                                                .events = POLLRDNORM
+                                        };
+                                }
+                                if ((pollfd->events & POLLWRNORM) !=
+                                    0) {
+                                        states[state_index++] = (state_t){
+                                                .pollable =
+                                                        poll_borrow_pollable(streams->outgoing_pollable),
+                                                .pollfd = pollfd,
+                                                .entry = entry,
+                                                .events = POLLWRNORM
+                                        };
+                                }
+                                break;
+                        }
+
+                        default:
+                                errno = ENOTSUP;
+                                return -1;
+                        }
+                        break;
+                }
+                case DESCRIPTOR_TABLE_ENTRY_FILE: {
+                    file_t *file = &entry->file;
+                    if ((pollfd->events & POLLRDNORM) != 0) {
+                        if (!file->readable) {
+                            errno = EBADF;
+                            return -1;
+                        }
+                        poll_borrow_pollable_t input_stream_pollable;
+                        if (__wasilibc_read_stream(pollfd->fd,
+                                                   NULL,
+                                                   NULL,
+                                                   &input_stream_pollable) < 0)
+                            return -1;
+                        states[state_index++] = (state_t) {
+                            .pollable = input_stream_pollable,
+                            .pollfd = pollfd,
+                            .entry = entry,
+                            .events = pollfd->events
+                        };
+                    }
+                    if ((pollfd->events & POLLWRNORM) != 0) {
+                        if (!file->writable) {
+                            errno = EBADF;
+                            return -1;
+                        }
+                        poll_borrow_pollable_t output_stream_pollable;
+                        if (__wasilibc_write_stream(pollfd->fd,
+                                                    NULL,
+                                                    NULL,
+                                                    &output_stream_pollable) < 0)
+                            return -1;
+                        states[state_index++] = (state_t){
+                            .pollable = output_stream_pollable,
+                            .pollfd = pollfd,
+                            .entry = entry,
+                            .events = pollfd->events
+                        };
+                    }
+                    break;
+                }
+                default:
+                        errno = ENOTSUP;
+                        return -1;
                 }
         }
 

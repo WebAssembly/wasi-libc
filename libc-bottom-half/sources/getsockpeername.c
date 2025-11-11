@@ -191,11 +191,9 @@ int udp_getpeername(udp_socket_t *socket, struct sockaddr *addr,
 int getsockname(int socket, struct sockaddr *__restrict addr,
 		socklen_t *__restrict addrlen)
 {
-	descriptor_table_entry_t *entry;
-	if (!descriptor_table_get_ref(socket, &entry)) {
-		errno = EBADF;
+	descriptor_table_entry_t *entry = descriptor_table_get_ref(socket);
+	if (!entry)
 		return -1;
-	}
 
 	switch (entry->tag) {
 	case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
@@ -211,11 +209,9 @@ int getsockname(int socket, struct sockaddr *__restrict addr,
 int getpeername(int socket, struct sockaddr *__restrict addr,
 		socklen_t *__restrict addrlen)
 {
-	descriptor_table_entry_t *entry;
-	if (!descriptor_table_get_ref(socket, &entry)) {
-		errno = EBADF;
+	descriptor_table_entry_t *entry = descriptor_table_get_ref(socket);
+	if (!entry)
 		return -1;
-	}
 
 	switch (entry->tag) {
 	case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:

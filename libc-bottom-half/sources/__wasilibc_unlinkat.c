@@ -12,11 +12,9 @@
 int __wasilibc_nocwd___wasilibc_unlinkat(int fd, const char *path) {
 #ifdef __wasilibc_use_wasip2
   // Translate the file descriptor to an internal handle
-  descriptor_table_entry_t* entry = 0;
-  if (!descriptor_table_get_ref(fd, &entry)) {
-    errno = EBADF;
+  descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
+  if (!entry)
     return -1;
-  }
   filesystem_borrow_descriptor_t file_handle;
 
   if (entry->tag != DESCRIPTOR_TABLE_ENTRY_FILE) {

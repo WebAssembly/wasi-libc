@@ -116,11 +116,9 @@ int accept(int socket, struct sockaddr *restrict addr,
 int accept4(int socket, struct sockaddr *restrict addr,
 	    socklen_t *restrict addrlen, int flags)
 {
-	descriptor_table_entry_t *entry;
-	if (!descriptor_table_get_ref(socket, &entry)) {
-		errno = EBADF;
+	descriptor_table_entry_t *entry = descriptor_table_get_ref(socket);
+	if (!entry)
 		return -1;
-	}
 
 	bool client_blocking = (flags & SOCK_NONBLOCK) == 0;
 	// Ignore SOCK_CLOEXEC flag. That concept does not exist in WASI.

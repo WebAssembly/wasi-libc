@@ -39,11 +39,9 @@ off_t __lseek(int fildes, off_t offset, int whence) {
 #ifdef __wasilibc_use_wasip2
   off_t offset_to_use = 0;
   // Look up a stream for fildes
-  descriptor_table_entry_t *entry;
-  if (!descriptor_table_get_ref(fildes, &entry)) {
-    errno = EBADF;
+  descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
+  if (!entry)
     return -1;
-  }
   if (entry->tag != DESCRIPTOR_TABLE_ENTRY_FILE) {
     errno = EINVAL;
     return -1;

@@ -213,31 +213,31 @@ static bool init_stdio() {
   descriptor_table_entry_t entry;
 
   memset(&entry, 0, sizeof(entry));
-  entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
-  entry.stream.read_stream = streams_borrow_input_stream(stdin_get_stdin());
-  entry.stream.offset = 0;
-  entry.stream.file_info.readable = true;
-  entry.stream.file_info.writable = false;
+  entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE;
+  entry.file.read_stream = stdin_get_stdin();
+  entry.file.offset = 0;
+  entry.file.readable = true;
+  entry.file.writable = false;
 
   if (!descriptor_table_update(0, entry))
     return false;
 
   memset(&entry, 0, sizeof(entry));
-  entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
-  entry.stream.write_stream = streams_borrow_output_stream(stdout_get_stdout());
-  entry.stream.offset = 0;
-  entry.stream.file_info.readable = false;
-  entry.stream.file_info.writable = true;
+  entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE;
+  entry.file.write_stream = stdout_get_stdout();
+  entry.file.offset = 0;
+  entry.file.readable = false;
+  entry.file.writable = true;
 
   if (!descriptor_table_update(1, entry))
     return false;
 
   memset(&entry, 0, sizeof(entry));
-  entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
-  entry.stream.write_stream = streams_borrow_output_stream(stderr_get_stderr());
-  entry.stream.offset = 0;
-  entry.stream.file_info.readable = false;
-  entry.stream.file_info.writable = true;
+  entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE;
+  entry.file.write_stream = stderr_get_stderr();
+  entry.file.offset = 0;
+  entry.file.readable = false;
+  entry.file.writable = true;
 
   if (!descriptor_table_update(2, entry))
     return false;

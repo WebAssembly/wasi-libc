@@ -1,10 +1,10 @@
 #include <errno.h>
 #include <poll.h>
-
 #include <wasi/descriptor_table.h>
+#include <wasi/file_utils.h>
 
 typedef struct {
-        poll_own_pollable_t pollable;
+        poll_borrow_pollable_t pollable;
         struct pollfd *pollfd;
         descriptor_table_entry_t *entry;
         short events;
@@ -36,7 +36,7 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
                                              (POLLRDNORM | POLLWRNORM)) != 0) {
                                                 states[state_index++] = (state_t){
                                                         .pollable =
-                                                                socket->socket_pollable,
+                                                                poll_borrow_pollable(socket->socket_pollable),
                                                         .pollfd = pollfd,
                                                         .entry = entry,
                                                         .events = pollfd->events
@@ -50,9 +50,9 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
                                             0) {
                                                 states[state_index++] = (state_t){
                                                         .pollable =
-                                                                socket->state
+                                                                poll_borrow_pollable(socket->state
                                                                         .connected
-                                                                        .input_pollable,
+                                                                        .input_pollable),
                                                         .pollfd = pollfd,
                                                         .entry = entry,
                                                         .events = POLLRDNORM
@@ -62,9 +62,9 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
                                             0) {
                                                 states[state_index++] = (state_t){
                                                         .pollable =
-                                                                socket->state
+                                                                poll_borrow_pollable(socket->state
                                                                         .connected
-                                                                        .output_pollable,
+                                                                        .output_pollable),
                                                         .pollfd = pollfd,
                                                         .entry = entry,
                                                         .events = POLLWRNORM
@@ -118,7 +118,7 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
                                             0) {
                                                 states[state_index++] = (state_t){
                                                         .pollable =
-                                                                streams->incoming_pollable,
+                                                                poll_borrow_pollable(streams->incoming_pollable),
                                                         .pollfd = pollfd,
                                                         .entry = entry,
                                                         .events = POLLRDNORM
@@ -128,7 +128,7 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
                                             0) {
                                                 states[state_index++] = (state_t){
                                                         .pollable =
-                                                                streams->outgoing_pollable,
+                                                                poll_borrow_pollable(streams->outgoing_pollable),
                                                         .pollfd = pollfd,
                                                         .entry = entry,
                                                         .events = POLLWRNORM
@@ -143,17 +143,19 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
                                 }
                                 break;
                         }
-                        case DESCRIPTOR_TABLE_ENTRY_FILE_STREAM: {
-                            file_stream_t *stream = &entry->stream;
+                        case DESCRIPTOR_TABLE_ENTRY_FILE: {
+                            file_t *file = &entry->file;
                             if ((pollfd->events & POLLRDNORM) != 0) {
-                                if (!stream->file_info.readable) {
+                                if (!file->readable) {
                                     errno = EBADF;
                                     return -1;
                                 }
-                                streams_own_pollable_t input_stream_pollable = stream->read_pollable;
-                                if (stream->read_pollable.__handle == 0) {
-                                    input_stream_pollable = stream->read_pollable = streams_method_input_stream_subscribe(stream->read_stream);
-                                }
+                                poll_borrow_pollable_t input_stream_pollable;
+                                if (__wasilibc_read_stream(pollfd->fd,
+                                                           NULL,
+                                                           NULL,
+                                                           &input_stream_pollable) < 0)
+                                    return -1;
                                 states[state_index++] = (state_t) {
                                     .pollable = input_stream_pollable,
                                     .pollfd = pollfd,
@@ -162,14 +164,16 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
                                 };
                             }
                             if ((pollfd->events & POLLWRNORM) != 0) {
-                                if (!stream->file_info.writable) {
+                                if (!file->writable) {
                                     errno = EBADF;
                                     return -1;
                                 }
-                                streams_own_pollable_t output_stream_pollable = stream->write_pollable;
-                                if (stream->write_pollable.__handle == 0) {
-                                    output_stream_pollable = stream->write_pollable = streams_method_output_stream_subscribe(stream->write_stream);
-                                }
+                                poll_borrow_pollable_t output_stream_pollable;
+                                if (__wasilibc_write_stream(pollfd->fd,
+                                                            NULL,
+                                                            NULL,
+                                                            &output_stream_pollable) < 0)
+                                    return -1;
                                 states[state_index++] = (state_t){
                                     .pollable = output_stream_pollable,
                                     .pollfd = pollfd,
@@ -179,10 +183,6 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
                             }
                             break;
                         }
-                        // File must be open
-                        case DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE:
-                                errno = EBADF;
-                                return -1;
                         default:
                                 errno = ENOTSUP;
                                 return -1;
@@ -198,7 +198,7 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
 
         poll_borrow_pollable_t pollables[state_index + 1];
         for (size_t i = 0; i < state_index; ++i) {
-                pollables[i] = poll_borrow_pollable(states[i].pollable);
+                pollables[i] = states[i].pollable;
         }
 
         poll_own_pollable_t timeout_pollable;
@@ -279,13 +279,7 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
                                         }
                                         state->pollfd->revents |= state->events;
                                 }
-                        } else if (state->entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_STREAM) {
-                                if (state->pollfd->revents == 0) {
-                                        ++event_count;
-                                }
-                                state->pollfd->revents |= state->events;
-                        }
-                        else {
+                        } else {
                                 if (state->pollfd->revents == 0) {
                                         ++event_count;
                                 }

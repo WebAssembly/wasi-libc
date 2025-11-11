@@ -20,7 +20,7 @@ int ftruncate(int fildes, off_t length) {
 #ifdef __wasilibc_use_wasip2
   // Translate the file descriptor to an internal file handle
   filesystem_borrow_descriptor_t file_handle;
-  if (!fd_to_file_handle_allow_open(fildes, &file_handle)) {
+  if (!fd_to_file_handle(fildes, &file_handle)) {
     errno = EBADF;
     return -1;
   }

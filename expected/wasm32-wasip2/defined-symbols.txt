@@ -312,6 +312,7 @@ __wasilibc_dttoif
 __wasilibc_ensure_environ
 __wasilibc_environ
 __wasilibc_fd_renumber
+__wasilibc_file_close_streams
 __wasilibc_find_abspath
 __wasilibc_find_relpath
 __wasilibc_find_relpath_alloc
@@ -339,6 +340,7 @@ __wasilibc_open_nomode
 __wasilibc_populate_preopens
 __wasilibc_pthread_self
 __wasilibc_random
+__wasilibc_read_stream
 __wasilibc_rename_newat
 __wasilibc_rename_oldat
 __wasilibc_reset_preopens
@@ -347,6 +349,7 @@ __wasilibc_stat
 __wasilibc_tell
 __wasilibc_unlinkat
 __wasilibc_utimens
+__wasilibc_write_stream
 __wasm_call_dtors
 __wcscoll_l
 __wcsftime_l
@@ -532,11 +535,6 @@ dprintf
 drand48
 drem
 dremf
-drop_directory_stream
-drop_file_handle
-drop_tcp_socket
-drop_udp_socket
-drop_udp_socket_streams
 duplocale
 ecvt
 encrypt

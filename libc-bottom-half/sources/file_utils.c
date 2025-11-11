@@ -1,6 +1,7 @@
 #include <wasi/file_utils.h>
 #include <errno.h>
 #include <stddef.h>
+#include <common/errors.h>
 
 #ifdef __wasilibc_use_wasip2
 
@@ -78,6 +79,105 @@ int wasip2_string_from_c(const char *s, wasip2_string_t *out) {
   out->ptr = (uint8_t*) s;
   out->len = len;
   return 0;
+}
+
+// Gets an `output-stream` borrow from the `fd` provided.
+int __wasilibc_write_stream(int fd,
+                            streams_borrow_output_stream_t *out,
+                            off_t **off,
+                            poll_borrow_pollable_t *pollable) {
+  descriptor_table_entry_t* entry = 0;
+  if (!descriptor_table_get_ref(fd, &entry)) {
+    errno = EBADF;
+    return -1;
+  }
+  if (entry->tag != DESCRIPTOR_TABLE_ENTRY_FILE) {
+    errno = EOPNOTSUPP;
+    return -1;
+  }
+  if (entry->file.write_stream.__handle == 0) {
+    filesystem_error_code_t error_code;
+    bool ok = filesystem_method_descriptor_write_via_stream(
+        filesystem_borrow_descriptor(entry->file.file_handle),
+        entry->file.offset,
+        &entry->file.write_stream,
+        &error_code);
+    if (!ok) {
+      translate_error(error_code);
+      return -1;
+    }
+  }
+  if (out)
+    *out = streams_borrow_output_stream(entry->file.write_stream);
+  if (off)
+    *off = &entry->file.offset;
+  if (pollable) {
+    if (entry->file.write_pollable.__handle == 0) {
+      streams_borrow_output_stream_t stream = streams_borrow_output_stream(entry->file.write_stream);
+      entry->file.write_pollable = streams_method_output_stream_subscribe(stream);
+    }
+    *pollable = poll_borrow_pollable(entry->file.write_pollable);
+  }
+  return 0;
+}
+
+// Gets an `input-stream` borrow from the `fd` provided.
+int __wasilibc_read_stream(int fd,
+                           streams_borrow_input_stream_t *out,
+                           off_t **off,
+                           poll_borrow_pollable_t *pollable) {
+  descriptor_table_entry_t* entry = 0;
+  if (!descriptor_table_get_ref(fd, &entry)) {
+    errno = EBADF;
+    return -1;
+  }
+  if (entry->tag != DESCRIPTOR_TABLE_ENTRY_FILE) {
+    errno = EOPNOTSUPP;
+    return -1;
+  }
+  if (entry->file.read_stream.__handle == 0) {
+    filesystem_error_code_t error_code;
+    bool ok = filesystem_method_descriptor_read_via_stream(
+        filesystem_borrow_descriptor(entry->file.file_handle),
+        entry->file.offset,
+        &entry->file.read_stream,
+        &error_code);
+    if (!ok) {
+      translate_error(error_code);
+      return -1;
+    }
+  }
+  if (out)
+    *out = streams_borrow_input_stream(entry->file.read_stream);
+  if (off)
+    *off = &entry->file.offset;
+  if (pollable) {
+    if (entry->file.read_pollable.__handle == 0) {
+      streams_borrow_input_stream_t stream = streams_borrow_input_stream(entry->file.read_stream);
+      entry->file.read_pollable = streams_method_input_stream_subscribe(stream);
+    }
+    *pollable = poll_borrow_pollable(entry->file.read_pollable);
+  }
+  return 0;
+}
+
+void __wasilibc_file_close_streams(file_t *file) {
+  if (file->read_pollable.__handle != 0) {
+    poll_pollable_drop_own(file->read_pollable);
+    file->read_pollable.__handle = 0;
+  }
+  if (file->write_pollable.__handle != 0) {
+    poll_pollable_drop_own(file->write_pollable);
+    file->write_pollable.__handle = 0;
+  }
+  if (file->read_stream.__handle != 0) {
+    streams_input_stream_drop_own(file->read_stream);
+    file->read_stream.__handle = 0;
+  }
+  if (file->write_stream.__handle != 0) {
+    streams_output_stream_drop_own(file->write_stream);
+    file->write_stream.__handle = 0;
+  }
 }
 
 #endif // __wasilibc_use_wasip2

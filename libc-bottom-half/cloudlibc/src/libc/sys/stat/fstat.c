@@ -53,11 +53,9 @@ int fstat(int fildes, struct stat *buf) {
   int st_mode = 0;
 
   switch (entry->tag) {
-    case DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE:
-      return fstat_file(entry->file.file_handle, buf);
-    case DESCRIPTOR_TABLE_ENTRY_FILE_STREAM:
-      if (entry->stream.file_info.file_handle.__handle != 0)
-        return fstat_file(entry->stream.file_info.file_handle, buf);
+    case DESCRIPTOR_TABLE_ENTRY_FILE:
+      if (entry->file.file_handle.__handle != 0)
+        return fstat_file(filesystem_borrow_descriptor(entry->file.file_handle), buf);
       break;
     case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:

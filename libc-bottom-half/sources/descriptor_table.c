@@ -276,9 +276,15 @@ int descriptor_table_renumber(int fd, int newfd)
     return 0;
 }
 
-bool descriptor_table_remove(int fd, descriptor_table_entry_t *entry)
+int descriptor_table_remove(int fd, descriptor_table_entry_t *entry)
 {
-      if (!stdio_initialized && !init_stdio())
-        return false;
-      return remove(fd, entry, &global_table);
+      if (!stdio_initialized && !init_stdio()) {
+        errno = ENOMEM;
+        return -1;
+      }
+      if (!remove(fd, entry, &global_table)) {
+        errno = EBADF;
+        return -1;
+      }
+      return 0;
 }

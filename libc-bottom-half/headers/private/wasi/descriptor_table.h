@@ -143,6 +143,6 @@ bool descriptor_table_insert(descriptor_table_entry_t entry, int *fd);
 
 bool descriptor_table_get_ref(int fd, descriptor_table_entry_t **entry);
 
-bool descriptor_table_remove(int fd, descriptor_table_entry_t *entry);
+int descriptor_table_remove(int fd, descriptor_table_entry_t *entry);
 
 #endif

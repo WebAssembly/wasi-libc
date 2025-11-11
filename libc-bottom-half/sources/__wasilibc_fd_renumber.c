@@ -87,10 +87,8 @@ int close(int fd) {
 
 #ifdef __wasilibc_use_wasip2
     descriptor_table_entry_t entry;
-    if (!descriptor_table_remove(fd, &entry)) {
-      errno = EBADF;
+    if (descriptor_table_remove(fd, &entry) < 0)
       return -1;
-    }
 
     switch (entry.tag)
     {

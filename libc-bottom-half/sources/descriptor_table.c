@@ -208,8 +208,7 @@ static bool remove(int fd, descriptor_table_entry_t *entry,
 
 static bool stdio_initialized = false;
 
-static bool init_stdio() {
-  int fd;
+static int init_stdio() {
   stdio_initialized = true;
 
   descriptor_table_entry_t entry;
@@ -221,8 +220,8 @@ static bool init_stdio() {
   entry.file.readable = true;
   entry.file.writable = false;
 
-  if (!descriptor_table_insert(entry, &fd))
-    return false;
+  if (descriptor_table_insert(entry) < 0)
+    return -1;
 
   memset(&entry, 0, sizeof(entry));
   entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE;
@@ -231,8 +230,8 @@ static bool init_stdio() {
   entry.file.readable = false;
   entry.file.writable = true;
 
-  if (!descriptor_table_insert(entry, &fd))
-    return false;
+  if (descriptor_table_insert(entry) < 0)
+    return -1;
 
   memset(&entry, 0, sizeof(entry));
   entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE;
@@ -241,23 +240,27 @@ static bool init_stdio() {
   entry.file.readable = false;
   entry.file.writable = true;
 
-  if (!descriptor_table_insert(entry, &fd))
-    return false;
+  if (descriptor_table_insert(entry) < 0)
+    return -1;
 
-  return true;
+  return 0;
 }
 
-bool descriptor_table_insert(descriptor_table_entry_t entry, int *fd)
+int descriptor_table_insert(descriptor_table_entry_t entry)
 {
-     if (!stdio_initialized && !init_stdio())
-       return false;
-     *fd = next_fd++;
-     return insert(entry, *fd, &global_table, false);
+     if (!stdio_initialized && init_stdio() < 0)
+       return -1;
+     int fd = next_fd++;
+     if (!insert(entry, fd, &global_table, false)) {
+         errno = EMFILE;
+         return -1;
+     }
+     return fd;
 }
 
 bool descriptor_table_get_ref(int fd, descriptor_table_entry_t **entry)
 {
-      if (!stdio_initialized && !init_stdio())
+      if (!stdio_initialized && init_stdio() < 0)
         return false;
       return get(fd, entry, &global_table);
 }
@@ -278,10 +281,8 @@ int descriptor_table_renumber(int fd, int newfd)
 
 int descriptor_table_remove(int fd, descriptor_table_entry_t *entry)
 {
-      if (!stdio_initialized && !init_stdio()) {
-        errno = ENOMEM;
+      if (!stdio_initialized && init_stdio() < 0)
         return -1;
-      }
       if (!remove(fd, entry, &global_table)) {
         errno = EBADF;
         return -1;

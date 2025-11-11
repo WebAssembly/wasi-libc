@@ -32,12 +32,7 @@ static int tcp_socket(network_ip_address_family_t family, bool blocking)
                                   .recv_timeout = 0,
 			  } };
 
-	int fd;
-	if (!descriptor_table_insert(entry, &fd)) {
-		errno = EMFILE;
-		return -1;
-	}
-	return fd;
+	return descriptor_table_insert(entry);
 }
 
 static int udp_socket(network_ip_address_family_t family, bool blocking)
@@ -65,12 +60,7 @@ static int udp_socket(network_ip_address_family_t family, bool blocking)
 						     /* No additional state. */ } },
 			  } };
 
-	int fd;
-	if (!descriptor_table_insert(entry, &fd)) {
-		errno = EMFILE;
-		return -1;
-	}
-	return fd;
+	return descriptor_table_insert(entry);
 }
 
 int socket(int domain, int type, int protocol)

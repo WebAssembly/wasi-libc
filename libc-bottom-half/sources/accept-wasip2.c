@@ -96,13 +96,7 @@ int tcp_accept(tcp_socket_t *socket, bool client_blocking,
         .recv_timeout = 0,
     } };
 
-	int client_fd;
-	if (!descriptor_table_insert(client_entry, &client_fd)) {
-		errno = EMFILE;
-		return -1;
-	}
-
-	return client_fd;
+	return descriptor_table_insert(client_entry);
 }
 
 int udp_accept(udp_socket_t *socket, bool client_blocking,

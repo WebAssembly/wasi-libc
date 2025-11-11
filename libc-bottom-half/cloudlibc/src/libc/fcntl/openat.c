@@ -104,15 +104,9 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
   }
 
   // Update the descriptor table with the new handle
-  int new_fd = -1;
   descriptor_table_entry_t new_entry;
   descriptor_init_file(&new_entry, new_handle, oflag);
-  if (!descriptor_table_insert(new_entry, &new_fd)) {
-    errno = ENOMEM;
-    return -1;
-  }
-  // Return the new file descriptor from the table
-  return new_fd;
+  return descriptor_table_insert(new_entry);
 #else
   // Compute rights corresponding with the access modes provided.
   // Attempt to obtain all rights, except the ones that contradict the

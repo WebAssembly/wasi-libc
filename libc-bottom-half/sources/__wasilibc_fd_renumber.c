@@ -13,15 +13,8 @@ int __wasilibc_fd_renumber(int fd, int newfd) {
     __wasilibc_populate_preopens();
 
 #ifdef __wasilibc_use_wasip2
-    descriptor_table_entry_t* entry;
-    if (!descriptor_table_get_ref(fd, &entry)) {
-        errno = EBADF;
+    if (descriptor_table_renumber(fd, newfd) < 0)
         return -1;
-    }
-    if (!descriptor_table_update(newfd, *entry)) {
-        errno = EBADF;
-        return -1;
-    }
 #else
     __wasi_errno_t error = __wasi_fd_renumber(fd, newfd);
     if (error != 0) {

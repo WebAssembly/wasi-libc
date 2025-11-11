@@ -23,6 +23,7 @@
  */
 
 #include <wasi/descriptor_table.h>
+#include <errno.h>
 
 /*
  * This hash table is based on the one in musl/src/search/hsearch.c, but uses
@@ -261,11 +262,18 @@ bool descriptor_table_get_ref(int fd, descriptor_table_entry_t **entry)
       return get(fd, entry, &global_table);
 }
 
-bool descriptor_table_update(int fd, descriptor_table_entry_t entry)
+int descriptor_table_renumber(int fd, int newfd)
 {
-      if (!stdio_initialized && !init_stdio())
-        return false;
-      return insert(entry, fd, &global_table, true);
+    descriptor_table_entry_t* entry;
+    if (!descriptor_table_get_ref(fd, &entry)) {
+        errno = EBADF;
+        return -1;
+    }
+    if (!insert(*entry, newfd, &global_table, true)) {
+        errno = ENOMEM;
+        return -1;
+    }
+    return 0;
 }
 
 bool descriptor_table_remove(int fd, descriptor_table_entry_t *entry)

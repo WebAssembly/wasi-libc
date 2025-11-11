@@ -137,7 +137,7 @@ typedef struct {
         };
 } descriptor_table_entry_t;
 
-bool descriptor_table_update(int fd, descriptor_table_entry_t entry);
+int descriptor_table_renumber(int fd, int newfd);
 
 bool descriptor_table_insert(descriptor_table_entry_t entry, int *fd);
 

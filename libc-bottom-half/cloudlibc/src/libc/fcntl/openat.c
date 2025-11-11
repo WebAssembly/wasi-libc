@@ -5,6 +5,7 @@
 #include <assert.h>
 #ifdef __wasilibc_use_wasip2
 #include <wasi/wasip2.h>
+#include <wasi/file.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
@@ -102,9 +103,7 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
   }
 
   // Update the descriptor table with the new handle
-  descriptor_table_entry_t new_entry;
-  descriptor_init_file(&new_entry, new_handle, oflag);
-  return descriptor_table_insert(new_entry);
+  return __wasilibc_add_file(new_handle, oflag);
 #else
   // Compute rights corresponding with the access modes provided.
   // Attempt to obtain all rights, except the ones that contradict the

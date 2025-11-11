@@ -15,13 +15,16 @@ int __wasilibc_nocwd___wasilibc_unlinkat(int fd, const char *path) {
   descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
   if (!entry)
     return -1;
-  filesystem_borrow_descriptor_t file_handle;
-
-  if (entry->tag != DESCRIPTOR_TABLE_ENTRY_FILE) {
+  if (!entry->vtable->get_file) {
     errno = EOPNOTSUPP;
     return -1;
   }
-  __wasilibc_file_close_streams(&entry->file);
+
+  if (entry->vtable->close_streams)
+    entry->vtable->close_streams(entry->data);
+  filesystem_borrow_descriptor_t file;
+  if (entry->vtable->get_file(entry->data, &file) < 0)
+    return -1;
 
   // Create a Wasm string from the path
   wasip2_string_t wasi_path;
@@ -30,10 +33,7 @@ int __wasilibc_nocwd___wasilibc_unlinkat(int fd, const char *path) {
 
   // Unlink the file
   filesystem_error_code_t error_code;
-  bool ok = filesystem_method_descriptor_unlink_file_at(
-      filesystem_borrow_descriptor(entry->file.file_handle),
-      &wasi_path,
-      &error_code);
+  bool ok = filesystem_method_descriptor_unlink_file_at(file, &wasi_path, &error_code);
   if (!ok) {
     translate_error(error_code);
     return -1;

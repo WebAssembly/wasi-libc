@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <wasi/descriptor_table.h>
+#include <wasi/stdio.h>
 
 #define MINSIZE 8
 #define MAXSIZE ((size_t)-1 / 2 + 1)
@@ -129,47 +130,20 @@ static bool stdio_initialized = false;
 
 static int init_stdio() {
   stdio_initialized = true;
-
-  descriptor_table_entry_t entry;
-
-  memset(&entry, 0, sizeof(entry));
-  entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE;
-  entry.file.read_stream = stdin_get_stdin();
-  entry.file.offset = 0;
-  entry.file.readable = true;
-  entry.file.writable = false;
-
-  if (descriptor_table_insert(entry) < 0)
-    return -1;
-
-  memset(&entry, 0, sizeof(entry));
-  entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE;
-  entry.file.write_stream = stdout_get_stdout();
-  entry.file.offset = 0;
-  entry.file.readable = false;
-  entry.file.writable = true;
-
-  if (descriptor_table_insert(entry) < 0)
-    return -1;
-
-  memset(&entry, 0, sizeof(entry));
-  entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE;
-  entry.file.write_stream = stderr_get_stderr();
-  entry.file.offset = 0;
-  entry.file.readable = false;
-  entry.file.writable = true;
-
-  if (descriptor_table_insert(entry) < 0)
-    return -1;
-
-  return 0;
+  return __wasilibc_init_stdio();
 }
 
 int descriptor_table_insert(descriptor_table_entry_t entry)
 {
      if (!stdio_initialized && init_stdio() < 0)
-       return -1;
-     return allocate(&global_table, entry);
+       goto error;
+     int fd = allocate(&global_table, entry);
+     if (fd < 0)
+       goto error;
+     return fd;
+error:
+     entry.vtable->free(entry.data);
+     return -1;
 }
 
 descriptor_table_entry_t *descriptor_table_get_ref(int fd)
@@ -191,13 +165,19 @@ int descriptor_table_renumber(int fd, int newfd)
     descriptor_table_entry_t temp = *fdentry;
     *fdentry = *newfdentry;
     *newfdentry = temp;
-    // TODO: need to close out any descriptors in `temp`
-    return remove(&global_table, fd, &temp);
+    if (remove(&global_table, fd, &temp) < 0)
+        return -1;
+    temp.vtable->free(temp.data);
+    return 0;
 }
 
-int descriptor_table_remove(int fd, descriptor_table_entry_t *entry)
+int descriptor_table_remove(int fd)
 {
       if (!stdio_initialized && init_stdio() < 0)
         return -1;
-      return remove(&global_table, fd, entry);
+      descriptor_table_entry_t entry;
+      if (remove(&global_table, fd, &entry) < 0)
+        return -1;
+      entry.vtable->free(entry.data);
+      return 0;
 }

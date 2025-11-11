@@ -24,7 +24,7 @@ int TIMEOUT = 100;
 
 size_t respond_to_client(int client_fd) {
     char buffer[BUFSIZE];
-    size_t total_bytes_read = 0, bytes_read = 0;
+    ssize_t total_bytes_read = 0, bytes_read = 0;
     while ((bytes_read = recv(client_fd, buffer, BUFSIZE, 0)) > 0) {
         total_bytes_read += bytes_read;
         // Echo back the data received from the client

@@ -21,25 +21,11 @@ static int fd_to_file_handle(int fd, filesystem_borrow_descriptor_t* result) {
   descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
   if (entry == NULL)
     return -1;
-  if (entry->tag != DESCRIPTOR_TABLE_ENTRY_FILE) {
+  if (!entry->vtable->get_file) {
     errno = EINVAL;
     return -1;
   }
-  *result = filesystem_borrow_descriptor(entry->file.file_handle);
-  return 0;
-}
-
-// Succeed only if fd is bound to a file handle in the descriptor table
-static void descriptor_init_file(descriptor_table_entry_t *out, filesystem_own_descriptor_t fd, int oflag) {
-  out->tag = DESCRIPTOR_TABLE_ENTRY_FILE;
-  out->file.file_handle = fd;
-  out->file.read_stream.__handle = 0;
-  out->file.write_stream.__handle = 0;
-  out->file.offset = 0;
-  out->file.read_pollable.__handle = 0;
-  out->file.write_pollable.__handle = 0;
-  out->file.readable = ((oflag & O_RDONLY) != 0);
-  out->file.writable = ((oflag & O_WRONLY) != 0);
+  return entry->vtable->get_file(entry->data, result);
 }
 
 // Gets an `output-stream` borrow from the `fd` provided.
@@ -54,8 +40,8 @@ int __wasilibc_read_stream(int fd,
                            off_t **off,
                            poll_borrow_pollable_t *pollable);
 
-// Closes input/output streams and pollables of `file`.
-void __wasilibc_file_close_streams(file_t *file);
+/* // Closes input/output streams and pollables of `file`. */
+/* void __wasilibc_file_close_streams(file_t *file); */
 
 static unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
   switch(ty) {

@@ -50,7 +50,8 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
   wasip2_list_u8_free(&contents);
 
   // Update the offset
-  *off += contents.len;
+  if (off)
+    *off += contents.len;
   return contents.len;
 
 #else

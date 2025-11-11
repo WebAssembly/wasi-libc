@@ -86,11 +86,9 @@ int __wasilibc_write_stream(int fd,
                             streams_borrow_output_stream_t *out,
                             off_t **off,
                             poll_borrow_pollable_t *pollable) {
-  descriptor_table_entry_t* entry = 0;
-  if (!descriptor_table_get_ref(fd, &entry)) {
-    errno = EBADF;
+  descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
+  if (!entry)
     return -1;
-  }
   if (entry->tag != DESCRIPTOR_TABLE_ENTRY_FILE) {
     errno = EOPNOTSUPP;
     return -1;
@@ -126,11 +124,9 @@ int __wasilibc_read_stream(int fd,
                            streams_borrow_input_stream_t *out,
                            off_t **off,
                            poll_borrow_pollable_t *pollable) {
-  descriptor_table_entry_t* entry = 0;
-  if (!descriptor_table_get_ref(fd, &entry)) {
-    errno = EBADF;
+  descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
+  if (!entry)
     return -1;
-  }
   if (entry->tag != DESCRIPTOR_TABLE_ENTRY_FILE) {
     errno = EOPNOTSUPP;
     return -1;

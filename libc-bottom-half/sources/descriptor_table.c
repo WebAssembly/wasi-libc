@@ -23,6 +23,7 @@
  */
 
 #include <wasi/descriptor_table.h>
+#include <errno.h>
 
 /*
  * This hash table is based on the one in musl/src/search/hsearch.c, but uses
@@ -51,7 +52,7 @@ static descriptor_table_t global_table = { .entries = NULL,
                                            .mask = 0,
                                            .used = 0 };
 
-static int next_fd = 3;
+static int next_fd = 0;
 
 static size_t keyhash(int key)
 {
@@ -207,7 +208,7 @@ static bool remove(int fd, descriptor_table_entry_t *entry,
 
 static bool stdio_initialized = false;
 
-static bool init_stdio() {
+static int init_stdio() {
   stdio_initialized = true;
 
   descriptor_table_entry_t entry;
@@ -219,8 +220,8 @@ static bool init_stdio() {
   entry.file.readable = true;
   entry.file.writable = false;
 
-  if (!descriptor_table_update(0, entry))
-    return false;
+  if (descriptor_table_insert(entry) < 0)
+    return -1;
 
   memset(&entry, 0, sizeof(entry));
   entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE;
@@ -229,8 +230,8 @@ static bool init_stdio() {
   entry.file.readable = false;
   entry.file.writable = true;
 
-  if (!descriptor_table_update(1, entry))
-    return false;
+  if (descriptor_table_insert(entry) < 0)
+    return -1;
 
   memset(&entry, 0, sizeof(entry));
   entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE;
@@ -239,37 +240,55 @@ static bool init_stdio() {
   entry.file.readable = false;
   entry.file.writable = true;
 
-  if (!descriptor_table_update(2, entry))
-    return false;
+  if (descriptor_table_insert(entry) < 0)
+    return -1;
 
-  return true;
+  return 0;
 }
 
-bool descriptor_table_insert(descriptor_table_entry_t entry, int *fd)
+int descriptor_table_insert(descriptor_table_entry_t entry)
 {
-     if (!stdio_initialized && !init_stdio())
-       return false;
-     *fd = ++next_fd;
-     return insert(entry, *fd, &global_table, false);
+     if (!stdio_initialized && init_stdio() < 0)
+       return -1;
+     int fd = next_fd++;
+     if (!insert(entry, fd, &global_table, false)) {
+         errno = EMFILE;
+         return -1;
+     }
+     return fd;
 }
 
-bool descriptor_table_get_ref(int fd, descriptor_table_entry_t **entry)
+descriptor_table_entry_t *descriptor_table_get_ref(int fd)
 {
-      if (!stdio_initialized && !init_stdio())
-        return false;
-      return get(fd, entry, &global_table);
+      if (!stdio_initialized && init_stdio() < 0)
+        return NULL;
+      descriptor_table_entry_t *entry;
+      if (!get(fd, &entry, &global_table)) {
+        errno = EBADF;
+        return NULL;
+      }
+      return entry;
 }
 
-bool descriptor_table_update(int fd, descriptor_table_entry_t entry)
+int descriptor_table_renumber(int fd, int newfd)
 {
-      if (!stdio_initialized && !init_stdio())
-        return false;
-      return insert(entry, fd, &global_table, true);
+    descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
+    if (!entry)
+        return -1;
+    if (!insert(*entry, newfd, &global_table, true)) {
+        errno = ENOMEM;
+        return -1;
+    }
+    return 0;
 }
 
-bool descriptor_table_remove(int fd, descriptor_table_entry_t *entry)
+int descriptor_table_remove(int fd, descriptor_table_entry_t *entry)
 {
-      if (!stdio_initialized && !init_stdio())
-        return false;
-      return remove(fd, entry, &global_table);
+      if (!stdio_initialized && init_stdio() < 0)
+        return -1;
+      if (!remove(fd, entry, &global_table)) {
+        errno = EBADF;
+        return -1;
+      }
+      return 0;
 }

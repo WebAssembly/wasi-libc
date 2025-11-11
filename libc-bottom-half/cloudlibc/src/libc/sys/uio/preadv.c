@@ -22,10 +22,8 @@ ssize_t preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
 #ifdef __wasilibc_use_wasip2
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
-  if (!fd_to_file_handle(fildes, &file_handle)) {
-    errno = EBADF;
+  if (fd_to_file_handle(fildes, &file_handle) < 0)
     return -1;
-  }
 
   // Create a WASI buffer to receive the contents
   wasip2_tuple2_list_u8_bool_t buffer;

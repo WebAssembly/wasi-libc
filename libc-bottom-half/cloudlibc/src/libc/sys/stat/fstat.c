@@ -44,11 +44,9 @@ static int fstat_file(filesystem_borrow_descriptor_t file, struct stat *buf) {
 
 int fstat(int fildes, struct stat *buf) {
   // Translate the file descriptor to an internal handle
-  descriptor_table_entry_t *entry;
-  if (!descriptor_table_get_ref(fildes, &entry)) {
-    errno = EBADF;
+  descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
+  if (!entry)
     return -1;
-  }
 
   int st_mode = 0;
 

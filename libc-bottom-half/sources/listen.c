@@ -89,11 +89,9 @@ int udp_listen(udp_socket_t *socket, int backlog)
 
 int listen(int socket, int backlog)
 {
-	descriptor_table_entry_t *entry;
-	if (!descriptor_table_get_ref(socket, &entry)) {
-		errno = EBADF;
+	descriptor_table_entry_t *entry = descriptor_table_get_ref(socket);
+	if (!entry)
 		return -1;
-	}
 
 	if (backlog < 0) {
 		// POSIX:

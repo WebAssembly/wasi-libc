@@ -51,10 +51,8 @@ static_assert(DT_UNKNOWN == __WASI_FILETYPE_UNKNOWN, "Value mismatch");
 #ifdef __wasilibc_use_wasip2
 
 static int ensure_has_directory_stream(DIR *dirp, filesystem_borrow_descriptor_t *handle) {
-  if (!fd_to_file_handle(dirp->fd, handle)) {
-    errno = EBADF;
+  if (fd_to_file_handle(dirp->fd, handle) < 0)
     return -1;
-  }
 
   if (dirp->stream.__handle != 0)
     return 0;

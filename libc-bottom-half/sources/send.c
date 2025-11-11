@@ -252,11 +252,9 @@ ssize_t send(int socket, const void *buffer, size_t length, int flags)
 ssize_t sendto(int socket, const void *buffer, size_t length, int flags,
 	       const struct sockaddr *addr, socklen_t addrlen)
 {
-	descriptor_table_entry_t *entry;
-	if (!descriptor_table_get_ref(socket, &entry)) {
-		errno = EBADF;
+	descriptor_table_entry_t *entry = descriptor_table_get_ref(socket);
+	if (!entry)
 		return -1;
-	}
 
 	if (buffer == NULL) {
 		errno = EINVAL;

@@ -24,9 +24,8 @@ DIR *fdopendir(int fd) {
 
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
-  if (!fd_to_file_handle(fd, &file_handle)) {
+  if (fd_to_file_handle(fd, &file_handle) < 0) {
     free(dirp);
-    errno = EBADF;
     return NULL;
   }
 

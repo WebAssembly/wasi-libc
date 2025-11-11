@@ -140,7 +140,8 @@ static int internal_register_preopened_fd_unlocked(preopen_t fd, const char *rel
 #ifdef __wasilibc_use_wasip2
     descriptor_table_entry_t entry;
     descriptor_init_file(&entry, fd, O_RDWR);
-    if (!descriptor_table_insert(entry, &preopens[num_preopens].libc_fd))
+    preopens[num_preopens].libc_fd = descriptor_table_insert(entry);
+    if (preopens[num_preopens].libc_fd < 0)
         goto err_free_prefix;
 
     assert(preopens[num_preopens].libc_fd != -1);

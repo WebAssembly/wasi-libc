@@ -35,11 +35,9 @@ int udp_bind(udp_socket_t *socket, const struct sockaddr *addr,
 
 int bind(int socket, const struct sockaddr *addr, socklen_t addrlen)
 {
-	descriptor_table_entry_t *entry;
-	if (!descriptor_table_get_ref(socket, &entry)) {
-		errno = EBADF;
+	descriptor_table_entry_t *entry = descriptor_table_get_ref(socket);
+	if (!entry)
 		return -1;
-	}
 
 	switch (entry->tag) {
 	case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET:

@@ -15,29 +15,8 @@
 
 #include "stat_impl.h"
 
-#ifdef __wasilibc_use_wasip2
-static void set_atim_tag_from_flags(__wasi_fstflags_t flags, filesystem_new_timestamp_t* timestamp) {
-  if (flags & __WASI_FSTFLAGS_ATIM) {
-    timestamp->tag = FILESYSTEM_NEW_TIMESTAMP_TIMESTAMP;
-  } else if (flags & __WASI_FSTFLAGS_ATIM_NOW) {
-    timestamp->tag = FILESYSTEM_NEW_TIMESTAMP_NOW;
-  } else {
-    timestamp->tag = FILESYSTEM_NEW_TIMESTAMP_NO_CHANGE;
-  }
-}
-
-static void set_mtim_tag_from_flags(__wasi_fstflags_t flags, filesystem_new_timestamp_t* timestamp) {
-  if (flags & __WASI_FSTFLAGS_MTIM) {
-    timestamp->tag = FILESYSTEM_NEW_TIMESTAMP_TIMESTAMP;
-  } else if (flags & __WASI_FSTFLAGS_MTIM_NOW) {
-    timestamp->tag = FILESYSTEM_NEW_TIMESTAMP_NOW;
-  } else {
-    timestamp->tag = FILESYSTEM_NEW_TIMESTAMP_NO_CHANGE;
-  }
-}
-
 int futimens(int fd, const struct timespec *times) {
-  // Translate the file descriptor to an internal handle
+#ifdef __wasilibc_use_wasip2
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (!fd_to_file_handle_allow_open(fd, &file_handle)) {
@@ -46,21 +25,13 @@ int futimens(int fd, const struct timespec *times) {
   }
 
   // Convert timestamps and extract NOW/OMIT flags.
-  filesystem_datetime_t st_atim;
-  filesystem_datetime_t st_mtim;
+  filesystem_new_timestamp_t new_timestamp_atim;
+  filesystem_new_timestamp_t new_timestamp_mtim;
   __wasi_fstflags_t flags;
-  if (!utimens_get_timestamps(times, &st_atim, &st_mtim, &flags)) {
+  if (!utimens_get_timestamps(times, &new_timestamp_atim, &new_timestamp_mtim)) {
     errno = EINVAL;
     return -1;
   }
-
-  // Set up filesystem_new_timestamps
-  filesystem_new_timestamp_t new_timestamp_atim;
-  set_atim_tag_from_flags(flags, &new_timestamp_atim);
-  new_timestamp_atim.val.timestamp = st_atim;
-  filesystem_new_timestamp_t new_timestamp_mtim;
-  set_mtim_tag_from_flags(flags, &new_timestamp_mtim);
-  new_timestamp_mtim.val.timestamp = st_mtim;
 
   // Perform system call.
   filesystem_error_code_t error;
@@ -72,10 +43,7 @@ int futimens(int fd, const struct timespec *times) {
     return -1;
   }
 
-  return 0;
-}
 #else
-int futimens(int fd, const struct timespec *times) {
   // Convert timestamps and extract NOW/OMIT flags.
   __wasi_timestamp_t st_atim;
   __wasi_timestamp_t st_mtim;
@@ -91,6 +59,7 @@ int futimens(int fd, const struct timespec *times) {
     errno = error;
     return -1;
   }
+#endif
+
   return 0;
 }
-#endif

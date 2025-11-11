@@ -127,53 +127,36 @@ static inline void to_public_stat(const __wasi_filestat_t *in,
 #endif
 
 #ifdef __wasilibc_use_wasip2
+static inline bool utimens_get_timestamp(const struct timespec *time,
+                                         filesystem_new_timestamp_t *out) {
+  switch (time->tv_nsec) {
+    case UTIME_NOW:
+      out->tag = FILESYSTEM_NEW_TIMESTAMP_NOW;
+      break;
+    case UTIME_OMIT:
+      out->tag = FILESYSTEM_NEW_TIMESTAMP_NO_CHANGE;
+      break;
+    default:
+      out->tag = FILESYSTEM_NEW_TIMESTAMP_TIMESTAMP;
+      if (!timespec_to_timestamp_exact(time, &out->val.timestamp))
+        return false;
+      break;
+  }
+  return true;
+}
+
 static inline bool utimens_get_timestamps(const struct timespec *times,
-                                          filesystem_datetime_t *st_atim,
-                                          filesystem_datetime_t *st_mtim,
-                                          __wasi_fstflags_t *flags) {
+                                          filesystem_new_timestamp_t *st_atim,
+                                          filesystem_new_timestamp_t *st_mtim) {
   if (times == NULL) {
     // Update both timestamps.
-    *flags = __WASI_FSTFLAGS_ATIM_NOW | __WASI_FSTFLAGS_MTIM_NOW;
-    st_atim->seconds = 0;
-    st_atim->nanoseconds = 0;
-    st_mtim->seconds = 0;
-    st_mtim->nanoseconds = 0;
+    st_atim->tag = FILESYSTEM_NEW_TIMESTAMP_NOW;
+    st_mtim->tag = FILESYSTEM_NEW_TIMESTAMP_NOW;
   } else {
-    // Set individual timestamps.
-    *flags = 0;
-    switch (times[0].tv_nsec) {
-      case UTIME_NOW:
-        *flags |= __WASI_FSTFLAGS_ATIM_NOW;
-        st_atim->seconds = 0;
-        st_atim->nanoseconds = 0;
-        break;
-      case UTIME_OMIT:
-        st_atim->seconds = 0;
-        st_atim->nanoseconds = 0;
-        break;
-      default:
-        *flags |= __WASI_FSTFLAGS_ATIM;
-        if (!timespec_to_timestamp_exact(&times[0], st_atim))
-          return false;
-        break;
-    }
-
-    switch (times[1].tv_nsec) {
-      case UTIME_NOW:
-        *flags |= __WASI_FSTFLAGS_MTIM_NOW;
-        st_mtim->seconds = 0;
-        st_mtim->nanoseconds = 0;
-        break;
-      case UTIME_OMIT:
-        st_mtim->seconds = 0;
-        st_mtim->nanoseconds = 0;
-        break;
-      default:
-        *flags |= __WASI_FSTFLAGS_MTIM;
-        if (!timespec_to_timestamp_exact(&times[1], st_mtim))
-          return false;
-        break;
-    }
+    if (!utimens_get_timestamp(&times[0], st_atim))
+      return false;
+    if (!utimens_get_timestamp(&times[1], st_mtim))
+      return false;
   }
   return true;
 }

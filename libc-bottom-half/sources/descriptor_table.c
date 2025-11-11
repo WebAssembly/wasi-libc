@@ -51,7 +51,7 @@ static descriptor_table_t global_table = { .entries = NULL,
                                            .mask = 0,
                                            .used = 0 };
 
-static int next_fd = 3;
+static int next_fd = 0;
 
 static size_t keyhash(int key)
 {
@@ -208,6 +208,7 @@ static bool remove(int fd, descriptor_table_entry_t *entry,
 static bool stdio_initialized = false;
 
 static bool init_stdio() {
+  int fd;
   stdio_initialized = true;
 
   descriptor_table_entry_t entry;
@@ -219,7 +220,7 @@ static bool init_stdio() {
   entry.file.readable = true;
   entry.file.writable = false;
 
-  if (!descriptor_table_update(0, entry))
+  if (!descriptor_table_insert(entry, &fd))
     return false;
 
   memset(&entry, 0, sizeof(entry));
@@ -229,7 +230,7 @@ static bool init_stdio() {
   entry.file.readable = false;
   entry.file.writable = true;
 
-  if (!descriptor_table_update(1, entry))
+  if (!descriptor_table_insert(entry, &fd))
     return false;
 
   memset(&entry, 0, sizeof(entry));
@@ -239,7 +240,7 @@ static bool init_stdio() {
   entry.file.readable = false;
   entry.file.writable = true;
 
-  if (!descriptor_table_update(2, entry))
+  if (!descriptor_table_insert(entry, &fd))
     return false;
 
   return true;
@@ -249,7 +250,7 @@ bool descriptor_table_insert(descriptor_table_entry_t entry, int *fd)
 {
      if (!stdio_initialized && !init_stdio())
        return false;
-     *fd = ++next_fd;
+     *fd = next_fd++;
      return insert(entry, *fd, &global_table, false);
 }
 

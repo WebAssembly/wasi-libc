@@ -1,209 +1,128 @@
-/*
- * This file provides a global hashtable for tracking `wasi-libc`-managed file
- * descriptors.
- *
- * WASI Preview 2 has no notion of file descriptors and instead uses unforgeable
- * resource handles (which are currently represented as integers at the ABI
- * level, used as indices into per-component tables managed by the host).
- * Moreover, there's not necessarily a one-to-one correspondence between POSIX
- * file descriptors and resource handles (e.g. a TCP connection may require
- * separate handles for reading, writing, and polling the same connection).  We
- * use this table to map each POSIX descriptor to a set of one or more handles.
- *
- * As of this writing, we still rely on the WASI Preview 1 adapter
- * (https://github.com/bytecodealliance/wasmtime/tree/main/crates/wasi-preview1-component-adapter)
- * to manage non-socket descriptors, so currently this table only tracks TCP and
- * UDP sockets.  We use the adapter's `adapter_open_badfd` and
- * `adapter_close_badfd` functions to reserve and later close descriptors to
- * avoid confusion (e.g. if an application tries to use Preview 1 host functions
- * directly for socket operations rather than go through `wasi-libc`).
- * Eventually, we'll switch `wasi-libc` over to Preview 2 entirely, at which
- * point we'll no longer need the adapter.  At that point, all file descriptors
- * will be managed exclusively in this table.
+/**
+ * This file defines the mapping from libc-based file descriptors to WASIp2
+ * resources/structures/etc. This is a slab which is indexed by file
+ * descriptors and makes allocation/deallocation relatively easy.
  */
 
-#include <wasi/descriptor_table.h>
+#include <assert.h>
 #include <errno.h>
-
-/*
- * This hash table is based on the one in musl/src/search/hsearch.c, but uses
- * integer keys and supports a `remove` operation.  Note that I've switched from
- * quadratic to linear probing in order to make `remove` simple and efficient,
- * with the tradeoff that clustering is more likely.  See also
- * https://en.wikipedia.org/wiki/Open_addressing.
- */
+#include <wasi/descriptor_table.h>
 
 #define MINSIZE 8
 #define MAXSIZE ((size_t)-1 / 2 + 1)
 
 typedef struct {
         bool occupied;
-        int key;
-        descriptor_table_entry_t entry;
+        union {
+          int next;
+          descriptor_table_entry_t entry;
+        };
 } descriptor_table_item_t;
 
 typedef struct {
+        // Dynamically allocated array of `cap` entries.
         descriptor_table_item_t *entries;
-        size_t mask;
-        size_t used;
+        // Next free entry.
+        int next;
+        // Number of `entries` that are initialized.
+        size_t len;
+        // Dynamic length of `entries`.
+        size_t cap;
 } descriptor_table_t;
 
 static descriptor_table_t global_table = { .entries = NULL,
-                                           .mask = 0,
-                                           .used = 0 };
+                                           .next = 0,
+                                           .len = 0,
+                                           .cap = 0 };
+static int global_table_stdio_initialized = 0;
 
-static int next_fd = 0;
+/**
+ * Allocates a new `descriptor_table_entry_t` in the `table` provided.
+ *
+ * Copies `entry` into the table and returns the integer descriptor.
+ *
+ * Returns -1 on failure and sets `errno`.
+ */
+static int allocate(descriptor_table_t *table, descriptor_table_entry_t entry) {
+  // If the table is at its limit, then a new entry needs to be allocated. If
+  // the table's entire allocation capacity has been reached then that must also
+  // be resized.
+  if (table->next == table->len) {
+    if (table->len == table->cap) {
+      size_t new_cap = table->cap == 0 ? MINSIZE : table->cap * 2;
+      descriptor_table_item_t *new_entries =
+          realloc(table->entries, new_cap * sizeof(descriptor_table_item_t));
+      if (!new_entries) {
+        errno = ENOMEM;
+        return -1;
+      }
+      table->entries = new_entries;
+      table->cap = new_cap;
+    }
+    assert(table->len < table->cap);
+    table->entries[table->len].occupied = false;
+    table->entries[table->len].next = table->len + 1;
+    table->len++;
+  }
 
-static size_t keyhash(int key)
-{
-        // TODO: use a hash function here
-        return key;
+  descriptor_table_item_t *table_entry = &table->entries[table->next];
+  int ret = table->next;
+  assert(!table_entry->occupied);
+  table->next = table_entry->next;
+  table_entry->occupied = true;
+  table_entry->entry = entry;
+
+  return ret;
 }
 
-static int resize(size_t nel, descriptor_table_t *table)
-{
-        size_t newsize;
-        size_t i;
-        descriptor_table_item_t *e, *newe;
-        descriptor_table_item_t *oldtab = table->entries;
-        descriptor_table_item_t *oldend = table->entries + table->mask + 1;
+/**
+ * Looks up `fd` within the provided `table`.
+ *
+ * Returns 0 on success and fills in `entry` with the located entry.
+ *
+ * Returns -1 on failure and sets `errno`.
+ */
+static descriptor_table_entry_t *lookup(descriptor_table_t *table, int fd) {
+  if (fd < 0 || (size_t)fd >= table->len) {
+    errno = EBADF;
+    return NULL;
+  }
 
-        if (nel > MAXSIZE)
-                nel = MAXSIZE;
-        for (newsize = MINSIZE; newsize < nel; newsize *= 2)
-                ;
-        table->entries = calloc(newsize, sizeof *table->entries);
-        if (!table->entries) {
-                table->entries = oldtab;
-                return 0;
-        }
-        table->mask = newsize - 1;
-        if (!oldtab)
-                return 1;
-        for (e = oldtab; e < oldend; e++)
-                if (e->occupied) {
-                        for (i = keyhash(e->key);; ++i) {
-                                newe = table->entries + (i & table->mask);
-                                if (!newe->occupied)
-                                        break;
-                        }
-                        *newe = *e;
-                }
-        free(oldtab);
-        return 1;
+  descriptor_table_item_t *table_entry = &table->entries[fd];
+  if (!table_entry->occupied) {
+    errno = EBADF;
+    return NULL;
+  }
+
+  return &table_entry->entry;
 }
 
-static descriptor_table_item_t *lookup(int key, size_t hash,
-                                       descriptor_table_t *table)
-{
-        size_t i;
-        descriptor_table_item_t *e;
+/**
+ * Removes `fd` within the provided `table`.
+ *
+ * Returns 0 on success and fills in `entry` with the contents of the entry
+ * before removal.
+ *
+ * Returns -1 on failure and sets `errno`.
+ */
+static int remove(descriptor_table_t *table, int fd, descriptor_table_entry_t *ret) {
+  if (fd < 0 || (size_t)fd >= table->len) {
+    errno = EBADF;
+    return -1;
+  }
 
-        for (i = hash;; ++i) {
-                e = table->entries + (i & table->mask);
-                if (!e->occupied || e->key == key)
-                        break;
-        }
-        return e;
-}
+  descriptor_table_item_t *table_entry = &table->entries[fd];
+  if (!table_entry->occupied) {
+    errno = EBADF;
+    return -1;
+  }
 
-static bool insert(descriptor_table_entry_t entry, int fd,
-                   descriptor_table_t *table,
-                   bool overwrite)
-{
-        if (!table->entries) {
-                if (!resize(MINSIZE, table)) {
-                        return false;
-                }
-        }
+  *ret = table_entry->entry;
+  table_entry->occupied = false;
+  table_entry->next = table->next;
+  table->next = fd;
 
-        size_t hash = keyhash(fd);
-        descriptor_table_item_t *e = lookup(fd, hash, table);
-
-        e->entry = entry;
-        if (!e->occupied || overwrite) {
-                e->key = fd;
-                e->occupied = true;
-                if (++table->used > table->mask - table->mask / 4) {
-                        if (!resize(2 * table->used, table)) {
-                                table->used--;
-                                e->occupied = false;
-                                return false;
-                        }
-                }
-        }
-        return true;
-}
-
-static bool get(int fd, descriptor_table_entry_t **entry,
-                descriptor_table_t *table)
-{
-        if (!table->entries) {
-                return false;
-        }
-
-        size_t hash = keyhash(fd);
-        descriptor_table_item_t *e = lookup(fd, hash, table);
-        if (e->occupied) {
-                *entry = &e->entry;
-                return true;
-        } else {
-                return false;
-        }
-}
-
-static bool remove(int fd, descriptor_table_entry_t *entry,
-                   descriptor_table_t *table)
-{
-        if (!table->entries) {
-                return false;
-        }
-
-        size_t hash = keyhash(fd);
-        size_t i;
-        descriptor_table_item_t *e;
-        for (i = hash;; ++i) {
-                e = table->entries + (i & table->mask);
-                if (!e->occupied || e->key == fd)
-                        break;
-        }
-
-        if (e->occupied) {
-                *entry = e->entry;
-                e->occupied = false;
-
-                // Search for any occupied entries which would be lost (due to
-                // an interrupted linear probe) if we left this one unoccupied
-                // and move them as necessary.
-                i = i & table->mask;
-                size_t j = i;
-                while (true) {
-                        j = (j + 1) & table->mask;
-                        e = table->entries + j;
-                        if (!e->occupied)
-                                break;
-                        size_t k = keyhash(e->key) & table->mask;
-                        if (i <= j) {
-                                if ((i < k) && (k <= j))
-                                        continue;
-                        } else if ((i < k) || (k <= j)) {
-                                continue;
-                        }
-                        table->entries[i] = *e;
-                        e->occupied = false;
-                        i = j;
-                }
-
-                // If the load factor has dropped below 25%, shrink the table to
-                // reduce memory footprint.
-                if (--table->used < table->mask / 4) {
-                        resize(table->mask / 2, table);
-                }
-
-                return true;
-        } else {
-                return false;
-        }
+  return 0;
 }
 
 static bool stdio_initialized = false;
@@ -250,45 +169,35 @@ int descriptor_table_insert(descriptor_table_entry_t entry)
 {
      if (!stdio_initialized && init_stdio() < 0)
        return -1;
-     int fd = next_fd++;
-     if (!insert(entry, fd, &global_table, false)) {
-         errno = EMFILE;
-         return -1;
-     }
-     return fd;
+     return allocate(&global_table, entry);
 }
 
 descriptor_table_entry_t *descriptor_table_get_ref(int fd)
 {
       if (!stdio_initialized && init_stdio() < 0)
         return NULL;
-      descriptor_table_entry_t *entry;
-      if (!get(fd, &entry, &global_table)) {
-        errno = EBADF;
-        return NULL;
-      }
-      return entry;
+      return lookup(&global_table, fd);
 }
 
 int descriptor_table_renumber(int fd, int newfd)
 {
-    descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
-    if (!entry)
+    descriptor_table_entry_t* fdentry = descriptor_table_get_ref(fd);
+    if (!fdentry)
         return -1;
-    if (!insert(*entry, newfd, &global_table, true)) {
-        errno = ENOMEM;
+    descriptor_table_entry_t* newfdentry = descriptor_table_get_ref(newfd);
+    if (!newfdentry)
         return -1;
-    }
-    return 0;
+
+    descriptor_table_entry_t temp = *fdentry;
+    *fdentry = *newfdentry;
+    *newfdentry = temp;
+    // TODO: need to close out any descriptors in `temp`
+    return remove(&global_table, fd, &temp);
 }
 
 int descriptor_table_remove(int fd, descriptor_table_entry_t *entry)
 {
       if (!stdio_initialized && init_stdio() < 0)
         return -1;
-      if (!remove(fd, entry, &global_table)) {
-        errno = EBADF;
-        return -1;
-      }
-      return 0;
+      return remove(&global_table, fd, entry);
 }

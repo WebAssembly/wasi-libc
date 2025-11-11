@@ -108,41 +108,32 @@ typedef struct {
         udp_socket_state_t state;
 } udp_socket_t;
 
-// Stream representing an open file.
 typedef struct {
-// File was opened for reading
-         bool readable;
-// File was opened for writing
-         bool writable;
-         filesystem_borrow_descriptor_t file_handle;
-} file_t;
-
-typedef struct {
-        streams_borrow_input_stream_t read_stream;
-        streams_borrow_output_stream_t write_stream;
+        filesystem_own_descriptor_t file_handle;
+        streams_own_input_stream_t read_stream;
+        streams_own_output_stream_t write_stream;
         // Current position in stream, relative to the beginning of the *file*, measured in bytes
         off_t offset;
         // Used for checking readiness to read/write to stream. Lazily initialized
         streams_own_pollable_t read_pollable;
         streams_own_pollable_t write_pollable;
-        // When the stream is closed, the caller should
-        // replace this entry in the table with the file handle
-        file_t file_info;
-} file_stream_t;
+        // File was opened for reading
+        bool readable;
+        // File was opened for writing
+        bool writable;
+} file_t;
 
 // This is a tagged union. When adding/removing/renaming cases, be sure to keep the tag and union definitions in sync.
 typedef struct {
         enum {
                 DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET,
                 DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET,
-                DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE,
-                DESCRIPTOR_TABLE_ENTRY_FILE_STREAM
+                DESCRIPTOR_TABLE_ENTRY_FILE,
         } tag;
         union {
                 tcp_socket_t tcp_socket;
                 udp_socket_t udp_socket;
                 file_t file;
-                file_stream_t stream;
         };
 } descriptor_table_entry_t;
 

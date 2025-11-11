@@ -18,70 +18,10 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
   bool ok = false;
 
   // Translate the file descriptor to an internal handle
-  descriptor_table_entry_t* entry = 0;
-  if (!descriptor_table_get_ref(fildes, &entry)) {
-    errno = EBADF;
-    return -1;
-  }
   streams_borrow_input_stream_t input_stream;
-  if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE) {
-    // File's input stream hasn't been opened yet
-
-    // Get the input stream
-    filesystem_error_code_t error_code;
-    streams_own_input_stream_t input_stream_own;
-
-    ok = filesystem_method_descriptor_read_via_stream(entry->file.file_handle,
-                                                      0,
-                                                      &input_stream_own,
-                                                      &error_code);
-    if (!ok) {
-      translate_error(error_code);
-      return -1;
-    }
-    input_stream = streams_borrow_input_stream(input_stream_own);
-
-    descriptor_table_entry_t new_entry;
-
-    // If the file is writable, also need an output stream
-    if (entry->file.writable) {
-      streams_own_output_stream_t write_stream;
-      ok = filesystem_method_descriptor_write_via_stream(entry->file.file_handle,
-                                                         0,
-                                                         &write_stream,
-                                                         &error_code);
-      if (!ok) {
-        translate_error(error_code);
-        return -1;
-      }
-
-      new_entry.stream.write_stream = streams_borrow_output_stream(write_stream);
-    }
-
-    // Update the descriptor table with the newly opened stream
-    // for this file
-    new_entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_STREAM;
-    new_entry.stream.read_stream = input_stream;
-    new_entry.stream.read_pollable.__handle = false;
-    new_entry.stream.write_pollable.__handle = false;
-    new_entry.stream.offset = 0;
-    new_entry.stream.file_info.readable = entry->file.readable;
-    new_entry.stream.file_info.writable = entry->file.writable;
-    new_entry.stream.file_info.file_handle = entry->file.file_handle;
-    if (!descriptor_table_update(fildes, new_entry)) {
-      errno = ENOMEM;
-      return -1;
-    }
-  } else if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_STREAM) {
-      if (!entry->stream.file_info.readable) {
-        errno = EBADF;
-        return -1;
-      }
-      input_stream = entry->stream.read_stream;
-  } else {
-    errno = EBADF;
+  off_t *off;
+  if (__wasilibc_read_stream(fildes, &input_stream, &off, NULL) < 0)
     return -1;
-  }
 
   // Set up a WASI list of bytes to receive the results
   wasip2_list_u8_t contents;
@@ -110,15 +50,7 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
   wasip2_list_u8_free(&contents);
 
   // Update the offset
-  if (!descriptor_table_get_ref(fildes, &entry)) {
-    errno = EBADF;
-    return -1;
-  }
-  if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_STREAM) {
-    entry->stream.offset += contents.len;
-  } else {
-    abort(); // unreachable
-  }
+  *off += contents.len;
   return contents.len;
 
 #else

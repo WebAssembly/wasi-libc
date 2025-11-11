@@ -1,5 +1,6 @@
 #ifdef __wasilibc_use_wasip2
 #include <wasi/descriptor_table.h>
+#include <wasi/file_utils.h>
 #else
 #include <wasi/api.h>
 #endif
@@ -33,7 +34,7 @@ int __wasilibc_fd_renumber(int fd, int newfd) {
 
 #ifdef __wasilibc_use_wasip2
 
-void drop_tcp_socket(tcp_socket_t socket) {
+static void drop_tcp_socket(tcp_socket_t socket) {
     switch (socket.state.tag) {
     case TCP_SOCKET_STATE_UNBOUND:
     case TCP_SOCKET_STATE_BOUND:
@@ -58,14 +59,14 @@ void drop_tcp_socket(tcp_socket_t socket) {
     tcp_tcp_socket_drop_own(socket.socket);
 }
 
-void drop_udp_socket_streams(udp_socket_streams_t streams) {
+static void drop_udp_socket_streams(udp_socket_streams_t streams) {
     poll_pollable_drop_own(streams.incoming_pollable);
     poll_pollable_drop_own(streams.outgoing_pollable);
     udp_incoming_datagram_stream_drop_own(streams.incoming);
     udp_outgoing_datagram_stream_drop_own(streams.outgoing);
 }
 
-void drop_udp_socket(udp_socket_t socket) {
+static void drop_udp_socket(udp_socket_t socket) {
     switch (socket.state.tag) {
     case UDP_SOCKET_STATE_UNBOUND:
     case UDP_SOCKET_STATE_BOUND_NOSTREAMS:
@@ -83,14 +84,6 @@ void drop_udp_socket(udp_socket_t socket) {
 
     poll_pollable_drop_own(socket.socket_pollable);
     udp_udp_socket_drop_own(socket.socket);
-}
-
-void drop_file_handle(filesystem_borrow_descriptor_t handle) {
-    filesystem_descriptor_drop_borrow(handle);
-}
-
-void drop_directory_stream(filesystem_own_directory_entry_stream_t directory_stream) {
-    filesystem_directory_entry_stream_drop_own(directory_stream);
 }
 
 #endif // __wasilibc_use_wasip2
@@ -114,20 +107,10 @@ int close(int fd) {
     case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET:
         drop_udp_socket(entry.udp_socket);
         break;
-    case DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE:
-        drop_file_handle(entry.file.file_handle);
-        break;
-    case DESCRIPTOR_TABLE_ENTRY_FILE_STREAM:
-        if (entry.stream.read_pollable.__handle != 0)
-            poll_pollable_drop_own(entry.stream.read_pollable);
-        if (entry.stream.write_pollable.__handle != 0)
-            poll_pollable_drop_own(entry.stream.write_pollable);
-        if (entry.stream.file_info.readable)
-            streams_input_stream_drop_borrow(entry.stream.read_stream);
-        if (entry.stream.file_info.writable)
-            streams_output_stream_drop_borrow(entry.stream.write_stream);
-        if (entry.stream.file_info.file_handle.__handle != 0)
-            drop_file_handle(entry.stream.file_info.file_handle);
+    case DESCRIPTOR_TABLE_ENTRY_FILE:
+        __wasilibc_file_close_streams(&entry.file);
+        if (entry.file.file_handle.__handle != 0)
+          filesystem_descriptor_drop_own(entry.file.file_handle);
         break;
     default: /* unreachable */ abort();
     }

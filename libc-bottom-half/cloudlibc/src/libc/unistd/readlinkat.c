@@ -19,7 +19,7 @@ ssize_t __wasilibc_nocwd_readlinkat(int fd, const char *restrict path, char *res
 #ifdef __wasilibc_use_wasip2
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
-  if (!fd_to_file_handle_allow_open(fd, &file_handle)) {
+  if (!fd_to_file_handle(fd, &file_handle)) {
     errno = EBADF;
     return -1;
   }

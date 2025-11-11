@@ -24,19 +24,9 @@ int fcntl(int fildes, int cmd, ...) {
     case F_GETFL: {
 #ifdef __wasilibc_use_wasip2
     // Translate the file descriptor to an internal handle
-    descriptor_table_entry_t *entry;
-    bool ref_exists = descriptor_table_get_ref(fildes, &entry);
     filesystem_borrow_descriptor_t file_handle;
-    if (!ref_exists) {
+    if (!fd_to_file_handle(fildes, &file_handle)) {
       errno = EBADF;
-      return -1;
-    }
-    if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_STREAM)
-      file_handle = entry->stream.file_info.file_handle;
-    else if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE)
-      file_handle = entry->file.file_handle;
-    else {
-      errno = EINVAL;
       return -1;
     }
 
@@ -95,7 +85,7 @@ int fcntl(int fildes, int cmd, ...) {
 #ifdef __wasilibc_use_wasip2
     // Translate the file descriptor to an internal handle
     filesystem_borrow_descriptor_t file_handle;
-    if (!fd_to_file_handle_allow_open(fildes, &file_handle)) {
+    if (!fd_to_file_handle(fildes, &file_handle)) {
       errno = EBADF;
       return -1;
     }

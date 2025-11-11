@@ -106,10 +106,7 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
   // Update the descriptor table with the new handle
   int new_fd = -1;
   descriptor_table_entry_t new_entry;
-  new_entry.tag = DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE;
-  new_entry.file.readable = ((oflag & O_RDONLY) != 0);
-  new_entry.file.writable = ((oflag & O_WRONLY) != 0);
-  new_entry.file.file_handle = filesystem_borrow_descriptor(new_handle);
+  descriptor_init_file(&new_entry, new_handle, oflag);
   if (!descriptor_table_insert(new_entry, &new_fd)) {
     errno = ENOMEM;
     return -1;

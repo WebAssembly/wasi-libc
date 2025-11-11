@@ -17,8 +17,8 @@ off_t __wasilibc_tell(int fildes) {
   }
 
   // Return the current offset in the stream
-  if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_STREAM) {
-    return entry->stream.offset;
+  if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE) {
+    return entry->file.offset;
   }
   errno = EINVAL;
   return -1;

@@ -29,7 +29,7 @@ int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
 
 #ifdef __wasilibc_use_wasip2
   filesystem_borrow_descriptor_t file_handle;
-  if (!fd_to_file_handle_allow_open(fd, &file_handle)) {
+  if (!fd_to_file_handle(fd, &file_handle)) {
     errno = EBADF;
     return EBADF;
   }

@@ -17,13 +17,13 @@ int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char 
 #ifdef __wasilibc_use_wasip2
   // Translate the file descriptors to internal handles
   filesystem_borrow_descriptor_t old_file_handle;
-  if (!fd_to_file_handle_allow_open(oldfd, &old_file_handle)) {
+  if (!fd_to_file_handle(oldfd, &old_file_handle)) {
     errno = EBADF;
     return -1;
   }
 
   filesystem_borrow_descriptor_t new_file_handle;
-  if (!fd_to_file_handle_allow_open(newfd, &new_file_handle)) {
+  if (!fd_to_file_handle(newfd, &new_file_handle)) {
     errno = EBADF;
     return -1;
   }

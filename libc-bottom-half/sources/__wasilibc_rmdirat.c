@@ -12,18 +12,10 @@
 int __wasilibc_nocwd___wasilibc_rmdirat(int fd, const char *path) {
 #ifdef __wasilibc_use_wasip2
   // Translate the file descriptor to an internal handle
-  descriptor_table_entry_t *entry;
-  bool ref_exists = descriptor_table_get_ref(fd, &entry);
   filesystem_borrow_descriptor_t file_handle;
-  if (!ref_exists) {
+  if (!fd_to_file_handle(fd, &file_handle)) {
     errno = EBADF;
     return EBADF;
-  }
-  if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE_HANDLE)
-    file_handle = entry->file.file_handle;
-  else {
-    errno = EINVAL;
-    return EINVAL;
   }
 
   // Create a WASI string for the path

@@ -63,15 +63,11 @@ off_t __lseek(int fildes, off_t offset, int whence) {
     offset_to_use = offset + entry->file.offset;
     break;
   case SEEK_END: {
-    // Find the end of the stream (is there a better way to do this?)
-    if (entry->file.readable) {
-      filesystem_filesize_t file_size = 0;
-      if (get_file_size(filesystem_borrow_descriptor(entry->file.file_handle), &file_size) < 0)
-        return -1;
-      offset_to_use = ((off_t) file_size) + offset;
-    } else {
-      offset_to_use = entry->file.offset + offset;
-    }
+    // Find the end of the stream
+    filesystem_filesize_t file_size = 0;
+    if (get_file_size(filesystem_borrow_descriptor(entry->file.file_handle), &file_size) < 0)
+      return -1;
+    offset_to_use = ((off_t) file_size) + offset;
     break;
   }
   default: {

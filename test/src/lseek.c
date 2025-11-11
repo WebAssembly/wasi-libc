@@ -32,7 +32,31 @@ int main(void) {
   TEST(memcmp(buf, "ello,", 5) == 0);
   TEST(lseek(fd, 0, SEEK_CUR) == 6);
 
+  TEST(close(fd) == 0);
+
+
+  TEST((fd = open("b.txt", O_WRONLY | O_CREAT, 0644)) >= 0);
+  char bytes[20] = {0};
+  TEST(write(fd, bytes, 20) == 20);
+
+  TEST(lseek(fd, 0, SEEK_CUR) == 20);
+
+  TEST(lseek(fd, 0, SEEK_SET) == 0);
+  TEST(lseek(fd, 0, SEEK_CUR) == 0);
+
+  TEST(lseek(fd, 10, SEEK_SET) == 10);
+  TEST(lseek(fd, 0, SEEK_CUR) == 10);
+
+  TEST(lseek(fd, 5, SEEK_CUR) == 15);
+  TEST(lseek(fd, 0, SEEK_CUR) == 15);
+
+  TEST(lseek(fd, -5, SEEK_CUR) == 10);
+  TEST(lseek(fd, 0, SEEK_CUR) == 10);
+
+  TEST(lseek(fd, -5, SEEK_END) == 15);
+  TEST(lseek(fd, 0, SEEK_CUR) == 15);
 
   TEST(close(fd) == 0);
+
   return t_status;
 }

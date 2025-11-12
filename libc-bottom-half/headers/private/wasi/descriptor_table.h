@@ -57,6 +57,8 @@ typedef struct descriptor_vtable_t {
   int (*fcntl_getfl)(void*);
   /// Implementation of `fnctl(fd, F_SETFL)`.
   int (*fcntl_setfl)(void*, int);
+  /// Implementation of `isatty`-the-function.
+  int (*isatty)(void*);
 
   // =====================================================================
   // Sockets-related APIs

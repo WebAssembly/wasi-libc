@@ -91,12 +91,45 @@ static int stdio_fcntl_getfl(void *data) {
   }
 }
 
+static int stdio_isatty(void *data) {
+  stdio_t *stdio = (stdio_t *)data;
+  switch (stdio->fd) {
+    case 0: {
+      terminal_stdin_own_terminal_input_t term_input;
+      if (!terminal_stdin_get_terminal_stdin(&term_input))
+        break;
+      terminal_input_terminal_input_drop_own(term_input);
+      return 1;
+    }
+    case 1: {
+      terminal_stdout_own_terminal_output_t term_output;
+      if (!terminal_stdout_get_terminal_stdout(&term_output))
+        break;
+      terminal_output_terminal_output_drop_own(term_output);
+      return 1;
+    }
+    case 2: {
+      terminal_stderr_own_terminal_output_t term_output;
+      if (!terminal_stderr_get_terminal_stderr(&term_output))
+        break;
+      terminal_output_terminal_output_drop_own(term_output);
+      return 1;
+    }
+    default:
+      break;
+  }
+
+  errno = ENOTTY;
+  return 0;
+}
+
 static descriptor_vtable_t stdio_vtable = {
   .free = stdio_free,
   .get_read_stream = stdio_get_read_stream,
   .get_write_stream = stdio_get_write_stream,
   .fstat = stdio_fstat,
   .fcntl_getfl = stdio_fcntl_getfl,
+  .isatty = stdio_isatty,
 };
 
 static int stdio_add(int fd) {

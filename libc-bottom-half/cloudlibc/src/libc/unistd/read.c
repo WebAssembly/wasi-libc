@@ -42,11 +42,8 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
     }
   }
 
-  // Copy the bytes to `buf` so we can free the list
-  if (!memcpy(buf, contents.ptr, contents.len)) {
-    errno = EINVAL;
-    return -1;
-  }
+  // Copy the bytes allocated in the canonical ABI to `buf`
+  memcpy(buf, contents.ptr, contents.len);
   wasip2_list_u8_free(&contents);
 
   // Update the offset

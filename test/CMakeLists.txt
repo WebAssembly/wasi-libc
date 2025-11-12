@@ -50,12 +50,27 @@ message(STATUS "libc-test source directory: ${LIBC_TEST}")
 
 if(NOT ENGINE OR ENGINE STREQUAL "")
   set(WASMTIME_VERSION "v38.0.2")
-  set(WASMTIME_ARCH "${CMAKE_HOST_SYSTEM_PROCESSOR}")
   set(WASMTIME_REPO "https://github.com/bytecodealliance/wasmtime")
+
+  if (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    set(WASMTIME_ARCH "x86_64")
+  elseif (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
+    set(WASMTIME_ARCH "aarch64")
+  else()
+    message(FATAL_ERROR "Unsupported architecture ${CMAKE_HOST_SYSTEM_PROCESSOR} for Wasmtime")
+  endif()
+
+  if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+    set(WASMTIME_OS macos)
+  elseif (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+    set(WASMTIME_OS linux)
+  else()
+    message(FATAL_ERROR "Unsupported system ${CMAKE_SYSTEM_NAME} for Wasmtime")
+  endif()
 
   ExternalProject_Add(
     engine
-    URL "${WASMTIME_REPO}/releases/download/${WASMTIME_VERSION}/wasmtime-${WASMTIME_VERSION}-${WASMTIME_ARCH}-linux.tar.xz"
+    URL "${WASMTIME_REPO}/releases/download/${WASMTIME_VERSION}/wasmtime-${WASMTIME_VERSION}-${WASMTIME_ARCH}-${WASMTIME_OS}.tar.xz"
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
@@ -314,6 +329,7 @@ add_wasilibc_test(utime.c FS)
 add_wasilibc_test(rewinddir.c FS)
 add_wasilibc_test(seekdir.c FS)
 add_wasilibc_test(usleep.c)
+add_wasilibc_test(write.c FS)
 
 if (TARGET_TRIPLE MATCHES "-threads")
   add_wasilibc_test(busywait.c)

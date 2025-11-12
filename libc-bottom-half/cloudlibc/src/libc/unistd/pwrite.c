@@ -27,11 +27,7 @@ ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
   // Convert `buf` to a WASI byte list
   wasip2_list_u8_t contents;
   contents.len = nbyte;
-  contents.ptr = malloc(nbyte);
-  if (!memcpy(contents.ptr, buf, nbyte)) {
-    errno = EINVAL;
-    return -1;
-  }
+  contents.ptr = (uint8_t*) buf;
 
   // Write the bytes
   filesystem_filesize_t bytes_written;
@@ -41,9 +37,6 @@ ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
                                                offset,
                                                &bytes_written,
                                                &error_code);
-  // Free the byte list
-  wasip2_list_u8_free(&contents);
-
   // Check for errors
   if (!ok) {
     translate_error(error_code);

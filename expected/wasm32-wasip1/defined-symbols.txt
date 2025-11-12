@@ -713,6 +713,7 @@ getdomainname
 getentropy
 getenv
 gethostid
+gethostname
 getline
 getopt
 getopt_long

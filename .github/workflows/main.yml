@@ -229,6 +229,8 @@ jobs:
         include:
           - env:
               TARGET_TRIPLE: wasm32-wasip1
+          - env:
+              TARGET_TRIPLE: wasm32-wasip2
     steps:
     - uses: actions/checkout@v4.1.7
       with:

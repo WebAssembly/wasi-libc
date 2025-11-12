@@ -74,7 +74,7 @@ static int validate_utf8(const char *ptr_signed) {
 int wasip2_string_from_c(const char *s, wasip2_string_t *out) {
   int len = validate_utf8(s);
   if (len < 0) {
-    errno = ENOENT;
+    errno = EILSEQ;
     return -1;
   }
   out->ptr = (uint8_t*) s;

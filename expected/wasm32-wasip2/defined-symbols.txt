@@ -765,6 +765,7 @@ getenv
 gethostbyaddr
 gethostbyname
 gethostid
+gethostname
 getline
 getnameinfo
 getopt

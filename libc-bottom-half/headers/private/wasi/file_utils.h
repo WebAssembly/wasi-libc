@@ -40,9 +40,6 @@ int __wasilibc_read_stream(int fd,
                            off_t **off,
                            poll_borrow_pollable_t *pollable);
 
-/* // Closes input/output streams and pollables of `file`. */
-/* void __wasilibc_file_close_streams(file_t *file); */
-
 static unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
   switch(ty) {
   case FILESYSTEM_DESCRIPTOR_TYPE_UNKNOWN:

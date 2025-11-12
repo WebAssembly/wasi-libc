@@ -2,6 +2,7 @@
 #include <wasi/wasip2.h>
 #include <wasi/descriptor_table.h>
 #include <common/errors.h>
+#include <unistd.h>
 #else
 #include <wasi/api.h>
 #endif
@@ -13,13 +14,11 @@ off_t __wasilibc_tell(int fildes) {
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
   if (!entry)
     return -1;
-
-  // Return the current offset in the stream
-  if (entry->tag == DESCRIPTOR_TABLE_ENTRY_FILE) {
-    return entry->file.offset;
+  if (!entry->vtable->seek) {
+    errno = EINVAL;
+    return -1;
   }
-  errno = EINVAL;
-  return -1;
+  return entry->vtable->seek(entry->data, 0, SEEK_CUR);
 #else
     __wasi_filesize_t offset;
     __wasi_errno_t error = __wasi_fd_tell(fildes, &offset);

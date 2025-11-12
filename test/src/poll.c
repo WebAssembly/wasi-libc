@@ -21,11 +21,11 @@ int main(void)
 
         struct pollfd poll_fd = { .fd =  fd, .events = POLLRDNORM, .revents = 0 };
         int r = poll(&poll_fd, 1, -1);
-        TEST(r==1, "poll returned %d, expected 1", r);
+        TEST(r==1, "poll returned %d, expected 1\n", r);
 
         poll_fd.events = POLLWRNORM;
         r = poll(&poll_fd, 1, -1);
-        TEST(r==1, "poll returned %d, expected 1", r);
+        TEST(r==1, "poll returned %d, expected 1\n", r);
 
         close(fd);
 

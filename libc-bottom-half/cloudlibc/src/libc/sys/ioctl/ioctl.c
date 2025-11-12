@@ -18,50 +18,18 @@ int ioctl(int fildes, int request, ...) {
 	descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
         if (!entry)
           return -1;
-	switch (entry->tag) {
-	case DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET: {
-		tcp_socket_t *socket = &entry->tcp_socket;
-		switch (request) {
-		case FIONBIO: {
-			va_list ap;
-			va_start(ap, request);
-			socket->blocking = *va_arg(ap, const int *) ==
-					   0;
-			va_end(ap);
-
-			return 0;
-		}
-
-		default:
-			// TODO wasi-sockets: anything else we should support?
-			errno = EINVAL;
-			return -1;
-		}
+	switch (request) {
+	case FIONBIO: {
+		va_list ap;
+		va_start(ap, request);
+		bool blocking = *va_arg(ap, const int *) == 0;
+		va_end(ap);
+		return entry->vtable->set_blocking(entry->data, blocking);
 	}
 
-	case DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET: {
-		udp_socket_t *socket = &entry->udp_socket;
-		switch (request) {
-		case FIONBIO: {
-			va_list ap;
-			va_start(ap, request);
-			socket->blocking = *va_arg(ap, const int *) ==
-					   0;
-			va_end(ap);
-
-			return 0;
-		}
-
-		default:
-			// TODO wasi-sockets: anything else we should support?
-			errno = EINVAL;
-			return -1;
-		}
-	}
-        // TODO: In particular, this doesn't support using FIONREAD
-        // with file descriptors
 	default:
-		errno = ENOPROTOOPT;
+		// TODO wasi-sockets: anything else we should support?
+		errno = EINVAL;
 		return -1;
 	}
 #endif // __wasilibc_use_wasip2

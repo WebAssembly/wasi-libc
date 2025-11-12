@@ -15,6 +15,7 @@
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
 #include <wasi/wasip2.h>
+#include <wasi/file.h>
 #else
 #include <wasi/api.h>
 #endif
@@ -138,9 +139,7 @@ static int internal_register_preopened_fd_unlocked(preopen_t fd, const char *rel
         goto err;
     preopens[num_preopens].prefix = prefix;
 #ifdef __wasilibc_use_wasip2
-    descriptor_table_entry_t entry;
-    descriptor_init_file(&entry, fd, O_RDWR);
-    preopens[num_preopens].libc_fd = descriptor_table_insert(entry);
+    preopens[num_preopens].libc_fd = __wasilibc_add_file(fd, O_RDWR);
     if (preopens[num_preopens].libc_fd < 0)
         goto err_free_prefix;
 

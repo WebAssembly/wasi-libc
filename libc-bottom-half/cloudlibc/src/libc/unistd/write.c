@@ -68,7 +68,8 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
     return -1;
   }
 
-  *off += nbyte;
+  if (off)
+    *off += nbyte;
   return nbyte;
 #else
   __wasi_ciovec_t iov = {.buf = buf, .buf_len = nbyte};

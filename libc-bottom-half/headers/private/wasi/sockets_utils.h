@@ -2,7 +2,6 @@
 #define __wasi_sockets_utils_h
 
 #include <netinet/in.h>
-
 #include <wasi/descriptor_table.h>
 
 typedef struct {
@@ -49,17 +48,7 @@ bool __wasi_sockets_utils__output_addr_validate(
 void __wasi_sockets_utils__output_addr_write(
 	const network_ip_socket_address_t input, output_sockaddr_t *output);
 int __wasi_sockets_utils__posix_family(network_ip_address_family_t wasi_family);
-network_ip_socket_address_t
-__wasi_sockets_utils__any_addr(network_ip_address_family_t family);
-int __wasi_sockets_utils__tcp_bind(tcp_socket_t *socket,
-				   network_ip_socket_address_t *address);
-int __wasi_sockets_utils__udp_bind(udp_socket_t *socket,
-				   network_ip_socket_address_t *address);
-bool __wasi_sockets_utils__stream(udp_socket_t *socket,
-				  network_ip_socket_address_t *remote_address,
-				  udp_socket_streams_t *result,
-				  network_error_code_t *error);
-void __wasi_sockets_utils__drop_streams(udp_socket_streams_t streams);
+network_ip_socket_address_t __wasi_sockets_utils__any_addr(network_ip_address_family_t family);
 int __wasi_sockets_utils__parse_port(const char *port);
 const service_entry_t *__wasi_sockets_utils__get_service_entry_by_name(const char *name);
 const service_entry_t *__wasi_sockets_utils__get_service_entry_by_port(const uint16_t port);

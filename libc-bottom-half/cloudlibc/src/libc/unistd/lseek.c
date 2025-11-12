@@ -18,69 +18,17 @@ static_assert(SEEK_CUR == __WASI_WHENCE_CUR, "Value mismatch");
 static_assert(SEEK_END == __WASI_WHENCE_END, "Value mismatch");
 static_assert(SEEK_SET == __WASI_WHENCE_SET, "Value mismatch");
 
-#ifdef __wasilibc_use_wasip2
-static int get_file_size(filesystem_borrow_descriptor_t handle,
-                         filesystem_filesize_t* size) {
-  filesystem_descriptor_stat_t stat;
-  filesystem_error_code_t error_code;
-
-  if (!filesystem_method_descriptor_stat(handle, &stat, &error_code)) {
-    translate_error(error_code);
-    return -1;
-  }
-
-  *size = stat.size;
-  return 0;
-}
-#endif
-
 off_t __lseek(int fildes, off_t offset, int whence) {
-
 #ifdef __wasilibc_use_wasip2
-  off_t offset_to_use = 0;
   // Look up a stream for fildes
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
   if (!entry)
     return -1;
-  if (entry->tag != DESCRIPTOR_TABLE_ENTRY_FILE) {
+  if (!entry->vtable->seek) {
     errno = EINVAL;
     return -1;
   }
-  if (entry->file.file_handle.__handle == 0) {
-    errno = EINVAL;
-    return -1;
-  }
-  // Find the offset relative to the beginning of the file
-  // The offset is always *added*: either to 0, the current
-  // offset, or the offset of the end of the file.
-  switch (whence) {
-  case SEEK_SET:
-    offset_to_use = offset;
-    break;
-  case SEEK_CUR:
-    offset_to_use = offset + entry->file.offset;
-    break;
-  case SEEK_END: {
-    // Find the end of the stream
-    filesystem_filesize_t file_size = 0;
-    if (get_file_size(filesystem_borrow_descriptor(entry->file.file_handle), &file_size) < 0)
-      return -1;
-    offset_to_use = ((off_t) file_size) + offset;
-    break;
-  }
-  default: {
-    errno = EINVAL;
-    return -1;
-  }
-  }
-  // Drop the existing streams/pollables.
-  __wasilibc_file_close_streams(&entry->file);
-
-  // Update offset
-  entry->file.offset = offset_to_use;
-
-  // Return the computed offset
-  return offset_to_use;
+  return entry->vtable->seek(entry->data, offset, whence);
 #else
   __wasi_filesize_t new_offset;
   __wasi_errno_t error =

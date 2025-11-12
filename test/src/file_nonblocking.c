@@ -44,10 +44,13 @@ int main(void)
 
         TEST(close(fd) == 0);
 
-        // stdio
+        // stdio - not that wasmtime's implementation for wasip1-threads is
+        // broken so some tests are skipped there.
         TEST(fcntl(0, F_GETFL) == O_RDONLY);
+#ifndef __wasm_atomics__
         TEST(fcntl(1, F_GETFL) == O_WRONLY);
         TEST(fcntl(2, F_GETFL) == O_WRONLY);
+#endif
         TEST(fcntl(0, F_SETFL, O_APPEND) == -1);
         TEST(fcntl(1, F_SETFL, O_APPEND) == -1);
         TEST(fcntl(2, F_SETFL, O_APPEND) == -1);

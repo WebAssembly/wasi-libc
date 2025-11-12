@@ -21,6 +21,11 @@ int main(void) {
   TEST(lseek(fd, 0, SEEK_SET) == 0);
   TEST(lseek(fd, 0, SEEK_CUR) == 0);
 
+  TEST(lseek(fd, -1, SEEK_END) == -1);
+  TEST(lseek(fd, -1, SEEK_CUR) == -1);
+  TEST(lseek(fd, -1, SEEK_SET) == -1);
+  TEST(lseek(fd, 0, SEEK_CUR) == 0);
+
   TEST(write(fd, "Hello, World!", 13) == 13);
   TEST(lseek(fd, 0, SEEK_CUR) == 13);
   TEST(lseek(fd, 0, SEEK_SET) == 0);

@@ -86,11 +86,20 @@ static int file_get_write_stream(void *data,
   file_t *file = (file_t *)data;
   if (file->write_stream.__handle == 0) {
     filesystem_error_code_t error_code;
-    bool ok = filesystem_method_descriptor_write_via_stream(
-        filesystem_borrow_descriptor(file->file_handle),
-        file->offset,
-        &file->write_stream,
-        &error_code);
+    bool ok;
+
+    if (file->oflag & O_APPEND) {
+      ok = filesystem_method_descriptor_append_via_stream(
+          filesystem_borrow_descriptor(file->file_handle),
+          &file->write_stream,
+          &error_code);
+    } else {
+      ok = filesystem_method_descriptor_write_via_stream(
+          filesystem_borrow_descriptor(file->file_handle),
+          file->offset,
+          &file->write_stream,
+          &error_code);
+    }
     if (!ok) {
       translate_error(error_code);
       return -1;
@@ -138,33 +147,53 @@ static int file_fstat(void *data, struct stat *buf) {
   return 0;
 }
 
+static int file_seek_end(file_t *file) {
+  filesystem_descriptor_stat_t stat;
+  filesystem_error_code_t error;
+  bool ok = filesystem_method_descriptor_stat(filesystem_borrow_descriptor(file->file_handle),
+      &stat,
+      &error);
+  if (!ok) {
+    translate_error(error);
+    return -1;
+  }
+  file->offset = (off_t) stat.size;
+  return 0;
+}
+
 static off_t file_seek(void *data, off_t offset, int whence) {
   file_t *file = (file_t *)data;
+
+  // If this file is in append mode, reset our knowledge of the current cursor
+  // to the current end of the file.
+  if ((file->oflag & O_APPEND) && file_seek_end(file) < 0)
+    return -1;
+
+  off_t result;
   switch (whence) {
     case SEEK_SET:
-      file->offset = offset;
+      result = offset;
       break;
     case SEEK_CUR:
-      file->offset += offset;
+      result = file->offset + offset;
       break;
     case SEEK_END: {
-      // Get the file metadata
-      filesystem_descriptor_stat_t stat;
-      filesystem_error_code_t error;
-      bool ok = filesystem_method_descriptor_stat(filesystem_borrow_descriptor(file->file_handle),
-                                                  &stat,
-                                                  &error);
-      if (!ok) {
-        translate_error(error);
+      // If we're in append mode we already reset to the end, but if we're not
+      // in append mode then do the reset to the end here.
+      if (!(file->oflag & O_APPEND) && file_seek_end(file) < 0)
         return -1;
-      }
-      file->offset = ((off_t) stat.size) + offset;
+      result = file->offset + offset;
       break;
     }
     default:
       errno = EINVAL;
       return -1;
   }
+  if (result < 0) {
+    errno = EINVAL;
+    return -1;
+  }
+  file->offset = result;
   file_close_streams(data);
   return file->offset;
 }

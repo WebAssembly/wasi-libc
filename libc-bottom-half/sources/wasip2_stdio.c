@@ -1,6 +1,7 @@
 #ifdef __wasilibc_use_wasip2
 
 #include <errno.h>
+#include <fcntl.h>
 #include <string.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/stdio.h>
@@ -81,11 +82,21 @@ static int stdio_fstat(void *data, struct stat *buf) {
   return 0;
 }
 
+static int stdio_fcntl_getfl(void *data) {
+  stdio_t *stdio = (stdio_t *)data;
+  if (stdio->fd == 0) {
+    return O_RDONLY;
+  } else {
+    return O_WRONLY;
+  }
+}
+
 static descriptor_vtable_t stdio_vtable = {
   .free = stdio_free,
   .get_read_stream = stdio_get_read_stream,
   .get_write_stream = stdio_get_write_stream,
   .fstat = stdio_fstat,
+  .fcntl_getfl = stdio_fcntl_getfl,
 };
 
 static int stdio_add(int fd) {

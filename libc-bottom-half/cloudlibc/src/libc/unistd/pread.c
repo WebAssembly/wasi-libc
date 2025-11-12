@@ -36,13 +36,8 @@ ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
                                               &contents,
                                               &error_code);
   bytes_read = contents.f0.len;
-  // Copy the result into the buffer
-  if (!memcpy(buf, contents.f0.ptr, bytes_read)) {
-    errno = EINVAL;
-    return -1;
-  }
-
-  // Free the list in the tuple
+  // Copy the bytes allocated in the canonical ABI to `buf`
+  memcpy(buf, contents.f0.ptr, bytes_read);
   wasip2_list_u8_free(&contents.f0);
 
   // Check for errors

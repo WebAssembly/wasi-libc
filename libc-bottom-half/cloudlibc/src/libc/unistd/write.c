@@ -30,32 +30,28 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
   // Check readiness for writing
   uint64_t num_bytes_permitted = 0;
   streams_stream_error_t stream_error;
-  ok = streams_method_output_stream_check_write(output_stream,
-                                                &num_bytes_permitted,
-                                                &stream_error);
-  if (!ok) {
-    errno = EIO;
-    return -1;
-  }
+  while (num_bytes_permitted == 0) {
+    ok = streams_method_output_stream_check_write(output_stream,
+                                                  &num_bytes_permitted,
+                                                  &stream_error);
+    if (!ok) {
+      errno = EIO;
+      return -1;
+    }
 
-  if (num_bytes_permitted < nbyte)
-    poll_method_pollable_block(pollable);
+    if (num_bytes_permitted == 0)
+      poll_method_pollable_block(pollable);
+  }
 
   // Convert the buffer to a WASI list of bytes
   wasip2_list_u8_t contents;
-  contents.len = nbyte;
-  contents.ptr = malloc(nbyte);
-  if (!memcpy(contents.ptr, buf, nbyte)) {
-    errno = EINVAL;
-    return -1;
-  }
+  contents.len = num_bytes_permitted < nbyte ? num_bytes_permitted : nbyte;
+  contents.ptr = (uint8_t*) buf;
 
   // Write the bytes to the stream
   ok = streams_method_output_stream_write(output_stream,
                                           &contents,
                                           &stream_error);
-  wasip2_list_u8_free(&contents);
-
   if (!ok) {
     errno = EIO;
     return -1;
@@ -69,8 +65,8 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
   }
 
   if (off)
-    *off += nbyte;
-  return nbyte;
+    *off += contents.len;
+  return contents.len;
 #else
   __wasi_ciovec_t iov = {.buf = buf, .buf_len = nbyte};
   size_t bytes_written;

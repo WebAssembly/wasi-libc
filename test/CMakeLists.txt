@@ -479,6 +479,9 @@ if (PYTHON_TESTS)
     # The following steps are copied from Python's own CI for managing WASI.
     # In general I don't know what they do. If Python's CI changes these
     # should change as well.
+    #
+    # More information about building Python for WASI can be found at
+    # https://devguide.python.org/getting-started/setup-building/#wasi
     CONFIGURE_COMMAND
       ${PYTHON} <SOURCE_DIR>/Tools/wasm/wasi configure-build-python -- --config-cache --with-pydebug
     COMMAND

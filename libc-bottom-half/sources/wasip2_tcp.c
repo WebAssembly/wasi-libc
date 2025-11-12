@@ -8,6 +8,7 @@
 #include <wasi/sockets_utils.h>
 #include <wasi/tcp.h>
 #include <wasi/wasip2.h>
+#include <wasi/file_utils.h>
 
 const uint64_t NS_PER_S = 1000000000;
 
@@ -535,15 +536,9 @@ static ssize_t tcp_recvfrom(void *data, void *buffer,
   while (true) {
     wasip2_list_u8_t result;
     streams_stream_error_t error;
-    if (!streams_method_input_stream_read(rx_borrow, length, &result, &error)) {
-      if (error.tag == STREAMS_STREAM_ERROR_CLOSED) {
-        return 0;
-      } else {
-        // TODO wasi-sockets: wasi-sockets has no way to recover TCP stream errors yet.
-        errno = EPIPE;
-        return -1;
-      }
-    }
+    if (!streams_method_input_stream_read(rx_borrow, length, &result, &error))
+      // TODO wasi-sockets: wasi-sockets has no way to recover TCP stream errors yet.
+      return wasip2_handle_read_error(error);
 
     if (result.len) {
       memcpy(buffer, result.ptr, result.len);
@@ -624,19 +619,16 @@ static ssize_t tcp_sendto(void *data, const void *buffer,
   while (true) {
     streams_stream_error_t error;
     uint64_t count;
-    if (!streams_method_output_stream_check_write(tx_borrow, &count, &error)) {
+    if (!streams_method_output_stream_check_write(tx_borrow, &count, &error))
       // TODO wasi-sockets: wasi-sockets has no way to recover stream errors yet.
-      errno = EPIPE;
-      return -1;
-    }
+      return wasip2_handle_write_error(error);
 
     if (count) {
       count = count < length ? count : length;
       wasip2_list_u8_t list = { .ptr = (uint8_t *)buffer, .len = count };
       if (!streams_method_output_stream_write(tx_borrow, &list, &error)) {
         // TODO wasi-sockets: wasi-sockets has no way to recover TCP stream errors yet.
-        errno = EPIPE;
-        return -1;
+        return wasip2_handle_write_error(error);
       } else {
         return count;
       }

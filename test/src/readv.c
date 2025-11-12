@@ -25,6 +25,10 @@ int main(void) {
   char buf[10];
 
   struct iovec iovs[3];
+
+  // TODO: wasmtime doesn't implement `readv` correctly with shared memory as
+  // it only fills the first iovec, not the first non-empty iovec.
+#ifndef __wasm_atomics__
   iovs[0].iov_base = NULL;
   iovs[0].iov_len = 0;
   iovs[1].iov_base = buf;
@@ -32,6 +36,7 @@ int main(void) {
   TEST(readv(fd, iovs, 2) == 10);
   TEST(readv(fd, iovs, 2) == 3);
   TEST(lseek(fd, 0, SEEK_CUR) == 13);
+#endif
 
   TEST(lseek(fd, 0, SEEK_SET) == 0);
   iovs[0].iov_base = buf;
@@ -43,6 +48,7 @@ int main(void) {
   TEST(lseek(fd, 0, SEEK_CUR) == 13);
 
   TEST(lseek(fd, 0, SEEK_SET) == 0);
+#ifndef __wasm_atomics__
   iovs[0].iov_base = NULL;
   iovs[0].iov_len = 0;
   iovs[1].iov_base = NULL;
@@ -52,6 +58,7 @@ int main(void) {
   TEST(readv(fd, iovs, 3) == 10);
   TEST(readv(fd, iovs, 3) == 3);
   TEST(lseek(fd, 0, SEEK_CUR) == 13);
+#endif
 
   TEST(lseek(fd, 0, SEEK_SET) == 0);
   iovs[0].iov_base = buf;

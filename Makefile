@@ -220,6 +220,7 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         env/setenv.c \
         env/unsetenv.c \
         unistd/posix_close.c \
+        unistd/gethostname.c \
         stat/futimesat.c \
         legacy/getpagesize.c \
         thread/thrd_sleep.c \

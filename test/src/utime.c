@@ -57,7 +57,8 @@ void run(int (*set_times)(int, const struct timespec[2]))
 	TESTVAL(st.st_mtim.tv_sec,==,0);
 	TESTVAL(st.st_mtim.tv_nsec,==,0);
 
-	t = time(0);
+        // Allow for some slop and clock drift.
+	t = time(0) - 5;
 
 	TEST(set_times(fd, ((struct timespec[2]){{.tv_nsec=UTIME_NOW},{.tv_nsec=UTIME_OMIT}})) == 0, "\n");
 	TEST(fstat(fd, &st) == 0, "\n");

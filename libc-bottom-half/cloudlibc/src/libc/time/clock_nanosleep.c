@@ -32,7 +32,12 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
 
   // Prepare pollable
   int64_t duration = (rqtp->tv_sec * NSEC_PER_SEC) + rqtp->tv_nsec;
-  monotonic_clock_own_pollable_t pollable = monotonic_clock_subscribe_duration(duration);
+  monotonic_clock_own_pollable_t pollable;
+  if (flags & TIMER_ABSTIME) {
+    pollable = monotonic_clock_subscribe_instant(duration);
+  } else {
+    pollable = monotonic_clock_subscribe_duration(duration);
+  }
 
   // Block until polling event is triggered.
   poll_method_pollable_block(poll_borrow_pollable(pollable));

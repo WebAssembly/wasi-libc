@@ -1,0 +1,51 @@
+diff --git a/Include/pyport.h b/Include/pyport.h
+index 3eac119bf8e..6a4df4bf75f 100644
+--- a/Include/pyport.h
++++ b/Include/pyport.h
+@@ -503,6 +503,7 @@ extern "C" {
+  * Thread support is stubbed and any attempt to create a new thread fails.
+  */
+ #if (!defined(HAVE_PTHREAD_STUBS) && \
++     !defined(__wasi__) && \
+       (!defined(__EMSCRIPTEN__) || defined(__EMSCRIPTEN_PTHREADS__)))
+ #  define Py_CAN_START_THREADS 1
+ #endif
+diff --git a/Lib/test/test_sys.py b/Lib/test/test_sys.py
+index e2117b9588d..1a14c758c55 100644
+--- a/Lib/test/test_sys.py
++++ b/Lib/test/test_sys.py
+@@ -737,7 +737,7 @@ def test_thread_info(self):
+         elif sys.platform == "emscripten":
+             self.assertIn(info.name, {"pthread", "pthread-stubs"})
+         elif sys.platform == "wasi":
+-            self.assertEqual(info.name, "pthread-stubs")
++            self.assertIn(info.name, {"pthread", "pthread-stubs"})
+ 
+     @unittest.skipUnless(support.is_emscripten, "only available on Emscripten")
+     def test_emscripten_info(self):
+diff --git a/Tools/wasm/wasi/__main__.py b/Tools/wasm/wasi/__main__.py
+index 54ccc95157d..e92e7419086 100644
+--- a/Tools/wasm/wasi/__main__.py
++++ b/Tools/wasm/wasi/__main__.py
+@@ -307,7 +307,7 @@ def main():
+                         # Make sure the stack size will work for a pydebug
+                         # build.
+                         # Use 16 MiB stack.
+-                        "--wasm max-wasm-stack=16777216 "
++                        "--wasm max-wasm-stack=33554432 "
+                         # Enable thread support; causes use of preview1.
+                         #"--wasm threads=y --wasi threads=y "
+                         # Map the checkout to / to load the stdlib from /Lib.
+diff --git a/Tools/wasm/wasm_build.py b/Tools/wasm/wasm_build.py
+index bcb80212362..95e4d91211e 100755
+--- a/Tools/wasm/wasm_build.py
++++ b/Tools/wasm/wasm_build.py
+@@ -329,7 +329,7 @@ def _check_wasi() -> None:
+         # workaround for https://github.com/python/cpython/issues/95952
+         "HOSTRUNNER": (
+             "wasmtime run "
+-            "--wasm max-wasm-stack=16777216 "
++            "--wasm max-wasm-stack=33554432 "
+             "--wasi preview2 "
+             "--dir {srcdir}::/ "
+             "--env PYTHONPATH=/{relbuilddir}/build/lib.wasi-wasm32-{version}:/Lib"

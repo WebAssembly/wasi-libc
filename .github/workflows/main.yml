@@ -213,3 +213,43 @@ jobs:
         submodules: true
     - run: make bindings
     - run: git diff --exit-code
+
+  # Currently wasi-libc's test suite is pretty bare-bones. To try to increase
+  # test coverage build Python in CI as well with a fresh copy of wasi-libc.
+  # This involves a bit of configuration to get all the stars to align, but in
+  # the end this runs at least some Python tests against a from-source-built
+  # copy of wasi-libc.
+  python:
+    name: Test Python
+    runs-on: ubuntu-latest
+    env: ${{ matrix.env || fromJSON('{}') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - env:
+              TARGET_TRIPLE: wasm32-wasip1
+    steps:
+    - uses: actions/checkout@v4.1.7
+      with:
+        submodules: true
+    - run: |
+        curl https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-24/wasi-sdk-24.0-x86_64-linux.tar.gz -L | tar xzvf -
+        echo "WASI_SDK_PATH=`pwd`/wasi-sdk-24.0-x86_64-linux" >> $GITHUB_ENV
+      if: runner.os == 'Linux'
+      shell: bash
+      working-directory: ${{ runner.tool_cache }}
+    - name: Setup `wasmtime`
+      uses: bytecodealliance/actions/wasmtime/setup@v1
+      with:
+        version: "38.0.3"
+    - run: make -j4 CC=$WASI_SDK_PATH/bin/clang AR=$WASI_SDK_PATH/bin/llvm-ar
+    - name: Setup testing
+      run: |
+        cmake -S test -B testbuild -G Ninja \
+          -DTARGET_TRIPLE=${{ env.TARGET_TRIPLE }} \
+          -DCMAKE_LINK_DEPENDS_USE_LINKER=OFF \
+          -DPYTHON_TESTS=ON \
+          -DCMAKE_C_COMPILER=clang
+    - name: Build and test python
+      run: ninja -C testbuild python

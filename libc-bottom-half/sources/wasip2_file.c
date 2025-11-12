@@ -24,10 +24,7 @@ typedef struct {
   // and initially set to 0.
   streams_own_pollable_t read_pollable;
   streams_own_pollable_t write_pollable;
-  // File was opened for reading
-  bool readable;
-  // File was opened for writing
-  bool writable;
+  int oflag;
 } file_t;
 
 static void file_close_streams(void *data) {
@@ -172,14 +169,60 @@ static off_t file_seek(void *data, off_t offset, int whence) {
   return file->offset;
 }
 
+static int file_set_blocking(void *data, bool blocking) {
+  file_t *file = (file_t *)data;
+  if (blocking)
+    file->oflag &= ~O_NONBLOCK;
+  else
+    file->oflag |= O_NONBLOCK;
+  return 0;
+}
+
+static int file_fcntl_getfl(void *data) {
+  file_t *file = (file_t *)data;
+
+  // Get the flags of the descriptor
+  filesystem_descriptor_flags_t flags;
+  filesystem_error_code_t error_code;
+
+  filesystem_borrow_descriptor_t file_handle = filesystem_borrow_descriptor(file->file_handle);
+  if (!filesystem_method_descriptor_get_flags(file_handle, &flags, &error_code)) {
+    translate_error(error_code);
+    return -1;
+  }
+
+  int oflags = file->oflag & (O_NONBLOCK | O_APPEND);
+  if (flags & FILESYSTEM_DESCRIPTOR_FLAGS_READ) {
+    if (flags & FILESYSTEM_DESCRIPTOR_FLAGS_WRITE)
+      oflags |= O_RDWR;
+    else
+      oflags |= O_RDONLY;
+  } else if (flags & FILESYSTEM_DESCRIPTOR_FLAGS_WRITE) {
+      oflags |= O_WRONLY;
+  } else {
+      oflags |= O_SEARCH;
+  }
+  return oflags;
+}
+
+static int file_fcntl_setfl(void *data, int flags) {
+  file_t *file = (file_t *)data;
+  flags &= O_NONBLOCK | O_APPEND;
+  file->oflag = (file->oflag & ~(O_NONBLOCK | O_APPEND)) | flags;
+  return 0;
+}
+
 static descriptor_vtable_t file_vtable = {
   .free = file_free,
   .get_read_stream = file_get_read_stream,
   .get_write_stream = file_get_write_stream,
   .get_file = file_get_file,
+  .set_blocking = file_set_blocking,
   .fstat = file_fstat,
   .seek = file_seek,
   .close_streams = file_close_streams,
+  .fcntl_getfl = file_fcntl_getfl,
+  .fcntl_setfl = file_fcntl_setfl,
 };
 
 int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
@@ -191,8 +234,7 @@ int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
   }
   assert(file_handle.__handle != 0);
   file->file_handle = file_handle;
-  file->readable = oflag & O_RDONLY;
-  file->writable = oflag & O_WRONLY;
+  file->oflag = oflag;
 
   descriptor_table_entry_t entry;
   entry.vtable = &file_vtable;

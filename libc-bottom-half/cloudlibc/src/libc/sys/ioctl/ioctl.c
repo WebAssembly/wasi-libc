@@ -14,26 +14,6 @@
 #endif
 
 int ioctl(int fildes, int request, ...) {
-#ifdef __wasilibc_use_wasip2
-	descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
-        if (!entry)
-          return -1;
-	switch (request) {
-	case FIONBIO: {
-		va_list ap;
-		va_start(ap, request);
-		bool blocking = *va_arg(ap, const int *) == 0;
-		va_end(ap);
-		return entry->vtable->set_blocking(entry->data, blocking);
-	}
-
-	default:
-		// TODO wasi-sockets: anything else we should support?
-		errno = EINVAL;
-		return -1;
-	}
-#endif // __wasilibc_use_wasip2
-
   switch (request) {
     case FIONREAD: {
 #ifdef __wasilibc_use_wasip2
@@ -87,9 +67,17 @@ int ioctl(int fildes, int request, ...) {
     }
     case FIONBIO: {
 #ifdef __wasilibc_use_wasip2
-      // wasip2 doesn't support setting the non-blocking flag
-      errno = ENOTSUP;
-      return -1;
+      descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
+      va_list ap;
+      va_start(ap, request);
+      bool blocking = *va_arg(ap, const int *) == 0;
+      va_end(ap);
+
+      if (!entry->vtable->set_blocking) {
+        errno = EINVAL;
+        return -1;
+      }
+      return entry->vtable->set_blocking(entry->data, blocking);
 #else
       // Obtain the current file descriptor flags.
       __wasi_fdstat_t fds;

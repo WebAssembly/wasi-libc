@@ -53,6 +53,10 @@ typedef struct descriptor_vtable_t {
   /// closed before deleting the file to ensure there are no open references to
   /// it.
   void (*close_streams)(void*);
+  /// Implementation of `fnctl(fd, F_GETFL)`.
+  int (*fcntl_getfl)(void*);
+  /// Implementation of `fnctl(fd, F_SETFL)`.
+  int (*fcntl_setfl)(void*, int);
 
   // =====================================================================
   // Sockets-related APIs

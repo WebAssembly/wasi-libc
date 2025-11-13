@@ -65,8 +65,7 @@ static void assert_invariants(void) {
         const preopen *pre = &preopens[i];
         assert(pre->prefix != NULL);
 #ifdef __wasilibc_use_wasip2
-        assert(pre->wasi_handle.__handle != 0);
-        assert(pre->wasi_handle.libc_fd != -1);
+        assert(pre->libc_fd != -1);
 #else
         assert(pre->wasi_handle != -1);
 #endif

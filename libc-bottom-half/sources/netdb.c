@@ -251,7 +251,8 @@ int getnameinfo(const struct sockaddr *restrict sa, socklen_t salen,
 		socklen_t servlen, int flags)
 {
 	// TODO wasi-sockets
-	abort();
+        errno = EOPNOTSUPP;
+        return EAI_SYSTEM;
 }
 
 struct hostent *gethostbyname(const char *name)

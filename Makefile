@@ -273,6 +273,9 @@ ifeq ($(WASI_SNAPSHOT), p2)
 LIBC_TOP_HALF_MUSL_SOURCES += \
     $(addprefix $(LIBC_TOP_HALF_MUSL_SRC_DIR)/, \
        network/gai_strerror.c \
+       network/inet_addr.c \
+       network/inet_legacy.c \
+       network/inet_ntoa.c \
     )
 endif
 

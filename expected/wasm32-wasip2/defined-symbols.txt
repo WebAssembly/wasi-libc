@@ -817,7 +817,13 @@ imaxdiv
 in6addr_any
 in6addr_loopback
 index
+inet_addr
 inet_aton
+inet_lnaof
+inet_makeaddr
+inet_netof
+inet_network
+inet_ntoa
 inet_ntop
 inet_pton
 initstate

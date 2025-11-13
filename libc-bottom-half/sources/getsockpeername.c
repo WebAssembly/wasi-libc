@@ -9,7 +9,7 @@ int getsockname(int socket, struct sockaddr *__restrict addr,
 	if (!entry)
 		return -1;
         if (!entry->vtable->getsockname) {
-		errno = EOPNOTSUPP;
+		errno = ENOTSOCK;
 		return -1;
         }
         return entry->vtable->getsockname(entry->data, addr, addrlen);
@@ -22,7 +22,7 @@ int getpeername(int socket, struct sockaddr *__restrict addr,
 	if (!entry)
 		return -1;
         if (!entry->vtable->getpeername) {
-		errno = EOPNOTSUPP;
+		errno = ENOTSOCK;
 		return -1;
         }
         return entry->vtable->getpeername(entry->data, addr, addrlen);

@@ -60,10 +60,14 @@ int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout)
 
         for (size_t i = 0; i < nfds; ++i) {
                 struct pollfd *pollfd = fds + i;
+                if (pollfd->fd < 0)
+                  continue;
                 state.pollfd = pollfd;
                 descriptor_table_entry_t *entry = descriptor_table_get_ref(pollfd->fd);
-                if (!entry)
-                    continue;
+                if (!entry) {
+                  errno = EBADF;
+                  return -1;
+                }
 
                 // If this descriptor has a custom registration function then
                 // use that exclusively.

@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <poll.h>
 #include "test.h"
+#include <errno.h>
 
 #define TEST(c, ...) ((c) ? 1 : (t_error(#c" failed: " __VA_ARGS__),0))
 
@@ -32,5 +33,15 @@ int main(void)
         if (fd > 2)
             TEST(unlink(tmp) != -1);
 
+        // skip negative fds
+        poll_fd.fd = -300;
+        r = poll(&poll_fd, 1, 0);
+        TEST(r==0, "poll returned %d, expected 0\n", r);
+
+        // fail on invalid fds
+        poll_fd.fd = 300;
+        r = poll(&poll_fd, 1, 0);
+        int err = errno;
+        TEST(r==-1 && err==EBADF, "poll returned %d, expected -1\n", r);
 	return t_status;
 }

@@ -66,7 +66,7 @@ void test_udp_client() {
     TEST(bytes_received == len);
 
     // Message received should be the same as message sent
-    TEST(strcmp(message, client_buffer) == 0);
+    TEST(strncmp(message, client_buffer, len) == 0);
 
     // Shut down client
     close(socket_fd);

@@ -221,7 +221,7 @@ jobs:
   # copy of wasi-libc.
   python:
     name: Test Python
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     env: ${{ matrix.env || fromJSON('{}') }}
     strategy:
       fail-fast: false
@@ -237,8 +237,8 @@ jobs:
       with:
         submodules: true
     - run: |
-        curl https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-24/wasi-sdk-24.0-x86_64-linux.tar.gz -L | tar xzvf -
-        echo "WASI_SDK_PATH=`pwd`/wasi-sdk-24.0-x86_64-linux" >> $GITHUB_ENV
+        curl https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-24/wasi-sdk-24.0-arm64-linux.tar.gz -L | tar xzvf -
+        echo "WASI_SDK_PATH=`pwd`/wasi-sdk-24.0-arm64-linux" >> $GITHUB_ENV
       if: runner.os == 'Linux'
       shell: bash
       working-directory: ${{ runner.tool_cache }}

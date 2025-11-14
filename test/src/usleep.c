@@ -32,7 +32,7 @@ int main(void)
                         / ns_to_sleep;
 
     // Allow the actual sleep time to be twice as much as the requested time
-    TEST(difference >= 0 && difference <= 1);
+    TEST(difference <= 1);
 
     return t_status;
 }

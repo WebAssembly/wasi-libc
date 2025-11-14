@@ -11,12 +11,15 @@
 int __isatty(int fd) {
 #ifdef __wasilibc_use_wasip2
   // Translate the file descriptor into an internal handle
-  filesystem_borrow_descriptor_t file_handle;
-  if (fd_to_file_handle(fd, &file_handle) < 0)
+  descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
+  if (!entry)
     return 0;
+  if (!entry->vtable->isatty) {
+    errno = ENOTTY;
+    return 0;
+  }
 
-  errno = ENOTTY;
-  return 0;
+  return entry->vtable->isatty(entry->data);
 #else
 
     __wasi_fdstat_t statbuf;

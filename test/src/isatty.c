@@ -28,12 +28,16 @@ int main(void)
 
         // make sure isatty can be called on stdio fds, but don't test what the
         // actual value is yet.
-        isatty(0);
+        int stdin_isatty = isatty(0);
         TEST(errno != EBADF);
-        isatty(1);
+        int stdout_isatty = isatty(1);
         TEST(errno != EBADF);
-        isatty(2);
+        int stderr_isatty = isatty(2);
         TEST(errno != EBADF);
+
+        printf("stdin isatty: %d\n", stdin_isatty);
+        printf("stdout isatty: %d\n", stdout_isatty);
+        printf("stderr isatty: %d\n", stderr_isatty);
 
 	return t_status;
 }

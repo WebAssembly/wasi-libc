@@ -166,74 +166,79 @@ int getaddrinfo(const char *restrict host, const char *restrict serv,
 		const struct addrinfo *restrict hint,
 		struct addrinfo **restrict res)
 {
-	if (host == NULL) {
-		host = "localhost";
-	}
+  if (host == NULL) {
+    host = "localhost";
+  }
 
-	*res = NULL;
-	struct addrinfo *current = NULL;
-	wasip2_string_t name = { .ptr = (uint8_t *)host, .len = strlen(host) };
-	ip_name_lookup_own_resolve_address_stream_t stream;
-	ip_name_lookup_error_code_t error;
-	if (ip_name_lookup_resolve_addresses(
-		    __wasi_sockets_utils__borrow_network(), &name, &stream,
-		    &error)) {
-		ip_name_lookup_borrow_resolve_address_stream_t stream_borrow =
-			ip_name_lookup_borrow_resolve_address_stream(stream);
-		// The 'serv' parameter can be either a port number or a service name.
-		int port = 0;
-		uint16_t protocol = SERVICE_PROTOCOL_TCP;
-		if (serv != NULL) {
-			port = __wasi_sockets_utils__parse_port(serv);
-			if (port < 0) {
-				const service_entry_t *service = __wasi_sockets_utils__get_service_entry_by_name(serv);
-				if (service) {
-					port = service->port;
-					protocol = service->protocol;
-				}
-				else {
-					return EAI_NONAME;
-				}
-			}
-		}
-		while (true) {
-			ip_name_lookup_option_ip_address_t address;
-			if (ip_name_lookup_method_resolve_address_stream_resolve_next_address(
-				    stream_borrow, &address, &error)) {
-				if (address.is_some) {
-					if (protocol & SERVICE_PROTOCOL_TCP) {
-						int error = add_addr(address, htons(port), SOCK_STREAM,
-										hint, &current, res);
-						if (error) {
-							return error;
-						}
-					}
-					if (protocol & SERVICE_PROTOCOL_UDP) {
-						int error = add_addr(address, htons(port), SOCK_DGRAM,
-										hint, &current, res);
-						if (error) {
-							return error;
-						}
-					}
-				} else {
-					return 0;
-				}
-			} else if (error == NETWORK_ERROR_CODE_WOULD_BLOCK) {
-				ip_name_lookup_own_pollable_t pollable =
-					ip_name_lookup_method_resolve_address_stream_subscribe(
-						stream_borrow);
-				poll_borrow_pollable_t pollable_borrow =
-					poll_borrow_pollable(pollable);
-				poll_method_pollable_block(pollable_borrow);
-				poll_pollable_drop_own(pollable);
-			} else {
-				freeaddrinfo(*res);
-				return map_error(error);
-			}
-		}
-	} else {
-		return map_error(error);
-	}
+  *res = NULL;
+  struct addrinfo *current = NULL;
+  wasip2_string_t name = { .ptr = (uint8_t *)host, .len = strlen(host) };
+  ip_name_lookup_own_resolve_address_stream_t stream;
+  ip_name_lookup_error_code_t error;
+  if (!ip_name_lookup_resolve_addresses(
+        __wasi_sockets_utils__borrow_network(), &name, &stream,
+        &error))
+    return map_error(error);
+
+  int ret = 0;
+  ip_name_lookup_borrow_resolve_address_stream_t stream_borrow =
+    ip_name_lookup_borrow_resolve_address_stream(stream);
+  // The 'serv' parameter can be either a port number or a service name.
+  int port = 0;
+  uint16_t protocol = SERVICE_PROTOCOL_TCP;
+  if (serv != NULL) {
+    port = __wasi_sockets_utils__parse_port(serv);
+    if (port < 0) {
+      const service_entry_t *service = __wasi_sockets_utils__get_service_entry_by_name(serv);
+      if (service) {
+        port = service->port;
+        protocol = service->protocol;
+      } else {
+        ret = EAI_NONAME;
+      }
+    }
+  }
+
+  poll_own_pollable_t pollable;
+  pollable.__handle = 0;
+
+  while (ret == 0) {
+    ip_name_lookup_option_ip_address_t address;
+    if (!ip_name_lookup_method_resolve_address_stream_resolve_next_address(
+          stream_borrow, &address, &error)) {
+      if (error != NETWORK_ERROR_CODE_WOULD_BLOCK) {
+        freeaddrinfo(*res);
+        ret = map_error(error);
+        break;
+      }
+
+      if (pollable.__handle == 0) {
+        pollable = ip_name_lookup_method_resolve_address_stream_subscribe(
+              stream_borrow);
+      }
+      poll_method_pollable_block(poll_borrow_pollable(pollable));
+      continue;
+    }
+    if (!address.is_some)
+      break;
+    if (protocol & SERVICE_PROTOCOL_TCP) {
+      ret = add_addr(address, htons(port), SOCK_STREAM,
+          hint, &current, res);
+      if (ret)
+        break;
+    }
+    if (protocol & SERVICE_PROTOCOL_UDP) {
+      ret = add_addr(address, htons(port), SOCK_DGRAM,
+          hint, &current, res);
+      if (ret)
+        break;
+    }
+  }
+
+  if (pollable.__handle != 0)
+    poll_pollable_drop_own(pollable);
+  ip_name_lookup_resolve_address_stream_drop_own(stream);
+  return ret;
 }
 
 void freeaddrinfo(struct addrinfo *p)

@@ -32,15 +32,8 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
                                                  nbyte,
                                                  &contents,
                                                  &stream_error);
-
-  if (!ok) {
-    if (stream_error.tag == STREAMS_STREAM_ERROR_CLOSED)
-      return 0;
-    else {
-      errno = EIO;
-      return -1;
-    }
-  }
+  if (!ok)
+    return wasip2_handle_read_error(stream_error);
 
   // Copy the bytes allocated in the canonical ABI to `buf`
   memcpy(buf, contents.ptr, contents.len);

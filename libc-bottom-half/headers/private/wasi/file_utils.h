@@ -2,10 +2,39 @@
 #define __wasi_file_utils_h
 
 #ifdef __wasilibc_use_wasip2
+#include <assert.h>
+#include <wasi/wasip2.h>
 #include <wasi/descriptor_table.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <errno.h>
+
+/// Handles a `wasi:io/streams.stream-error` for a `read`-style operation.
+///
+/// If the error indicates "closed" then 0 is returned to mean EOF. Otherwise
+/// the last-operation-failed handle is closed and errno is set to EIO.
+static int wasip2_handle_read_error(streams_stream_error_t error) {
+  if (error.tag == STREAMS_STREAM_ERROR_CLOSED) {
+    return 0;
+  }
+  assert(error.tag == STREAMS_STREAM_ERROR_LAST_OPERATION_FAILED);
+  io_error_error_drop_own(error.val.last_operation_failed);
+  errno = EIO;
+  return -1;
+}
+
+/// Same as `wasip2_handle_read_error` except "closed" now returns EPIPE
+/// instead of 0.
+static int wasip2_handle_write_error(streams_stream_error_t error) {
+  if (error.tag == STREAMS_STREAM_ERROR_CLOSED) {
+    errno = EPIPE;
+    return -1;
+  }
+  assert(error.tag == STREAMS_STREAM_ERROR_LAST_OPERATION_FAILED);
+  io_error_error_drop_own(error.val.last_operation_failed);
+  errno = EIO;
+  return -1;
+}
 
 // Converts the C string `s` into a WASI string stored in `out`.
 //

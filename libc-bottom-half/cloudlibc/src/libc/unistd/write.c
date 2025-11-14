@@ -34,10 +34,8 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
     ok = streams_method_output_stream_check_write(output_stream,
                                                   &num_bytes_permitted,
                                                   &stream_error);
-    if (!ok) {
-      errno = EIO;
-      return -1;
-    }
+    if (!ok)
+      return wasip2_handle_write_error(stream_error);
 
     if (num_bytes_permitted == 0)
       poll_method_pollable_block(pollable);
@@ -52,17 +50,14 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
   ok = streams_method_output_stream_write(output_stream,
                                           &contents,
                                           &stream_error);
-  if (!ok) {
-    errno = EIO;
-    return -1;
-  }
+  if (!ok)
+    return wasip2_handle_write_error(stream_error);
 
   ok = streams_method_output_stream_blocking_flush(output_stream,
                                                    &stream_error);
-  if (!ok) {
-    errno = EIO;
-    return -1;
-  }
+  if (!ok)
+    return wasip2_handle_write_error(stream_error);
+
 
   if (off)
     *off += contents.len;

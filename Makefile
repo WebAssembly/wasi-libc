@@ -170,13 +170,16 @@ LIBC_TOP_HALF_MUSL_SOURCES = \
         errno/strerror.c \
         network/htonl.c \
         network/htons.c \
-        network/ntohl.c \
-        network/ntohs.c \
-        network/inet_ntop.c \
-        network/inet_pton.c \
-        network/inet_aton.c \
         network/in6addr_any.c \
         network/in6addr_loopback.c \
+        network/inet_addr.c \
+        network/inet_aton.c \
+        network/inet_legacy.c \
+        network/inet_ntoa.c \
+        network/inet_ntop.c \
+        network/inet_pton.c \
+        network/ntohl.c \
+        network/ntohs.c \
         fenv/fenv.c \
         fenv/fesetround.c \
         fenv/feupdateenv.c \

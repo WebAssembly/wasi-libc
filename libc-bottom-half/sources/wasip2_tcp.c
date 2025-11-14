@@ -476,7 +476,8 @@ static int tcp_listen(void *data, int backlog) {
   }
 
   if (!tcp_method_tcp_socket_set_listen_backlog_size(socket_borrow, backlog, &error)) {
-    abort(); // Our own state checks should've prevented this from happening.
+    errno = __wasi_sockets_utils__map_error(error);
+    return -1;
   }
 
   if (socket->state.tag == TCP_SOCKET_STATE_LISTENING) {

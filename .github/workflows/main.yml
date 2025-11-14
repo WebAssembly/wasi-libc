@@ -118,6 +118,30 @@ jobs:
               MAKE_TARGETS: "no-check-symbols"
               EXTRA_CFLAGS: "-O2 -DNDEBUG -msimd128 -mrelaxed-simd -mbulk-memory -D__wasilibc_simd_string"
 
+          - name: Test wasm32-wasip1 (debug)
+            os: ubuntu-24.04
+            clang_version: 19
+            test: true
+            env:
+              TARGET_TRIPLE: wasm32-wasip1
+              DEBUG: true
+          - name: Test wasm32-wasip2 (debug)
+            os: ubuntu-24.04
+            clang_version: 19
+            test: true
+            env:
+              TARGET_TRIPLE: wasm32-wasip2
+              WASI_SNAPSHOT: p2
+              DEBUG: true
+          - name: Test wasm32-wasip1-threads (debug)
+            os: ubuntu-24.04
+            clang_version: 19
+            test: true
+            env:
+              TARGET_TRIPLE: wasm32-wasip1-threads
+              THREAD_MODEL: posix
+              DEBUG: true
+
     steps:
     - uses: actions/checkout@v4.1.7
       with:

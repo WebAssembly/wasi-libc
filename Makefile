@@ -8,6 +8,10 @@ NM ?= $(patsubst %clang,%llvm-nm,$(filter-out ccache sccache,$(CC)))
 ifeq ($(origin AR), default)
 AR = $(patsubst %clang,%llvm-ar,$(filter-out ccache sccache,$(CC)))
 endif
+ifeq ($(origin ARFLAGS), default)
+# Use `--format=gnu` to generate identical archives regardless of the host.
+ARFLAGS = --format=gnu crs
+endif
 ifeq ($(DEBUG), true)
 EXTRA_CFLAGS ?= -O0 -g
 else
@@ -705,13 +709,13 @@ $(SYSROOT_LIB)/libsetjmp.a: $(LIBSETJMP_OBJS)
 %.a:
 	@mkdir -p "$(@D)"
 	# On Windows, the commandline for the ar invocation got too long, so it needs to be split up.
-	$(AR) crs $@ $(wordlist 1, 199, $(sort $^))
-	$(AR) crs $@ $(wordlist 200, 399, $(sort $^))
-	$(AR) crs $@ $(wordlist 400, 599, $(sort $^))
-	$(AR) crs $@ $(wordlist 600, 799, $(sort $^))
+	$(AR) $(ARFLAGS) $@ $(wordlist 1, 199, $(sort $^))
+	$(AR) $(ARFLAGS) $@ $(wordlist 200, 399, $(sort $^))
+	$(AR) $(ARFLAGS) $@ $(wordlist 400, 599, $(sort $^))
+	$(AR) $(ARFLAGS) $@ $(wordlist 600, 799, $(sort $^))
 	# This might eventually overflow again, but at least it'll do so in a loud way instead of
 	# silently dropping the tail.
-	$(AR) crs $@ $(wordlist 800, 100000, $(sort $^))
+	$(AR) $(ARFLAGS) $@ $(wordlist 800, 100000, $(sort $^))
 
 $(PIC_OBJS): CFLAGS += -fPIC -fvisibility=default
 
@@ -875,7 +879,7 @@ $(DUMMY_LIBS):
 	#
 	mkdir -p "$(SYSROOT_LIB)"
 	for lib in $@; do \
-	    $(AR) crs "$$lib"; \
+	    $(AR) $(ARFLAGS) "$$lib"; \
 	done
 
 no-check-symbols: $(STARTUP_FILES) libc $(DUMMY_LIBS)

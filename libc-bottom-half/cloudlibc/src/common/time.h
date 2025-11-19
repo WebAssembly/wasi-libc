@@ -57,7 +57,7 @@ static inline bool timespec_to_timestamp_clamp(
 
   if (timespec->tv_sec < 0) {
     // Timestamps before the Epoch are not supported.
-#if __wasilibc_use_wasip2
+#ifdef __wasilibc_use_wasip2
     timestamp->seconds = 0;
     timestamp->nanoseconds = 0;
   } else {

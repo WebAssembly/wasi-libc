@@ -177,7 +177,8 @@ jobs:
         cmake -S test -B testbuild -G Ninja \
           -DTARGET_TRIPLE=${{ env.TARGET_TRIPLE }} \
           -DENGINE=${{ env.ENGINE }} \
-          -DCMAKE_LINK_DEPENDS_USE_LINKER=OFF
+          -DCMAKE_LINK_DEPENDS_USE_LINKER=OFF \
+          -DMALLOC_IMPL=${{ env.MALLOC_IMPL }}
 
     - name: Build tests
       if: matrix.test

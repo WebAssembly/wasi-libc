@@ -1,6 +1,7 @@
 #ifdef __wasilibc_use_wasip2
 #include <wasi/wasip2.h>
 #include <errno.h>
+#include <stdlib.h>
 
 static void translate_error(filesystem_error_code_t error) {
     switch (error) {

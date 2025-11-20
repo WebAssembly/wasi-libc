@@ -5,6 +5,7 @@
 #ifdef __wasilibc_use_wasip2
 #include <wasi/wasip2.h>
 #include <wasi/file_utils.h>
+#include <string.h>
 #include <common/errors.h>
 #else
 #include <wasi/api.h>

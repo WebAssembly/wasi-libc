@@ -2,7 +2,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <arpa/inet.h>
-
+#include <string.h>
 #include <wasi/sockets_utils.h>
 
 _Thread_local int h_errno = 0;

@@ -1,6 +1,7 @@
 #ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
+#include <string.h>
 #include <wasi/libc-environ.h>
+#include <wasi/wasip2.h>
 #else
 #include <wasi/api.h>
 #endif

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sysexits.h>
 #ifdef __wasilibc_use_wasip2
+#include <string.h>
 #include <wasi/wasip2.h>
 #else
 #include <wasi/api.h>

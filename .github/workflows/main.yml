@@ -147,6 +147,7 @@ jobs:
             clang_version: 19
             test: true
             env:
+              TARGET_TRIPLE: wasm32-wasip1
               MALLOC_IMPL: emmalloc
 
     steps:

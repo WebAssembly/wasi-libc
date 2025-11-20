@@ -142,6 +142,13 @@ jobs:
               THREAD_MODEL: posix
               DEBUG: true
 
+          - name: Test emmalloc
+            os: ubuntu-24.04
+            clang_version: 19
+            test: true
+            env:
+              MALLOC_IMPL: emmalloc
+
     steps:
     - uses: actions/checkout@v4.1.7
       with:
@@ -256,6 +263,9 @@ jobs:
           - env:
               TARGET_TRIPLE: wasm32-wasip2
               WASI_SNAPSHOT: p2
+          - env:
+              TARGET_TRIPLE: wasm32-wasip1
+              MALLOC_IMPL: emmalloc
     steps:
     - uses: actions/checkout@v4.1.7
       with:

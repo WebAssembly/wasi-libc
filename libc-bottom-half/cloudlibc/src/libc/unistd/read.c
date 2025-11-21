@@ -7,6 +7,7 @@
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
+#include <string.h>
 #else
 #include <wasi/api.h>
 #endif

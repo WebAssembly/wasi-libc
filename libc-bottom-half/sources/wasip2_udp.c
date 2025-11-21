@@ -2,6 +2,8 @@
 
 #include <errno.h>
 #include <limits.h>
+#include <stdlib.h>
+#include <string.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/sockets_utils.h>
 #include <wasi/udp.h>

@@ -1,14 +1,15 @@
 #ifdef __wasilibc_use_wasip2
 
 #include "common/time.h"
-#include <netinet/tcp.h>
 #include <errno.h>
 #include <limits.h>
+#include <netinet/tcp.h>
+#include <string.h>
 #include <wasi/descriptor_table.h>
+#include <wasi/file_utils.h>
 #include <wasi/sockets_utils.h>
 #include <wasi/tcp.h>
 #include <wasi/wasip2.h>
-#include <wasi/file_utils.h>
 
 const uint64_t NS_PER_S = 1000000000;
 

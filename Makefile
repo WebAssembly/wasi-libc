@@ -1042,7 +1042,7 @@ BINDING_WORK_DIR ?= build/bindings
 WASI_CLI_URL ?= https://github.com/WebAssembly/wasi-cli/archive/refs/tags/v0.2.0.tar.gz
 # URL from which to retrieve the `wit-bindgen` command used to generate the
 # WASIp2 bindings.
-WIT_BINDGEN_URL ?= https://github.com/bytecodealliance/wit-bindgen/releases/download/wit-bindgen-cli-0.17.0/wit-bindgen-v0.17.0-x86_64-linux.tar.gz
+WIT_BINDGEN_URL ?= https://github.com/bytecodealliance/wit-bindgen/releases/download/v0.48.0/wit-bindgen-0.48.0-x86_64-linux.tar.gz
 
 $(BINDING_WORK_DIR)/wasi-cli:
 	mkdir -p "$(BINDING_WORK_DIR)"

@@ -1,5 +1,6 @@
 #ifdef __wasilibc_use_wasip2
 
+#include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>

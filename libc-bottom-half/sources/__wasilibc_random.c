@@ -1,8 +1,10 @@
 #include <errno.h>
 #include <unistd.h>
 #ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sysexits.h>
+#include <wasi/wasip2.h>
 
 int __wasilibc_random(void *buffer, size_t len) {
 

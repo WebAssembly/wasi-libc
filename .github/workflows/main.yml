@@ -142,6 +142,14 @@ jobs:
               THREAD_MODEL: posix
               DEBUG: true
 
+          - name: Test emmalloc
+            os: ubuntu-24.04
+            clang_version: 19
+            test: true
+            env:
+              TARGET_TRIPLE: wasm32-wasip1
+              MALLOC_IMPL: emmalloc
+
     steps:
     - uses: actions/checkout@v4.1.7
       with:
@@ -169,7 +177,8 @@ jobs:
         cmake -S test -B testbuild -G Ninja \
           -DTARGET_TRIPLE=${{ env.TARGET_TRIPLE }} \
           -DENGINE=${{ env.ENGINE }} \
-          -DCMAKE_LINK_DEPENDS_USE_LINKER=OFF
+          -DCMAKE_LINK_DEPENDS_USE_LINKER=OFF \
+          -DMALLOC_IMPL=${{ env.MALLOC_IMPL }}
 
     - name: Build tests
       if: matrix.test
@@ -256,6 +265,9 @@ jobs:
           - env:
               TARGET_TRIPLE: wasm32-wasip2
               WASI_SNAPSHOT: p2
+          - env:
+              TARGET_TRIPLE: wasm32-wasip1
+              MALLOC_IMPL: emmalloc
     steps:
     - uses: actions/checkout@v4.1.7
       with:

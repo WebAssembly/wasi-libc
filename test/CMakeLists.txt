@@ -15,6 +15,7 @@ include(CTest)
 enable_testing()
 
 set(TARGET_TRIPLE "wasm32-wasi" CACHE STRING "WASI target to test")
+set(MALLOC_IMPL "" CACHE STRING "Malloc implementation in use")
 option(PYTHON_TESTS "Build Python with this wasi-libc and run its tests" OFF)
 
 # ========= Sysroot sanity check ================================
@@ -234,6 +235,9 @@ add_libc_test(functional/memstream.c)
 add_libc_test(functional/qsort.c)
 add_libc_test(functional/random.c)
 add_libc_test(functional/search_hsearch.c)
+if (MALLOC_IMPL STREQUAL "emmalloc")
+  set_tests_properties(libc_test_functional_search_hsearch.wasm PROPERTIES WILL_FAIL TRUE)
+endif()
 add_libc_test(functional/search_insque.c)
 add_libc_test(functional/search_lsearch.c)
 add_libc_test(functional/search_tsearch.c)

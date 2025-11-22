@@ -1,0 +1,213 @@
+add_subdirectory(clocks)
+add_subdirectory(mman)
+add_subdirectory(getpid)
+add_subdirectory(signal)
+
+# =============================================================================
+# sysroot headers from the bottom half
+#
+configure_file(headers/public/__wasi_snapshot.h.in ${SYSROOT_INC}/__wasi_snapshot.h)
+add_custom_target(sysroot-wasi-snapshot-header DEPENDS ${SYSROOT_INC}/__wasi_snapshot.h)
+add_dependencies(sysroot_inc sysroot-wasi-snapshot-header)
+
+file(
+  GLOB_RECURSE globbed_headers
+  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+  CONFIGURE_DEPENDS
+  headers/public/*.h
+)
+
+# TODO: these headers are not actually installed in the sysroot since the
+# musl-sourced ones are. These should probably be deleted from the source
+# tree and the musl ones used instead.
+list(REMOVE_ITEM globbed_headers
+  headers/public/dirent.h
+  headers/public/errno.h
+  headers/public/fcntl.h
+  headers/public/inttypes.h
+  headers/public/netinet/in.h
+  headers/public/poll.h
+  headers/public/stdlib.h
+  headers/public/string.h
+  headers/public/sys/ioctl.h
+  headers/public/sys/resource.h
+  headers/public/sys/select.h
+  headers/public/sys/socket.h
+  headers/public/sys/stat.h
+  headers/public/sys/time.h
+  headers/public/sys/times.h
+  headers/public/sys/types.h
+  headers/public/sys/uio.h
+  headers/public/sys/un.h
+  headers/public/time.h
+  headers/public/unistd.h
+  headers/public/wchar.h
+)
+
+if (WASI STREQUAL "p1")
+  list(REMOVE_ITEM globbed_headers headers/public/wasi/wasip2.h)
+endif()
+
+foreach(header ${globbed_headers})
+  string(REPLACE "headers/public/" "" dst ${header})
+  add_sysroot_header(${header} ${dst})
+endforeach()
+
+# =============================================================================
+# building bottom-half sources
+#
+set(bottom_half_sources
+  cloudlibc/src/libc/dirent/closedir.c
+  cloudlibc/src/libc/dirent/dirfd.c
+  cloudlibc/src/libc/dirent/fdclosedir.c
+  cloudlibc/src/libc/dirent/fdopendir.c
+  cloudlibc/src/libc/dirent/opendirat.c
+  cloudlibc/src/libc/dirent/readdir.c
+  cloudlibc/src/libc/dirent/rewinddir.c
+  cloudlibc/src/libc/dirent/scandirat.c
+  cloudlibc/src/libc/dirent/seekdir.c
+  cloudlibc/src/libc/dirent/telldir.c
+  cloudlibc/src/libc/errno/errno.c
+  cloudlibc/src/libc/fcntl/fcntl.c
+  cloudlibc/src/libc/fcntl/openat.c
+  cloudlibc/src/libc/fcntl/posix_fadvise.c
+  cloudlibc/src/libc/fcntl/posix_fallocate.c
+  cloudlibc/src/libc/poll/poll.c
+  cloudlibc/src/libc/sched/sched_yield.c
+  cloudlibc/src/libc/stdio/renameat.c
+  cloudlibc/src/libc/stdlib/_Exit.c
+  cloudlibc/src/libc/sys/ioctl/ioctl.c
+  cloudlibc/src/libc/sys/select/pselect.c
+  cloudlibc/src/libc/sys/select/select.c
+  cloudlibc/src/libc/sys/stat/fstat.c
+  cloudlibc/src/libc/sys/stat/fstatat.c
+  cloudlibc/src/libc/sys/stat/futimens.c
+  cloudlibc/src/libc/sys/stat/mkdirat.c
+  cloudlibc/src/libc/sys/stat/utimensat.c
+  cloudlibc/src/libc/sys/time/gettimeofday.c
+  cloudlibc/src/libc/sys/uio/preadv.c
+  cloudlibc/src/libc/sys/uio/pwritev.c
+  cloudlibc/src/libc/sys/uio/readv.c
+  cloudlibc/src/libc/sys/uio/writev.c
+  cloudlibc/src/libc/time/CLOCK_MONOTONIC.c
+  cloudlibc/src/libc/time/CLOCK_REALTIME.c
+  cloudlibc/src/libc/time/clock_getres.c
+  cloudlibc/src/libc/time/clock_gettime.c
+  cloudlibc/src/libc/time/clock_nanosleep.c
+  cloudlibc/src/libc/time/nanosleep.c
+  cloudlibc/src/libc/time/time.c
+  cloudlibc/src/libc/unistd/faccessat.c
+  cloudlibc/src/libc/unistd/fdatasync.c
+  cloudlibc/src/libc/unistd/fsync.c
+  cloudlibc/src/libc/unistd/ftruncate.c
+  cloudlibc/src/libc/unistd/linkat.c
+  cloudlibc/src/libc/unistd/lseek.c
+  cloudlibc/src/libc/unistd/pread.c
+  cloudlibc/src/libc/unistd/pwrite.c
+  cloudlibc/src/libc/unistd/read.c
+  cloudlibc/src/libc/unistd/readlinkat.c
+  cloudlibc/src/libc/unistd/sleep.c
+  cloudlibc/src/libc/unistd/symlinkat.c
+  cloudlibc/src/libc/unistd/unlinkat.c
+  cloudlibc/src/libc/unistd/usleep.c
+  cloudlibc/src/libc/unistd/write.c
+  sources/__errno_location.c
+  sources/__main_void.c
+  sources/__wasilibc_dt.c
+  sources/__wasilibc_environ.c
+  sources/__wasilibc_fd_renumber.c
+  sources/__wasilibc_initialize_environ.c
+  sources/__wasilibc_random.c
+  sources/__wasilibc_real.c
+  sources/__wasilibc_rmdirat.c
+  sources/__wasilibc_tell.c
+  sources/__wasilibc_unlinkat.c
+  sources/abort.c
+  sources/at_fdcwd.c
+  sources/chdir.c
+  sources/complex-builtins.c
+  sources/environ.c
+  sources/errno.c
+  sources/getcwd.c
+  sources/getentropy.c
+  sources/isatty.c
+  sources/math/fmin-fmax.c
+  sources/math/math-builtins.c
+  sources/posix.c
+  sources/preopens.c
+  sources/reallocarray.c
+  sources/sbrk.c
+  sources/truncate.c
+)
+
+if (WASI STREQUAL "p1")
+  list(APPEND bottom_half_sources
+    cloudlibc/src/libc/sys/socket/getsockopt.c
+    cloudlibc/src/libc/sys/socket/recv.c
+    cloudlibc/src/libc/sys/socket/send.c
+    cloudlibc/src/libc/sys/socket/shutdown.c
+    sources/accept-wasip1.c
+  )
+elseif(WASI STREQUAL "p2")
+  list(APPEND bottom_half_sources
+    sources/accept-wasip2.c
+    sources/bind.c
+    sources/connect.c
+    sources/descriptor_table.c
+    sources/getsockpeername.c
+    sources/listen.c
+    sources/netdb.c
+    sources/poll-wasip2.c
+    sources/recv.c
+    sources/send.c
+    sources/shutdown.c
+    sources/socket.c
+    sources/sockets_utils.c
+    sources/sockopt.c
+    sources/wasip2.c
+    sources/wasip2_file.c
+    sources/wasip2_file_utils.c
+    sources/wasip2_stdio.c
+    sources/wasip2_tcp.c
+    sources/wasip2_udp.c
+  )
+endif()
+
+add_object_library(bottom-half ${bottom_half_sources})
+foreach(obj bottom-half-shared bottom-half-static)
+  target_link_libraries(${obj} PUBLIC musl-top-half-interface)
+  target_include_directories(${obj} PRIVATE
+    cloudlibc/src/include
+    cloudlibc/src
+    headers/private
+  )
+endforeach()
+
+add_custom_target(sysroot-startup-objects)
+add_dependencies(sysroot sysroot-startup-objects)
+
+# =============================================================================
+# startup objects
+#
+foreach(file crt/crt1.c
+             crt/crt1-command.c
+             crt/crt1-reactor.c)
+  # get the filename without the directory and extension
+  cmake_path(GET file STEM filename)
+
+  # create a custom target for each file
+  add_library(${filename}.o OBJECT ${file})
+  target_link_libraries(${filename}.o PUBLIC musl-top-half-interface)
+  set_target_properties(${filename}.o PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+  target_compile_options(${filename}.o PRIVATE -fvisibility=default)
+
+  # add a custom command to compile the file
+  set(dst ${SYSROOT_LIB}/${filename}.o)
+  add_custom_command(
+    OUTPUT ${dst}
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:${filename}.o> ${dst}
+    DEPENDS ${filename}.o
+  )
+  add_custom_target(sysroot-startup-${filename}.o DEPENDS ${dst})
+  add_dependencies(sysroot-startup-objects sysroot-startup-${filename}.o)
+endforeach()

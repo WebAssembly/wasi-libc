@@ -3240,6 +3240,7 @@
 #define __WASI_ROFLAGS_RECV_DATA_TRUNCATED ((__wasi_roflags_t)(1 << 0))
 #define __WASI_SDFLAGS_RD ((__wasi_sdflags_t)(1 << 0))
 #define __WASI_SDFLAGS_WR ((__wasi_sdflags_t)(1 << 1))
+#define __WASI_SNAPSHOT_H 
 #define __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME ((__wasi_subclockflags_t)(1 << 0))
 #define __WASI_WHENCE_CUR (UINT8_C(1))
 #define __WASI_WHENCE_END (UINT8_C(2))
@@ -3280,7 +3281,7 @@
 #define __va_copy(d,s) __builtin_va_copy(d, s)
 #define __wasi__ 1
 #define __wasi_api_h 
-#define __wasi_libc_busywait_h
+#define __wasi_libc_busywait_h 
 #define __wasi_libc_environ_h 
 #define __wasi_libc_find_relpath_h 
 #define __wasi_libc_h 
@@ -3347,7 +3348,7 @@
 #define __wasilibc___typedef_suseconds_t_h 
 #define __wasilibc___typedef_time_t_h 
 #define __wasilibc___typedef_uid_t_h 
-#define __wasilibc_use_wasip2 1
+#define __wasilibc_use_wasip2 
 #define __wasm 1
 #define __wasm32 1
 #define __wasm32__ 1

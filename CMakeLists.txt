@@ -17,7 +17,7 @@ set(CMAKE_SYSTEM_NAME WASI)
 
 # I'm not entirely sure why this is necessary on Windows. This may be a bug in
 # CMake, I'm not sure. The problem is that, at least on CI, CMake detects that
-# the compiler in use in clang but doesn't understand the `SYSTEM` header
+# the compiler in use is clang but doesn't understand the `SYSTEM` header
 # option meaning it just pass `-I...` instead of
 # `-isystem ...`. This in turn causes the build to fail for... somewhat
 # unknown reasons which may also be bugs in wasi-libc. Setting this seems

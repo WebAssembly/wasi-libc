@@ -11,17 +11,33 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sysexits.h>
+#ifdef __wasilibc_use_wasip2
+#include <wasi/descriptor_table.h>
+#include <wasi/file_utils.h>
+#include <wasi/wasip2.h>
+#include <wasi/file.h>
+#else
 #include <wasi/api.h>
+#endif
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc.h>
+
+#ifdef __wasilibc_use_wasip2
+typedef filesystem_preopens_own_descriptor_t preopen_t;
+#else
+typedef __wasi_fd_t preopen_t;
+#endif
 
 /// A name and file descriptor pair.
 typedef struct preopen {
     /// The path prefix associated with the file descriptor.
-    const char *prefix;
+    char *prefix;
 
-    /// The file descriptor.
-    __wasi_fd_t fd;
+#ifdef __wasilibc_use_wasip2
+    int libc_fd;
+#else
+    preopen_t wasi_handle;
+#endif
 } preopen;
 
 /// A simple growable array of `preopen`.
@@ -48,7 +64,11 @@ static void assert_invariants(void) {
     for (size_t i = 0; i < num_preopens; ++i) {
         const preopen *pre = &preopens[i];
         assert(pre->prefix != NULL);
-        assert(pre->fd != (__wasi_fd_t)-1);
+#ifdef __wasilibc_use_wasip2
+        assert(pre->libc_fd != -1);
+#else
+        assert(pre->wasi_handle != -1);
+#endif
 #ifdef __wasm__
         assert((uintptr_t)pre->prefix <
                (__uint128_t)__builtin_wasm_memory_size(0) * PAGESIZE);
@@ -99,38 +119,48 @@ static const char *strip_prefixes(const char *path) {
 }
 
 /// Similar to `internal_register_preopened_fd` but does not take a lock.
-static int internal_register_preopened_fd_unlocked(__wasi_fd_t fd, const char *relprefix) {
+static int internal_register_preopened_fd_unlocked(preopen_t fd, const char *relprefix) {
     // Check preconditions.
     assert_invariants();
+#ifdef __wasilibc_use_wasip2
+    assert(fd.__handle != 0);
+#else
     assert(fd != AT_FDCWD);
     assert(fd != -1);
+#endif
     assert(relprefix != NULL);
 
-    if (num_preopens == preopen_capacity && resize() != 0) {
-        return -1;
-    }
+    if (num_preopens == preopen_capacity && resize() != 0)
+        goto err;
 
     char *prefix = strdup(strip_prefixes(relprefix));
-    if (prefix == NULL) {
-        return -1;
-    }
-    preopens[num_preopens++] = (preopen) { prefix, fd, };
+    if (prefix == NULL)
+        goto err;
+    preopens[num_preopens].prefix = prefix;
+#ifdef __wasilibc_use_wasip2
+    preopens[num_preopens].libc_fd = __wasilibc_add_file(fd, O_RDWR);
+    if (preopens[num_preopens].libc_fd < 0)
+        goto err_free_prefix;
+
+    assert(preopens[num_preopens].libc_fd != -1);
+#else
+    preopens[num_preopens].wasi_handle = fd;
+#endif
+    num_preopens++;
 
     assert_invariants();
     return 0;
-}
 
-/// Register the given preopened file descriptor under the given path.
-///
-/// This function takes ownership of `prefix`.
-static int internal_register_preopened_fd(__wasi_fd_t fd, const char *relprefix) {
-    LOCK(lock);
+#ifdef __wasilibc_use_wasip2
+err_free_prefix:
+    free(prefix);
+#endif
 
-    int r = internal_register_preopened_fd_unlocked(fd, relprefix);
-
-    UNLOCK(lock);
-
-    return r;
+err:
+#ifdef __wasilibc_use_wasip2
+    filesystem_descriptor_drop_own(fd);
+#endif
+    return -1;
 }
 
 /// Are the `prefix_len` bytes pointed to by `prefix` a prefix of `path`?
@@ -154,12 +184,27 @@ static bool prefix_matches(const char *prefix, size_t prefix_len, const char *pa
     return last == '/' || last == '\0';
 }
 
+#ifndef __wasilibc_use_wasip2
+/// Register the given preopened file descriptor under the given path.
+///
+/// This function takes ownership of `prefix`.
+static int internal_register_preopened_fd(__wasi_fd_t fd, const char *relprefix) {
+    LOCK(lock);
+
+    int r = internal_register_preopened_fd_unlocked(fd, relprefix);
+
+    UNLOCK(lock);
+
+    return r;
+}
+
 // See the documentation in libc.h
 int __wasilibc_register_preopened_fd(int fd, const char *prefix) {
     __wasilibc_populate_preopens();
 
     return internal_register_preopened_fd((__wasi_fd_t)fd, prefix);
 }
+#endif
 
 // See the documentation in libc-find-relpath.h.
 int __wasilibc_find_relpath(const char *path,
@@ -180,7 +225,7 @@ int __wasilibc_find_abspath(const char *path,
                             const char **relative_path) {
     __wasilibc_populate_preopens();
 
-    // Strip leading `/` characters, the prefixes we're mataching won't have
+    // Strip leading `/` characters, the prefixes we're matching won't have
     // them.
     while (*path == '/')
         path++;
@@ -200,7 +245,11 @@ int __wasilibc_find_abspath(const char *path,
         if ((fd == -1 || len > match_len) &&
             prefix_matches(prefix, len, path))
         {
-            fd = pre->fd;
+#ifdef __wasilibc_use_wasip2
+            fd = pre->libc_fd;
+#else
+            fd = pre->wasi_handle;
+#endif
             match_len = len;
             *abs_prefix = prefix;
         }
@@ -241,6 +290,25 @@ void __wasilibc_populate_preopens(void) {
         return;
     }
 
+#ifdef __wasilibc_use_wasip2
+   filesystem_preopens_list_tuple2_own_descriptor_string_t preopens;
+   filesystem_preopens_get_directories(&preopens);
+
+   for (size_t i = 0; i < preopens.len; ++i) {
+       filesystem_preopens_tuple2_own_descriptor_string_t name_and_descriptor = preopens.ptr[i];
+       char *prefix = strndup((const char*) name_and_descriptor.f1.ptr, name_and_descriptor.f1.len);
+       wasip2_string_free(&name_and_descriptor.f1);
+       if (prefix == NULL) {
+           filesystem_descriptor_drop_own(name_and_descriptor.f0);
+           goto software;
+       }
+       int r = internal_register_preopened_fd_unlocked(name_and_descriptor.f0, prefix);
+       free(prefix);
+        if (r != 0)
+	   goto software;
+   }
+
+#else // __wasilibc_use_wasip2
     // Skip stdin, stdout, and stderr, and count up until we reach an invalid
     // file descriptor.
     for (__wasi_fd_t fd = 3; fd != 0; ++fd) {
@@ -264,9 +332,10 @@ void __wasilibc_populate_preopens(void) {
                 goto oserr;
             prefix[prestat.u.dir.pr_name_len] = '\0';
 
-            if (internal_register_preopened_fd_unlocked(fd, prefix) != 0)
-                goto software;
+            int r = internal_register_preopened_fd_unlocked(fd, prefix);
             free(prefix);
+            if (r != 0)
+                goto software;
 
             break;
         }
@@ -274,6 +343,7 @@ void __wasilibc_populate_preopens(void) {
             break;
         }
     }
+#endif // not __wasilibc_use_wasip2
 
     // Preopens are now initialized.
     preopens_populated = true;
@@ -281,8 +351,10 @@ void __wasilibc_populate_preopens(void) {
     UNLOCK(lock);
 
     return;
+#ifndef __wasilibc_use_wasip2
 oserr:
     _Exit(EX_OSERR);
+#endif
 software:
     _Exit(EX_SOFTWARE);
 }
@@ -293,16 +365,19 @@ void __wasilibc_reset_preopens(void) {
     if (num_preopens) {
         for (int i = 0; i < num_preopens; ++i) {
             free((void*) preopens[i].prefix);
+#ifdef __wasilibc_use_wasip2
+            close(preopens[i].libc_fd);
+#endif
         }
         free(preopens);
     }
-    
+
     preopens_populated = false;
     preopens = NULL;
     num_preopens = 0;
     preopen_capacity = 0;
-    
+
     assert_invariants();
-    
+
     UNLOCK(lock);
 }

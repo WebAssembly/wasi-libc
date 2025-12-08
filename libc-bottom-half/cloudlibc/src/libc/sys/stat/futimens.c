@@ -4,12 +4,44 @@
 
 #include <sys/stat.h>
 
+#ifdef __wasilibc_use_wasip2
+#include <wasi/wasip2.h>
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#else
 #include <wasi/api.h>
+#endif
 #include <errno.h>
 
 #include "stat_impl.h"
 
 int futimens(int fd, const struct timespec *times) {
+#ifdef __wasilibc_use_wasip2
+  // Translate the file descriptor to an internal handle
+  filesystem_borrow_descriptor_t file_handle;
+  if (fd_to_file_handle(fd, &file_handle) < 0)
+    return -1;
+
+  // Convert timestamps and extract NOW/OMIT flags.
+  filesystem_new_timestamp_t new_timestamp_atim;
+  filesystem_new_timestamp_t new_timestamp_mtim;
+  __wasi_fstflags_t flags;
+  if (!utimens_get_timestamps(times, &new_timestamp_atim, &new_timestamp_mtim)) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  // Perform system call.
+  filesystem_error_code_t error;
+  if (!filesystem_method_descriptor_set_times(file_handle,
+                                              &new_timestamp_atim,
+                                              &new_timestamp_mtim,
+                                              &error)) {
+    translate_error(error);
+    return -1;
+  }
+
+#else
   // Convert timestamps and extract NOW/OMIT flags.
   __wasi_timestamp_t st_atim;
   __wasi_timestamp_t st_mtim;
@@ -25,5 +57,7 @@ int futimens(int fd, const struct timespec *times) {
     errno = error;
     return -1;
   }
+#endif
+
   return 0;
 }

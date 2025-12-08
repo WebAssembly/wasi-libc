@@ -5,9 +5,16 @@
 #include <sys/uio.h>
 
 #include <assert.h>
+#ifdef __wasilibc_use_wasip2
+#include <wasi/wasip2.h>
+#include <wasi/descriptor_table.h>
+#include <common/errors.h>
+#else
 #include <wasi/api.h>
+#endif
 #include <errno.h>
 #include <stddef.h>
+#include <unistd.h>
 
 static_assert(offsetof(struct iovec, iov_base) ==
                   offsetof(__wasi_ciovec_t, buf),
@@ -29,7 +36,20 @@ ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
     errno = EINVAL;
     return -1;
   }
-  size_t bytes_written;
+
+#ifdef __wasilibc_use_wasip2
+  // Skip empty iovecs and then delegate to `read` with the first non-empty
+  // iovec.
+  while (iovcnt) {
+    if (iov->iov_len != 0) {
+      return write(fildes, iov->iov_base, iov->iov_len);
+    }
+    iovcnt--;
+    iov++;
+  }
+  return write(fildes, NULL, 0);
+#else
+  size_t bytes_written = 0;
   __wasi_errno_t error = __wasi_fd_write(
       fildes, (const __wasi_ciovec_t *)iov, iovcnt, &bytes_written);
   if (error != 0) {
@@ -37,4 +57,5 @@ ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
     return -1;
   }
   return bytes_written;
+#endif
 }

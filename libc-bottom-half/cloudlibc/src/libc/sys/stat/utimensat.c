@@ -4,7 +4,13 @@
 
 #include <sys/stat.h>
 
+#ifdef __wasilibc_use_wasip2
+#include <wasi/wasip2.h>
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#else
 #include <wasi/api.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -13,6 +19,45 @@
 
 int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec times[2],
                                int flag) {
+#ifdef __wasilibc_use_wasip2
+  // Translate the file descriptor to an internal handle
+  filesystem_borrow_descriptor_t file_handle;
+  if (fd_to_file_handle(fd, &file_handle) < 0)
+    return -1;
+
+  // Convert timestamps and extract NOW/OMIT flags.
+  filesystem_new_timestamp_t new_timestamp_atim;
+  filesystem_new_timestamp_t new_timestamp_mtim;
+  if (!utimens_get_timestamps(times, &new_timestamp_atim, &new_timestamp_mtim)) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  // Create lookup properties.
+  __wasi_lookupflags_t lookup_flags = 0;
+  if ((flag & AT_SYMLINK_NOFOLLOW) == 0)
+    lookup_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
+
+  // Convert the string into a Wasm string
+  wasip2_string_t path_wasm_string;
+  if (wasip2_string_from_c(path, &path_wasm_string) < 0)
+    return -1;
+
+  // Perform system call.
+  filesystem_error_code_t error;
+  bool set_times_result = filesystem_method_descriptor_set_times_at(file_handle,
+                                                                    lookup_flags,
+                                                                    &path_wasm_string,
+                                                                    &new_timestamp_atim,
+                                                                    &new_timestamp_mtim,
+                                                                    &error);
+  if (!set_times_result) {
+    translate_error(error);
+    return -1;
+  }
+
+#else
+
   // Convert timestamps and extract NOW/OMIT flags.
   __wasi_timestamp_t st_atim;
   __wasi_timestamp_t st_mtim;
@@ -34,5 +79,6 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
     errno = error;
     return -1;
   }
+#endif
   return 0;
 }

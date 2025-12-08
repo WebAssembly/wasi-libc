@@ -2403,8 +2403,12 @@
 #define _POSIX_STREAM_MAX 8
 #define _POSIX_SYMLINK_MAX 255
 #define _POSIX_SYMLOOP_MAX 8
+#define _POSIX_THREADS _POSIX_VERSION
+#define _POSIX_THREAD_ATTR_STACKSIZE _POSIX_VERSION
 #define _POSIX_THREAD_DESTRUCTOR_ITERATIONS 4
 #define _POSIX_THREAD_KEYS_MAX 128
+#define _POSIX_THREAD_PROCESS_SHARED _POSIX_VERSION
+#define _POSIX_THREAD_SAFE_FUNCTIONS _POSIX_VERSION
 #define _POSIX_THREAD_THREADS_MAX 64
 #define _POSIX_TIMEOUTS _POSIX_VERSION
 #define _POSIX_TIMERS _POSIX_VERSION
@@ -3276,6 +3280,7 @@
 #define __va_copy(d,s) __builtin_va_copy(d, s)
 #define __wasi__ 1
 #define __wasi_api_h 
+#define __wasi_libc_busywait_h
 #define __wasi_libc_environ_h 
 #define __wasi_libc_find_relpath_h 
 #define __wasi_libc_h 
@@ -3584,12 +3589,7 @@
 #define preadv64 preadv
 #define pthread_cleanup_pop(r) _pthread_cleanup_pop(&__cb, (r)); } while(0)
 #define pthread_cleanup_push(f,x) do { struct __ptcb __cb; _pthread_cleanup_push(&__cb, f, x);
-#define pthread_create(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
-#define pthread_detach(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
 #define pthread_equal(x,y) ((x)==(y))
-#define pthread_join(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
-#define pthread_timedjoin_np(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
-#define pthread_tryjoin_np(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; to enable stub functions which always fail, compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
 #define pwrite64 pwrite
 #define pwritev64 pwritev
 #define readdir64 readdir

@@ -2,10 +2,12 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <arpa/inet.h>
-
+#include <string.h>
 #include <wasi/sockets_utils.h>
 
 _Thread_local int h_errno = 0;
+
+static struct servent global_serv = { 0 };
 
 static int map_error(ip_name_lookup_error_code_t error)
 {
@@ -27,6 +29,7 @@ static int map_error(ip_name_lookup_error_code_t error)
 
 static int add_addr(ip_name_lookup_option_ip_address_t address,
 		    in_port_t port,
+			int socktype,
 		    const struct addrinfo *restrict hint,
 		    struct addrinfo **restrict current,
 		    struct addrinfo **restrict res)
@@ -117,7 +120,7 @@ static int add_addr(ip_name_lookup_option_ip_address_t address,
 	*result = (struct addrinfo){
 		.ai_family = family,
 		.ai_flags = 0,
-		.ai_socktype = SOCK_STREAM,
+		.ai_socktype = socktype,
 		.ai_protocol = 0,
 		.ai_addrlen = addrlen,
 		.ai_addr = addr,
@@ -136,66 +139,106 @@ static int add_addr(ip_name_lookup_option_ip_address_t address,
         return 0;
 }
 
+static bool set_global_serv_entry(const service_entry_t *entry, const char *proto) {
+	if (!entry) {
+		return false; // Service not found
+	}
+
+	global_serv.s_name = entry->s_name;
+	global_serv.s_port = htons(entry->port);
+	global_serv.s_aliases = NULL;
+
+	// If proto is NULL then any protocol is matched
+	if ((!proto || strcmp(proto, "tcp") == 0) && entry->protocol & SERVICE_PROTOCOL_TCP) {
+		global_serv.s_proto = "tcp";
+	}
+	else if ((!proto || strcmp(proto, "udp") == 0) && entry->protocol & SERVICE_PROTOCOL_UDP) {
+		global_serv.s_proto = "udp";
+	}
+	else {
+		return false; // Protocol not supported
+	}
+
+	return true;
+}
+
 int getaddrinfo(const char *restrict host, const char *restrict serv,
 		const struct addrinfo *restrict hint,
 		struct addrinfo **restrict res)
 {
-	if (host == NULL) {
-		host = "localhost";
-	}
+  if (host == NULL) {
+    host = "localhost";
+  }
 
-	*res = NULL;
-	struct addrinfo *current = NULL;
-	wasip2_string_t name = { .ptr = (uint8_t *)host, .len = strlen(host) };
-	ip_name_lookup_own_resolve_address_stream_t stream;
-	ip_name_lookup_error_code_t error;
-	if (ip_name_lookup_resolve_addresses(
-		    __wasi_sockets_utils__borrow_network(), &name, &stream,
-		    &error)) {
-		ip_name_lookup_borrow_resolve_address_stream_t stream_borrow =
-			ip_name_lookup_borrow_resolve_address_stream(stream);
-		// The 'serv' parameter can be either a port number or a service name.
-		//
-		// TODO wasi-sockets: If the conversion of 'serv' to a valid port
-		// number fails, use getservbyname() to resolve the service name to
-		// its corresponding port number. This can be done after the
-		// getservbyname function is implemented.)
-		int port = 0;
-		if (serv != NULL) {
-			port = __wasi_sockets_utils__parse_port(serv);
-			if (port < 0) {
-				return EAI_NONAME;
-			}
-		}
-		while (true) {
-			ip_name_lookup_option_ip_address_t address;
-			if (ip_name_lookup_method_resolve_address_stream_resolve_next_address(
-				    stream_borrow, &address, &error)) {
-				if (address.is_some) {
-					int error = add_addr(address, htons(port), hint,
-							     &current, res);
-					if (error) {
-						return error;
-					}
-				} else {
-					return 0;
-				}
-			} else if (error == NETWORK_ERROR_CODE_WOULD_BLOCK) {
-				ip_name_lookup_own_pollable_t pollable =
-					ip_name_lookup_method_resolve_address_stream_subscribe(
-						stream_borrow);
-				poll_borrow_pollable_t pollable_borrow =
-					poll_borrow_pollable(pollable);
-				poll_method_pollable_block(pollable_borrow);
-				poll_pollable_drop_own(pollable);
-			} else {
-				freeaddrinfo(*res);
-				return map_error(error);
-			}
-		}
-	} else {
-		return map_error(error);
-	}
+  *res = NULL;
+  struct addrinfo *current = NULL;
+  wasip2_string_t name = { .ptr = (uint8_t *)host, .len = strlen(host) };
+  ip_name_lookup_own_resolve_address_stream_t stream;
+  ip_name_lookup_error_code_t error;
+  if (!ip_name_lookup_resolve_addresses(
+        __wasi_sockets_utils__borrow_network(), &name, &stream,
+        &error))
+    return map_error(error);
+
+  int ret = 0;
+  ip_name_lookup_borrow_resolve_address_stream_t stream_borrow =
+    ip_name_lookup_borrow_resolve_address_stream(stream);
+  // The 'serv' parameter can be either a port number or a service name.
+  int port = 0;
+  uint16_t protocol = SERVICE_PROTOCOL_TCP;
+  if (serv != NULL) {
+    port = __wasi_sockets_utils__parse_port(serv);
+    if (port < 0) {
+      const service_entry_t *service = __wasi_sockets_utils__get_service_entry_by_name(serv);
+      if (service) {
+        port = service->port;
+        protocol = service->protocol;
+      } else {
+        ret = EAI_NONAME;
+      }
+    }
+  }
+
+  poll_own_pollable_t pollable;
+  pollable.__handle = 0;
+
+  while (ret == 0) {
+    ip_name_lookup_option_ip_address_t address;
+    if (!ip_name_lookup_method_resolve_address_stream_resolve_next_address(
+          stream_borrow, &address, &error)) {
+      if (error != NETWORK_ERROR_CODE_WOULD_BLOCK) {
+        freeaddrinfo(*res);
+        ret = map_error(error);
+        break;
+      }
+
+      if (pollable.__handle == 0) {
+        pollable = ip_name_lookup_method_resolve_address_stream_subscribe(
+              stream_borrow);
+      }
+      poll_method_pollable_block(poll_borrow_pollable(pollable));
+      continue;
+    }
+    if (!address.is_some)
+      break;
+    if (protocol & SERVICE_PROTOCOL_TCP) {
+      ret = add_addr(address, htons(port), SOCK_STREAM,
+          hint, &current, res);
+      if (ret)
+        break;
+    }
+    if (protocol & SERVICE_PROTOCOL_UDP) {
+      ret = add_addr(address, htons(port), SOCK_DGRAM,
+          hint, &current, res);
+      if (ret)
+        break;
+    }
+  }
+
+  if (pollable.__handle != 0)
+    poll_pollable_drop_own(pollable);
+  ip_name_lookup_resolve_address_stream_drop_own(stream);
+  return ret;
 }
 
 void freeaddrinfo(struct addrinfo *p)
@@ -213,7 +256,8 @@ int getnameinfo(const struct sockaddr *restrict sa, socklen_t salen,
 		socklen_t servlen, int flags)
 {
 	// TODO wasi-sockets
-	abort();
+        errno = EOPNOTSUPP;
+        return EAI_SYSTEM;
 }
 
 struct hostent *gethostbyname(const char *name)
@@ -236,14 +280,20 @@ const char *hstrerror(int err)
 
 struct servent *getservbyname(const char *name, const char *proto)
 {
-	// TODO wasi-sockets
-	return NULL;
+	const service_entry_t *entry = __wasi_sockets_utils__get_service_entry_by_name(name);
+	if (!set_global_serv_entry(entry, proto)) {
+		return NULL;
+	}
+	return &global_serv;
 }
 
 struct servent *getservbyport(int port, const char *proto)
 {
-	// TODO wasi-sockets
-	return NULL;
+	const service_entry_t *entry = __wasi_sockets_utils__get_service_entry_by_port(htons(port));
+	if (!set_global_serv_entry(entry, proto)) {
+		return NULL;
+	}
+	return &global_serv;
 }
 
 struct protoent *getprotobyname(const char *name)

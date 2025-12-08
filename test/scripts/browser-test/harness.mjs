@@ -18,16 +18,6 @@ import { readFileSync } from 'node:fs';
 import url from "node:url";
 import { chromium } from 'playwright';
 
-const SKIP_TESTS = [
-    // "poll_oneoff" can't be implemented in the browser
-    "libc-test/functional/pthread_cond",
-    // atomic.wait32 can't be executed on the main thread
-    "libc-test/functional/pthread_mutex",
-    "libc-test/functional/pthread_tsd",
-    // XFAIL: @bjorn3/browser_wasi_shim doesn't support symlinks for now
-    "misc/fts",
-];
-
 /**
  * @param {{wasmPath: string, port: number}}
  * @returns {Promise<{server: import('node:http').Server, port: number}>}
@@ -122,11 +112,6 @@ async function main() {
     if (!wasmPath) {
         console.error('Test path not specified');
         return 1;
-    }
-
-    if (SKIP_TESTS.some(test => wasmPath.includes(test + "."))) {
-        // Silently skip tests that are known to fail in the browser
-        return 0;
     }
 
     if (args.values.dir && args.values.dir.length > 0) {

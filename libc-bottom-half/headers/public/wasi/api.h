@@ -745,7 +745,7 @@ _Static_assert(_Alignof(__wasi_whence_t) == 1, "witx calculated align");
 
 /**
  * A reference to the offset of a directory entry.
- * 
+ *
  * The value 0 signifies the start of the directory.
  */
 typedef uint64_t __wasi_dircookie_t;
@@ -1391,6 +1391,8 @@ typedef struct __wasi_prestat_t {
 
 _Static_assert(sizeof(__wasi_prestat_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
+
+#ifndef __wasilibc_use_wasip2
 
 /**
  * @defgroup wasi_snapshot_preview1
@@ -2107,6 +2109,8 @@ int32_t __wasi_thread_spawn(
     void *start_arg
 )  __attribute__((__warn_unused_result__));
 #endif
+
+#endif // __wasilibc_use_wasip2
 
 #ifdef __cplusplus
 }

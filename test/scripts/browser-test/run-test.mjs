@@ -1,7 +1,7 @@
 /**
  * This script is served by `harness.mjs` and runs in the browser.
  */
-import { WASI, File, OpenFile, ConsoleStdout, PreopenDirectory } from 'https://cdn.jsdelivr.net/npm/@bjorn3/browser_wasi_shim@0.3.0/+esm'
+import { WASI, File, OpenFile, ConsoleStdout, PreopenDirectory } from 'https://cdn.jsdelivr.net/npm/@bjorn3/browser_wasi_shim@0.4.2/+esm'
 import { polyfill } from 'https://cdn.jsdelivr.net/npm/wasm-imports-parser@1.0.4/polyfill.js/+esm';
 
 /**

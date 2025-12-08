@@ -8,7 +8,13 @@
 #include <fcntl.h>
 
 #include <assert.h>
+#ifdef __wasilibc_use_wasip2
+#include <wasi/wasip2.h>
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#else
 #include <wasi/api.h>
+#endif
 #include <dirent.h>
 #include <errno.h>
 #include <stddef.h>
@@ -33,13 +39,128 @@ static_assert(DT_UNKNOWN == __WASI_FILETYPE_UNKNOWN, "Value mismatch");
       while (new_size < (target_size))              \
         new_size *= 2;                              \
       void *new_buffer = realloc(buffer, new_size); \
-      if (new_buffer == NULL)                       \
+      if (new_buffer == NULL) {                     \
+        errno = ENOMEM;                             \
         return NULL;                                \
+      }                                             \
       (buffer) = new_buffer;                        \
       (buffer_size) = new_size;                     \
     }                                               \
   } while (0)
 
+#ifdef __wasilibc_use_wasip2
+
+static int ensure_has_directory_stream(DIR *dirp, filesystem_borrow_descriptor_t *handle) {
+  if (fd_to_file_handle(dirp->fd, handle) < 0)
+    return -1;
+
+  if (dirp->stream.__handle != 0)
+    return 0;
+
+  filesystem_error_code_t error_code;
+  bool ok = filesystem_method_descriptor_read_directory(*handle,
+                                                        &dirp->stream,
+                                                        &error_code);
+  if (!ok) {
+    translate_error(error_code);
+    return -1;
+  }
+  return 0;
+}
+
+static struct dirent *readdir_next(DIR *dirp) {
+  filesystem_metadata_hash_value_t metadata;
+  filesystem_error_code_t error_code;
+  filesystem_borrow_descriptor_t dir_handle;
+
+  if (ensure_has_directory_stream(dirp, &dir_handle) < 0)
+    return NULL;
+
+  // Yield '.' first if the offset is 0. Note that `d_ino` is from the metadata
+  // hash of the directory itself.
+  if (dirp->offset == 0) {
+    dirp->offset += 1;
+    GROW(dirp->dirent, dirp->dirent_size, offsetof(struct dirent, d_name) + 2);
+    bool ok = filesystem_method_descriptor_metadata_hash(dir_handle,
+                                                         &metadata,
+                                                         &error_code);
+    if (!ok) {
+      translate_error(error_code);
+      return NULL;
+    }
+    dirp->dirent->d_ino = metadata.lower;
+    dirp->dirent->d_type = DT_DIR;
+    dirp->dirent->d_name[0] = '.';
+    dirp->dirent->d_name[1] = 0;
+    return dirp->dirent;
+  }
+
+  // Yield '..' next if the offset is 1. Note that `d_ino` is set to 0 to
+  // avoid opening the parent directory here.
+  if (dirp->offset == 1) {
+    dirp->offset += 1;
+    GROW(dirp->dirent, dirp->dirent_size, offsetof(struct dirent, d_name) + 3);
+    dirp->dirent->d_ino = 0;
+    dirp->dirent->d_type = DT_DIR;
+    dirp->dirent->d_name[0] = '.';
+    dirp->dirent->d_name[1] = '.';
+    dirp->dirent->d_name[2] = 0;
+    return dirp->dirent;
+  }
+
+  filesystem_borrow_directory_entry_stream_t stream = filesystem_borrow_directory_entry_stream(dirp->stream);
+  filesystem_option_directory_entry_t dir_entry_optional;
+  bool ok = filesystem_method_directory_entry_stream_read_directory_entry(stream,
+                                                                          &dir_entry_optional,
+                                                                          &error_code);
+  if (!ok) {
+    translate_error(error_code);
+    return NULL;
+  }
+
+  // Reached end-of-directory? Return null.
+  if (!dir_entry_optional.is_some)
+    return NULL;
+
+  filesystem_directory_entry_t dir_entry = dir_entry_optional.val;
+
+  // Ensure that the dirent is large enough to fit the filename
+  size_t the_size = offsetof(struct dirent, d_name);
+  GROW(dirp->dirent, dirp->dirent_size, the_size + dir_entry.name.len + 1);
+
+  // Fill out `d_type` and `d_name`
+  dirp->dirent->d_type = dir_entry_type_to_d_type(dir_entry.type);
+  memcpy(dirp->dirent->d_name, dir_entry.name.ptr, dir_entry.name.len);
+  dirp->dirent->d_name[dir_entry.name.len] = '\0';
+
+  // Fill out `d_ino` with the metadata hash.
+  filesystem_path_flags_t path_flags = 0; // Don't follow symlinks
+  ok = filesystem_method_descriptor_metadata_hash_at(dir_handle,
+                                                     path_flags,
+                                                     &dir_entry.name,
+                                                     &metadata,
+                                                     &error_code);
+  wasip2_string_free(&dir_entry.name);
+  if (!ok) {
+    translate_error(error_code);
+    return NULL;
+  }
+  dirp->dirent->d_ino = metadata.lower;
+  dirp->offset += 1;
+
+  return dirp->dirent;
+}
+
+struct dirent *readdir(DIR *dirp) {
+  struct dirent *result = readdir_next(dirp);
+  while (result != NULL && dirp->skip > 0) {
+    dirp->skip -= 1;
+    result = readdir_next(dirp);
+  }
+  return result;
+}
+
+#else
 struct dirent *readdir(DIR *dirp) {
   for (;;) {
     // Extract the next dirent header.
@@ -130,3 +251,4 @@ struct dirent *readdir(DIR *dirp) {
     dirp->buffer_processed = 0;
   }
 }
+#endif

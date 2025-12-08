@@ -1,0 +1,66 @@
+name: 'Install LLVM'
+description: 'Install LLVM'
+inputs:
+  clang_version:
+    description: 'version string of Clang to download'
+    required: true
+  llvm_asset_suffix:
+    description: 'extra info about how to download from LLVM binaries'
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Install LLVM tools (Windows)
+      shell: bash
+      run: |
+        curl -fsSLO https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.clang_version }}/LLVM-${{ inputs.clang_version }}-win64.exe
+        7z x LLVM-${{ inputs.clang_version }}-win64.exe -y -o"llvm"
+        echo "$(pwd)/llvm/bin" >> $GITHUB_PATH
+        echo "CC=$(pwd)/llvm/bin/clang.exe" >> $GITHUB_ENV
+        echo "AR=$(pwd)/llvm/bin/llvm-ar.exe" >> $GITHUB_ENV
+        echo "NM=$(pwd)/llvm/bin/llvm-nm.exe" >> $GITHUB_ENV
+      if: runner.os == 'Windows'
+
+    - name: Override llvm-nm with one from rustup (Windows)
+      shell: bash
+      run: |
+        rustup update stable
+        rustup default stable
+        rustup component add llvm-tools-preview
+        echo "NM=$(rustc --print sysroot|sed 's|C:|/c|'|sed 's|\\|/|g')/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-nm.exe" >> $GITHUB_ENV
+      if: runner.os == 'Windows'
+
+    - name: Install LLVM tools (MacOS)
+      shell: bash
+      run: |
+        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.clang_version }}/clang+llvm-${{ inputs.clang_version }}-${{ inputs.llvm_asset_suffix }}.tar.xz | tar xJf -
+        export CLANG_DIR=`pwd`/clang+llvm-${{ inputs.clang_version }}-${{ inputs.llvm_asset_suffix }}/bin
+        echo "$CLANG_DIR" >> $GITHUB_PATH
+        echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
+        echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
+        echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
+      if: runner.os == 'macOS'
+
+    # Note that this uses apt-based packages for installing Clang/tools to
+    # ensure that all various dependencies are also installed. Binaries from
+    # llvm-project depend on libtinfo.so and TBH I don't know what that is.
+    # Using apt-get should basically serve the same purpose though.
+    - name: Install LLVM tools (Linux)
+      shell: bash
+      run: |
+        set -ex
+        v=${{ inputs.clang_version }}
+        sudo apt-get update
+        sudo apt-get install -y clang-$v clang-tools-$v lld-$v
+        echo "CC=clang-$v" >> $GITHUB_ENV
+        echo "AR=llvm-ar-$v" >> $GITHUB_ENV
+        echo "NM=llvm-nm-$v" >> $GITHUB_ENV
+        # Note: wasm-component-ld is only needed for Linux because
+        # currently, wasm32-wasip2 is only tested on Linux. If that changes,
+        # this step will have to be added to the other targets.
+        curl -fsSLO https://github.com/bytecodealliance/wasm-component-ld/releases/download/v0.5.15/wasm-component-ld-v0.5.15-x86_64-linux.tar.gz
+        tar xzf wasm-component-ld-v0.5.15-x86_64-linux.tar.gz
+        echo "$(pwd)/wasm-component-ld-v0.5.15-x86_64-linux" >> $GITHUB_PATH
+      if: runner.os == 'Linux'

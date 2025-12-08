@@ -83,21 +83,14 @@ int pthread_detach(pthread_t);
 _Noreturn void pthread_exit(void *);
 int pthread_join(pthread_t, void **);
 #else
-#if defined(_WASI_EMULATED_PTHREAD) || defined(_REENTRANT)
+#if defined(_REENTRANT) || !defined(_WASI_STRICT_PTHREAD)
 int pthread_create(pthread_t *__restrict, const pthread_attr_t *__restrict, void *(*)(void *), void *__restrict);
 int pthread_detach(pthread_t);
 int pthread_join(pthread_t, void **);
 #else
-#include <assert.h>
-#define pthread_create(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; \
-to enable stub functions which always fail, \
-compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
-#define pthread_detach(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; \
-to enable stub functions which always fail, \
-compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
-#define pthread_join(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; \
-to enable stub functions which always fail, \
-compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
+#define pthread_create(...) ({ _Static_assert(0, "This function is not available on a single-threaded target; switch to a multi-threaded target with -pthread or enable a stub implementation by undefining _WASI_STRICT_PTHREAD"); 0;})
+#define pthread_detach(...) ({ _Static_assert(0, "This function is not available on a single-threaded target; switch to a multi-threaded target with -pthread or enable a stub implementation by undefining _WASI_STRICT_PTHREAD"); 0;})
+#define pthread_join(...) ({ _Static_assert(0, "This function is not available on a single-threaded target; switch to a multi-threaded target with -pthread or enable a stub implementation by undefining _WASI_STRICT_PTHREAD"); 0;})
 #endif
 #endif
 
@@ -249,16 +242,12 @@ int pthread_setname_np(pthread_t, const char *);
 int pthread_getname_np(pthread_t, char *, size_t);
 int pthread_getattr_default_np(pthread_attr_t *);
 int pthread_setattr_default_np(const pthread_attr_t *);
-#if defined(__wasilibc_unmodified_upstream) || defined(_WASI_EMULATED_PTHREAD) || defined(_REENTRANT)
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT) || !defined(_WASI_STRICT_PTHREAD)
 int pthread_tryjoin_np(pthread_t, void **);
 int pthread_timedjoin_np(pthread_t, void **, const struct timespec *);
 #else
-#define pthread_tryjoin_np(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; \
-to enable stub functions which always fail, \
-compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
-#define pthread_timedjoin_np(...) ({ _Static_assert(0, "This mode of WASI does not have threads enabled; \
-to enable stub functions which always fail, \
-compile with -D_WASI_EMULATED_PTHREAD and link with -lwasi-emulated-pthread"); 0;})
+#define pthread_tryjoin_np(...) ({ _Static_assert(0, "This function is not available on a single-threaded target; switch to a multi-threaded target with -pthread or enable a stub implementation by undefining _WASI_STRICT_PTHREAD"); 0;})
+#define pthread_timedjoin_np(...) ({ _Static_assert(0, "This function is not available on a single-threaded target; switch to a multi-threaded target with -pthread or enable a stub implementation by undefining _WASI_STRICT_PTHREAD"); 0;})
 #endif
 #endif
 

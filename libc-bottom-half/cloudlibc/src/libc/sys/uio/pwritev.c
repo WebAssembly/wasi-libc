@@ -4,8 +4,14 @@
 
 #include <sys/types.h>
 #include <sys/uio.h>
-
+#ifdef __wasilibc_use_wasip2
+#include <wasi/wasip2.h>
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#include <unistd.h>
+#else
 #include <wasi/api.h>
+#endif
 #include <errno.h>
 
 ssize_t pwritev(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
@@ -13,6 +19,18 @@ ssize_t pwritev(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
     errno = EINVAL;
     return -1;
   }
+#ifdef __wasilibc_use_wasip2
+  // Skip empty iovecs and then delegate to `pwrite` with the first non-empty
+  // iovec.
+  while (iovcnt) {
+    if (iov->iov_len != 0) {
+      return pwrite(fildes, iov->iov_base, iov->iov_len, offset);
+    }
+    iovcnt--;
+    iov++;
+  }
+  return pwrite(fildes, NULL, 0, offset);
+#else
   size_t bytes_written;
   __wasi_errno_t error = __wasi_fd_pwrite(
       fildes, (const __wasi_ciovec_t *)iov, iovcnt, offset, &bytes_written);
@@ -21,4 +39,5 @@ ssize_t pwritev(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
     return -1;
   }
   return bytes_written;
+#endif
 }

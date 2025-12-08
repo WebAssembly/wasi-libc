@@ -2,126 +2,149 @@
 #define DESCRIPTOR_TABLE_H
 
 #include <wasi/wasip2.h>
+#include <wasi/poll.h>
+#include <sys/stat.h>
+#include <netinet/in.h>
 
-typedef struct {
-	int dummy;
-} tcp_socket_state_unbound_t;
-typedef struct {
-	int dummy;
-} tcp_socket_state_bound_t;
-typedef struct {
-	int dummy;
-} tcp_socket_state_connecting_t;
-typedef struct {
-	int dummy;
-} tcp_socket_state_listening_t;
+/**
+ * Operations that are required of all descriptors registered as file
+ * descriptors.
+ *
+ * This structure is used to dynamically dispatch operations various I/O
+ * objects like files and sockets. Functions pointers below can all be `NULL`
+ * except for `free`. These are the implementation of the corresponding
+ * functions in libc.
+ *
+ * All functions below communicate errors through the return value. A -1 return
+ * value indicates that an error happened and that `errno` is set.
+ */
+typedef struct descriptor_vtable_t {
+  /// Deallocates the parameter provided, closing all resources as well.
+  void (*free)(void*);
 
-typedef struct {
-	streams_own_input_stream_t input;
-	poll_own_pollable_t input_pollable;
-	streams_own_output_stream_t output;
-	poll_own_pollable_t output_pollable;
-} tcp_socket_state_connected_t;
+  // =====================================================================
+  // Generic I/O
 
-typedef struct {
-	network_error_code_t error_code;
-} tcp_socket_state_connect_failed_t;
+  /// Looks up a `wasi:io/streams.input-stream` object and stores it in
+  /// the first argument. If provide also stores a pointer to the internal
+  /// `off_t` offset and `pollable` for this object. The returned pointers
+  /// point within the descriptor itself.
+  int (*get_read_stream)(void*, streams_borrow_input_stream_t*, off_t**, poll_own_pollable_t**);
 
-// This is a tagged union. When adding/removing/renaming cases, be sure to keep the tag and union definitions in sync.
-typedef struct {
-	enum {
-		TCP_SOCKET_STATE_UNBOUND,
-		TCP_SOCKET_STATE_BOUND,
-		TCP_SOCKET_STATE_CONNECTING,
-		TCP_SOCKET_STATE_CONNECTED,
-		TCP_SOCKET_STATE_CONNECT_FAILED,
-		TCP_SOCKET_STATE_LISTENING,
-	} tag;
-	union {
-		tcp_socket_state_unbound_t unbound;
-		tcp_socket_state_bound_t bound;
-		tcp_socket_state_connecting_t connecting;
-		tcp_socket_state_connected_t connected;
-		tcp_socket_state_connect_failed_t connect_failed;
-		tcp_socket_state_listening_t listening;
-	};
-} tcp_socket_state_t;
+  /// Same as `get_read_stream`, but for output streams.
+  int (*get_write_stream)(void*, streams_borrow_output_stream_t*, off_t**, poll_own_pollable_t**);
 
-typedef struct {
-	tcp_own_tcp_socket_t socket;
-	poll_own_pollable_t socket_pollable;
-	bool blocking;
-	bool fake_nodelay;
-	bool fake_reuseaddr;
-	network_ip_address_family_t family;
-	tcp_socket_state_t state;
-} tcp_socket_t;
+  /// Sets the nonblocking flag for this object to the specified value.
+  int (*set_blocking)(void*, bool);
 
-typedef struct {
-	udp_own_incoming_datagram_stream_t incoming;
-	poll_own_pollable_t incoming_pollable;
-	udp_own_outgoing_datagram_stream_t outgoing;
-	poll_own_pollable_t outgoing_pollable;
-} udp_socket_streams_t;
+  /// Implementation of `fstat` the function call, used to learn about file
+  /// descriptors.
+  int (*fstat)(void*, struct stat*);
 
-typedef struct {
-	int dummy;
-} udp_socket_state_unbound_t;
-typedef struct {
-	int dummy;
-} udp_socket_state_bound_nostreams_t;
+  // =====================================================================
+  // File-related APIs
 
-typedef struct {
-	udp_socket_streams_t streams; // Streams have no remote_address
-} udp_socket_state_bound_streaming_t;
+  /// Looks up a `wasi:filesystem/types.descriptor`, if present, from this
+  /// object.
+  int (*get_file)(void*, filesystem_borrow_descriptor_t*);
+  /// Implementation of `lseek`-the-function.
+  off_t (*seek)(void*, off_t, int);
+  /// Used during `unlinkat` to ensure that all internal stremas are
+  /// closed before deleting the file to ensure there are no open references to
+  /// it.
+  void (*close_streams)(void*);
+  /// Implementation of `fnctl(fd, F_GETFL)`.
+  int (*fcntl_getfl)(void*);
+  /// Implementation of `fnctl(fd, F_SETFL)`.
+  int (*fcntl_setfl)(void*, int);
+  /// Implementation of `isatty`-the-function.
+  int (*isatty)(void*);
 
-typedef struct {
-	udp_socket_streams_t streams; // Streams have a remote_address
-} udp_socket_state_connected_t;
+  // =====================================================================
+  // Sockets-related APIs
 
-// This is a tagged union. When adding/removing/renaming cases, be sure to keep the tag and union definitions in sync.
-// The "bound" state is split up into two distinct tags:
-// - "bound_nostreams": Bound, but no datagram streams set up (yet). That will be done the first time send or recv is called.
-// - "bound_streaming": Bound with active streams.
-typedef struct {
-	enum {
-		UDP_SOCKET_STATE_UNBOUND,
-		UDP_SOCKET_STATE_BOUND_NOSTREAMS,
-		UDP_SOCKET_STATE_BOUND_STREAMING,
-		UDP_SOCKET_STATE_CONNECTED,
-	} tag;
-	union {
-		udp_socket_state_unbound_t unbound;
-		udp_socket_state_bound_nostreams_t bound_nostreams;
-		udp_socket_state_bound_streaming_t bound_streaming;
-		udp_socket_state_connected_t connected;
-	};
-} udp_socket_state_t;
+  /// Implementation of `accept4`-the-function.
+  int (*accept4)(void*, struct sockaddr *addr, socklen_t *addrlen, int flags);
+  /// Implementation of `bind`-the-function.
+  int (*bind)(void*, const struct sockaddr *addr, socklen_t addrlen);
+  /// Implementation of `connect`-the-function.
+  int (*connect)(void*, const struct sockaddr *addr, socklen_t addrlen);
+  /// Implementation of `getsockname`-the-function.
+  int (*getsockname)(void*, struct sockaddr *addr, socklen_t *addrlen);
+  /// Implementation of `getpeername`-the-function.
+  int (*getpeername)(void*, struct sockaddr *addr, socklen_t *addrlen);
+  /// Implementation of `listen`-the-function.
+  int (*listen)(void*, int backlog);
+  /// Implementation of `recvfrom`-the-function.
+  ssize_t (*recvfrom)(void*, void *buffer, size_t length, int flags,
+                      struct sockaddr *addr, socklen_t *addrlen);
+  /// Implementation of `sendto`-the-function.
+  ssize_t (*sendto)(void*, const void *buffer, size_t length, int flags,
+                    const struct sockaddr *addr, socklen_t addrlen);
+  /// Implementation of `shutdown`-the-function.
+  int (*shutdown)(void*, int how);
+  /// Implementation of `getsockopt`-the-function.
+  int (*getsockopt)(void*, int level, int optname,
+                    void *optval, socklen_t *optlen);
+  /// Implementation of `setsockopt`-the-function.
+  int (*setsockopt)(void*, int level, int optname,
+                    const void *optval, socklen_t optlen);
 
-typedef struct {
-	udp_own_udp_socket_t socket;
-	poll_own_pollable_t socket_pollable;
-	bool blocking;
-	network_ip_address_family_t family;
-	udp_socket_state_t state;
-} udp_socket_t;
+  // =====================================================================
+  // `poll`-related APIs
 
-// This is a tagged union. When adding/removing/renaming cases, be sure to keep the tag and union definitions in sync.
+  /// Invoked when this descriptor is passed as one of the objects to the
+  /// `poll` function. The `wasi/poll.h` header has functions that can operate
+  /// on the `state` provided. This should invoke `__wasilibc_poll_add`, for
+  /// example, for any event in `events` with a pollable derived from this
+  /// object.
+  ///
+  /// If this function is not provided then `poll` will use `get_read_stream`
+  /// and `get_write_stream`, if present, to handle `POLL{RD,WR}NORM` events.
+  int (*poll_register)(void*, poll_state_t *state, short events);
+
+  /// Invoked when `poll` has already run and detected that this object was
+  /// ready. The `events` provided are the same as those provided to
+  /// `__wasilibc_poll_add` originally. This function should call
+  /// `__wasilibc_poll_ready` for example to indicate that the underlying
+  /// `pollfd` structure has some events ready.
+  ///
+  /// If this function is not provided then `events` will automatically
+  /// be placed into the `revents` field of `pollfd`.
+  int (*poll_finish)(void*, poll_state_t *state, short events);
+} descriptor_vtable_t;
+
+/// A "fat pointer" which is placed inside of the descriptor table.
 typedef struct {
-	enum {
-		DESCRIPTOR_TABLE_ENTRY_TCP_SOCKET,
-		DESCRIPTOR_TABLE_ENTRY_UDP_SOCKET,
-	} tag;
-	union {
-		tcp_socket_t tcp_socket;
-		udp_socket_t udp_socket;
-	};
+  /// Arbitrary descriptor-specific data passed to `vtable` function pointer.
+  void *data;
+  /// Definition of various operations for this descriptor.
+  descriptor_vtable_t *vtable;
 } descriptor_table_entry_t;
 
-bool descriptor_table_insert(descriptor_table_entry_t entry, int *fd);
+/// Inserts the `entry` provided into the descriptor table, returning the
+/// integer file descriptor used to refer to it.
+///
+/// On failure returns -1, sets `errno`, and runs `entry`'s destructor.
+int descriptor_table_insert(descriptor_table_entry_t entry);
 
-bool descriptor_table_get_ref(int fd, descriptor_table_entry_t **entry);
+/// Looks up a descriptor by its file descriptor.
+///
+/// On success returns a non-null value of the entry in the table. On failure
+/// returns `NULL` and sets errno.
+descriptor_table_entry_t *descriptor_table_get_ref(int fd);
 
-bool descriptor_table_remove(int fd, descriptor_table_entry_t *entry);
+/// Removes the specified file descriptor from the table.
+///
+/// On success returns 0 and runs the entry's destructor. On failure returns -1
+/// and sets `errno`.
+int descriptor_table_remove(int fd);
+
+/// Moves `fd` to `newfd` in the descriptor table.
+///
+/// This will overwrite `newfd` and open up `fd` for a future file descriptor.
+/// Both descriptors are required to be present. Returns 0 on success and -1 +
+/// errno on failure.
+int descriptor_table_renumber(int fd, int newfd);
 
 #endif

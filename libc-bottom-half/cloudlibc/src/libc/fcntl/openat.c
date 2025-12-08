@@ -3,7 +3,15 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <assert.h>
+#ifdef __wasilibc_use_wasip2
+#include <wasi/wasip2.h>
+#include <wasi/file.h>
+#include <wasi/descriptor_table.h>
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#else
 #include <wasi/api.h>
+#endif
 #include <wasi/libc.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -21,6 +29,82 @@ static_assert(O_EXCL >> 12 == __WASI_OFLAGS_EXCL, "Value mismatch");
 static_assert(O_TRUNC >> 12 == __WASI_OFLAGS_TRUNC, "Value mismatch");
 
 int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
+
+#ifdef __wasilibc_use_wasip2
+  // Set up path flags
+  filesystem_path_flags_t lookup_flags = 0;
+  if ((oflag & O_NOFOLLOW) == 0)
+    lookup_flags |= FILESYSTEM_PATH_FLAGS_SYMLINK_FOLLOW;
+
+  // Set up open flags
+  filesystem_open_flags_t open_flags = 0;
+  if ((oflag & O_CREAT) != 0)
+      open_flags |= FILESYSTEM_OPEN_FLAGS_CREATE;
+  if ((oflag & O_DIRECTORY) != 0)
+      open_flags |= FILESYSTEM_OPEN_FLAGS_DIRECTORY;
+  if ((oflag & O_EXCL) != 0)
+      open_flags |= FILESYSTEM_OPEN_FLAGS_EXCLUSIVE;
+  if ((oflag & O_TRUNC) != 0)
+      open_flags |= FILESYSTEM_OPEN_FLAGS_TRUNCATE;
+
+  // Set up descriptor flags
+  filesystem_descriptor_flags_t fs_flags = 0;
+
+  switch (oflag & O_ACCMODE) {
+    case O_RDONLY:
+    case O_RDWR:
+    case O_WRONLY:
+      if ((oflag & O_RDONLY) != 0) {
+        fs_flags |= FILESYSTEM_DESCRIPTOR_FLAGS_READ;
+      }
+      if ((oflag & O_WRONLY) != 0) {
+        fs_flags |= FILESYSTEM_DESCRIPTOR_FLAGS_WRITE | FILESYSTEM_DESCRIPTOR_FLAGS_MUTATE_DIRECTORY;
+      }
+      break;
+    case O_EXEC:
+      break;
+    case O_SEARCH:
+      break;
+    default:
+      errno = EINVAL;
+      return -1;
+  }
+
+  if ((oflag & O_SYNC) != 0)
+    fs_flags |= FILESYSTEM_DESCRIPTOR_FLAGS_FILE_INTEGRITY_SYNC;
+  if ((oflag & O_DSYNC) != 0)
+    fs_flags |= FILESYSTEM_DESCRIPTOR_FLAGS_DATA_INTEGRITY_SYNC;
+  if ((oflag & O_RSYNC) != 0)
+    fs_flags |= FILESYSTEM_DESCRIPTOR_FLAGS_REQUESTED_WRITE_SYNC;
+
+  // Translate the file descriptor to an internal handle
+  filesystem_borrow_descriptor_t file_handle;
+  if (fd_to_file_handle(fd, &file_handle) < 0)
+    return -1;
+
+  // Construct a WASI string for the path
+  wasip2_string_t path2;
+  if (wasip2_string_from_c(path, &path2) < 0)
+    return -1;
+
+  // Open the file, yielding a new handle
+  filesystem_own_descriptor_t new_handle;
+  filesystem_error_code_t error_code;
+  bool ok = filesystem_method_descriptor_open_at(file_handle,
+                                                 lookup_flags,
+                                                 &path2,
+                                                 open_flags,
+                                                 fs_flags,
+                                                 &new_handle,
+                                                 &error_code);
+  if (!ok) {
+    translate_error(error_code);
+    return -1;
+  }
+
+  // Update the descriptor table with the new handle
+  return __wasilibc_add_file(new_handle, oflag);
+#else
   // Compute rights corresponding with the access modes provided.
   // Attempt to obtain all rights, except the ones that contradict the
   // access mode provided to openat().
@@ -77,4 +161,6 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
     return -1;
   }
   return newfd;
+#endif
+
 }

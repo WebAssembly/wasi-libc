@@ -3,6 +3,10 @@
 
 #include <__typedef_off_t.h>
 #include <__struct_timespec.h>
+#include <unistd.h>
+#ifdef __wasilibc_use_wasip2
+#include <wasi/wasip2.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,10 +21,11 @@ struct timespec;
 /// afterward, you should call this before doing so.
 void __wasilibc_populate_preopens(void);
 
+#ifndef __wasilibc_use_wasip2
 /// Register the given pre-opened file descriptor under the given path.
-///
-/// This function does not take ownership of `prefix` (it makes its own copy).
-int __wasilibc_register_preopened_fd(int fd, const char *prefix);
+int __wasilibc_register_preopened_fd(int fd,
+                                     const char* prefix);
+#endif
 
 /// Renumber `fd` to `newfd`; similar to `dup2` but does a move rather than a
 /// copy.
@@ -63,6 +68,13 @@ int __wasilibc_rename_oldat(int olddirfd, const char *oldpath, const char *newpa
     __attribute__((__warn_unused_result__));
 int __wasilibc_rename_newat(const char *oldpath, int newdirfd, const char *newpath)
     __attribute__((__warn_unused_result__));
+
+/// Enable busywait in futex on current thread.
+void __wasilibc_enable_futex_busywait_on_current_thread(void);
+
+/// Fill a buffer with random bytes
+int __wasilibc_random(void* buffer, size_t len)
+   __attribute__((__warn_unused_result__));
 
 #ifdef __cplusplus
 }

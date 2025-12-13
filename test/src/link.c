@@ -25,9 +25,34 @@ int main(void)
         close(fd);
 
         TEST(link(tmp, tmp1)==0);
-
         TEST(unlink(tmp1) != -1);
+
+        TEST(linkat(AT_FDCWD, tmp, AT_FDCWD, tmp1, 0)==0);
+        TEST(unlink(tmp1) != -1);
+
         TEST(unlink(tmp) != -1);
+
+        char src[] = "/dir/a";
+        char dst[] = "/dir/b";
+
+        TEST(mkdir("dir", 0700) == 0);
+	TEST((fd = open(src, flags | O_WRONLY | O_CREAT | O_EXCL, 0600)) > 2);
+        close(fd);
+
+        TEST(link(src, dst)==0);
+        TEST(unlink(dst) != -1);
+
+        TEST(linkat(AT_FDCWD, src, AT_FDCWD, dst, 0) == 0);
+        TEST(unlink(dst) != -1);
+
+        TEST(chdir("/dir") == 0);
+
+        TEST(linkat(AT_FDCWD, "a", AT_FDCWD, "b", 0) == 0);
+        TEST(unlink("b") != -1);
+
+        TEST(chdir("/") == 0);
+
+        TEST(unlink(src) != -1);
 
 	return t_status;
 }

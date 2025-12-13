@@ -408,7 +408,7 @@ __wasilibc_link(const char *oldpath, const char *newpath, int flags)
     char *old_relative_path;
     char *new_relative_path;
     int old_dirfd = find_relpath(oldpath, &old_relative_path);
-    int new_dirfd = find_relpath(newpath, &new_relative_path);
+    int new_dirfd = find_relpath_alt(newpath, &new_relative_path);
 
     // If we can't find a preopen for it, fail as if we can't find the path.
     if (old_dirfd == -1 || new_dirfd == -1) {

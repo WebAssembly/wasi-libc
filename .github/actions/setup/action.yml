@@ -57,10 +57,4 @@ runs:
         echo "CC=clang-$v" >> $GITHUB_ENV
         echo "AR=llvm-ar-$v" >> $GITHUB_ENV
         echo "NM=llvm-nm-$v" >> $GITHUB_ENV
-        # Note: wasm-component-ld is only needed for Linux because
-        # currently, wasm32-wasip2 is only tested on Linux. If that changes,
-        # this step will have to be added to the other targets.
-        curl -fsSLO https://github.com/bytecodealliance/wasm-component-ld/releases/download/v0.5.15/wasm-component-ld-v0.5.15-x86_64-linux.tar.gz
-        tar xzf wasm-component-ld-v0.5.15-x86_64-linux.tar.gz
-        echo "$(pwd)/wasm-component-ld-v0.5.15-x86_64-linux" >> $GITHUB_PATH
       if: runner.os == 'Linux'

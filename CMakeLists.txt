@@ -135,6 +135,7 @@ if (NOT (WASI STREQUAL "p1"))
   include(wasm-component-ld)
 endif()
 include(check-symbols)
+include(clang-format)
 
 # =============================================================================
 # Generic top-level build flags/settings
@@ -210,6 +211,7 @@ function(add_sysroot_header src dst)
   )
   add_custom_target(sysroot-header-${target_name} DEPENDS ${SYSROOT_INC}/${dst})
   add_dependencies(sysroot_inc sysroot-header-${target_name})
+  clang_format_file(${src})
 endfunction()
 
 # Adds two object libraries named `${name}-{shared,static}` and hook them up to
@@ -219,6 +221,7 @@ function(add_object_library name)
   set_target_properties(${name}-shared PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
   target_compile_options(${name}-shared PRIVATE -fvisibility=default)
   add_dependencies(${name}-shared sysroot_inc)
+  clang_format_target(${name}-shared)
 
   add_library(${name}-static OBJECT EXCLUDE_FROM_ALL ${ARGN})
   add_dependencies(${name}-static sysroot_inc)
@@ -244,6 +247,7 @@ function(add_internal_shared_library name)
   add_dependencies(${name} sysroot-c builtins)
   target_compile_options(${name} PRIVATE -fvisibility=default)
   set_target_properties(${name} PROPERTIES NO_SONAME 1)
+  clang_format_target(${name})
 endfunction()
 
 # Adds `${name}` and `${name}-static.

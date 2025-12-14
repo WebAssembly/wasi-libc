@@ -74,6 +74,7 @@ function(add_test_executable executable_name src)
 
   # Build the test exeutable itself and apply all custom options as applicable.
   add_executable(${executable_name} ${src})
+  clang_format_target(${executable_name})
   add_wasilibc_flags(${executable_name})
   target_link_libraries(${executable_name} PRIVATE libc_test_support)
   foreach(flag IN LISTS arg_CFLAGS)

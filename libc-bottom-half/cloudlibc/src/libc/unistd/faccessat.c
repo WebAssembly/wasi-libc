@@ -2,17 +2,16 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#include <wasi/file_utils.h>
-#include <common/errors.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
+
+#ifdef __wasip2__
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#endif
 
 int __wasilibc_nocwd_faccessat(int fd, const char *path, int amode, int flag) {
   // Validate function parameters.
@@ -22,7 +21,7 @@ int __wasilibc_nocwd_faccessat(int fd, const char *path, int amode, int flag) {
     return -1;
   }
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   // Translate the file descriptor to an internal handle
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;

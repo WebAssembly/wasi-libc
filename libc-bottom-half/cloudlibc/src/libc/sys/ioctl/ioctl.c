@@ -6,17 +6,16 @@
 
 #include <errno.h>
 #include <stdarg.h>
-
-#ifdef __wasilibc_use_wasip2
-#include <wasi/descriptor_table.h>
-#else
 #include <wasi/api.h>
+
+#ifdef __wasip2__
+#include <wasi/descriptor_table.h>
 #endif
 
 int ioctl(int fildes, int request, ...) {
   switch (request) {
     case FIONREAD: {
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
       // wasip2 doesn't support this operation
       errno = ENOTSUP;
       return -1;
@@ -66,7 +65,7 @@ int ioctl(int fildes, int request, ...) {
 #endif
     }
     case FIONBIO: {
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
       descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
       va_list ap;
       va_start(ap, request);

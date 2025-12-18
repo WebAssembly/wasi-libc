@@ -1,16 +1,15 @@
-#ifdef __wasilibc_use_wasip2
+#include <errno.h>
+#include <wasi/api.h>
+#include <wasi/libc.h>
+
+#ifdef __wasip2__
 #include <common/errors.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
-#include <wasi/wasip2.h>
-#else
-#include <wasi/api.h>
 #endif
-#include <errno.h>
-#include <wasi/libc.h>
 
 int __wasilibc_nocwd___wasilibc_rmdirat(int fd, const char *path) {
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fd, &file_handle) < 0)

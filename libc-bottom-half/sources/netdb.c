@@ -5,7 +5,7 @@
 #include <string.h>
 #include <wasi/sockets_utils.h>
 
-#ifndef __wasilibc_use_wasip2
+#ifdef __wasip1__
 static_assert(SOCK_DGRAM == __WASI_FILETYPE_SOCKET_DGRAM, "value mismatch");
 static_assert(SOCK_STREAM == __WASI_FILETYPE_SOCKET_STREAM, "value mismatch");
 #endif

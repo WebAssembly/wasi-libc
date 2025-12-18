@@ -10,7 +10,7 @@
 #include <stddef.h>
 #include <unistd.h>
 
-#ifndef __wasilibc_use_wasip2
+#ifdef __wasip1__
 static_assert(offsetof(struct iovec, iov_base) ==
                   offsetof(__wasi_iovec_t, buf),
               "Offset mismatch");
@@ -32,7 +32,7 @@ ssize_t readv(int fildes, const struct iovec *iov, int iovcnt) {
     errno = EINVAL;
     return -1;
   }
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   // Skip empty iovecs and then delegate to `read` with the first non-empty
   // iovec.
   while (iovcnt) {

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
 #include <wasi/wasip2.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>

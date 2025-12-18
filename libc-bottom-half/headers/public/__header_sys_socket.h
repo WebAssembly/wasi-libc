@@ -4,15 +4,14 @@
 #include <__struct_msghdr.h>
 #include <__struct_sockaddr.h>
 #include <__struct_sockaddr_storage.h>
-#include <__wasi_snapshot.h>
 
-#include <wasi/api.h>
+#include <wasi/version.h>
 
 #define SHUT_RD 1
 #define SHUT_WR 2
 #define SHUT_RDWR (SHUT_RD | SHUT_WR)
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
 #define MSG_DONTWAIT 0x0040
 #define MSG_NOSIGNAL 0x4000
 #define MSG_PEEK 0x0002
@@ -43,11 +42,12 @@
 #define SO_SNDTIMEO 21
 #endif
 
-#else // __wasilibc_use_wasip2
+#else // __wasip2__
+#include <wasi/api.h>
 #define MSG_PEEK __WASI_RIFLAGS_RECV_PEEK
 #define MSG_WAITALL __WASI_RIFLAGS_RECV_WAITALL
 #define MSG_TRUNC __WASI_ROFLAGS_RECV_DATA_TRUNCATED
-#endif // __wasilibc_use_wasip2
+#endif // __wasip2__
 
 #define SOCK_DGRAM 5
 #define SOCK_STREAM 6

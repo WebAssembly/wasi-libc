@@ -3,11 +3,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <common/clock.h>
-
+#include <assert.h>
 #include <wasi/api.h>
 #include <time.h>
 
-#ifndef __wasilibc_use_wasip2
+#ifdef __wasip1__
 static_assert(__WASI_CLOCKID_REALTIME == CLOCKID_REALTIME,
               "__WASI_CLOCKID_REALTIME has changed value");
 #endif

@@ -3,17 +3,16 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <assert.h>
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#include <wasi/file_utils.h>
-#include <common/errors.h>
-#else
-#include <wasi/api.h>
-#endif
 #include <errno.h>
 #include <fcntl.h>
+#include <wasi/api.h>
 
-#ifndef __wasilibc_use_wasip2
+#ifdef __wasip2__
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#endif
+
+#ifdef __wasip1__
 static_assert(POSIX_FADV_DONTNEED == __WASI_ADVICE_DONTNEED,
               "Value mismatch");
 static_assert(POSIX_FADV_NOREUSE == __WASI_ADVICE_NOREUSE, "Value mismatch");
@@ -29,7 +28,7 @@ int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
   if (offset < 0 || len < 0)
     return EINVAL;
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fd, &file_handle) < 0)
     return EBADF;

@@ -38,16 +38,13 @@ hidden void __stack_chk_fail_local(void);
 weak_alias(__stack_chk_fail, __stack_chk_fail_local);
 
 #ifndef __wasilibc_unmodified_upstream
-#ifdef __wasilibc_use_wasip2
-# include <wasi/libc.h>
-#else
-# include <wasi/api.h>
-#endif
+#include <wasi/libc.h>
+#include <wasi/api.h>
 
 __attribute__((constructor(60)))
 static void __wasilibc_init_ssp(void) {
 	uintptr_t entropy;
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
         int len = sizeof(uintptr_t);
 
         int r = __wasilibc_random(&entropy, len);

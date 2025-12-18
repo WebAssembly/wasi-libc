@@ -7,7 +7,7 @@
 #include "dirent_impl.h"
 
 void seekdir(DIR *dirp, long loc) {
-#if __wasilibc_use_wasip2
+#ifdef __wasip2__
   dirp->stream.__handle = 0;
   dirp->skip = loc;
   dirp->offset = 0;

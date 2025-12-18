@@ -3,25 +3,24 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <assert.h>
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#include <wasi/descriptor_table.h>
-#include <wasi/file_utils.h>
-#include <common/errors.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <errno.h>
 #include <unistd.h>
 
-#ifndef __wasilibc_use_wasip2
+#ifdef __wasip2__
+#include <wasi/descriptor_table.h>
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#endif
+
+#ifdef __wasip1__
 static_assert(SEEK_CUR == __WASI_WHENCE_CUR, "Value mismatch");
 static_assert(SEEK_END == __WASI_WHENCE_END, "Value mismatch");
 static_assert(SEEK_SET == __WASI_WHENCE_SET, "Value mismatch");
 #endif
 
 off_t __lseek(int fildes, off_t offset, int whence) {
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   // Look up a stream for fildes
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
   if (!entry)

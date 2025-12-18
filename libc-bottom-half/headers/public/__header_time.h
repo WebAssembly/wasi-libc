@@ -10,10 +10,6 @@
 #include <__typedef_clockid_t.h>
 #include <__typedef_time_t.h>
 
-#ifndef __wasilibc_use_wasip2
-#include <wasi/api.h>
-#endif
-
 #define TIMER_ABSTIME 1
 
 extern const struct __clockid _CLOCK_MONOTONIC;

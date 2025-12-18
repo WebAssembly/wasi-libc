@@ -1,14 +1,13 @@
 #include <stdlib.h>
 #include <sysexits.h>
 #include <unistd.h>
-#ifdef __wasilibc_use_wasip2
-#include <string.h>
-#include <wasi/wasip2.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <wasi/libc-environ.h>
 #include <wasi/libc.h>
+
+#ifdef __wasip2__
+#include <string.h>
+#endif
 
 /// If the program doesn't use `environ`, it'll get this version of
 /// `__wasilibc_environ`, which isn't initialized with a constructor function.
@@ -31,7 +30,7 @@ static char *empty_environ[1] = {NULL};
 
 // See the comments in libc-environ.h.
 void __wasilibc_initialize_environ(void) {
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   // Get the environment
   wasip2_list_tuple2_string_string_t wasi_environment;
   environment_get_environment(&wasi_environment);

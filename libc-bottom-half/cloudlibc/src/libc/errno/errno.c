@@ -7,7 +7,7 @@
 #include <errno.h>
 #include <threads.h>
 
-#ifndef __wasilibc_use_wasip2
+#ifdef __wasip1__
 static_assert(E2BIG == __WASI_ERRNO_2BIG, "Value mismatch");
 static_assert(EACCES == __WASI_ERRNO_ACCES, "Value mismatch");
 static_assert(EADDRINUSE == __WASI_ERRNO_ADDRINUSE, "Value mismatch");

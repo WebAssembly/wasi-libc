@@ -1,15 +1,14 @@
-#ifdef __wasilibc_use_wasip2
-#include <common/errors.h>
-#include <wasi/file_utils.h>
-#include <wasi/wasip2.h>
-#else
-#include <wasi/api.h>
-#endif
 #include <__errno.h>
 #include <__function___isatty.h>
+#include <wasi/api.h>
+
+#ifdef __wasip2__
+#include <common/errors.h>
+#include <wasi/file_utils.h>
+#endif
 
 int __isatty(int fd) {
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   // Translate the file descriptor into an internal handle
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
   if (!entry)
@@ -40,7 +39,7 @@ int __isatty(int fd) {
   return 1;
 #endif
 }
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
 weak_alias(__isatty, isatty);
 #else
 extern __typeof(__isatty) isatty __attribute__((weak, alias("__isatty")));

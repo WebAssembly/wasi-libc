@@ -9,11 +9,7 @@
 
 #include <sys/time.h>
 
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <stdbool.h>
 #include <time.h>
 
@@ -21,7 +17,7 @@
 #define USEC_PER_SEC 1000000
 
 static inline bool timespec_to_timestamp_exact(
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   const struct timespec *timespec, wall_clock_datetime_t *timestamp) {
 #else
   const struct timespec *timespec, __wasi_timestamp_t *timestamp) {
@@ -34,7 +30,7 @@ static inline bool timespec_to_timestamp_exact(
   if (timespec->tv_sec < 0)
     return false;
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   timestamp->seconds = timespec->tv_sec;
   timestamp->nanoseconds = timespec->tv_nsec;
   return true;
@@ -46,7 +42,7 @@ static inline bool timespec_to_timestamp_exact(
 }
 
 static inline bool timespec_to_timestamp_clamp(
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   const struct timespec *timespec, wall_clock_datetime_t *timestamp) {
 #else
   const struct timespec *timespec, __wasi_timestamp_t *timestamp) {
@@ -57,7 +53,7 @@ static inline bool timespec_to_timestamp_clamp(
 
   if (timespec->tv_sec < 0) {
     // Timestamps before the Epoch are not supported.
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
     timestamp->seconds = 0;
     timestamp->nanoseconds = 0;
   } else {
@@ -74,7 +70,7 @@ static inline bool timespec_to_timestamp_clamp(
   return true;
 }
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
 static inline struct timespec timestamp_to_timespec(
   wall_clock_datetime_t *timestamp) {
   return (struct timespec){.tv_sec = timestamp->seconds,
@@ -89,7 +85,7 @@ static inline struct timespec timestamp_to_timespec(
 }
 #endif
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
 static inline struct timespec instant_to_timespec(
   monotonic_clock_instant_t ns) {
     // Decompose instant into seconds and nanoseconds

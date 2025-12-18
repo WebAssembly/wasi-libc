@@ -2,16 +2,16 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#include <wasi/file_utils.h>
-#include <common/errors.h>
-#else
-#include <wasi/api.h>
-#endif
 #include <dirent.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <wasi/api.h>
+
+#ifdef __wasip2__
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#else
+#endif
 
 #include "dirent_impl.h"
 
@@ -20,7 +20,7 @@ DIR *fdopendir(int fd) {
   DIR *dirp = malloc(sizeof(*dirp));
   if (dirp == NULL)
     return NULL;
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
 
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;

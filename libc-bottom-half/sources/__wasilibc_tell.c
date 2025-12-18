@@ -1,15 +1,14 @@
-#ifdef __wasilibc_use_wasip2
+#include <errno.h>
+#include <wasi/api.h>
+
+#ifdef __wasip2__
 #include <common/errors.h>
 #include <unistd.h>
 #include <wasi/descriptor_table.h>
-#include <wasi/wasip2.h>
-#else
-#include <wasi/api.h>
 #endif
-#include <errno.h>
 
 off_t __wasilibc_tell(int fildes) {
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   // Look up a stream for fildes
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
   if (!entry)

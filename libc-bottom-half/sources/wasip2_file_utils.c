@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <common/errors.h>
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
 
 /**
  * Validates that `ptr_signed` is a valid utf-8 string.
@@ -132,4 +132,4 @@ int __wasilibc_read_stream(int fd,
   return 0;
 }
 
-#endif // __wasilibc_use_wasip2
+#endif // __wasip2__

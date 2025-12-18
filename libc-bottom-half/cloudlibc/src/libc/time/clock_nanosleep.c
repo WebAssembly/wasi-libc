@@ -4,22 +4,17 @@
 
 #include <common/clock.h>
 #include <common/time.h>
-
 #include <assert.h>
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <errno.h>
 #include <time.h>
 
-#ifndef __wasilibc_use_wasip2
+#ifdef __wasip1__
 static_assert(TIMER_ABSTIME == __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME,
               "Value mismatch");
 #endif
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
 int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
                     struct timespec *rmtp) {
   if ((flags & ~TIMER_ABSTIME) != 0)

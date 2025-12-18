@@ -1,0 +1,14 @@
+#ifndef __WASI_VERSION_H
+#define __WASI_VERSION_H
+
+#ifndef __wasi__
+#error <wasi/version.h> is only supported on WASI platforms.
+#endif
+
+// After llvm/llvm-project#165345 these can be conditionally defined by a clang
+// version test here to use the upstream definitions.
+#cmakedefine __wasip1__
+#cmakedefine __wasip2__
+#cmakedefine __wasip3__
+
+#endif /* __WASI_VERSION_H */

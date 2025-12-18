@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
-#include <sys/socket.h>
+#include <wasi/version.h>
 
 #define TEST(c)                                                                \
   do {                                                                         \
@@ -25,7 +25,7 @@ int main(void) {
   TEST((fd = open(tmp, flags, 0600)) > 2);
   TEST(write(fd, "hello", 6) == 6);
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   // Not supported on wasip2
   TEST(ioctl(fd, FIONREAD, &nbytes) == -1);
 #else

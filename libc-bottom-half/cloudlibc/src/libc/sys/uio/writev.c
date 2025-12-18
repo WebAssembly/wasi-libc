@@ -3,20 +3,18 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <sys/uio.h>
-
 #include <assert.h>
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#include <wasi/descriptor_table.h>
-#include <common/errors.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <errno.h>
 #include <stddef.h>
 #include <unistd.h>
 
-#ifndef __wasilibc_use_wasip2
+#ifdef __wasip2__
+#include <wasi/descriptor_table.h>
+#include <common/errors.h>
+#endif
+
+#ifdef __wasip1__
 static_assert(offsetof(struct iovec, iov_base) ==
                   offsetof(__wasi_ciovec_t, buf),
               "Offset mismatch");
@@ -39,7 +37,7 @@ ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
     return -1;
   }
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   // Skip empty iovecs and then delegate to `read` with the first non-empty
   // iovec.
   while (iovcnt) {

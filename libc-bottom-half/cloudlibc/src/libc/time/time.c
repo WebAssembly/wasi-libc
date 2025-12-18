@@ -3,16 +3,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <common/time.h>
-
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <time.h>
 
 time_t time(time_t *tloc) {
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   wall_clock_datetime_t res;
   wall_clock_now(&res);
   uint64_t ts = (res.seconds * NSEC_PER_SEC) + res.nanoseconds;

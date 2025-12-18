@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#ifndef __wasilibc_use_wasip2
 static_assert(POSIX_FADV_DONTNEED == __WASI_ADVICE_DONTNEED,
               "Value mismatch");
 static_assert(POSIX_FADV_NOREUSE == __WASI_ADVICE_NOREUSE, "Value mismatch");
@@ -22,6 +23,7 @@ static_assert(POSIX_FADV_SEQUENTIAL == __WASI_ADVICE_SEQUENTIAL,
               "Value mismatch");
 static_assert(POSIX_FADV_WILLNEED == __WASI_ADVICE_WILLNEED,
               "Value mismatch");
+#endif
 
 int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
   if (offset < 0 || len < 0)

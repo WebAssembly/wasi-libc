@@ -16,6 +16,7 @@
 #include <stddef.h>
 #include <unistd.h>
 
+#ifndef __wasilibc_use_wasip2
 static_assert(offsetof(struct iovec, iov_base) ==
                   offsetof(__wasi_ciovec_t, buf),
               "Offset mismatch");
@@ -30,6 +31,7 @@ static_assert(sizeof(((struct iovec *)0)->iov_len) ==
               "Size mismatch");
 static_assert(sizeof(struct iovec) == sizeof(__wasi_ciovec_t),
               "Size mismatch");
+#endif
 
 ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
   if (iovcnt < 0) {

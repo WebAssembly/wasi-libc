@@ -1,10 +1,10 @@
 #ifndef __wasilibc___header_sys_socket_h
 #define __wasilibc___header_sys_socket_h
 
-#include <__wasi_snapshot.h>
 #include <__struct_msghdr.h>
 #include <__struct_sockaddr.h>
 #include <__struct_sockaddr_storage.h>
+#include <__wasi_snapshot.h>
 
 #include <wasi/api.h>
 
@@ -13,16 +13,16 @@
 #define SHUT_RDWR (SHUT_RD | SHUT_WR)
 
 #ifdef __wasilibc_use_wasip2
-#define MSG_DONTWAIT  0x0040
-#define MSG_NOSIGNAL  0x4000
-#define MSG_PEEK      0x0002
-#define MSG_WAITALL   0x0100
-#define MSG_TRUNC     0x0020
+#define MSG_DONTWAIT 0x0040
+#define MSG_NOSIGNAL 0x4000
+#define MSG_PEEK 0x0002
+#define MSG_WAITALL 0x0100
+#define MSG_TRUNC 0x0020
 
-#define SOL_IP     0
-#define SOL_TCP    6
-#define SOL_UDP    17
-#define SOL_IPV6   41
+#define SOL_IP 0
+#define SOL_TCP 6
+#define SOL_UDP 17
+#define SOL_IPV6 41
 
 #define SOMAXCONN 128
 
@@ -34,13 +34,13 @@
 #define SO_ACCEPTCONN 30
 #define SO_PROTOCOL 38
 #define SO_DOMAIN 39
- 
+
 #if __LONG_MAX == 0x7fffffff
-#define SO_RCVTIMEO     66
-#define SO_SNDTIMEO     67
+#define SO_RCVTIMEO 66
+#define SO_SNDTIMEO 67
 #else
-#define SO_RCVTIMEO     20
-#define SO_SNDTIMEO     21
+#define SO_RCVTIMEO 20
+#define SO_SNDTIMEO 21
 #endif
 
 #else // __wasilibc_use_wasip2

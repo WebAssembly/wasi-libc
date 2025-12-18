@@ -5,8 +5,8 @@
 
 /* As specified in POSIX. */
 struct timespec {
-    time_t tv_sec;
-    long tv_nsec;
+  time_t tv_sec;
+  long tv_nsec;
 };
 
 #endif

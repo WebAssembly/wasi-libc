@@ -7,8 +7,8 @@
 #include <__macro_FD_SETSIZE.h>
 
 typedef struct {
-    size_t __nfds;
-    int __fds[FD_SETSIZE];
+  size_t __nfds;
+  int __fds[FD_SETSIZE];
 } fd_set;
 
 #endif

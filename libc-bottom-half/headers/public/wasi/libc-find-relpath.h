@@ -23,12 +23,12 @@ extern "C" {
  *
  *  * ENOMEM - failed to allocate memory for internal routines.
  *  * ENOENT - the `path` could not be found relative to any preopened dir.
- *  * ERANGE - the `relative_path` buffer is too small to hold the relative path.
+ *  * ERANGE - the `relative_path` buffer is too small to hold the relative
+ * path.
  */
 int __wasilibc_find_relpath(const char *path,
                             const char **__restrict__ abs_prefix,
-                            char **relative_path,
-                            size_t relative_path_len);
+                            char **relative_path, size_t relative_path_len);
 
 /**
  * Look up the given `path`, which is interpreted as absolute, in the preopened
@@ -64,13 +64,9 @@ int __wasilibc_find_abspath(const char *abspath,
  *
  * See documentation on `__wasilibc_find_relpath` for more information.
  */
-int __wasilibc_find_relpath_alloc(
-    const char *path,
-    const char **abs,
-    char **relative,
-    size_t *relative_len,
-    int can_realloc
-) __attribute__((__weak__));
+int __wasilibc_find_relpath_alloc(const char *path, const char **abs,
+                                  char **relative, size_t *relative_len,
+                                  int can_realloc) __attribute__((__weak__));
 
 #ifdef __cplusplus
 }

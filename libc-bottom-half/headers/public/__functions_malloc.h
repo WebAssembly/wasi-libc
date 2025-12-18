@@ -12,11 +12,14 @@ extern "C" {
 
 void *malloc(size_t __size) __attribute__((__malloc__, __warn_unused_result__));
 void free(void *__ptr);
-void *calloc(size_t __nmemb, size_t __size) __attribute__((__malloc__, __warn_unused_result__));
-void *realloc(void *__ptr, size_t __size) __attribute__((__warn_unused_result__));
+void *calloc(size_t __nmemb, size_t __size)
+    __attribute__((__malloc__, __warn_unused_result__));
+void *realloc(void *__ptr, size_t __size)
+    __attribute__((__warn_unused_result__));
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
-void *reallocarray(void *__ptr, size_t __nmemb, size_t __size) __attribute__((__warn_unused_result__));
+void *reallocarray(void *__ptr, size_t __nmemb, size_t __size)
+    __attribute__((__warn_unused_result__));
 #endif
 
 #ifdef __cplusplus

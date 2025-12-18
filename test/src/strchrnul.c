@@ -28,7 +28,8 @@ int main(void) {
         memset(ptr, 5, length);
 
         // The first instance of the character is found.
-        if (pos >= 0) ptr[pos + 2] = 7;
+        if (pos >= 0)
+          ptr[pos + 2] = 7;
         ptr[pos] = 7;
         ptr[length] = 0;
 
@@ -38,7 +39,8 @@ int main(void) {
     }
 
     // We need space for the terminator.
-    if (length == 0) continue;
+    if (length == 0)
+      continue;
 
     // Ensure we never read past the end of memory.
     char *ptr = LIMIT - length;

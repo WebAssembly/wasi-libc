@@ -8,7 +8,7 @@
 #include "dirent_impl.h"
 
 void rewinddir(DIR *dirp) {
-#if __wasilibc_use_wasip2
+#ifdef __wasip2__
   dirp->stream.__handle = 0;
   dirp->skip = 0;
   dirp->offset = 0;

@@ -1,7 +1,9 @@
 #ifndef DESCRIPTOR_TABLE_H
 #define DESCRIPTOR_TABLE_H
 
-#include <wasi/wasip2.h>
+#include <wasi/api.h>
+
+#ifndef __wasip1__
 #include <wasi/poll.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
@@ -147,4 +149,6 @@ int descriptor_table_remove(int fd);
 /// errno on failure.
 int descriptor_table_renumber(int fd, int newfd);
 
-#endif
+#endif // __wasip1__
+
+#endif // DESCRIPTOR_TABLE_H

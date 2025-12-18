@@ -4,22 +4,21 @@
 
 #include <sys/types.h>
 #include <sys/uio.h>
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
+#include <errno.h>
+#include <wasi/api.h>
+
+#ifdef __wasip2__
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #include <unistd.h>
-#else
-#include <wasi/api.h>
 #endif
-#include <errno.h>
 
 ssize_t pwritev(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
   if (iovcnt < 0 || offset < 0) {
     errno = EINVAL;
     return -1;
   }
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   // Skip empty iovecs and then delegate to `pwrite` with the first non-empty
   // iovec.
   while (iovcnt) {

@@ -1,5 +1,6 @@
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
+#include <wasi/api.h>
+
+#ifdef __wasip2__
 #include <errno.h>
 #include <stdlib.h>
 

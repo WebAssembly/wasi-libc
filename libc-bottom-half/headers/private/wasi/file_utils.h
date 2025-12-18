@@ -1,7 +1,9 @@
 #ifndef __wasi_file_utils_h
 #define __wasi_file_utils_h
 
-#ifdef __wasilibc_use_wasip2
+#include <wasi/version.h>
+
+#ifdef __wasip2__
 #include <assert.h>
 #include <wasi/wasip2.h>
 #include <wasi/descriptor_table.h>

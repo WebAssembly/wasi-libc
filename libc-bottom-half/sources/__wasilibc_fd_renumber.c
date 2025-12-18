@@ -1,18 +1,18 @@
-#ifdef __wasilibc_use_wasip2
-#include <wasi/descriptor_table.h>
-#include <wasi/file_utils.h>
-#else
-#include <wasi/api.h>
-#endif
 #include <errno.h>
 #include <unistd.h>
+#include <wasi/api.h>
 #include <wasi/libc.h>
+
+#ifdef __wasip2__
+#include <wasi/descriptor_table.h>
+#include <wasi/file_utils.h>
+#endif
 
 int __wasilibc_fd_renumber(int fd, int newfd) {
   // Scan the preopen fds before making any changes.
   __wasilibc_populate_preopens();
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   if (descriptor_table_renumber(fd, newfd) < 0)
     return -1;
 #else
@@ -29,7 +29,7 @@ int close(int fd) {
   // Scan the preopen fds before making any changes.
   __wasilibc_populate_preopens();
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   if (descriptor_table_remove(fd) < 0)
     return -1;
 
@@ -39,7 +39,7 @@ int close(int fd) {
     errno = error;
     return -1;
   }
-#endif // __wasilibc_use_wasip2
+#endif // __wasip2__
 
   return 0;
 }

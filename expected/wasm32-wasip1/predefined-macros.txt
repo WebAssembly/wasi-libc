@@ -1743,14 +1743,14 @@
 #define S_IRWXG (S_IXGRP | S_IWGRP | S_IRGRP)
 #define S_IRWXO (S_IXOTH | S_IWOTH | S_IROTH)
 #define S_IRWXU (S_IXUSR | S_IWUSR | S_IRUSR)
-#define S_ISBLK(m) (((m)&S_IFMT) == S_IFBLK)
-#define S_ISCHR(m) (((m)&S_IFMT) == S_IFCHR)
-#define S_ISDIR(m) (((m)&S_IFMT) == S_IFDIR)
-#define S_ISFIFO(m) (((m)&S_IFMT) == S_IFIFO)
+#define S_ISBLK(m) (((m) & S_IFMT) == S_IFBLK)
+#define S_ISCHR(m) (((m) & S_IFMT) == S_IFCHR)
+#define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#define S_ISFIFO(m) (((m) & S_IFMT) == S_IFIFO)
 #define S_ISGID (0x400)
-#define S_ISLNK(m) (((m)&S_IFMT) == S_IFLNK)
-#define S_ISREG(m) (((m)&S_IFMT) == S_IFREG)
-#define S_ISSOCK(m) (((m)&S_IFMT) == S_IFSOCK)
+#define S_ISLNK(m) (((m) & S_IFMT) == S_IFLNK)
+#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
+#define S_ISSOCK(m) (((m) & S_IFMT) == S_IFSOCK)
 #define S_ISUID (0x800)
 #define S_ISVTX (0x200)
 #define S_IWGRP (0x10)
@@ -3088,8 +3088,8 @@
 #define __WASI_ROFLAGS_RECV_DATA_TRUNCATED ((__wasi_roflags_t)(1 << 0))
 #define __WASI_SDFLAGS_RD ((__wasi_sdflags_t)(1 << 0))
 #define __WASI_SDFLAGS_WR ((__wasi_sdflags_t)(1 << 1))
-#define __WASI_SNAPSHOT_H 
 #define __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME ((__wasi_subclockflags_t)(1 << 0))
+#define __WASI_VERSION_H 
 #define __WASI_WHENCE_CUR (UINT8_C(1))
 #define __WASI_WHENCE_END (UINT8_C(2))
 #define __WASI_WHENCE_SET (UINT8_C(0))
@@ -3134,6 +3134,7 @@
 #define __wasi_libc_find_relpath_h 
 #define __wasi_libc_h 
 #define __wasi_libc_nocwd_h 
+#define __wasi_wasip1_h 
 #define __wasilibc___errno_h 
 #define __wasilibc___errno_values_h 
 #define __wasilibc___fd_set_h 
@@ -3196,6 +3197,7 @@
 #define __wasilibc___typedef_suseconds_t_h 
 #define __wasilibc___typedef_time_t_h 
 #define __wasilibc___typedef_uid_t_h 
+#define __wasip1__ 
 #define __wasm 1
 #define __wasm32 1
 #define __wasm32__ 1

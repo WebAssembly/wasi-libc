@@ -3,21 +3,20 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <assert.h>
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#include <wasi/file.h>
-#include <wasi/descriptor_table.h>
-#include <wasi/file_utils.h>
-#include <common/errors.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <wasi/libc.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 
-#ifndef __wasilibc_use_wasip2
+#ifdef __wasip2__
+#include <wasi/file.h>
+#include <wasi/descriptor_table.h>
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#endif
+
+#ifdef __wasip1__
 static_assert(O_APPEND == __WASI_FDFLAGS_APPEND, "Value mismatch");
 static_assert(O_DSYNC == __WASI_FDFLAGS_DSYNC, "Value mismatch");
 static_assert(O_NONBLOCK == __WASI_FDFLAGS_NONBLOCK, "Value mismatch");
@@ -32,7 +31,7 @@ static_assert(O_TRUNC >> 12 == __WASI_OFLAGS_TRUNC, "Value mismatch");
 
 int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   // Set up path flags
   filesystem_path_flags_t lookup_flags = 0;
   if ((oflag & O_NOFOLLOW) == 0)

@@ -1,12 +1,11 @@
-#ifdef __wasilibc_use_wasip2
-#include <string.h>
-#include <wasi/libc-environ.h>
-#include <wasi/wasip2.h>
-#else
-#include <wasi/api.h>
-#endif
 #include <stdlib.h>
 #include <sysexits.h>
+#include <wasi/api.h>
+
+#ifdef __wasip2__
+#include <string.h>
+#include <wasi/libc-environ.h>
+#endif
 
 // The user's `main` function, expecting arguments.
 //
@@ -25,7 +24,7 @@ __attribute__((__weak__)) int __main_argc_argv(int argc, char *argv[]);
 // breaks `--no-gc-sections`, so we'll probably need to create a new file
 // (e.g. crt0.o or crtend.o) and teach Clang to use it when needed.
 __attribute__((__weak__, nodebug)) int __main_void(void) {
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   wasip2_list_string_t argument_list;
 
   environment_get_arguments(&argument_list);
@@ -110,7 +109,7 @@ __attribute__((__weak__, nodebug)) int __main_void(void) {
 #endif
 }
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
 bool exports_wasi_cli_run_run(void) {
   // TODO: this is supposed to be unnecessary, but functional/env.c fails
   // without it

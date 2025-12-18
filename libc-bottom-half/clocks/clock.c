@@ -1,16 +1,12 @@
 #define _WASI_EMULATED_PROCESS_CLOCKS
-#include <time.h>
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#else
-#include <wasi/api.h>
-#endif
 #include <common/time.h>
+#include <time.h>
+#include <wasi/api.h>
 
 _Static_assert(CLOCKS_PER_SEC == NSEC_PER_SEC,
                "This implementation assumes that `clock` is in nanoseconds");
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
 // Snapshot of the monotonic clock at the start of the program.
 static monotonic_clock_instant_t start;
 

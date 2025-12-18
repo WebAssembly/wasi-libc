@@ -6,24 +6,22 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
-
 #include <assert.h>
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#include <wasi/file_utils.h>
-#include <common/errors.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <dirent.h>
 #include <errno.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef __wasip2__
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#endif
+
 #include "dirent_impl.h"
 
-#ifndef __wasilibc_use_wasip2
+#ifdef __wasip1__
 static_assert(DT_BLK == __WASI_FILETYPE_BLOCK_DEVICE, "Value mismatch");
 static_assert(DT_CHR == __WASI_FILETYPE_CHARACTER_DEVICE, "Value mismatch");
 static_assert(DT_DIR == __WASI_FILETYPE_DIRECTORY, "Value mismatch");
@@ -50,7 +48,7 @@ static_assert(DT_UNKNOWN == __WASI_FILETYPE_UNKNOWN, "Value mismatch");
     }                                               \
   } while (0)
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
 
 static int ensure_has_directory_stream(DIR *dirp, filesystem_borrow_descriptor_t *handle) {
   if (fd_to_file_handle(dirp->fd, handle) < 0)

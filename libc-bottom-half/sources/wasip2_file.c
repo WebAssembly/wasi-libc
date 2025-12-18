@@ -1,5 +1,3 @@
-#ifdef __wasilibc_use_wasip2
-
 #include <assert.h>
 #include <common/errors.h>
 #include <errno.h>
@@ -7,6 +5,8 @@
 #include <wasi/descriptor_table.h>
 #include <wasi/file.h>
 #include <wasi/wasip2.h>
+
+#ifdef __wasip2__
 
 #include "libc/sys/stat/stat_impl.h"
 
@@ -264,4 +264,4 @@ int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
   return descriptor_table_insert(entry);
 }
 
-#endif // __wasilibc_use_wasip2
+#endif // __wasip2__

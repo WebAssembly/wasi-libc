@@ -1,39 +1,9 @@
-cmake_minimum_required(VERSION 3.26)
-project(wasi-libc-tests)
-
-if(NOT CMAKE_C_COMPILER_ID MATCHES Clang)
-  message(FATAL_ERROR "C compiler ${CMAKE_C_COMPILER} is not `Clang`, it is ${CMAKE_C_COMPILER_ID}")
-endif()
-
-message(STATUS "Found executable for `nm`: ${CMAKE_NM}")
-message(STATUS "Found executable for `ar`: ${CMAKE_AR}")
-message(STATUS "Found executable for `ranlib`: ${CMAKE_RANLIB}")
-
 include(FetchContent)
 include(ExternalProject)
 include(CTest)
 enable_testing()
 
-set(TARGET_TRIPLE "wasm32-wasi" CACHE STRING "WASI target to test")
-set(MALLOC_IMPL "" CACHE STRING "Malloc implementation in use")
 option(PYTHON_TESTS "Build Python with this wasi-libc and run its tests" OFF)
-
-# ========= Sysroot sanity check ================================
-
-cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH LIBC_SRC_DIR)
-set(SYSROOT_DIR "${LIBC_SRC_DIR}/sysroot")
-set(SYSROOT "${SYSROOT_DIR}/lib/${TARGET_TRIPLE}")
-
-# This build configuration does not currently manage the sysroot itself (but
-# ideally it will one day). Double-check that the sysroot exists before actually
-# trying to build any tests.
-if (NOT EXISTS "${SYSROOT_DIR}")
-  message(FATAL_ERROR "
-  No sysroot for ${TARGET_TRIPLE} available at ${SYSROOT_DIR}; to build it, e.g.:
-    cd ${LIBC_SRC_DIR}
-    make TARGET_TRIPLE=${TARGET_TRIPLE}
-  ")
-endif()
 
 # ========= Clone libc-test =====================================
 
@@ -48,39 +18,18 @@ set(LIBC_TEST "${libc-test_SOURCE_DIR}")
 message(STATUS "libc-test source directory: ${LIBC_TEST}")
 
 # ========= Download wasmtime as a test runner ==================
+include(ba-download)
 
 if(NOT ENGINE OR ENGINE STREQUAL "")
-  set(WASMTIME_VERSION "v38.0.2")
-  set(WASMTIME_REPO "https://github.com/bytecodealliance/wasmtime")
-
-  if (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
-    set(WASMTIME_ARCH "x86_64")
-  elseif (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
-    set(WASMTIME_ARCH "aarch64")
-  elseif (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64")
-    set(WASMTIME_ARCH "aarch64")
-  else()
-    message(FATAL_ERROR "Unsupported architecture ${CMAKE_HOST_SYSTEM_PROCESSOR} for Wasmtime")
-  endif()
-
-  if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
-    set(WASMTIME_OS macos)
-  elseif (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
-    set(WASMTIME_OS linux)
-  else()
-    message(FATAL_ERROR "Unsupported system ${CMAKE_SYSTEM_NAME} for Wasmtime")
-  endif()
-
-  ExternalProject_Add(
-    engine
-    URL "${WASMTIME_REPO}/releases/download/${WASMTIME_VERSION}/wasmtime-${WASMTIME_VERSION}-${WASMTIME_ARCH}-${WASMTIME_OS}.tar.xz"
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
+  ba_download(
+    wasmtime
+    "https://github.com/bytecodealliance/wasmtime"
+    "v38.0.2"
   )
-  ExternalProject_Get_Property(engine SOURCE_DIR)
+  ExternalProject_Get_Property(wasmtime SOURCE_DIR)
   set(ENGINE "${SOURCE_DIR}/wasmtime")
   message(STATUS "Wasmtime executable: ${ENGINE}")
+  add_custom_target(engine ALL DEPENDS wasmtime)
 else()
   add_custom_target(engine)
 endif()
@@ -88,17 +37,12 @@ endif()
 # ========= libc-test defined tests =============================
 
 function(add_wasilibc_flags target)
-  target_compile_options(${target} PRIVATE
-    "--target=${TARGET_TRIPLE}"
-    "--sysroot=${SYSROOT_DIR}"
-  )
-  target_link_options(${target} PRIVATE
-    "--target=${TARGET_TRIPLE}"
-    "--sysroot=${SYSROOT_DIR}"
-    "-resource-dir=${LIBC_SRC_DIR}/build/${TARGET_TRIPLE}/resource-dir"
-  )
+  add_dependencies(${target} sysroot builtins)
+  # Using an `INTERFACE` looks to get what we want here which is to rebuild this
+  # if the library changes but not actually add any arguments to the link-line.
+  target_link_libraries(${target} INTERFACE c-static)
+
   if (TARGET_TRIPLE MATCHES "-threads")
-    target_compile_options(${target} PRIVATE -pthread)
     target_link_options(${target} PRIVATE -pthread
       -Wl,--import-memory,--export-memory,--shared-memory,--max-memory=1073741824)
   endif()
@@ -131,7 +75,7 @@ function(add_test_executable executable_name src)
   # Build the test exeutable itself and apply all custom options as applicable.
   add_executable(${executable_name} ${src})
   add_wasilibc_flags(${executable_name})
-  target_link_libraries(${executable_name} libc_test_support)
+  target_link_libraries(${executable_name} PRIVATE libc_test_support)
   foreach(flag IN LISTS arg_CFLAGS)
     target_compile_options(${executable_name} PRIVATE ${flag})
   endforeach()
@@ -235,14 +179,14 @@ add_libc_test(functional/memstream.c)
 add_libc_test(functional/qsort.c)
 add_libc_test(functional/random.c)
 add_libc_test(functional/search_hsearch.c)
-if (MALLOC_IMPL STREQUAL "emmalloc")
+if (MALLOC STREQUAL "emmalloc")
   set_tests_properties(libc_test_functional_search_hsearch.wasm PROPERTIES WILL_FAIL TRUE)
 endif()
 add_libc_test(functional/search_insque.c)
 add_libc_test(functional/search_lsearch.c)
 add_libc_test(functional/search_tsearch.c)
 add_libc_test(functional/snprintf.c)
-add_libc_test(functional/sscanf.c)
+add_libc_test(functional/sscanf.c CFLAGS -Wno-literal-range)
 add_libc_test(functional/strftime.c)
 add_libc_test(functional/string.c)
 add_libc_test(functional/string_memcpy.c)
@@ -451,7 +395,7 @@ if (PYTHON_TESTS)
   find_program(PYTHON python3 python REQUIRED)
   find_program(MAKE make REQUIRED)
 
-  set(flags "--target=${TARGET_TRIPLE} --sysroot=${SYSROOT_DIR}")
+  set(flags "--target=${TARGET_TRIPLE} --sysroot=${SYSROOT}")
 
   ExternalProject_Add(
     python
@@ -514,4 +458,5 @@ if (PYTHON_TESTS)
         -E env CFLAGS=${flags} LDFLAGS=${flags} --
         ${MAKE} --directory cross-build/wasm32-wasip1 test
   )
+  ExternalProject_Add_StepDependencies(python configure sysroot)
 endif()

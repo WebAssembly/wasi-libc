@@ -3,8 +3,8 @@
 
 #include <wasi/api.h>
 
-#define SEEK_CUR __WASI_WHENCE_CUR
-#define SEEK_END __WASI_WHENCE_END
-#define SEEK_SET __WASI_WHENCE_SET
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#define SEEK_END 2
 
 #endif

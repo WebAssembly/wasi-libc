@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 void test(char *ptr, size_t length, void *want) {
   void *got = memchr(ptr, 7, length);

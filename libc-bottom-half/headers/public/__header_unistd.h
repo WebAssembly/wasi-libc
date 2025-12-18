@@ -3,6 +3,7 @@
 
 struct stat;
 
+#include <inttypes.h>
 #include <__seek.h>
 
 #define F_OK (0)

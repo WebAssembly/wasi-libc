@@ -23,7 +23,7 @@ void arc4random_buf(void* buffer, size_t len)
 #endif
 
     // `__wasi_random_get` should always succeed.
-    if (r != __WASI_ERRNO_SUCCESS) {
+    if (r != 0) {
         __builtin_trap();
     }
 }

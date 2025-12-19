@@ -17,33 +17,6 @@ file(
   headers/public/*.h
 )
 
-# TODO: these headers are not actually installed in the sysroot since the
-# musl-sourced ones are. These should probably be deleted from the source
-# tree and the musl ones used instead.
-list(REMOVE_ITEM globbed_headers
-  headers/public/dirent.h
-  headers/public/errno.h
-  headers/public/fcntl.h
-  headers/public/inttypes.h
-  headers/public/netinet/in.h
-  headers/public/poll.h
-  headers/public/stdlib.h
-  headers/public/string.h
-  headers/public/sys/ioctl.h
-  headers/public/sys/resource.h
-  headers/public/sys/select.h
-  headers/public/sys/socket.h
-  headers/public/sys/stat.h
-  headers/public/sys/time.h
-  headers/public/sys/times.h
-  headers/public/sys/types.h
-  headers/public/sys/uio.h
-  headers/public/sys/un.h
-  headers/public/time.h
-  headers/public/unistd.h
-  headers/public/wchar.h
-)
-
 if (WASI STREQUAL "p1")
   list(REMOVE_ITEM globbed_headers headers/public/wasi/wasip2.h)
 endif()

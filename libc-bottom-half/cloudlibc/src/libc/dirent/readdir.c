@@ -23,6 +23,7 @@
 
 #include "dirent_impl.h"
 
+#ifndef __wasilibc_use_wasip2
 static_assert(DT_BLK == __WASI_FILETYPE_BLOCK_DEVICE, "Value mismatch");
 static_assert(DT_CHR == __WASI_FILETYPE_CHARACTER_DEVICE, "Value mismatch");
 static_assert(DT_DIR == __WASI_FILETYPE_DIRECTORY, "Value mismatch");
@@ -30,6 +31,7 @@ static_assert(DT_FIFO == __WASI_FILETYPE_SOCKET_STREAM, "Value mismatch");
 static_assert(DT_LNK == __WASI_FILETYPE_SYMBOLIC_LINK, "Value mismatch");
 static_assert(DT_REG == __WASI_FILETYPE_REGULAR_FILE, "Value mismatch");
 static_assert(DT_UNKNOWN == __WASI_FILETYPE_UNKNOWN, "Value mismatch");
+#endif
 
 // Grows a buffer to be large enough to hold a certain amount of data.
 #define GROW(buffer, buffer_size, target_size)      \

@@ -5,6 +5,11 @@
 #include <string.h>
 #include <wasi/sockets_utils.h>
 
+#ifndef __wasilibc_use_wasip2
+static_assert(SOCK_DGRAM == __WASI_FILETYPE_SOCKET_DGRAM, "value mismatch");
+static_assert(SOCK_STREAM == __WASI_FILETYPE_SOCKET_STREAM, "value mismatch");
+#endif
+
 _Thread_local int h_errno = 0;
 
 static struct servent global_serv = { 0 };

@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include <string.h>
 
+#ifndef __wasilibc_use_wasip2
 static_assert(O_APPEND == __WASI_FDFLAGS_APPEND, "Value mismatch");
 static_assert(O_DSYNC == __WASI_FDFLAGS_DSYNC, "Value mismatch");
 static_assert(O_NONBLOCK == __WASI_FDFLAGS_NONBLOCK, "Value mismatch");
@@ -27,6 +28,7 @@ static_assert(O_CREAT >> 12 == __WASI_OFLAGS_CREAT, "Value mismatch");
 static_assert(O_DIRECTORY >> 12 == __WASI_OFLAGS_DIRECTORY, "Value mismatch");
 static_assert(O_EXCL >> 12 == __WASI_OFLAGS_EXCL, "Value mismatch");
 static_assert(O_TRUNC >> 12 == __WASI_OFLAGS_TRUNC, "Value mismatch");
+#endif
 
 int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
 

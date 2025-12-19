@@ -14,7 +14,7 @@
 #include <wasi/api.h>
 #endif
 
-#define TIMER_ABSTIME __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME
+#define TIMER_ABSTIME 1
 
 extern const struct __clockid _CLOCK_MONOTONIC;
 #define CLOCK_MONOTONIC (&_CLOCK_MONOTONIC)

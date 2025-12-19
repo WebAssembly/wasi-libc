@@ -1,9 +1,9 @@
 #ifndef __wasilibc___header_fcntl_h
 #define __wasilibc___header_fcntl_h
 
-#include <wasi/api.h>
-#include <__seek.h>
 #include <__mode_t.h>
+#include <__seek.h>
+#include <wasi/api.h>
 
 #define O_APPEND __WASI_FDFLAGS_APPEND
 #define O_DSYNC __WASI_FDFLAGS_DSYNC
@@ -16,15 +16,15 @@
 #define O_TRUNC (__WASI_OFLAGS_TRUNC << 12)
 
 #define O_NOFOLLOW (0x01000000)
-#define O_EXEC     (0x02000000)
-#define O_RDONLY   (0x04000000)
-#define O_SEARCH   (0x08000000)
-#define O_WRONLY   (0x10000000)
+#define O_EXEC (0x02000000)
+#define O_RDONLY (0x04000000)
+#define O_SEARCH (0x08000000)
+#define O_WRONLY (0x10000000)
 
 /*
  * O_CLOEXEC is defined to be zero, as WASI has no exec-style functions.
  */
-#define O_CLOEXEC  (0)
+#define O_CLOEXEC (0)
 
 /*
  * O_TTY_INIT is defined to be zero, meaning that WASI implementations are
@@ -32,7 +32,7 @@
  */
 #define O_TTY_INIT (0)
 
-#define O_NOCTTY   (0)
+#define O_NOCTTY (0)
 
 #define O_RDWR (O_RDONLY | O_WRONLY)
 #define O_ACCMODE (O_EXEC | O_RDWR | O_SEARCH)
@@ -51,10 +51,10 @@
 
 #define FD_CLOEXEC (1)
 
-#define AT_EACCESS          (0x0)
+#define AT_EACCESS (0x0)
 #define AT_SYMLINK_NOFOLLOW (0x1)
-#define AT_SYMLINK_FOLLOW   (0x2)
-#define AT_REMOVEDIR        (0x4)
+#define AT_SYMLINK_FOLLOW (0x2)
+#define AT_REMOVEDIR (0x4)
 
 #define AT_FDCWD (-2)
 

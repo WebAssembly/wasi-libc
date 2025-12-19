@@ -1,17 +1,17 @@
-#include <sys/stat.h>
+#include "test.h"
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fcntl.h>
-#include "test.h"
+#include <sys/stat.h>
 
-#define TEST(c) do { \
-	errno = 0; \
-	if (!(c)) \
-		t_error("%s failed (errno = %d)\n", #c, errno); \
-} while(0)
-
+#define TEST(c)                                                                \
+  do {                                                                         \
+    errno = 0;                                                                 \
+    if (!(c))                                                                  \
+      t_error("%s failed (errno = %d)\n", #c, errno);                          \
+  } while (0)
 
 int main(void) {
   int fd;
@@ -38,7 +38,6 @@ int main(void) {
   TEST(lseek(fd, 0, SEEK_CUR) == 6);
 
   TEST(close(fd) == 0);
-
 
   TEST((fd = open("b.txt", O_WRONLY | O_CREAT, 0644)) >= 0);
   char bytes[20] = {0};

@@ -200,6 +200,16 @@ jobs:
     - run: cargo test
       working-directory: tools/wasi-headers
 
+  clang-format:
+    name: Clang Format
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4.1.7
+      with:
+        submodules: true
+    - run: cmake -S . -B build -DBUILD_TESTS=ON -G Ninja -DCMAKE_C_COMPILER=clang
+    - run: ninja -C build format-check
+
   rustfmt:
     name: Rustfmt
     runs-on: ubuntu-latest

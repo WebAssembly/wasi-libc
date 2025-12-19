@@ -5,10 +5,10 @@
 #define __need_NULL
 #include <stddef.h>
 
-#include <__typedef_time_t.h>
 #include <__struct_timespec.h>
 #include <__struct_tm.h>
 #include <__typedef_clockid_t.h>
+#include <__typedef_time_t.h>
 
 #ifndef __wasilibc_use_wasip2
 #include <wasi/api.h>

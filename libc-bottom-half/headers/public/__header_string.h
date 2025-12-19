@@ -11,10 +11,13 @@
 extern "C" {
 #endif
 
-size_t strlen(const char *) __attribute__((__nothrow__, __leaf__, __pure__, __nonnull__(1)));
+size_t strlen(const char *)
+    __attribute__((__nothrow__, __leaf__, __pure__, __nonnull__(1)));
 char *strdup(const char *) __attribute__((__nothrow__, __nonnull__(1)));
-int strcmp(const char *, const char *) __attribute__((__nothrow__, __pure__, __nonnull__(1, 2)));
-void *memchr(const void *, int, size_t) __attribute__((__nothrow__, __pure__, __nonnull__(1)));
+int strcmp(const char *, const char *)
+    __attribute__((__nothrow__, __pure__, __nonnull__(1, 2)));
+void *memchr(const void *, int, size_t)
+    __attribute__((__nothrow__, __pure__, __nonnull__(1)));
 
 #ifdef __cplusplus
 }

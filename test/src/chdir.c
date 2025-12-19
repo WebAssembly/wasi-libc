@@ -1,16 +1,17 @@
-#include <sys/stat.h>
+#include "test.h"
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fcntl.h>
-#include "test.h"
+#include <sys/stat.h>
 
-#define TEST(c) do { \
-	errno = 0; \
-	if (!(c)) \
-		t_error("%s failed (errno = %d)\n", #c, errno); \
-} while(0)
+#define TEST(c)                                                                \
+  do {                                                                         \
+    errno = 0;                                                                 \
+    if (!(c))                                                                  \
+      t_error("%s failed (errno = %d)\n", #c, errno);                          \
+  } while (0)
 
 static int exists(const char *path) {
   struct stat st;
@@ -18,7 +19,7 @@ static int exists(const char *path) {
 }
 
 static void spray_heap(void) {
-  #define N 100
+#define N 100
   void *ptrs[N];
   for (int i = 0; i < N; i++) {
     size_t size = (rand() % 256) + 16;

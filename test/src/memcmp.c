@@ -3,9 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int sign(int val) {
-    return (0 < val) - (val < 0);
-}
+int sign(int val) { return (0 < val) - (val < 0); }
 void test(char *ptr1, char *ptr2, size_t length, int want) {
   int got = memcmp(ptr1, ptr2, length);
   if (sign(got) != sign(want)) {

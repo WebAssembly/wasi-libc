@@ -10,25 +10,33 @@
 #include <math.h>
 
 float fminf(float x, float y) {
-    if (isnan(x)) return y;
-    if (isnan(y)) return x;
-    return __builtin_wasm_min_f32(x, y);
+  if (isnan(x))
+    return y;
+  if (isnan(y))
+    return x;
+  return __builtin_wasm_min_f32(x, y);
 }
 
 float fmaxf(float x, float y) {
-    if (isnan(x)) return y;
-    if (isnan(y)) return x;
-    return __builtin_wasm_max_f32(x, y);
+  if (isnan(x))
+    return y;
+  if (isnan(y))
+    return x;
+  return __builtin_wasm_max_f32(x, y);
 }
 
 double fmin(double x, double y) {
-    if (isnan(x)) return y;
-    if (isnan(y)) return x;
-    return __builtin_wasm_min_f64(x, y);
+  if (isnan(x))
+    return y;
+  if (isnan(y))
+    return x;
+  return __builtin_wasm_min_f64(x, y);
 }
 
 double fmax(double x, double y) {
-    if (isnan(x)) return y;
-    if (isnan(y)) return x;
-    return __builtin_wasm_max_f64(x, y);
+  if (isnan(x))
+    return y;
+  if (isnan(y))
+    return x;
+  return __builtin_wasm_max_f64(x, y);
 }

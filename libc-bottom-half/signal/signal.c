@@ -6,42 +6,36 @@
 #define _WASI_EMULATED_SIGNAL
 #define _ALL_SOURCE
 #define _GNU_SOURCE
+#include <assert.h>
+#include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <string.h>
-#include <assert.h>
 
 void __SIG_IGN(int sig) {
-    // do nothing
+  // do nothing
 }
 
-_Noreturn
-void __SIG_ERR(int sig) {
-    __builtin_trap();
+_Noreturn void __SIG_ERR(int sig) { __builtin_trap(); }
+
+_Noreturn static void core_handler(int sig) {
+  fprintf(stderr, "Program received fatal signal: %s\n", strsignal(sig));
+  abort();
 }
 
-_Noreturn
-static void core_handler(int sig) {
-    fprintf(stderr, "Program received fatal signal: %s\n", strsignal(sig));
-    abort();
+_Noreturn static void terminate_handler(int sig) {
+  fprintf(stderr, "Program received termination signal: %s\n", strsignal(sig));
+  abort();
 }
 
-_Noreturn
-static void terminate_handler(int sig) {
-    fprintf(stderr, "Program received termination signal: %s\n", strsignal(sig));
-    abort();
-}
-
-_Noreturn
-static void stop_handler(int sig) {
-    fprintf(stderr, "Program received stop signal: %s\n", strsignal(sig));
-    abort();
+_Noreturn static void stop_handler(int sig) {
+  fprintf(stderr, "Program received stop signal: %s\n", strsignal(sig));
+  abort();
 }
 
 static void continue_handler(int sig) {
-    // do nothing
+  // do nothing
 }
 
 static const sighandler_t default_handlers[_NSIG] = {
@@ -102,40 +96,40 @@ static const sighandler_t default_handlers[_NSIG] = {
 static sighandler_t handlers[_NSIG];
 
 int raise(int sig) {
-    if (sig < 0 || sig >= _NSIG) {
-        errno = EINVAL;
-        return -1;
-    }
+  if (sig < 0 || sig >= _NSIG) {
+    errno = EINVAL;
+    return -1;
+  }
 
-    sighandler_t func = handlers[sig];
+  sighandler_t func = handlers[sig];
 
-    if (func == NULL) {
-        default_handlers[sig](sig);
-    } else {
-        func(sig);
-    }
+  if (func == NULL) {
+    default_handlers[sig](sig);
+  } else {
+    func(sig);
+  }
 
-    return 0;
+  return 0;
 }
 
 void (*signal(int sig, void (*func)(int)))(int) {
-    assert(SIG_DFL == NULL);
+  assert(SIG_DFL == NULL);
 
-    if (sig < 0 || sig >= _NSIG) {
-        errno = EINVAL;
-        return SIG_ERR;
-    }
+  if (sig < 0 || sig >= _NSIG) {
+    errno = EINVAL;
+    return SIG_ERR;
+  }
 
-    if (sig == SIGKILL || sig == SIGSTOP) {
-        errno = EINVAL;
-        return SIG_ERR;
-    }
+  if (sig == SIGKILL || sig == SIGSTOP) {
+    errno = EINVAL;
+    return SIG_ERR;
+  }
 
-    sighandler_t old = handlers[sig];
+  sighandler_t old = handlers[sig];
 
-    handlers[sig] = func;
+  handlers[sig] = func;
 
-    return old;
+  return old;
 }
 
 extern __typeof(signal) bsd_signal __attribute__((weak, alias("signal")));

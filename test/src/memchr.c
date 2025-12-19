@@ -26,7 +26,8 @@ int main(void) {
         memset(ptr, 5, length);
 
         // The first instance of the character is found.
-        if (pos >= 0) ptr[pos + 2] = 7;
+        if (pos >= 0)
+          ptr[pos + 2] = 7;
         ptr[pos] = 7;
 
         // The character is found if it's within range.
@@ -44,7 +45,8 @@ int main(void) {
     test(ptr, length, length != 0 ? &ptr[length - 1] : NULL);
 
     // Test for length overflow.
-    if (length > 0) test(ptr, SIZE_MAX, &ptr[length - 1]);
+    if (length > 0)
+      test(ptr, SIZE_MAX, &ptr[length - 1]);
   }
 
   return 0;

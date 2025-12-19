@@ -1,8 +1,8 @@
 #ifndef __wasi_libc_h
 #define __wasi_libc_h
 
-#include <__typedef_off_t.h>
 #include <__struct_timespec.h>
+#include <__typedef_off_t.h>
 #include <unistd.h>
 #ifdef __wasilibc_use_wasip2
 #include <wasi/wasip2.h>
@@ -23,8 +23,7 @@ void __wasilibc_populate_preopens(void);
 
 #ifndef __wasilibc_use_wasip2
 /// Register the given pre-opened file descriptor under the given path.
-int __wasilibc_register_preopened_fd(int fd,
-                                     const char* prefix);
+int __wasilibc_register_preopened_fd(int fd, const char *prefix);
 #endif
 
 /// Renumber `fd` to `newfd`; similar to `dup2` but does a move rather than a
@@ -48,33 +47,37 @@ int __wasilibc_openat_nomode(int fd, const char *path, int oflag);
 
 /// Return the current file offset. Like `lseek(fd, 0, SEEK_CUR)`, but without
 /// depending on `lseek`.
-off_t __wasilibc_tell(int fd)
-    __attribute__((__warn_unused_result__));
+off_t __wasilibc_tell(int fd) __attribute__((__warn_unused_result__));
 
 /* Non-`at` forms of various `*at` functions. */
 int __wasilibc_access(const char *pathname, int mode, int flags)
     __attribute__((__warn_unused_result__));
-int __wasilibc_stat(const char *__restrict pathname, struct stat *__restrict statbuf, int flags)
+int __wasilibc_stat(const char *__restrict pathname,
+                    struct stat *__restrict statbuf, int flags)
     __attribute__((__warn_unused_result__));
-int __wasilibc_utimens(const char *pathname, const struct timespec times[2], int flags)
-    __attribute__((__warn_unused_result__));
+int __wasilibc_utimens(const char *pathname, const struct timespec times[2],
+                       int flags) __attribute__((__warn_unused_result__));
 int __wasilibc_link(const char *oldpath, const char *newpath, int flags)
     __attribute__((__warn_unused_result__));
-int __wasilibc_link_oldat(int olddirfd, const char *oldpath, const char *newpath, int flags)
+int __wasilibc_link_oldat(int olddirfd, const char *oldpath,
+                          const char *newpath, int flags)
     __attribute__((__warn_unused_result__));
-int __wasilibc_link_newat(const char *oldpath, int newdirfd, const char *newpath, int flags)
+int __wasilibc_link_newat(const char *oldpath, int newdirfd,
+                          const char *newpath, int flags)
     __attribute__((__warn_unused_result__));
-int __wasilibc_rename_oldat(int olddirfd, const char *oldpath, const char *newpath)
+int __wasilibc_rename_oldat(int olddirfd, const char *oldpath,
+                            const char *newpath)
     __attribute__((__warn_unused_result__));
-int __wasilibc_rename_newat(const char *oldpath, int newdirfd, const char *newpath)
+int __wasilibc_rename_newat(const char *oldpath, int newdirfd,
+                            const char *newpath)
     __attribute__((__warn_unused_result__));
 
 /// Enable busywait in futex on current thread.
 void __wasilibc_enable_futex_busywait_on_current_thread(void);
 
 /// Fill a buffer with random bytes
-int __wasilibc_random(void* buffer, size_t len)
-   __attribute__((__warn_unused_result__));
+int __wasilibc_random(void *buffer, size_t len)
+    __attribute__((__warn_unused_result__));
 
 #ifdef __cplusplus
 }

@@ -1,24 +1,25 @@
-#include <sys/stat.h>
+#include "test.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "test.h"
+#include <sys/stat.h>
 
-#define TEST(c) do { \
-	errno = 0; \
-	if (!(c)) \
-		t_error("%s failed (errno = %d)\n", #c, errno); \
-} while(0)
+#define TEST(c)                                                                \
+  do {                                                                         \
+    errno = 0;                                                                 \
+    if (!(c))                                                                  \
+      t_error("%s failed (errno = %d)\n", #c, errno);                          \
+  } while (0)
 
 static FILE *make_temp_file() {
-    const char* path = "temp_file";
-    FILE *f = fopen(path, "w");
-    if (f == NULL) {
-      printf("Error: fopen(%s) failed: %s\n", path, strerror(errno));
-      exit(1);
-    }
-    return f;
+  const char *path = "temp_file";
+  FILE *f = fopen(path, "w");
+  if (f == NULL) {
+    printf("Error: fopen(%s) failed: %s\n", path, strerror(errno));
+    exit(1);
+  }
+  return f;
 }
 
 int main(void) {

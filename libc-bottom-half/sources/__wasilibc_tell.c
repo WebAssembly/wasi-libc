@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <sys/types.h>
 #include <wasi/api.h>
 
 #ifdef __wasip2__

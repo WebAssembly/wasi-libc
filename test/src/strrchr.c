@@ -1,7 +1,7 @@
 #include <__macro_PAGESIZE.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <stddef.h>
 
 void test(char *ptr, char *want) {
   char *got = strrchr(ptr, 7);

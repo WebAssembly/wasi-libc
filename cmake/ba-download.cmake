@@ -24,9 +24,11 @@ function(ba_download target repo version)
   endif()
 
   if (target STREQUAL wasmtime)
-    set(fmt xz)
+    set(fmt tar.xz)
+  elseif ((target STREQUAL wasm-component-ld) AND (os STREQUAL windows))
+    set(fmt zip)
   else()
-    set(fmt gz)
+    set(fmt tar.gz)
   endif()
 
   if (target STREQUAL wit-bindgen)
@@ -40,7 +42,7 @@ function(ba_download target repo version)
   ExternalProject_Add(
     ${target}
     EXCLUDE_FROM_ALL ON
-    URL "${repo}/releases/download/${tag}/${target}-${version}-${arch}-${os}.tar.${fmt}"
+    URL "${repo}/releases/download/${tag}/${target}-${version}-${arch}-${os}.${fmt}"
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""

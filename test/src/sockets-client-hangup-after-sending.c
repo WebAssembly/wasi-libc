@@ -1,20 +1,21 @@
+#include "test.h"
+#include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <netdb.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include "test.h"
+#include <unistd.h>
 
-#define TEST(c) do { \
-	errno = 0; \
-	if (!(c)) \
-		t_error("%s failed (errno = %d)\n", #c, errno); \
-} while(0)
+#define TEST(c)                                                                \
+  do {                                                                         \
+    errno = 0;                                                                 \
+    if (!(c))                                                                  \
+      t_error("%s failed (errno = %d)\n", #c, errno);                          \
+  } while (0)
 
 int BUFSIZE = 256;
 
@@ -27,38 +28,37 @@ static int wait_for_server(struct sockaddr_in *addr) {
     close(fd);
     usleep(5000); // sleep for 5ms
   }
-  t_error("server didn't come online within 1 second (errno = %d)\n", errno); \
+  t_error("server didn't come online within 1 second (errno = %d)\n", errno);
   return -1;
 }
 
 // See sockets-server.c -- must be running already as a separate executable
 void test_tcp_client() {
-    // Prepare server socket
-    int server_port = 4001;
+  // Prepare server socket
+  int server_port = 4001;
 
-    // Prepare sockaddr_in for client
-    struct sockaddr_in sockaddr_in;
-    sockaddr_in.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    sockaddr_in.sin_family = AF_INET;
-    sockaddr_in.sin_port = htons(server_port);
+  // Prepare sockaddr_in for client
+  struct sockaddr_in sockaddr_in;
+  sockaddr_in.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  sockaddr_in.sin_family = AF_INET;
+  sockaddr_in.sin_port = htons(server_port);
 
-    // Connect from client
-    char message[] = "There's gonna be a party when the wolf comes home";
-    int len = strlen(message);
-    char client_buffer[BUFSIZE];
+  // Connect from client
+  char message[] = "There's gonna be a party when the wolf comes home";
+  int len = strlen(message);
+  char client_buffer[BUFSIZE];
 
-    int socket_fd = wait_for_server(&sockaddr_in);
+  int socket_fd = wait_for_server(&sockaddr_in);
 
-    // Client writes a message to server
-    TEST(send(socket_fd, message, len, 0) == len);
+  // Client writes a message to server
+  TEST(send(socket_fd, message, len, 0) == len);
 
-    // Shut down client
-    close(socket_fd);
+  // Shut down client
+  close(socket_fd);
 }
 
-int main(void)
-{
-    test_tcp_client();
+int main(void) {
+  test_tcp_client();
 
-    return t_status;
+  return t_status;
 }

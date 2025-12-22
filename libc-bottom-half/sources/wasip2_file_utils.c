@@ -1,8 +1,8 @@
 #include <assert.h>
-#include <wasi/file_utils.h>
+#include <common/errors.h>
 #include <errno.h>
 #include <stddef.h>
-#include <common/errors.h>
+#include <wasi/file_utils.h>
 
 #ifdef __wasilibc_use_wasip2
 
@@ -77,17 +77,15 @@ int wasip2_string_from_c(const char *s, wasip2_string_t *out) {
     errno = EILSEQ;
     return -1;
   }
-  out->ptr = (uint8_t*) s;
+  out->ptr = (uint8_t *)s;
   out->len = len;
   return 0;
 }
 
 // Gets an `output-stream` borrow from the `fd` provided.
-int __wasilibc_write_stream(int fd,
-                            streams_borrow_output_stream_t *out,
-                            off_t **off,
-                            poll_borrow_pollable_t *pollable) {
-  descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
+int __wasilibc_write_stream(int fd, streams_borrow_output_stream_t *out,
+                            off_t **off, poll_borrow_pollable_t *pollable) {
+  descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
   if (!entry)
     return -1;
   if (!entry->vtable->get_write_stream) {
@@ -108,11 +106,9 @@ int __wasilibc_write_stream(int fd,
 }
 
 // Gets an `input-stream` borrow from the `fd` provided.
-int __wasilibc_read_stream(int fd,
-                           streams_borrow_input_stream_t *out,
-                           off_t **off,
-                           poll_borrow_pollable_t *pollable) {
-  descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
+int __wasilibc_read_stream(int fd, streams_borrow_input_stream_t *out,
+                           off_t **off, poll_borrow_pollable_t *pollable) {
+  descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
   if (!entry)
     return -1;
   if (!entry->vtable->get_read_stream) {

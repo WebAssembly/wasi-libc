@@ -20,6 +20,9 @@ add_custom_target(format-check)
 set(formatted_sources)
 
 function(clang_format_file file)
+  if (file MATCHES "wasip2\..$")  # Skip auto-generated files
+    return()
+  endif()
   cmake_path(ABSOLUTE_PATH file BASE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE src)
 
   # Only format sources primarily authored in this repository itself. This

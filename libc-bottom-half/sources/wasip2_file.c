@@ -62,10 +62,8 @@ static int file_get_read_stream(void *data,
   if (file->read_stream.__handle == 0) {
     filesystem_error_code_t error_code;
     bool ok = filesystem_method_descriptor_read_via_stream(
-        filesystem_borrow_descriptor(file->file_handle),
-        file->offset,
-        &file->read_stream,
-        &error_code);
+        filesystem_borrow_descriptor(file->file_handle), file->offset,
+        &file->read_stream, &error_code);
     if (!ok) {
       translate_error(error_code);
       return -1;
@@ -90,15 +88,12 @@ static int file_get_write_stream(void *data,
 
     if (file->oflag & O_APPEND) {
       ok = filesystem_method_descriptor_append_via_stream(
-          filesystem_borrow_descriptor(file->file_handle),
-          &file->write_stream,
+          filesystem_borrow_descriptor(file->file_handle), &file->write_stream,
           &error_code);
     } else {
       ok = filesystem_method_descriptor_write_via_stream(
-          filesystem_borrow_descriptor(file->file_handle),
-          file->offset,
-          &file->write_stream,
-          &error_code);
+          filesystem_borrow_descriptor(file->file_handle), file->offset,
+          &file->write_stream, &error_code);
     }
     if (!ok) {
       translate_error(error_code);
@@ -113,8 +108,7 @@ static int file_get_write_stream(void *data,
   return 0;
 }
 
-static int file_get_file(void *data,
-                         filesystem_borrow_descriptor_t *out_file) {
+static int file_get_file(void *data, filesystem_borrow_descriptor_t *out_file) {
   file_t *file = (file_t *)data;
   *out_file = filesystem_borrow_descriptor(file->file_handle);
   return 0;
@@ -125,18 +119,16 @@ static int file_fstat(void *data, struct stat *buf) {
   // Get the metadata hash for the file descriptor
   filesystem_metadata_hash_value_t metadata;
   filesystem_error_code_t error;
-  if (!filesystem_method_descriptor_metadata_hash(filesystem_borrow_descriptor(file->file_handle),
-                                                  &metadata,
-                                                  &error)) {
+  if (!filesystem_method_descriptor_metadata_hash(
+          filesystem_borrow_descriptor(file->file_handle), &metadata, &error)) {
     translate_error(error);
     return -1;
   }
 
   // Get the file metadata
   filesystem_descriptor_stat_t internal_stat;
-  bool stat_result = filesystem_method_descriptor_stat(filesystem_borrow_descriptor(file->file_handle),
-                                                       &internal_stat,
-                                                       &error);
+  bool stat_result = filesystem_method_descriptor_stat(
+      filesystem_borrow_descriptor(file->file_handle), &internal_stat, &error);
   if (!stat_result) {
     translate_error(error);
     return -1;
@@ -150,14 +142,13 @@ static int file_fstat(void *data, struct stat *buf) {
 static int file_seek_end(file_t *file) {
   filesystem_descriptor_stat_t stat;
   filesystem_error_code_t error;
-  bool ok = filesystem_method_descriptor_stat(filesystem_borrow_descriptor(file->file_handle),
-      &stat,
-      &error);
+  bool ok = filesystem_method_descriptor_stat(
+      filesystem_borrow_descriptor(file->file_handle), &stat, &error);
   if (!ok) {
     translate_error(error);
     return -1;
   }
-  file->offset = (off_t) stat.size;
+  file->offset = (off_t)stat.size;
   return 0;
 }
 
@@ -171,23 +162,23 @@ static off_t file_seek(void *data, off_t offset, int whence) {
 
   off_t result;
   switch (whence) {
-    case SEEK_SET:
-      result = offset;
-      break;
-    case SEEK_CUR:
-      result = file->offset + offset;
-      break;
-    case SEEK_END: {
-      // If we're in append mode we already reset to the end, but if we're not
-      // in append mode then do the reset to the end here.
-      if (!(file->oflag & O_APPEND) && file_seek_end(file) < 0)
-        return -1;
-      result = file->offset + offset;
-      break;
-    }
-    default:
-      errno = EINVAL;
+  case SEEK_SET:
+    result = offset;
+    break;
+  case SEEK_CUR:
+    result = file->offset + offset;
+    break;
+  case SEEK_END: {
+    // If we're in append mode we already reset to the end, but if we're not
+    // in append mode then do the reset to the end here.
+    if (!(file->oflag & O_APPEND) && file_seek_end(file) < 0)
       return -1;
+    result = file->offset + offset;
+    break;
+  }
+  default:
+    errno = EINVAL;
+    return -1;
   }
   if (result < 0) {
     errno = EINVAL;
@@ -214,8 +205,10 @@ static int file_fcntl_getfl(void *data) {
   filesystem_descriptor_flags_t flags;
   filesystem_error_code_t error_code;
 
-  filesystem_borrow_descriptor_t file_handle = filesystem_borrow_descriptor(file->file_handle);
-  if (!filesystem_method_descriptor_get_flags(file_handle, &flags, &error_code)) {
+  filesystem_borrow_descriptor_t file_handle =
+      filesystem_borrow_descriptor(file->file_handle);
+  if (!filesystem_method_descriptor_get_flags(file_handle, &flags,
+                                              &error_code)) {
     translate_error(error_code);
     return -1;
   }
@@ -227,9 +220,9 @@ static int file_fcntl_getfl(void *data) {
     else
       oflags |= O_RDONLY;
   } else if (flags & FILESYSTEM_DESCRIPTOR_FLAGS_WRITE) {
-      oflags |= O_WRONLY;
+    oflags |= O_WRONLY;
   } else {
-      oflags |= O_SEARCH;
+    oflags |= O_SEARCH;
   }
   return oflags;
 }
@@ -242,16 +235,16 @@ static int file_fcntl_setfl(void *data, int flags) {
 }
 
 static descriptor_vtable_t file_vtable = {
-  .free = file_free,
-  .get_read_stream = file_get_read_stream,
-  .get_write_stream = file_get_write_stream,
-  .get_file = file_get_file,
-  .set_blocking = file_set_blocking,
-  .fstat = file_fstat,
-  .seek = file_seek,
-  .close_streams = file_close_streams,
-  .fcntl_getfl = file_fcntl_getfl,
-  .fcntl_setfl = file_fcntl_setfl,
+    .free = file_free,
+    .get_read_stream = file_get_read_stream,
+    .get_write_stream = file_get_write_stream,
+    .get_file = file_get_file,
+    .set_blocking = file_set_blocking,
+    .fstat = file_fstat,
+    .seek = file_seek,
+    .close_streams = file_close_streams,
+    .fcntl_getfl = file_fcntl_getfl,
+    .fcntl_setfl = file_fcntl_setfl,
 };
 
 int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {

@@ -10,6 +10,8 @@ int usleep(useconds_t useconds) {
   struct timespec ts = {.tv_sec = useconds / 1000000,
                         .tv_nsec = useconds % 1000000 * 1000};
 #ifdef __wasilibc_use_wasip2
+  // FIXME(WebAssembly/WASI#857): wasip2 only supports the monotonic clock for
+  // sleeping.
   clockid_t clock_id = CLOCK_MONOTONIC;
 #else
   clockid_t clock_id = CLOCK_REALTIME;

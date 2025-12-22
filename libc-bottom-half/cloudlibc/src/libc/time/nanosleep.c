@@ -6,7 +6,14 @@
 #include <time.h>
 
 int nanosleep(const struct timespec *rqtp, struct timespec *rem) {
-  int error = clock_nanosleep(CLOCK_REALTIME, 0, rqtp, rem);
+#ifdef __wasilibc_use_wasip2
+  // FIXME(WebAssembly/WASI#857): wasip2 only supports the monotonic clock for
+  // sleeping.
+  clockid_t clock = CLOCK_MONOTONIC;
+#else
+  clockid_t clock = CLOCK_REALTIME;
+#endif
+  int error = clock_nanosleep(clock, 0, rqtp, rem);
   if (error != 0) {
     errno = error;
     return -1;

@@ -7,17 +7,38 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
+#include "stat_impl.h"
 
-#ifdef __wasip2__
+#ifndef __wasip1__
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #endif
 
-#include "stat_impl.h"
-
 int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec times[2],
                                int flag) {
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  // Convert timestamps and extract NOW/OMIT flags.
+  __wasi_timestamp_t st_atim;
+  __wasi_timestamp_t st_mtim;
+  __wasi_fstflags_t flags;
+  if (!utimens_get_timestamps(times, &st_atim, &st_mtim, &flags)) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  // Create lookup properties.
+  __wasi_lookupflags_t lookup_flags = 0;
+  if ((flag & AT_SYMLINK_NOFOLLOW) == 0)
+    lookup_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
+
+  // Perform system call.
+  __wasi_errno_t error =
+      __wasi_path_filestat_set_times(fd, lookup_flags, path, st_atim, st_mtim, flags);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+#elif defined(__wasip2__)
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fd, &file_handle) < 0)
@@ -53,30 +74,8 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
     translate_error(error);
     return -1;
   }
-
 #else
-
-  // Convert timestamps and extract NOW/OMIT flags.
-  __wasi_timestamp_t st_atim;
-  __wasi_timestamp_t st_mtim;
-  __wasi_fstflags_t flags;
-  if (!utimens_get_timestamps(times, &st_atim, &st_mtim, &flags)) {
-    errno = EINVAL;
-    return -1;
-  }
-
-  // Create lookup properties.
-  __wasi_lookupflags_t lookup_flags = 0;
-  if ((flag & AT_SYMLINK_NOFOLLOW) == 0)
-    lookup_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
-
-  // Perform system call.
-  __wasi_errno_t error =
-      __wasi_path_filestat_set_times(fd, lookup_flags, path, st_atim, st_mtim, flags);
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
+# error "Unsupported WASI version"
 #endif
   return 0;
 }

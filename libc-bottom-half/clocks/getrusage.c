@@ -12,12 +12,14 @@ clock_t __clock(void);
 int getrusage(int who, struct rusage *r_usage) {
   switch (who) {
   case RUSAGE_SELF: {
-#ifdef __wasip2__
+#if defined(__wasip1__)
+    __wasi_timestamp_t usertime = __clock();
+    *r_usage = (struct rusage){.ru_utime = timestamp_to_timeval(usertime)};
+#elif defined(__wasip2__)
     clock_t usertime = __clock();
     *r_usage = (struct rusage){.ru_utime = instant_to_timeval(usertime)};
 #else
-    __wasi_timestamp_t usertime = __clock();
-    *r_usage = (struct rusage){.ru_utime = timestamp_to_timeval(usertime)};
+#error "Unknown WASI version"
 #endif
     return 0;
   }

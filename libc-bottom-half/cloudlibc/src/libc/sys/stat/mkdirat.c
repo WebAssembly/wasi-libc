@@ -7,14 +7,21 @@
 #include <string.h>
 #include <wasi/api.h>
 
-#ifdef __wasip2__
+#ifndef __wasip1__
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #endif
 
 int __wasilibc_nocwd_mkdirat_nomode(int fd, const char *path) {
+#if defined(__wasip1__)
+  __wasi_errno_t error = __wasi_path_create_directory(fd, path);
 
-#ifdef __wasip2__
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+  return 0;
+#elif defined(__wasip2__)
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fd, &file_handle) < 0)
@@ -34,12 +41,6 @@ int __wasilibc_nocwd_mkdirat_nomode(int fd, const char *path) {
   }
   return 0;
 #else
-  __wasi_errno_t error = __wasi_path_create_directory(fd, path);
-
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
-  return 0;
+# error "Unsupported WASI version"
 #endif
 }

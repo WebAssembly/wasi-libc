@@ -8,11 +8,13 @@
 #include <unistd.h>
 
 noreturn void _Exit(int status) {
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  __wasi_proc_exit(status);
+#elif defined(__wasip2__)
   exit_result_void_void_t exit_status = { .is_err = status != 0 };
   exit_exit(&exit_status);
 #else
-  __wasi_proc_exit(status);
+# error "Unknown WASI version"
 #endif
 }
 

@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include <unistd.h>
 
-#ifdef __wasip2__
+#ifndef __wasip1__
 #include <wasi/descriptor_table.h>
 #include <common/errors.h>
 #endif
@@ -37,7 +37,16 @@ ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
     return -1;
   }
 
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  size_t bytes_written = 0;
+  __wasi_errno_t error = __wasi_fd_write(
+      fildes, (const __wasi_ciovec_t *)iov, iovcnt, &bytes_written);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+  return bytes_written;
+#elif defined(__wasip2__)
   // Skip empty iovecs and then delegate to `read` with the first non-empty
   // iovec.
   while (iovcnt) {
@@ -49,13 +58,6 @@ ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
   }
   return write(fildes, NULL, 0);
 #else
-  size_t bytes_written = 0;
-  __wasi_errno_t error = __wasi_fd_write(
-      fildes, (const __wasi_ciovec_t *)iov, iovcnt, &bytes_written);
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
-  return bytes_written;
+# error "Unsupported WASI version"
 #endif
 }

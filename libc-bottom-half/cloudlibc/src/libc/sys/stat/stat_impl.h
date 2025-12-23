@@ -19,7 +19,53 @@ static_assert(S_ISLNK(S_IFLNK), "Value mismatch");
 static_assert(S_ISREG(S_IFREG), "Value mismatch");
 static_assert(S_ISSOCK(S_IFSOCK), "Value mismatch");
 
-#ifdef __wasip2__
+#if defined(__wasip1__)
+static inline void to_public_stat(const __wasi_filestat_t *in,
+                                  struct stat *out) {
+  // Ensure that we don't truncate any values.
+  static_assert(sizeof(in->dev) == sizeof(out->st_dev), "Size mismatch");
+  static_assert(sizeof(in->ino) == sizeof(out->st_ino), "Size mismatch");
+   /*
+    * The non-standard __st_filetype field appears to only be used for shared
+    * memory, which we don't currently support.
+    */
+   /* nlink_t is 64-bit on wasm32, following the x32 ABI. */
+  static_assert(sizeof(in->nlink) <= sizeof(out->st_nlink), "Size shortfall");
+
+  static_assert(sizeof(in->size) == sizeof(out->st_size), "Size mismatch");
+
+  *out = (struct stat){
+      .st_dev = in->dev,
+      .st_ino = in->ino,
+      .st_nlink = in->nlink,
+      .st_size = in->size,
+      .st_atim = timestamp_to_timespec(in->atim),
+      .st_mtim = timestamp_to_timespec(in->mtim),
+      .st_ctim = timestamp_to_timespec(in->ctim),
+  };
+  // Convert file type to legacy types encoded in st_mode.
+  switch (in->filetype) {
+    case __WASI_FILETYPE_BLOCK_DEVICE:
+      break;
+    case __WASI_FILETYPE_CHARACTER_DEVICE:
+       out->st_mode |= S_IFCHR;
+       break;
+    case __WASI_FILETYPE_DIRECTORY:
+       out->st_mode |= S_IFDIR;
+       break;
+     case __WASI_FILETYPE_REGULAR_FILE:
+       out->st_mode |= S_IFREG;
+       break;
+     case __WASI_FILETYPE_SOCKET_DGRAM:
+     case __WASI_FILETYPE_SOCKET_STREAM:
+       out->st_mode |= S_IFSOCK;
+       break;
+     case __WASI_FILETYPE_SYMBOLIC_LINK:
+       out->st_mode |= S_IFLNK;
+       break;
+   }
+}
+#elif defined(__wasip2__)
 static inline void to_public_stat(const filesystem_metadata_hash_value_t *metadata,
                                   const filesystem_descriptor_stat_t *in,
                                   struct stat *out) {
@@ -73,88 +119,10 @@ static inline void to_public_stat(const filesystem_metadata_hash_value_t *metada
   }
 }
 #else
-static inline void to_public_stat(const __wasi_filestat_t *in,
-                                  struct stat *out) {
-  // Ensure that we don't truncate any values.
-  static_assert(sizeof(in->dev) == sizeof(out->st_dev), "Size mismatch");
-  static_assert(sizeof(in->ino) == sizeof(out->st_ino), "Size mismatch");
-   /*
-    * The non-standard __st_filetype field appears to only be used for shared
-    * memory, which we don't currently support.
-    */
-   /* nlink_t is 64-bit on wasm32, following the x32 ABI. */
-  static_assert(sizeof(in->nlink) <= sizeof(out->st_nlink), "Size shortfall");
-
-  static_assert(sizeof(in->size) == sizeof(out->st_size), "Size mismatch");
-
-  *out = (struct stat){
-      .st_dev = in->dev,
-      .st_ino = in->ino,
-      .st_nlink = in->nlink,
-      .st_size = in->size,
-      .st_atim = timestamp_to_timespec(in->atim),
-      .st_mtim = timestamp_to_timespec(in->mtim),
-      .st_ctim = timestamp_to_timespec(in->ctim),
-  };
-  // Convert file type to legacy types encoded in st_mode.
-  switch (in->filetype) {
-    case __WASI_FILETYPE_BLOCK_DEVICE:
-      break;
-    case __WASI_FILETYPE_CHARACTER_DEVICE:
-       out->st_mode |= S_IFCHR;
-       break;
-    case __WASI_FILETYPE_DIRECTORY:
-       out->st_mode |= S_IFDIR;
-       break;
-     case __WASI_FILETYPE_REGULAR_FILE:
-       out->st_mode |= S_IFREG;
-       break;
-     case __WASI_FILETYPE_SOCKET_DGRAM:
-     case __WASI_FILETYPE_SOCKET_STREAM:
-       out->st_mode |= S_IFSOCK;
-       break;
-     case __WASI_FILETYPE_SYMBOLIC_LINK:
-       out->st_mode |= S_IFLNK;
-       break;
-   }
-}
+# error "Unsupported WASI version"
 #endif
 
-#ifdef __wasip2__
-static inline bool utimens_get_timestamp(const struct timespec *time,
-                                         filesystem_new_timestamp_t *out) {
-  switch (time->tv_nsec) {
-    case UTIME_NOW:
-      out->tag = FILESYSTEM_NEW_TIMESTAMP_NOW;
-      break;
-    case UTIME_OMIT:
-      out->tag = FILESYSTEM_NEW_TIMESTAMP_NO_CHANGE;
-      break;
-    default:
-      out->tag = FILESYSTEM_NEW_TIMESTAMP_TIMESTAMP;
-      if (!timespec_to_timestamp_exact(time, &out->val.timestamp))
-        return false;
-      break;
-  }
-  return true;
-}
-
-static inline bool utimens_get_timestamps(const struct timespec *times,
-                                          filesystem_new_timestamp_t *st_atim,
-                                          filesystem_new_timestamp_t *st_mtim) {
-  if (times == NULL) {
-    // Update both timestamps.
-    st_atim->tag = FILESYSTEM_NEW_TIMESTAMP_NOW;
-    st_mtim->tag = FILESYSTEM_NEW_TIMESTAMP_NOW;
-  } else {
-    if (!utimens_get_timestamp(&times[0], st_atim))
-      return false;
-    if (!utimens_get_timestamp(&times[1], st_mtim))
-      return false;
-  }
-  return true;
-}
-#else
+#if defined(__wasip1__)
 static inline bool utimens_get_timestamps(const struct timespec *times,
                                           __wasi_timestamp_t *st_atim,
                                           __wasi_timestamp_t *st_mtim,
@@ -199,5 +167,42 @@ static inline bool utimens_get_timestamps(const struct timespec *times,
   }
   return true;
 }
+#elif defined(__wasip2__)
+static inline bool utimens_get_timestamp(const struct timespec *time,
+                                         filesystem_new_timestamp_t *out) {
+  switch (time->tv_nsec) {
+    case UTIME_NOW:
+      out->tag = FILESYSTEM_NEW_TIMESTAMP_NOW;
+      break;
+    case UTIME_OMIT:
+      out->tag = FILESYSTEM_NEW_TIMESTAMP_NO_CHANGE;
+      break;
+    default:
+      out->tag = FILESYSTEM_NEW_TIMESTAMP_TIMESTAMP;
+      if (!timespec_to_timestamp_exact(time, &out->val.timestamp))
+        return false;
+      break;
+  }
+  return true;
+}
+
+static inline bool utimens_get_timestamps(const struct timespec *times,
+                                          filesystem_new_timestamp_t *st_atim,
+                                          filesystem_new_timestamp_t *st_mtim) {
+  if (times == NULL) {
+    // Update both timestamps.
+    st_atim->tag = FILESYSTEM_NEW_TIMESTAMP_NOW;
+    st_mtim->tag = FILESYSTEM_NEW_TIMESTAMP_NOW;
+  } else {
+    if (!utimens_get_timestamp(&times[0], st_atim))
+      return false;
+    if (!utimens_get_timestamp(&times[1], st_mtim))
+      return false;
+  }
+  return true;
+}
+#else
+# error "Unsupported WASI version"
 #endif
+
 #endif

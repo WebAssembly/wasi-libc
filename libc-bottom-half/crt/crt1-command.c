@@ -47,14 +47,16 @@ void _start(void) {
 
     // If main exited successfully, just return, otherwise call
     // `__wasi_proc_exit`.
-#ifdef __wasip2__
+#if defined(__wasip1__)
+    if (r != 0) {
+        __wasi_proc_exit(r);
+    }
+#elif defined(__wasip2__)
     if (r != 0) {
         exit_result_void_void_t status = { .is_err = true };
         exit_exit(&status);
     }
 #else
-    if (r != 0) {
-        __wasi_proc_exit(r);
-    }
+# error "Unsupported WASI version"
 #endif
 }

@@ -7,7 +7,7 @@
 #include <errno.h>
 #include <wasi/api.h>
 
-#ifdef __wasip2__
+#ifndef __wasip1__
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #include <unistd.h>
@@ -18,7 +18,16 @@ ssize_t pwritev(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
     errno = EINVAL;
     return -1;
   }
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  size_t bytes_written;
+  __wasi_errno_t error = __wasi_fd_pwrite(
+      fildes, (const __wasi_ciovec_t *)iov, iovcnt, offset, &bytes_written);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+  return bytes_written;
+#elif defined(__wasip2__)
   // Skip empty iovecs and then delegate to `pwrite` with the first non-empty
   // iovec.
   while (iovcnt) {
@@ -30,13 +39,6 @@ ssize_t pwritev(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
   }
   return pwrite(fildes, NULL, 0, offset);
 #else
-  size_t bytes_written;
-  __wasi_errno_t error = __wasi_fd_pwrite(
-      fildes, (const __wasi_ciovec_t *)iov, iovcnt, offset, &bytes_written);
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
-  return bytes_written;
+# error "Unsupported WASI version"
 #endif
 }

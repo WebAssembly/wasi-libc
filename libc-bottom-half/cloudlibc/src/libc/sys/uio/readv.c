@@ -32,7 +32,16 @@ ssize_t readv(int fildes, const struct iovec *iov, int iovcnt) {
     errno = EINVAL;
     return -1;
   }
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  size_t bytes_read;
+  __wasi_errno_t error = __wasi_fd_read(
+      fildes, (const __wasi_iovec_t *)iov, iovcnt, &bytes_read);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+  return bytes_read;
+#elif defined(__wasip2__)
   // Skip empty iovecs and then delegate to `read` with the first non-empty
   // iovec.
   while (iovcnt) {
@@ -44,13 +53,6 @@ ssize_t readv(int fildes, const struct iovec *iov, int iovcnt) {
   }
   return read(fildes, NULL, 0);
 #else
-  size_t bytes_read;
-  __wasi_errno_t error = __wasi_fd_read(
-      fildes, (const __wasi_iovec_t *)iov, iovcnt, &bytes_read);
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
-  return bytes_read;
+# error "Unsupported WASI version"
 #endif
 }

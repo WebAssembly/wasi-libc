@@ -9,11 +9,13 @@
 
 int fdclosedir(DIR *dirp) {
   int fd = dirp->fd;
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  free(dirp->buffer);
+#elif defined(__wasip2__)
   if (dirp->stream.__handle != 0)
     filesystem_directory_entry_stream_drop_own(dirp->stream);
 #else
-  free(dirp->buffer);
+# error "Unsupported WASI version"
 #endif
   free(dirp->dirent);
   free(dirp);

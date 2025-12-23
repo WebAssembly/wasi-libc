@@ -2,24 +2,11 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#include <wasi/file_utils.h>
-#include <common/errors.h>
-#else
-#include <wasi/api.h>
-#endif
-#include <wasi/libc.h>
-#include <wasi/libc-nocwd.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/stat.h>
-
-#include "dirent_impl.h"
 
 static int sel_true(const struct dirent *de) {
   return 1;

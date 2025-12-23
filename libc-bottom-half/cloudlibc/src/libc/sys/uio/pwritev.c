@@ -4,22 +4,30 @@
 
 #include <sys/types.h>
 #include <sys/uio.h>
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
+#include <errno.h>
+#include <wasi/api.h>
+
+#ifndef __wasip1__
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #include <unistd.h>
-#else
-#include <wasi/api.h>
 #endif
-#include <errno.h>
 
 ssize_t pwritev(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
   if (iovcnt < 0 || offset < 0) {
     errno = EINVAL;
     return -1;
   }
-#ifdef __wasilibc_use_wasip2
+#if defined(__wasip1__)
+  size_t bytes_written;
+  __wasi_errno_t error = __wasi_fd_pwrite(
+      fildes, (const __wasi_ciovec_t *)iov, iovcnt, offset, &bytes_written);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+  return bytes_written;
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Skip empty iovecs and then delegate to `pwrite` with the first non-empty
   // iovec.
   while (iovcnt) {
@@ -31,13 +39,6 @@ ssize_t pwritev(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
   }
   return pwrite(fildes, NULL, 0, offset);
 #else
-  size_t bytes_written;
-  __wasi_errno_t error = __wasi_fd_pwrite(
-      fildes, (const __wasi_ciovec_t *)iov, iovcnt, offset, &bytes_written);
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
-  return bytes_written;
+# error "Unsupported WASI version"
 #endif
 }

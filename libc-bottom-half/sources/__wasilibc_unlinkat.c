@@ -1,16 +1,22 @@
-#ifdef __wasilibc_use_wasip2
+#include <errno.h>
+#include <wasi/api.h>
+#include <wasi/libc.h>
+
+#ifndef __wasip1__
 #include <common/errors.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
-#include <wasi/wasip2.h>
-#else
-#include <wasi/api.h>
 #endif
-#include <errno.h>
-#include <wasi/libc.h>
 
 int __wasilibc_nocwd___wasilibc_unlinkat(int fd, const char *path) {
-#ifdef __wasilibc_use_wasip2
+#if defined(__wasip1__)
+  __wasi_errno_t error = __wasi_path_unlink_file(fd, path);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+  return 0;
+#elif defined(__wasip2__)
   // Translate the file descriptor to an internal handle
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
   if (!entry)
@@ -41,12 +47,11 @@ int __wasilibc_nocwd___wasilibc_unlinkat(int fd, const char *path) {
   }
 
   return 0;
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
-  __wasi_errno_t error = __wasi_path_unlink_file(fd, path);
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
-  return 0;
+#error "Unknown WASI version"
 #endif
 }

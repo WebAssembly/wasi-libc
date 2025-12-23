@@ -2,21 +2,28 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#include <wasi/file_utils.h>
-#include <common/errors.h>
-#else
-#include <wasi/api.h>
-#endif
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <wasi/api.h>
+
+#ifndef __wasip1__
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#endif
 
 ssize_t __wasilibc_nocwd_readlinkat(int fd, const char *restrict path, char *restrict buf,
                                     size_t bufsize) {
   size_t bufused;
-#ifdef __wasilibc_use_wasip2
+#if defined(__wasip1__)
+  // TODO: Remove the cast on `buf` once the witx is updated with char8 support.
+  __wasi_errno_t error = __wasi_path_readlink(fd, path,
+                                                      (uint8_t*)buf, bufsize, &bufused);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+#elif defined(__wasip2__)
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fd, &file_handle) < 0)
@@ -42,14 +49,12 @@ ssize_t __wasilibc_nocwd_readlinkat(int fd, const char *restrict path, char *res
   bufused = bufsize < link_source.len ? bufsize : link_source.len;
   memcpy(buf, link_source.ptr, bufused);
   wasip2_string_free(&link_source);
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
-  // TODO: Remove the cast on `buf` once the witx is updated with char8 support.
-  __wasi_errno_t error = __wasi_path_readlink(fd, path,
-                                                      (uint8_t*)buf, bufsize, &bufused);
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
+# error "Unsupported WASI version"
 #endif
   return bufused;
 }

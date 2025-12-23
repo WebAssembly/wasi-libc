@@ -1,12 +1,10 @@
 #ifdef _REENTRANT
 #include <stdatomic.h>
 #endif
-extern void __wasi_init_tp(void);
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#else
+
 #include <wasi/api.h>
-#endif
+
+extern void __wasi_init_tp(void);
 extern void __wasm_call_ctors(void);
 extern int __main_void(void);
 extern void __wasm_call_dtors(void);
@@ -49,14 +47,16 @@ void _start(void) {
 
     // If main exited successfully, just return, otherwise call
     // `__wasi_proc_exit`.
-#ifdef __wasilibc_use_wasip2
+#if defined(__wasip1__)
+    if (r != 0) {
+        __wasi_proc_exit(r);
+    }
+#elif defined(__wasip2__) || defined(__wasip3__)
     if (r != 0) {
         exit_result_void_void_t status = { .is_err = true };
         exit_exit(&status);
     }
 #else
-    if (r != 0) {
-        __wasi_proc_exit(r);
-    }
+# error "Unsupported WASI version"
 #endif
 }

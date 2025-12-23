@@ -2,15 +2,14 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#include <wasi/file_utils.h>
-#include <common/errors.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <errno.h>
 #include <unistd.h>
+
+#ifndef __wasip1__
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#endif
 
 ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
   if (offset < 0) {
@@ -18,7 +17,25 @@ ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
     return -1;
   }
 
-#ifdef __wasilibc_use_wasip2
+#if defined(__wasip1__)
+  __wasi_ciovec_t iov = {.buf = buf, .buf_len = nbyte};
+  size_t bytes_written;
+  __wasi_errno_t error =
+      __wasi_fd_pwrite(fildes, &iov, 1, offset, &bytes_written);
+  if (error != 0) {
+    __wasi_fdstat_t fds;
+    if (error == ENOTCAPABLE && __wasi_fd_fdstat_get(fildes, &fds) == 0) {
+      // Determine why we got ENOTCAPABLE.
+      if ((fds.fs_rights_base & __WASI_RIGHTS_FD_WRITE) == 0)
+        error = EBADF;
+      else
+        error = ESPIPE;
+    }
+    errno = error;
+    return -1;
+  }
+  return bytes_written;
+#elif defined(__wasip2__)
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fildes, &file_handle) < 0)
@@ -44,23 +61,11 @@ ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
   }
 
   return bytes_written;
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
-  __wasi_ciovec_t iov = {.buf = buf, .buf_len = nbyte};
-  size_t bytes_written;
-  __wasi_errno_t error =
-      __wasi_fd_pwrite(fildes, &iov, 1, offset, &bytes_written);
-  if (error != 0) {
-    __wasi_fdstat_t fds;
-    if (error == ENOTCAPABLE && __wasi_fd_fdstat_get(fildes, &fds) == 0) {
-      // Determine why we got ENOTCAPABLE.
-      if ((fds.fs_rights_base & __WASI_RIGHTS_FD_WRITE) == 0)
-        error = EBADF;
-      else
-        error = ESPIPE;
-    }
-    errno = error;
-    return -1;
-  }
-  return bytes_written;
+# error "Unsupported WASI version"
 #endif
 }

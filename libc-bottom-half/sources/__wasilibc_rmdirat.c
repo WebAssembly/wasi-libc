@@ -1,16 +1,21 @@
-#ifdef __wasilibc_use_wasip2
+#include <errno.h>
+#include <wasi/api.h>
+#include <wasi/libc.h>
+
+#ifndef __wasip1__
 #include <common/errors.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
-#include <wasi/wasip2.h>
-#else
-#include <wasi/api.h>
 #endif
-#include <errno.h>
-#include <wasi/libc.h>
 
 int __wasilibc_nocwd___wasilibc_rmdirat(int fd, const char *path) {
-#ifdef __wasilibc_use_wasip2
+#if defined(__wasip1__)
+  __wasi_errno_t error = __wasi_path_remove_directory(fd, path);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+#elif defined(__wasip2__)
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fd, &file_handle) < 0)
@@ -29,12 +34,12 @@ int __wasilibc_nocwd___wasilibc_rmdirat(int fd, const char *path) {
     translate_error(error_code);
     return -1;
   }
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
-  __wasi_errno_t error = __wasi_path_remove_directory(fd, path);
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
+#error "Unsupported WASI version"
 #endif
   return 0;
 }

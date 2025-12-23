@@ -2,20 +2,31 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#include <wasi/file_utils.h>
-#include <common/errors.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 
+#ifndef __wasip1__
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#endif
+
 int __wasilibc_nocwd_linkat(int fd1, const char *path1, int fd2, const char *path2, int flag) {
-#ifdef __wasilibc_use_wasip2
+#if defined(__wasip1__)
+  // Create lookup properties.
+  __wasi_lookupflags_t lookup1_flags = 0;
+  if ((flag & AT_SYMLINK_FOLLOW) != 0)
+    lookup1_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
+
+  // Perform system call.
+  __wasi_errno_t error = __wasi_path_link(fd1, lookup1_flags, path1, fd2, path2);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+#elif defined(__wasip2__)
   // Translate the file descriptors to internal handles
   filesystem_borrow_descriptor_t file_handle1, file_handle2;
   if (fd_to_file_handle(fd1, &file_handle1) < 0)
@@ -42,18 +53,12 @@ int __wasilibc_nocwd_linkat(int fd1, const char *path1, int fd2, const char *pat
     translate_error(error_code);
     return -1;
   }
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
-  // Create lookup properties.
-  __wasi_lookupflags_t lookup1_flags = 0;
-  if ((flag & AT_SYMLINK_FOLLOW) != 0)
-    lookup1_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
-
-  // Perform system call.
-  __wasi_errno_t error = __wasi_path_link(fd1, lookup1_flags, path1, fd2, path2);
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
+# error "Unsupported WASI version"
 #endif
   return 0;
 }

@@ -1,13 +1,23 @@
 #ifndef WASI_POLL_H
 #define WASI_POLL_H
 
-#ifdef __wasilibc_use_wasip2
+#include <wasi/version.h>
+
+#ifndef __wasip1__
 
 #include <poll.h>
 #include <wasi/wasip2.h>
 
 /// Opaque state that the `poll` function manages for itself.
 typedef struct poll_state_t poll_state_t;
+
+/// Indicates that the `pollfd` which `state` refers to is ready with `events`.
+///
+/// If called during `poll_register` then `wasi:io/poll.poll` won't be invoked,
+/// and otherwise sets the `revents` field after `poll` has run.
+void __wasilibc_poll_ready(poll_state_t *state, short events);
+
+#ifdef __wasip2__
 
 /// Adds the `pollable` to the `state` provided.
 ///
@@ -19,12 +29,6 @@ typedef struct poll_state_t poll_state_t;
 int __wasilibc_poll_add(poll_state_t *state,
                         short events,
                         poll_borrow_pollable_t pollable);
-
-/// Indicates that the `pollfd` which `state` refers to is ready with `events`.
-///
-/// If called during `poll_register` then `wasi:io/poll.poll` won't be invoked,
-/// and otherwise sets the `revents` field after `poll` has run.
-void __wasilibc_poll_ready(poll_state_t *state, short events);
 
 /// Helper function to lazily subscribe to an input stream and call
 /// `__wasilibc_poll_add`.
@@ -48,6 +52,8 @@ static int __wasilibc_poll_add_output_stream(
   return __wasilibc_poll_add(state, POLLWRNORM, poll_borrow_pollable(*pollable));
 }
 
-#endif // __wasilibc_use_wasip2
+#endif // __wasip2__
+
+#endif // not(__wasip1__)
 
 #endif // WASI_POLL_H

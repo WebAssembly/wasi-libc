@@ -1,7 +1,9 @@
 #ifndef DESCRIPTOR_TABLE_H
 #define DESCRIPTOR_TABLE_H
 
-#include <wasi/wasip2.h>
+#include <wasi/api.h>
+
+#ifndef __wasip1__
 #include <wasi/poll.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
@@ -25,6 +27,7 @@ typedef struct descriptor_vtable_t {
   // =====================================================================
   // Generic I/O
 
+#ifdef __wasip2__
   /// Looks up a `wasi:io/streams.input-stream` object and stores it in
   /// the first argument. If provide also stores a pointer to the internal
   /// `off_t` offset and `pollable` for this object. The returned pointers
@@ -33,6 +36,7 @@ typedef struct descriptor_vtable_t {
 
   /// Same as `get_read_stream`, but for output streams.
   int (*get_write_stream)(void*, streams_borrow_output_stream_t*, off_t**, poll_own_pollable_t**);
+#endif
 
   /// Sets the nonblocking flag for this object to the specified value.
   int (*set_blocking)(void*, bool);
@@ -147,4 +151,6 @@ int descriptor_table_remove(int fd);
 /// errno on failure.
 int descriptor_table_renumber(int fd, int newfd);
 
-#endif
+#endif // __wasip1__
+
+#endif // DESCRIPTOR_TABLE_H

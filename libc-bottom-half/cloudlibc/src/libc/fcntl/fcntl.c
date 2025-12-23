@@ -2,23 +2,23 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#include <wasi/file_utils.h>
-#include <common/errors.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>
 
+#ifndef __wasip1__
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#endif
+
 int fcntl(int fildes, int cmd, ...) {
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
   if (entry == NULL)
     return -1;
 #endif
+
   switch (cmd) {
     case F_GETFD:
       // Act as if the close-on-exec flag is always set.
@@ -27,13 +27,8 @@ int fcntl(int fildes, int cmd, ...) {
       // The close-on-exec flag is ignored.
       return 0;
     case F_GETFL: {
-#ifdef __wasilibc_use_wasip2
-      if (!entry->vtable->fcntl_getfl) {
-        errno = EINVAL;
-        return -1;
-      }
-      return entry->vtable->fcntl_getfl(entry->data);
-#else
+
+#if defined(__wasip1__)
       // Obtain the flags and the rights of the descriptor.
       __wasi_fdstat_t fds;
       __wasi_errno_t error = __wasi_fd_fdstat_get(fildes, &fds);
@@ -56,6 +51,18 @@ int fcntl(int fildes, int cmd, ...) {
         oflags |= O_SEARCH;
       }
       return oflags;
+#elif defined(__wasip2__)
+      if (!entry->vtable->fcntl_getfl) {
+        errno = EINVAL;
+        return -1;
+      }
+      return entry->vtable->fcntl_getfl(entry->data);
+#elif defined(__wasip3__)
+      // TODO(wasip3)
+      errno = ENOTSUP;
+      return -1;
+#else
+# error "Unknown WASI version"
 #endif
     }
     case F_SETFL: {
@@ -65,13 +72,7 @@ int fcntl(int fildes, int cmd, ...) {
       int flags = va_arg(ap, int);
       va_end(ap);
 
-#ifdef __wasilibc_use_wasip2
-      if (!entry->vtable->fcntl_setfl) {
-        errno = EINVAL;
-        return -1;
-      }
-      return entry->vtable->fcntl_setfl(entry->data, flags);
-#else
+#if defined(__wasip1__)
       __wasi_fdflags_t fs_flags = flags & 0xfff;
       __wasi_errno_t error =
           __wasi_fd_fdstat_set_flags(fildes, fs_flags);
@@ -79,6 +80,18 @@ int fcntl(int fildes, int cmd, ...) {
         errno = error;
         return -1;
       }
+#elif defined(__wasip2__)
+      if (!entry->vtable->fcntl_setfl) {
+        errno = EINVAL;
+        return -1;
+      }
+      return entry->vtable->fcntl_setfl(entry->data, flags);
+#elif defined(__wasip3__)
+      // TODO(wasip3)
+      errno = ENOTSUP;
+      return -1;
+#else
+# error "Unknown WASI version"
 #endif
       return 0;
     }

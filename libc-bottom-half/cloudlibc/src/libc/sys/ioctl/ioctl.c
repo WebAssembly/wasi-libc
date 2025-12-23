@@ -6,21 +6,13 @@
 
 #include <errno.h>
 #include <stdarg.h>
-
-#ifdef __wasilibc_use_wasip2
-#include <wasi/descriptor_table.h>
-#else
 #include <wasi/api.h>
-#endif
+#include <wasi/descriptor_table.h>
 
 int ioctl(int fildes, int request, ...) {
   switch (request) {
     case FIONREAD: {
-#ifdef __wasilibc_use_wasip2
-      // wasip2 doesn't support this operation
-      errno = ENOTSUP;
-      return -1;
-#else
+#if defined(__wasip1__)
       // Poll the file descriptor to determine how many bytes can be read.
       __wasi_subscription_t subscriptions[2] = {
           {
@@ -63,22 +55,16 @@ int ioctl(int fildes, int request, ...) {
       // No data available for reading.
       *result = 0;
       return 0;
+#elif defined(__wasip2__) || defined(__wasip3__)
+      // wasip{2,3} doesn't support this operation
+      errno = ENOTSUP;
+      return -1;
+#else
+# error "Unknown WASI version"
 #endif
     }
     case FIONBIO: {
-#ifdef __wasilibc_use_wasip2
-      descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
-      va_list ap;
-      va_start(ap, request);
-      bool blocking = *va_arg(ap, const int *) == 0;
-      va_end(ap);
-
-      if (!entry->vtable->set_blocking) {
-        errno = EINVAL;
-        return -1;
-      }
-      return entry->vtable->set_blocking(entry->data, blocking);
-#else
+#if defined(__wasip1__)
       // Obtain the current file descriptor flags.
       __wasi_fdstat_t fds;
       __wasi_errno_t error = __wasi_fd_fdstat_get(fildes, &fds);
@@ -103,6 +89,24 @@ int ioctl(int fildes, int request, ...) {
         return -1;
       }
       return 0;
+#elif defined(__wasip2__)
+      descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
+      va_list ap;
+      va_start(ap, request);
+      bool blocking = *va_arg(ap, const int *) == 0;
+      va_end(ap);
+
+      if (!entry->vtable->set_blocking) {
+        errno = EINVAL;
+        return -1;
+      }
+      return entry->vtable->set_blocking(entry->data, blocking);
+#elif defined(__wasip3__)
+      // TODO(wasip3)
+      errno = ENOTSUP;
+      return -1;
+#else
+# error "Unknown WASI version"
 #endif
     }
     default:

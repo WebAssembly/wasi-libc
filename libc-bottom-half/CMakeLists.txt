@@ -6,8 +6,8 @@ add_subdirectory(signal)
 # =============================================================================
 # sysroot headers from the bottom half
 #
-configure_file(headers/public/__wasi_snapshot.h.in ${SYSROOT_INC}/__wasi_snapshot.h)
-add_custom_target(sysroot-wasi-snapshot-header DEPENDS ${SYSROOT_INC}/__wasi_snapshot.h)
+configure_file(headers/public/wasi/version.h.in ${SYSROOT_INC}/wasi/version.h)
+add_custom_target(sysroot-wasi-snapshot-header DEPENDS ${SYSROOT_INC}/wasi/version.h)
 add_dependencies(sysroot_inc sysroot-wasi-snapshot-header)
 
 file(
@@ -44,8 +44,11 @@ list(REMOVE_ITEM globbed_headers
   headers/public/wchar.h
 )
 
-if (WASI STREQUAL "p1")
-  list(REMOVE_ITEM globbed_headers headers/public/wasi/wasip2.h)
+if (NOT (WASI STREQUAL "p2"))
+  list(REMOVE_ITEM globbed_headers headers/public/wasi/__generated_wasip2.h)
+endif()
+if (NOT (WASI STREQUAL "p3"))
+  list(REMOVE_ITEM globbed_headers headers/public/wasi/__generated_wasip3.h)
 endif()
 
 foreach(header ${globbed_headers})
@@ -148,28 +151,42 @@ if (WASI STREQUAL "p1")
     cloudlibc/src/libc/sys/socket/shutdown.c
     sources/accept-wasip1.c
   )
-elseif(WASI STREQUAL "p2")
+else()
   list(APPEND bottom_half_sources
-    sources/accept-wasip2.c
+    sources/accept.c
     sources/bind.c
     sources/connect.c
     sources/descriptor_table.c
     sources/getsockpeername.c
     sources/listen.c
-    sources/netdb.c
-    sources/poll-wasip2.c
     sources/recv.c
     sources/send.c
     sources/shutdown.c
     sources/socket.c
     sources/sockets_utils.c
     sources/sockopt.c
+  )
+endif()
+
+if(WASI STREQUAL "p2")
+  list(APPEND bottom_half_sources
+    sources/netdb.c
     sources/wasip2.c
     sources/wasip2_file.c
     sources/wasip2_file_utils.c
     sources/wasip2_stdio.c
     sources/wasip2_tcp.c
     sources/wasip2_udp.c
+  )
+endif()
+
+if (WASI STREQUAL "p3")
+  list(APPEND bottom_half_sources
+    sources/wasip3.c
+    sources/wasip3_file.c
+    sources/wasip3_stdio.c
+    sources/wasip3_tcp.c
+    sources/wasip3_udp.c
   )
 endif()
 

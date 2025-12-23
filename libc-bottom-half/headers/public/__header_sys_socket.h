@@ -4,15 +4,19 @@
 #include <__struct_msghdr.h>
 #include <__struct_sockaddr.h>
 #include <__struct_sockaddr_storage.h>
-#include <__wasi_snapshot.h>
 
-#include <wasi/api.h>
+#include <wasi/version.h>
 
-#define SHUT_RD __WASI_SDFLAGS_RD
-#define SHUT_WR __WASI_SDFLAGS_WR
+#define SHUT_RD 1
+#define SHUT_WR 2
 #define SHUT_RDWR (SHUT_RD | SHUT_WR)
 
-#ifdef __wasilibc_use_wasip2
+#if defined(__wasip1__)
+#include <wasi/api.h>
+#define MSG_PEEK __WASI_RIFLAGS_RECV_PEEK
+#define MSG_WAITALL __WASI_RIFLAGS_RECV_WAITALL
+#define MSG_TRUNC __WASI_ROFLAGS_RECV_DATA_TRUNCATED
+#elif defined(__wasip2__) || defined(__wasip3__)
 #define MSG_DONTWAIT 0x0040
 #define MSG_NOSIGNAL 0x4000
 #define MSG_PEEK 0x0002
@@ -43,14 +47,12 @@
 #define SO_SNDTIMEO 21
 #endif
 
-#else // __wasilibc_use_wasip2
-#define MSG_PEEK __WASI_RIFLAGS_RECV_PEEK
-#define MSG_WAITALL __WASI_RIFLAGS_RECV_WAITALL
-#define MSG_TRUNC __WASI_ROFLAGS_RECV_DATA_TRUNCATED
-#endif // __wasilibc_use_wasip2
+#else
+#error "Unknown WASI version"
+#endif
 
-#define SOCK_DGRAM __WASI_FILETYPE_SOCKET_DGRAM
-#define SOCK_STREAM __WASI_FILETYPE_SOCKET_STREAM
+#define SOCK_DGRAM 5
+#define SOCK_STREAM 6
 
 #define SOCK_NONBLOCK (0x00004000)
 #define SOCK_CLOEXEC (0x00002000)

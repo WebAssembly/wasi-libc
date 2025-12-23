@@ -2,18 +2,23 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#include <wasi/file_utils.h>
-#include <common/errors.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <errno.h>
 #include <unistd.h>
 
+#ifndef __wasip1__
+#include <wasi/file_utils.h>
+#include <common/errors.h>
+#endif
+
 int fsync(int fildes) {
-#ifdef __wasilibc_use_wasip2
+#if defined(__wasip1__)
+  __wasi_errno_t error = __wasi_fd_sync(fildes);
+  if (error != 0) {
+    errno = error == ENOTCAPABLE ? EINVAL : error;
+    return -1;
+  }
+#elif defined(__wasip2__)
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fildes, &file_handle) < 0)
@@ -25,12 +30,12 @@ int fsync(int fildes) {
     translate_error(error_code);
     return -1;
   }
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
-  __wasi_errno_t error = __wasi_fd_sync(fildes);
-  if (error != 0) {
-    errno = error == ENOTCAPABLE ? EINVAL : error;
-    return -1;
-  }
+# error "Unsupported WASI version"
 #endif
   return 0;
 }

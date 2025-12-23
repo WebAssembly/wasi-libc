@@ -2,20 +2,28 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
+#include <wasi/api.h>
+#include <errno.h>
+#include <unistd.h>
+
+#ifndef __wasip1__
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #include <string.h>
-#else
-#include <wasi/api.h>
 #endif
-#include <errno.h>
-#include <unistd.h>
 
 ssize_t read(int fildes, void *buf, size_t nbyte) {
-#ifdef __wasilibc_use_wasip2
+#if defined(__wasip1__)
+  __wasi_iovec_t iov = {.buf = buf, .buf_len = nbyte};
+  size_t bytes_read;
+  __wasi_errno_t error = __wasi_fd_read(fildes, &iov, 1, &bytes_read);
+  if (error != 0) {
+    errno = error == ENOTCAPABLE ? EBADF : error;
+    return -1;
+  }
+  return bytes_read;
+#elif defined(__wasip2__)
   bool ok = false;
 
   // Translate the file descriptor to an internal handle
@@ -44,15 +52,11 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
   if (off)
     *off += contents.len;
   return contents.len;
-
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
-  __wasi_iovec_t iov = {.buf = buf, .buf_len = nbyte};
-  size_t bytes_read;
-  __wasi_errno_t error = __wasi_fd_read(fildes, &iov, 1, &bytes_read);
-  if (error != 0) {
-    errno = error == ENOTCAPABLE ? EBADF : error;
-    return -1;
-  }
-  return bytes_read;
+# error "Unsupported WASI version"
 #endif
 }

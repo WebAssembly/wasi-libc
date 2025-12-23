@@ -3,19 +3,18 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <sys/uio.h>
-
 #include <assert.h>
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#include <wasi/descriptor_table.h>
-#include <common/errors.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <errno.h>
 #include <stddef.h>
 #include <unistd.h>
 
+#ifndef __wasip1__
+#include <wasi/descriptor_table.h>
+#include <common/errors.h>
+#endif
+
+#ifdef __wasip1__
 static_assert(offsetof(struct iovec, iov_base) ==
                   offsetof(__wasi_ciovec_t, buf),
               "Offset mismatch");
@@ -30,6 +29,7 @@ static_assert(sizeof(((struct iovec *)0)->iov_len) ==
               "Size mismatch");
 static_assert(sizeof(struct iovec) == sizeof(__wasi_ciovec_t),
               "Size mismatch");
+#endif
 
 ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
   if (iovcnt < 0) {
@@ -37,7 +37,16 @@ ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
     return -1;
   }
 
-#ifdef __wasilibc_use_wasip2
+#if defined(__wasip1__)
+  size_t bytes_written = 0;
+  __wasi_errno_t error = __wasi_fd_write(
+      fildes, (const __wasi_ciovec_t *)iov, iovcnt, &bytes_written);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+  return bytes_written;
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Skip empty iovecs and then delegate to `read` with the first non-empty
   // iovec.
   while (iovcnt) {
@@ -49,13 +58,6 @@ ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
   }
   return write(fildes, NULL, 0);
 #else
-  size_t bytes_written = 0;
-  __wasi_errno_t error = __wasi_fd_write(
-      fildes, (const __wasi_ciovec_t *)iov, iovcnt, &bytes_written);
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
-  return bytes_written;
+# error "Unsupported WASI version"
 #endif
 }

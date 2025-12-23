@@ -5,7 +5,8 @@
 #ifndef COMMON_CLOCK_H
 #define COMMON_CLOCK_H
 
-#include <wasi/api.h>
+#define CLOCKID_REALTIME 0
+#define CLOCKID_MONOTONIC 1
 
 // In this implementation we define clockid_t as a pointer type, so that
 // we can implement them as full objects. Right now we only use those
@@ -13,7 +14,7 @@
 // future we can use this to provide support for pthread_getcpuclockid()
 // and clock file descriptors.
 struct __clockid {
-  __wasi_clockid_t id;
+  int id;
 };
 
 #endif

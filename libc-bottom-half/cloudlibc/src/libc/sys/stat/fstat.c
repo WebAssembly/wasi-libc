@@ -2,24 +2,14 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <sys/stat.h>
-
-#ifdef __wasilibc_use_wasip2
-#include <wasi/descriptor_table.h>
-#else
-#include <wasi/api.h>
 #include "stat_impl.h"
-#endif
 #include <errno.h>
+#include <sys/stat.h>
+#include <wasi/api.h>
+#include <wasi/descriptor_table.h>
 
 int fstat(int fildes, struct stat *buf) {
-#ifdef __wasilibc_use_wasip2
-  // Translate the file descriptor to an internal handle
-  descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
-  if (!entry)
-    return -1;
-  return entry->vtable->fstat(entry->data, buf);
-#else
+#if defined(__wasip1__)
   __wasi_filestat_t internal_stat;
   __wasi_errno_t error = __wasi_fd_filestat_get(fildes, &internal_stat);
   if (error != 0) {
@@ -28,5 +18,17 @@ int fstat(int fildes, struct stat *buf) {
   }
   to_public_stat(&internal_stat, buf);
   return 0;
+#elif defined(__wasip2__)
+  // Translate the file descriptor to an internal handle
+  descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
+  if (!entry)
+    return -1;
+  return entry->vtable->fstat(entry->data, buf);
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
+#else
+# error "Unsupported WASI version"
 #endif
 }

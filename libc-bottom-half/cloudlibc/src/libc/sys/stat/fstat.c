@@ -24,6 +24,10 @@ int fstat(int fildes, struct stat *buf) {
   if (!entry)
     return -1;
   return entry->vtable->fstat(entry->data, buf);
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

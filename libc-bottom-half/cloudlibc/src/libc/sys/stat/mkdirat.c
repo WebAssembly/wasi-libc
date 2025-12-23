@@ -40,6 +40,10 @@ int __wasilibc_nocwd_mkdirat_nomode(int fd, const char *path) {
     return -1;
   }
   return 0;
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

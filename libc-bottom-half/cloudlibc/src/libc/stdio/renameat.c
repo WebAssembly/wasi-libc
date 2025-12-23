@@ -47,6 +47,10 @@ int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char 
     translate_error(error_code);
     return -1;
   }
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
 # error "Unknown WASI version"
 #endif

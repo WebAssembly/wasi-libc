@@ -2,3 +2,13 @@
 # them differing depending on the line-ending style of the host they
 # were checked out on.
 * text eol=lf
+
+# All of the `expected/**/*.txt` files are auto-generated via the
+# `update-symbols` target, so flag them as such.
+expected linguist-generated
+
+# Flag some wit-bindgen-generated files checked into the repo as generated
+__generated_wasip2.h linguist-generated
+__generated_wasip3.h linguist-generated
+libc-bottom-half/sources/wasip2.c linguist-generated
+libc-bottom-half/sources/wasip3.c linguist-generated

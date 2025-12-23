@@ -27,6 +27,10 @@ struct _DIR {
   filesystem_own_directory_entry_stream_t stream;
   size_t skip;
   size_t offset;
+#elif defined(__wasip3__)
+  filesystem_stream_directory_entry_t stream;
+  size_t skip;
+  size_t offset;
 #else
 # error "Unknown WASI version"
 #endif

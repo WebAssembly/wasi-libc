@@ -18,7 +18,7 @@ int __wasilibc_fd_renumber(int fd, int newfd) {
     errno = error;
     return -1;
   }
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   if (descriptor_table_renumber(fd, newfd) < 0)
     return -1;
 #else
@@ -37,7 +37,7 @@ int close(int fd) {
     errno = error;
     return -1;
   }
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   if (descriptor_table_remove(fd) < 0)
     return -1;
 #else

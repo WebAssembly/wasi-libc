@@ -166,6 +166,7 @@
 #include <unistd.h>
 #include <utime.h>
 #include <values.h>
+#include <wasi/__generated_wasip2.h>
 #include <wasi/api.h>
 #include <wasi/libc-busywait.h>
 #include <wasi/libc-environ.h>
@@ -175,5 +176,6 @@
 #include <wasi/version.h>
 #include <wasi/wasip1.h>
 #include <wasi/wasip2.h>
+#include <wasi/wasip3.h>
 #include <wchar.h>
 #include <wctype.h>

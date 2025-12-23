@@ -65,7 +65,7 @@ static inline void to_public_stat(const __wasi_filestat_t *in,
        break;
    }
 }
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
 static inline void to_public_stat(const filesystem_metadata_hash_value_t *metadata,
                                   const filesystem_descriptor_stat_t *in,
                                   struct stat *out) {
@@ -167,7 +167,7 @@ static inline bool utimens_get_timestamps(const struct timespec *times,
   }
   return true;
 }
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
 static inline bool utimens_get_timestamp(const struct timespec *time,
                                          filesystem_new_timestamp_t *out) {
   switch (time->tv_nsec) {

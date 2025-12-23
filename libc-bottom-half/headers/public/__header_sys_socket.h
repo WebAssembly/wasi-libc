@@ -11,7 +11,12 @@
 #define SHUT_WR 2
 #define SHUT_RDWR (SHUT_RD | SHUT_WR)
 
-#ifdef __wasip2__
+#if defined(__wasip1__)
+#include <wasi/api.h>
+#define MSG_PEEK __WASI_RIFLAGS_RECV_PEEK
+#define MSG_WAITALL __WASI_RIFLAGS_RECV_WAITALL
+#define MSG_TRUNC __WASI_ROFLAGS_RECV_DATA_TRUNCATED
+#elif defined(__wasip2__) || defined(__wasip3__)
 #define MSG_DONTWAIT 0x0040
 #define MSG_NOSIGNAL 0x4000
 #define MSG_PEEK 0x0002
@@ -42,12 +47,9 @@
 #define SO_SNDTIMEO 21
 #endif
 
-#else // __wasip2__
-#include <wasi/api.h>
-#define MSG_PEEK __WASI_RIFLAGS_RECV_PEEK
-#define MSG_WAITALL __WASI_RIFLAGS_RECV_WAITALL
-#define MSG_TRUNC __WASI_ROFLAGS_RECV_DATA_TRUNCATED
-#endif // __wasip2__
+#else
+#error "Unknown WASI version"
+#endif
 
 #define SOCK_DGRAM 5
 #define SOCK_STREAM 6

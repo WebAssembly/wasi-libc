@@ -64,7 +64,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
     uint64_t timeout_u64;
 #if defined(__wasip1__)
     if (!timespec_to_timestamp_clamp(timeout, &timeout_u64) ) {
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
     if (!timespec_to_instant_clamp(timeout, &timeout_u64) ) {
 #else
 # error "Unknown WASI version"

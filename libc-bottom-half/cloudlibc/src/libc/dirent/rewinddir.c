@@ -17,6 +17,10 @@ void rewinddir(DIR *dirp) {
   dirp->stream.__handle = 0;
   dirp->skip = 0;
   dirp->offset = 0;
+#elif defined(__wasip3__)
+  dirp->stream = 0;
+  dirp->skip = 0;
+  dirp->offset = 0;
 #else
 # error "Unknown WASI version"
 #endif

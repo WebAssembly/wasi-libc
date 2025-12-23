@@ -71,6 +71,10 @@ int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
     return errno;
   }
   return 0;
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return ENOTSUP;
 #else
 # error "Unsupported WASI version"
 #endif

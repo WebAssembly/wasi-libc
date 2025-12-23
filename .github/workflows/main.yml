@@ -125,6 +125,19 @@ jobs:
             test: true
             args: -DCMAKE_BUILD_TYPE=Debug -DTARGET_TRIPLE=wasm32-wasip1-threads
 
+          - name: Test wasm32-wasip3
+            os: ubuntu-24.04
+            clang_version: 19
+            test: true
+            upload: wasm32-wasip3
+            args: -DTARGET_TRIPLE=wasm32-wasip3
+
+          - name: Test wasm32-wasip3 (debug)
+            os: ubuntu-24.04
+            clang_version: 19
+            test: true
+            args: -DCMAKE_BUILD_TYPE=Debug -DTARGET_TRIPLE=wasm32-wasip3
+
           - name: Test emmalloc
             os: ubuntu-24.04
             clang_version: 19

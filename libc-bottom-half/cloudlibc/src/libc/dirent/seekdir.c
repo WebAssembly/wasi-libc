@@ -17,6 +17,10 @@ void seekdir(DIR *dirp, long loc) {
   dirp->stream.__handle = 0;
   dirp->skip = loc;
   dirp->offset = 0;
+#elif defined(__wasip3__)
+  dirp->stream = 0;
+  dirp->skip = loc;
+  dirp->offset = 0;
 #else
 # error "Unsupported WASI version"
 #endif

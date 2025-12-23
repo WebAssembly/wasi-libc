@@ -55,8 +55,8 @@ int ioctl(int fildes, int request, ...) {
       // No data available for reading.
       *result = 0;
       return 0;
-#elif defined(__wasip2__)
-      // wasip2 doesn't support this operation
+#elif defined(__wasip2__) || defined(__wasip3__)
+      // wasip{2,3} doesn't support this operation
       errno = ENOTSUP;
       return -1;
 #else
@@ -101,6 +101,10 @@ int ioctl(int fildes, int request, ...) {
         return -1;
       }
       return entry->vtable->set_blocking(entry->data, blocking);
+#elif defined(__wasip3__)
+      // TODO(wasip3)
+      errno = ENOTSUP;
+      return -1;
 #else
 # error "Unknown WASI version"
 #endif

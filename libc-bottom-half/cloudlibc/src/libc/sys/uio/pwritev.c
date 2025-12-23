@@ -27,7 +27,7 @@ ssize_t pwritev(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
     return -1;
   }
   return bytes_written;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Skip empty iovecs and then delegate to `pwrite` with the first non-empty
   // iovec.
   while (iovcnt) {

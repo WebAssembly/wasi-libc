@@ -80,6 +80,10 @@ int __wasilibc_nocwd_fstatat(int fd, const char *restrict path, struct stat *res
   // Convert the internal data to an external struct
   to_public_stat(&metadata, &internal_stat, buf);
   return 0;
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

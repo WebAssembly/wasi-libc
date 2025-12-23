@@ -29,7 +29,7 @@ clock_t __clock(void) {
   return now - start;
 }
 
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
 
 // Snapshot of the monotonic clock at the start of the program.
 static monotonic_clock_instant_t start;

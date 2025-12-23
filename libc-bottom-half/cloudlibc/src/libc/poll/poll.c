@@ -283,6 +283,14 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
   return state.event_count;
 }
 
+#elif defined(__wasip3__)
+
+static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
+}
+
 #else
 # error "Unknown WASI version"
 #endif

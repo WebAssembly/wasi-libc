@@ -7,6 +7,7 @@
 #endif
 #include <__errno.h>
 #include <__function___isatty.h>
+#include <features.h>
 
 int __isatty(int fd) {
 #ifdef __wasilibc_use_wasip2
@@ -40,8 +41,5 @@ int __isatty(int fd) {
   return 1;
 #endif
 }
-#ifdef __wasilibc_use_wasip2
+
 weak_alias(__isatty, isatty);
-#else
-extern __typeof(__isatty) isatty __attribute__((weak, alias("__isatty")));
-#endif

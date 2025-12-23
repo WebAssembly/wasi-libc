@@ -6,7 +6,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#ifdef __wasip2__
+#ifndef __wasip1__
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
@@ -14,7 +14,16 @@
 #endif
 
 ssize_t read(int fildes, void *buf, size_t nbyte) {
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  __wasi_iovec_t iov = {.buf = buf, .buf_len = nbyte};
+  size_t bytes_read;
+  __wasi_errno_t error = __wasi_fd_read(fildes, &iov, 1, &bytes_read);
+  if (error != 0) {
+    errno = error == ENOTCAPABLE ? EBADF : error;
+    return -1;
+  }
+  return bytes_read;
+#elif defined(__wasip2__)
   bool ok = false;
 
   // Translate the file descriptor to an internal handle
@@ -43,15 +52,7 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
   if (off)
     *off += contents.len;
   return contents.len;
-
 #else
-  __wasi_iovec_t iov = {.buf = buf, .buf_len = nbyte};
-  size_t bytes_read;
-  __wasi_errno_t error = __wasi_fd_read(fildes, &iov, 1, &bytes_read);
-  if (error != 0) {
-    errno = error == ENOTCAPABLE ? EBADF : error;
-    return -1;
-  }
-  return bytes_read;
+# error "Unsupported WASI version"
 #endif
 }

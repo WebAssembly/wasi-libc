@@ -7,13 +7,19 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef __wasip2__
+#ifndef __wasip1__
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #endif
 
 int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char *new) {
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  __wasi_errno_t error = __wasi_path_rename(oldfd, old, newfd, new);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+#elif defined(__wasip2__)
   // Translate the file descriptors to internal handles
   filesystem_borrow_descriptor_t old_file_handle;
   if (fd_to_file_handle(oldfd, &old_file_handle) < 0)
@@ -42,11 +48,7 @@ int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char 
     return -1;
   }
 #else
-  __wasi_errno_t error = __wasi_path_rename(oldfd, old, newfd, new);
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
+# error "Unknown WASI version"
 #endif
   return 0;
 }

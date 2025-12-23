@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <wasi/api.h>
 
-#ifdef __wasip2__
+#ifndef __wasip1__
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #endif
@@ -28,7 +28,9 @@ int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
   if (offset < 0 || len < 0)
     return EINVAL;
 
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  return __wasi_fd_advise(fd, offset, len, advice);
+#elif defined(__wasip2__)
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fd, &file_handle) < 0)
     return EBADF;
@@ -70,6 +72,6 @@ int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
   }
   return 0;
 #else
-  return __wasi_fd_advise(fd, offset, len, advice);
+# error "Unsupported WASI version"
 #endif
 }

@@ -9,7 +9,15 @@
 #include <time.h>
 
 int __clock_gettime(clockid_t clock_id, struct timespec *tp) {
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  __wasi_timestamp_t ts;
+  __wasi_errno_t error = __wasi_clock_time_get(clock_id->id, 1, &ts);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+  *tp = timestamp_to_timespec(ts);
+#elif defined(__wasip2__)
   if (tp == NULL)
     return 0;
 
@@ -25,13 +33,7 @@ int __clock_gettime(clockid_t clock_id, struct timespec *tp) {
     return -1; // wasip2 only supports wall and monotonic clocks
   }
 #else
-  __wasi_timestamp_t ts;
-  __wasi_errno_t error = __wasi_clock_time_get(clock_id->id, 1, &ts);
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
-  *tp = timestamp_to_timespec(ts);
+# error "Unsupported WASI version"
 #endif
   return 0;
 }

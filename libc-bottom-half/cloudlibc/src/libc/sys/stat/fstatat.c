@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <wasi/api.h>
 
-#ifdef __wasip2__
+#ifndef __wasip1__
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #endif
@@ -19,7 +19,23 @@
 
 int __wasilibc_nocwd_fstatat(int fd, const char *restrict path, struct stat *restrict buf,
                              int flag) {
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  __wasi_lookupflags_t lookup_flags = 0;
+  if ((flag & AT_SYMLINK_NOFOLLOW) == 0)
+      lookup_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
+
+  // Perform system call.
+  __wasi_filestat_t internal_stat;
+  __wasi_errno_t error =
+      __wasi_path_filestat_get(fd, lookup_flags, path, &internal_stat);
+  if (error != 0) {
+      errno = error;
+      return -1;
+  }
+  to_public_stat(&internal_stat, buf);
+
+  return 0;
+#elif defined(__wasip2__)
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fd, &file_handle) < 0)
@@ -65,20 +81,6 @@ int __wasilibc_nocwd_fstatat(int fd, const char *restrict path, struct stat *res
   to_public_stat(&metadata, &internal_stat, buf);
   return 0;
 #else
-  __wasi_lookupflags_t lookup_flags = 0;
-  if ((flag & AT_SYMLINK_NOFOLLOW) == 0)
-      lookup_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
-
-  // Perform system call.
-  __wasi_filestat_t internal_stat;
-  __wasi_errno_t error =
-      __wasi_path_filestat_get(fd, lookup_flags, path, &internal_stat);
-  if (error != 0) {
-      errno = error;
-      return -1;
-  }
-  to_public_stat(&internal_stat, buf);
-
-  return 0;
+# error "Unsupported WASI version"
 #endif
 }

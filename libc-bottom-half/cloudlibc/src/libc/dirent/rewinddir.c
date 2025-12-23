@@ -8,14 +8,16 @@
 #include "dirent_impl.h"
 
 void rewinddir(DIR *dirp) {
-#ifdef __wasip2__
-  dirp->stream.__handle = 0;
-  dirp->skip = 0;
-  dirp->offset = 0;
-#else
+#if defined(__wasip1__)
   // Update cookie.
   dirp->cookie = __WASI_DIRCOOKIE_START;
   // Mark entire buffer as processed to force a read of new data.
   dirp->buffer_used = dirp->buffer_processed = dirp->buffer_size;
+#elif defined(__wasip2__)
+  dirp->stream.__handle = 0;
+  dirp->skip = 0;
+  dirp->offset = 0;
+#else
+# error "Unknown WASI version"
 #endif
 }

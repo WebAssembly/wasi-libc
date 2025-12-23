@@ -6,7 +6,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#ifdef __wasip2__
+#ifndef __wasip1__
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #endif
@@ -16,7 +16,15 @@ int ftruncate(int fildes, off_t length) {
     errno = EINVAL;
     return -1;
   }
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  __wasi_filesize_t st_size = length;
+  __wasi_errno_t error =
+      __wasi_fd_filestat_set_size(fildes, st_size);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+#elif defined(__wasip2__)
   // Translate the file descriptor to an internal file handle
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fildes, &file_handle) < 0)
@@ -28,13 +36,7 @@ int ftruncate(int fildes, off_t length) {
     return -1;
   }
 #else
-  __wasi_filesize_t st_size = length;
-  __wasi_errno_t error =
-      __wasi_fd_filestat_set_size(fildes, st_size);
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
+# error "Unsupported WASI version"
 #endif
   return 0;
 }

@@ -25,12 +25,14 @@ int main(void) {
   TEST((fd = open(tmp, flags, 0600)) > 2);
   TEST(write(fd, "hello", 6) == 6);
 
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  // Always returns 0?
+  TEST(ioctl(fd, FIONREAD, &nbytes) == 0);
+#elif defined(__wasip2__)
   // Not supported on wasip2
   TEST(ioctl(fd, FIONREAD, &nbytes) == -1);
 #else
-  // Always returns 0?
-  TEST(ioctl(fd, FIONREAD, &nbytes) == 0);
+#error "Unknown WASI version"
 #endif
   close(fd);
   TEST(unlink(tmp) == 0);

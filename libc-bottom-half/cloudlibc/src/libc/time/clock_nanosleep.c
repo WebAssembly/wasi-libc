@@ -14,12 +14,27 @@ static_assert(TIMER_ABSTIME == __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME,
               "Value mismatch");
 #endif
 
-#ifdef __wasip2__
 int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
                     struct timespec *rmtp) {
   if ((flags & ~TIMER_ABSTIME) != 0)
     return EINVAL;
 
+#if defined(__wasip1__)
+  // Prepare polling subscription.
+  __wasi_subscription_t sub = {
+      .u.tag = __WASI_EVENTTYPE_CLOCK,
+      .u.u.clock.id = clock_id->id,
+      .u.u.clock.flags = flags,
+  };
+  if (!timespec_to_timestamp_clamp(rqtp, &sub.u.u.clock.timeout))
+    return EINVAL;
+
+  // Block until polling event is triggered.
+  size_t nevents;
+  __wasi_event_t ev;
+  __wasi_errno_t error = __wasi_poll_oneoff(&sub, &ev, 1, &nevents);
+  return error == 0 && ev.error == 0 ? 0 : ENOTSUP;
+#elif defined(__wasip2__)
   // Note: rmtp is ignored
 
   if (clock_id != CLOCK_MONOTONIC) {
@@ -41,28 +56,9 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
 
   poll_pollable_drop_own(pollable);
   return 0;
-}
 #else
-int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
-                    struct timespec *rmtp) {
-  if ((flags & ~TIMER_ABSTIME) != 0)
-    return EINVAL;
-
-  // Prepare polling subscription.
-  __wasi_subscription_t sub = {
-      .u.tag = __WASI_EVENTTYPE_CLOCK,
-      .u.u.clock.id = clock_id->id,
-      .u.u.clock.flags = flags,
-  };
-  if (!timespec_to_timestamp_clamp(rqtp, &sub.u.u.clock.timeout))
-    return EINVAL;
-
-  // Block until polling event is triggered.
-  size_t nevents;
-  __wasi_event_t ev;
-  __wasi_errno_t error = __wasi_poll_oneoff(&sub, &ev, 1, &nevents);
-  return error == 0 && ev.error == 0 ? 0 : ENOTSUP;
-}
+# error "Unsupported WASI version"
 #endif
+}
 
 weak_alias(clock_nanosleep, __clock_nanosleep);

@@ -3,13 +3,14 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <dirent.h>
-
 #include "dirent_impl.h"
 
 long telldir(DIR *dirp) {
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  return dirp->cookie;
+#elif defined(__wasip2__)
   return dirp->offset + dirp->skip;
 #else
-  return dirp->cookie;
+# error "Unsupported WASI version"
 #endif
 }

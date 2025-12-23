@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <wasi/api.h>
 
-#ifdef __wasip2__
+#ifndef __wasip1__
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #else
@@ -20,36 +20,8 @@ DIR *fdopendir(int fd) {
   DIR *dirp = malloc(sizeof(*dirp));
   if (dirp == NULL)
     return NULL;
-#ifdef __wasip2__
 
-  // Translate the file descriptor to an internal handle
-  filesystem_borrow_descriptor_t file_handle;
-  if (fd_to_file_handle(fd, &file_handle) < 0) {
-    free(dirp);
-    return NULL;
-  }
-
-  // Read the directory
-  filesystem_own_directory_entry_stream_t result;
-  filesystem_error_code_t error_code;
-  bool ok = filesystem_method_descriptor_read_directory(file_handle,
-                                                        &result,
-                                                        &error_code);
-  if (!ok) {
-    free(dirp);
-    translate_error(error_code);
-    return NULL;
-  }
-
-  dirp->fd = fd;
-  dirp->stream = result;
-  dirp->skip = 0;
-  dirp->offset = 0;
-  dirp->dirent = NULL;
-  dirp->dirent_size = 1;
-  return dirp;
-
-#else
+#if defined(__wasip1__)
   dirp->buffer = malloc(DIRENT_DEFAULT_BUFFER_SIZE);
   if (dirp->buffer == NULL) {
     free(dirp);
@@ -77,5 +49,34 @@ DIR *fdopendir(int fd) {
   dirp->dirent = NULL;
   dirp->dirent_size = 1;
   return dirp;
+#elif defined(__wasip2__)
+  // Translate the file descriptor to an internal handle
+  filesystem_borrow_descriptor_t file_handle;
+  if (fd_to_file_handle(fd, &file_handle) < 0) {
+    free(dirp);
+    return NULL;
+  }
+
+  // Read the directory
+  filesystem_own_directory_entry_stream_t result;
+  filesystem_error_code_t error_code;
+  bool ok = filesystem_method_descriptor_read_directory(file_handle,
+                                                        &result,
+                                                        &error_code);
+  if (!ok) {
+    free(dirp);
+    translate_error(error_code);
+    return NULL;
+  }
+
+  dirp->fd = fd;
+  dirp->stream = result;
+  dirp->skip = 0;
+  dirp->offset = 0;
+  dirp->dirent = NULL;
+  dirp->dirent_size = 1;
+  return dirp;
+#else
+# error "Unsupported WASI version"
 #endif
 }

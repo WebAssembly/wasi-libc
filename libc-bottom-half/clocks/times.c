@@ -21,7 +21,7 @@ clock_t times(struct tms *buffer) {
 
   __wasi_timestamp_t realtime = 0;
   (void)__wasi_clock_time_get(__WASI_CLOCKID_MONOTONIC, 0, &realtime);
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   clock_t user = __clock();
   *buffer = (struct tms){
       .tms_utime = user,

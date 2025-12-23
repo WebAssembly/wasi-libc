@@ -3,9 +3,9 @@
 
 #include <wasi/version.h>
 
-#ifdef __wasip2__
+#ifndef __wasip1__
 
-#include <wasi/wasip2.h>
+#include <wasi/api.h>
 
 // Adds a new file handle to the descriptor table, returning the new `fd`.
 int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag);

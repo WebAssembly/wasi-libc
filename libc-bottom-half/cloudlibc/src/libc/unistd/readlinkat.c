@@ -49,6 +49,10 @@ ssize_t __wasilibc_nocwd_readlinkat(int fd, const char *restrict path, char *res
   bufused = bufsize < link_source.len ? bufsize : link_source.len;
   memcpy(buf, link_source.ptr, bufused);
   wasip2_string_free(&link_source);
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

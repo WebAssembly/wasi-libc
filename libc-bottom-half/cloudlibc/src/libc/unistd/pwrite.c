@@ -61,6 +61,10 @@ ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
   }
 
   return bytes_written;
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

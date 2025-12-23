@@ -46,7 +46,7 @@ static void __wasilibc_init_ssp(void) {
 	uintptr_t entropy;
 #if defined(__wasip1__)
 	int r = __wasi_random_get((uint8_t *)&entropy, sizeof(uintptr_t));
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
         int len = sizeof(uintptr_t);
         int r = __wasilibc_random(&entropy, len);
 #else

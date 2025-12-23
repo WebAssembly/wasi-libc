@@ -67,8 +67,18 @@ __attribute__((__weak__, nodebug)) int __main_void(void) {
 
   // Call `__main_argc_argv` with the arguments!
   return __main_argc_argv(argc, argv);
-#elif defined(__wasip2__)
-  wasip2_list_string_t argument_list;
+#elif defined(__wasip2__) || defined(__wasip3__)
+#ifdef __wasip2__
+  typedef wasip2_list_string_t list_string_t;
+  typedef wasip2_string_t string_t;
+#define list_string_free wasip2_list_string_free
+#else
+  typedef wasip3_list_string_t list_string_t;
+  typedef wasip3_string_t string_t;
+#define list_string_free wasip3_list_string_free
+#endif
+
+  list_string_t argument_list;
 
   environment_get_arguments(&argument_list);
 
@@ -76,7 +86,7 @@ __attribute__((__weak__, nodebug)) int __main_void(void) {
   size_t argc = argument_list.len;
   size_t num_ptrs = argc + 1;
   if (num_ptrs == 0) {
-    wasip2_list_string_free(&argument_list);
+    list_string_free(&argument_list);
     _Exit(EX_SOFTWARE);
   }
 
@@ -84,17 +94,17 @@ __attribute__((__weak__, nodebug)) int __main_void(void) {
   // handle overflow and to initialize the NULL pointer at the end.
   char **argv = calloc(num_ptrs, sizeof(char *));
   if (argv == NULL) {
-    wasip2_list_string_free(&argument_list);
+    list_string_free(&argument_list);
     _Exit(EX_SOFTWARE);
   }
 
   // Copy the arguments
   for (size_t i = 0; i < argc; i++) {
-    wasip2_string_t wasi_string = argument_list.ptr[i];
+    string_t wasi_string = argument_list.ptr[i];
     size_t len = wasi_string.len;
     argv[i] = malloc(len + 1);
     if (!argv[i]) {
-      wasip2_list_string_free(&argument_list);
+      list_string_free(&argument_list);
       _Exit(EX_SOFTWARE);
     }
     memcpy(argv[i], wasi_string.ptr, len);
@@ -102,7 +112,7 @@ __attribute__((__weak__, nodebug)) int __main_void(void) {
   }
 
   // Free the WASI argument list
-  wasip2_list_string_free(&argument_list);
+  list_string_free(&argument_list);
 
   // Call `__main_argc_argv` with the arguments!
   return __main_argc_argv(argc, argv);

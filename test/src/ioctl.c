@@ -28,8 +28,8 @@ int main(void) {
 #if defined(__wasip1__)
   // Always returns 0?
   TEST(ioctl(fd, FIONREAD, &nbytes) == 0);
-#elif defined(__wasip2__)
-  // Not supported on wasip2
+#elif defined(__wasip2__) || defined(__wasip3__)
+  // Not supported on wasip{2,3}
   TEST(ioctl(fd, FIONREAD, &nbytes) == -1);
 #else
 #error "Unknown WASI version"

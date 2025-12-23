@@ -65,6 +65,10 @@ ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
   }
 
   return bytes_read;
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
 # error "Unknown WASI version"
 #endif

@@ -18,7 +18,7 @@
 
 #if defined(__wasip1__)
 typedef __wasi_timestamp_t wasilibc_timestamp_t;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
 typedef wall_clock_datetime_t wasilibc_timestamp_t;
 #else
 # error "Unknown WASI version"
@@ -38,7 +38,7 @@ static inline bool timespec_to_timestamp_exact(
   // Make sure our timestamp does not overflow.
   return !__builtin_mul_overflow(timespec->tv_sec, NSEC_PER_SEC, timestamp) &&
          !__builtin_add_overflow(*timestamp, timespec->tv_nsec, timestamp);
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   timestamp->seconds = timespec->tv_sec;
   timestamp->nanoseconds = timespec->tv_nsec;
   return true;
@@ -62,7 +62,7 @@ static inline bool timespec_to_timestamp_clamp(
     // Make sure our timestamp does not overflow.
     *timestamp = NUMERIC_MAX(__wasi_timestamp_t);
   }
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   if (timespec->tv_sec < 0) {
     // Timestamps before the Epoch are not supported.
     timestamp->seconds = 0;
@@ -92,7 +92,7 @@ static inline struct timeval timestamp_to_timeval(
   return (struct timeval){.tv_sec = ts.tv_sec, ts.tv_nsec / 1000};
 }
 
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
 
 static inline struct timespec timestamp_to_timespec(
   wall_clock_datetime_t *timestamp) {

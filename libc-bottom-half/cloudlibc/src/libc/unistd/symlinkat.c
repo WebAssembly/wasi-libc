@@ -44,6 +44,10 @@ int __wasilibc_nocwd_symlinkat(const char *path1, int fd, const char *path2) {
     translate_error(error_code);
     return -1;
   }
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

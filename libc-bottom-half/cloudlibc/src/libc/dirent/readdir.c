@@ -251,6 +251,13 @@ struct dirent *readdir(DIR *dirp) {
   }
   return result;
 }
+#elif defined(__wasip3__)
+struct dirent *readdir(DIR *dirp) {
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  free(dirp);
+  return NULL;
+}
 #else
 # error "Unknown WASI version"
 #endif

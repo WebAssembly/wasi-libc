@@ -3091,6 +3091,8 @@
 #define __USER_LABEL_PREFIX__ 
 #define __USE_TIME_BITS64 1
 #define __WASI_VERSION_H 
+#define __WASI_WASIP2_H 
+#define __WASI_WASIP3_H 
 #define __WCHAR_MAX__ 2147483647
 #define __WCHAR_TYPE__ int
 #define __WCHAR_WIDTH__ 32

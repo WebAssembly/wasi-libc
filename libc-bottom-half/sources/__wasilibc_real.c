@@ -12,7 +12,7 @@
 
 #include <wasi/api.h>
 
-#ifndef __wasip2__
+#ifdef __wasip1__
 
 #include <string.h>
 #include <wasi/api.h>

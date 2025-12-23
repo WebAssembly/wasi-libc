@@ -14,6 +14,7 @@
 
 #include <stdalign.h>
 #include <assert.h>
+#include <wasi/api.h>
 
 static void dummy_0()
 {

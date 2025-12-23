@@ -52,6 +52,10 @@ int futimens(int fd, const struct timespec *times) {
     translate_error(error);
     return -1;
   }
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

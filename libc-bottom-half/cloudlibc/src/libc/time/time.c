@@ -10,7 +10,7 @@ time_t time(time_t *tloc) {
 #if defined(__wasip1__)
   __wasi_timestamp_t ts = 0;
   (void)__wasi_clock_time_get(__WASI_CLOCKID_REALTIME, NSEC_PER_SEC, &ts);
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   wall_clock_datetime_t res;
   wall_clock_now(&res);
   uint64_t ts = (res.seconds * NSEC_PER_SEC) + res.nanoseconds;

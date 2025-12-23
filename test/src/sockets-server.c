@@ -25,6 +25,9 @@ void run_tcp_server() {
   int server_port = 4001;
   // Use blocking sockets
   int server_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  TEST(server_socket_fd != -1);
+  if (server_socket_fd == -1)
+    return;
 
   // Bind server to socket
   struct sockaddr_in server_address;

@@ -17,7 +17,7 @@ int __clock_gettime(clockid_t clock_id, struct timespec *tp) {
     return -1;
   }
   *tp = timestamp_to_timespec(ts);
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   if (tp == NULL)
     return 0;
 

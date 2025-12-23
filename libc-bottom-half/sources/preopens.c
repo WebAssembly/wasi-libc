@@ -15,7 +15,7 @@
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc.h>
 
-#ifdef __wasip2__
+#ifndef __wasip1__
 #include <wasi/descriptor_table.h>
 #include <wasi/file.h>
 #include <wasi/file_utils.h>
@@ -48,7 +48,7 @@ static int preopen_state_get_fd(const preopen_state_t *state) {
 
 static void preopen_state_close(preopen_state_t *state) {}
 
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
 
 typedef struct {
   int libc_fd;
@@ -349,7 +349,7 @@ void __wasilibc_populate_preopens(void) {
       break;
     }
   }
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   filesystem_preopens_list_tuple2_own_descriptor_string_t preopens;
   filesystem_preopens_get_directories(&preopens);
 
@@ -358,7 +358,11 @@ void __wasilibc_populate_preopens(void) {
         preopens.ptr[i];
     char *prefix = strndup((const char *)name_and_descriptor.f1.ptr,
                            name_and_descriptor.f1.len);
+#ifdef __wasip2__
     wasip2_string_free(&name_and_descriptor.f1);
+#else
+    wasip3_string_free(&name_and_descriptor.f1);
+#endif
     if (prefix == NULL) {
       filesystem_descriptor_drop_own(name_and_descriptor.f0);
       goto software;
@@ -380,7 +384,7 @@ void __wasilibc_populate_preopens(void) {
   UNLOCK(lock);
 
   return;
-#ifndef __wasip2__
+#ifdef __wasip1__
 oserr:
   _Exit(EX_OSERR);
 #endif

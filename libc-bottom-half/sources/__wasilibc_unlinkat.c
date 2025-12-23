@@ -47,6 +47,10 @@ int __wasilibc_nocwd___wasilibc_unlinkat(int fd, const char *path) {
   }
 
   return 0;
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
 #error "Unknown WASI version"
 #endif

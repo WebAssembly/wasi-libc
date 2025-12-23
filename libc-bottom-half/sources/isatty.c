@@ -1,7 +1,9 @@
 #include <__errno.h>
 #include <__function___isatty.h>
+#include <errno.h>
 #include <features.h>
 #include <wasi/api.h>
+#include <wasi/descriptor_table.h>
 
 #ifndef __wasip1__
 #include <common/errors.h>
@@ -26,7 +28,7 @@ int __isatty(int fd) {
   }
 
   return 1;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Translate the file descriptor into an internal handle
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
   if (!entry)

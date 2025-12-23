@@ -3,7 +3,6 @@
 
 #include <__mode_t.h>
 #include <__seek.h>
-#include <wasi/api.h>
 
 #define O_APPEND 0x0001
 #define O_DSYNC 0x0002

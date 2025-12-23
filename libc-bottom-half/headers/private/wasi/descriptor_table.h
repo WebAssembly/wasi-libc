@@ -27,6 +27,7 @@ typedef struct descriptor_vtable_t {
   // =====================================================================
   // Generic I/O
 
+#ifdef __wasip2__
   /// Looks up a `wasi:io/streams.input-stream` object and stores it in
   /// the first argument. If provide also stores a pointer to the internal
   /// `off_t` offset and `pollable` for this object. The returned pointers
@@ -35,6 +36,7 @@ typedef struct descriptor_vtable_t {
 
   /// Same as `get_read_stream`, but for output streams.
   int (*get_write_stream)(void*, streams_borrow_output_stream_t*, off_t**, poll_own_pollable_t**);
+#endif
 
   /// Sets the nonblocking flag for this object to the specified value.
   int (*set_blocking)(void*, bool);

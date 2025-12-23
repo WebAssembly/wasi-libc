@@ -12,7 +12,7 @@ int usleep(useconds_t useconds) {
                         .tv_nsec = useconds % 1000000 * 1000};
 #if defined(__wasip1__)
   clockid_t clock_id = CLOCK_REALTIME;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   clockid_t clock_id = CLOCK_MONOTONIC;
 #else
 # error "Unsupported WASI version"

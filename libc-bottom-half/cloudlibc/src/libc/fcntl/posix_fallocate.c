@@ -11,7 +11,7 @@ int posix_fallocate(int fd, off_t offset, off_t len) {
   if (offset < 0 || len < 0)
     return EINVAL;
   return __wasi_fd_allocate(fd, offset, len);
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Note: this operation isn't supported in wasip2
   return ENOTSUP;
 #else

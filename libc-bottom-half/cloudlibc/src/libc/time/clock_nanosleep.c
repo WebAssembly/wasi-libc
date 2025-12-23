@@ -56,6 +56,10 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
 
   poll_pollable_drop_own(pollable);
   return 0;
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

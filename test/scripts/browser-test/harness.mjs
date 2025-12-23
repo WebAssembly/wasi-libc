@@ -92,6 +92,10 @@ async function main() {
                 type: "string",
                 multiple: true,
             },
+            wasm: {
+                type: "string",
+                multiple: true,
+            },
             dir: {
                 type: "string",
                 multiple: true,

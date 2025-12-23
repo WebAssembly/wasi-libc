@@ -46,7 +46,7 @@ ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
     return -1;
   }
   return bytes_written;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Skip empty iovecs and then delegate to `read` with the first non-empty
   // iovec.
   while (iovcnt) {

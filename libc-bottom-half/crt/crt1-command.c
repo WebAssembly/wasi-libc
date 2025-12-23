@@ -51,7 +51,7 @@ void _start(void) {
     if (r != 0) {
         __wasi_proc_exit(r);
     }
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
     if (r != 0) {
         exit_result_void_void_t status = { .is_err = true };
         exit_exit(&status);

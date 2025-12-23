@@ -109,6 +109,10 @@ int __wasilibc_nocwd_faccessat(int fd, const char *path, int amode, int flag) {
       return -1;
     }
   }
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

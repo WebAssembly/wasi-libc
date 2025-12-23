@@ -1,8 +1,6 @@
 #ifndef __wasilibc___header_dirent_h
 #define __wasilibc___header_dirent_h
 
-#include <wasi/api.h>
-
 #define DT_UNKNOWN 0
 #define DT_BLK 1
 #define DT_CHR 2

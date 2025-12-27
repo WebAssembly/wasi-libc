@@ -44,9 +44,21 @@ void _start(void) {
     // arguments and calls `__main_argv_argc`.
     int r = __main_void();
 
+    // The following code is basically an inlined copy of exit().
+    // It's mandated by the C standard:
+    //
+    // > If the return type of the main function is a type compatible
+    // > with int, a return from the initial call to the main function
+    // > is equivalent to calling the exit function with the value
+    // > returned by the main function as its argument,
+
     // Call atexit functions, destructors, stdio cleanup, etc.
     __wasm_call_dtors();
 
+#ifdef _REENTRANT
+    // `__wasi_proc_exit` terminates sibling threads.
+    __wasi_proc_exit(r);
+#else
     // If main exited successfully, just return, otherwise call
     // `__wasi_proc_exit`.
 #ifdef __wasilibc_use_wasip2

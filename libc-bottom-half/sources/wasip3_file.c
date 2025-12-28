@@ -2,8 +2,8 @@
 #include <wasi/api.h>
 
 #ifdef __wasip3__
-#include <wasi/descriptor_table.h>
 #include <assert.h>
+#include <wasi/descriptor_table.h>
 
 int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
   // TODO(wasip3)
@@ -11,10 +11,8 @@ int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
   return -1;
 }
 
-int __wasilibc_write_stream3(int fd,
-                            filesystem_stream_u8_t *out,
-                            off_t **off) {
-  descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
+int __wasilibc_write_stream3(int fd, filesystem_stream_u8_t *out, off_t **off) {
+  descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
   if (!entry)
     return -1;
   if (!entry->vtable->get_write_stream3) {

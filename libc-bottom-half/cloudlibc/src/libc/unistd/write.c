@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <wasi/api.h>
+#include <stdlib.h>
 
 #ifndef __wasip1__
 #include <wasi/descriptor_table.h>
@@ -72,9 +73,18 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
     *off += contents.len;
   return contents.len;
 #elif defined(__wasip3__)
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
+  off_t *off;
+  filesystem_stream_u8_t output_stream;
+  if (__wasilibc_write_stream3(fildes, &output_stream, &off) < 0)
+    return -1;
+
+  wasip3_waitable_status_t status = filesystem_stream_u8_write(output_stream, buf, nbyte);
+  if (WASIP3_WAITABLE_STATE(status) == WASIP3_WAITABLE_COMPLETED) {
+    return WASIP3_WAITABLE_COUNT(status);
+  }
+  else {
+    abort();
+  }
 #else
 # error "Unknown WASI version"
 #endif

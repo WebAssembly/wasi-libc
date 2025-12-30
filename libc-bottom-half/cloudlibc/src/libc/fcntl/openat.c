@@ -87,7 +87,7 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
     return -1;
   }
   return newfd;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Set up path flags
   filesystem_path_flags_t lookup_flags = 0;
   if ((oflag & O_NOFOLLOW) == 0)
@@ -140,6 +140,7 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
     return -1;
 
   // Construct a WASI string for the path
+#ifdef __wasip2__
   wasip2_string_t path2;
   if (wasip2_string_from_c(path, &path2) < 0)
     return -1;
@@ -162,9 +163,43 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
   // Update the descriptor table with the new handle
   return __wasilibc_add_file(new_handle, oflag);
 #elif defined(__wasip3__)
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
+  wasip3_string_t path2;
+  if (wasip3_string_from_c(path, &path2) < 0)
+    return -1;
+
+  // Open the file, yielding a new handle
+  filesystem_method_descriptor_open_at_args_t args;
+  args.self = file_handle;
+  args.flags = lookup_flags;
+  args.path = path2;
+  args.open_flags = open_flags;
+  args.path_flags = fs_flags;
+  filesystem_result_own_descriptor_error_code_t result;
+  wasip3_subtask_status_t status = filesystem_method_descriptor_open_at(&args, &result);
+  if (status != WASIP3_SUBTASK_RETURNED) {
+    if (WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_STARTED) {
+      wasip3_subtask_t handle = WASIP3_SUBTASK_HANDLE(status);
+      wasip3_waitable_set_t set = wasip3_waitable_set_new();
+      wasip3_waitable_join(handle, set);
+      wasip3_event_t event;
+      wasip3_waitable_set_wait(set, &event);
+      assert(event.event == WASIP3_EVENT_SUBTASK);
+      assert(event.code == WASIP3_SUBTASK_RETURNED);
+      wasip3_subtask_drop(event.waitable);
+      wasip3_waitable_set_drop(set);
+    }
+    else {
+      abort();
+    }
+  }
+  if (result.is_err) {
+    translate_error(result.val.err);
+    return -1;
+  }
+
+  // Update the descriptor table with the new handle
+  return __wasilibc_add_file(result.val.ok, oflag);
+#endif
 #else
 # error "Unsupported WASI version"
 #endif

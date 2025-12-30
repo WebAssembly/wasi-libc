@@ -13,7 +13,7 @@ typedef struct {
 
 static void file_close_streams(void *data) {
   file3_t *file = (file3_t *)data;
-  abort();
+  // nothing yet?
 }
 
 static void file_free(void *data) {
@@ -48,7 +48,9 @@ static int file_read_stream(void *data, filesystem_stream_u8_t *out,
   filesystem_method_descriptor_read_via_stream(
       filesystem_borrow_descriptor(file->file_handle), file->offset, &res);
   *out = res.f0;
+  // TODO: I think we need to return f1 as well.
   filesystem_future_result_void_error_code_drop_readable(res.f1);
+  *offs = &file->offset;
   return 0;
 }
 

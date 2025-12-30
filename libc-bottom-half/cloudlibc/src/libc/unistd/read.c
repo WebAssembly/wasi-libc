@@ -60,7 +60,12 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
 
   wasip3_waitable_status_t status = filesystem_stream_u8_read(input_stream, buf, nbyte);
   if (WASIP3_WAITABLE_STATE(status) == WASIP3_WAITABLE_COMPLETED) {
-    return WASIP3_WAITABLE_COUNT(status);
+    ssize_t bytes_read = WASIP3_WAITABLE_COUNT(status);
+    if (off)
+      *off += bytes_read;
+    return bytes_read;
+  } else if (WASIP3_WAITABLE_STATE(status) == WASIP3_WAITABLE_DROPPED) {
+    return 0;
   }
   else {
     abort();

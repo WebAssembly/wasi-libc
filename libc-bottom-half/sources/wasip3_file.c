@@ -43,7 +43,13 @@ static int file_fcntl_setfl(void *data, int flags) { abort(); }
 
 static int file_read_stream(void *data, filesystem_stream_u8_t *out,
                             off_t **offs) {
-  abort();
+  file3_t *file = (file3_t *)data;
+  filesystem_tuple2_stream_u8_future_result_void_error_code_t res;
+  filesystem_method_descriptor_read_via_stream(
+      filesystem_borrow_descriptor(file->file_handle), file->offset, &res);
+  *out = res.f0;
+  filesystem_future_result_void_error_code_drop_readable(res.f1);
+  return 0;
 }
 
 static descriptor_vtable_t file_vtable = {

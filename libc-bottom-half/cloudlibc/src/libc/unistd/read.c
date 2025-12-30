@@ -53,9 +53,18 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
     *off += contents.len;
   return contents.len;
 #elif defined(__wasip3__)
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
+  off_t *off;
+  filesystem_stream_u8_t input_stream;
+  if (__wasilibc_read_stream3(fildes, &input_stream, &off) < 0)
+    return -1;
+
+  wasip3_waitable_status_t status = filesystem_stream_u8_read(input_stream, buf, nbyte);
+  if (WASIP3_WAITABLE_STATE(status) == WASIP3_WAITABLE_COMPLETED) {
+    return WASIP3_WAITABLE_COUNT(status);
+  }
+  else {
+    abort();
+  }
 #else
 # error "Unsupported WASI version"
 #endif

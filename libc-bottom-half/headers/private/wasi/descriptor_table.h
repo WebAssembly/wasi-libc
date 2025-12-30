@@ -38,6 +38,7 @@ typedef struct descriptor_vtable_t {
   int (*get_write_stream)(void*, streams_borrow_output_stream_t*, off_t**, poll_own_pollable_t**);
 #endif
 #ifdef __wasip3__
+  int (*get_read_stream3)(void*, filesystem_stream_u8_t*, off_t**);
   int (*get_write_stream3)(void*, filesystem_stream_u8_t*, off_t**);
 #endif
 

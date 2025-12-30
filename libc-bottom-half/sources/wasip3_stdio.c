@@ -36,6 +36,15 @@ static int stdio3_get_write_stream(void *data,
   return 0;
 }
 
+static int stdio3_get_read_stream(void *data,
+                                  filesystem_stream_u8_t *out_stream,
+                                  off_t **out_offset) {
+  stdio3_t *stdio = (stdio3_t *)data;
+  *out_stream = (filesystem_stream_u8_t)stdio->input;
+  *out_offset = NULL;
+  return 0;
+}
+
 static int stdio3_fstat(void *data, struct stat *buf) {
   memset(buf, 0, sizeof(*buf));
   return 0;
@@ -54,6 +63,7 @@ static int stdio3_isatty(void *data) { return 1; }
 
 static descriptor_vtable_t stdio3_vtable = {
     .free = stdio3_free,
+    .get_read_stream3 = stdio3_get_read_stream,
     .get_write_stream3 = stdio3_get_write_stream,
     .fstat = stdio3_fstat,
     .fcntl_getfl = stdio3_fcntl_getfl,

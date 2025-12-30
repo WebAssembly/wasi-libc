@@ -41,6 +41,11 @@ static int file_fcntl_getfl(void *data) { abort(); }
 
 static int file_fcntl_setfl(void *data, int flags) { abort(); }
 
+static int file_read_stream(void *data, filesystem_stream_u8_t *out,
+                            off_t **offs) {
+  abort();
+}
+
 static descriptor_vtable_t file_vtable = {
     .free = file_free,
     .get_file = file_get_file,
@@ -50,6 +55,7 @@ static descriptor_vtable_t file_vtable = {
     .close_streams = file_close_streams,
     .fcntl_getfl = file_fcntl_getfl,
     .fcntl_setfl = file_fcntl_setfl,
+    .get_read_stream3 = file_read_stream,
 };
 
 int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
@@ -142,6 +148,21 @@ int wasip3_string_from_c(const char *s, wasip3_string_t *out) {
   }
   out->ptr = (uint8_t *)s;
   out->len = len;
+  return 0;
+}
+
+// Gets an `input-stream` borrow from the `fd` provided.
+int __wasilibc_read_stream3(int fd, filesystem_stream_u8_t *out, off_t **off) {
+  descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
+  if (!entry)
+    return -1;
+  if (!entry->vtable->get_read_stream3) {
+    errno = EOPNOTSUPP;
+    return -1;
+  }
+  if (entry->vtable->get_read_stream3(entry->data, out, off) < 0)
+    return -1;
+  assert(out != 0);
   return 0;
 }
 

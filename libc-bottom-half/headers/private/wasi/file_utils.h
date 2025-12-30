@@ -79,6 +79,9 @@ int __wasilibc_read_stream(int fd,
 int __wasilibc_write_stream3(int fd,
                             filesystem_stream_u8_t *out,
                             off_t **off);
+int __wasilibc_read_stream3(int fd,
+                            filesystem_stream_u8_t *out,
+                            off_t **off);
 #endif
 
 static unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {

@@ -67,6 +67,8 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
     wasip3_waitable_set_wait(set, &event);
     assert(event.event == WASIP3_EVENT_STREAM_READ);
     assert(event.waitable == input_stream);
+    // remove from set
+    wasip3_waitable_join(input_stream, 0);
     wasip3_waitable_set_drop(set);
     ssize_t bytes_read = event.code;
     if (off)

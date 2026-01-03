@@ -164,6 +164,8 @@ if (WASI STREQUAL "p3")
   list(APPEND bottom_half_sources
     sources/wasip3.c
     sources/wasip3_file.c
+    sources/wasip3_file_utils.c
+    sources/wasip3_pipe.c
     sources/wasip3_stdio.c
     sources/wasip3_tcp.c
     sources/wasip3_udp.c

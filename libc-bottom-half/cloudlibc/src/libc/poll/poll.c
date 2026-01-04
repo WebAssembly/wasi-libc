@@ -412,7 +412,8 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
   }
   if (timeout >= 0) {
     wasip3_waitable_join(WASIP3_SUBTASK_HANDLE(timeout_subtask), 0);
-    wasip3_subtask_cancel(WASIP3_SUBTASK_HANDLE(timeout_subtask));
+    if (return_value>0)
+      wasip3_subtask_cancel(WASIP3_SUBTASK_HANDLE(timeout_subtask));
   }
 
   //repeat wasip3_waitable_set_poll(set, &event); ?

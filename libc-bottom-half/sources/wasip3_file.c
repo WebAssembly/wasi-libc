@@ -20,10 +20,14 @@ typedef struct {
 
 static void file_close_streams(void *data) {
   file3_t *file = (file3_t *)data;
-  filesystem_stream_u8_drop_readable(file->read.f0);
-  filesystem_future_result_void_error_code_drop_readable(file->read.f1);
-  sockets_stream_u8_drop_writable(file->write);
-  wasip3_subtask_cancel(file->write_task);
+  if (file->read.f0 != 0) {
+    filesystem_stream_u8_drop_readable(file->read.f0);
+    filesystem_future_result_void_error_code_drop_readable(file->read.f1);
+  }
+  if (file->write != 0) {
+    sockets_stream_u8_drop_writable(file->write);
+    wasip3_subtask_cancel(file->write_task);
+  }
 }
 
 static void file_free(void *data) {
@@ -80,6 +84,11 @@ static int file_read_stream(void *data, void *buf, size_t nbyte,
                             waitable_t *waitable, wasip3_waitable_status_t *out,
                             off_t **offs) {
   file3_t *file = (file3_t *)data;
+  if (file->read.f0 == 0) {
+    filesystem_method_descriptor_read_via_stream(
+        filesystem_borrow_descriptor(file->file_handle), file->offset,
+        &file->read);
+  }
   *waitable = file->read.f0;
   *out = filesystem_stream_u8_read(file->read.f0, buf, nbyte);
   *offs = &file->offset;
@@ -109,13 +118,13 @@ int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
   file->file_handle = file_handle;
   file->oflag = oflag;
 
-  // seeking will probably need a larger change
-  filesystem_stream_u8_t write_read = filesystem_stream_u8_new(&file->write);
-  file->write_task = filesystem_method_descriptor_write_via_stream(
-      filesystem_borrow_descriptor(file_handle), write_read, 0,
-      &file->write_error);
-  filesystem_method_descriptor_read_via_stream(
-      filesystem_borrow_descriptor(file->file_handle), 0, &file->read);
+  // if (oflag == O_WRONLY) {
+  //   filesystem_stream_u8_t write_read =
+  //   filesystem_stream_u8_new(&file->write); file->write_task =
+  //   filesystem_method_descriptor_write_via_stream(
+  //       filesystem_borrow_descriptor(file_handle), write_read, 0,
+  //       &file->write_error);
+  // }
 
   descriptor_table_entry_t entry;
   entry.vtable = &file_vtable;

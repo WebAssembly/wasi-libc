@@ -54,21 +54,19 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
   return contents.len;
 #elif defined(__wasip3__)
   off_t *off;
-  filesystem_stream_u8_t input_stream;
-  if (__wasilibc_read_stream3(fildes, &input_stream, &off) < 0)
+  waitable_t waitable;
+  wasip3_waitable_status_t status;
+  if (__wasilibc_read3(fildes, buf, nbyte, &waitable, &status, &off) < 0)
     return -1;
-
-  wasip3_waitable_status_t status = filesystem_stream_u8_read(input_stream, buf, nbyte);
   if (status == WASIP3_WAITABLE_STATUS_BLOCKED) {
-    // What to wait on?
     wasip3_waitable_set_t set = wasip3_waitable_set_new();
-    wasip3_waitable_join(input_stream, set);
+    wasip3_waitable_join(waitable, set);
     wasip3_event_t event;
     wasip3_waitable_set_wait(set, &event);
     assert(event.event == WASIP3_EVENT_STREAM_READ);
-    assert(event.waitable == input_stream);
+    assert(event.waitable == waitable);
     // remove from set
-    wasip3_waitable_join(input_stream, 0);
+    wasip3_waitable_join(waitable, 0);
     wasip3_waitable_set_drop(set);
     ssize_t bytes_read = event.code;
     if (off)

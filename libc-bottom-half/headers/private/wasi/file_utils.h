@@ -77,12 +77,20 @@ int __wasilibc_read_stream(int fd,
                            off_t **off,
                            poll_borrow_pollable_t *pollable);
 #elif defined(__wasip3__)
-int __wasilibc_write_stream3(int fd,
-                            filesystem_stream_u8_t *out,
-                            off_t **off);
-int __wasilibc_read_stream3(int fd,
-                            filesystem_stream_u8_t *out,
-                            off_t **off);
+// int __wasilibc_write_stream3(int fd,
+//                             filesystem_stream_u8_t *out,
+//                             off_t **off);
+// int __wasilibc_read_stream3(int fd,
+//                             filesystem_stream_u8_t *out,
+//                             off_t **off);
+int __wasilibc_write3(int fd, void const *buf, size_t nbyte,
+                      waitable_t *waitable,
+                      wasip3_waitable_status_t *out,
+                      off_t **off);
+int __wasilibc_read3(int fd, void *buf, size_t nbyte,
+                     waitable_t *waitable,
+                     wasip3_waitable_status_t *out,
+                     off_t **off);
 #endif
 
 static unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {

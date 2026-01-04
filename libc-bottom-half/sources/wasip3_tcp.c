@@ -13,6 +13,10 @@ typedef struct {
   sockets_ip_address_family_t family;
   bool blocking;
   sockets_stream_own_tcp_socket_t incoming;
+  sockets_tuple2_stream_u8_future_result_void_error_code_t receive;
+  sockets_stream_u8_writer_t send;
+  wasip3_subtask_status_t send_task;
+  sockets_result_void_error_code_t send_error;
 } tcp_socket_t;
 
 static int tcp_connect(void *data, const struct sockaddr *addr,
@@ -144,17 +148,45 @@ int tcp_setsockopt(void *data, int level, int optname, const void *optval,
   }
 }
 
+static int tcp_read_stream(void *data, filesystem_stream_u8_t *out,
+                           off_t **offs) {
+  tcp_socket_t *file = (tcp_socket_t *)data;
+  *out = file->receive.f0;
+  *offs = 0;
+  return 0;
+}
+
+static int tcp_write_stream(void *data, filesystem_stream_u8_t *out,
+                            off_t **offs) {
+  tcp_socket_t *file = (tcp_socket_t *)data;
+  *out = file->send;
+  *offs = 0;
+  return 0;
+}
+
+static ssize_t tcp_recvfrom(void *data, void *buffer, size_t length, int flags,
+                            struct sockaddr *addr, socklen_t *addrlen) {
+  abort();
+}
+
+ssize_t tcp_sendto(void *data, const void *buffer, size_t length, int flags,
+                   const struct sockaddr *addr, socklen_t addrlen) {
+  abort();
+}
+
 static descriptor_vtable_t tcp_vtable = {
     .bind = tcp_bind,
     .connect = tcp_connect,
     .getsockname = tcp_getsockname,
     .listen = tcp_listen,
     // .getpeername = tcp_getpeername,
-    // .recvfrom = tcp_recvfrom,
-    // .sendto = tcp_sendto,
+    .recvfrom = tcp_recvfrom,
+    .sendto = tcp_sendto,
     // .shutdown = tcp_shutdown,
     // .getsockopt = tcp_getsockopt,
     .setsockopt = tcp_setsockopt,
+    .get_read_stream3 = tcp_read_stream,
+    .get_write_stream3 = tcp_write_stream,
 };
 
 int __wasilibc_add_tcp_socket(sockets_own_tcp_socket_t socket,
@@ -170,6 +202,12 @@ int __wasilibc_add_tcp_socket(sockets_own_tcp_socket_t socket,
   tcp->family = family;
   tcp->blocking = blocking;
   tcp->incoming = 0;
+  sockets_stream_u8_t send_read = sockets_stream_u8_new(&tcp->send);
+  tcp->send_task = sockets_method_tcp_socket_send(
+      sockets_borrow_tcp_socket(socket), send_read, &tcp->send_error);
+
+  sockets_method_tcp_socket_receive(sockets_borrow_tcp_socket(socket),
+                                    &tcp->receive);
 
   descriptor_table_entry_t entry;
   entry.vtable = &tcp_vtable;

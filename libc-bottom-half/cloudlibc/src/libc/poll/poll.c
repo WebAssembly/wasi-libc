@@ -298,7 +298,7 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
   size_t max_pollables = (2 * nfds) + 1;
   state3_t states[max_pollables];
   size_t pollable_count = 0;
-  wasip3_subtask_status_t timeout_pollable;
+  wasip3_subtask_status_t timeout_subtask;
 
   wasip3_waitable_set_t set = wasip3_waitable_set_new();
 
@@ -373,9 +373,13 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
   if (return_value) goto cleanup_and_exit;
 
   if (timeout >= 0) {
-    timeout_pollable = monotonic_clock_wait_for(
+    timeout_subtask = monotonic_clock_wait_for(
         ((monotonic_clock_duration_t)timeout) * 1000000);
-    wasip3_waitable_join(timeout_pollable, set);
+    if (WASIP3_SUBTASK_STATE(timeout_subtask) == WASIP3_SUBTASK_RETURNED) {
+      goto cleanup_and_exit;
+    }
+    assert(WASIP3_SUBTASK_STATE(timeout_subtask) == WASIP3_SUBTASK_STARTED);
+    wasip3_waitable_join(WASIP3_SUBTASK_HANDLE(timeout_subtask), set);
   }
 
   wasip3_event_t event;
@@ -401,10 +405,14 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
       }
       break;
     case WASIP3_EVENT_SUBTASK:
-      assert(event.waitable == timeout_pollable);
+      assert(event.waitable == WASIP3_SUBTASK_HANDLE(timeout_subtask));
       break;
     default:
       abort();
+  }
+  if (timeout >= 0) {
+    wasip3_waitable_join(WASIP3_SUBTASK_HANDLE(timeout_subtask), 0);
+    wasip3_subtask_cancel(WASIP3_SUBTASK_HANDLE(timeout_subtask));
   }
 
   //repeat wasip3_waitable_set_poll(set, &event); ?

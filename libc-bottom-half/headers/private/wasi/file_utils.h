@@ -49,6 +49,7 @@ static int wasip2_handle_write_error(streams_stream_error_t error) {
 int wasip2_string_from_c(const char *s, wasip2_string_t* out);
 #elif defined(__wasip3__)
 int wasip3_string_from_c(const char *s, wasip3_string_t* out);
+void wasip3_subtask_block_on(wasip3_subtask_status_t status);
 #endif
 
 // Succeed only if fd is bound to a file handle in the descriptor table

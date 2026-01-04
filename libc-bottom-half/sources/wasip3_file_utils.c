@@ -107,4 +107,22 @@ int __wasilibc_write_stream3(int fd, filesystem_stream_u8_t *out, off_t **off) {
   return 0;
 }
 
+void wasip3_subtask_block_on(wasip3_subtask_status_t status) {
+  if (status != WASIP3_SUBTASK_RETURNED) {
+    if (WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_STARTED) {
+      wasip3_subtask_t handle = WASIP3_SUBTASK_HANDLE(status);
+      wasip3_waitable_set_t set = wasip3_waitable_set_new();
+      wasip3_waitable_join(handle, set);
+      wasip3_event_t event;
+      wasip3_waitable_set_wait(set, &event);
+      assert(event.event == WASIP3_EVENT_SUBTASK);
+      assert(event.code == WASIP3_SUBTASK_RETURNED);
+      wasip3_subtask_drop(event.waitable);
+      wasip3_waitable_set_drop(set);
+    } else {
+      abort();
+    }
+  }
+}
+
 #endif

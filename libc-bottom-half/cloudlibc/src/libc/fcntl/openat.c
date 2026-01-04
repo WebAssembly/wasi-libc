@@ -16,6 +16,10 @@
 #include <common/errors.h>
 #endif
 
+#ifdef __wasip3__
+#include <wasi/sockets_utils.h>
+#endif
+
 #ifdef __wasip1__
 static_assert(O_APPEND == __WASI_FDFLAGS_APPEND, "Value mismatch");
 static_assert(O_DSYNC == __WASI_FDFLAGS_DSYNC, "Value mismatch");
@@ -176,22 +180,7 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
   args.path_flags = fs_flags;
   filesystem_result_own_descriptor_error_code_t result;
   wasip3_subtask_status_t status = filesystem_method_descriptor_open_at(&args, &result);
-  if (status != WASIP3_SUBTASK_RETURNED) {
-    if (WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_STARTED) {
-      wasip3_subtask_t handle = WASIP3_SUBTASK_HANDLE(status);
-      wasip3_waitable_set_t set = wasip3_waitable_set_new();
-      wasip3_waitable_join(handle, set);
-      wasip3_event_t event;
-      wasip3_waitable_set_wait(set, &event);
-      assert(event.event == WASIP3_EVENT_SUBTASK);
-      assert(event.code == WASIP3_SUBTASK_RETURNED);
-      wasip3_subtask_drop(event.waitable);
-      wasip3_waitable_set_drop(set);
-    }
-    else {
-      abort();
-    }
-  }
+  wasip3_subtask_block_on(status);
   if (result.is_err) {
     translate_error(result.val.err);
     return -1;

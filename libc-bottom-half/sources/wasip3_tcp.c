@@ -174,6 +174,17 @@ ssize_t tcp_sendto(void *data, const void *buffer, size_t length, int flags,
   abort();
 }
 
+static void tcp_free(void *data) {
+  tcp_socket_t *tcp = (tcp_socket_t *)data;
+  sockets_stream_u8_drop_readable(tcp->receive.f0);
+  sockets_future_result_void_error_code_drop_readable(tcp->receive.f1);
+  if (tcp->incoming != 0)
+    sockets_stream_own_tcp_socket_drop_readable(tcp->incoming);
+  sockets_stream_u8_drop_writable(tcp->send);
+  wasip3_subtask_cancel(tcp->send_task);
+  free(data);
+}
+
 static descriptor_vtable_t tcp_vtable = {
     .bind = tcp_bind,
     .connect = tcp_connect,
@@ -182,6 +193,7 @@ static descriptor_vtable_t tcp_vtable = {
     // .getpeername = tcp_getpeername,
     .recvfrom = tcp_recvfrom,
     .sendto = tcp_sendto,
+    .free = tcp_free,
     // .shutdown = tcp_shutdown,
     // .getsockopt = tcp_getsockopt,
     .setsockopt = tcp_setsockopt,

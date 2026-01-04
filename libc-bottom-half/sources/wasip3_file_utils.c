@@ -78,37 +78,6 @@ int wasip3_string_from_c(const char *s, wasip3_string_t *out) {
   return 0;
 }
 
-#if 0
-// Gets an `input-stream` borrow from the `fd` provided.
-int __wasilibc_read_stream3(int fd, filesystem_stream_u8_t *out, off_t **off) {
-  descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
-  if (!entry)
-    return -1;
-  if (!entry->vtable->get_read_stream3) {
-    errno = EOPNOTSUPP;
-    return -1;
-  }
-  if (entry->vtable->get_read_stream3(entry->data, out, off) < 0)
-    return -1;
-  assert(out != 0);
-  return 0;
-}
-
-int __wasilibc_write_stream3(int fd, filesystem_stream_u8_t *out, off_t **off) {
-  descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
-  if (!entry)
-    return -1;
-  if (!entry->vtable->get_write_stream3) {
-    errno = EOPNOTSUPP;
-    return -1;
-  }
-  if (entry->vtable->get_write_stream3(entry->data, out, off) < 0)
-    return -1;
-  assert(out != 0);
-  return 0;
-}
-#endif
-
 int __wasilibc_read3(int fd, void *buf, size_t nbyte, waitable_t *waitable,
                      wasip3_waitable_status_t *out, off_t **off) {
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);

@@ -2,6 +2,7 @@
 #include <wasi/api.h>
 
 #ifdef __wasip3__
+#include <netinet/tcp.h>
 #include <stdlib.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
@@ -118,6 +119,31 @@ static int tcp_listen(void *data, int backlog) {
   return 0;
 }
 
+int tcp_setsockopt(void *data, int level, int optname, const void *optval,
+                   socklen_t optlen) {
+  tcp_socket_t *socket = (tcp_socket_t *)data;
+  int intval = *(int *)optval;
+
+  switch (level) {
+  case SOL_TCP:
+    switch (optname) {
+    case TCP_NODELAY: {
+      // is this right?
+      socket->blocking = false;
+      return 0;
+    }
+    default:
+      errno = ENOPROTOOPT;
+      return -1;
+    }
+    break;
+
+  default:
+    errno = ENOPROTOOPT;
+    return -1;
+  }
+}
+
 static descriptor_vtable_t tcp_vtable = {
     .bind = tcp_bind,
     .connect = tcp_connect,
@@ -128,7 +154,7 @@ static descriptor_vtable_t tcp_vtable = {
     // .sendto = tcp_sendto,
     // .shutdown = tcp_shutdown,
     // .getsockopt = tcp_getsockopt,
-    // .setsockopt = tcp_setsockopt,
+    .setsockopt = tcp_setsockopt,
 };
 
 int __wasilibc_add_tcp_socket(sockets_own_tcp_socket_t socket,

@@ -284,11 +284,138 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
 }
 
 #elif defined(__wasip3__)
+typedef struct {
+  wasip3_subtask_status_t waitable;
+  struct pollfd *pollfd;
+} state3_t;
 
 static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
+  for (size_t i = 0; i < nfds; ++i) {
+    fds[i].revents = 0;
+  }
+
+  int return_value = 0;
+  size_t max_pollables = (2 * nfds) + 1;
+  state3_t states[max_pollables];
+  size_t pollable_count = 0;
+  wasip3_subtask_status_t timeout_pollable;
+
+  wasip3_waitable_set_t set = wasip3_waitable_set_new();
+
+  for (size_t i = 0; i < nfds; ++i) {
+    struct pollfd *pollfd = fds + i;
+    if (pollfd->fd < 0)
+      continue;
+    descriptor_table_entry_t *entry = descriptor_table_get_ref(pollfd->fd);
+    if (!entry) {
+      errno = EBADF;
+      return_value = -1;
+      goto cleanup_and_exit;
+    }
+
+    // Without a custom registration handle read/write readiness
+    // below, but everything else is unsupported.
+    if (pollfd->events & ~(POLLRDNORM | POLLWRNORM)) {
+      errno = EOPNOTSUPP;
+      return_value = -1;
+      goto cleanup_and_exit;
+    }
+
+    if (pollfd->events & POLLRDNORM) {
+      if (entry->vtable->get_read_stream3) {
+        filesystem_stream_u8_t input;
+        if (entry->vtable->get_read_stream3(entry->data, &input, NULL) < 0) {
+          return_value = -1;
+          goto cleanup_and_exit;
+        }
+        wasip3_waitable_status_t status = filesystem_stream_u8_read(input, 0, 0);
+        if (status != WASIP3_WAITABLE_STATUS_BLOCKED) {
+          pollfd->revents |= POLLRDNORM;
+          ++return_value;
+        } else if (!return_value) {
+          states[pollable_count].waitable = input;
+          states[pollable_count].pollfd = pollfd;
+          ++pollable_count;
+          wasip3_waitable_join(input, set);
+        }
+      } else {
+        errno = EOPNOTSUPP;
+        return_value = -1;
+        goto cleanup_and_exit;
+      }
+    }
+
+    if (pollfd->events & POLLWRNORM) {
+      if (entry->vtable->get_write_stream3) {
+        filesystem_stream_u8_t input;
+        if (entry->vtable->get_write_stream3(entry->data, &input, NULL) < 0){
+          return_value = -1;
+          goto cleanup_and_exit;
+        }
+        wasip3_waitable_status_t status = filesystem_stream_u8_write(input, 0, 0);
+        if (status != WASIP3_WAITABLE_STATUS_BLOCKED) {
+          pollfd->revents |= POLLWRNORM;
+          ++return_value;
+        } else if (!return_value) {
+          states[pollable_count].waitable = input;
+          states[pollable_count].pollfd = pollfd;
+          ++pollable_count;
+          wasip3_waitable_join(input, set);
+        }
+      } else {
+        errno = EOPNOTSUPP;
+        return_value = -1;
+        goto cleanup_and_exit;
+      }
+    }
+  }
+
+  if (return_value) goto cleanup_and_exit;
+
+  if (timeout >= 0) {
+    timeout_pollable = monotonic_clock_wait_for(
+        ((monotonic_clock_duration_t)timeout) * 1000000);
+    wasip3_waitable_join(timeout_pollable, set);
+  }
+
+  wasip3_event_t event;
+  wasip3_waitable_set_wait(set, &event);
+  return_value = 0;
+  switch (event.event) {
+    case WASIP3_EVENT_STREAM_READ:
+      for (size_t i=0; i<pollable_count; ++i) {
+        if (states[i].waitable == event.waitable) {
+          states[i].pollfd->revents |= POLLRDNORM;
+          ++return_value;
+          break;
+        }
+      }
+      break;
+    case WASIP3_EVENT_STREAM_WRITE:
+      for (size_t i=0; i<pollable_count; ++i) {
+        if (states[i].waitable == event.waitable) {
+          states[i].pollfd->revents |= POLLWRNORM;
+          ++return_value;
+          break;
+        }
+      }
+      break;
+    case WASIP3_EVENT_SUBTASK:
+      assert(event.waitable == timeout_pollable);
+      break;
+    default:
+      abort();
+  }
+
+  //repeat wasip3_waitable_set_poll(set, &event); ?
+
+cleanup_and_exit:
+    for (size_t i=0; i<pollable_count; ++i) {
+      wasip3_waitable_join(states[i].waitable, 0);
+    }
+    wasip3_waitable_set_drop(set);
+
+  return return_value;
 }
 
 #else

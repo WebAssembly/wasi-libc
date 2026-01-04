@@ -4,6 +4,7 @@
 #ifdef __wasip3__
 #include <stdlib.h>
 #include <wasi/descriptor_table.h>
+#include <wasi/file_utils.h>
 #include <wasi/sockets_utils.h>
 
 typedef struct {
@@ -15,7 +16,29 @@ typedef struct {
 
 static int tcp_connect(void *data, const struct sockaddr *addr,
                        socklen_t addrlen) {
-  abort();
+  tcp_socket_t *socket = (tcp_socket_t *)data;
+  sockets_method_tcp_socket_connect_args_t args;
+  // sockets_ip_socket_address_t remote_address;
+  int parse_err;
+  if (!__wasi_sockets_utils__parse_address(socket->family, addr, addrlen,
+                                           &args.remote_address, &parse_err)) {
+    errno = parse_err;
+    return -1;
+  }
+
+  args.self = sockets_borrow_tcp_socket(socket->socket);
+  sockets_result_void_error_code_t error;
+
+  wasip3_subtask_status_t status =
+      sockets_method_tcp_socket_connect(&args, &error);
+  wasip3_subtask_block_on(status);
+
+  if (error.is_err) {
+    errno = __wasi_sockets_utils__map_error(error.val.err);
+    return -1;
+  }
+
+  return 0;
 }
 
 static int tcp_do_bind(tcp_socket_t *socket,

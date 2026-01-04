@@ -1,17 +1,17 @@
 #include <wasi/version.h>
 
 #ifdef __wasip3__
-#include <stdlib.h>
-#include <wasi/descriptor_table.h>
-#include <wasi/api.h>
 #include <common/errors.h>
+#include <stdlib.h>
+#include <wasi/api.h>
+#include <wasi/descriptor_table.h>
 
 typedef struct {
-    filesystem_stream_u8_writer_t handle;
+  filesystem_stream_u8_writer_t handle;
 } pipe3w_t;
 
 typedef struct {
-    filesystem_stream_u8_t handle;
+  filesystem_stream_u8_t handle;
 } pipe3r_t;
 
 static int pipe_read_stream(void *data, filesystem_stream_u8_t *out,
@@ -29,7 +29,7 @@ static void pipe_r_free(void *data) {
 }
 
 static int pipe_write_stream(void *data, filesystem_stream_u8_t *out,
-                            off_t **offs) {
+                             off_t **offs) {
   pipe3w_t *file = (pipe3w_t *)data;
   *out = file->handle;
   *offs = 0;
@@ -69,7 +69,7 @@ int pipe(int pipefd[2]) {
   entry.vtable = &pipe_r_vtable;
   entry.data = readhandle;
   int pipefd0 = descriptor_table_insert(entry);
-  if (pipefd0<0) {
+  if (pipefd0 < 0) {
     pipe_r_free(readhandle);
     pipe_w_free(writehandle);
     return -1;
@@ -77,7 +77,7 @@ int pipe(int pipefd[2]) {
   entry.vtable = &pipe_w_vtable;
   entry.data = writehandle;
   int pipefd1 = descriptor_table_insert(entry);
-  if (pipefd1<0) {
+  if (pipefd1 < 0) {
     pipe_r_free(readhandle);
     pipe_w_free(writehandle);
     descriptor_table_remove(pipefd0);

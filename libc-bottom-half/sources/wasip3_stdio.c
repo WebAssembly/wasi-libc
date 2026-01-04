@@ -27,21 +27,24 @@ static void stdio3_free(void *data) {
   free(stdio);
 }
 
-static int stdio3_get_write_stream(void *data,
-                                   filesystem_stream_u8_t *out_stream,
-                                   off_t **out_offset) {
+static int stdio3_get_write_stream(void *data, void const *buf, size_t nbyte,
+                                   waitable_t *waitable,
+                                   wasip3_waitable_status_t *out,
+                                   off_t **offs) {
   stdio3_t *stdio = (stdio3_t *)data;
-  *out_stream = (filesystem_stream_u8_t)stdio->stdout;
-  *out_offset = NULL;
+  *waitable = stdio->stdout;
+  *out = stdin_stream_u8_write(stdio->stdout, buf, nbyte);
+  *offs = NULL;
   return 0;
 }
 
-static int stdio3_get_read_stream(void *data,
-                                  filesystem_stream_u8_t *out_stream,
-                                  off_t **out_offset) {
+static int stdio3_get_read_stream(void *data, void *buf, size_t nbyte,
+                                  waitable_t *waitable,
+                                  wasip3_waitable_status_t *out, off_t **offs) {
   stdio3_t *stdio = (stdio3_t *)data;
-  *out_stream = (filesystem_stream_u8_t)stdio->input;
-  *out_offset = NULL;
+  *waitable = stdio->input;
+  *out = stdin_stream_u8_read(stdio->input, buf, nbyte);
+  *offs = NULL;
   return 0;
 }
 
@@ -63,8 +66,8 @@ static int stdio3_isatty(void *data) { return 1; }
 
 static descriptor_vtable_t stdio3_vtable = {
     .free = stdio3_free,
-    .get_read_stream3 = stdio3_get_read_stream,
-    .get_write_stream3 = stdio3_get_write_stream,
+    .read3 = stdio3_get_read_stream,
+    .write3 = stdio3_get_write_stream,
     .fstat = stdio3_fstat,
     .fcntl_getfl = stdio3_fcntl_getfl,
     .isatty = stdio3_isatty,

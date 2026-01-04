@@ -123,8 +123,9 @@ int __wasilibc_read3(int fd, void *buf, size_t nbyte, waitable_t *waitable,
   return 0;
 }
 
-int __wasilibc_write3(int fd, void const *buf, size_t nbyte, waitable_t *waitable,
-                      wasip3_waitable_status_t *out, off_t **off) {
+int __wasilibc_write3(int fd, void const *buf, size_t nbyte,
+                      waitable_t *waitable, wasip3_waitable_status_t *out,
+                      off_t **off) {
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
   if (!entry)
     return -1;

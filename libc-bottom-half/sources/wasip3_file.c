@@ -12,11 +12,18 @@ typedef struct {
   filesystem_own_descriptor_t file_handle;
   off_t offset;
   int oflag;
+  filesystem_tuple2_stream_u8_future_result_void_error_code_t read;
+  filesystem_stream_u8_writer_t write;
+  wasip3_subtask_status_t write_task;
+  filesystem_result_void_error_code_t write_error;
 } file3_t;
 
 static void file_close_streams(void *data) {
   file3_t *file = (file3_t *)data;
-  // nothing yet?
+  filesystem_stream_u8_drop_readable(file->read.f0);
+  filesystem_future_result_void_error_code_drop_readable(file->read.f1);
+  sockets_stream_u8_drop_writable(file->write);
+  wasip3_subtask_cancel(file->write_task);
 }
 
 static void file_free(void *data) {
@@ -69,15 +76,12 @@ static int file_fcntl_getfl(void *data) { abort(); }
 
 static int file_fcntl_setfl(void *data, int flags) { abort(); }
 
-static int file_read_stream(void *data, filesystem_stream_u8_t *out,
+static int file_read_stream(void *data, void *buf, size_t nbyte,
+                            waitable_t *waitable, wasip3_waitable_status_t *out,
                             off_t **offs) {
   file3_t *file = (file3_t *)data;
-  filesystem_tuple2_stream_u8_future_result_void_error_code_t res;
-  filesystem_method_descriptor_read_via_stream(
-      filesystem_borrow_descriptor(file->file_handle), file->offset, &res);
-  *out = res.f0;
-  // TODO: I think we need to return f1 as well.
-  filesystem_future_result_void_error_code_drop_readable(res.f1);
+  *waitable = file->read.f0;
+  *out = filesystem_stream_u8_read(file->read.f0, buf, nbyte);
   *offs = &file->offset;
   return 0;
 }
@@ -91,7 +95,7 @@ static descriptor_vtable_t file_vtable = {
     .close_streams = file_close_streams,
     .fcntl_getfl = file_fcntl_getfl,
     .fcntl_setfl = file_fcntl_setfl,
-    .get_read_stream3 = file_read_stream,
+    .read3 = file_read_stream,
 };
 
 int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
@@ -104,6 +108,14 @@ int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
   assert(file_handle.__handle != 0);
   file->file_handle = file_handle;
   file->oflag = oflag;
+
+  // seeking will probably need a larger change
+  filesystem_stream_u8_t write_read = filesystem_stream_u8_new(&file->write);
+  file->write_task = filesystem_method_descriptor_write_via_stream(
+      filesystem_borrow_descriptor(file_handle), write_read, 0,
+      &file->write_error);
+  filesystem_method_descriptor_read_via_stream(
+      filesystem_borrow_descriptor(file->file_handle), 0, &file->read);
 
   descriptor_table_entry_t entry;
   entry.vtable = &file_vtable;

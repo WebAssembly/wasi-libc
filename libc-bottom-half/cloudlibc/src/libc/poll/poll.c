@@ -322,13 +322,14 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
     }
 
     if (pollfd->events & POLLRDNORM) {
-      if (entry->vtable->get_read_stream3) {
-        filesystem_stream_u8_t input;
-        if (entry->vtable->get_read_stream3(entry->data, &input, NULL) < 0) {
+      if (entry->vtable->read3) {
+        waitable_t input;
+        wasip3_waitable_status_t status;
+        if (entry->vtable->read3(entry->data, 0, 0, &input, &status, NULL) < 0) {
           return_value = -1;
           goto cleanup_and_exit;
         }
-        wasip3_waitable_status_t status = filesystem_stream_u8_read(input, 0, 0);
+        // = filesystem_stream_u8_read(input, 0, 0);
         if (status != WASIP3_WAITABLE_STATUS_BLOCKED) {
           pollfd->revents |= POLLRDNORM;
           ++return_value;
@@ -346,13 +347,13 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
     }
 
     if (pollfd->events & POLLWRNORM) {
-      if (entry->vtable->get_write_stream3) {
-        filesystem_stream_u8_t input;
-        if (entry->vtable->get_write_stream3(entry->data, &input, NULL) < 0){
+      if (entry->vtable->write3) {
+        waitable_t input;
+        wasip3_waitable_status_t status;
+        if (entry->vtable->write3(entry->data, 0, 0, &input, &status, NULL) < 0){
           return_value = -1;
           goto cleanup_and_exit;
         }
-        wasip3_waitable_status_t status = filesystem_stream_u8_write(input, 0, 0);
         if (status != WASIP3_WAITABLE_STATUS_BLOCKED) {
           pollfd->revents |= POLLWRNORM;
           ++return_value;

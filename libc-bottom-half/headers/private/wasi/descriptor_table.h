@@ -42,8 +42,8 @@ typedef struct descriptor_vtable_t {
   int (*get_write_stream)(void*, streams_borrow_output_stream_t*, off_t**, poll_own_pollable_t**);
 #endif
 #ifdef __wasip3__
-  int (*get_read_stream3)(void*, filesystem_stream_u8_t*, off_t**);
-  int (*get_write_stream3)(void*, filesystem_stream_u8_t*, off_t**);
+  //int (*get_read_stream3)(void*, filesystem_stream_u8_t*, off_t**);
+  //int (*get_write_stream3)(void*, filesystem_stream_u8_t*, off_t**);
   // async interfaces
   int (*read3)(void*, void *buf, size_t nbyte, waitable_t *waitable, wasip3_waitable_status_t *out, off_t**);
   int (*write3)(void*, void const *buf, size_t nbyte, waitable_t *waitable, wasip3_waitable_status_t *out, off_t**);

@@ -148,18 +148,22 @@ int tcp_setsockopt(void *data, int level, int optname, const void *optval,
   }
 }
 
-static int tcp_read_stream(void *data, filesystem_stream_u8_t *out,
+static int tcp_read_stream(void *data, void *buf, size_t nbyte,
+                           waitable_t *waitable, wasip3_waitable_status_t *out,
                            off_t **offs) {
   tcp_socket_t *file = (tcp_socket_t *)data;
-  *out = file->receive.f0;
+  *waitable = file->receive.f0;
+  *out = sockets_stream_u8_read(file->receive.f0, buf, nbyte);
   *offs = 0;
   return 0;
 }
 
-static int tcp_write_stream(void *data, filesystem_stream_u8_t *out,
+static int tcp_write_stream(void *data, void const *buf, size_t nbyte,
+                            waitable_t *waitable, wasip3_waitable_status_t *out,
                             off_t **offs) {
   tcp_socket_t *file = (tcp_socket_t *)data;
-  *out = file->send;
+  *waitable = file->send;
+  *out = sockets_stream_u8_write(file->send, buf, nbyte);
   *offs = 0;
   return 0;
 }
@@ -197,8 +201,8 @@ static descriptor_vtable_t tcp_vtable = {
     // .shutdown = tcp_shutdown,
     // .getsockopt = tcp_getsockopt,
     .setsockopt = tcp_setsockopt,
-    .get_read_stream3 = tcp_read_stream,
-    .get_write_stream3 = tcp_write_stream,
+    .read3 = tcp_read_stream,
+    .write3 = tcp_write_stream,
 };
 
 int __wasilibc_add_tcp_socket(sockets_own_tcp_socket_t socket,

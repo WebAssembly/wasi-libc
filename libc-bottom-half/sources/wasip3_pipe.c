@@ -14,10 +14,12 @@ typedef struct {
   filesystem_stream_u8_t handle;
 } pipe3r_t;
 
-static int pipe_read_stream(void *data, filesystem_stream_u8_t *out,
+static int pipe_read_stream(void *data, void *buf, size_t nbyte,
+                            waitable_t *waitable, wasip3_waitable_status_t *out,
                             off_t **offs) {
   pipe3r_t *file = (pipe3r_t *)data;
-  *out = file->handle;
+  *waitable = file->handle;
+  *out = filesystem_stream_u8_read(file->handle, buf, nbyte);
   *offs = 0;
   return 0;
 }
@@ -28,10 +30,12 @@ static void pipe_r_free(void *data) {
   free(file);
 }
 
-static int pipe_write_stream(void *data, filesystem_stream_u8_t *out,
-                             off_t **offs) {
+static int pipe_write_stream(void *data, void const *buf, size_t nbyte,
+                             waitable_t *waitable,
+                             wasip3_waitable_status_t *out, off_t **offs) {
   pipe3w_t *file = (pipe3w_t *)data;
-  *out = file->handle;
+  *waitable = file->handle;
+  *out = filesystem_stream_u8_write(file->handle, buf, nbyte);
   *offs = 0;
   return 0;
 }
@@ -44,12 +48,12 @@ static void pipe_w_free(void *data) {
 
 static descriptor_vtable_t pipe_r_vtable = {
     .free = pipe_r_free,
-    .get_read_stream3 = pipe_read_stream,
+    .read3 = pipe_read_stream,
 };
 
 static descriptor_vtable_t pipe_w_vtable = {
     .free = pipe_w_free,
-    .get_write_stream3 = pipe_write_stream,
+    .write3 = pipe_write_stream,
 };
 
 int pipe(int pipefd[2]) {

@@ -34,9 +34,9 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
   }
 
   // Create lookup properties.
-  __wasi_lookupflags_t lookup_flags = 0;
+  filesystem_path_flags_t lookup_flags = 0;
   if ((flag & AT_SYMLINK_NOFOLLOW) == 0)
-    lookup_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
+    lookup_flags |= FILESYSTEM_PATH_FLAGS_SYMLINK_FOLLOW;
 
   // Convert the string into a Wasm string
   wasip2_string_t path_wasm_string;

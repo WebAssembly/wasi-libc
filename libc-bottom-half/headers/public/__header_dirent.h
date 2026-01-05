@@ -3,19 +3,13 @@
 
 #include <wasi/api.h>
 
-#define DT_BLK __WASI_FILETYPE_BLOCK_DEVICE
-#define DT_CHR __WASI_FILETYPE_CHARACTER_DEVICE
-#define DT_DIR __WASI_FILETYPE_DIRECTORY
-#define DT_FIFO __WASI_FILETYPE_SOCKET_STREAM
-#define DT_LNK __WASI_FILETYPE_SYMBOLIC_LINK
-#define DT_REG __WASI_FILETYPE_REGULAR_FILE
-#define DT_UNKNOWN __WASI_FILETYPE_UNKNOWN
-
-// DT_SOCK is not supported in WASI Preview 1 (but will be in Preview 2).  We
-// define it regardless so that libc++'s `<filesystem>` implementation builds.
-// The exact value is mostly arbitrary, but chosen so it doesn't conflict with
-// any of the existing `__WASI_FILETYPE_*` flags.  We do not expect any new
-// flags to be added to WASI Preview 1, so that should be sufficient.
+#define DT_UNKNOWN 0
+#define DT_BLK 1
+#define DT_CHR 2
+#define DT_DIR 3
+#define DT_REG 4
+#define DT_FIFO 6
+#define DT_LNK 7
 #define DT_SOCK 20
 
 #define IFTODT(x) (__wasilibc_iftodt(x))

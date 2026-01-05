@@ -46,9 +46,9 @@ int __wasilibc_nocwd_fstatat(int fd, const char *restrict path, struct stat *res
   }
 
   // Create lookup properties.
-  __wasi_lookupflags_t lookup_flags = 0;
+  filesystem_path_flags_t lookup_flags = 0;
   if ((flag & AT_SYMLINK_NOFOLLOW) == 0)
-    lookup_flags |= __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW;
+    lookup_flags |= FILESYSTEM_PATH_FLAGS_SYMLINK_FOLLOW;
 
   // Perform system call.
   filesystem_descriptor_stat_t internal_stat;

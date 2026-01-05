@@ -77,9 +77,9 @@ int pthread_condattr_getclock(const pthread_condattr_t *restrict a, clockid_t *r
 #else
 int pthread_condattr_getclock(const pthread_condattr_t *restrict a, clockid_t *restrict clk)
 {
-	if (a->__attr & 0x7fffffff == __WASI_CLOCKID_REALTIME)
+	if (a->__attr & 0x7fffffff == CLOCKID_REALTIME)
 		*clk = CLOCK_REALTIME;
-	if (a->__attr & 0x7fffffff == __WASI_CLOCKID_MONOTONIC)
+	if (a->__attr & 0x7fffffff == CLOCKID_MONOTONIC)
 		*clk = CLOCK_MONOTONIC;
 	return 0;
 }

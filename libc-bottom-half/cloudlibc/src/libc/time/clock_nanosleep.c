@@ -14,8 +14,10 @@
 #include <errno.h>
 #include <time.h>
 
+#ifndef __wasilibc_use_wasip2
 static_assert(TIMER_ABSTIME == __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME,
               "Value mismatch");
+#endif
 
 #ifdef __wasilibc_use_wasip2
 int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,

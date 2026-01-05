@@ -8,8 +8,8 @@
 
 #include <wasi/api.h>
 
-#define SHUT_RD __WASI_SDFLAGS_RD
-#define SHUT_WR __WASI_SDFLAGS_WR
+#define SHUT_RD 1
+#define SHUT_WR 2
 #define SHUT_RDWR (SHUT_RD | SHUT_WR)
 
 #ifdef __wasilibc_use_wasip2
@@ -49,8 +49,8 @@
 #define MSG_TRUNC __WASI_ROFLAGS_RECV_DATA_TRUNCATED
 #endif // __wasilibc_use_wasip2
 
-#define SOCK_DGRAM __WASI_FILETYPE_SOCKET_DGRAM
-#define SOCK_STREAM __WASI_FILETYPE_SOCKET_STREAM
+#define SOCK_DGRAM 5
+#define SOCK_STREAM 6
 
 #define SOCK_NONBLOCK (0x00004000)
 #define SOCK_CLOEXEC (0x00002000)

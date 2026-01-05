@@ -14,9 +14,11 @@
 #include <errno.h>
 #include <unistd.h>
 
+#ifndef __wasilibc_use_wasip2
 static_assert(SEEK_CUR == __WASI_WHENCE_CUR, "Value mismatch");
 static_assert(SEEK_END == __WASI_WHENCE_END, "Value mismatch");
 static_assert(SEEK_SET == __WASI_WHENCE_SET, "Value mismatch");
+#endif
 
 off_t __lseek(int fildes, off_t offset, int whence) {
 #ifdef __wasilibc_use_wasip2

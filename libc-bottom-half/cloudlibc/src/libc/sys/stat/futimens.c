@@ -25,7 +25,6 @@ int futimens(int fd, const struct timespec *times) {
   // Convert timestamps and extract NOW/OMIT flags.
   filesystem_new_timestamp_t new_timestamp_atim;
   filesystem_new_timestamp_t new_timestamp_mtim;
-  __wasi_fstflags_t flags;
   if (!utimens_get_timestamps(times, &new_timestamp_atim, &new_timestamp_mtim)) {
     errno = EINVAL;
     return -1;

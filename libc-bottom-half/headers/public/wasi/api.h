@@ -19,6 +19,8 @@
 #ifndef __wasi_api_h
 #define __wasi_api_h
 
+#ifndef __wasilibc_use_wasip2
+
 #ifndef __wasi__
 #error <wasi/api.h> is only supported on WASI platforms.
 #endif
@@ -1444,8 +1446,6 @@ typedef struct __wasi_prestat_t {
 
 _Static_assert(sizeof(__wasi_prestat_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
-
-#ifndef __wasilibc_use_wasip2
 
 /**
  * @defgroup wasi_snapshot_preview1

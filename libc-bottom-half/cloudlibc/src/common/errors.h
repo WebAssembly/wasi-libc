@@ -6,115 +6,115 @@
 static void translate_error(filesystem_error_code_t error) {
     switch (error) {
     case FILESYSTEM_ERROR_CODE_ACCESS:
-        errno = __WASI_ERRNO_ACCES;
+        errno = EACCES;
         break;
     case FILESYSTEM_ERROR_CODE_WOULD_BLOCK:
-        errno = __WASI_ERRNO_AGAIN;
+        errno = EAGAIN;
         break;
     case FILESYSTEM_ERROR_CODE_ALREADY:
-        errno = __WASI_ERRNO_ALREADY;
+        errno = EALREADY;
         break;
     case FILESYSTEM_ERROR_CODE_BAD_DESCRIPTOR:
-        errno = __WASI_ERRNO_BADF;
+        errno = EBADF;
         break;
     case FILESYSTEM_ERROR_CODE_BUSY:
-        errno = __WASI_ERRNO_BUSY;
+        errno = EBUSY;
         break;
     case FILESYSTEM_ERROR_CODE_DEADLOCK:
-        errno = __WASI_ERRNO_DEADLK;
+        errno = EDEADLK;
         break;
     case FILESYSTEM_ERROR_CODE_QUOTA:
-        errno = __WASI_ERRNO_DQUOT;
+        errno = EDQUOT;
         break;
     case FILESYSTEM_ERROR_CODE_EXIST:
-        errno = __WASI_ERRNO_EXIST;
+        errno = EEXIST;
         break;
     case FILESYSTEM_ERROR_CODE_FILE_TOO_LARGE:
-        errno = __WASI_ERRNO_FBIG;
+        errno = EFBIG;
         break;
     case FILESYSTEM_ERROR_CODE_ILLEGAL_BYTE_SEQUENCE:
-        errno = __WASI_ERRNO_ILSEQ;
+        errno = EILSEQ;
         break;
     case FILESYSTEM_ERROR_CODE_IN_PROGRESS:
-        errno = __WASI_ERRNO_INPROGRESS;
+        errno = EINPROGRESS;
         break;
     case FILESYSTEM_ERROR_CODE_INTERRUPTED:
-        errno = __WASI_ERRNO_INTR;
+        errno = EINTR;
         break;
     case FILESYSTEM_ERROR_CODE_INVALID:
-        errno = __WASI_ERRNO_INVAL;
+        errno = EINVAL;
         break;
     case FILESYSTEM_ERROR_CODE_IO:
-        errno = __WASI_ERRNO_IO;
+        errno = EIO;
         break;
     case FILESYSTEM_ERROR_CODE_IS_DIRECTORY:
-        errno = __WASI_ERRNO_ISDIR;
+        errno = EISDIR;
         break;
     case FILESYSTEM_ERROR_CODE_LOOP:
-        errno = __WASI_ERRNO_LOOP;
+        errno = ELOOP;
         break;
     case FILESYSTEM_ERROR_CODE_TOO_MANY_LINKS:
-        errno = __WASI_ERRNO_MLINK;
+        errno = EMLINK;
         break;
     case FILESYSTEM_ERROR_CODE_MESSAGE_SIZE:
-        errno = __WASI_ERRNO_MSGSIZE;
+        errno = EMSGSIZE;
         break;
     case FILESYSTEM_ERROR_CODE_NAME_TOO_LONG:
-        errno = __WASI_ERRNO_NAMETOOLONG;
+        errno = ENAMETOOLONG;
         break;
     case FILESYSTEM_ERROR_CODE_NO_DEVICE:
-        errno = __WASI_ERRNO_NODEV;
+        errno = ENODEV;
         break;
     case FILESYSTEM_ERROR_CODE_NO_ENTRY:
-        errno = __WASI_ERRNO_NOENT;
+        errno = ENOENT;
         break;
     case FILESYSTEM_ERROR_CODE_NO_LOCK:
-        errno = __WASI_ERRNO_NOLCK;
+        errno = ENOLCK;
         break;
     case FILESYSTEM_ERROR_CODE_INSUFFICIENT_MEMORY:
-        errno = __WASI_ERRNO_NOMEM;
+        errno = ENOMEM;
         break;
     case FILESYSTEM_ERROR_CODE_INSUFFICIENT_SPACE:
-        errno = __WASI_ERRNO_NOSPC;
+        errno = ENOSPC;
         break;
     case FILESYSTEM_ERROR_CODE_NOT_DIRECTORY:
-        errno = __WASI_ERRNO_NOTDIR;
+        errno = ENOTDIR;
         break;
     case FILESYSTEM_ERROR_CODE_NOT_EMPTY:
-        errno = __WASI_ERRNO_NOTEMPTY;
+        errno = ENOTEMPTY;
         break;
     case FILESYSTEM_ERROR_CODE_NOT_RECOVERABLE:
-        errno = __WASI_ERRNO_NOTRECOVERABLE;
+        errno = ENOTRECOVERABLE;
         break;
     case FILESYSTEM_ERROR_CODE_UNSUPPORTED:
-        errno = __WASI_ERRNO_NOTSUP;
+        errno = ENOTSUP;
         break;
     case FILESYSTEM_ERROR_CODE_NO_TTY:
-        errno = __WASI_ERRNO_NOTTY;
+        errno = ENOTTY;
         break;
     case FILESYSTEM_ERROR_CODE_NO_SUCH_DEVICE:
-        errno = __WASI_ERRNO_NXIO;
+        errno = ENXIO;
         break;
     case FILESYSTEM_ERROR_CODE_OVERFLOW:
-        errno = __WASI_ERRNO_OVERFLOW;
+        errno = EOVERFLOW;
         break;
     case FILESYSTEM_ERROR_CODE_NOT_PERMITTED:
-        errno = __WASI_ERRNO_PERM;
+        errno = EPERM;
         break;
     case FILESYSTEM_ERROR_CODE_PIPE:
-        errno = __WASI_ERRNO_PIPE;
+        errno = EPIPE;
         break;
     case FILESYSTEM_ERROR_CODE_READ_ONLY:
-        errno = __WASI_ERRNO_ROFS;
+        errno = EROFS;
         break;
     case FILESYSTEM_ERROR_CODE_INVALID_SEEK:
-        errno = __WASI_ERRNO_SPIPE;
+        errno = ESPIPE;
         break;
     case FILESYSTEM_ERROR_CODE_TEXT_FILE_BUSY:
-        errno = __WASI_ERRNO_TXTBSY;
+        errno = ETXTBSY;
         break;
     case FILESYSTEM_ERROR_CODE_CROSS_DEVICE:
-        errno = __WASI_ERRNO_XDEV;
+        errno = EXDEV;
         break;
     default:
         abort(); // Unreachable

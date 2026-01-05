@@ -152,6 +152,10 @@ static int tcp_read_stream(void *data, void *buf, size_t nbyte,
                            waitable_t *waitable, wasip3_waitable_status_t *out,
                            off_t **offs) {
   tcp_socket_t *file = (tcp_socket_t *)data;
+  if (file->receive.f0 == 0) {
+    sockets_method_tcp_socket_receive(sockets_borrow_tcp_socket(file->socket),
+                                      &file->receive);
+  }
   *waitable = file->receive.f0;
   *out = sockets_stream_u8_read(file->receive.f0, buf, nbyte);
   *offs = 0;
@@ -162,6 +166,11 @@ static int tcp_write_stream(void *data, void const *buf, size_t nbyte,
                             waitable_t *waitable, wasip3_waitable_status_t *out,
                             off_t **offs) {
   tcp_socket_t *file = (tcp_socket_t *)data;
+  if (file->send == 0) {
+    sockets_stream_u8_t send_read = sockets_stream_u8_new(&file->send);
+    file->send_task = sockets_method_tcp_socket_send(
+        sockets_borrow_tcp_socket(file->socket), send_read, &file->send_error);
+  }
   *waitable = file->send;
   *out = sockets_stream_u8_write(file->send, buf, nbyte);
   *offs = 0;
@@ -218,12 +227,6 @@ int __wasilibc_add_tcp_socket(sockets_own_tcp_socket_t socket,
   tcp->family = family;
   tcp->blocking = blocking;
   tcp->incoming = 0;
-  sockets_stream_u8_t send_read = sockets_stream_u8_new(&tcp->send);
-  tcp->send_task = sockets_method_tcp_socket_send(
-      sockets_borrow_tcp_socket(socket), send_read, &tcp->send_error);
-
-  sockets_method_tcp_socket_receive(sockets_borrow_tcp_socket(socket),
-                                    &tcp->receive);
 
   descriptor_table_entry_t entry;
   entry.vtable = &tcp_vtable;

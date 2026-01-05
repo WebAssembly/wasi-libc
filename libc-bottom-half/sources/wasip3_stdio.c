@@ -74,7 +74,7 @@ static descriptor_vtable_t stdio3_vtable = {
 };
 
 static int stdio_add_input(int fd, stdin_stream_u8_t stream,
-                    stdin_future_result_void_error_code_t future) {
+                           stdin_future_result_void_error_code_t future) {
   stdio3_t *stdio = calloc(1, sizeof(stdio3_t));
   if (!stdio) {
     errno = ENOMEM;
@@ -90,9 +90,10 @@ static int stdio_add_input(int fd, stdin_stream_u8_t stream,
   return descriptor_table_insert(entry);
 }
 
-static int stdio3_add_output(int fd, wasip3_subtask_status_t (*func)(
-                                  stdin_stream_u8_t data,
-                                  stdout_result_void_error_code_t *result)) {
+static int stdio3_add_output(
+    int fd,
+    wasip3_subtask_status_t (*func)(stdin_stream_u8_t data,
+                                    stdout_result_void_error_code_t *result)) {
   stdio3_t *stdio = calloc(1, sizeof(stdio3_t));
   if (!stdio) {
     errno = ENOMEM;

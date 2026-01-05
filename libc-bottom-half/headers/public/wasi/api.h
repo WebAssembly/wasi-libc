@@ -2119,10 +2119,10 @@ int32_t __wasi_thread_spawn(
     void *start_arg) __attribute__((__warn_unused_result__));
 #endif
 
-#endif // __wasilibc_use_wasip2
-
 #ifdef __cplusplus
 }
 #endif
+
+#endif // __wasilibc_use_wasip2
 
 #endif

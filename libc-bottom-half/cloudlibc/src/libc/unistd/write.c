@@ -78,8 +78,25 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
   wasip3_waitable_status_t status;
   if (__wasilibc_write3(fildes, buf, nbyte, &output_stream, &status, &off) < 0)
     return -1;
-  if (WASIP3_WAITABLE_STATE(status) == WASIP3_WAITABLE_COMPLETED) {
-    return WASIP3_WAITABLE_COUNT(status);
+  if (status == WASIP3_WAITABLE_STATUS_BLOCKED) {
+    wasip3_waitable_set_t set = wasip3_waitable_set_new();
+    wasip3_waitable_join(output_stream, set);
+    wasip3_event_t event;
+    wasip3_waitable_set_wait(set, &event);
+    assert(event.event == WASIP3_EVENT_STREAM_READ);
+    assert(event.waitable == output_stream);
+    // remove from set
+    wasip3_waitable_join(output_stream, 0);
+    wasip3_waitable_set_drop(set);
+    ssize_t bytes_written = event.code;
+    if (off)
+      *off += bytes_written;
+    return bytes_written;
+  } else if (WASIP3_WAITABLE_STATE(status) == WASIP3_WAITABLE_COMPLETED) {
+    ssize_t bytes_written = WASIP3_WAITABLE_COUNT(status);
+    if (off)
+      *off += bytes_written;
+    return bytes_written;
   } else {
     abort();
   }

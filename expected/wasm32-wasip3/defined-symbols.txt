@@ -335,8 +335,8 @@ __wasilibc_nocwd_utimensat
 __wasilibc_open_nomode
 __wasilibc_populate_preopens
 __wasilibc_pthread_self
-__wasilibc_read3
 __wasilibc_random
+__wasilibc_read3
 __wasilibc_rename_newat
 __wasilibc_rename_oldat
 __wasilibc_reset_preopens

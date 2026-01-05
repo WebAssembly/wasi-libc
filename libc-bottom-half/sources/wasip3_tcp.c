@@ -123,7 +123,7 @@ static int tcp_listen(void *data, int backlog) {
   return 0;
 }
 
-int tcp_setsockopt(void *data, int level, int optname, const void *optval,
+static int tcp_setsockopt(void *data, int level, int optname, const void *optval,
                    socklen_t optlen) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
   int intval = *(int *)optval;
@@ -182,7 +182,7 @@ static ssize_t tcp_recvfrom(void *data, void *buffer, size_t length, int flags,
   abort();
 }
 
-ssize_t tcp_sendto(void *data, const void *buffer, size_t length, int flags,
+static ssize_t tcp_sendto(void *data, const void *buffer, size_t length, int flags,
                    const struct sockaddr *addr, socklen_t addrlen) {
   abort();
 }

@@ -1,7 +1,6 @@
 __addtf3
 __backpressure_dec
 __backpressure_inc
-__backpressure_set
 __context_get
 __context_set
 __data_end
@@ -38,6 +37,7 @@ __waitable_set_new
 __waitable_set_poll
 __waitable_set_wait
 __wasm_call_ctors
+__wasm_export_exports_wasi_cli_run_run__task_return
 __wasm_import_environment_get_arguments
 __wasm_import_environment_get_environment
 __wasm_import_environment_get_initial_cwd

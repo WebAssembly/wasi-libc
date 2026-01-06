@@ -3,6 +3,7 @@
 #endif
 
 #include <wasi/api.h>
+#include <stdbool.h>
 
 extern void __wasi_init_tp(void);
 extern void __wasm_call_ctors(void);
@@ -58,3 +59,15 @@ void _start(void) {
     }
 #endif
 }
+
+
+#ifdef __wasip2__
+#include <wasi/libc-environ.h>
+
+// The wasi:cli/run export for wasip2 components. This is only linked for
+// command-style executables, not reactors.
+bool exports_wasi_cli_run_run(void) {
+    __wasilibc_initialize_environ();
+    return __main_void() == 0;
+}
+#endif

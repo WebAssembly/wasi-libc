@@ -108,12 +108,3 @@ __attribute__((__weak__, nodebug)) int __main_void(void) {
   return __main_argc_argv(argc, argv);
 #endif
 }
-
-#ifdef __wasip2__
-bool exports_wasi_cli_run_run(void) {
-  // TODO: this is supposed to be unnecessary, but functional/env.c fails
-  // without it
-  __wasilibc_initialize_environ();
-  return __main_void() == 0;
-}
-#endif

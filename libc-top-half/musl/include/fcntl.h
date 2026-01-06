@@ -3,7 +3,6 @@
 
 #ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #else
-#include <__wasi_snapshot.h>
 #include <__header_fcntl.h>
 #endif
 #ifdef __cplusplus

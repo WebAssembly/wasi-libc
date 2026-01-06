@@ -1,7 +1,7 @@
 #ifndef	_SYS_SOCKET_H
 #define	_SYS_SOCKET_H
 
-#include <__wasi_snapshot.h>
+#include <wasi/version.h>
 
 #ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #else
@@ -398,7 +398,7 @@ struct sockaddr_storage {
 #include <__struct_sockaddr_storage.h>
 #endif
 
-#if (defined __wasilibc_unmodified_upstream) || (defined __wasilibc_use_wasip2)
+#if (defined __wasilibc_unmodified_upstream) || !(defined __wasip1__)
 int socket (int, int, int);
 #endif
 
@@ -408,7 +408,7 @@ int socketpair (int, int, int, int [2]);
 
 int shutdown (int, int);
 
-#if (defined __wasilibc_unmodified_upstream) || (defined __wasilibc_use_wasip2)
+#if (defined __wasilibc_unmodified_upstream) || !(defined __wasip1__)
 int connect (int, const struct sockaddr *, socklen_t);
 int bind (int, const struct sockaddr *, socklen_t);
 int listen (int, int);
@@ -417,14 +417,14 @@ int listen (int, int);
 int accept (int, struct sockaddr *__restrict, socklen_t *__restrict);
 int accept4(int, struct sockaddr *__restrict, socklen_t *__restrict, int);
 
-#if (defined __wasilibc_unmodified_upstream) || (defined __wasilibc_use_wasip2)
+#if (defined __wasilibc_unmodified_upstream) || !(defined __wasip1__)
 int getsockname (int, struct sockaddr *__restrict, socklen_t *__restrict);
 int getpeername (int, struct sockaddr *__restrict, socklen_t *__restrict);
 #endif
 
 ssize_t send (int, const void *, size_t, int);
 ssize_t recv (int, void *, size_t, int);
-#if (defined __wasilibc_unmodified_upstream) || (defined __wasilibc_use_wasip2)
+#if (defined __wasilibc_unmodified_upstream) || !(defined __wasip1__)
 ssize_t sendto (int, const void *, size_t, int, const struct sockaddr *, socklen_t);
 ssize_t recvfrom (int, void *__restrict, size_t, int, struct sockaddr *__restrict, socklen_t *__restrict);
 #endif
@@ -434,7 +434,7 @@ ssize_t recvmsg (int, struct msghdr *, int);
 #endif
 
 int getsockopt (int, int, int, void *__restrict, socklen_t *__restrict);
-#if (defined __wasilibc_unmodified_upstream) || (defined __wasilibc_use_wasip2)
+#if (defined __wasilibc_unmodified_upstream) || !(defined __wasip1__)
 int setsockopt (int, int, int, const void *, socklen_t);
 #endif
 

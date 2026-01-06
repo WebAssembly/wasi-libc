@@ -2,20 +2,19 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
+#include <errno.h>
+#include <unistd.h>
+#include <wasi/api.h>
+
+#ifdef __wasip2__
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #include <time.h>
-#else
-#include <wasi/api.h>
 #endif
-#include <errno.h>
-#include <unistd.h>
 
 ssize_t write(int fildes, const void *buf, size_t nbyte) {
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   streams_borrow_output_stream_t output_stream;
   poll_borrow_pollable_t pollable;
   bool ok = false;

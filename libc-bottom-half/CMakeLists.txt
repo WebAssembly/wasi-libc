@@ -6,8 +6,8 @@ add_subdirectory(signal)
 # =============================================================================
 # sysroot headers from the bottom half
 #
-configure_file(headers/public/__wasi_snapshot.h.in ${SYSROOT_INC}/__wasi_snapshot.h)
-add_custom_target(sysroot-wasi-snapshot-header DEPENDS ${SYSROOT_INC}/__wasi_snapshot.h)
+configure_file(headers/public/wasi/version.h.in ${SYSROOT_INC}/wasi/version.h)
+add_custom_target(sysroot-wasi-snapshot-header DEPENDS ${SYSROOT_INC}/wasi/version.h)
 add_dependencies(sysroot_inc sysroot-wasi-snapshot-header)
 
 file(

@@ -4,11 +4,11 @@
 
 #include <assert.h>
 #include <common/clock.h>
-
+#include <assert.h>
 #include <wasi/api.h>
 #include <time.h>
 
-#ifndef __wasilibc_use_wasip2
+#ifdef __wasip1__
 static_assert(__WASI_CLOCKID_MONOTONIC == CLOCKID_MONOTONIC,
               "__WASI_CLOCKID_MONOTONIC has changed value");
 #endif

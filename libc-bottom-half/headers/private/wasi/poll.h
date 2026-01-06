@@ -1,7 +1,9 @@
 #ifndef WASI_POLL_H
 #define WASI_POLL_H
 
-#ifdef __wasilibc_use_wasip2
+#include <wasi/version.h>
+
+#ifdef __wasip2__
 
 #include <poll.h>
 #include <wasi/wasip2.h>
@@ -48,6 +50,6 @@ static int __wasilibc_poll_add_output_stream(
   return __wasilibc_poll_add(state, POLLWRNORM, poll_borrow_pollable(*pollable));
 }
 
-#endif // __wasilibc_use_wasip2
+#endif // __wasip2__
 
 #endif // WASI_POLL_H

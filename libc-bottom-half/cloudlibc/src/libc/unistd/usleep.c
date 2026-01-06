@@ -5,11 +5,12 @@
 #include <errno.h>
 #include <time.h>
 #include <unistd.h>
+#include <wasi/version.h>
 
 int usleep(useconds_t useconds) {
   struct timespec ts = {.tv_sec = useconds / 1000000,
                         .tv_nsec = useconds % 1000000 * 1000};
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   // FIXME(WebAssembly/WASI#857): wasip2 only supports the monotonic clock for
   // sleeping.
   clockid_t clock_id = CLOCK_MONOTONIC;

@@ -1,5 +1,3 @@
-#ifdef __wasilibc_use_wasip2
-
 #include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -7,6 +5,8 @@
 #include <wasi/descriptor_table.h>
 #include <wasi/stdio.h>
 #include <wasi/wasip2.h>
+
+#ifdef __wasip2__
 
 typedef struct {
   int fd;
@@ -156,4 +156,4 @@ int __wasilibc_init_stdio() {
     return -1;
   return 0;
 }
-#endif // __wasilibc_use_wasip2
+#endif // __wasip2__

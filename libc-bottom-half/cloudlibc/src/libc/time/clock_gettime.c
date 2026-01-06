@@ -4,17 +4,12 @@
 
 #include <common/clock.h>
 #include <common/time.h>
-
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <errno.h>
 #include <time.h>
 
 int __clock_gettime(clockid_t clock_id, struct timespec *tp) {
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   if (tp == NULL)
     return 0;
 

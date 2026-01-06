@@ -1,8 +1,6 @@
 #ifndef __wasilibc___errno_values_h
 #define __wasilibc___errno_values_h
 
-#include <wasi/api.h>
-
 #define E2BIG 1
 #define EACCES 2
 #define EADDRINUSE 3

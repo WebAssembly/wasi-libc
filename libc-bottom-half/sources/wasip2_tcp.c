@@ -1,5 +1,3 @@
-#ifdef __wasilibc_use_wasip2
-
 #include "common/time.h"
 #include <errno.h>
 #include <limits.h>
@@ -10,6 +8,8 @@
 #include <wasi/sockets_utils.h>
 #include <wasi/tcp.h>
 #include <wasi/wasip2.h>
+
+#ifdef __wasip2__
 
 const uint64_t NS_PER_S = 1000000000;
 
@@ -1245,4 +1245,4 @@ static descriptor_vtable_t tcp_vtable = {
     .poll_finish = tcp_poll_finish,
 };
 
-#endif // __wasilibc_use_wasip2
+#endif // __wasip2__

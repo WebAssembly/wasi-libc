@@ -7,7 +7,7 @@
 #include "dirent_impl.h"
 
 long telldir(DIR *dirp) {
-#if __wasilibc_use_wasip2
+#ifdef __wasip2__
   return dirp->offset + dirp->skip;
 #else
   return dirp->cookie;

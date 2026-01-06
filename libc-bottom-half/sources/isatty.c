@@ -1,16 +1,15 @@
-#ifdef __wasilibc_use_wasip2
-#include <common/errors.h>
-#include <wasi/file_utils.h>
-#include <wasi/wasip2.h>
-#else
-#include <wasi/api.h>
-#endif
 #include <__errno.h>
 #include <__function___isatty.h>
 #include <features.h>
+#include <wasi/api.h>
+
+#ifdef __wasip2__
+#include <common/errors.h>
+#include <wasi/file_utils.h>
+#endif
 
 int __isatty(int fd) {
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   // Translate the file descriptor into an internal handle
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
   if (!entry)

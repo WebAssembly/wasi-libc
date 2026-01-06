@@ -7,7 +7,7 @@
 #include <poll.h>
 #include <stdbool.h>
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
 #include <wasi/descriptor_table.h>
 
 int poll_wasip2(struct pollfd *fds, size_t nfds, int timeout);
@@ -16,7 +16,7 @@ int poll(struct pollfd* fds, nfds_t nfds, int timeout)
 {
     return poll_wasip2(fds, nfds, timeout);
 }
-#else // not __wasilibc_use_wasip2
+#else // not __wasip2__
 
 static int poll_wasip1(struct pollfd *fds, size_t nfds, int timeout) {
   // Construct events for poll().
@@ -144,4 +144,4 @@ int poll(struct pollfd* fds, nfds_t nfds, int timeout)
 {
     return poll_wasip1(fds, nfds, timeout);
 }
-#endif // not __wasilibc_use_wasip2
+#endif // not __wasip2__

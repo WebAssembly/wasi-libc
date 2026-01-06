@@ -6,15 +6,9 @@
 #define SYS_STAT_STAT_IMPL_H
 
 #include <common/time.h>
-
 #include <sys/stat.h>
-
 #include <assert.h>
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
-#else
 #include <wasi/api.h>
-#endif
 #include <stdbool.h>
 
 static_assert(S_ISBLK(S_IFBLK), "Value mismatch");
@@ -25,7 +19,7 @@ static_assert(S_ISLNK(S_IFLNK), "Value mismatch");
 static_assert(S_ISREG(S_IFREG), "Value mismatch");
 static_assert(S_ISSOCK(S_IFSOCK), "Value mismatch");
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
 static inline void to_public_stat(const filesystem_metadata_hash_value_t *metadata,
                                   const filesystem_descriptor_stat_t *in,
                                   struct stat *out) {
@@ -126,7 +120,7 @@ static inline void to_public_stat(const __wasi_filestat_t *in,
 }
 #endif
 
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
 static inline bool utimens_get_timestamp(const struct timespec *time,
                                          filesystem_new_timestamp_t *out) {
   switch (time->tv_nsec) {

@@ -1,5 +1,3 @@
-#ifdef __wasilibc_use_wasip2
-
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -8,6 +6,8 @@
 #include <wasi/sockets_utils.h>
 #include <wasi/udp.h>
 #include <wasi/wasip2.h>
+
+#ifdef __wasip2__
 
 // Pollables here are lazily initialized as-needed.
 typedef struct {
@@ -874,4 +874,4 @@ static descriptor_vtable_t udp_vtable = {
     .poll_register = udp_poll_register,
 };
 
-#endif // __wasilibc_use_wasip2
+#endif // __wasip2__

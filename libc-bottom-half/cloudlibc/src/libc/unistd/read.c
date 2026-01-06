@@ -2,20 +2,19 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#ifdef __wasilibc_use_wasip2
-#include <wasi/wasip2.h>
+#include <wasi/api.h>
+#include <errno.h>
+#include <unistd.h>
+
+#ifdef __wasip2__
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #include <string.h>
-#else
-#include <wasi/api.h>
 #endif
-#include <errno.h>
-#include <unistd.h>
 
 ssize_t read(int fildes, void *buf, size_t nbyte) {
-#ifdef __wasilibc_use_wasip2
+#ifdef __wasip2__
   bool ok = false;
 
   // Translate the file descriptor to an internal handle

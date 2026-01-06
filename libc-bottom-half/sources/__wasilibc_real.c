@@ -10,7 +10,9 @@
  * must be modified to change this file.
  */
 
-#ifndef __wasilibc_use_wasip2
+#include <wasi/api.h>
+
+#ifndef __wasip2__
 
 #include <string.h>
 #include <wasi/api.h>
@@ -611,4 +613,4 @@ int32_t __wasi_thread_spawn(void *start_arg) {
 #else
 // Suppress the "no symbols" linker error
 static void __wasi_noop() {}
-#endif // __wasilibc_use_wasip2
+#endif // __wasip2__

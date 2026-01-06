@@ -1,6 +1,0 @@
-#ifndef __WASI_SNAPSHOT_H
-#define __WASI_SNAPSHOT_H
-
-#cmakedefine __wasilibc_use_wasip2
-
-#endif /* __WASI_SNAPSHOT_H */

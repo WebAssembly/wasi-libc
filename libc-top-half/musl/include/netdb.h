@@ -1,6 +1,8 @@
 #ifndef	_NETDB_H
 #define	_NETDB_H
 
+#include <wasi/version.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -122,7 +124,7 @@ __attribute__((const))
 #ifdef __wasilibc_unmodified_upstream
 int *__h_errno_location(void);
 #define h_errno (*__h_errno_location())
-#elif (defined __wasilibc_use_wasip2)
+#elif !(defined __wasip1__)
 extern _Thread_local int h_errno;
 #define h_errno h_errno
 #endif

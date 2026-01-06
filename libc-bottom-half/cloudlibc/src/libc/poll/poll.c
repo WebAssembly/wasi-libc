@@ -284,6 +284,8 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
 }
 
 #elif defined(__wasip3__)
+#include <stdlib.h>
+
 typedef struct {
   wasip3_subtask_status_t waitable;
   struct pollfd *pollfd;

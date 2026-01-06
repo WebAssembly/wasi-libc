@@ -1,6 +1,7 @@
 #include <wasi/file_utils.h>
 
 #ifdef __wasip3__
+#include <stdlib.h>
 
 /**
  * Validates that `ptr_signed` is a valid utf-8 string.

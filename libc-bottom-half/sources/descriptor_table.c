@@ -6,6 +6,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <stdlib.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/stdio.h>
 

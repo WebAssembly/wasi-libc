@@ -3,25 +3,13 @@
 #include <features.h>
 #include <wasi/api.h>
 
-#ifdef __wasip2__
+#ifndef __wasip1__
 #include <common/errors.h>
 #include <wasi/file_utils.h>
 #endif
 
 int __isatty(int fd) {
-#ifdef __wasip2__
-  // Translate the file descriptor into an internal handle
-  descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
-  if (!entry)
-    return 0;
-  if (!entry->vtable->isatty) {
-    errno = ENOTTY;
-    return 0;
-  }
-
-  return entry->vtable->isatty(entry->data);
-#else
-
+#if defined(__wasip1__)
   __wasi_fdstat_t statbuf;
   int r = __wasi_fd_fdstat_get(fd, &statbuf);
   if (r != 0) {
@@ -38,6 +26,19 @@ int __isatty(int fd) {
   }
 
   return 1;
+#elif defined(__wasip2__)
+  // Translate the file descriptor into an internal handle
+  descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
+  if (!entry)
+    return 0;
+  if (!entry->vtable->isatty) {
+    errno = ENOTTY;
+    return 0;
+  }
+
+  return entry->vtable->isatty(entry->data);
+#else
+#error "Unsupported WASI version"
 #endif
 }
 

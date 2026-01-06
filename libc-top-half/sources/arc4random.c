@@ -15,10 +15,12 @@ void arc4random_buf(void* buffer, size_t len)
     // We therefore effectively expect that `__wasi_random_get` is "fast",
     // presumably using a PRNG-style implementation rather than a slower
     // raw-entropy-style implementation.
-#ifdef __wasip2__
+#if defined(__wasip1__)
+    int r = __wasi_random_get(buffer, len);
+#elif defined(__wasip2__)
     int r = __wasilibc_random(buffer, len);
 #else
-    int r = __wasi_random_get(buffer, len);
+# error "Unknown WASI version"
 #endif
 
     // `__wasi_random_get` should always succeed.

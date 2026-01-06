@@ -16,12 +16,16 @@
 #define NSEC_PER_SEC 1000000000
 #define USEC_PER_SEC 1000000
 
-static inline bool timespec_to_timestamp_exact(
-#ifdef __wasip2__
-  const struct timespec *timespec, wall_clock_datetime_t *timestamp) {
+#if defined(__wasip1__)
+typedef __wasi_timestamp_t wasilibc_timestamp_t;
+#elif defined(__wasip2__)
+typedef wall_clock_datetime_t wasilibc_timestamp_t;
 #else
-  const struct timespec *timespec, __wasi_timestamp_t *timestamp) {
+# error "Unknown WASI version"
 #endif
+
+static inline bool timespec_to_timestamp_exact(
+  const struct timespec *timespec, wasilibc_timestamp_t *timestamp) {
   // Invalid nanoseconds field.
   if (timespec->tv_nsec < 0 || timespec->tv_nsec >= NSEC_PER_SEC)
     return false;
@@ -30,62 +34,72 @@ static inline bool timespec_to_timestamp_exact(
   if (timespec->tv_sec < 0)
     return false;
 
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  // Make sure our timestamp does not overflow.
+  return !__builtin_mul_overflow(timespec->tv_sec, NSEC_PER_SEC, timestamp) &&
+         !__builtin_add_overflow(*timestamp, timespec->tv_nsec, timestamp);
+#elif defined(__wasip2__)
   timestamp->seconds = timespec->tv_sec;
   timestamp->nanoseconds = timespec->tv_nsec;
   return true;
 #else
-  // Make sure our timestamp does not overflow.
-  return !__builtin_mul_overflow(timespec->tv_sec, NSEC_PER_SEC, timestamp) &&
-         !__builtin_add_overflow(*timestamp, timespec->tv_nsec, timestamp);
+# error "Unknown WASI version"
 #endif
 }
 
 static inline bool timespec_to_timestamp_clamp(
-#ifdef __wasip2__
-  const struct timespec *timespec, wall_clock_datetime_t *timestamp) {
-#else
-  const struct timespec *timespec, __wasi_timestamp_t *timestamp) {
-#endif
+  const struct timespec *timespec, wasilibc_timestamp_t *timestamp) {
   // Invalid nanoseconds field.
   if (timespec->tv_nsec < 0 || timespec->tv_nsec >= NSEC_PER_SEC)
     return false;
 
+#if defined(__wasip1__)
   if (timespec->tv_sec < 0) {
     // Timestamps before the Epoch are not supported.
-#ifdef __wasip2__
+    *timestamp = 0;
+  } else if (__builtin_mul_overflow(timespec->tv_sec, NSEC_PER_SEC, timestamp) ||
+             __builtin_add_overflow(*timestamp, timespec->tv_nsec, timestamp)) {
+    // Make sure our timestamp does not overflow.
+    *timestamp = NUMERIC_MAX(__wasi_timestamp_t);
+  }
+#elif defined(__wasip2__)
+  if (timespec->tv_sec < 0) {
+    // Timestamps before the Epoch are not supported.
     timestamp->seconds = 0;
     timestamp->nanoseconds = 0;
   } else {
     timestamp->seconds = timespec->tv_sec;
     timestamp->nanoseconds = timespec->tv_nsec;
-#else
- *timestamp = 0;
-  } else if (__builtin_mul_overflow(timespec->tv_sec, NSEC_PER_SEC, timestamp) ||
-             __builtin_add_overflow(*timestamp, timespec->tv_nsec, timestamp)) {
-    // Make sure our timestamp does not overflow.
-    *timestamp = NUMERIC_MAX(__wasi_timestamp_t);
-#endif
   }
+#else
+# error "Unknown WASI version"
+#endif
   return true;
 }
 
-#ifdef __wasip2__
-static inline struct timespec timestamp_to_timespec(
-  wall_clock_datetime_t *timestamp) {
-  return (struct timespec){.tv_sec = timestamp->seconds,
-                           .tv_nsec = timestamp->nanoseconds};
-}
-#else
+#if defined(__wasip1__)
+
 static inline struct timespec timestamp_to_timespec(
   __wasi_timestamp_t timestamp) {
   // Decompose timestamp into seconds and nanoseconds.
   return (struct timespec){.tv_sec = timestamp / NSEC_PER_SEC,
                            .tv_nsec = timestamp % NSEC_PER_SEC};
 }
-#endif
 
-#ifdef __wasip2__
+static inline struct timeval timestamp_to_timeval(
+  __wasi_timestamp_t timestamp) {
+  struct timespec ts = timestamp_to_timespec(timestamp);
+  return (struct timeval){.tv_sec = ts.tv_sec, ts.tv_nsec / 1000};
+}
+
+#elif defined(__wasip2__)
+
+static inline struct timespec timestamp_to_timespec(
+  wall_clock_datetime_t *timestamp) {
+  return (struct timespec){.tv_sec = timestamp->seconds,
+                           .tv_nsec = timestamp->nanoseconds};
+}
+
 static inline struct timespec instant_to_timespec(
   monotonic_clock_instant_t ns) {
     // Decompose instant into seconds and nanoseconds
@@ -146,10 +160,6 @@ static inline struct timeval timestamp_to_timeval(
                           .tv_usec = timestamp->nanoseconds / 1000};
 }
 #else
-static inline struct timeval timestamp_to_timeval(
-  __wasi_timestamp_t timestamp) {
-  struct timespec ts = timestamp_to_timespec(timestamp);
-  return (struct timeval){.tv_sec = ts.tv_sec, ts.tv_nsec / 1000};
-}
+# error "Unknown WASI version"
 #endif
 #endif

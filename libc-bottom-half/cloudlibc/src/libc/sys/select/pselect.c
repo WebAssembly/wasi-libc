@@ -36,7 +36,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
 
   struct pollfd poll_fds[readfds->__nfds + writefds->__nfds];
   size_t poll_nfds = 0;
-  
+
   for (size_t i = 0; i < readfds->__nfds; ++i) {
     int fd = readfds->__fds[i];
     if (fd < nfds) {
@@ -47,7 +47,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
         };
     }
   }
-  
+
   for (size_t i = 0; i < writefds->__nfds; ++i) {
     int fd = writefds->__fds[i];
     if (fd < nfds) {
@@ -61,23 +61,20 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
 
   int poll_timeout;
   if (timeout) {
-#ifdef __wasip2__
-    monotonic_clock_instant_t timestamp;
-    if (!timespec_to_instant_clamp(timeout, &timestamp) ) {
-#else
     uint64_t timeout_u64;
+#if defined(__wasip1__)
     if (!timespec_to_timestamp_clamp(timeout, &timeout_u64) ) {
+#elif defined(__wasip2__)
+    if (!timespec_to_instant_clamp(timeout, &timeout_u64) ) {
+#else
+# error "Unknown WASI version"
 #endif
       errno = EINVAL;
       return -1;
     }
 
     // Convert nanoseconds to milliseconds:
-#ifdef __wasip2__
-    uint64_t timeout_u64 = timestamp /= 1000000;
-#else
     timeout_u64 /= 1000000;
-#endif
 
     if (timeout_u64 > INT_MAX) {
       timeout_u64 = INT_MAX;
@@ -87,7 +84,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
   } else {
     poll_timeout = -1;
   };
-  
+
   if (poll(poll_fds, poll_nfds, poll_timeout) < 0) {
     return -1;
   }
@@ -103,6 +100,6 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
       writefds->__fds[writefds->__nfds++] = pollfd->fd;
     }
   }
-  
+
   return readfds->__nfds + writefds->__nfds;
 }

@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <wasi/api.h>
 
-#ifdef __wasip2__
+#ifndef __wasip1__
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #endif
@@ -15,7 +15,15 @@
 ssize_t __wasilibc_nocwd_readlinkat(int fd, const char *restrict path, char *restrict buf,
                                     size_t bufsize) {
   size_t bufused;
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  // TODO: Remove the cast on `buf` once the witx is updated with char8 support.
+  __wasi_errno_t error = __wasi_path_readlink(fd, path,
+                                                      (uint8_t*)buf, bufsize, &bufused);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+#elif defined(__wasip2__)
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fd, &file_handle) < 0)
@@ -42,13 +50,7 @@ ssize_t __wasilibc_nocwd_readlinkat(int fd, const char *restrict path, char *res
   memcpy(buf, link_source.ptr, bufused);
   wasip2_string_free(&link_source);
 #else
-  // TODO: Remove the cast on `buf` once the witx is updated with char8 support.
-  __wasi_errno_t error = __wasi_path_readlink(fd, path,
-                                                      (uint8_t*)buf, bufsize, &bufused);
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
+# error "Unsupported WASI version"
 #endif
   return bufused;
 }

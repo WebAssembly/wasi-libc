@@ -7,19 +7,12 @@
 #include <stdarg.h>
 #include <sys/ioctl.h>
 #include <wasi/api.h>
-
-#ifdef __wasip2__
 #include <wasi/descriptor_table.h>
-#endif
 
 int ioctl(int fildes, int request, ...) {
   switch (request) {
     case FIONREAD: {
-#ifdef __wasip2__
-      // wasip2 doesn't support this operation
-      errno = ENOTSUP;
-      return -1;
-#else
+#if defined(__wasip1__)
       // Poll the file descriptor to determine how many bytes can be read.
       __wasi_subscription_t subscriptions[2] = {
           {
@@ -62,22 +55,16 @@ int ioctl(int fildes, int request, ...) {
       // No data available for reading.
       *result = 0;
       return 0;
+#elif defined(__wasip2__)
+      // wasip2 doesn't support this operation
+      errno = ENOTSUP;
+      return -1;
+#else
+# error "Unknown WASI version"
 #endif
     }
     case FIONBIO: {
-#ifdef __wasip2__
-      descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
-      va_list ap;
-      va_start(ap, request);
-      bool blocking = *va_arg(ap, const int *) == 0;
-      va_end(ap);
-
-      if (!entry->vtable->set_blocking) {
-        errno = EINVAL;
-        return -1;
-      }
-      return entry->vtable->set_blocking(entry->data, blocking);
-#else
+#if defined(__wasip1__)
       // Obtain the current file descriptor flags.
       __wasi_fdstat_t fds;
       __wasi_errno_t error = __wasi_fd_fdstat_get(fildes, &fds);
@@ -102,6 +89,20 @@ int ioctl(int fildes, int request, ...) {
         return -1;
       }
       return 0;
+#elif defined(__wasip2__)
+      descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
+      va_list ap;
+      va_start(ap, request);
+      bool blocking = *va_arg(ap, const int *) == 0;
+      va_end(ap);
+
+      if (!entry->vtable->set_blocking) {
+        errno = EINVAL;
+        return -1;
+      }
+      return entry->vtable->set_blocking(entry->data, blocking);
+#else
+# error "Unknown WASI version"
 #endif
     }
     default:

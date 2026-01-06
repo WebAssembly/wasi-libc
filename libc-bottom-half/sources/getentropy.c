@@ -9,10 +9,12 @@ int __getentropy(void *buffer, size_t len) {
     return -1;
   }
 
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  int r = __wasi_random_get(buffer, len);
+#elif defined(__wasip2__)
   int r = __wasilibc_random(buffer, len);
 #else
-  int r = __wasi_random_get(buffer, len);
+#error "Unsupported WASI version"
 #endif
   if (r != 0) {
     errno = r;

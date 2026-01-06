@@ -44,12 +44,13 @@ weak_alias(__stack_chk_fail, __stack_chk_fail_local);
 __attribute__((constructor(60)))
 static void __wasilibc_init_ssp(void) {
 	uintptr_t entropy;
-#ifdef __wasip2__
+#if defined(__wasip1__)
+	int r = __wasi_random_get((uint8_t *)&entropy, sizeof(uintptr_t));
+#elif defined(__wasip2__)
         int len = sizeof(uintptr_t);
-
         int r = __wasilibc_random(&entropy, len);
 #else
-	int r = __wasi_random_get((uint8_t *)&entropy, sizeof(uintptr_t));
+# error "Unknown WASI version"
 #endif
 	__init_ssp(r ? NULL : &entropy);
 }

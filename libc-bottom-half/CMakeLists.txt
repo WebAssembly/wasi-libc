@@ -130,7 +130,6 @@ elseif(WASI STREQUAL "p2")
     sources/getsockpeername.c
     sources/listen.c
     sources/netdb.c
-    sources/poll-wasip2.c
     sources/recv.c
     sources/send.c
     sources/shutdown.c

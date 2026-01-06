@@ -7,12 +7,14 @@
 #include <fcntl.h>
 
 int posix_fallocate(int fd, off_t offset, off_t len) {
-// Note: this operation isn't supported in wasip2
-#ifdef __wasip2__
-  return ENOTSUP;
-#else
+#if defined(__wasip1__)
   if (offset < 0 || len < 0)
     return EINVAL;
   return __wasi_fd_allocate(fd, offset, len);
+#elif defined(__wasip2__)
+  // Note: this operation isn't supported in wasip2
+  return ENOTSUP;
+#else
+# error "Unsupported WASI version"
 #endif
 }

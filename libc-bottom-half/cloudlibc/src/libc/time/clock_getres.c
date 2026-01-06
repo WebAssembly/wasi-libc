@@ -9,7 +9,15 @@
 #include <time.h>
 
 int clock_getres(clockid_t clock_id, struct timespec *res) {
-#ifdef __wasip2__
+#if defined(__wasip1__)
+  __wasi_timestamp_t ts;
+  __wasi_errno_t error = __wasi_clock_res_get(clock_id->id, &ts);
+  if (error != 0) {
+    errno = error;
+    return -1;
+  }
+  *res = timestamp_to_timespec(ts);
+#elif defined(__wasip2__)
   if (res != NULL) {
     if (clock_id == CLOCK_REALTIME) {
         wall_clock_datetime_t time_result;
@@ -24,13 +32,7 @@ int clock_getres(clockid_t clock_id, struct timespec *res) {
     }
   }
 #else
-  __wasi_timestamp_t ts;
-  __wasi_errno_t error = __wasi_clock_res_get(clock_id->id, &ts);
-  if (error != 0) {
-    errno = error;
-    return -1;
-  }
-  *res = timestamp_to_timespec(ts);
+# error "Unsupported WASI version"
 #endif
   return 0;
 }

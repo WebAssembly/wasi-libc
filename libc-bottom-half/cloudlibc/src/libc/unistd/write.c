@@ -83,7 +83,7 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
     wasip3_waitable_join(output_stream, set);
     wasip3_event_t event;
     wasip3_waitable_set_wait(set, &event);
-    assert(event.event == WASIP3_EVENT_STREAM_READ);
+    assert(event.event == WASIP3_EVENT_STREAM_WRITE);
     assert(event.waitable == output_stream);
     // remove from set
     wasip3_waitable_join(output_stream, 0);

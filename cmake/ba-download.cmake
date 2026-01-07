@@ -33,7 +33,7 @@ function(ba_download target repo version)
     set(fmt tar.gz)
   endif()
 
-  if (target STREQUAL wit-bindgen)
+  if (target STREQUAL wit-bindgen OR target STREQUAL wasm-tools)
     set(tag v${version})
   else()
     set(tag ${version})

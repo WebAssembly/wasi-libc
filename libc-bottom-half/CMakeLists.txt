@@ -205,7 +205,7 @@ else()
         $<TARGET_OBJECTS:crt1-command>
         --world wasi:cli/command@0.2.0
         -o ${SYSROOT_LIB}/crt1-command.o
-    DEPENDS crt1-command wasi-wits $<TARGET_OBJECTS:crt1-command>
+    DEPENDS crt1-command wasi-wits $<TARGET_OBJECTS:crt1-command> wasm-tools
   )
 endif()
 

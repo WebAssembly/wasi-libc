@@ -6,6 +6,12 @@ add_subdirectory(signal)
 # =============================================================================
 # sysroot headers from the bottom half
 #
+if(WASI_SDK_VERSION)
+  set(__wasi_sdk_version__ ${WASI_SDK_VERSION})
+  if (WASI_SDK_VERSION MATCHES "([0-9]+)\\..*")
+    set(__wasi_sdk_major__ ${CMAKE_MATCH_1})
+  endif()
+endif()
 configure_file(headers/public/wasi/version.h.in ${SYSROOT_INC}/wasi/version.h)
 add_custom_target(sysroot-wasi-snapshot-header DEPENDS ${SYSROOT_INC}/wasi/version.h)
 add_dependencies(sysroot_inc sysroot-wasi-snapshot-header)

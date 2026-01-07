@@ -161,31 +161,66 @@ foreach(obj bottom-half-shared bottom-half-static)
   )
 endforeach()
 
-add_custom_target(sysroot-startup-objects)
-add_dependencies(sysroot sysroot-startup-objects)
 
 # =============================================================================
 # startup objects
 #
-foreach(file crt/crt1.c
-             crt/crt1-command.c
+# This is the logic for building `crt1{,-reactor,-command}.o` objects which
+# Clang will link by default based on compiler flags. These are compiled into
+# "object libraries" with CMake and then they're copied into the final location
+# with adjustments based on WASI versions.
+foreach(file crt/crt1-command.c
              crt/crt1-reactor.c)
-  # get the filename without the directory and extension
-  cmake_path(GET file STEM filename)
-
-  # create a custom target for each file
-  add_library(${filename}.o OBJECT ${file})
-  target_link_libraries(${filename}.o PUBLIC musl-top-half-interface)
-  set_pic(${filename}.o)
-  target_compile_options(${filename}.o PRIVATE -fvisibility=default)
-
-  # add a custom command to compile the file
-  set(dst ${SYSROOT_LIB}/${filename}.o)
-  add_custom_command(
-    OUTPUT ${dst}
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:${filename}.o> ${dst}
-    DEPENDS ${filename}.o
-  )
-  add_custom_target(sysroot-startup-${filename}.o DEPENDS ${dst})
-  add_dependencies(sysroot-startup-objects sysroot-startup-${filename}.o)
+  cmake_path(GET file STEM stem)
+  add_library(${stem} OBJECT ${file})
+  clang_format_target(${stem})
+  target_link_libraries(${stem} PUBLIC musl-top-half-interface)
+  set_pic(${stem})
+  target_compile_options(${stem} PRIVATE -fvisibility=default)
 endforeach()
+
+# crt1-reactor.o is a straight copy of what CMake produces
+add_custom_command(
+  OUTPUT ${SYSROOT_LIB}/crt1-reactor.o
+  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:crt1-reactor> ${SYSROOT_LIB}/crt1-reactor.o
+  DEPENDS crt1-reactor $<TARGET_OBJECTS:crt1-reactor>
+)
+
+if (WASI STREQUAL "p1")
+  # wasip1: crt1-command.o is a straight copy of what CMake produces
+  add_custom_command(
+    OUTPUT ${SYSROOT_LIB}/crt1-command.o
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:crt1-command> ${SYSROOT_LIB}/crt1-command.o
+    DEPENDS crt1-command $<TARGET_OBJECTS:crt1-command>
+  )
+else()
+  # wasip2+: crt1-command.o is modified from what CMake produces to
+  # additionally have a custom section representing the type information needed
+  # for its contained export. This is the `wasi:cli/run` interface, for example.
+  add_custom_command(
+    OUTPUT ${SYSROOT_LIB}/crt1-command.o
+    COMMAND
+      ${wasm_tools} component embed
+        ${wit_dir}
+        $<TARGET_OBJECTS:crt1-command>
+        --world wasi:cli/command@0.2.0
+        -o ${SYSROOT_LIB}/crt1-command.o
+    DEPENDS crt1-command wasi-wits $<TARGET_OBJECTS:crt1-command>
+  )
+endif()
+
+# Provide a plain crt1.o for toolchain compatibility, identical to
+# `crt1-command.c`
+add_custom_command(
+  OUTPUT ${SYSROOT_LIB}/crt1.o
+  COMMAND ${CMAKE_COMMAND} -E copy ${SYSROOT_LIB}/crt1-command.o ${SYSROOT_LIB}/crt1.o
+  DEPENDS ${SYSROOT_LIB}/crt1-command.o
+)
+
+add_custom_target(sysroot-startup-objects
+  DEPENDS
+    ${SYSROOT_LIB}/crt1-reactor.o
+    ${SYSROOT_LIB}/crt1-command.o
+    ${SYSROOT_LIB}/crt1.o
+)
+add_dependencies(sysroot sysroot-startup-objects)

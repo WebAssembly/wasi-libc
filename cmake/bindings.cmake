@@ -31,6 +31,7 @@ if (NOT WIT_BINDGEN_EXECUTABLE)
   ExternalProject_Get_Property(wit-bindgen SOURCE_DIR)
   set(wit_bindgen "${SOURCE_DIR}/wit-bindgen")
 else()
+  add_custom_target(wit-bindgen)
   set(wit_bindgen ${WIT_BINDGEN_EXECUTABLE})
 endif()
 

@@ -148,6 +148,7 @@ if (NOT (WASI STREQUAL "p1"))
 endif()
 include(check-symbols)
 include(clang-format)
+include(wasm-tools)
 
 # =============================================================================
 # Generic top-level build flags/settings

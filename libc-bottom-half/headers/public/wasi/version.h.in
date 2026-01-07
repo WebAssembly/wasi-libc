@@ -11,4 +11,7 @@
 #cmakedefine __wasip2__
 #cmakedefine __wasip3__
 
+#cmakedefine __wasi_sdk_major__ @__wasi_sdk_major__@
+#cmakedefine __wasi_sdk_version__ "@__wasi_sdk_version__@"
+
 #endif /* __WASI_VERSION_H */

@@ -49,6 +49,7 @@ option(BUILD_TESTS "Whether or not to build tests" OFF)
 option(SIMD "Whether or not to build simd-enabled intrinsics into wasi-libc" OFF)
 option(BUILD_SHARED "Whether or not to build shared libraries" ON)
 option(CHECK_SYMBOLS "Whether or not to check the exported symbols of libc.a" OFF)
+set(WASI_SDK_VERSION "" CACHE STRING "Version information for wasi-sdk to embed in headers")
 
 if(TARGET_TRIPLE MATCHES "-threads$")
   set(WASI p1)

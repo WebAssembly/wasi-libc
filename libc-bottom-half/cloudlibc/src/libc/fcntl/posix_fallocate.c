@@ -12,7 +12,7 @@ int posix_fallocate(int fd, off_t offset, off_t len) {
     return EINVAL;
   return __wasi_fd_allocate(fd, offset, len);
 #elif defined(__wasip2__) || defined(__wasip3__)
-  // Note: this operation isn't supported in wasip2
+  // Note: this operation isn't supported in wasip{2,3}
   return ENOTSUP;
 #else
 # error "Unsupported WASI version"

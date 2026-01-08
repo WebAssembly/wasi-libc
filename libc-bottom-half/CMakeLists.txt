@@ -192,13 +192,32 @@ foreach(file crt/crt1.c
   set_pic(${filename}.o)
   target_compile_options(${filename}.o PRIVATE -fvisibility=default)
 
-  # add a custom command to compile the file
   set(dst ${SYSROOT_LIB}/${filename}.o)
-  add_custom_command(
-    OUTPUT ${dst}
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:${filename}.o> ${dst}
-    DEPENDS ${filename}.o
-  )
+
+  # for wasip3, also build the the ASM trampolines
+  if(WASI STREQUAL "p3")
+    if(filename STREQUAL "crt1-reactor")
+      set(asm_stub crt/wasm32/wasip3-crt1-reactor.s)
+    elseif(filename STREQUAL "crt1" OR filename STREQUAL "crt1-command")
+      set(asm_stub crt/wasm32/wasip3-crt1-command.s)
+    endif()
+    add_library(${filename}_trampoline.o OBJECT ${asm_stub})
+
+    # perform a relocatable link to create the final startup object
+    add_custom_command(
+      OUTPUT ${dst}
+      COMMAND ${CMAKE_C_COMPILER} -r $<TARGET_OBJECTS:${filename}.o> $<TARGET_OBJECTS:${filename}_trampoline.o> -o ${dst} -nostdlib
+      DEPENDS ${filename}.o ${filename}_trampoline.o
+    )
+  else()
+    # add a custom command to compile the file
+    add_custom_command(
+      OUTPUT ${dst}
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:${filename}.o> ${dst}
+      DEPENDS ${filename}.o
+    )
+  endif()
+  
   add_custom_target(sysroot-startup-${filename}.o DEPENDS ${dst})
   add_dependencies(sysroot-startup-objects sysroot-startup-${filename}.o)
 endforeach()

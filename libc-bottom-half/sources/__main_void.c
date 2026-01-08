@@ -23,7 +23,8 @@ __attribute__((__weak__)) int __main_argc_argv(int argc, char *argv[]);
 // as necessary by the Clang driver.  However, moving it to crt1-command.c
 // breaks `--no-gc-sections`, so we'll probably need to create a new file
 // (e.g. crt0.o or crtend.o) and teach Clang to use it when needed.
-__attribute__((__weak__, nodebug)) int __main_void(void) {
+__attribute__((__weak__, nodebug)) int __main_void(void)
+{
 #if defined(__wasip1__)
   __wasi_errno_t err;
 
@@ -31,26 +32,30 @@ __attribute__((__weak__, nodebug)) int __main_void(void) {
   size_t argv_buf_size;
   size_t argc;
   err = __wasi_args_sizes_get(&argc, &argv_buf_size);
-  if (err != __WASI_ERRNO_SUCCESS) {
+  if (err != __WASI_ERRNO_SUCCESS)
+  {
     _Exit(EX_OSERR);
   }
 
   // Add 1 for the NULL pointer to mark the end, and check for overflow.
   size_t num_ptrs = argc + 1;
-  if (num_ptrs == 0) {
+  if (num_ptrs == 0)
+  {
     _Exit(EX_SOFTWARE);
   }
 
   // Allocate memory for storing the argument chars.
   char *argv_buf = malloc(argv_buf_size);
-  if (argv_buf == NULL) {
+  if (argv_buf == NULL)
+  {
     _Exit(EX_SOFTWARE);
   }
 
   // Allocate memory for the array of pointers. This uses `calloc` both to
   // handle overflow and to initialize the NULL pointer at the end.
   char **argv = calloc(num_ptrs, sizeof(char *));
-  if (argv == NULL) {
+  if (argv == NULL)
+  {
     free(argv_buf);
     _Exit(EX_SOFTWARE);
   }
@@ -59,7 +64,8 @@ __attribute__((__weak__, nodebug)) int __main_void(void) {
   // TODO: Remove the casts on `argv_ptrs` and `argv_buf` once the witx is
   // updated with char8 support.
   err = __wasi_args_get((uint8_t **)argv, (uint8_t *)argv_buf);
-  if (err != __WASI_ERRNO_SUCCESS) {
+  if (err != __WASI_ERRNO_SUCCESS)
+  {
     free(argv_buf);
     free(argv);
     _Exit(EX_OSERR);
@@ -85,7 +91,8 @@ __attribute__((__weak__, nodebug)) int __main_void(void) {
   // Add 1 for the NULL pointer to mark the end, and check for overflow.
   size_t argc = argument_list.len;
   size_t num_ptrs = argc + 1;
-  if (num_ptrs == 0) {
+  if (num_ptrs == 0)
+  {
     list_string_free(&argument_list);
     _Exit(EX_SOFTWARE);
   }
@@ -93,17 +100,20 @@ __attribute__((__weak__, nodebug)) int __main_void(void) {
   // Allocate memory for the array of pointers. This uses `calloc` both to
   // handle overflow and to initialize the NULL pointer at the end.
   char **argv = calloc(num_ptrs, sizeof(char *));
-  if (argv == NULL) {
+  if (argv == NULL)
+  {
     list_string_free(&argument_list);
     _Exit(EX_SOFTWARE);
   }
 
   // Copy the arguments
-  for (size_t i = 0; i < argc; i++) {
+  for (size_t i = 0; i < argc; i++)
+  {
     string_t wasi_string = argument_list.ptr[i];
     size_t len = wasi_string.len;
     argv[i] = malloc(len + 1);
-    if (!argv[i]) {
+    if (!argv[i])
+    {
       list_string_free(&argument_list);
       _Exit(EX_SOFTWARE);
     }
@@ -121,8 +131,9 @@ __attribute__((__weak__, nodebug)) int __main_void(void) {
 #endif
 }
 
-#ifdef __wasip2__
-bool exports_wasi_cli_run_run(void) {
+#if defined(__wasip2__) || defined(__wasip3__)
+bool exports_wasi_cli_run_run(void)
+{
   // TODO: this is supposed to be unnecessary, but functional/env.c fails
   // without it
   __wasilibc_initialize_environ();

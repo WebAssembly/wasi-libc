@@ -7,19 +7,7 @@ endif()
 # If `wit-bindgen` is on the system and has the right version, favor that,
 # otherwise download a known good version.
 find_program(WIT_BINDGEN_EXECUTABLE NAMES wit-bindgen)
-if(WIT_BINDGEN_EXECUTABLE)
-  message(STATUS "Found wit-bindgen: ${WIT_BINDGEN_EXECUTABLE}")
-
-  execute_process(
-    COMMAND ${WIT_BINDGEN_EXECUTABLE} --version
-    OUTPUT_VARIABLE WIT_BINDGEN_VERSION
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-  if (NOT (WIT_BINDGEN_VERSION MATCHES "0\\.48\\.0"))
-    message(WARNING "wit-bindgen version 0.48.0 is required, found: ${WIT_BINDGEN_VERSION}")
-    set(WIT_BINDGEN_EXECUTABLE "")
-  endif()
-endif()
+set(WIT_BINDGEN_EXECUTABLE "/Users/sybrand/src/bytecodealliance/wit-bindgen/target/debug/wit-bindgen")
 
 if (NOT WIT_BINDGEN_EXECUTABLE)
   include(ba-download)
@@ -142,9 +130,9 @@ add_custom_target(bindings DEPENDS bindings-p2 bindings-p3)
 function(wit_bindgen_edit p)
   add_custom_target(
     bindings-${p}-edit
-    COMMAND sed -i "'s_#include .wasi${p}\.h._#include \"wasi/wasi${p}.h\"_'" ${bottom_half}/sources/wasi${p}.c
-    COMMAND sed -i "s/extern void exit_exit/_Noreturn extern void exit_exit/" ${bottom_half}/headers/public/wasi/__generated_wasi${p}.h
-    COMMAND sed -i "s/extern void __wasm_import_exit_exit/_Noreturn extern void __wasm_import_exit_exit/" ${bottom_half}/sources/wasi${p}.c
+    COMMAND sed -i '' "'s_#include .wasi${p}\.h._#include \"wasi/wasi${p}.h\"_'" "${bottom_half}/sources/wasi${p}.c"
+    COMMAND sed -i '' "s/extern void exit_exit/_Noreturn extern void exit_exit/" "${bottom_half}/headers/public/wasi/__generated_wasi${p}.h"
+    COMMAND sed -i '' "s/extern void __wasm_import_exit_exit/_Noreturn extern void __wasm_import_exit_exit/" "${bottom_half}/sources/wasi${p}.c"
     DEPENDS bindings-${p}
   )
   add_dependencies(bindings bindings-${p}-edit)

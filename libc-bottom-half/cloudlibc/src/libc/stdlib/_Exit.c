@@ -7,14 +7,15 @@
 #include <stdnoreturn.h>
 #include <unistd.h>
 
-noreturn void _Exit(int status) {
+noreturn void _Exit(int status)
+{
 #if defined(__wasip1__)
   __wasi_proc_exit(status);
 #elif defined(__wasip2__) || defined(__wasip3__)
-  exit_result_void_void_t exit_status = { .is_err = status != 0 };
+  exit_result_void_void_t exit_status = {.is_err = status != 0};
   exit_exit(&exit_status);
 #else
-# error "Unknown WASI version"
+#error "Unknown WASI version"
 #endif
 }
 

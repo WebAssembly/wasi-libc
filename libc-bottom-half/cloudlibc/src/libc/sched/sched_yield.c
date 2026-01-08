@@ -5,15 +5,21 @@
 #include <wasi/api.h>
 #include <errno.h>
 #include <sched.h>
+#include <stdio.h>
 
-int sched_yield(void) {
-#ifdef __wasip1__
+int sched_yield(void)
+{
+#if defined(__wasip1__)
   __wasi_errno_t error = __wasi_sched_yield();
-  if (error != 0) {
+  if (error != 0)
+  {
     errno = error;
     return -1;
   }
-#endif
+#elif defined(__wasip3__)
+  wasip3_thread_yield();
   return 0;
+#else
+  return 0;
+#endif
 }
-

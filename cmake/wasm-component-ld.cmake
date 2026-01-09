@@ -14,6 +14,7 @@ if (NOT WASM_COMPONENT_LD_EXECUTABLE)
   )
   ExternalProject_Get_Property(wasm-component-ld SOURCE_DIR)
   set(WASM_COMPONENT_LD_EXECUTABLE "${SOURCE_DIR}/wasm-component-ld")
-  add_link_options(-fuse-ld=${WASM_COMPONENT_LD_EXECUTABLE})
   add_dependencies(sysroot_inc wasm-component-ld)
 endif()
+
+add_link_options(-fuse-ld=${WASM_COMPONENT_LD_EXECUTABLE})

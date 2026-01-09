@@ -24,7 +24,7 @@ if(NOT ENGINE OR ENGINE STREQUAL "")
   ba_download(
     wasmtime
     "https://github.com/bytecodealliance/wasmtime"
-    "v38.0.2"
+    "v40.0.0"
   )
   ExternalProject_Get_Property(wasmtime SOURCE_DIR)
   set(ENGINE "${SOURCE_DIR}/wasmtime")
@@ -98,8 +98,9 @@ endfunction()
 # * `ENV a=b b=c` - set env vars for when executing this test
 # * `NETWORK` - this test uses the network and sockets.
 # * `PASS_REGULAR_EXPRESSION` - a regex that must match the test output to pass
+# * `FAILP3` - this test fails on wasip3 targets
 function(register_test test_name executable_name)
-  set(options FS NETWORK)
+  set(options FS NETWORK FAILP3)
   set(oneValueArgs CLIENT PASS_REGULAR_EXPRESSION)
   set(multiValueArgs ARGV ENV LDFLAGS CFLAGS)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
@@ -117,7 +118,11 @@ function(register_test test_name executable_name)
     list(APPEND wasmtime_args --env ${env})
   endforeach()
   if (TARGET_TRIPLE MATCHES "-threads")
-    list(APPEND wasmtime_args --wasi threads)
+    list(APPEND wasmtime_args --wasi threads --wasm shared-memory)
+  endif()
+  if (WASI STREQUAL "p3")
+    list(APPEND wasmtime_args --wasm component-model-async)
+    list(APPEND wasmtime_args --wasi p3)
   endif()
 
   add_test(
@@ -148,6 +153,10 @@ function(register_test test_name executable_name)
     set_tests_properties(${test_name} PROPERTIES PASS_REGULAR_EXPRESSION "${arg_PASS_REGULAR_EXPRESSION}")
   endif()
   set_tests_properties(${test_name} PROPERTIES TIMEOUT 10)
+
+  if (arg_FAILP3 AND (WASI STREQUAL "p3"))
+    set_tests_properties(${test_name} PROPERTIES WILL_FAIL TRUE)
+  endif()
 
   add_dependencies(${test_name} engine)
 endfunction()
@@ -227,48 +236,48 @@ endfunction()
 # TODO: this test fails with `-Sthreads` in Wasmtime since that uses a different
 # implementation of WASI which causes this test to fail.
 if (NOT TARGET_TRIPLE MATCHES "-threads")
-  add_wasilibc_test(access.c FS)
+  add_wasilibc_test(access.c FS FAILP3)
 endif()
-add_wasilibc_test(append.c FS)
+add_wasilibc_test(append.c FS FAILP3)
 add_wasilibc_test(argv_two_args.c ARGV foo bar)
-add_wasilibc_test(clock_nanosleep.c)
-add_wasilibc_test(chdir.c FS)
-add_wasilibc_test(close.c FS)
+add_wasilibc_test(clock_nanosleep.c FAILP3)
+add_wasilibc_test(chdir.c FS FAILP3)
+add_wasilibc_test(close.c FS FAILP3)
 add_wasilibc_test(external_env.c ENV VAR1=foo VAR2=bar)
-add_wasilibc_test(fadvise.c FS)
-add_wasilibc_test(fallocate.c FS)
-add_wasilibc_test(fcntl.c FS)
-add_wasilibc_test(fdatasync.c FS)
-add_wasilibc_test(fdopen.c FS)
-add_wasilibc_test(feof.c FS)
-add_wasilibc_test(file_permissions.c FS)
-add_wasilibc_test(file_nonblocking.c FS)
-add_wasilibc_test(fseek.c FS)
-add_wasilibc_test(fstat.c FS)
-add_wasilibc_test(fsync.c FS)
-add_wasilibc_test(ftruncate.c FS)
-add_wasilibc_test(fts.c FS)
-add_wasilibc_test(fwscanf.c FS)
+add_wasilibc_test(fadvise.c FS FAILP3)
+add_wasilibc_test(fallocate.c FS FAILP3)
+add_wasilibc_test(fcntl.c FS FAILP3)
+add_wasilibc_test(fdatasync.c FS FAILP3)
+add_wasilibc_test(fdopen.c FS FAILP3)
+add_wasilibc_test(feof.c FS FAILP3)
+add_wasilibc_test(file_permissions.c FS FAILP3)
+add_wasilibc_test(file_nonblocking.c FS FAILP3)
+add_wasilibc_test(fseek.c FS FAILP3)
+add_wasilibc_test(fstat.c FS FAILP3)
+add_wasilibc_test(fsync.c FS FAILP3)
+add_wasilibc_test(ftruncate.c FS FAILP3)
+add_wasilibc_test(fts.c FS FAILP3)
+add_wasilibc_test(fwscanf.c FS FAILP3)
 add_wasilibc_test(getentropy.c)
-add_wasilibc_test(hello.c PASS_REGULAR_EXPRESSION "Hello, World!")
-add_wasilibc_test(ioctl.c FS)
-add_wasilibc_test(isatty.c FS)
-add_wasilibc_test(link.c FS)
-add_wasilibc_test(lseek.c FS)
+add_wasilibc_test(hello.c PASS_REGULAR_EXPRESSION "Hello, World!" FAILP3)
+add_wasilibc_test(ioctl.c FS FAILP3)
+add_wasilibc_test(isatty.c FS FAILP3)
+add_wasilibc_test(link.c FS FAILP3)
+add_wasilibc_test(lseek.c FS FAILP3)
 add_wasilibc_test(memchr.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680)
 add_wasilibc_test(memcmp.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680)
-add_wasilibc_test(opendir.c FS ARGV /)
-add_wasilibc_test(open_relative_path.c FS ARGV /)
-add_wasilibc_test(poll.c FS)
-add_wasilibc_test(preadvwritev.c FS)
-add_wasilibc_test(preadwrite.c FS)
-add_wasilibc_test(readlink.c FS)
-add_wasilibc_test(readv.c FS)
-add_wasilibc_test(rename.c FS)
-add_wasilibc_test(rmdir.c FS)
-add_wasilibc_test(scandir.c FS)
-add_wasilibc_test(stat.c FS)
-add_wasilibc_test(stdio.c FS)
+add_wasilibc_test(opendir.c FS FAILP3 ARGV /)
+add_wasilibc_test(open_relative_path.c FS FAILP3 ARGV /)
+add_wasilibc_test(poll.c FS FAILP3)
+add_wasilibc_test(preadvwritev.c FS FAILP3)
+add_wasilibc_test(preadwrite.c FS FAILP3)
+add_wasilibc_test(readlink.c FS FAILP3)
+add_wasilibc_test(readv.c FS FAILP3)
+add_wasilibc_test(rename.c FS FAILP3)
+add_wasilibc_test(rmdir.c FS FAILP3)
+add_wasilibc_test(scandir.c FS FAILP3)
+add_wasilibc_test(stat.c FS FAILP3)
+add_wasilibc_test(stdio.c FS FAILP3)
 add_wasilibc_test(strchrnul.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680)
 add_wasilibc_test(strlen.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680)
 add_wasilibc_test(strptime.c)
@@ -277,12 +286,12 @@ add_wasilibc_test(time_and_times.c
   CFLAGS -D_WASI_EMULATED_PROCESS_CLOCKS
   LDFLAGS -lwasi-emulated-process-clocks)
 add_wasilibc_test(time.c)
-add_wasilibc_test(utime.c FS)
-add_wasilibc_test(rewinddir.c FS)
-add_wasilibc_test(seekdir.c FS)
-add_wasilibc_test(usleep.c)
-add_wasilibc_test(nanosleep.c)
-add_wasilibc_test(write.c FS)
+add_wasilibc_test(utime.c FS FAILP3)
+add_wasilibc_test(rewinddir.c FS FAILP3)
+add_wasilibc_test(seekdir.c FS FAILP3)
+add_wasilibc_test(usleep.c FAILP3)
+add_wasilibc_test(nanosleep.c FAILP3)
+add_wasilibc_test(write.c FS FAILP3)
 
 if (TARGET_TRIPLE MATCHES "-threads")
   add_wasilibc_test(busywait.c)
@@ -293,12 +302,12 @@ endif()
 
 # ========= sockets-related tests ===============================
 
-if (TARGET_TRIPLE MATCHES "wasip2")
-  add_wasilibc_test(poll-nonblocking-socket.c NETWORK)
-  add_wasilibc_test(setsockopt.c NETWORK)
-  add_wasilibc_test(sockets-nonblocking-udp.c NETWORK)
-  add_wasilibc_test(sockets-nonblocking-multiple.c NETWORK)
-  add_wasilibc_test(sockets-nonblocking-udp-multiple.c NETWORK)
+if (NOT (WASI STREQUAL "p1"))
+  add_wasilibc_test(poll-nonblocking-socket.c NETWORK FAILP3)
+  add_wasilibc_test(setsockopt.c NETWORK FAILP3)
+  add_wasilibc_test(sockets-nonblocking-udp.c NETWORK FAILP3)
+  add_wasilibc_test(sockets-nonblocking-multiple.c NETWORK FAILP3)
+  add_wasilibc_test(sockets-nonblocking-udp-multiple.c NETWORK FAILP3)
 
   # TODO: flaky tests
   # add_wasilibc_test(sockets-nonblocking.c NETWORK)
@@ -330,7 +339,7 @@ if (TARGET_TRIPLE MATCHES "wasip2")
   add_sockets_test_executable(sockets-multiple-server.c)
 
   function(sockets_test test_name client server)
-    set(options)
+    set(options FAILP3)
     set(oneValueArgs NCLIENTS)
     set(multiValueArgs)
     cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
@@ -346,34 +355,48 @@ if (TARGET_TRIPLE MATCHES "wasip2")
           -P ${CMAKE_CURRENT_SOURCE_DIR}/socket-test.cmake
     )
     set_tests_properties(${test_name} PROPERTIES RESOURCE_LOCK socket-test)
+
+    if (arg_FAILP3 AND (WASI STREQUAL "p3"))
+      set_tests_properties(${test_name} PROPERTIES WILL_FAIL TRUE)
+    endif()
   endfunction()
 
-  sockets_test(sockets sockets-client.wasm sockets-server.wasm)
-  sockets_test(sockets-udp-blocking sockets-client-udp-blocking.wasm sockets-server-udp-blocking.wasm)
+  sockets_test(sockets sockets-client.wasm sockets-server.wasm FAILP3)
+  sockets_test(sockets-udp-blocking sockets-client-udp-blocking.wasm
+    sockets-server-udp-blocking.wasm FAILP3)
   sockets_test(sockets-multiple sockets-multiple-client.wasm sockets-multiple-server.wasm
-    NCLIENTS 10)
+    NCLIENTS 10 FAILP3)
 
   # Various forms of client hangups
   sockets_test(sockets-client-hangup-after-connect
-    sockets-client-hangup-after-connect.wasm sockets-server-handle-hangups.wasm)
+    sockets-client-hangup-after-connect.wasm sockets-server-handle-hangups.wasm
+    FAILP3)
   sockets_test(sockets-client-hangup-while-sending
-    sockets-client-hangup-while-sending.wasm sockets-server-handle-hangups.wasm)
+    sockets-client-hangup-while-sending.wasm sockets-server-handle-hangups.wasm
+    FAILP3)
   sockets_test(sockets-client-hangup-after-sending
-    sockets-client-hangup-after-sending.wasm sockets-server-handle-hangups.wasm)
+    sockets-client-hangup-after-sending.wasm sockets-server-handle-hangups.wasm
+    FAILP3)
   sockets_test(sockets-client-hangup-while-receiving
-    sockets-client-hangup-while-receiving.wasm sockets-server-handle-hangups.wasm)
+    sockets-client-hangup-while-receiving.wasm sockets-server-handle-hangups.wasm
+    FAILP3)
 
   # Various forms of server hangups, including when there's no server at all
   sockets_test(sockets-server-hangup-before-send
-    sockets-client-handle-hangups.wasm sockets-server-hangup-before-send.wasm)
+    sockets-client-handle-hangups.wasm sockets-server-hangup-before-send.wasm
+    FAILP3)
   sockets_test(sockets-server-hangup-during-send
-    sockets-client-handle-hangups.wasm sockets-server-hangup-during-send.wasm)
+    sockets-client-handle-hangups.wasm sockets-server-hangup-during-send.wasm
+    FAILP3)
   sockets_test(sockets-server-hangup-before-recv
-    sockets-client-handle-hangups.wasm sockets-server-hangup-before-recv.wasm)
+    sockets-client-handle-hangups.wasm sockets-server-hangup-before-recv.wasm
+    FAILP3)
   sockets_test(sockets-server-hangup-during-recv
-    sockets-client-handle-hangups.wasm sockets-server-hangup-during-recv.wasm)
+    sockets-client-handle-hangups.wasm sockets-server-hangup-during-recv.wasm
+    FAILP3)
   sockets_test(sockets-client-handle-hangups
-    sockets-client-handle-hangups.wasm hello.wasm)
+    sockets-client-handle-hangups.wasm hello.wasm
+    FAILP3)
 endif()
 
 # Flag some tests as failing in V8

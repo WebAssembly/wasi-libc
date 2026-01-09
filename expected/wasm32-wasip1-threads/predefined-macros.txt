@@ -3093,6 +3093,8 @@
 #define __WASI_SDFLAGS_WR ((__wasi_sdflags_t)(1 << 1))
 #define __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME ((__wasi_subclockflags_t)(1 << 0))
 #define __WASI_VERSION_H 
+#define __WASI_WASIP2_H 
+#define __WASI_WASIP3_H 
 #define __WASI_WHENCE_CUR (UINT8_C(1))
 #define __WASI_WHENCE_END (UINT8_C(2))
 #define __WASI_WHENCE_SET (UINT8_C(0))

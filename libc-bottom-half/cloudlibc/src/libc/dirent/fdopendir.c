@@ -76,6 +76,11 @@ DIR *fdopendir(int fd) {
   dirp->dirent = NULL;
   dirp->dirent_size = 1;
   return dirp;
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  free(dirp);
+  return NULL;
 #else
 # error "Unsupported WASI version"
 #endif

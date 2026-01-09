@@ -2,10 +2,44 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <wasi/sockets_utils.h>
 
-static network_own_network_t global_network;
+// For now favor the naming of wasip3 which uses the "sockets" namespace
+// instead of the "network" namespace. The definitions of these types in WIT,
+// however, is the same so all that's needed is some renaming here.
+#ifdef __wasip2__
+#define SOCKETS_ERROR_CODE_ACCESS_DENIED NETWORK_ERROR_CODE_ACCESS_DENIED
+#define SOCKETS_ERROR_CODE_NOT_SUPPORTED NETWORK_ERROR_CODE_NOT_SUPPORTED
+#define SOCKETS_ERROR_CODE_INVALID_ARGUMENT NETWORK_ERROR_CODE_INVALID_ARGUMENT
+#define SOCKETS_ERROR_CODE_OUT_OF_MEMORY NETWORK_ERROR_CODE_OUT_OF_MEMORY
+#define SOCKETS_ERROR_CODE_TIMEOUT NETWORK_ERROR_CODE_TIMEOUT
+#define SOCKETS_ERROR_CODE_ADDRESS_NOT_BINDABLE                                \
+  NETWORK_ERROR_CODE_ADDRESS_NOT_BINDABLE
+#define SOCKETS_ERROR_CODE_ADDRESS_IN_USE NETWORK_ERROR_CODE_ADDRESS_IN_USE
+#define SOCKETS_ERROR_CODE_REMOTE_UNREACHABLE                                  \
+  NETWORK_ERROR_CODE_REMOTE_UNREACHABLE
+#define SOCKETS_ERROR_CODE_CONNECTION_REFUSED                                  \
+  NETWORK_ERROR_CODE_CONNECTION_REFUSED
+#define SOCKETS_ERROR_CODE_CONNECTION_RESET NETWORK_ERROR_CODE_CONNECTION_RESET
+#define SOCKETS_ERROR_CODE_CONNECTION_ABORTED                                  \
+  NETWORK_ERROR_CODE_CONNECTION_ABORTED
+#define SOCKETS_ERROR_CODE_DATAGRAM_TOO_LARGE                                  \
+  NETWORK_ERROR_CODE_DATAGRAM_TOO_LARGE
+#define SOCKETS_ERROR_CODE_INVALID_STATE NETWORK_ERROR_CODE_INVALID_STATE
+#define SOCKETS_ERROR_CODE_UNKNOWN NETWORK_ERROR_CODE_UNKNOWN
+
+#define SOCKETS_IP_ADDRESS_FAMILY_IPV4 NETWORK_IP_ADDRESS_FAMILY_IPV4
+#define SOCKETS_IP_ADDRESS_FAMILY_IPV6 NETWORK_IP_ADDRESS_FAMILY_IPV6
+#define SOCKETS_IP_SOCKET_ADDRESS_IPV4 NETWORK_IP_SOCKET_ADDRESS_IPV4
+#define SOCKETS_IP_SOCKET_ADDRESS_IPV6 NETWORK_IP_SOCKET_ADDRESS_IPV6
+
+typedef network_ipv4_socket_address_t sockets_ipv4_socket_address_t;
+typedef network_ipv4_address_t sockets_ipv4_address_t;
+typedef network_ipv6_socket_address_t sockets_ipv6_socket_address_t;
+typedef network_ipv6_address_t sockets_ipv6_address_t;
+typedef network_ip_socket_address_t sockets_ip_socket_address_t;
+#endif
+
 static bool global_network_initialized = false;
 static const service_entry_t global_services[] = {
     {"domain", 53, SERVICE_PROTOCOL_TCP | SERVICE_PROTOCOL_UDP},
@@ -29,6 +63,9 @@ static const service_entry_t global_services[] = {
 };
 weak_alias(global_services, __wasi_sockets_services_db);
 
+#ifdef __wasip2__
+static network_own_network_t global_network;
+
 network_borrow_network_t __wasi_sockets_utils__borrow_network() {
   if (!global_network_initialized) {
     global_network = instance_network_instance_network();
@@ -37,69 +74,76 @@ network_borrow_network_t __wasi_sockets_utils__borrow_network() {
 
   return network_borrow_network(global_network);
 }
+#endif
 
-int __wasi_sockets_utils__map_error(network_error_code_t wasi_error) {
+int __wasi_sockets_utils__map_error(sockets_error_code_t wasi_error) {
   switch (wasi_error) {
-  case NETWORK_ERROR_CODE_ACCESS_DENIED:
+  case SOCKETS_ERROR_CODE_ACCESS_DENIED:
     return EACCES;
-  case NETWORK_ERROR_CODE_NOT_SUPPORTED:
+  case SOCKETS_ERROR_CODE_NOT_SUPPORTED:
     return EOPNOTSUPP;
-  case NETWORK_ERROR_CODE_INVALID_ARGUMENT:
+  case SOCKETS_ERROR_CODE_INVALID_ARGUMENT:
     return EINVAL;
-  case NETWORK_ERROR_CODE_OUT_OF_MEMORY:
+  case SOCKETS_ERROR_CODE_OUT_OF_MEMORY:
     return ENOMEM;
-  case NETWORK_ERROR_CODE_TIMEOUT:
+  case SOCKETS_ERROR_CODE_TIMEOUT:
     return ETIMEDOUT;
+#ifdef __wasip2__
   case NETWORK_ERROR_CODE_CONCURRENCY_CONFLICT:
     return EALREADY;
   case NETWORK_ERROR_CODE_WOULD_BLOCK:
     return EWOULDBLOCK;
   case NETWORK_ERROR_CODE_NEW_SOCKET_LIMIT:
     return EMFILE;
-  case NETWORK_ERROR_CODE_ADDRESS_NOT_BINDABLE:
+#endif
+  case SOCKETS_ERROR_CODE_ADDRESS_NOT_BINDABLE:
     return EADDRNOTAVAIL;
-  case NETWORK_ERROR_CODE_ADDRESS_IN_USE:
+  case SOCKETS_ERROR_CODE_ADDRESS_IN_USE:
     return EADDRINUSE;
-  case NETWORK_ERROR_CODE_REMOTE_UNREACHABLE:
+  case SOCKETS_ERROR_CODE_REMOTE_UNREACHABLE:
     return EHOSTUNREACH;
-  case NETWORK_ERROR_CODE_CONNECTION_REFUSED:
+  case SOCKETS_ERROR_CODE_CONNECTION_REFUSED:
     return ECONNREFUSED;
-  case NETWORK_ERROR_CODE_CONNECTION_RESET:
+  case SOCKETS_ERROR_CODE_CONNECTION_RESET:
     return ECONNRESET;
-  case NETWORK_ERROR_CODE_CONNECTION_ABORTED:
+  case SOCKETS_ERROR_CODE_CONNECTION_ABORTED:
     return ECONNABORTED;
-  case NETWORK_ERROR_CODE_DATAGRAM_TOO_LARGE:
+  case SOCKETS_ERROR_CODE_DATAGRAM_TOO_LARGE:
     return EMSGSIZE;
 
-  case NETWORK_ERROR_CODE_INVALID_STATE:
+  case SOCKETS_ERROR_CODE_INVALID_STATE:
+#ifdef __wasip2__
   case NETWORK_ERROR_CODE_NOT_IN_PROGRESS:
+#endif
     abort(); // If our internal state checks are working right, these errors
              // should never show up.
     break;
 
+#ifdef __wasip2__
   case NETWORK_ERROR_CODE_NAME_UNRESOLVABLE:
   case NETWORK_ERROR_CODE_TEMPORARY_RESOLVER_FAILURE:
   case NETWORK_ERROR_CODE_PERMANENT_RESOLVER_FAILURE:
     abort(); // These errors are specific to getaddrinfo, which should have
              // filtered these errors out before calling this generic method
     break;
+#endif
 
-  case NETWORK_ERROR_CODE_UNKNOWN:
+  case SOCKETS_ERROR_CODE_UNKNOWN:
   default:
     return EOPNOTSUPP;
   }
 }
 
 bool __wasi_sockets_utils__parse_address(
-    network_ip_address_family_t expected_family, const struct sockaddr *address,
-    socklen_t len, network_ip_socket_address_t *result, int *error) {
+    sockets_ip_address_family_t expected_family, const struct sockaddr *address,
+    socklen_t len, sockets_ip_socket_address_t *result, int *error) {
   if (address == NULL || len < sizeof(struct sockaddr)) {
     *error = EINVAL;
     return false;
   }
 
   switch (expected_family) {
-  case NETWORK_IP_ADDRESS_FAMILY_IPV4: {
+  case SOCKETS_IP_ADDRESS_FAMILY_IPV4: {
     if (address->sa_family != AF_INET) {
       *error = EAFNOSUPPORT;
       return false;
@@ -113,8 +157,8 @@ bool __wasi_sockets_utils__parse_address(
     struct sockaddr_in *ipv4 = (struct sockaddr_in *)address;
     unsigned ip = ipv4->sin_addr.s_addr;
     unsigned short port = ipv4->sin_port;
-    *result = (network_ip_socket_address_t){
-        .tag = NETWORK_IP_SOCKET_ADDRESS_IPV4,
+    *result = (sockets_ip_socket_address_t){
+        .tag = SOCKETS_IP_SOCKET_ADDRESS_IPV4,
         .val = {.ipv4 =
                     {
                         .port = ntohs(port), // (port << 8) | (port >> 8),
@@ -124,7 +168,7 @@ bool __wasi_sockets_utils__parse_address(
     };
     return true;
   }
-  case NETWORK_IP_ADDRESS_FAMILY_IPV6: {
+  case SOCKETS_IP_ADDRESS_FAMILY_IPV6: {
     if (address->sa_family != AF_INET6) {
       *error = EAFNOSUPPORT;
       return false;
@@ -138,8 +182,8 @@ bool __wasi_sockets_utils__parse_address(
     struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)address;
     unsigned char *ip = (unsigned char *)&(ipv6->sin6_addr.s6_addr);
     unsigned short port = ipv6->sin6_port;
-    *result = (network_ip_socket_address_t){
-        .tag = NETWORK_IP_SOCKET_ADDRESS_IPV6,
+    *result = (sockets_ip_socket_address_t){
+        .tag = SOCKETS_IP_SOCKET_ADDRESS_IPV6,
         .val = {.ipv6 = {
                     .port = ntohs(port),
                     .address =
@@ -165,7 +209,7 @@ bool __wasi_sockets_utils__parse_address(
 }
 
 bool __wasi_sockets_utils__output_addr_validate(
-    network_ip_address_family_t expected_family, struct sockaddr *addr,
+    sockets_ip_address_family_t expected_family, struct sockaddr *addr,
     socklen_t *addrlen, output_sockaddr_t *result) {
   // The address parameters must be either both null or both _not_ null.
 
@@ -174,7 +218,7 @@ bool __wasi_sockets_utils__output_addr_validate(
     return true;
 
   } else if (addr != NULL && addrlen != NULL) {
-    if (expected_family == NETWORK_IP_ADDRESS_FAMILY_IPV4) {
+    if (expected_family == SOCKETS_IP_ADDRESS_FAMILY_IPV4) {
       if (*addrlen < sizeof(struct sockaddr_in)) {
         return false;
       }
@@ -186,7 +230,7 @@ bool __wasi_sockets_utils__output_addr_validate(
                                     }};
       return true;
 
-    } else if (expected_family == NETWORK_IP_ADDRESS_FAMILY_IPV6) {
+    } else if (expected_family == SOCKETS_IP_ADDRESS_FAMILY_IPV6) {
       if (*addrlen < sizeof(struct sockaddr_in6)) {
         return false;
       }
@@ -208,15 +252,15 @@ bool __wasi_sockets_utils__output_addr_validate(
 }
 
 void __wasi_sockets_utils__output_addr_write(
-    const network_ip_socket_address_t input, output_sockaddr_t *output) {
+    const sockets_ip_socket_address_t input, output_sockaddr_t *output) {
   switch (input.tag) {
-  case NETWORK_IP_SOCKET_ADDRESS_IPV4: {
+  case SOCKETS_IP_SOCKET_ADDRESS_IPV4: {
     if (output->tag != OUTPUT_SOCKADDR_V4) {
       abort();
     }
 
-    network_ipv4_socket_address_t input_v4 = input.val.ipv4;
-    network_ipv4_address_t ip = input_v4.address;
+    sockets_ipv4_socket_address_t input_v4 = input.val.ipv4;
+    sockets_ipv4_address_t ip = input_v4.address;
 
     *output->v4.addrlen = sizeof(struct sockaddr_in);
     *output->v4.addr = (struct sockaddr_in){
@@ -227,13 +271,13 @@ void __wasi_sockets_utils__output_addr_write(
     };
     return;
   }
-  case NETWORK_IP_SOCKET_ADDRESS_IPV6: {
+  case SOCKETS_IP_SOCKET_ADDRESS_IPV6: {
     if (output->tag != OUTPUT_SOCKADDR_V6) {
       abort();
     }
 
-    network_ipv6_socket_address_t input_v6 = input.val.ipv6;
-    network_ipv6_address_t ip = input_v6.address;
+    sockets_ipv6_socket_address_t input_v6 = input.val.ipv6;
+    sockets_ipv6_address_t ip = input_v6.address;
 
     *output->v6.addrlen = sizeof(struct sockaddr_in6);
     *output->v6.addr = (struct sockaddr_in6){
@@ -270,29 +314,29 @@ void __wasi_sockets_utils__output_addr_write(
 }
 
 int __wasi_sockets_utils__posix_family(
-    network_ip_address_family_t wasi_family) {
+    sockets_ip_address_family_t wasi_family) {
   switch (wasi_family) {
-  case NETWORK_IP_ADDRESS_FAMILY_IPV4:
+  case SOCKETS_IP_ADDRESS_FAMILY_IPV4:
     return AF_INET;
-  case NETWORK_IP_ADDRESS_FAMILY_IPV6:
+  case SOCKETS_IP_ADDRESS_FAMILY_IPV6:
     return AF_INET6;
   default: /* unreachable */
     abort();
   }
 }
 
-network_ip_socket_address_t
-__wasi_sockets_utils__any_addr(network_ip_address_family_t family) {
+sockets_ip_socket_address_t
+__wasi_sockets_utils__any_addr(sockets_ip_address_family_t family) {
   switch (family) {
-  case NETWORK_IP_ADDRESS_FAMILY_IPV4:
-    return (network_ip_socket_address_t){.tag = NETWORK_IP_SOCKET_ADDRESS_IPV4,
+  case SOCKETS_IP_ADDRESS_FAMILY_IPV4:
+    return (sockets_ip_socket_address_t){.tag = SOCKETS_IP_SOCKET_ADDRESS_IPV4,
                                          .val = {.ipv4 = {
                                                      .port = 0,
                                                      .address = {0, 0, 0, 0},
                                                  }}};
-  case NETWORK_IP_ADDRESS_FAMILY_IPV6:
-    return (network_ip_socket_address_t){
-        .tag = NETWORK_IP_SOCKET_ADDRESS_IPV6,
+  case SOCKETS_IP_ADDRESS_FAMILY_IPV6:
+    return (sockets_ip_socket_address_t){
+        .tag = SOCKETS_IP_SOCKET_ADDRESS_IPV6,
         .val = {.ipv6 = {
                     .port = 0,
                     .address = {0, 0, 0, 0, 0, 0, 0, 0},

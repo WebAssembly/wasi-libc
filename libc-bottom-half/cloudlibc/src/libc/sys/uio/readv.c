@@ -41,7 +41,7 @@ ssize_t readv(int fildes, const struct iovec *iov, int iovcnt) {
     return -1;
   }
   return bytes_read;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Skip empty iovecs and then delegate to `read` with the first non-empty
   // iovec.
   while (iovcnt) {

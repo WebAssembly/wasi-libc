@@ -31,6 +31,10 @@ int clock_getres(clockid_t clock_id, struct timespec *res) {
         return -1;
     }
   }
+#elif defined(__wasip3__)
+  // TODO(wasip3)
+  errno = ENOTSUP;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

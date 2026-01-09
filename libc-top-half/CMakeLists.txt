@@ -383,7 +383,7 @@ list(REMOVE_ITEM globbed_sources
 
 list(APPEND top_half_sources ${globbed_sources})
 
-if (WASI STREQUAL "p2")
+if (NOT (WASI STREQUAL "p1"))
   list(APPEND top_half_sources
     musl/src/network/gai_strerror.c
   )

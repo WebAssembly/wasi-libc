@@ -26,7 +26,7 @@ ssize_t preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
     errno = error;
     return -1;
   }
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Skip empty iovecs and then delegate to `pread` with the first non-empty
   // iovec.
   while (iovcnt) {

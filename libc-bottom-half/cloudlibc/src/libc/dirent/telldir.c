@@ -8,7 +8,7 @@
 long telldir(DIR *dirp) {
 #if defined(__wasip1__)
   return dirp->cookie;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   return dirp->offset + dirp->skip;
 #else
 # error "Unsupported WASI version"

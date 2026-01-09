@@ -1,6 +1,9 @@
 #if defined(_REENTRANT)
 #include <stdatomic.h>
 #endif
+
+#include <wasi/api.h>
+
 extern void __wasi_init_tp(void);
 extern void __wasm_call_ctors(void);
 

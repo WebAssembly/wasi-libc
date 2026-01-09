@@ -188,7 +188,7 @@ foreach(file crt/crt1.c
 
   # create a custom target for each file
   add_library(${filename}.o OBJECT ${file})
-  target_link_libraries(${filename}.o PUBLIC musl-top-half-interface)
+  target_link_libraries(${filename}.o PRIVATE musl-top-half-interface)
   set_pic(${filename}.o)
   target_compile_options(${filename}.o PRIVATE -fvisibility=default)
 

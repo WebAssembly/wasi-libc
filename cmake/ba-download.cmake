@@ -27,13 +27,14 @@ function(ba_download target repo version)
 
   if (target STREQUAL wasmtime)
     set(fmt tar.xz)
-  elseif ((target STREQUAL wasm-component-ld) AND (os STREQUAL windows))
+  elseif ((os STREQUAL windows) AND
+      ((target STREQUAL wasm-component-ld) OR (target STREQUAL wasm-tools)))
     set(fmt zip)
   else()
     set(fmt tar.gz)
   endif()
 
-  if (target STREQUAL wit-bindgen)
+  if (target STREQUAL wit-bindgen OR target STREQUAL wasm-tools)
     set(tag v${version})
   else()
     set(tag ${version})

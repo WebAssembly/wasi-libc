@@ -216,6 +216,21 @@ elseif (WASI STREQUAL "p2")
   # wasip2: crt1-command.o is modified from what CMake produces to
   # additionally have a custom section representing the type information needed
   # for its contained export. This is the `wasi:cli/run` interface, for example.
+  #
+  # TODO: ideally this wouldn't need `wasm-tools` as that's an extra build tool
+  # needed here and it's best to slim down dependencies as much as possible.
+  # This additionally requires downloading/vendoring WITs which isn't great.
+  # Ideally the type information embedded here would be referenced dierctly in
+  # `crt1-command.c` itself in the source. That would likely require some
+  # combination of `__asm__` and `#embed` but I at least couldn't figure out how
+  # to get that working. I'm also not aware of a way to, in Clang, define a
+  # global in C that goes into a custom section in the output object. Another
+  # possible route would be to use the `--relocatable` option of `wasm-ld,` but
+  # it looks like that loses `__attribute__((export_name("...")))` information
+  # which this object file relies on. As a workaround `wasm-tools` is used for
+  # now. If you, dear reader, know of how to do this in the C source itself
+  # please feel free to open an issue or a PR and maintainers can work with you
+  # on getting that integrated.
   add_custom_command(
     OUTPUT ${SYSROOT_LIB}/crt1-command.o
     COMMAND

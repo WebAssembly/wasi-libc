@@ -2206,6 +2206,7 @@
 #define UTIME_NOW (-1)
 #define UTIME_OMIT (-2)
 #define WASIP3_CALLBACK_CODE_EXIT 0
+#define WASIP3_CALLBACK_CODE_POLL(set) (3 | (set << 4))
 #define WASIP3_CALLBACK_CODE_WAIT(set) (2 | (set << 4))
 #define WASIP3_CALLBACK_CODE_YIELD 1
 #define WASIP3_SUBTASK_HANDLE(status) ((wasip3_subtask_t) ((status) >> 4))

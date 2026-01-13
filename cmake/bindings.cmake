@@ -107,6 +107,7 @@ add_custom_target(
   bindings-p3
   COMMAND
     ${wit_bindgen} c
+      --generate-threading-helpers
       --autodrop-borrows yes
       --rename-world wasip3
       --type-section-suffix __wasi_libc

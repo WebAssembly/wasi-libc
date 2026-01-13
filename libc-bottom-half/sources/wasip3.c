@@ -1142,6 +1142,91 @@ void wasip3_thread_yield(void) {
 }
 
 
+__attribute__((__import_module__("$root"), __import_name__("[context-get-1]")))
+extern void* __context_get_1(void);
+
+void* wasip3_context_get_1(void) {
+  return __context_get_1();
+}
+
+__attribute__((__import_module__("$root"), __import_name__("[context-set-1]")))
+extern void __context_set_1(void*);
+
+void wasip3_context_set_1(void* value) {
+  __context_set_1(value);
+}
+
+__attribute__((__import_module__("$root"), __import_name__("[cancellable][thread-yield]")))
+extern uint32_t __thread_yield_cancellable(void);
+
+uint32_t wasip3_thread_yield_cancellable(void) {
+  return __thread_yield_cancellable();
+}
+
+__attribute__((__import_module__("$root"), __import_name__("[thread-index]")))
+extern uint32_t __thread_index(void);
+
+uint32_t wasip3_thread_index(void) {
+  return __thread_index();
+}
+
+__attribute__((__import_module__("$root"), __import_name__("[thread-new-indirect-v0]")))
+extern uint32_t __thread_new_indirect(uint32_t, void*);
+
+uint32_t wasip3_thread_new_indirect(void (*start_function)(void*), void* arg) {
+  return __thread_new_indirect((uint32_t)(uintptr_t)start_function, arg
+  );
+}
+
+__attribute__((__import_module__("$root"), __import_name__("[thread-switch-to]")))
+extern uint32_t __thread_switch_to(uint32_t);
+
+void wasip3_thread_switch_to(uint32_t thread) {
+  __thread_switch_to(thread);
+}
+
+__attribute__((__import_module__("$root"), __import_name__("[cancellable][thread-switch-to]")))
+extern uint32_t __thread_switch_to_cancellable(uint32_t);
+
+uint32_t wasip3_thread_switch_to_cancellable(uint32_t thread) {
+  return __thread_switch_to_cancellable(thread);
+}
+
+__attribute__((__import_module__("$root"), __import_name__("[thread-resume-later]")))
+extern void __thread_resume_later(uint32_t);
+
+void wasip3_thread_resume_later(uint32_t thread) {
+  __thread_resume_later(thread);
+}
+
+__attribute__((__import_module__("$root"), __import_name__("[thread-yield-to]")))
+extern uint32_t __thread_yield_to(uint32_t);
+
+void wasip3_thread_yield_to(uint32_t thread) {
+  __thread_yield_to(thread);
+}
+
+__attribute__((__import_module__("$root"), __import_name__("[cancellable][thread-yield-to]")))
+extern uint32_t __thread_yield_to_cancellable(uint32_t);
+
+uint32_t wasip3_thread_yield_to_cancellable(uint32_t thread) {
+  return __thread_yield_to_cancellable(thread);
+}
+
+__attribute__((__import_module__("$root"), __import_name__("[thread-suspend]")))
+extern uint32_t __thread_suspend(void);
+
+void wasip3_thread_suspend(void) {
+  __thread_suspend();
+}
+
+__attribute__((__import_module__("$root"), __import_name__("[cancellable][thread-suspend]")))
+extern uint32_t __thread_suspend_cancellable(void);
+uint32_t wasip3_thread_suspend_cancellable(void) {
+  return __thread_suspend_cancellable();
+}
+
+
 
 // Component Adapters
 

@@ -80,6 +80,20 @@ void wasip3_context_set_0(void* value);
 void wasip3_thread_yield(void);
 
 
+void* wasip3_context_get_1(void);
+void wasip3_context_set_1(void* value);
+uint32_t wasip3_thread_yield_cancellable(void);
+uint32_t wasip3_thread_index(void);
+uint32_t wasip3_thread_new_indirect(void (*start_function)(void*), void* arg);
+void wasip3_thread_switch_to(uint32_t thread);
+uint32_t wasip3_thread_switch_to_cancellable(uint32_t thread);
+void wasip3_thread_resume_later(uint32_t thread);
+void wasip3_thread_yield_to(uint32_t thread);
+uint32_t wasip3_thread_yield_to_cancellable(uint32_t thread);
+void wasip3_thread_suspend(void);
+uint32_t wasip3_thread_suspend_cancellable(void);
+
+
 
 typedef struct {
   wasip3_string_t f0;

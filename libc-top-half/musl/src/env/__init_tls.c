@@ -221,7 +221,7 @@ static void static_init_tls(size_t *aux)
 	size_t base = 0;
 	void *mem;
 
-	for (p=(void *)aux[AT_PHDR], n=aux[AT_PHNUM]; n; n--, p+=aux[AT_PHENT]) {
+	for (p=(void *)aux[AT_PHDR],n=aux[AT_PHNUM]; n; n--,p+=aux[AT_PHENT]) {
 		phdr = (void *)p;
 		if (phdr->p_type == PT_PHDR)
 			base = aux[AT_PHDR] - phdr->p_vaddr;
@@ -246,11 +246,11 @@ static void static_init_tls(size_t *aux)
 	}
 
 	main_tls.size += (-main_tls.size - (uintptr_t)main_tls.image)
-        & (main_tls.align-1);
+		& (main_tls.align-1);
 #ifdef TLS_ABOVE_TP
 	main_tls.offset = GAP_ABOVE_TP;
 	main_tls.offset += (-GAP_ABOVE_TP + (uintptr_t)main_tls.image)
-        & (main_tls.align-1);
+		& (main_tls.align-1);
 #else
 	main_tls.offset = main_tls.size;
 #endif

@@ -68,8 +68,7 @@ static inline struct stack_bounds get_stack_bounds()
 	if (&__stack_high) {
 		bounds.base = &__stack_high;
 		bounds.size = &__stack_high - &__stack_low;
-	}
-	else {
+	} else {
 		/* For non-pic, make a guess using the knowledge about
 		 * how wasm-ld lays out things. For pic, just give up.
 		 */
@@ -78,8 +77,7 @@ static inline struct stack_bounds get_stack_bounds()
 		if (sp > &__global_base) {
 			bounds.base = &__heap_base;
 			bounds.size = &__heap_base - &__data_end;
-		}
-		else {
+		} else {
 			bounds.base = &__global_base;
 			bounds.size = (size_t)&__global_base;
 		}
@@ -97,7 +95,8 @@ void __wasi_init_tp() {
 }
 #endif
 
-int __init_tp(void *p) {
+int __init_tp(void *p) 
+{
 	pthread_t td = p;
 	td->self = td;
 #ifdef __wasilibc_unmodified_upstream
@@ -109,7 +108,7 @@ int __init_tp(void *p) {
 #else
 	struct stack_bounds bounds = get_stack_bounds();
 	__default_stacksize =
-		bounds.size < DEFAULT_STACK_MAX ? 
+		bounds.size < DEFAULT_STACK_MAX ?
 		bounds.size : DEFAULT_STACK_MAX;
 	td->stack = bounds.base;
 	td->stack_size = bounds.size;
@@ -170,7 +169,7 @@ void *__copy_tls(unsigned char *mem)
 	td = (pthread_t)mem;
 	mem += sizeof(struct pthread);
 
-	for (i = 1, p = libc.tls_head; p; i++, p = p->next) {
+	for (i=1, p=libc.tls_head; p; i++, p=p->next) {
 		dtv[i] = (uintptr_t)(mem + p->offset) + DTP_OFFSET;
 		memcpy(mem + p->offset, p->image, p->len);
 	}
@@ -181,7 +180,7 @@ void *__copy_tls(unsigned char *mem)
 	mem -= (uintptr_t)mem & (libc.tls_align-1);
 	td = (pthread_t)mem;
 
-	for (i = 1, p = libc.tls_head; p; i++, p = p->next) {
+	for (i=1, p=libc.tls_head; p; i++, p=p->next) {
 		dtv[i] = (uintptr_t)(mem - p->offset) + DTP_OFFSET;
 		memcpy(mem - p->offset, p->image, p->len);
 	}
@@ -222,8 +221,7 @@ static void static_init_tls(size_t *aux)
 	size_t base = 0;
 	void *mem;
 
-	for (p = (void *)aux[AT_PHDR], n = aux[AT_PHNUM]; n; n--, p += aux[AT_PHENT])
-	{
+	for (p = (void *)aux[AT_PHDR], n = aux[AT_PHNUM]; n; n--, p += aux[AT_PHENT]) {
 		phdr = (void *)p;
 		if (phdr->p_type == PT_PHDR)
 			base = aux[AT_PHDR] - phdr->p_vaddr;
@@ -234,7 +232,7 @@ static void static_init_tls(size_t *aux)
 		if (phdr->p_type == PT_GNU_STACK &&
 		    phdr->p_memsz > __default_stacksize)
 			__default_stacksize =
-				phdr->p_memsz < DEFAULT_STACK_MAX ? 
+				phdr->p_memsz < DEFAULT_STACK_MAX ?
 				phdr->p_memsz : DEFAULT_STACK_MAX;
 	}
 
@@ -247,39 +245,37 @@ static void static_init_tls(size_t *aux)
 		libc.tls_head = &main_tls;
 	}
 
-	main_tls.size += (-main_tls.size - (uintptr_t)main_tls.image) & (main_tls.align - 1);
+	main_tls.size += (-main_tls.size - (uintptr_t)main_tls.image)
+        & (main_tls.align - 1);
 #ifdef TLS_ABOVE_TP
 	main_tls.offset = GAP_ABOVE_TP;
-	main_tls.offset += (-GAP_ABOVE_TP + (uintptr_t)main_tls.image) & (main_tls.align - 1);
+	main_tls.offset += (-GAP_ABOVE_TP + (uintptr_t)main_tls.image)
+        & (main_tls.align - 1);
 #else
 	main_tls.offset = main_tls.size;
 #endif
-	if (main_tls.align < MIN_TLS_ALIGN)
-		main_tls.align = MIN_TLS_ALIGN;
+	if (main_tls.align < MIN_TLS_ALIGN) main_tls.align = MIN_TLS_ALIGN;
 
 	libc.tls_align = main_tls.align;
-	libc.tls_size = 2 * sizeof(void *) + sizeof(struct pthread)
+	libc.tls_size = 2*sizeof(void *) + sizeof(struct pthread)
 #ifdef TLS_ABOVE_TP
-						+ main_tls.offset
+		+ main_tls.offset
 #endif
-						+ main_tls.size + main_tls.align + MIN_TLS_ALIGN - 1 &
-					-MIN_TLS_ALIGN;
+		+ main_tls.size + main_tls.align
+		+ MIN_TLS_ALIGN - 1 & -MIN_TLS_ALIGN;
 
-	if (libc.tls_size > sizeof builtin_tls)
-	{
+	if (libc.tls_size > sizeof builtin_tls) {
 #ifndef SYS_mmap2
 #define SYS_mmap2 SYS_mmap
 #endif
 		mem = (void *)__syscall(
 			SYS_mmap2,
-			0, libc.tls_size, PROT_READ | PROT_WRITE,
-			MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+			0, libc.tls_size, PROT_READ|PROT_WRITE,
+			MAP_ANONYMOUS|MAP_PRIVATE, -1, 0);
 		/* -4095...-1 cast to void * will crash on dereference anyway,
 		 * so don't bloat the init code checking for error codes and
 		 * explicitly calling a_crash(). */
-	}
-	else
-	{
+	} else {
 		mem = builtin_tls;
 	}
 

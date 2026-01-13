@@ -26,7 +26,7 @@ if (NOT WIT_BINDGEN_EXECUTABLE)
   ba_download(
     wit-bindgen
     "https://github.com/bytecodealliance/wit-bindgen"
-    "0.48.0"
+    "0.50.0"
   )
   ExternalProject_Get_Property(wit-bindgen SOURCE_DIR)
   set(wit_bindgen "${SOURCE_DIR}/wit-bindgen")
@@ -142,9 +142,9 @@ add_custom_target(bindings DEPENDS bindings-p2 bindings-p3)
 function(wit_bindgen_edit p)
   add_custom_target(
     bindings-${p}-edit
-    COMMAND sed -i "" "'s_#include .wasi${p}\.h._#include \"wasi/wasi${p}.h\"_'" ${bottom_half}/sources/wasi${p}.c
-    COMMAND sed -i "" "s/extern void exit_exit/_Noreturn extern void exit_exit/" ${bottom_half}/headers/public/wasi/__generated_wasi${p}.h
-    COMMAND sed -i "" "s/extern void __wasm_import_exit_exit/_Noreturn extern void __wasm_import_exit_exit/" ${bottom_half}/sources/wasi${p}.c
+    COMMAND sed -i '' "'s_#include .wasi${p}\.h._#include \"wasi/wasi${p}.h\"_'" ${bottom_half}/sources/wasi${p}.c
+    COMMAND sed -i '' "s/extern void exit_exit/_Noreturn extern void exit_exit/" ${bottom_half}/headers/public/wasi/__generated_wasi${p}.h
+    COMMAND sed -i '' "s/extern void __wasm_import_exit_exit/_Noreturn extern void __wasm_import_exit_exit/" ${bottom_half}/sources/wasi${p}.c
     DEPENDS bindings-${p}
   )
   add_dependencies(bindings bindings-${p}-edit)

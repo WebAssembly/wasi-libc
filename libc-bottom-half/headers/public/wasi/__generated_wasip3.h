@@ -75,17 +75,10 @@ typedef enum wasip3_waitable_state {
 
 void wasip3_backpressure_inc(void);
 void wasip3_backpressure_dec(void);
-void* wasip3_context_get(size_t index);
-void wasip3_context_set(size_t index, void* value);
-void wasip3_thread_yield(void);
-uint32_t wasip3_thread_yield_cancellable(void);
-uint32_t wasip3_thread_index(void);
-uint32_t wasip3_thread_new_indirect(void (*start_function)(void*), void* arg);
-void wasip3_thread_switch_to(uint32_t thread);
-uint32_t wasip3_thread_switch_to_cancellable(uint32_t thread);
-void wasip3_thread_resume_later(uint32_t thread);
-void wasip3_thread_yield_to(uint32_t thread);
-uint32_t wasip3_thread_yield_to_cancellable(uint32_t thread);
+void* wasip3_context_get(void);
+void wasip3_context_set(void*);
+void wasip3_yield(void);
+uint32_t wasip3_yield_cancellable(void);
 
 
 

@@ -15,8 +15,8 @@ if(WIT_BINDGEN_EXECUTABLE)
     OUTPUT_VARIABLE WIT_BINDGEN_VERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  if (NOT (WIT_BINDGEN_VERSION MATCHES "0\\.48\\.0"))
-    message(WARNING "wit-bindgen version 0.48.0 is required, found: ${WIT_BINDGEN_VERSION}")
+  if (NOT (WIT_BINDGEN_VERSION MATCHES "0\\.51\\.0"))
+    message(WARNING "wit-bindgen version 0.51.0 is required, found: ${WIT_BINDGEN_VERSION}")
     set(WIT_BINDGEN_EXECUTABLE "")
   endif()
 endif()
@@ -26,7 +26,7 @@ if (NOT WIT_BINDGEN_EXECUTABLE)
   ba_download(
     wit-bindgen
     "https://github.com/bytecodealliance/wit-bindgen"
-    "0.50.0"
+    "0.51.0"
   )
   ExternalProject_Get_Property(wit-bindgen SOURCE_DIR)
   set(wit_bindgen "${SOURCE_DIR}/wit-bindgen")

@@ -235,6 +235,14 @@ static void __pthread_exit(void *result)
 	/* Wake any joiner. */
 	a_store(&self->detach_state, DT_EXITED);
 	__wake(&self->detach_state, 1, 1);
+	#ifdef __wasip3__
+	// Yield to the joining thread, if any.
+	// Note that we use yield_to here instead of switch_to,
+	// so that eventually this thread will get rescheduled
+	// and can exit properly.
+	if (self->joining_tid != 0)
+		wasip3_thread_yield_to(self->joining_tid);
+	#endif
 
 #ifdef __wasilibc_unmodified_upstream
 	for (;;)
@@ -326,6 +334,8 @@ static int start_c11(void *p)
  */
 void wasip3_thread_start(void *context);
 hidden void *__dummy_reference = wasip3_thread_start;
+void __wasilibc_init_task(void);
+hidden void * __dummy_reference_init_task = __wasilibc_init_task;
 
 hidden void __wasip3_thread_start_C(int tid, void *context)
 {

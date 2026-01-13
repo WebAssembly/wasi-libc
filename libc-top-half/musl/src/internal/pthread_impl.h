@@ -17,6 +17,8 @@
 #include "atomic.h"
 #include "futex.h"
 
+#include <wasi/api.h>
+
 #include "pthread_arch.h"
 
 #define pthread __pthread
@@ -66,6 +68,9 @@ struct pthread {
 	volatile int killlock[1];
 	char *dlerror_buf;
 	void *stdio_locks;
+	#ifdef __wasip3__
+	int joining_tid;
+	#endif
 
 	/* Part 3 -- the positions of these fields relative to
 	 * the end of the structure is external and internal ABI. */

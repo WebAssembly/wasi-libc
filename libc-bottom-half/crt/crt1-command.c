@@ -17,6 +17,8 @@ __attribute__((export_name("_start"))) void _start(void)
 // `wit-bindgen` rigamarole and the signature of this function is simple enough
 // that this shouldn't be too problematic (in theory).
 __attribute__((export_name("wasi:cli/run@0.2.0#run"))) int _start(void)
+#elif defined(__wasip3__)
+__attribute__((export_name("wasi:cli/run@0.3.0-rc-2025-09-16#run"))) int _start(void)
 #else
 #error "Unsupported WASI version"
 #endif
@@ -61,7 +63,7 @@ __attribute__((export_name("wasi:cli/run@0.2.0#run"))) int _start(void)
   if (r != 0) {
     __wasi_proc_exit(r);
   }
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   return r != 0;
 #else
 #error "Unsupported WASI version"

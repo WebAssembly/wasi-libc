@@ -1172,7 +1172,7 @@ uint32_t wasip3_thread_new_indirect(void (*start_function)(void*), void* arg) {
 }
 
 __attribute__((__import_module__("$root"), __import_name__("[thread-switch-to]")))
-extern void __thread_switch_to(uint32_t);
+extern uint32_t __thread_switch_to(uint32_t);
 
 void wasip3_thread_switch_to(uint32_t thread) {
   __thread_switch_to(thread);

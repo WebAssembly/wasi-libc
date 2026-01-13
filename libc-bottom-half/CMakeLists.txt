@@ -99,6 +99,7 @@ set(bottom_half_sources
   sources/__wasilibc_dt.c
   sources/__wasilibc_environ.c
   sources/__wasilibc_fd_renumber.c
+  sources/__wasilibc_init_task.s
   sources/__wasilibc_initialize_environ.c
   sources/__wasilibc_random.c
   sources/__wasilibc_real.c
@@ -216,15 +217,24 @@ else()
   # wasip2+: crt1-command.o is modified from what CMake produces to
   # additionally have a custom section representing the type information needed
   # for its contained export. This is the `wasi:cli/run` interface, for example.
+  if (WASI STREQUAL "p2") 
+    set(world wasi:cli/command@0.2.0)
+    set(wit_target wasip2-wits)
+    set(wit_dir ${wasip2_wit_dir})
+  elseif (WASI STREQUAL "p3")
+    set(world wasi:cli/command@0.3.0-rc-2025-09-16)
+    set(wit_target wasip3-wits)
+    set(wit_dir ${wasip3_wit_dir})
+  endif()
   add_custom_command(
     OUTPUT ${SYSROOT_LIB}/crt1-command.o
     COMMAND
       ${wasm_tools} component embed
         ${wit_dir}
         $<TARGET_OBJECTS:crt1-command>
-        --world wasi:cli/command@0.2.0
+        --world ${world}
         -o ${SYSROOT_LIB}/crt1-command.o
-    DEPENDS crt1-command wasi-wits $<TARGET_OBJECTS:crt1-command> wasm-tools
+    DEPENDS crt1-command ${wit_target} $<TARGET_OBJECTS:crt1-command> wasm-tools
   )
 endif()
 

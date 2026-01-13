@@ -99,6 +99,7 @@ set(bottom_half_sources
   sources/__wasilibc_dt.c
   sources/__wasilibc_environ.c
   sources/__wasilibc_fd_renumber.c
+  sources/__wasilibc_init_task.s
   sources/__wasilibc_initialize_environ.c
   sources/__wasilibc_random.c
   sources/__wasilibc_real.c

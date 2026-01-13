@@ -7,19 +7,7 @@ endif()
 # If `wit-bindgen` is on the system and has the right version, favor that,
 # otherwise download a known good version.
 find_program(WIT_BINDGEN_EXECUTABLE NAMES wit-bindgen)
-if(WIT_BINDGEN_EXECUTABLE)
-  message(STATUS "Found wit-bindgen: ${WIT_BINDGEN_EXECUTABLE}")
-
-  execute_process(
-    COMMAND ${WIT_BINDGEN_EXECUTABLE} --version
-    OUTPUT_VARIABLE WIT_BINDGEN_VERSION
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-  if (NOT (WIT_BINDGEN_VERSION MATCHES "0\\.48\\.0"))
-    message(WARNING "wit-bindgen version 0.48.0 is required, found: ${WIT_BINDGEN_VERSION}")
-    set(WIT_BINDGEN_EXECUTABLE "")
-  endif()
-endif()
+set(WIT_BINDGEN_EXECUTABLE "/Users/sybrand/src/bytecodealliance/wit-bindgen/target/debug/wit-bindgen")
 
 if (NOT WIT_BINDGEN_EXECUTABLE)
   include(ba-download)

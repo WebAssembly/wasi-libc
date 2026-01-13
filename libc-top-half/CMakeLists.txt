@@ -389,7 +389,7 @@ if (NOT (WASI STREQUAL "p1"))
   )
 endif()
 
-if (THREADS)
+if (THREADS OR (WASI STREQUAL "p3"))
   # pthreads functions needed for actual thread support
   list(APPEND top_half_sources
     musl/src/stdio/__lockfile.c
@@ -435,9 +435,15 @@ if (THREADS)
     musl/src/thread/sem_timedwait.c
     musl/src/thread/sem_trywait.c
     musl/src/thread/sem_wait.c
-    musl/src/thread/wasm32/wasi_thread_start.s
     musl/src/thread/wasm32/__wasilibc_busywait.c
   )
+  if (THREADS) 
+    list (APPEND top_half_sources
+      musl/src/thread/wasm32/wasi_thread_start.s)
+  elseif(WASI STREQUAL "p3")
+    list (APPEND top_half_sources
+      musl/src/thread/wasm32/wasip3_thread_start.s)
+  endif()
 else()
   # pthreads stubs for single-threaded environment
   list(APPEND top_half_sources

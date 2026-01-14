@@ -18,8 +18,11 @@
 
 #if defined(__wasip1__)
 typedef __wasi_timestamp_t wasilibc_timestamp_t;
-#elif defined(__wasip2__) || defined(__wasip3__)
+#elif defined(__wasip2__)
 typedef wall_clock_datetime_t wasilibc_timestamp_t;
+#elif defined(__wasip3__)
+typedef filesystem_instant_t wasilibc_timestamp_t;
+typedef monotonic_clock_mark_t monotonic_clock_instant_t;
 #else
 # error "Unknown WASI version"
 #endif
@@ -95,7 +98,7 @@ static inline struct timeval timestamp_to_timeval(
 #elif defined(__wasip2__) || defined(__wasip3__)
 
 static inline struct timespec timestamp_to_timespec(
-  wall_clock_datetime_t *timestamp) {
+  wasilibc_timestamp_t *timestamp) {
   return (struct timespec){.tv_sec = timestamp->seconds,
                            .tv_nsec = timestamp->nanoseconds};
 }
@@ -155,7 +158,7 @@ static inline bool timeval_to_duration(
 }
 
 static inline struct timeval timestamp_to_timeval(
-  wall_clock_datetime_t *timestamp) {
+  wasilibc_timestamp_t *timestamp) {
   return (struct timeval){.tv_sec = timestamp->seconds,
                           .tv_usec = timestamp->nanoseconds / 1000};
 }

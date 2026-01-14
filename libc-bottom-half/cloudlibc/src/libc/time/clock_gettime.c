@@ -25,12 +25,16 @@ int __clock_gettime(clockid_t clock_id, struct timespec *tp) {
     monotonic_clock_instant_t ns = monotonic_clock_now();
     *tp = instant_to_timespec(ns);
   } else if (clock_id == CLOCK_REALTIME) {
-    wall_clock_datetime_t time_result;
+    wasilibc_timestamp_t time_result;
+    #ifdef __wasip2__
     wall_clock_now(&time_result);
+    #else
+    wasi_clocks_system_clock_now(&time_result);
+    #endif
     *tp = timestamp_to_timespec(&time_result);
   } else {
     errno = EINVAL;
-    return -1; // wasip2 only supports wall and monotonic clocks
+    return -1; // wasip{2,3} only supports wall and monotonic clocks
   }
 #else
 # error "Unsupported WASI version"

@@ -8,6 +8,9 @@
 #include <wasi/api.h>
 #include <errno.h>
 #include <time.h>
+#ifdef __wasip3__
+#include <wasi/wasip3_block.h>
+#endif
 
 #ifdef __wasip1__
 static_assert(TIMER_ABSTIME == __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME,
@@ -57,9 +60,29 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
   poll_pollable_drop_own(pollable);
   return 0;
 #elif defined(__wasip3__)
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
+  // Note: rmtp is ignored
+
+  if (clock_id != CLOCK_MONOTONIC) {
+    // wasip3 only provides a pollable for monotonic clocks
+    return ENOTSUP;
+  }
+
+  // Prepare pollable
+  int64_t duration = (rqtp->tv_sec * NSEC_PER_SEC) + rqtp->tv_nsec;
+  wasip3_subtask_status_t status;
+  for (;;) {
+    if (flags & TIMER_ABSTIME) {
+      status = monotonic_clock_wait_until(duration);
+    } else {
+      status = monotonic_clock_wait_for(duration);
+    }
+
+    switch (wasip3_subtask_block_on(status)) {
+      case -1: errno=ECANCELED; return -1;
+      case 0: /* repeat */ break;
+      case 1: return 0;
+    }
+  }
 #else
 # error "Unsupported WASI version"
 #endif

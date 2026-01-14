@@ -165,6 +165,7 @@ if (WASI STREQUAL "p3")
     sources/wasip3.c
     sources/wasip3_file.c
     sources/wasip3_stdio.c
+    sources/wasip3_subtask.c
     sources/wasip3_tcp.c
     sources/wasip3_udp.c
   )

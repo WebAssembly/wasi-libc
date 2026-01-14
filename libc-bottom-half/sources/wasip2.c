@@ -387,14 +387,14 @@ extern void __wasm_import_tcp_create_socket_create_tcp_socket(int32_t, uint8_t *
 
 // Imported Functions from `wasi:sockets/ip-name-lookup@0.2.0`
 
-__attribute__((__import_module__("wasi:sockets/ip-name-lookup@0.2.0"), __import_name__("resolve-addresses")))
-extern void __wasm_import_ip_name_lookup_resolve_addresses(int32_t, uint8_t *, size_t, uint8_t *);
-
 __attribute__((__import_module__("wasi:sockets/ip-name-lookup@0.2.0"), __import_name__("[method]resolve-address-stream.resolve-next-address")))
 extern void __wasm_import_ip_name_lookup_method_resolve_address_stream_resolve_next_address(int32_t, uint8_t *);
 
 __attribute__((__import_module__("wasi:sockets/ip-name-lookup@0.2.0"), __import_name__("[method]resolve-address-stream.subscribe")))
 extern int32_t __wasm_import_ip_name_lookup_method_resolve_address_stream_subscribe(int32_t);
+
+__attribute__((__import_module__("wasi:sockets/ip-name-lookup@0.2.0"), __import_name__("resolve-addresses")))
+extern void __wasm_import_ip_name_lookup_resolve_addresses(int32_t, uint8_t *, size_t, uint8_t *);
 
 // Imported Functions from `wasi:random/random@0.2.0`
 
@@ -1002,12 +1002,6 @@ ip_name_lookup_borrow_resolve_address_stream_t ip_name_lookup_borrow_resolve_add
   return (ip_name_lookup_borrow_resolve_address_stream_t) { arg.__handle };
 }
 
-void ip_name_lookup_result_own_resolve_address_stream_error_code_free(ip_name_lookup_result_own_resolve_address_stream_error_code_t *ptr) {
-  if (!ptr->is_err) {
-  } else {
-  }
-}
-
 void ip_name_lookup_option_ip_address_free(ip_name_lookup_option_ip_address_t *ptr) {
   if (ptr->is_some) {
     ip_name_lookup_ip_address_free(&ptr->val);
@@ -1017,6 +1011,12 @@ void ip_name_lookup_option_ip_address_free(ip_name_lookup_option_ip_address_t *p
 void ip_name_lookup_result_option_ip_address_error_code_free(ip_name_lookup_result_option_ip_address_error_code_t *ptr) {
   if (!ptr->is_err) {
     ip_name_lookup_option_ip_address_free(&ptr->val.ok);
+  } else {
+  }
+}
+
+void ip_name_lookup_result_own_resolve_address_stream_error_code_free(ip_name_lookup_result_own_resolve_address_stream_error_code_t *ptr) {
+  if (!ptr->is_err) {
   } else {
   }
 }
@@ -4201,33 +4201,6 @@ bool tcp_create_socket_create_tcp_socket(tcp_create_socket_ip_address_family_t a
   }
 }
 
-bool ip_name_lookup_resolve_addresses(ip_name_lookup_borrow_network_t network, wasip2_string_t *name, ip_name_lookup_own_resolve_address_stream_t *ret, ip_name_lookup_error_code_t *err) {
-  __attribute__((__aligned__(4)))
-  uint8_t ret_area[8];
-  uint8_t *ptr = (uint8_t *) &ret_area;
-  __wasm_import_ip_name_lookup_resolve_addresses((network).__handle, (uint8_t *) (*name).ptr, (*name).len, ptr);
-  ip_name_lookup_result_own_resolve_address_stream_error_code_t result;
-  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
-    case 0: {
-      result.is_err = false;
-      result.val.ok = (ip_name_lookup_own_resolve_address_stream_t) { *((int32_t*) (ptr + 4)) };
-      break;
-    }
-    case 1: {
-      result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 4));
-      break;
-    }
-  }
-  if (!result.is_err) {
-    *ret = result.val.ok;
-    return 1;
-  } else {
-    *err = result.val.err;
-    return 0;
-  }
-}
-
 bool ip_name_lookup_method_resolve_address_stream_resolve_next_address(ip_name_lookup_borrow_resolve_address_stream_t self, ip_name_lookup_option_ip_address_t *ret, ip_name_lookup_error_code_t *err) {
   __attribute__((__aligned__(2)))
   uint8_t ret_area[22];
@@ -4298,6 +4271,33 @@ bool ip_name_lookup_method_resolve_address_stream_resolve_next_address(ip_name_l
 ip_name_lookup_own_pollable_t ip_name_lookup_method_resolve_address_stream_subscribe(ip_name_lookup_borrow_resolve_address_stream_t self) {
   int32_t ret = __wasm_import_ip_name_lookup_method_resolve_address_stream_subscribe((self).__handle);
   return (ip_name_lookup_own_pollable_t) { ret };
+}
+
+bool ip_name_lookup_resolve_addresses(ip_name_lookup_borrow_network_t network, wasip2_string_t *name, ip_name_lookup_own_resolve_address_stream_t *ret, ip_name_lookup_error_code_t *err) {
+  __attribute__((__aligned__(4)))
+  uint8_t ret_area[8];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_ip_name_lookup_resolve_addresses((network).__handle, (uint8_t *) (*name).ptr, (*name).len, ptr);
+  ip_name_lookup_result_own_resolve_address_stream_error_code_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (ip_name_lookup_own_resolve_address_stream_t) { *((int32_t*) (ptr + 4)) };
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) *((uint8_t*) (ptr + 4));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
 }
 
 void random_get_random_bytes(uint64_t len, wasip2_list_u8_t *ret) {

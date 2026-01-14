@@ -35,20 +35,48 @@ else()
   set(wit_bindgen ${WIT_BINDGEN_EXECUTABLE})
 endif()
 
-include(ExternalProject)
-set(p2 0.2.0)
-ExternalProject_Add(
-  wasip2-wits
-  URL https://github.com/WebAssembly/wasi-cli/archive/refs/tags/v${p2}.tar.gz
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
-  INSTALL_COMMAND ""
-  EXCLUDE_FROM_ALL TRUE
-)
-ExternalProject_Get_Property(wasip2-wits SOURCE_DIR)
-set(wasip2_wit_dir ${SOURCE_DIR}/wit)
+# If `wkg` is on the system and has the right version, favor that,
+# otherwise download a known good version.
+find_program(WKG_EXECUTABLE NAMES wkg)
+if(WKG_EXECUTABLE)
+  message(STATUS "Found wkg: ${WKG_EXECUTABLE}")
+
+  execute_process(
+    COMMAND ${WKG_EXECUTABLE} --version
+    OUTPUT_VARIABLE WKG_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  if (NOT (WKG_VERSION MATCHES "0\\.13\\.0"))
+    message(WARNING "wkg version 0.13.0 is required, found: ${WKG_VERSION}")
+    set(WKG_EXECUTABLE "")
+  endif()
+endif()
+
+if (NOT WKG_EXECUTABLE)
+  include(ba-download)
+  ba_download(
+    wit-bindgen
+    "https://github.com/bytecodealliance/wasm-pkg-tools"
+    "0.13.0"
+  )
+  ExternalProject_Get_Property(wkg SOURCE_DIR)
+  set(wkg "${SOURCE_DIR}/wkg")
+else()
+  add_custom_target(wkg)
+  set(wkg ${WKG_EXECUTABLE})
+endif()
+
 set(bottom_half "${CMAKE_SOURCE_DIR}/libc-bottom-half")
 
+set(wasip2_wit_dir ${CMAKE_CURRENT_BINARY_DIR}/wasi/p2/wit)
+set(p2 0.2.0)
+file(MAKE_DIRECTORY ${wasip2_wit_dir})
+configure_file(${CMAKE_SOURCE_DIR}/wasi/wasi-libc-wasip2.wit ${wasip2_wit_dir} COPYONLY)
+add_custom_target(
+  wasip2-wits
+  COMMAND ${wkg} wit fetch
+  WORKING_DIRECTORY ${wasip2_wit_dir}/..
+)
 add_custom_target(
   bindings-p2
   COMMAND
@@ -91,18 +119,15 @@ add_custom_target(
   DEPENDS wit-bindgen wasip2-wits
 )
 
-set(p3 0.3.0-rc-2025-09-16)
-ExternalProject_Add(
+set(wasip3_wit_dir ${CMAKE_CURRENT_BINARY_DIR}/wasi/p3/wit)
+set(p3 0.3.0-rc-2026-01-06)
+file(MAKE_DIRECTORY ${wasip3_wit_dir})
+configure_file(${CMAKE_SOURCE_DIR}/wasi/wasi-libc-wasip3.wit ${wasip3_wit_dir} COPYONLY)
+add_custom_target(
   wasip3-wits
-  URL https://github.com/WebAssembly/wasi-cli/archive/refs/tags/v${p3}.tar.gz
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
-  INSTALL_COMMAND ""
-  EXCLUDE_FROM_ALL TRUE
+  COMMAND ${wkg} wit fetch
+  WORKING_DIRECTORY ${wasip3_wit_dir}/..
 )
-ExternalProject_Get_Property(wasip3-wits SOURCE_DIR)
-set(wasip3_wit_dir ${SOURCE_DIR}/wit-0.3.0-draft)
-
 add_custom_target(
   bindings-p3
   COMMAND

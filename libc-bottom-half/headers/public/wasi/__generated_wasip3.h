@@ -206,18 +206,35 @@ typedef uint64_t wasi_clocks_types_duration_t;
 
 typedef wasi_clocks_types_duration_t monotonic_clock_duration_t;
 
-// An instant in time, in nanoseconds. An instant is relative to an
+// A mark on a monotonic clock is a number of nanoseconds since an
 // unspecified initial value, and can only be compared to instances from
 // the same monotonic-clock.
-typedef uint64_t monotonic_clock_instant_t;
+typedef uint64_t monotonic_clock_mark_t;
 
-// A time and date in seconds plus nanoseconds.
-typedef struct wall_clock_datetime_t {
-  uint64_t   seconds;
+typedef wasi_clocks_types_duration_t wasi_clocks_system_clock_duration_t;
+
+// An "instant", or "exact time", is a point in time without regard to any
+// time zone: just the time since a particular external reference point,
+// often called an "epoch".
+// 
+// Here, the epoch is 1970-01-01T00:00:00Z, also known as
+// [POSIX's Seconds Since the Epoch], also known as [Unix Time].
+// 
+// Note that even if the seconds field is negative, incrementing
+// nanoseconds always represents moving forwards in time.
+// For example, `{ -1 seconds, 999999999 nanoseconds }` represents the
+// instant one nanosecond before the epoch.
+// For more on various different ways to represent time, see
+// https://tc39.es/proposal-temporal/docs/timezone.html
+// 
+// [POSIX's Seconds Since the Epoch]: https://pubs.opengroup.org/onlinepubs/9699919799/xrat/V4_xbd_chap04.html#tag_21_04_16
+// [Unix Time]: https://en.wikipedia.org/wiki/Unix_time
+typedef struct wasi_clocks_system_clock_instant_t {
+  int64_t   seconds;
   uint32_t   nanoseconds;
-} wall_clock_datetime_t;
+} wasi_clocks_system_clock_instant_t;
 
-typedef wall_clock_datetime_t filesystem_datetime_t;
+typedef wasi_clocks_system_clock_instant_t filesystem_instant_t;
 
 // File size or length of a region within a file.
 typedef uint64_t filesystem_filesize_t;
@@ -312,8 +329,8 @@ typedef uint64_t filesystem_link_count_t;
 
 typedef struct {
   bool is_some;
-  filesystem_datetime_t val;
-} filesystem_option_datetime_t;
+  filesystem_instant_t val;
+} filesystem_option_instant_t;
 
 // File attributes.
 // 
@@ -330,24 +347,24 @@ typedef struct filesystem_descriptor_stat_t {
   // 
   // If the `option` is none, the platform doesn't maintain an access
   // timestamp for this file.
-  filesystem_option_datetime_t   data_access_timestamp;
+  filesystem_option_instant_t   data_access_timestamp;
   // Last data modification timestamp.
   // 
   // If the `option` is none, the platform doesn't maintain a
   // modification timestamp for this file.
-  filesystem_option_datetime_t   data_modification_timestamp;
+  filesystem_option_instant_t   data_modification_timestamp;
   // Last file status-change timestamp.
   // 
   // If the `option` is none, the platform doesn't maintain a
   // status-change timestamp for this file.
-  filesystem_option_datetime_t   status_change_timestamp;
+  filesystem_option_instant_t   status_change_timestamp;
 } filesystem_descriptor_stat_t;
 
 // When setting a timestamp, this gives the value to set it to.
 typedef struct filesystem_new_timestamp_t {
   uint8_t tag;
   union {
-    filesystem_datetime_t     timestamp;
+    filesystem_instant_t     timestamp;
   } val;
 } filesystem_new_timestamp_t;
 
@@ -605,7 +622,7 @@ typedef struct {
   size_t len;
 } filesystem_preopens_list_tuple2_own_descriptor_string_t;
 
-typedef monotonic_clock_duration_t sockets_duration_t;
+typedef wasi_clocks_types_duration_t sockets_duration_t;
 
 // Error codes.
 // 
@@ -907,7 +924,7 @@ typedef struct {
   uint64_t f1;
 } wasip3_tuple2_u64_u64_t;
 
-// Imported Functions from `wasi:cli/environment@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:cli/environment@0.3.0-rc-2026-01-06`
 // Get the POSIX-style environment variables.
 // 
 // Each environment variable is provided as a pair of string variable names
@@ -923,11 +940,11 @@ extern void environment_get_arguments(wasip3_list_string_t *ret);
 // directory, interpreting `.` as shorthand for this.
 extern bool environment_get_initial_cwd(wasip3_string_t *ret);
 
-// Imported Functions from `wasi:cli/exit@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:cli/exit@0.3.0-rc-2026-01-06`
 // Exit the current instance and any linked instances.
 _Noreturn extern void exit_exit(exit_result_void_void_t *status);
 
-// Imported Functions from `wasi:cli/stdin@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:cli/stdin@0.3.0-rc-2026-01-06`
 // Return a stream for reading from stdin.
 // 
 // This function returns a stream which provides data read from stdin,
@@ -943,7 +960,7 @@ _Noreturn extern void exit_exit(exit_result_void_void_t *status);
 // reads is implementation-specific.
 extern void stdin_read_via_stream(stdin_tuple2_stream_u8_future_result_void_error_code_t *ret);
 
-// Imported Functions from `wasi:cli/stdout@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:cli/stdout@0.3.0-rc-2026-01-06`
 // Write the given stream to stdout.
 // 
 // If the stream's writable end is dropped this function will either return
@@ -954,7 +971,7 @@ extern void stdin_read_via_stream(stdin_tuple2_stream_u8_future_result_void_erro
 // dropped and this function will return an error-code.
 extern wasip3_subtask_status_t stdout_write_via_stream(stdin_stream_u8_t data, stdout_result_void_error_code_t *result);
 
-// Imported Functions from `wasi:cli/stderr@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:cli/stderr@0.3.0-rc-2026-01-06`
 // Write the given stream to stderr.
 // 
 // If the stream's writable end is dropped this function will either return
@@ -965,61 +982,53 @@ extern wasip3_subtask_status_t stdout_write_via_stream(stdin_stream_u8_t data, s
 // dropped and this function will return an error-code.
 extern wasip3_subtask_status_t stderr_write_via_stream(stdin_stream_u8_t data, stderr_result_void_error_code_t *result);
 
-// Imported Functions from `wasi:cli/terminal-stdin@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:cli/terminal-stdin@0.3.0-rc-2026-01-06`
 // If stdin is connected to a terminal, return a `terminal-input` handle
 // allowing further interaction with it.
 extern bool terminal_stdin_get_terminal_stdin(terminal_stdin_own_terminal_input_t *ret);
 
-// Imported Functions from `wasi:cli/terminal-stdout@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:cli/terminal-stdout@0.3.0-rc-2026-01-06`
 // If stdout is connected to a terminal, return a `terminal-output` handle
 // allowing further interaction with it.
 extern bool terminal_stdout_get_terminal_stdout(terminal_stdout_own_terminal_output_t *ret);
 
-// Imported Functions from `wasi:cli/terminal-stderr@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:cli/terminal-stderr@0.3.0-rc-2026-01-06`
 // If stderr is connected to a terminal, return a `terminal-output` handle
 // allowing further interaction with it.
 extern bool terminal_stderr_get_terminal_stderr(terminal_stderr_own_terminal_output_t *ret);
 
-// Imported Functions from `wasi:clocks/monotonic-clock@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06`
 // Read the current value of the clock.
 // 
 // The clock is monotonic, therefore calling this function repeatedly will
 // produce a sequence of non-decreasing values.
 // 
 // For completeness, this function traps if it's not possible to represent
-// the value of the clock in an `instant`. Consequently, implementations
+// the value of the clock in a `mark`. Consequently, implementations
 // should ensure that the starting time is low enough to avoid the
 // possibility of overflow in practice.
-extern monotonic_clock_instant_t monotonic_clock_now(void);
+extern monotonic_clock_mark_t monotonic_clock_now(void);
 // Query the resolution of the clock. Returns the duration of time
 // corresponding to a clock tick.
 extern monotonic_clock_duration_t monotonic_clock_get_resolution(void);
-// Wait until the specified instant has occurred.
-extern wasip3_subtask_status_t monotonic_clock_wait_until(monotonic_clock_instant_t when);
+// Wait until the specified mark has occurred.
+extern wasip3_subtask_status_t monotonic_clock_wait_until(monotonic_clock_mark_t when);
 // Wait for the specified duration to elapse.
 extern wasip3_subtask_status_t monotonic_clock_wait_for(monotonic_clock_duration_t how_long);
 
-// Imported Functions from `wasi:clocks/wall-clock@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:clocks/system-clock@0.3.0-rc-2026-01-06`
 // Read the current value of the clock.
 // 
 // This clock is not monotonic, therefore calling this function repeatedly
 // will not necessarily produce a sequence of non-decreasing values.
 // 
-// The returned timestamps represent the number of seconds since
-// 1970-01-01T00:00:00Z, also known as [POSIX's Seconds Since the Epoch],
-// also known as [Unix Time].
-// 
 // The nanoseconds field of the output is always less than 1000000000.
-// 
-// [POSIX's Seconds Since the Epoch]: https://pubs.opengroup.org/onlinepubs/9699919799/xrat/V4_xbd_chap04.html#tag_21_04_16
-// [Unix Time]: https://en.wikipedia.org/wiki/Unix_time
-extern void wall_clock_now(wall_clock_datetime_t *ret);
-// Query the resolution of the clock.
-// 
-// The nanoseconds field of the output is always less than 1000000000.
-extern void wall_clock_get_resolution(wall_clock_datetime_t *ret);
+extern void wasi_clocks_system_clock_now(wasi_clocks_system_clock_instant_t *ret);
+// Query the resolution of the clock. Returns the smallest duration of time
+// that the implementation permits distinguishing.
+extern wasi_clocks_system_clock_duration_t wasi_clocks_system_clock_get_resolution(void);
 
-// Imported Functions from `wasi:filesystem/types@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:filesystem/types@0.3.0-rc-2026-01-06`
 // Return a stream for reading from a file.
 // 
 // Multiple read, write, and append streams may be active on the same open
@@ -1231,11 +1240,11 @@ extern wasip3_subtask_status_t filesystem_method_descriptor_metadata_hash(filesy
 // This performs the same hash computation as `metadata-hash`.
 extern wasip3_subtask_status_t filesystem_method_descriptor_metadata_hash_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t path, filesystem_result_metadata_hash_value_error_code_t *result);
 
-// Imported Functions from `wasi:filesystem/preopens@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:filesystem/preopens@0.3.0-rc-2026-01-06`
 // Return the set of preopened directories, and their paths.
 extern void filesystem_preopens_get_directories(filesystem_preopens_list_tuple2_own_descriptor_string_t *ret);
 
-// Imported Functions from `wasi:sockets/types@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:sockets/types@0.3.0-rc-2026-01-06`
 // Create a new TCP socket.
 // 
 // Similar to `socket(AF_INET or AF_INET6, SOCK_STREAM, IPPROTO_TCP)` in POSIX.
@@ -1748,7 +1757,7 @@ extern bool sockets_method_udp_socket_set_receive_buffer_size(sockets_borrow_udp
 extern bool sockets_method_udp_socket_get_send_buffer_size(sockets_borrow_udp_socket_t self, uint64_t *ret, sockets_error_code_t *err);
 extern bool sockets_method_udp_socket_set_send_buffer_size(sockets_borrow_udp_socket_t self, uint64_t value, sockets_error_code_t *err);
 
-// Imported Functions from `wasi:sockets/ip-name-lookup@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:sockets/ip-name-lookup@0.3.0-rc-2026-01-06`
 // Resolve an internet host name to a list of IP addresses.
 // 
 // Unicode domain names are automatically converted to ASCII using IDNA encoding.
@@ -1773,7 +1782,7 @@ extern bool sockets_method_udp_socket_set_send_buffer_size(sockets_borrow_udp_so
 // - <https://man.freebsd.org/cgi/man.cgi?query=getaddrinfo&sektion=3>
 extern wasip3_subtask_status_t ip_name_lookup_resolve_addresses(wasip3_string_t name, ip_name_lookup_result_list_ip_address_error_code_t *result);
 
-// Imported Functions from `wasi:random/random@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:random/random@0.3.0-rc-2026-01-06`
 // Return `len` cryptographically-secure random or pseudo-random bytes.
 // 
 // This function must produce data at least as cryptographically secure and
@@ -1793,7 +1802,7 @@ extern void random_get_random_bytes(uint64_t len, wasip3_list_u8_t *ret);
 // represented as a `u64`.
 extern uint64_t random_get_random_u64(void);
 
-// Imported Functions from `wasi:random/insecure@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:random/insecure@0.3.0-rc-2026-01-06`
 // Return `len` insecure pseudo-random bytes.
 // 
 // This function is not cryptographically secure. Do not use it for
@@ -1809,7 +1818,7 @@ extern void random_insecure_get_insecure_random_bytes(uint64_t len, wasip3_list_
 // `get-insecure-random-bytes`, represented as a `u64`.
 extern uint64_t random_insecure_get_insecure_random_u64(void);
 
-// Imported Functions from `wasi:random/insecure-seed@0.3.0-rc-2025-09-16`
+// Imported Functions from `wasi:random/insecure-seed@0.3.0-rc-2026-01-06`
 // Return a 128-bit value that may contain a pseudo-random value.
 // 
 // The returned value is not required to be computed from a CSPRNG, and may
@@ -1883,7 +1892,7 @@ void terminal_stdout_option_own_terminal_output_free(terminal_stdout_option_own_
 
 void terminal_stderr_option_own_terminal_output_free(terminal_stderr_option_own_terminal_output_t *ptr);
 
-void filesystem_option_datetime_free(filesystem_option_datetime_t *ptr);
+void filesystem_option_instant_free(filesystem_option_instant_t *ptr);
 
 void filesystem_descriptor_stat_free(filesystem_descriptor_stat_t *ptr);
 

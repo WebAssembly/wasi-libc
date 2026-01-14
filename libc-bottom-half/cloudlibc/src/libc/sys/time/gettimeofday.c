@@ -12,9 +12,13 @@ int gettimeofday(struct timeval *restrict tp, void *tz) {
     __wasi_timestamp_t ts = 0;
     (void)__wasi_clock_time_get(__WASI_CLOCKID_REALTIME, 1000, &ts);
     *tp = timestamp_to_timeval(ts);
-#elif defined(__wasip2__) || defined(__wasip3__)
+#elif defined(__wasip2__)
     wall_clock_datetime_t time_result;
     wall_clock_now(&time_result);
+    *tp = timestamp_to_timeval(&time_result);
+#elif defined(__wasip3__)
+    wasi_clocks_system_clock_instant_t time_result;
+    wasi_clocks_system_clock_now(&time_result);
     *tp = timestamp_to_timeval(&time_result);
 #else
 # error "Unsupported WASI version"

@@ -1,0 +1,5 @@
+package wasi-libc:wasip2;
+
+world wasip3 {
+    include wasi:cli/command@0.2.0;
+}

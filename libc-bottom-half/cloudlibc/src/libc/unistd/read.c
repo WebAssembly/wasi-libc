@@ -53,9 +53,7 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
     *off += contents.len;
   return contents.len;
 #elif defined(__wasip3__)
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
+  return __wasilibc_read3(fildes, buf, nbyte);
 #else
 # error "Unsupported WASI version"
 #endif

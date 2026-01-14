@@ -96,4 +96,11 @@ static unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
 
 #endif
 
+#ifdef __wasip3__
+#include <wasi/descriptor_table.h>
+
+ssize_t __wasilibc_write3(int fildes, void const *buf, size_t nbyte);
+ssize_t __wasilibc_read3(int fildes, void *buf, size_t nbyte);
+#endif
+
 #endif

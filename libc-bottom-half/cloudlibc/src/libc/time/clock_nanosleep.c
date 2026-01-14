@@ -8,6 +8,9 @@
 #include <wasi/api.h>
 #include <errno.h>
 #include <time.h>
+#ifdef __wasip3__
+#include <wasi/wasip3_block.h>
+#endif
 
 #ifdef __wasip1__
 static_assert(TIMER_ABSTIME == __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME,
@@ -34,7 +37,7 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
   __wasi_event_t ev;
   __wasi_errno_t error = __wasi_poll_oneoff(&sub, &ev, 1, &nevents);
   return error == 0 && ev.error == 0 ? 0 : ENOTSUP;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Note: rmtp is ignored
 
   if (clock_id != CLOCK_MONOTONIC) {
@@ -42,8 +45,10 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
     return ENOTSUP;
   }
 
-  // Prepare pollable
   int64_t duration = (rqtp->tv_sec * NSEC_PER_SEC) + rqtp->tv_nsec;
+
+#ifdef __wasip2__
+  // Prepare pollable
   monotonic_clock_own_pollable_t pollable;
   if (flags & TIMER_ABSTIME) {
     pollable = monotonic_clock_subscribe_instant(duration);
@@ -55,11 +60,17 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
   poll_method_pollable_block(poll_borrow_pollable(pollable));
 
   poll_pollable_drop_own(pollable);
+#else // defined(__wasip3__)
+  wasip3_subtask_status_t status;
+  if (flags & TIMER_ABSTIME) {
+    status = monotonic_clock_wait_until(duration);
+  } else {
+    status = monotonic_clock_wait_for(duration);
+  }
+  wasip3_subtask_block_on(status);
+#endif
   return 0;
-#elif defined(__wasip3__)
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
+
 #else
 # error "Unsupported WASI version"
 #endif

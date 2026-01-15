@@ -1141,7 +1141,6 @@ void wasip3_thread_yield(void) {
   __thread_yield();
 }
 
-<<<<<<< HEAD
 
 __attribute__((__import_module__("$root"), __import_name__("[context-get-1]")))
 extern void* __context_get_1(void);
@@ -1227,8 +1226,6 @@ uint32_t wasip3_thread_suspend_cancellable(void) {
   return __thread_suspend_cancellable();
 }
 
-=======
->>>>>>> sy/wasip3-bindings
 
 
 // Component Adapters

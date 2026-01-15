@@ -1,5 +1,11 @@
 package wasi-libc:wasip2;
 
-world wasip3 {
+world wasip2 {
     include wasi:cli/command@0.2.0;
+    include wasi:clocks/imports@0.2.0;
+    include wasi:filesystem/imports@0.2.0;
+    include wasi:http/proxy@0.2.0;
+    include wasi:random/imports@0.2.0;
+    include wasi:io/imports@0.2.0;
+    include wasi:sockets/imports@0.2.0;
 }

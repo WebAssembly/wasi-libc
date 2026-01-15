@@ -4,6 +4,8 @@ if (NOT BINDINGS_TARGET)
   return()
 endif()
 
+include(ExternalProject)
+
 # If `wit-bindgen` is on the system and has the right version, favor that,
 # otherwise download a known good version.
 find_program(WIT_BINDGEN_EXECUTABLE NAMES wit-bindgen)
@@ -59,8 +61,8 @@ if (NOT WKG_EXECUTABLE)
     "https://github.com/bytecodealliance/wasm-pkg-tools"
     "0.13.0"
   )
-  ExternalProject_Get_Property(wkg SOURCE_DIR)
-  set(wkg "${SOURCE_DIR}/wkg")
+  ExternalProject_Get_Property(wkg DOWNLOAD_DIR)
+  set(wkg "${DOWNLOAD_DIR}/wkg-bin")
 else()
   add_custom_target(wkg)
   set(wkg ${WKG_EXECUTABLE})
@@ -116,7 +118,7 @@ add_custom_target(
   COMMAND cmake -E copy wasip2.h ${bottom_half}/headers/public/wasi/__generated_wasip2.h
   COMMAND cmake -E copy wasip2_component_type.o ${bottom_half}/sources
   COMMAND cmake -E copy wasip2.c ${bottom_half}/sources
-  DEPENDS wit-bindgen wasip2-wits
+  DEPENDS wit-bindgen wkg wasip2-wits
 )
 
 set(wasip3_wit_dir ${CMAKE_CURRENT_BINARY_DIR}/wasi/p3/wit)
@@ -159,7 +161,7 @@ add_custom_target(
   COMMAND cmake -E copy wasip3.h ${bottom_half}/headers/public/wasi/__generated_wasip3.h
   COMMAND cmake -E copy wasip3_component_type.o ${bottom_half}/sources
   COMMAND cmake -E copy wasip3.c ${bottom_half}/sources
-  DEPENDS wit-bindgen wasip3-wits
+  DEPENDS wit-bindgen wkg wasip3-wits
 )
 
 add_custom_target(bindings DEPENDS bindings-p2 bindings-p3)

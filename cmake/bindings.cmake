@@ -62,10 +62,10 @@ if (NOT WKG_EXECUTABLE)
     "0.13.0"
   )
   ExternalProject_Get_Property(wkg DOWNLOAD_DIR)
-  set(wkg "${DOWNLOAD_DIR}/wkg-bin")
+  set(wkg_bin "${DOWNLOAD_DIR}/wkg-bin")
 else()
   add_custom_target(wkg)
-  set(wkg ${WKG_EXECUTABLE})
+  set(wkg_bin ${WKG_EXECUTABLE})
 endif()
 
 set(bottom_half "${CMAKE_SOURCE_DIR}/libc-bottom-half")
@@ -127,7 +127,7 @@ file(MAKE_DIRECTORY ${wasip3_wit_dir})
 configure_file(${CMAKE_SOURCE_DIR}/wasi/wasi-libc-wasip3.wit.in ${wasip3_wit_dir}/wasi-libc-wasip3.wit)
 add_custom_target(
   wasip3-wits
-  COMMAND ${wkg} wit fetch
+  COMMAND ${wkg_bin} wit fetch
   WORKING_DIRECTORY ${wasip3_wit_dir}/..
 )
 add_custom_target(

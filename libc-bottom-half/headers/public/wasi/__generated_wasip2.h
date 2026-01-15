@@ -869,11 +869,59 @@ extern bool streams_method_input_stream_blocking_skip(streams_borrow_input_strea
 extern streams_own_pollable_t streams_method_input_stream_subscribe(streams_borrow_input_stream_t self);
 extern bool streams_method_output_stream_check_write(streams_borrow_output_stream_t self, uint64_t *ret, streams_stream_error_t *err);
 extern bool streams_method_output_stream_write(streams_borrow_output_stream_t self, wasip2_list_u8_t *contents, streams_stream_error_t *err);
+// Perform a write of up to 4096 bytes, and then flush the stream. Block
+// until all of these operations are complete, or an error occurs.
+// 
+// This is a convenience wrapper around the use of `check-write`,
+// `subscribe`, `write`, and `flush`, and is implemented with the
+// following pseudo-code:
+// 
+// ```text
+// let pollable = this.subscribe();
+// while !contents.is_empty() {
+// // Wait for the stream to become writable
+// pollable.block();
+// let Ok(n) = this.check-write(); // eliding error handling
+// let len = min(n, contents.len());
+// let (chunk, rest) = contents.split_at(len);
+// this.write(chunk  );            // eliding error handling
+// contents = rest;
+// }
+// this.flush();
+// // Wait for completion of `flush`
+// pollable.block();
+// // Check for any errors that arose during `flush`
+// let _ = this.check-write();         // eliding error handling
+// ```
 extern bool streams_method_output_stream_blocking_write_and_flush(streams_borrow_output_stream_t self, wasip2_list_u8_t *contents, streams_stream_error_t *err);
 extern bool streams_method_output_stream_flush(streams_borrow_output_stream_t self, streams_stream_error_t *err);
 extern bool streams_method_output_stream_blocking_flush(streams_borrow_output_stream_t self, streams_stream_error_t *err);
 extern streams_own_pollable_t streams_method_output_stream_subscribe(streams_borrow_output_stream_t self);
 extern bool streams_method_output_stream_write_zeroes(streams_borrow_output_stream_t self, uint64_t len, streams_stream_error_t *err);
+// Perform a write of up to 4096 zeroes, and then flush the stream.
+// Block until all of these operations are complete, or an error
+// occurs.
+// 
+// This is a convenience wrapper around the use of `check-write`,
+// `subscribe`, `write-zeroes`, and `flush`, and is implemented with
+// the following pseudo-code:
+// 
+// ```text
+// let pollable = this.subscribe();
+// while num_zeroes != 0 {
+// // Wait for the stream to become writable
+// pollable.block();
+// let Ok(n) = this.check-write(); // eliding error handling
+// let len = min(n, num_zeroes);
+// this.write-zeroes(len);         // eliding error handling
+// num_zeroes -= len;
+// }
+// this.flush();
+// // Wait for completion of `flush`
+// pollable.block();
+// // Check for any errors that arose during `flush`
+// let _ = this.check-write();         // eliding error handling
+// ```
 extern bool streams_method_output_stream_blocking_write_zeroes_and_flush(streams_borrow_output_stream_t self, uint64_t len, streams_stream_error_t *err);
 extern bool streams_method_output_stream_splice(streams_borrow_output_stream_t self, streams_borrow_input_stream_t src, uint64_t len, uint64_t *ret, streams_stream_error_t *err);
 extern bool streams_method_output_stream_blocking_splice(streams_borrow_output_stream_t self, streams_borrow_input_stream_t src, uint64_t len, uint64_t *ret, streams_stream_error_t *err);
@@ -938,6 +986,25 @@ extern bool filesystem_method_descriptor_rename_at(filesystem_borrow_descriptor_
 extern bool filesystem_method_descriptor_symlink_at(filesystem_borrow_descriptor_t self, wasip2_string_t *old_path, wasip2_string_t *new_path, filesystem_error_code_t *err);
 extern bool filesystem_method_descriptor_unlink_file_at(filesystem_borrow_descriptor_t self, wasip2_string_t *path, filesystem_error_code_t *err);
 extern bool filesystem_method_descriptor_is_same_object(filesystem_borrow_descriptor_t self, filesystem_borrow_descriptor_t other);
+// Return a hash of the metadata associated with a filesystem object referred
+// to by a descriptor.
+// 
+// This returns a hash of the last-modification timestamp and file size, and
+// may also include the inode number, device number, birth timestamp, and
+// other metadata fields that may change when the file is modified or
+// replaced. It may also include a secret value chosen by the
+// implementation and not otherwise exposed.
+// 
+// Implementations are encourated to provide the following properties:
+// 
+// - If the file is not modified or replaced, the computed hash value should
+// usually not change.
+// - If the object is modified or replaced, the computed hash value should
+// usually change.
+// - The inputs to the hash should not be easily computable from the
+// computed hash.
+// 
+// However, none of these is required.
 extern bool filesystem_method_descriptor_metadata_hash(filesystem_borrow_descriptor_t self, filesystem_metadata_hash_value_t *ret, filesystem_error_code_t *err);
 extern bool filesystem_method_descriptor_metadata_hash_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip2_string_t *path, filesystem_metadata_hash_value_t *ret, filesystem_error_code_t *err);
 extern bool filesystem_method_directory_entry_stream_read_directory_entry(filesystem_borrow_directory_entry_stream_t self, filesystem_option_directory_entry_t *ret, filesystem_error_code_t *err);
@@ -952,6 +1019,46 @@ extern instance_network_own_network_t instance_network_instance_network(void);
 // Imported Functions from `wasi:sockets/udp@0.2.0`
 extern bool udp_method_udp_socket_start_bind(udp_borrow_udp_socket_t self, udp_borrow_network_t network, udp_ip_socket_address_t *local_address, udp_error_code_t *err);
 extern bool udp_method_udp_socket_finish_bind(udp_borrow_udp_socket_t self, udp_error_code_t *err);
+// Set up inbound & outbound communication channels, optionally to a specific peer.
+// 
+// This function only changes the local socket configuration and does not generate any network traffic.
+// On success, the `remote-address` of the socket is updated. The `local-address` may be updated as well,
+// based on the best network path to `remote-address`.
+// 
+// When a `remote-address` is provided, the returned streams are limited to communicating with that specific peer:
+// - `send` can only be used to send to this destination.
+// - `receive` will only return datagrams sent from the provided `remote-address`.
+// 
+// This method may be called multiple times on the same socket to change its association, but
+// only the most recently returned pair of streams will be operational. Implementations may trap if
+// the streams returned by a previous invocation haven't been dropped yet before calling `stream` again.
+// 
+// The POSIX equivalent in pseudo-code is:
+// ```text
+// if (was previously connected) {
+// connect(s, AF_UNSPEC)
+// }
+// if (remote_address is Some) {
+// connect(s, remote_address)
+// }
+// ```
+// 
+// Unlike in POSIX, the socket must already be explicitly bound.
+// 
+// # Typical errors
+// - `invalid-argument`:          The `remote-address` has the wrong address family. (EAFNOSUPPORT)
+// - `invalid-argument`:          The IP address in `remote-address` is set to INADDR_ANY (`0.0.0.0` / `::`). (EDESTADDRREQ, EADDRNOTAVAIL)
+// - `invalid-argument`:          The port in `remote-address` is set to 0. (EDESTADDRREQ, EADDRNOTAVAIL)
+// - `invalid-state`:             The socket is not bound.
+// - `address-in-use`:            Tried to perform an implicit bind, but there were no ephemeral ports available. (EADDRINUSE, EADDRNOTAVAIL on Linux, EAGAIN on BSD)
+// - `remote-unreachable`:        The remote address is not reachable. (ECONNRESET, ENETRESET, EHOSTUNREACH, EHOSTDOWN, ENETUNREACH, ENETDOWN, ENONET)
+// - `connection-refused`:        The connection was refused. (ECONNREFUSED)
+// 
+// # References
+// - <https://pubs.opengroup.org/onlinepubs/9699919799/functions/connect.html>
+// - <https://man7.org/linux/man-pages/man2/connect.2.html>
+// - <https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect>
+// - <https://man.freebsd.org/cgi/man.cgi?connect>
 extern bool udp_method_udp_socket_stream(udp_borrow_udp_socket_t self, udp_ip_socket_address_t *maybe_remote_address, udp_tuple2_own_incoming_datagram_stream_own_outgoing_datagram_stream_t *ret, udp_error_code_t *err);
 extern bool udp_method_udp_socket_local_address(udp_borrow_udp_socket_t self, udp_ip_socket_address_t *ret, udp_error_code_t *err);
 extern bool udp_method_udp_socket_remote_address(udp_borrow_udp_socket_t self, udp_ip_socket_address_t *ret, udp_error_code_t *err);
@@ -1000,14 +1107,74 @@ extern bool tcp_method_tcp_socket_set_receive_buffer_size(tcp_borrow_tcp_socket_
 extern bool tcp_method_tcp_socket_send_buffer_size(tcp_borrow_tcp_socket_t self, uint64_t *ret, tcp_error_code_t *err);
 extern bool tcp_method_tcp_socket_set_send_buffer_size(tcp_borrow_tcp_socket_t self, uint64_t value, tcp_error_code_t *err);
 extern tcp_own_pollable_t tcp_method_tcp_socket_subscribe(tcp_borrow_tcp_socket_t self);
+// Initiate a graceful shutdown.
+// 
+// - `receive`: The socket is not expecting to receive any data from
+// the peer. The `input-stream` associated with this socket will be
+// closed. Any data still in the receive queue at time of calling
+// this method will be discarded.
+// - `send`: The socket has no more data to send to the peer. The `output-stream`
+// associated with this socket will be closed and a FIN packet will be sent.
+// - `both`: Same effect as `receive` & `send` combined.
+// 
+// This function is idempotent. Shutting a down a direction more than once
+// has no effect and returns `ok`.
+// 
+// The shutdown function does not close (drop) the socket.
+// 
+// # Typical errors
+// - `invalid-state`: The socket is not in the `connected` state. (ENOTCONN)
+// 
+// # References
+// - <https://pubs.opengroup.org/onlinepubs/9699919799/functions/shutdown.html>
+// - <https://man7.org/linux/man-pages/man2/shutdown.2.html>
+// - <https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-shutdown>
+// - <https://man.freebsd.org/cgi/man.cgi?query=shutdown&sektion=2>
 extern bool tcp_method_tcp_socket_shutdown(tcp_borrow_tcp_socket_t self, tcp_shutdown_type_t shutdown_type, tcp_error_code_t *err);
 
 // Imported Functions from `wasi:sockets/tcp-create-socket@0.2.0`
 extern bool tcp_create_socket_create_tcp_socket(tcp_create_socket_ip_address_family_t address_family, tcp_create_socket_own_tcp_socket_t *ret, tcp_create_socket_error_code_t *err);
 
 // Imported Functions from `wasi:sockets/ip-name-lookup@0.2.0`
+// Returns the next address from the resolver.
+// 
+// This function should be called multiple times. On each call, it will
+// return the next address in connection order preference. If all
+// addresses have been exhausted, this function returns `none`.
+// 
+// This function never returns IPv4-mapped IPv6 addresses.
+// 
+// # Typical errors
+// - `name-unresolvable`:          Name does not exist or has no suitable associated IP addresses. (EAI_NONAME, EAI_NODATA, EAI_ADDRFAMILY)
+// - `temporary-resolver-failure`: A temporary failure in name resolution occurred. (EAI_AGAIN)
+// - `permanent-resolver-failure`: A permanent failure in name resolution occurred. (EAI_FAIL)
+// - `would-block`:                A result is not available yet. (EWOULDBLOCK, EAGAIN)
 extern bool ip_name_lookup_method_resolve_address_stream_resolve_next_address(ip_name_lookup_borrow_resolve_address_stream_t self, ip_name_lookup_option_ip_address_t *ret, ip_name_lookup_error_code_t *err);
+// Create a `pollable` which will resolve once the stream is ready for I/O.
+// 
+// Note: this function is here for WASI Preview2 only.
+// It's planned to be removed when `future` is natively supported in Preview3.
 extern ip_name_lookup_own_pollable_t ip_name_lookup_method_resolve_address_stream_subscribe(ip_name_lookup_borrow_resolve_address_stream_t self);
+// Resolve an internet host name to a list of IP addresses.
+// 
+// Unicode domain names are automatically converted to ASCII using IDNA encoding.
+// If the input is an IP address string, the address is parsed and returned
+// as-is without making any external requests.
+// 
+// See the wasi-socket proposal README.md for a comparison with getaddrinfo.
+// 
+// This function never blocks. It either immediately fails or immediately
+// returns successfully with a `resolve-address-stream` that can be used
+// to (asynchronously) fetch the results.
+// 
+// # Typical errors
+// - `invalid-argument`: `name` is a syntactically invalid domain name or IP address.
+// 
+// # References:
+// - <https://pubs.opengroup.org/onlinepubs/9699919799/functions/getaddrinfo.html>
+// - <https://man7.org/linux/man-pages/man3/getaddrinfo.3.html>
+// - <https://learn.microsoft.com/en-us/windows/win32/api/ws2tcpip/nf-ws2tcpip-getaddrinfo>
+// - <https://man.freebsd.org/cgi/man.cgi?query=getaddrinfo&sektion=3>
 extern bool ip_name_lookup_resolve_addresses(ip_name_lookup_borrow_network_t network, wasip2_string_t *name, ip_name_lookup_own_resolve_address_stream_t *ret, ip_name_lookup_error_code_t *err);
 
 // Imported Functions from `wasi:random/random@0.2.0`

@@ -78,6 +78,7 @@ void wasip3_backpressure_dec(void);
 void* wasip3_context_get_0(void);
 void wasip3_context_set_0(void* value);
 void wasip3_thread_yield(void);
+<<<<<<< HEAD
 
 
 void* wasip3_context_get_1(void);
@@ -92,6 +93,8 @@ void wasip3_thread_yield_to(uint32_t thread);
 uint32_t wasip3_thread_yield_to_cancellable(uint32_t thread);
 void wasip3_thread_suspend(void);
 uint32_t wasip3_thread_suspend_cancellable(void);
+=======
+>>>>>>> sy/wasip3-bindings
 
 
 

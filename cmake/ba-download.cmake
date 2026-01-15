@@ -60,14 +60,13 @@ function(ba_download target repo version)
     if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
       set(chmod_cmd "")
     else()
-      set(chmod_cmd chmod +x <DOWNLOAD_DIR>/wkg)
+      set(chmod_cmd chmod +x <DOWNLOADED_FILE>)
     endif()
     ExternalProject_Add(
       ${target}
       EXCLUDE_FROM_ALL ON
       URL "${repo}/releases/download/${tag}/${target}-${arch}-${os}"
       DOWNLOAD_NO_EXTRACT ON
-      DOWNLOAD_NAME wkg-bin
       CONFIGURE_COMMAND ${chmod_cmd}
       BUILD_COMMAND ""
       INSTALL_COMMAND ""

@@ -61,8 +61,8 @@ if (NOT WKG_EXECUTABLE)
     "https://github.com/bytecodealliance/wasm-pkg-tools"
     "0.13.0"
   )
-  ExternalProject_Get_Property(wkg DOWNLOAD_DIR)
-  set(wkg_bin "${DOWNLOAD_DIR}/wkg-bin")
+  ExternalProject_Get_Property(wkg DOWNLOADED_FILE)
+  set(wkg_bin "${DOWNLOADED_FILE}")
 else()
   add_custom_target(wkg)
   set(wkg_bin ${WKG_EXECUTABLE})
@@ -76,8 +76,9 @@ file(MAKE_DIRECTORY ${wasip2_wit_dir})
 configure_file(${CMAKE_SOURCE_DIR}/wasi/wasi-libc-wasip2.wit.in ${wasip2_wit_dir}/wasi-libc-wasip2.wit)
 add_custom_target(
   wasip2-wits
-  COMMAND ${wkg} wit fetch
+  COMMAND ${wkg_bin} wit fetch
   WORKING_DIRECTORY ${wasip2_wit_dir}/..
+  DEPENDS wkg
 )
 add_custom_target(
   bindings-p2
@@ -129,6 +130,7 @@ add_custom_target(
   wasip3-wits
   COMMAND ${wkg_bin} wit fetch
   WORKING_DIRECTORY ${wasip3_wit_dir}/..
+  DEPENDS wkg
 )
 add_custom_target(
   bindings-p3
@@ -161,7 +163,7 @@ add_custom_target(
   COMMAND cmake -E copy wasip3.h ${bottom_half}/headers/public/wasi/__generated_wasip3.h
   COMMAND cmake -E copy wasip3_component_type.o ${bottom_half}/sources
   COMMAND cmake -E copy wasip3.c ${bottom_half}/sources
-  DEPENDS wit-bindgen wkg wasip3-wits
+  DEPENDS wit-bindgen wasip3-wits
 )
 
 add_custom_target(bindings DEPENDS bindings-p2 bindings-p3)

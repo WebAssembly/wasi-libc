@@ -55,7 +55,7 @@ endif()
 if (NOT WKG_EXECUTABLE)
   include(ba-download)
   ba_download(
-    wit-bindgen
+    wkg
     "https://github.com/bytecodealliance/wasm-pkg-tools"
     "0.13.0"
   )

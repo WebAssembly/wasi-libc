@@ -56,7 +56,8 @@ function(ba_download target repo version)
   message(STATUS "Using ${target} ${version} for ${arch}-${os} from ${repo}")
 
   if (target STREQUAL wkg)
-   if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+    # wkg ships a binary rather than an archive
+    if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
       set(chmod_cmd "")
     else()
       set(chmod_cmd chmod +x <DOWNLOAD_DIR>/wkg)

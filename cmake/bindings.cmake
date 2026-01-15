@@ -61,8 +61,7 @@ if (NOT WKG_EXECUTABLE)
     "https://github.com/bytecodealliance/wasm-pkg-tools"
     "0.13.0"
   )
-  ExternalProject_Get_Property(wkg DOWNLOADED_FILE)
-  set(wkg_bin "${DOWNLOADED_FILE}")
+  # wkg_bin is set by ba_download
 else()
   add_custom_target(wkg)
   set(wkg_bin ${WKG_EXECUTABLE})
@@ -74,12 +73,16 @@ set(wasip2_wit_dir ${CMAKE_CURRENT_BINARY_DIR}/wasi/p2/wit)
 set(wasip2-version 0.2.0)
 file(MAKE_DIRECTORY ${wasip2_wit_dir})
 configure_file(${CMAKE_SOURCE_DIR}/wasi/wasi-libc-wasip2.wit.in ${wasip2_wit_dir}/wasi-libc-wasip2.wit)
-add_custom_target(
-  wasip2-wits
+set(wasip2_stamp ${CMAKE_CURRENT_BINARY_DIR}/wasi/p2/.wit-fetch-stamp)
+add_custom_command(
+  OUTPUT ${wasip2_stamp}
   COMMAND ${wkg_bin} wit fetch
+  COMMAND ${CMAKE_COMMAND} -E touch ${wasip2_stamp}
   WORKING_DIRECTORY ${wasip2_wit_dir}/..
-  DEPENDS wkg
+  DEPENDS wkg ${wasip2_wit_dir}/wasi-libc-wasip2.wit
+  COMMENT "Fetching WASI P2 dependencies"
 )
+add_custom_target(wasip2-wits DEPENDS ${wasip2_stamp})
 add_custom_target(
   bindings-p2
   COMMAND
@@ -126,12 +129,16 @@ set(wasip3_wit_dir ${CMAKE_CURRENT_BINARY_DIR}/wasi/p3/wit)
 set(wasip3-version 0.3.0-rc-2026-01-06)
 file(MAKE_DIRECTORY ${wasip3_wit_dir})
 configure_file(${CMAKE_SOURCE_DIR}/wasi/wasi-libc-wasip3.wit.in ${wasip3_wit_dir}/wasi-libc-wasip3.wit)
-add_custom_target(
-  wasip3-wits
+set(wasip3_stamp ${CMAKE_CURRENT_BINARY_DIR}/wasi/p3/.wit-fetch-stamp)
+add_custom_command(
+  OUTPUT ${wasip3_stamp}
   COMMAND ${wkg_bin} wit fetch
+  COMMAND ${CMAKE_COMMAND} -E touch ${wasip3_stamp}
   WORKING_DIRECTORY ${wasip3_wit_dir}/..
-  DEPENDS wkg
+  DEPENDS wkg ${wasip3_wit_dir}/wasi-libc-wasip3.wit
+  COMMENT "Fetching WASI P3 dependencies"
 )
+add_custom_target(wasip3-wits DEPENDS ${wasip3_stamp})
 add_custom_target(
   bindings-p3
   COMMAND

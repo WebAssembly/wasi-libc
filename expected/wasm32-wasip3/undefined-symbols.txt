@@ -1,9 +1,8 @@
 __addtf3
 __backpressure_dec
 __backpressure_inc
-__backpressure_set
-__context_get
-__context_set
+__context_get_0
+__context_set_0
 __data_end
 __divtf3
 __eqtf2
@@ -28,7 +27,6 @@ __subtask_drop
 __subtf3
 __task_cancel
 __thread_yield
-__thread_yield_cancellable
 __trunctfdf2
 __trunctfsf2
 __unordtf2
@@ -129,8 +127,8 @@ __wasm_import_terminal_output_terminal_output_drop
 __wasm_import_terminal_stderr_get_terminal_stderr
 __wasm_import_terminal_stdin_get_terminal_stdin
 __wasm_import_terminal_stdout_get_terminal_stdout
-__wasm_import_wall_clock_get_resolution
-__wasm_import_wall_clock_now
+__wasm_import_wasi_clocks_system_clock_get_resolution
+__wasm_import_wasi_clocks_system_clock_now
 filesystem_future_result_void_error_code__cancel_read
 filesystem_future_result_void_error_code__cancel_write
 filesystem_future_result_void_error_code__drop_readable

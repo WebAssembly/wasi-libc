@@ -18,8 +18,11 @@
 
 #if defined(__wasip1__)
 typedef __wasi_timestamp_t wasilibc_timestamp_t;
-#elif defined(__wasip2__) || defined(__wasip3__)
+#elif defined(__wasip2__)
 typedef wall_clock_datetime_t wasilibc_timestamp_t;
+#elif defined(__wasip3__)
+typedef filesystem_instant_t wasilibc_timestamp_t;
+typedef monotonic_clock_mark_t monotonic_clock_instant_t;
 #else
 # error "Unknown WASI version"
 #endif
@@ -30,15 +33,17 @@ static inline bool timespec_to_timestamp_exact(
   if (timespec->tv_nsec < 0 || timespec->tv_nsec >= NSEC_PER_SEC)
     return false;
 
+  #if defined(__wasip1__) || defined(__wasip2__)
   // Timestamps before the Epoch are not supported.
   if (timespec->tv_sec < 0)
     return false;
+  #endif
 
 #if defined(__wasip1__)
   // Make sure our timestamp does not overflow.
   return !__builtin_mul_overflow(timespec->tv_sec, NSEC_PER_SEC, timestamp) &&
          !__builtin_add_overflow(*timestamp, timespec->tv_nsec, timestamp);
-#elif defined(__wasip2__) || defined(__wasip3__)
+#elif defined(__wasip2__) | defined(__wasip3__)
   timestamp->seconds = timespec->tv_sec;
   timestamp->nanoseconds = timespec->tv_nsec;
   return true;
@@ -62,7 +67,7 @@ static inline bool timespec_to_timestamp_clamp(
     // Make sure our timestamp does not overflow.
     *timestamp = NUMERIC_MAX(__wasi_timestamp_t);
   }
-#elif defined(__wasip2__) || defined(__wasip3__)
+#elif defined(__wasip2__) 
   if (timespec->tv_sec < 0) {
     // Timestamps before the Epoch are not supported.
     timestamp->seconds = 0;
@@ -71,6 +76,9 @@ static inline bool timespec_to_timestamp_clamp(
     timestamp->seconds = timespec->tv_sec;
     timestamp->nanoseconds = timespec->tv_nsec;
   }
+#elif defined(__wasip3__)
+    timestamp->seconds = timespec->tv_sec;
+    timestamp->nanoseconds = timespec->tv_nsec;
 #else
 # error "Unknown WASI version"
 #endif
@@ -95,7 +103,13 @@ static inline struct timeval timestamp_to_timeval(
 #elif defined(__wasip2__) || defined(__wasip3__)
 
 static inline struct timespec timestamp_to_timespec(
-  wall_clock_datetime_t *timestamp) {
+  wasilibc_timestamp_t *timestamp) {
+#if defined(__wasip2__)
+  // Check for overflow when converting unsigned to signed
+  if (timestamp->seconds > INT64_MAX) {
+    return (struct timespec){.tv_sec = INT64_MAX, .tv_nsec = NSEC_PER_SEC - 1};
+  }
+#endif
   return (struct timespec){.tv_sec = timestamp->seconds,
                            .tv_nsec = timestamp->nanoseconds};
 }
@@ -155,7 +169,13 @@ static inline bool timeval_to_duration(
 }
 
 static inline struct timeval timestamp_to_timeval(
-  wall_clock_datetime_t *timestamp) {
+  wasilibc_timestamp_t *timestamp) {
+  #if defined(__wasip2__)
+  // Check for overflow when converting unsigned to signed
+  if (timestamp->seconds > INT64_MAX) {
+    return (struct timeval){.tv_sec = INT64_MAX, .tv_usec = USEC_PER_SEC - 1};
+  }
+  #endif
   return (struct timeval){.tv_sec = timestamp->seconds,
                           .tv_usec = timestamp->nanoseconds / 1000};
 }

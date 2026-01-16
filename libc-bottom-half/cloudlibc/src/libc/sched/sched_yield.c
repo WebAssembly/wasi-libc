@@ -13,7 +13,10 @@ int sched_yield(void) {
     errno = error;
     return -1;
   }
-#endif
+#elif defined(__wasip3__)
+  wasip3_thread_yield();
   return 0;
+#else
+  return 0;
+#endif
 }
-

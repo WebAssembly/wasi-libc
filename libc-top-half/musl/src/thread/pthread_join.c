@@ -35,7 +35,7 @@ int __pthread_join(pthread_t t, void **res)
 {	
 	#ifdef __wasip3__
 	if (t->detach_state != DT_EXITED) {
-		t->joining_tid = __pthread_self()->tid;
+		t->joining_tid = wasip3_thread_index();
 		wasip3_thread_switch_to(t->tid);
 	}
 	if (res) *res = t->result;

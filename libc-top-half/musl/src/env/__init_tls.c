@@ -113,7 +113,10 @@ int __init_tp(void *p)
 	td->stack = bounds.base;
 	td->stack_size = bounds.size;
 	td->guard_size = 0;
-#ifdef _REENTRANT
+#if defined(__wasip3__)
+	td->detach_state = DT_JOINABLE;
+	td->tid = wasip3_thread_index();
+#elif defined(_REENTRANT)
 	td->detach_state = DT_JOINABLE;
 	/*
 	 * Initialize the TID to a value which doesn't conflict with

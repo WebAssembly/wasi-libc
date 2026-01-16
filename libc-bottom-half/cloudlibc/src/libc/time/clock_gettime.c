@@ -29,7 +29,7 @@ int __clock_gettime(clockid_t clock_id, struct timespec *tp) {
     #ifdef __wasip2__
     wall_clock_now(&time_result);
     #else
-    wasi_clocks_system_clock_now(&time_result);
+    system_clock_now(&time_result);
     #endif
     *tp = timestamp_to_timespec(&time_result);
   } else {

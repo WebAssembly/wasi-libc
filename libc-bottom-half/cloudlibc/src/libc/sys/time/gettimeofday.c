@@ -17,8 +17,8 @@ int gettimeofday(struct timeval *restrict tp, void *tz) {
     wall_clock_now(&time_result);
     *tp = timestamp_to_timeval(&time_result);
 #elif defined(__wasip3__)
-    wasi_clocks_system_clock_instant_t time_result;
-    wasi_clocks_system_clock_now(&time_result);
+    system_clock_instant_t time_result;
+    system_clock_now(&time_result);
     *tp = timestamp_to_timeval(&time_result);
 #else
 # error "Unsupported WASI version"

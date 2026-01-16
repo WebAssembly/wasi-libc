@@ -1,0 +1,11 @@
+package wasi-libc:wasip2;
+
+world wasip2 {
+    include wasi:cli/command@${wasip2-version};
+    include wasi:clocks/imports@${wasip2-version};
+    include wasi:filesystem/imports@${wasip2-version};
+    include wasi:http/proxy@${wasip2-version};
+    include wasi:random/imports@${wasip2-version};
+    include wasi:io/imports@${wasip2-version};
+    include wasi:sockets/imports@${wasip2-version};
+}

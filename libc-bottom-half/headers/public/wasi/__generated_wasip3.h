@@ -197,7 +197,7 @@ typedef wasi_clocks_types_duration_t monotonic_clock_duration_t;
 // the same monotonic-clock.
 typedef uint64_t monotonic_clock_mark_t;
 
-typedef wasi_clocks_types_duration_t wasi_clocks_system_clock_duration_t;
+typedef wasi_clocks_types_duration_t system_clock_duration_t;
 
 // An "instant", or "exact time", is a point in time without regard to any
 // time zone: just the time since a particular external reference point,
@@ -215,12 +215,12 @@ typedef wasi_clocks_types_duration_t wasi_clocks_system_clock_duration_t;
 // 
 // [POSIX's Seconds Since the Epoch]: https://pubs.opengroup.org/onlinepubs/9699919799/xrat/V4_xbd_chap04.html#tag_21_04_16
 // [Unix Time]: https://en.wikipedia.org/wiki/Unix_time
-typedef struct wasi_clocks_system_clock_instant_t {
+typedef struct system_clock_instant_t {
   int64_t   seconds;
   uint32_t   nanoseconds;
-} wasi_clocks_system_clock_instant_t;
+} system_clock_instant_t;
 
-typedef wasi_clocks_system_clock_instant_t filesystem_instant_t;
+typedef system_clock_instant_t filesystem_instant_t;
 
 // File size or length of a region within a file.
 typedef uint64_t filesystem_filesize_t;
@@ -1009,10 +1009,10 @@ extern wasip3_subtask_status_t monotonic_clock_wait_for(monotonic_clock_duration
 // will not necessarily produce a sequence of non-decreasing values.
 // 
 // The nanoseconds field of the output is always less than 1000000000.
-extern void wasi_clocks_system_clock_now(wasi_clocks_system_clock_instant_t *ret);
+extern void system_clock_now(system_clock_instant_t *ret);
 // Query the resolution of the clock. Returns the smallest duration of time
 // that the implementation permits distinguishing.
-extern wasi_clocks_system_clock_duration_t wasi_clocks_system_clock_get_resolution(void);
+extern system_clock_duration_t system_clock_get_resolution(void);
 
 // Imported Functions from `wasi:filesystem/types@0.3.0-rc-2026-01-06`
 // Return a stream for reading from a file.

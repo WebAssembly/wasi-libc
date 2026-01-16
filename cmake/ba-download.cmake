@@ -57,25 +57,21 @@ function(ba_download target repo version)
 
   if (target STREQUAL wkg)
     # wkg ships a single binary rather than an archive
-    set(download_path "${CMAKE_CURRENT_BINARY_DIR}/${target}")
-    set(url "${repo}/releases/download/${tag}/${target}-${arch}-${os}")
-    
-    if (NOT EXISTS "${download_path}")
-      message(STATUS "Downloading ${target} from ${url}")
-      file(DOWNLOAD "${url}" "${download_path}" STATUS download_status)
-      list(GET download_status 0 status_code)
-      if (NOT status_code EQUAL 0)
-        list(GET download_status 1 error_message)
-        message(FATAL_ERROR "Failed to download ${target}: ${error_message}")
-      endif()
-      
-      if (NOT CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-        execute_process(COMMAND chmod +x "${download_path}")
-      endif()
+    if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+      set(chmod_cmd "")
+    else()
+      set(chmod_cmd COMMAND chmod +x <DOWNLOADED_FILE>)
     endif()
     
-    add_custom_target(${target})
-    set(${target}_bin "${download_path}" PARENT_SCOPE)
+    ExternalProject_Add(
+      ${target}
+      EXCLUDE_FROM_ALL ON
+      URL "${repo}/releases/download/${tag}/${target}-${arch}-${os}"
+      DOWNLOAD_NO_EXTRACT ON
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND ${chmod_cmd}
+      INSTALL_COMMAND ""
+    )
   else()
     ExternalProject_Add(
       ${target}

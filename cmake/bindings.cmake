@@ -61,7 +61,8 @@ if (NOT WKG_EXECUTABLE)
     "https://github.com/bytecodealliance/wasm-pkg-tools"
     "0.13.0"
   )
-  # wkg_bin is set by ba_download
+  ExternalProject_Get_Property(wkg DOWNLOADED_FILE)
+  set(wkg_bin ${DOWNLOADED_FILE})
 else()
   add_custom_target(wkg)
   set(wkg_bin ${WKG_EXECUTABLE})
@@ -148,7 +149,7 @@ add_custom_target(
       --type-section-suffix __wasi_libc
       --world wasi:cli/imports@${wasip3-version}
       --rename wasi:clocks/monotonic-clock@${wasip3-version}=monotonic_clock
-      --rename wasi:clocks/wall-clock@${wasip3-version}=wall_clock
+      --rename wasi:clocks/system-clock@${wasip3-version}=system_clock
       --rename wasi:filesystem/preopens@${wasip3-version}=filesystem_preopens
       --rename wasi:filesystem/types@${wasip3-version}=filesystem
       --rename wasi:random/insecure-seed@${wasip3-version}=random_insecure_seed
@@ -175,18 +176,18 @@ add_custom_target(
 
 add_custom_target(bindings DEPENDS bindings-p2 bindings-p3)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-  set(SED_INPLACE_FLAG "''")
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+  set(SED_INPLACE_ARGS -i '')
 else()
-  set(SED_INPLACE_FLAG "")
+  set(SED_INPLACE_ARGS -i)
 endif()
 
 function(wit_bindgen_edit p)
   add_custom_target(
     bindings-${p}-edit
-    COMMAND sed -i ${SED_INPLACE_FLAG} "'s_#include .wasi${p}\.h._#include \"wasi/wasi${p}.h\"_'" ${bottom_half}/sources/wasi${p}.c
-    COMMAND sed -i ${SED_INPLACE_FLAG} "s/extern void exit_exit/_Noreturn extern void exit_exit/" ${bottom_half}/headers/public/wasi/__generated_wasi${p}.h
-    COMMAND sed -i ${SED_INPLACE_FLAG} "s/extern void __wasm_import_exit_exit/_Noreturn extern void __wasm_import_exit_exit/" ${bottom_half}/sources/wasi${p}.c
+    COMMAND sed ${SED_INPLACE_ARGS} "'s_#include .wasi${p}\.h._#include \"wasi/wasi${p}.h\"_'" ${bottom_half}/sources/wasi${p}.c
+    COMMAND sed ${SED_INPLACE_ARGS} "s/extern void exit_exit/_Noreturn extern void exit_exit/" ${bottom_half}/headers/public/wasi/__generated_wasi${p}.h
+    COMMAND sed ${SED_INPLACE_ARGS} "s/extern void __wasm_import_exit_exit/_Noreturn extern void __wasm_import_exit_exit/" ${bottom_half}/sources/wasi${p}.c
     DEPENDS bindings-${p}
   )
   add_dependencies(bindings bindings-${p}-edit)

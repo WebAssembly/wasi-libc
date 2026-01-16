@@ -66,10 +66,10 @@ extern int32_t __wasm_import_monotonic_clock_wait_for(int64_t);
 // Imported Functions from `wasi:clocks/system-clock@0.3.0-rc-2026-01-06`
 
 __attribute__((__import_module__("wasi:clocks/system-clock@0.3.0-rc-2026-01-06"), __import_name__("now")))
-extern void __wasm_import_wasi_clocks_system_clock_now(uint8_t *);
+extern void __wasm_import_system_clock_now(uint8_t *);
 
 __attribute__((__import_module__("wasi:clocks/system-clock@0.3.0-rc-2026-01-06"), __import_name__("get-resolution")))
-extern int64_t __wasm_import_wasi_clocks_system_clock_get_resolution(void);
+extern int64_t __wasm_import_system_clock_get_resolution(void);
 
 // Imported Functions from `wasi:filesystem/types@0.3.0-rc-2026-01-06`
 
@@ -1292,19 +1292,19 @@ wasip3_subtask_status_t monotonic_clock_wait_for(monotonic_clock_duration_t how_
   return __wasm_import_monotonic_clock_wait_for((int64_t) (how_long));
 }
 
-void wasi_clocks_system_clock_now(wasi_clocks_system_clock_instant_t *ret) {
+void system_clock_now(system_clock_instant_t *ret) {
   __attribute__((__aligned__(8)))
   uint8_t ret_area[16];
   uint8_t *ptr = (uint8_t *) &ret_area;
-  __wasm_import_wasi_clocks_system_clock_now(ptr);
-  *ret = (wasi_clocks_system_clock_instant_t) {
+  __wasm_import_system_clock_now(ptr);
+  *ret = (system_clock_instant_t) {
     (int64_t) *((int64_t*) (ptr + 0)),
     (uint32_t) (uint32_t) (*((int32_t*) (ptr + 8))),
   };
 }
 
-wasi_clocks_system_clock_duration_t wasi_clocks_system_clock_get_resolution(void) {
-  int64_t ret = __wasm_import_wasi_clocks_system_clock_get_resolution();
+system_clock_duration_t system_clock_get_resolution(void) {
+  int64_t ret = __wasm_import_system_clock_get_resolution();
   return (uint64_t) (ret);
 }
 

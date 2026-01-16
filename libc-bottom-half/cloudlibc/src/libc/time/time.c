@@ -16,8 +16,8 @@ time_t time(time_t *tloc) {
   uint64_t ts = (res.seconds * NSEC_PER_SEC) + res.nanoseconds;
 #elif defined(__wasip3__)
   wasilibc_timestamp_t res;
-  wasi_clocks_system_clock_now(&res);
-  uint64_t ts = (res.seconds * NSEC_PER_SEC) + res.nanoseconds;
+  system_clock_now(&res);
+  time_t ts = (res.seconds * NSEC_PER_SEC) + res.nanoseconds;
 #else
 # error "Unsupported WASI version"
 #endif

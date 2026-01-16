@@ -58,20 +58,30 @@ function(ba_download target repo version)
   if (target STREQUAL wkg)
     # wkg ships a single binary rather than an archive
     if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-      set(chmod_cmd ${CMAKE_COMMAND} -E true)
+      set(download_name "${target}-${arch}-${os}.exe")
     else()
-      set(chmod_cmd chmod +x <DOWNLOADED_FILE>)
+      set(download_name "${target}-${arch}-${os}")
     endif()
-    
     ExternalProject_Add(
       ${target}
       EXCLUDE_FROM_ALL ON
       URL "${repo}/releases/download/${tag}/${target}-${arch}-${os}"
       DOWNLOAD_NO_EXTRACT ON
+      DOWNLOAD_NAME ${download_name}
       CONFIGURE_COMMAND ""
-      BUILD_COMMAND ${chmod_cmd}
+      BUILD_COMMAND ""
       INSTALL_COMMAND ""
     )
+    
+    # Make the binary executable on Unix-like systems
+    if (NOT CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+      ExternalProject_Add_Step(
+        ${target} chmod-executable
+        COMMAND chmod +x <DOWNLOADED_FILE>
+        DEPENDEES download
+        DEPENDERS build
+      )
+    endif()
   else()
     ExternalProject_Add(
       ${target}

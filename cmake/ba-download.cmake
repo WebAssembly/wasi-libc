@@ -58,9 +58,9 @@ function(ba_download target repo version)
   if (target STREQUAL wkg)
     # wkg ships a single binary rather than an archive
     if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-      set(chmod_cmd "")
+      set(chmod_cmd ${CMAKE_COMMAND} -E true)
     else()
-      set(chmod_cmd COMMAND chmod +x <DOWNLOADED_FILE>)
+      set(chmod_cmd chmod +x <DOWNLOADED_FILE>)
     endif()
     
     ExternalProject_Add(

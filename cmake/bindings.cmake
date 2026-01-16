@@ -77,6 +77,7 @@ configure_file(${CMAKE_SOURCE_DIR}/wasi/wasi-libc-wasip2.wit.in ${wasip2_wit_dir
 set(wasip2_stamp ${CMAKE_CURRENT_BINARY_DIR}/wasi/p2/.wit-fetch-stamp)
 add_custom_command(
   OUTPUT ${wasip2_stamp}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/wasi/p2
   COMMAND ${wkg_bin} wit fetch
   COMMAND ${CMAKE_COMMAND} -E touch ${wasip2_stamp}
   WORKING_DIRECTORY ${wasip2_wit_dir}/..
@@ -133,6 +134,7 @@ configure_file(${CMAKE_SOURCE_DIR}/wasi/wasi-libc-wasip3.wit.in ${wasip3_wit_dir
 set(wasip3_stamp ${CMAKE_CURRENT_BINARY_DIR}/wasi/p3/.wit-fetch-stamp)
 add_custom_command(
   OUTPUT ${wasip3_stamp}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/wasi/p3
   COMMAND ${wkg_bin} wit fetch
   COMMAND ${CMAKE_COMMAND} -E touch ${wasip3_stamp}
   WORKING_DIRECTORY ${wasip3_wit_dir}/..

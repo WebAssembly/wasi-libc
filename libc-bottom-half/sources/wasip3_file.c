@@ -2,11 +2,133 @@
 #include <wasi/api.h>
 
 #ifdef __wasip3__
+#include <assert.h>
+#include <common/errors.h>
+#include <libc/sys/stat/stat_impl.h>
+#include <wasi/descriptor_table.h>
+#include <wasi/file_utils.h>
+#include <wasi/wasip3_block.h>
+
+typedef struct {
+  filesystem_own_descriptor_t file_handle;
+  off_t offset;
+  int oflag;
+  filesystem_tuple2_stream_u8_future_result_void_error_code_t read;
+  filesystem_stream_u8_writer_t write;
+  wasip3_subtask_status_t write_task;
+  filesystem_result_void_error_code_t write_error;
+} file3_t;
+
+static void file_close_streams(void *data) {
+  file3_t *file = (file3_t *)data;
+  if (file->read.f0!=0) {
+  filesystem_stream_u8_drop_readable(file->read.f0);
+  filesystem_future_result_void_error_code_drop_readable(file->read.f1);
+  }
+  if (file->write!=0) {
+  sockets_stream_u8_drop_writable(file->write);
+  wasip3_subtask_cancel(file->write_task);
+  }
+}
+
+static void file_free(void *data) {
+  file3_t *file = (file3_t *)data;
+  file_close_streams(data);
+  filesystem_descriptor_drop_own(file->file_handle);
+  free(file);
+}
+
+static int file_get_file(void *data, filesystem_borrow_descriptor_t *out_file) {
+  file3_t *file = (file3_t *)data;
+  *out_file = filesystem_borrow_descriptor(file->file_handle);
+  return 0;
+}
+
+static int file_fstat(void *data, struct stat *buf) {
+  file3_t *file = (file3_t *)data;
+  // Get the metadata hash for the file descriptor
+  filesystem_result_metadata_hash_value_error_code_t result;
+  wasip3_subtask_status_t status = filesystem_method_descriptor_metadata_hash(
+      filesystem_borrow_descriptor(file->file_handle), &result);
+  wasip3_subtask_block_on(status);
+  if (result.is_err) {
+    translate_error(result.val.err);
+    return -1;
+  }
+
+  // Get the file metadata
+  filesystem_result_descriptor_stat_error_code_t stat_result;
+  status = filesystem_method_descriptor_stat(
+      filesystem_borrow_descriptor(file->file_handle), &stat_result);
+  wasip3_subtask_block_on(status);
+  if (stat_result.is_err) {
+    translate_error(stat_result.val.err);
+    return -1;
+  }
+
+  // Convert the internal data to an external struct
+  to_public_stat(&result.val.ok, &stat_result.val.ok, buf);
+  return 0;
+}
+
+static int file_seek_end(file3_t *file) { abort(); }
+
+static off_t file_seek(void *data, off_t offset, int whence) { abort(); }
+
+static int file_set_blocking(void *data, bool blocking) { abort(); }
+
+static int file_fcntl_getfl(void *data) { abort(); }
+
+static int file_fcntl_setfl(void *data, int flags) { abort(); }
+
+static int file_read_stream(void *data, void *buf, size_t nbyte,
+                            waitable_t *waitable, wasip3_waitable_status_t *out,
+                            off_t **offs) {
+  file3_t *file = (file3_t *)data;
+  if (file->read.f0==0) {
+    filesystem_method_descriptor_read_via_stream(
+        filesystem_borrow_descriptor(file->file_handle), file->offset, &file->read);
+  }
+  *waitable = file->read.f0;
+  *out = filesystem_stream_u8_read(file->read.f0, buf, nbyte);
+  *offs = &file->offset;
+  return 0;
+}
+
+static descriptor_vtable_t file_vtable = {
+    .free = file_free,
+    .get_file = file_get_file,
+    .set_blocking = file_set_blocking,
+    .fstat = file_fstat,
+    .seek = file_seek,
+    .close_streams = file_close_streams,
+    .fcntl_getfl = file_fcntl_getfl,
+    .fcntl_setfl = file_fcntl_setfl,
+    .read3 = file_read_stream,
+};
 
 int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
-  // TODO(wasip3)
-  errno = EOPNOTSUPP;
-  return -1;
+  file3_t *file = calloc(1, sizeof(file3_t));
+  if (!file) {
+    filesystem_descriptor_drop_own(file_handle);
+    errno = ENOMEM;
+    return -1;
+  }
+  assert(file_handle.__handle != 0);
+  file->file_handle = file_handle;
+  file->oflag = oflag;
+
+  // if (oflag == O_WRONLY) {
+  //   filesystem_stream_u8_t write_read = filesystem_stream_u8_new(&file->write);
+  //   file->write_task = filesystem_method_descriptor_write_via_stream(
+  //       filesystem_borrow_descriptor(file_handle), write_read, 0,
+  //       &file->write_error);
+  // }
+
+  descriptor_table_entry_t entry;
+  entry.vtable = &file_vtable;
+  entry.data = file;
+  return descriptor_table_insert(entry);
 }
 
 #endif // __wasip3__

@@ -334,8 +334,6 @@ static int start_c11(void *p)
  */
 void wasip3_thread_start(void *context);
 hidden void *__dummy_reference = wasip3_thread_start;
-void __wasilibc_init_task(void);
-hidden void * __dummy_reference_init_task = __wasilibc_init_task;
 
 hidden void __wasip3_thread_start_C(int tid, void *context)
 {

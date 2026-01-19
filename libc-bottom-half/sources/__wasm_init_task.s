@@ -1,7 +1,7 @@
 	.text
 
-	.export_name	__wasilibc_init_task, __wasilibc_init_task
-    .export_name    __wasilibc_init_task_async, __wasilibc_init_task_async
+	.export_name	__wasm_init_task, __wasm_init_task
+    .export_name    __wasm_init_async_task, __wasm_init_async_task
 
 	.globaltype	__init_stack_pointer, i32
     .globaltype __init_tls_base, i32
@@ -18,13 +18,13 @@
     .functype    malloc (i32) -> (i32)
     .functype   __copy_tls (i32) -> (i32)
 
-	.globl	__wasilibc_init_task
-	.type	__wasilibc_init_task,@function
-    .globl	__wasilibc_init_task_async
-    .type	__wasilibc_init_task_async,@function
+	.globl	__wasm_init_task
+	.type	__wasm_init_task,@function
+    .globl	__wasm_init_async_task
+    .type	__wasm_init_async_task,@function
     
-__wasilibc_init_task:
-	.functype	__wasilibc_init_task () -> ()
+__wasm_init_task:
+	.functype	__wasm_init_task () -> ()
 
     global.get   __init_stack_pointer
 	call __wasm_component_model_builtin_context_set_0
@@ -41,8 +41,8 @@ __wasilibc_init_task:
 
     end_function
 
-__wasilibc_init_task_async:
-    .functype	__wasilibc_init_task_async () -> ()
+__wasm_init_async_task:
+    .functype	__wasm_init_async_task () -> ()
 
     # malloc and __init_tls may use the stack pointer and TLS base, so set those first
     # to the statically-allocated values used for synchronous tasks.

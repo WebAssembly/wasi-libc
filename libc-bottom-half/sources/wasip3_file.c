@@ -71,9 +71,55 @@ static int file_fstat(void *data, struct stat *buf) {
   return 0;
 }
 
-static int file_seek_end(file3_t *file) { abort(); }
+static int file_seek_end(file3_t *file) {
+  filesystem_result_descriptor_stat_error_code_t result;
+  wasip3_subtask_status_t status = filesystem_method_descriptor_stat(
+      filesystem_borrow_descriptor(file->file_handle), &result);
+  wasip3_subtask_block_on(status);
+  if (result.is_err) {
+    translate_error(result.val.err);
+    return -1;
+  }
+  file->offset = (off_t)result.val.ok.size;
+  return 0;
+}
 
-static off_t file_seek(void *data, off_t offset, int whence) { abort(); }
+static off_t file_seek(void *data, off_t offset, int whence) { 
+  file3_t *file = (file3_t *)data;
+
+  // If this file is in append mode, reset our knowledge of the current cursor
+  // to the current end of the file.
+  if ((file->oflag & O_APPEND) && file_seek_end(file) < 0)
+    return -1;
+
+  off_t result;
+  switch (whence) {
+  case SEEK_SET:
+    result = offset;
+    break;
+  case SEEK_CUR:
+    result = file->offset + offset;
+    break;
+  case SEEK_END: {
+    // If we're in append mode we already reset to the end, but if we're not
+    // in append mode then do the reset to the end here.
+    if (!(file->oflag & O_APPEND) && file_seek_end(file) < 0)
+      return -1;
+    result = file->offset + offset;
+    break;
+  }
+  default:
+    errno = EINVAL;
+    return -1;
+  }
+  if (result < 0) {
+    errno = EINVAL;
+    return -1;
+  }
+  file->offset = result;
+  file_close_streams(data);
+  return file->offset;
+}
 
 static int file_set_blocking(void *data, bool blocking) { abort(); }
 

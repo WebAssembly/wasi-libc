@@ -1,8 +1,5 @@
 # Enable turning this rule off entirely if so desired.
 option(BINDINGS_TARGET "Generate bindings target" ON)
-if (NOT BINDINGS_TARGET)
-  return()
-endif()
 
 include(ExternalProject)
 

@@ -333,7 +333,11 @@ static int start_c11(void *p)
  * wasip3_thread_start is used indirectly via a wasm export.
  */
 void wasip3_thread_start(void *context);
+void __wasm_init_task();
+void __wasm_init_async_task();
 hidden void *__dummy_reference = wasip3_thread_start;
+hidden void *__wasm_init_task_reference = __wasm_init_task;
+hidden void *__wasm_init_async_task_reference = __wasm_init_async_task;
 
 hidden void __wasip3_thread_start_C(int tid, void *context)
 {

@@ -55,6 +55,13 @@ static int __wasilibc_poll_add_output_stream(
 
 #endif // __wasip2__
 
+#ifdef __wasip3__
+
+#include <wasi/wasip3.h>
+void wasip3_subtask_block_on(wasip3_subtask_status_t status);
+
+#endif // __wasip3__
+
 #endif // not(__wasip1__)
 
 #endif // WASI_POLL_H

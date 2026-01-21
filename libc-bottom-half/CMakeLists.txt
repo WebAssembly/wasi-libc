@@ -151,7 +151,7 @@ endif()
 
 if(WASI STREQUAL "p2")
   list(APPEND bottom_half_sources
-    sources/netdb.c
+    sources/wasip2_netdb.c
     sources/wasip2.c
     sources/wasip2_file.c
     sources/wasip2_file_utils.c
@@ -163,6 +163,7 @@ endif()
 
 if (WASI STREQUAL "p3")
   list(APPEND bottom_half_sources
+    sources/wasip3_netdb.c
     sources/wasip3.c
     sources/wasip3_file.c
     sources/wasip3_stdio.c

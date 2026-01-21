@@ -51,6 +51,7 @@
 #error "Unknown WASI version"
 #endif
 
+#define SOCK_RAW 3
 #define SOCK_DGRAM 5
 #define SOCK_STREAM 6
 

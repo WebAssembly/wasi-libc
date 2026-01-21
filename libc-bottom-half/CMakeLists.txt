@@ -105,6 +105,7 @@ set(bottom_half_sources
   sources/__wasilibc_rmdirat.c
   sources/__wasilibc_tell.c
   sources/__wasilibc_unlinkat.c
+  sources/__wasm_init_task.s
   sources/abort.c
   sources/at_fdcwd.c
   sources/chdir.c
@@ -150,7 +151,7 @@ endif()
 
 if(WASI STREQUAL "p2")
   list(APPEND bottom_half_sources
-    sources/netdb.c
+    sources/wasip2_netdb.c
     sources/wasip2.c
     sources/wasip2_file.c
     sources/wasip2_file_utils.c
@@ -162,6 +163,7 @@ endif()
 
 if (WASI STREQUAL "p3")
   list(APPEND bottom_half_sources
+    sources/wasip3_netdb.c
     sources/wasip3.c
     sources/wasip3_file.c
     sources/wasip3_stdio.c
@@ -249,7 +251,7 @@ elseif (WASI STREQUAL "p3")
       ${wasm_tools} component embed
         ${wasip3_wit_dir}
         $<TARGET_OBJECTS:crt1-command>
-        --world wasi:cli/command@0.3.0-rc-2025-09-16
+        --world wasi:cli/command@0.3.0-rc-2026-01-06
         -o ${SYSROOT_LIB}/crt1-command.o
     DEPENDS crt1-command wasip3-wits $<TARGET_OBJECTS:crt1-command> wasm-tools
   )

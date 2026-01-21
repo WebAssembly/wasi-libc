@@ -8,6 +8,8 @@
 #include <wasi/api.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
+#include <stdlib.h>
+#include <assert.h>
 
 #if defined(__wasip1__)
 static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
@@ -289,6 +291,24 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;
+}
+
+void wasip3_subtask_block_on(wasip3_subtask_status_t status) {
+  if (status != WASIP3_SUBTASK_RETURNED) {
+    if (WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_STARTED) {
+      wasip3_subtask_t handle = WASIP3_SUBTASK_HANDLE(status);
+      wasip3_waitable_set_t set = wasip3_waitable_set_new();
+      wasip3_waitable_join(handle, set);
+      wasip3_event_t event;
+      wasip3_waitable_set_wait(set, &event);
+      assert(event.event == WASIP3_EVENT_SUBTASK);
+      assert(event.code == WASIP3_SUBTASK_RETURNED);
+      wasip3_subtask_drop(event.waitable);
+      wasip3_waitable_set_drop(set);
+    } else {
+      abort();
+    }
+  }
 }
 
 #else

@@ -32,8 +32,17 @@ static int __pthread_timedjoin_np(pthread_t t, void **res, const struct timespec
 }
 
 int __pthread_join(pthread_t t, void **res)
-{
+{	
+	#ifdef __wasip3__
+	if (t->detach_state != DT_EXITED) {
+		t->joining_tid = wasip3_thread_index();
+		wasip3_thread_switch_to(t->tid);
+	}
+	if (res) *res = t->result;
+	return 0;
+	#else
 	return __pthread_timedjoin_np(t, res, 0);
+	#endif
 }
 
 static int __pthread_tryjoin_np(pthread_t t, void **res)

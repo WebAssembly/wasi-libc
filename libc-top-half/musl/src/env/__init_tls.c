@@ -6,6 +6,7 @@
 #ifdef __wasilibc_unmodified_upstream
 #include <sys/mman.h>
 #endif
+#include <wasi/api.h>
 #include <string.h>
 #include <stddef.h>
 #include "pthread_impl.h"
@@ -40,6 +41,26 @@ struct stack_bounds {
 	size_t size;
 };
 
+static inline unsigned char *get_stack_pointer() {
+	unsigned char *sp;
+#ifdef __wasip3__
+	__asm__(
+		".functype   __wasm_component_model_builtin_context_get_0 () -> (i32)\n"
+		".import_module __wasm_component_model_builtin_context_get_0, \"$root\"\n"
+		".import_name __wasm_component_model_builtin_context_get_0, \"[context-get-0]\"\n"
+		"call __wasm_component_model_builtin_context_get_0\n"
+		"local.set %0\n"
+		: "=r"(sp));
+#else
+	__asm__(
+		".globaltype __stack_pointer, i32\n"
+		"global.get __stack_pointer\n"
+		"local.set %0\n"
+		: "=r"(sp));
+#endif
+	return sp;
+}
+
 static inline struct stack_bounds get_stack_bounds()
 {
 	struct stack_bounds bounds;
@@ -52,12 +73,7 @@ static inline struct stack_bounds get_stack_bounds()
 		 * how wasm-ld lays out things. For pic, just give up.
 		 */
 #if !defined(__pic__)
-		unsigned char *sp;
-		__asm__(
-			".globaltype __stack_pointer, i32\n"
-			"global.get __stack_pointer\n"
-			"local.set %0\n"
-			: "=r"(sp));
+		unsigned char *sp = get_stack_pointer();
 		if (sp > &__global_base) {
 			bounds.base = &__heap_base;
 			bounds.size = &__heap_base - &__data_end;
@@ -97,7 +113,10 @@ int __init_tp(void *p)
 	td->stack = bounds.base;
 	td->stack_size = bounds.size;
 	td->guard_size = 0;
-#ifdef _REENTRANT
+#if defined(__wasip3__)
+	td->detach_state = DT_JOINABLE;
+	td->tid = wasip3_thread_index();
+#elif defined(_REENTRANT)
 	td->detach_state = DT_JOINABLE;
 	/*
 	 * Initialize the TID to a value which doesn't conflict with
@@ -174,13 +193,15 @@ void *__copy_tls(unsigned char *mem)
 	return td;
 #else
 	size_t tls_align = __builtin_wasm_tls_align();
-	volatile void* tls_base = __builtin_wasm_tls_base();
 	mem += tls_align;
 	mem -= (uintptr_t)mem & (tls_align-1);
 	__wasm_init_tls(mem);
-  	__asm__("local.get %0\n"
-			"global.set __tls_base\n"
-			:: "r"(tls_base));
+#ifndef __wasip3__
+	volatile void *tls_base = __builtin_wasm_tls_base();
+	__asm__("local.get %0\n"
+			"global.set __tls_base\n" 
+			::"r"(tls_base));
+#endif
 	return mem;
 #endif
 }

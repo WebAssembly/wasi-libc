@@ -144,6 +144,12 @@ jobs:
             test: true
             args: -DMALLOC=emmalloc
 
+          - name: Test LTO
+            os: ubuntu-24.04
+            clang_version: 19
+            test: true
+            args: -DLTO=full -DTARGET_TRIPLE=wasm32-wasip2 -DCHECK_SYMBOLS=OFF
+
     steps:
     - uses: actions/checkout@v4.1.7
       with:

@@ -196,21 +196,23 @@ foreach(file crt/crt1-command.c
   clang_format_target(${stem})
   target_link_libraries(${stem} PRIVATE musl-top-half-interface)
   set_pic(${stem})
-  target_compile_options(${stem} PRIVATE -fvisibility=default)
+  target_compile_options(${stem} PRIVATE -fvisibility=default -fno-lto)
 endforeach()
+
+set(crt_sysroot ${SYSROOT}/lib/${TARGET_TRIPLE})
 
 # crt1-reactor.o is a straight copy of what CMake produces
 add_custom_command(
-  OUTPUT ${SYSROOT_LIB}/crt1-reactor.o
-  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:crt1-reactor> ${SYSROOT_LIB}/crt1-reactor.o
+  OUTPUT ${crt_sysroot}/crt1-reactor.o
+  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:crt1-reactor> ${crt_sysroot}/crt1-reactor.o
   DEPENDS crt1-reactor $<TARGET_OBJECTS:crt1-reactor>
 )
 
 if (WASI STREQUAL "p1")
   # wasip1: crt1-command.o is a straight copy of what CMake produces
   add_custom_command(
-    OUTPUT ${SYSROOT_LIB}/crt1-command.o
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:crt1-command> ${SYSROOT_LIB}/crt1-command.o
+    OUTPUT ${crt_sysroot}/crt1-command.o
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:crt1-command> ${crt_sysroot}/crt1-command.o
     DEPENDS crt1-command $<TARGET_OBJECTS:crt1-command>
   )
 elseif (WASI STREQUAL "p2")
@@ -233,24 +235,24 @@ elseif (WASI STREQUAL "p2")
   # please feel free to open an issue or a PR and maintainers can work with you
   # on getting that integrated.
   add_custom_command(
-    OUTPUT ${SYSROOT_LIB}/crt1-command.o
+    OUTPUT ${crt_sysroot}/crt1-command.o
     COMMAND
       ${wasm_tools} component embed
         ${wasip2_wit_dir}
         $<TARGET_OBJECTS:crt1-command>
         --world wasi:cli/command@0.2.0
-        -o ${SYSROOT_LIB}/crt1-command.o
+        -o ${crt_sysroot}/crt1-command.o
     DEPENDS crt1-command wasip2-wits $<TARGET_OBJECTS:crt1-command> wasm-tools
   )
 elseif (WASI STREQUAL "p3")
   add_custom_command(
-    OUTPUT ${SYSROOT_LIB}/crt1-command.o
+    OUTPUT ${crt_sysroot}/crt1-command.o
     COMMAND
       ${wasm_tools} component embed
         ${wasip3_wit_dir}
         $<TARGET_OBJECTS:crt1-command>
         --world wasi:cli/command@0.3.0-rc-2025-09-16
-        -o ${SYSROOT_LIB}/crt1-command.o
+        -o ${crt_sysroot}/crt1-command.o
     DEPENDS crt1-command wasip3-wits $<TARGET_OBJECTS:crt1-command> wasm-tools
   )
 else()
@@ -260,15 +262,15 @@ endif()
 # Provide a plain crt1.o for toolchain compatibility, identical to
 # `crt1-command.c`
 add_custom_command(
-  OUTPUT ${SYSROOT_LIB}/crt1.o
-  COMMAND ${CMAKE_COMMAND} -E copy ${SYSROOT_LIB}/crt1-command.o ${SYSROOT_LIB}/crt1.o
-  DEPENDS ${SYSROOT_LIB}/crt1-command.o
+  OUTPUT ${crt_sysroot}/crt1.o
+  COMMAND ${CMAKE_COMMAND} -E copy ${crt_sysroot}/crt1-command.o ${crt_sysroot}/crt1.o
+  DEPENDS ${crt_sysroot}/crt1-command.o
 )
 
 add_custom_target(sysroot-startup-objects
   DEPENDS
-    ${SYSROOT_LIB}/crt1-reactor.o
-    ${SYSROOT_LIB}/crt1-command.o
-    ${SYSROOT_LIB}/crt1.o
+    ${crt_sysroot}/crt1-reactor.o
+    ${crt_sysroot}/crt1-command.o
+    ${crt_sysroot}/crt1.o
 )
 add_dependencies(sysroot sysroot-startup-objects)

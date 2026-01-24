@@ -251,7 +251,7 @@ elseif (WASI STREQUAL "p3")
       ${wasm_tools} component embed
         ${wasip3_wit_dir}
         $<TARGET_OBJECTS:crt1-command>
-        --world wasi:cli/command@0.3.0-rc-2025-09-16
+        --world wasi:cli/command@0.3.0-rc-2026-01-06
         -o ${crt_sysroot}/crt1-command.o
     DEPENDS crt1-command wasip3-wits $<TARGET_OBJECTS:crt1-command> wasm-tools
   )

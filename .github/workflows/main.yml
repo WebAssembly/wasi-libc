@@ -290,7 +290,7 @@ jobs:
     - name: Setup `wasmtime`
       uses: bytecodealliance/actions/wasmtime/setup@v1
       with:
-        version: "38.0.3"
+        version: "40.0.2"
     - name: Setup wasi-libc
       run: |
         cmake -S . -B build -G Ninja \

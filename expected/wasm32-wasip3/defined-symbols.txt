@@ -1382,6 +1382,8 @@ swscanf
 symlink
 symlinkat
 sysconf
+system_clock_get_resolution
+system_clock_now
 tan
 tanf
 tanh
@@ -1459,8 +1461,6 @@ vswprintf
 vswscanf
 vwprintf
 vwscanf
-wasi_clocks_system_clock_get_resolution
-wasi_clocks_system_clock_now
 wasip3_backpressure_dec
 wasip3_backpressure_inc
 wasip3_context_get_0

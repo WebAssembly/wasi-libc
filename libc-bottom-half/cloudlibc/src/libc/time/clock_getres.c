@@ -20,13 +20,13 @@ int clock_getres(clockid_t clock_id, struct timespec *res) {
 #elif defined(__wasip2__) || defined(__wasip3__)
   if (res != NULL) {
     if (clock_id == CLOCK_REALTIME) {
-        wall_clock_datetime_t time_result;
 #ifdef __wasip2__
+        wall_clock_datetime_t time_result;
         wall_clock_resolution(&time_result);
-#else // __wasip3__
-        wall_clock_get_resolution(&time_result);
-#endif
         *res = timestamp_to_timespec(&time_result);
+#else // __wasip3__
+        *res = instant_to_timespec(system_clock_get_resolution());
+#endif
     } else if (clock_id == CLOCK_MONOTONIC) {
 #ifdef __wasip2__
         monotonic_clock_duration_t time_result = monotonic_clock_resolution();

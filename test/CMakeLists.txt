@@ -24,7 +24,7 @@ if(NOT ENGINE OR ENGINE STREQUAL "")
   ba_download(
     wasmtime
     "https://github.com/bytecodealliance/wasmtime"
-    "v40.0.0"
+    "v41.0.0"
   )
   ExternalProject_Get_Property(wasmtime SOURCE_DIR)
   set(ENGINE "${SOURCE_DIR}/wasmtime")

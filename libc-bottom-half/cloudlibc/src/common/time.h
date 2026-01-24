@@ -43,7 +43,7 @@ static inline bool timespec_to_timestamp_exact(
   // Make sure our timestamp does not overflow.
   return !__builtin_mul_overflow(timespec->tv_sec, NSEC_PER_SEC, timestamp) &&
          !__builtin_add_overflow(*timestamp, timespec->tv_nsec, timestamp);
-#elif defined(__wasip2__) | defined(__wasip3__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   timestamp->seconds = timespec->tv_sec;
   timestamp->nanoseconds = timespec->tv_nsec;
   return true;
@@ -67,7 +67,7 @@ static inline bool timespec_to_timestamp_clamp(
     // Make sure our timestamp does not overflow.
     *timestamp = NUMERIC_MAX(__wasi_timestamp_t);
   }
-#elif defined(__wasip2__) 
+#elif defined(__wasip2__)
   if (timespec->tv_sec < 0) {
     // Timestamps before the Epoch are not supported.
     timestamp->seconds = 0;

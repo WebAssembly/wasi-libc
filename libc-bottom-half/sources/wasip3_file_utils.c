@@ -97,7 +97,8 @@ ssize_t wasip3_waitable_block_on(wasip3_waitable_status_t status,
     wasip3_waitable_set_drop(set);
     ssize_t amount = event.code;
     return amount;
-  } else if (WASIP3_WAITABLE_STATE(status) == WASIP3_WAITABLE_COMPLETED) {
+  } else if (WASIP3_WAITABLE_STATE(status) == WASIP3_WAITABLE_COMPLETED ||
+             WASIP3_WAITABLE_STATE(status) == WASIP3_WAITABLE_DROPPED) {
     ssize_t amount = WASIP3_WAITABLE_COUNT(status);
     return amount;
   } else {

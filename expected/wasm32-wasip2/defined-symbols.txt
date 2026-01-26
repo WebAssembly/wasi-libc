@@ -566,7 +566,6 @@ explicit_bzero
 expm1
 expm1f
 expm1l
-exports_wasi_cli_run_run
 fabs
 fabsf
 fabsl

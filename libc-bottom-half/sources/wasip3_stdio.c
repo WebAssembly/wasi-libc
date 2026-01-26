@@ -9,8 +9,8 @@
 #include <wasi/wasip3.h>
 
 typedef struct {
-  stdin_stream_u8_t input;
-  stdin_future_result_void_error_code_t future;
+  stdin_tuple2_stream_u8_future_result_void_error_code_t input;
+  // stdin_future_result_void_error_code_t future;
   terminal_input_own_terminal_input_t terminal_in;
 
   stdin_stream_u8_writer_t stdout;
@@ -24,10 +24,10 @@ static void stdio3_free(void *data) {
   stdio3_t *stdio = (stdio3_t *)data;
   if (stdio->terminal_in.__handle)
     terminal_input_terminal_input_drop_own(stdio->terminal_in);
-  if (stdio->future)
-    stdin_future_result_void_error_code_drop_readable(stdio->future);
-  if (stdio->input)
-    stdin_stream_u8_drop_readable(stdio->input);
+  if (stdio->input.f1)
+    stdin_future_result_void_error_code_drop_readable(stdio->input.f1);
+  if (stdio->input.f0)
+    stdin_stream_u8_drop_readable(stdio->input.f0);
 
   if (stdio->terminal_out.__handle)
     terminal_output_terminal_output_drop_own(stdio->terminal_out);
@@ -52,16 +52,21 @@ static int stdio3_write(void *data, void const *buf, size_t nbyte,
   return 0;
 }
 
-static int stdio3_read(void *data, void *buf, size_t nbyte,
-                       waitable_t *waitable, wasip3_waitable_status_t *out,
-                       off_t **offs) {
+static int stdio3_read(
+    void *data,
+    filesystem_tuple2_stream_u8_future_result_void_error_code_t **out,
+    // void *buf, size_t nbyte,
+    //                      waitable_t *waitable, wasip3_waitable_status_t *out,
+    off_t **offs) {
   stdio3_t *stdio = (stdio3_t *)data;
-  if (!stdio->input) {
+  if (!stdio->input.f0) {
     errno = EBADF;
     return -1;
   }
-  *waitable = stdio->input;
-  *out = stdin_stream_u8_read(stdio->input, buf, nbyte);
+  *out = (filesystem_tuple2_stream_u8_future_result_void_error_code_t *)&stdio
+             ->input;
+  //  *waitable = stdio->input.f0;
+  //  *out = stdin_stream_u8_read(stdio->input, buf, nbyte);
   *offs = NULL;
   return 0;
 }
@@ -87,7 +92,7 @@ static int stdio3_isatty(void *data) {
 
 static descriptor_vtable_t stdio3_vtable = {
     .free = stdio3_free,
-    .read3 = stdio3_read,
+    .get_read_stream3 = stdio3_read,
     .write3 = stdio3_write,
     .fstat = stdio3_fstat,
     .fcntl_getfl = stdio3_fcntl_getfl,
@@ -101,13 +106,13 @@ static int stdio_add_input() {
     return -1;
   }
   stdin_tuple2_stream_u8_future_result_void_error_code_t stdin;
-  stdin_read_via_stream(&stdin);
+  stdin_read_via_stream(&stdio->input);
 
   if (!terminal_stdin_get_terminal_stdin(&stdio->terminal_in))
     stdio->terminal_in.__handle = 0;
 
-  stdio->input = stdin.f0;
-  stdio->future = stdin.f1;
+  // stdio->input = stdin.f0;
+  // stdio->future = stdin.f1;
 
   descriptor_table_entry_t entry;
   entry.vtable = &stdio3_vtable;

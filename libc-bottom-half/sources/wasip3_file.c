@@ -130,8 +130,6 @@ static int file_fcntl_setfl(void *data, int flags) { abort(); }
 static int file_read_stream(
     void *data,
     filesystem_tuple2_stream_u8_future_result_void_error_code_t **out,
-    // void *buf, size_t nbyte,
-    // waitable_t *waitable, wasip3_waitable_status_t *out,
     off_t **offs) {
   file3_t *file = (file3_t *)data;
   if (file->read.f0 == 0) {
@@ -139,7 +137,6 @@ static int file_read_stream(
         filesystem_borrow_descriptor(file->file_handle), file->offset,
         &file->read);
   }
-  // *waitable = file->read.f0;
   *out = &file->read;
   *offs = &file->offset;
   return 0;

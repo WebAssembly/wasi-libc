@@ -21,13 +21,19 @@ static void file_close_streams(void *data) {
   file3_t *file = (file3_t *)data;
   if (file->read.f0 != 0) {
     filesystem_stream_u8_drop_readable(file->read.f0);
+    file->read.f0 = 0;
     filesystem_future_result_void_error_code_drop_readable(file->read.f1);
   }
   if (file->write.output != 0) {
     // TODO: This fails
-    // if (file->write.subtask)
-    //   wasip3_subtask_cancel(file->write.subtask);
+    if (WASIP3_SUBTASK_HANDLE(file->write.subtask)) {
+      wasip3_subtask_status_t status2 =
+          wasip3_subtask_cancel(WASIP3_SUBTASK_HANDLE(file->write.subtask));
+      wasip3_subtask_block_on(status2);
+      file->write.subtask = WASIP3_SUBTASK_RETURNED_CANCELLED;
+    }
     sockets_stream_u8_drop_writable(file->write.output);
+    file->write.output = 0;
   }
 }
 

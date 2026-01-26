@@ -7,7 +7,8 @@
 
 void wasip3_subtask_block_on(wasip3_subtask_status_t status) {
   // we don't encounter cancelled state because this function won't cancel
-  if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED) {
+  if (WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_STARTING ||
+      WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_STARTED) {
     wasip3_subtask_t handle = WASIP3_SUBTASK_HANDLE(status);
     wasip3_waitable_set_t set = wasip3_waitable_set_new();
     wasip3_waitable_join(handle, set);

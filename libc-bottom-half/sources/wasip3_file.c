@@ -127,17 +127,20 @@ static int file_fcntl_getfl(void *data) { abort(); }
 
 static int file_fcntl_setfl(void *data, int flags) { abort(); }
 
-static int file_read_stream(void *data, void *buf, size_t nbyte,
-                            waitable_t *waitable, wasip3_waitable_status_t *out,
-                            off_t **offs) {
+static int file_read_stream(
+    void *data,
+    filesystem_tuple2_stream_u8_future_result_void_error_code_t **out,
+    // void *buf, size_t nbyte,
+    // waitable_t *waitable, wasip3_waitable_status_t *out,
+    off_t **offs) {
   file3_t *file = (file3_t *)data;
   if (file->read.f0 == 0) {
     filesystem_method_descriptor_read_via_stream(
         filesystem_borrow_descriptor(file->file_handle), file->offset,
         &file->read);
   }
-  *waitable = file->read.f0;
-  *out = filesystem_stream_u8_read(file->read.f0, buf, nbyte);
+  // *waitable = file->read.f0;
+  *out = &file->read;
   *offs = &file->offset;
   return 0;
 }
@@ -151,7 +154,7 @@ static descriptor_vtable_t file_vtable = {
     .close_streams = file_close_streams,
     .fcntl_getfl = file_fcntl_getfl,
     .fcntl_setfl = file_fcntl_setfl,
-    .read3 = file_read_stream,
+    .get_read_stream3 = file_read_stream,
 };
 
 int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {

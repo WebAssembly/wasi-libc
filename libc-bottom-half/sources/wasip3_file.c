@@ -21,13 +21,13 @@ typedef struct {
 
 static void file_close_streams(void *data) {
   file3_t *file = (file3_t *)data;
-  if (file->read.f0!=0) {
-  filesystem_stream_u8_drop_readable(file->read.f0);
-  filesystem_future_result_void_error_code_drop_readable(file->read.f1);
+  if (file->read.f0 != 0) {
+    filesystem_stream_u8_drop_readable(file->read.f0);
+    filesystem_future_result_void_error_code_drop_readable(file->read.f1);
   }
-  if (file->write!=0) {
-  sockets_stream_u8_drop_writable(file->write);
-  wasip3_subtask_cancel(file->write_task);
+  if (file->write != 0) {
+    sockets_stream_u8_drop_writable(file->write);
+    wasip3_subtask_cancel(file->write_task);
   }
 }
 
@@ -84,7 +84,7 @@ static int file_seek_end(file3_t *file) {
   return 0;
 }
 
-static off_t file_seek(void *data, off_t offset, int whence) { 
+static off_t file_seek(void *data, off_t offset, int whence) {
   file3_t *file = (file3_t *)data;
 
   // If this file is in append mode, reset our knowledge of the current cursor
@@ -131,9 +131,10 @@ static int file_read_stream(void *data, void *buf, size_t nbyte,
                             waitable_t *waitable, wasip3_waitable_status_t *out,
                             off_t **offs) {
   file3_t *file = (file3_t *)data;
-  if (file->read.f0==0) {
+  if (file->read.f0 == 0) {
     filesystem_method_descriptor_read_via_stream(
-        filesystem_borrow_descriptor(file->file_handle), file->offset, &file->read);
+        filesystem_borrow_descriptor(file->file_handle), file->offset,
+        &file->read);
   }
   *waitable = file->read.f0;
   *out = filesystem_stream_u8_read(file->read.f0, buf, nbyte);
@@ -165,8 +166,9 @@ int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
   file->oflag = oflag;
 
   // if (oflag == O_WRONLY) {
-  //   filesystem_stream_u8_t write_read = filesystem_stream_u8_new(&file->write);
-  //   file->write_task = filesystem_method_descriptor_write_via_stream(
+  //   filesystem_stream_u8_t write_read =
+  //   filesystem_stream_u8_new(&file->write); file->write_task =
+  //   filesystem_method_descriptor_write_via_stream(
   //       filesystem_borrow_descriptor(file_handle), write_read, 0,
   //       &file->write_error);
   // }

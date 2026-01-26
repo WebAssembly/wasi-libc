@@ -17,6 +17,8 @@ int fdclosedir(DIR *dirp) {
 #elif defined(__wasip3__)
   if (dirp->stream != 0)
     filesystem_stream_directory_entry_drop_readable(dirp->stream);
+  if (dirp->future != 0)
+    filesystem_future_result_void_error_code_drop_readable(dirp->future);
 #else
 # error "Unsupported WASI version"
 #endif

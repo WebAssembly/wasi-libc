@@ -55,10 +55,7 @@ typedef struct descriptor_vtable_t {
 #endif
 #ifdef __wasip3__
   int (*get_read_stream3)(void*, filesystem_tuple2_stream_u8_future_result_void_error_code_t **out, off_t** off);
-  /// Start an asynchronous read or write, returns zero on success.
-  /// Stores the waitable, status and offset location.
-    //void *buf, size_t nbyte, waitable_t *waitable, wasip3_waitable_status_t *out, off_t**);
-  int (*write3)(void*, void const *buf, size_t nbyte, waitable_t *waitable, wasip3_waitable_status_t *out, off_t**);
+  int (*get_write_stream3)(void*, wasip3_write_t **write_end, off_t**);
 #endif
 
   /// Sets the nonblocking flag for this object to the specified value.

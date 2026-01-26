@@ -89,20 +89,30 @@ ssize_t __wasilibc_write3(int fildes, void const *buf, size_t nbyte) {
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
   if (!entry)
     return -1;
-  if (!entry->vtable->write3) {
+  if (!entry->vtable->get_write_stream3) {
     errno = EOPNOTSUPP;
     return -1;
   }
   off_t *off;
-  waitable_t output_stream;
-  wasip3_waitable_status_t status;
-  if ((*entry->vtable->write3)(entry->data, buf, nbyte, &output_stream, &status,
-                               &off) < 0)
+  wasip3_write_t *write_end;
+  if ((*entry->vtable->get_write_stream3)(entry->data, &write_end, &off) < 0)
     return -1;
-  ssize_t amount = wasip3_waitable_block_on(status, output_stream);
-  if (amount > 0 && off)
-    *off += amount;
-  return amount;
+  wasip3_waitable_status_t status =
+      filesystem_stream_u8_write(write_end->output, buf, nbyte);
+  ssize_t amount = wasip3_waitable_block_on(status, write_end->output);
+  if (amount > 0) {
+    if (off)
+      *off += amount;
+    return amount;
+  } else {
+    wasip3_subtask_block_on(write_end->subtask);
+    if (write_end->pending_result.is_err) {
+      translate_error(write_end->pending_result.val.err);
+      return -1;
+    }
+    // EOF
+    return 0;
+  }
 }
 
 ssize_t __wasilibc_read3(int fildes, void *buf, size_t nbyte) {

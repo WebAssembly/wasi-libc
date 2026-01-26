@@ -34,16 +34,13 @@ static void stdio3_free(void *data) {
   free(stdio);
 }
 
-static int stdio3_write(void *data, void const *buf, size_t nbyte,
-                        waitable_t *waitable, wasip3_waitable_status_t *out,
-                        off_t **offs) {
+static int stdio3_write(void *data, wasip3_write_t **out, off_t **offs) {
   stdio3_t *stdio = (stdio3_t *)data;
   if (!stdio->stdout.output) {
     errno = EBADF;
     return -1;
   }
-  *waitable = stdio->stdout.output;
-  *out = stdin_stream_u8_write(stdio->stdout.output, buf, nbyte);
+  *out = &stdio->stdout;
   *offs = NULL;
   return 0;
 }
@@ -85,7 +82,7 @@ static int stdio3_isatty(void *data) {
 static descriptor_vtable_t stdio3_vtable = {
     .free = stdio3_free,
     .get_read_stream3 = stdio3_read,
-    .write3 = stdio3_write,
+    .get_write_stream3 = stdio3_write,
     .fstat = stdio3_fstat,
     .fcntl_getfl = stdio3_fcntl_getfl,
     .isatty = stdio3_isatty,

@@ -11,6 +11,17 @@
 #ifdef __wasip3__
 // create an alias to distinguish the handle type in the API
 typedef uint32_t waitable_t;
+
+/**
+ * This data structure represents the write end of a file
+ */
+typedef struct wasip3_write_t {
+  filesystem_stream_u8_writer_t output;
+  // contents will be filled by host (once write has an error)
+  stdout_result_void_error_code_t pending_result;
+  // this task gets ready on error or eof
+  wasip3_subtask_t subtask;
+} wasip3_write_t;
 #endif
 
 /**

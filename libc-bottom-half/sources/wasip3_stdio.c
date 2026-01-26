@@ -117,7 +117,8 @@ static int stdio3_add_output(
   }
   stdin_stream_u8_t read_side = stdin_stream_u8_new(&stdio->stdout.output);
   wasip3_subtask_status_t res =
-      (*func)(read_side, &stdio->stdout.pending_result);
+      (*func)(read_side,
+              (stdout_result_void_error_code_t *)&stdio->stdout.pending_result);
   stdio->stdout.subtask = WASIP3_SUBTASK_HANDLE(res);
 
   if (!(*terminal)(&stdio->terminal_out))

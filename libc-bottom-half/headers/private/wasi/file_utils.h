@@ -76,7 +76,9 @@ int __wasilibc_read_stream(int fd,
                            streams_borrow_input_stream_t *out,
                            off_t **off,
                            poll_borrow_pollable_t *pollable);
+#endif
 
+#if defined(__wasip2__) || defined(__wasip3__)
 static unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
   switch(ty) {
   case FILESYSTEM_DESCRIPTOR_TYPE_UNKNOWN:

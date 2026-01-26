@@ -13,6 +13,10 @@
 #else
 #endif
 
+#ifdef __wasip3__
+#include <wasi/wasip3_block.h>
+#endif
+
 #include "dirent_impl.h"
 
 DIR *fdopendir(int fd) {
@@ -49,7 +53,7 @@ DIR *fdopendir(int fd) {
   dirp->dirent = NULL;
   dirp->dirent_size = 1;
   return dirp;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fd, &file_handle) < 0) {
@@ -58,6 +62,7 @@ DIR *fdopendir(int fd) {
   }
 
   // Read the directory
+#ifdef __wasip2__
   filesystem_own_directory_entry_stream_t result;
   filesystem_error_code_t error_code;
   bool ok = filesystem_method_descriptor_read_directory(file_handle,
@@ -69,18 +74,21 @@ DIR *fdopendir(int fd) {
     return NULL;
   }
 
-  dirp->fd = fd;
   dirp->stream = result;
+#elif defined(__wasip3__)
+  filesystem_tuple2_stream_directory_entry_future_result_void_error_code_t result;
+  wasip3_subtask_status_t status = filesystem_method_descriptor_read_directory(file_handle,
+                                                        &result);
+  wasip3_subtask_block_on(status);
+  dirp->stream = result.f0;
+  dirp->future = result.f1;
+#endif
+  dirp->fd = fd;
   dirp->skip = 0;
   dirp->offset = 0;
   dirp->dirent = NULL;
   dirp->dirent_size = 1;
   return dirp;
-#elif defined(__wasip3__)
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  free(dirp);
-  return NULL;
 #else
 # error "Unsupported WASI version"
 #endif

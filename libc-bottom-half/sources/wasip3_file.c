@@ -14,9 +14,7 @@ typedef struct {
   off_t offset;
   int oflag;
   filesystem_tuple2_stream_u8_future_result_void_error_code_t read;
-  filesystem_stream_u8_writer_t write;
-  wasip3_subtask_status_t write_task;
-  filesystem_result_void_error_code_t write_error;
+  wasip3_write_t write;
 } file3_t;
 
 static void file_close_streams(void *data) {
@@ -25,9 +23,11 @@ static void file_close_streams(void *data) {
     filesystem_stream_u8_drop_readable(file->read.f0);
     filesystem_future_result_void_error_code_drop_readable(file->read.f1);
   }
-  if (file->write != 0) {
-    sockets_stream_u8_drop_writable(file->write);
-    wasip3_subtask_cancel(file->write_task);
+  if (file->write.output != 0) {
+    // TODO: This fails
+    // if (file->write.subtask)
+    //   wasip3_subtask_cancel(file->write.subtask);
+    sockets_stream_u8_drop_writable(file->write.output);
   }
 }
 
@@ -142,6 +142,20 @@ static int file_read_stream(
   return 0;
 }
 
+static int file_write_stream(void *data, wasip3_write_t **out, off_t **offs) {
+  file3_t *file = (file3_t *)data;
+  if (file->write.output == 0) {
+    filesystem_stream_u8_t write_read =
+        filesystem_stream_u8_new(&file->write.output);
+    file->write.subtask = filesystem_method_descriptor_write_via_stream(
+        filesystem_borrow_descriptor(file->file_handle), write_read,
+        file->offset, &file->write.pending_result);
+  }
+  *out = &file->write;
+  *offs = &file->offset;
+  return 0;
+}
+
 static descriptor_vtable_t file_vtable = {
     .free = file_free,
     .get_file = file_get_file,
@@ -152,6 +166,7 @@ static descriptor_vtable_t file_vtable = {
     .fcntl_getfl = file_fcntl_getfl,
     .fcntl_setfl = file_fcntl_setfl,
     .get_read_stream3 = file_read_stream,
+    .get_write_stream3 = file_write_stream,
 };
 
 int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
@@ -164,14 +179,6 @@ int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
   assert(file_handle.__handle != 0);
   file->file_handle = file_handle;
   file->oflag = oflag;
-
-  // if (oflag == O_WRONLY) {
-  //   filesystem_stream_u8_t write_read =
-  //   filesystem_stream_u8_new(&file->write); file->write_task =
-  //   filesystem_method_descriptor_write_via_stream(
-  //       filesystem_borrow_descriptor(file_handle), write_read, 0,
-  //       &file->write_error);
-  // }
 
   descriptor_table_entry_t entry;
   entry.vtable = &file_vtable;

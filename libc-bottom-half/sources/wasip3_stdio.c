@@ -7,35 +7,42 @@
 #include <string.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/wasip3.h>
+#include <wasi/wasip3_block.h>
 
 typedef struct {
   stdin_tuple2_stream_u8_future_result_void_error_code_t input;
   terminal_input_own_terminal_input_t terminal_in;
+} stdin3_t;
 
+typedef struct {
   wasip3_write_t stdout;
   terminal_output_own_terminal_output_t terminal_out;
-} stdio3_t;
+} stdout3_t;
 
-static void stdio3_free(void *data) {
-  stdio3_t *stdio = (stdio3_t *)data;
+static void stdin3_free(void *data) {
+  stdin3_t *stdio = (stdin3_t *)data;
   if (stdio->terminal_in.__handle)
     terminal_input_terminal_input_drop_own(stdio->terminal_in);
   if (stdio->input.f1)
     stdin_future_result_void_error_code_drop_readable(stdio->input.f1);
   if (stdio->input.f0)
     stdin_stream_u8_drop_readable(stdio->input.f0);
-
-  if (stdio->terminal_out.__handle)
-    terminal_output_terminal_output_drop_own(stdio->terminal_out);
-  if (stdio->stdout.subtask)
-    wasip3_subtask_cancel(stdio->stdout.subtask);
-  if (stdio->stdout.output)
-    stdin_stream_u8_drop_writable(stdio->stdout.output);
   free(stdio);
 }
 
-static int stdio3_write(void *data, wasip3_write_t **out, off_t **offs) {
-  stdio3_t *stdio = (stdio3_t *)data;
+static void stdout3_free(void *data) {
+  stdout3_t *stdio = (stdout3_t *)data;
+  if (stdio->terminal_out.__handle)
+    terminal_output_terminal_output_drop_own(stdio->terminal_out);
+  if (stdio->stdout.output)
+    stdin_stream_u8_drop_writable(stdio->stdout.output);
+  if (stdio->stdout.subtask)
+    wasip3_subtask_block_on(stdio->stdout.subtask);
+  free(stdio);
+}
+
+static int stdout3_write(void *data, wasip3_write_t **out, off_t **offs) {
+  stdout3_t *stdio = (stdout3_t *)data;
   if (!stdio->stdout.output) {
     errno = EBADF;
     return -1;
@@ -46,10 +53,10 @@ static int stdio3_write(void *data, wasip3_write_t **out, off_t **offs) {
 }
 
 static int
-stdio3_read(void *data,
+stdin3_read(void *data,
             filesystem_tuple2_stream_u8_future_result_void_error_code_t **out,
             off_t **offs) {
-  stdio3_t *stdio = (stdio3_t *)data;
+  stdin3_t *stdio = (stdin3_t *)data;
   if (!stdio->input.f0) {
     errno = EBADF;
     return -1;
@@ -65,31 +72,38 @@ static int stdio3_fstat(void *data, struct stat *buf) {
   return 0;
 }
 
-static int stdio3_fcntl_getfl(void *data) {
-  stdio3_t *stdio = (stdio3_t *)data;
-  if (stdio->stdout.output == 0) {
-    return O_RDONLY;
-  } else {
-    return O_WRONLY;
-  }
+static int stdin3_fcntl_getfl(void *data) { return O_RDONLY; }
+
+static int stdout3_fcntl_getfl(void *data) { return O_WRONLY; }
+
+static int stdin3_isatty(void *data) {
+  stdin3_t *stdio = (stdin3_t *)data;
+  return stdio->terminal_in.__handle != 0;
 }
 
-static int stdio3_isatty(void *data) {
-  stdio3_t *stdio = (stdio3_t *)data;
-  return stdio->terminal_in.__handle != 0 || stdio->terminal_out.__handle != 0;
+static int stdout3_isatty(void *data) {
+  stdout3_t *stdio = (stdout3_t *)data;
+  return stdio->terminal_out.__handle != 0;
 }
 
-static descriptor_vtable_t stdio3_vtable = {
-    .free = stdio3_free,
-    .get_read_stream3 = stdio3_read,
-    .get_write_stream3 = stdio3_write,
+static descriptor_vtable_t stdin3_vtable = {
+    .free = stdin3_free,
+    .get_read_stream3 = stdin3_read,
     .fstat = stdio3_fstat,
-    .fcntl_getfl = stdio3_fcntl_getfl,
-    .isatty = stdio3_isatty,
+    .fcntl_getfl = stdin3_fcntl_getfl,
+    .isatty = stdin3_isatty,
+};
+
+static descriptor_vtable_t stdout3_vtable = {
+    .free = stdout3_free,
+    .get_write_stream3 = stdout3_write,
+    .fstat = stdio3_fstat,
+    .fcntl_getfl = stdout3_fcntl_getfl,
+    .isatty = stdout3_isatty,
 };
 
 static int stdio_add_input() {
-  stdio3_t *stdio = calloc(1, sizeof(stdio3_t));
+  stdin3_t *stdio = calloc(1, sizeof(stdin3_t));
   if (!stdio) {
     errno = ENOMEM;
     return -1;
@@ -101,7 +115,7 @@ static int stdio_add_input() {
     stdio->terminal_in.__handle = 0;
 
   descriptor_table_entry_t entry;
-  entry.vtable = &stdio3_vtable;
+  entry.vtable = &stdin3_vtable;
   entry.data = stdio;
   return descriptor_table_insert(entry);
 }
@@ -110,7 +124,7 @@ static int stdio3_add_output(
     wasip3_subtask_status_t (*func)(stdin_stream_u8_t data,
                                     stdout_result_void_error_code_t *result),
     bool (*terminal)(terminal_stdout_own_terminal_output_t *ret)) {
-  stdio3_t *stdio = calloc(1, sizeof(stdio3_t));
+  stdout3_t *stdio = calloc(1, sizeof(stdout3_t));
   if (!stdio) {
     errno = ENOMEM;
     return -1;
@@ -125,7 +139,7 @@ static int stdio3_add_output(
     stdio->terminal_out.__handle = 0;
 
   descriptor_table_entry_t entry;
-  entry.vtable = &stdio3_vtable;
+  entry.vtable = &stdout3_vtable;
   entry.data = stdio;
   return descriptor_table_insert(entry);
 }

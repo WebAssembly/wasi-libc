@@ -13,6 +13,10 @@
 #include <string.h>
 #endif
 
+#ifdef __wasip3__
+#include <wasi/wasip3_block.h>
+#endif
+
 ssize_t read(int fildes, void *buf, size_t nbyte) {
 #if defined(__wasip1__)
   __wasi_iovec_t iov = {.buf = buf, .buf_len = nbyte};
@@ -53,7 +57,28 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
     *off += contents.len;
   return contents.len;
 #elif defined(__wasip3__)
-  return __wasilibc_read3(fildes, buf, nbyte);
+  filesystem_tuple2_stream_u8_future_result_void_error_code_t *stream;
+  off_t *off;
+  if (__wasilibc_read_stream3(fildes, &stream, &off)<0)
+    return -1;
+  wasip3_waitable_status_t status =
+      filesystem_stream_u8_read(stream->f0, buf, nbyte);
+  ssize_t amount = wasip3_waitable_block_on(status, stream->f0);
+  if (amount > 0) {
+    if (off)
+      *off += amount;
+    return amount;
+  } else {
+    filesystem_result_void_error_code_t error;
+    status = filesystem_future_result_void_error_code_read(stream->f1, &error);
+    amount = wasip3_waitable_block_on(status, stream->f1);
+    if (amount > 0 && error.is_err) {
+      translate_error(error.val.err);
+      return -1;
+    }
+    // EOF
+    return 0;
+  }
 #else
 # error "Unsupported WASI version"
 #endif

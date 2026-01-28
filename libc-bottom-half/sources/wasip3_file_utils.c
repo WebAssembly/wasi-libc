@@ -1,13 +1,7 @@
 #include <wasi/version.h>
 
 #ifdef __wasip3__
-#include <assert.h>
-#include <common/errors.h>
-#include <errno.h>
-#include <stddef.h>
-#include <stdlib.h>
 #include <wasi/file_utils.h>
-#include <wasi/wasip3_block.h>
 
 /**
  * Validates that `ptr_signed` is a valid utf-8 string.
@@ -85,7 +79,8 @@ int wasip3_string_from_c(const char *s, wasip3_string_t *out) {
   return 0;
 }
 
-ssize_t __wasilibc_write3(int fildes, void const *buf, size_t nbyte) {
+ssize_t __wasilibc_write_stream3(int fildes, wasip3_write_t **write_end,
+                                 off_t **off) {
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
   if (!entry)
     return -1;
@@ -93,29 +88,13 @@ ssize_t __wasilibc_write3(int fildes, void const *buf, size_t nbyte) {
     errno = EOPNOTSUPP;
     return -1;
   }
-  off_t *off;
-  wasip3_write_t *write_end;
-  if ((*entry->vtable->get_write_stream3)(entry->data, &write_end, &off) < 0)
-    return -1;
-  wasip3_waitable_status_t status =
-      filesystem_stream_u8_write(write_end->output, buf, nbyte);
-  ssize_t amount = wasip3_waitable_block_on(status, write_end->output);
-  if (amount > 0) {
-    if (off)
-      *off += amount;
-    return amount;
-  } else {
-    wasip3_subtask_block_on(write_end->subtask);
-    if (write_end->pending_result.is_err) {
-      translate_error(write_end->pending_result.val.err);
-      return -1;
-    }
-    // EOF
-    return 0;
-  }
+  return (*entry->vtable->get_write_stream3)(entry->data, write_end, off);
 }
 
-ssize_t __wasilibc_read3(int fildes, void *buf, size_t nbyte) {
+ssize_t __wasilibc_read_stream3(
+    int fildes,
+    filesystem_tuple2_stream_u8_future_result_void_error_code_t **stream,
+    off_t **off) {
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
   if (!entry)
     return -1;
@@ -123,27 +102,6 @@ ssize_t __wasilibc_read3(int fildes, void *buf, size_t nbyte) {
     errno = EOPNOTSUPP;
     return -1;
   }
-  off_t *off;
-  filesystem_tuple2_stream_u8_future_result_void_error_code_t *stream;
-  if ((*entry->vtable->get_read_stream3)(entry->data, &stream, &off) < 0)
-    return -1;
-  wasip3_waitable_status_t status =
-      filesystem_stream_u8_read(stream->f0, buf, nbyte);
-  ssize_t amount = wasip3_waitable_block_on(status, stream->f0);
-  if (amount > 0) {
-    if (off)
-      *off += amount;
-    return amount;
-  } else {
-    filesystem_result_void_error_code_t error;
-    status = filesystem_future_result_void_error_code_read(stream->f1, &error);
-    amount = wasip3_waitable_block_on(status, stream->f1);
-    if (amount > 0 && error.is_err) {
-      translate_error(error.val.err);
-      return -1;
-    }
-    // EOF
-    return 0;
-  }
+  return (*entry->vtable->get_read_stream3)(entry->data, stream, off);
 }
 #endif // __wasip3__

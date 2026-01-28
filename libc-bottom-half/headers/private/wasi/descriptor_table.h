@@ -8,6 +8,11 @@
 #include <sys/stat.h>
 #include <netinet/in.h>
 
+#ifdef __wasip3__
+// create an alias to distinguish the handle type in the API
+typedef uint32_t waitable_t;
+#endif
+
 /**
  * Operations that are required of all descriptors registered as file
  * descriptors.
@@ -36,6 +41,12 @@ typedef struct descriptor_vtable_t {
 
   /// Same as `get_read_stream`, but for output streams.
   int (*get_write_stream)(void*, streams_borrow_output_stream_t*, off_t**, poll_own_pollable_t**);
+#endif
+#ifdef __wasip3__
+  /// Start an asynchronous read or write, returns zero on success.
+  /// Stores the waitable, status and offset location.
+  int (*read3)(void*, void *buf, size_t nbyte, waitable_t *waitable, wasip3_waitable_status_t *out, off_t**);
+  int (*write3)(void*, void const *buf, size_t nbyte, waitable_t *waitable, wasip3_waitable_status_t *out, off_t**);
 #endif
 
   /// Sets the nonblocking flag for this object to the specified value.

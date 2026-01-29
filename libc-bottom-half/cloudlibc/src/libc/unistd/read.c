@@ -53,9 +53,35 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
     *off += contents.len;
   return contents.len;
 #elif defined(__wasip3__)
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
+  off_t *off;
+  waitable_t waitable;
+  wasip3_waitable_status_t status;
+  if (__wasilibc_read3(fildes, buf, nbyte, &waitable, &status, &off) < 0)
+    return -1;
+  if (status == WASIP3_WAITABLE_STATUS_BLOCKED) {
+    wasip3_waitable_set_t set = wasip3_waitable_set_new();
+    wasip3_waitable_join(waitable, set);
+    wasip3_event_t event;
+    wasip3_waitable_set_wait(set, &event);
+    assert(event.event == WASIP3_EVENT_STREAM_READ);
+    assert(event.waitable == waitable);
+    // remove from set
+    wasip3_waitable_join(waitable, 0);
+    wasip3_waitable_set_drop(set);
+    ssize_t bytes_read = event.code;
+    if (off)
+      *off += bytes_read;
+    return bytes_read;
+  } else if (WASIP3_WAITABLE_STATE(status) == WASIP3_WAITABLE_COMPLETED) {
+    ssize_t bytes_read = WASIP3_WAITABLE_COUNT(status);
+    if (off)
+      *off += bytes_read;
+    return bytes_read;
+  } else if (WASIP3_WAITABLE_STATE(status) == WASIP3_WAITABLE_DROPPED) {
+    return 0;
+  } else {
+    abort();
+  }
 #else
 # error "Unsupported WASI version"
 #endif

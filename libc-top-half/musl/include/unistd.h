@@ -32,6 +32,7 @@ extern "C" {
 #else
 #define __need_NULL
 #include <stddef.h>
+#include <wasi/version.h> // for pipe decision
 #endif
 
 #define __NEED_size_t
@@ -45,7 +46,7 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no pipe */
+#if defined __wasilibc_unmodified_upstream /* WASI has no pipe */ || defined(__wasip3__)
 int pipe(int [2]);
 int pipe2(int [2], int);
 #endif

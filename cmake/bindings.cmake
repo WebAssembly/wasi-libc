@@ -37,7 +37,6 @@ endif()
 
 set(bottom_half "${CMAKE_SOURCE_DIR}/libc-bottom-half")
 
-file(MAKE_DIRECTORY ${wasip2_wit_dir})
 add_custom_target(
   bindings-p2
   COMMAND

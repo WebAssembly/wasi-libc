@@ -13,6 +13,10 @@
 #include <time.h>
 #endif
 
+#ifdef __wasip3__
+#include <wasi/wasip3_block.h>
+#endif
+
 ssize_t write(int fildes, const void *buf, size_t nbyte) {
 #if defined(__wasip1__)
   __wasi_ciovec_t iov = {.buf = buf, .buf_len = nbyte};
@@ -72,7 +76,26 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
     *off += contents.len;
   return contents.len;
 #elif defined(__wasip3__)
-  return __wasilibc_write3(fildes, buf, nbyte);
+  wasip3_write_t *write_end;
+  off_t *off;
+  if (__wasilibc_write_stream3(fildes, &write_end, &off)<0) return -1;
+    wasip3_waitable_status_t status =
+      filesystem_stream_u8_write(write_end->output, buf, nbyte);
+  ssize_t amount = wasip3_waitable_block_on(status, write_end->output);
+  if (amount > 0) {
+    if (off)
+      *off += amount;
+    return amount;
+  } else {
+    wasip3_subtask_block_on(write_end->subtask);
+    write_end->subtask = WASIP3_SUBTASK_RETURNED;
+    if (write_end->pending_result.is_err) {
+      translate_error(write_end->pending_result.val.err);
+      return -1;
+    }
+    // EOF
+    return 0;
+  }
 #else
 # error "Unknown WASI version"
 #endif

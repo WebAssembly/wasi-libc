@@ -47,7 +47,7 @@ static void stdout3_free(void *data) {
 static int stdout3_write(void *data, wasip3_write_t **out, off_t **offs) {
   stdout3_t *stdio = (stdout3_t *)data;
   if (!stdio->stdout.output) {
-    errno = EBADF;
+    errno = EOPNOTSUPP;
     return -1;
   }
   *out = &stdio->stdout;
@@ -61,7 +61,7 @@ stdin3_read(void *data,
             off_t **offs) {
   stdin3_t *stdio = (stdin3_t *)data;
   if (!stdio->input.f0) {
-    errno = EBADF;
+    errno = EOPNOTSUPP;
     return -1;
   }
   *out = (filesystem_tuple2_stream_u8_future_result_void_error_code_t *)&stdio

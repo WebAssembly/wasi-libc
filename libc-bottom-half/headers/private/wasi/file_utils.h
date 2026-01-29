@@ -107,8 +107,6 @@ static unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
 #ifdef __wasip3__
 #include <wasi/descriptor_table.h>
 
-int wasip3_string_from_c(const char *s, wasip3_string_t* out);
-
 ssize_t __wasilibc_write_stream3(int fildes, wasip3_write_t **write_end, off_t **off);
 ssize_t __wasilibc_read_stream3(int fildes, filesystem_tuple2_stream_u8_future_result_void_error_code_t **stream, off_t **off);
 #endif

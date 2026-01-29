@@ -3,7 +3,6 @@
 #ifdef __wasip3__
 #include <wasi/file_utils.h>
 
-
 ssize_t __wasilibc_write_stream3(int fildes, wasip3_write_t **write_end,
                                  off_t **off) {
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);

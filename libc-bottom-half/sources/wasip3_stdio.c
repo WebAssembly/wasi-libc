@@ -12,13 +12,18 @@
 #define KNOWN_NOT_A_TERMINAL -1
 
 typedef struct {
+  // input stream and future for result<_, error-code-t>
   stdin_tuple2_stream_u8_future_result_void_error_code_t input;
+  // tristate: zero=unknown, valid handle=yes, -1=no
   terminal_input_own_terminal_input_t terminal_in;
 } stdin3_t;
 
 typedef struct {
-  wasip3_write_t stdout;
+  // contains stream, result storage and result subtask
+  wasip3_write_t output;
+  // tristate: zero=unknown, valid handle=yes, -1=no
   terminal_output_own_terminal_output_t terminal_out;
+  // function to determine whether this is a terminal
   bool (*terminal_func)(terminal_stdout_own_terminal_output_t *ret);
 } stdout3_t;
 
@@ -37,20 +42,20 @@ static void stdout3_free(void *data) {
   stdout3_t *stdio = (stdout3_t *)data;
   if (stdio->terminal_out.__handle > 0)
     terminal_output_terminal_output_drop_own(stdio->terminal_out);
-  if (stdio->stdout.output)
-    stdin_stream_u8_drop_writable(stdio->stdout.output);
-  if (stdio->stdout.subtask)
-    wasip3_subtask_block_on(stdio->stdout.subtask);
+  if (stdio->output.output)
+    stdin_stream_u8_drop_writable(stdio->output.output);
+  if (stdio->output.subtask)
+    wasip3_subtask_block_on(stdio->output.subtask);
   free(stdio);
 }
 
 static int stdout3_write(void *data, wasip3_write_t **out, off_t **offs) {
   stdout3_t *stdio = (stdout3_t *)data;
-  if (!stdio->stdout.output) {
+  if (!stdio->output.output) {
     errno = EOPNOTSUPP;
     return -1;
   }
-  *out = &stdio->stdout;
+  *out = &stdio->output;
   *offs = NULL;
   return 0;
 }
@@ -137,11 +142,11 @@ static int stdio3_add_output(
     errno = ENOMEM;
     return -1;
   }
-  stdin_stream_u8_t read_side = stdin_stream_u8_new(&stdio->stdout.output);
-  wasip3_subtask_status_t res =
+  stdin_stream_u8_t read_side = stdin_stream_u8_new(&stdio->output.output);
+  stdio->output.subtask =
       (*func)(read_side,
-              (stdout_result_void_error_code_t *)&stdio->stdout.pending_result);
-  stdio->stdout.subtask = WASIP3_SUBTASK_HANDLE(res);
+              (stdout_result_void_error_code_t *)&stdio->output.pending_result);
+  // subtask will be checked by write for error before writing
 
   stdio->terminal_func = terminal_func;
 

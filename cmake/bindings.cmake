@@ -4,8 +4,6 @@ if (NOT BINDINGS_TARGET)
   return()
 endif()
 
-include(ExternalProject)
-
 # If `wit-bindgen` is on the system and has the right version, favor that,
 # otherwise download a known good version.
 find_program(WIT_BINDGEN_EXECUTABLE NAMES wit-bindgen)
@@ -37,54 +35,9 @@ else()
   set(wit_bindgen ${WIT_BINDGEN_EXECUTABLE})
 endif()
 
-# If `wkg` is on the system and has the right version, favor that,
-# otherwise download a known good version.
-find_program(WKG_EXECUTABLE NAMES wkg)
-if(WKG_EXECUTABLE)
-  message(STATUS "Found wkg: ${WKG_EXECUTABLE}")
-
-  execute_process(
-    COMMAND ${WKG_EXECUTABLE} --version
-    OUTPUT_VARIABLE WKG_VERSION
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-  if (NOT (WKG_VERSION MATCHES "0\\.13\\.0"))
-    message(WARNING "wkg version 0.13.0 is required, found: ${WKG_VERSION}")
-    set(WKG_EXECUTABLE "")
-  endif()
-endif()
-
-if (NOT WKG_EXECUTABLE)
-  include(ba-download)
-  ba_download(
-    wkg
-    "https://github.com/bytecodealliance/wasm-pkg-tools"
-    "0.13.0"
-  )
-  ExternalProject_Get_Property(wkg DOWNLOADED_FILE)
-  set(wkg_bin ${DOWNLOADED_FILE})
-else()
-  add_custom_target(wkg)
-  set(wkg_bin ${WKG_EXECUTABLE})
-endif()
-
 set(bottom_half "${CMAKE_SOURCE_DIR}/libc-bottom-half")
 
-set(wasip2_wit_dir ${CMAKE_CURRENT_BINARY_DIR}/wasi/p2/wit)
-set(wasip2-version 0.2.0)
 file(MAKE_DIRECTORY ${wasip2_wit_dir})
-configure_file(${CMAKE_SOURCE_DIR}/wasi/wasi-libc-wasip2.wit.in ${wasip2_wit_dir}/wasi-libc-wasip2.wit)
-set(wasip2_stamp ${CMAKE_CURRENT_BINARY_DIR}/wasi/p2/.wit-fetch-stamp)
-add_custom_command(
-  OUTPUT ${wasip2_stamp}
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/wasi/p2
-  COMMAND ${wkg_bin} wit fetch
-  COMMAND ${CMAKE_COMMAND} -E touch ${wasip2_stamp}
-  WORKING_DIRECTORY ${wasip2_wit_dir}/..
-  DEPENDS wkg ${wasip2_wit_dir}/wasi-libc-wasip2.wit
-  COMMENT "Fetching WASI P2 dependencies"
-)
-add_custom_target(wasip2-wits DEPENDS ${wasip2_stamp})
 add_custom_target(
   bindings-p2
   COMMAND
@@ -120,28 +73,13 @@ add_custom_target(
       --rename wasi:cli/terminal-stdin@${wasip2-version}=terminal_stdin
       --rename wasi:cli/terminal-stdout@${wasip2-version}=terminal_stdout
       --rename wasi:cli/terminal-stderr@${wasip2-version}=terminal_stderr
-      ${wasip2_wit_dir}
+      ${CMAKE_SOURCE_DIR}/wasi/p2/wit
   COMMAND cmake -E copy wasip2.h ${bottom_half}/headers/public/wasi/__generated_wasip2.h
   COMMAND cmake -E copy wasip2_component_type.o ${bottom_half}/sources
   COMMAND cmake -E copy wasip2.c ${bottom_half}/sources
   DEPENDS wit-bindgen wkg wasip2-wits
 )
 
-set(wasip3_wit_dir ${CMAKE_CURRENT_BINARY_DIR}/wasi/p3/wit)
-set(wasip3-version 0.3.0-rc-2026-01-06)
-file(MAKE_DIRECTORY ${wasip3_wit_dir})
-configure_file(${CMAKE_SOURCE_DIR}/wasi/wasi-libc-wasip3.wit.in ${wasip3_wit_dir}/wasi-libc-wasip3.wit)
-set(wasip3_stamp ${CMAKE_CURRENT_BINARY_DIR}/wasi/p3/.wit-fetch-stamp)
-add_custom_command(
-  OUTPUT ${wasip3_stamp}
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/wasi/p3
-  COMMAND ${wkg_bin} wit fetch
-  COMMAND ${CMAKE_COMMAND} -E touch ${wasip3_stamp}
-  WORKING_DIRECTORY ${wasip3_wit_dir}/..
-  DEPENDS wkg ${wasip3_wit_dir}/wasi-libc-wasip3.wit
-  COMMENT "Fetching WASI P3 dependencies"
-)
-add_custom_target(wasip3-wits DEPENDS ${wasip3_stamp})
 add_custom_target(
   bindings-p3
   COMMAND
@@ -169,7 +107,7 @@ add_custom_target(
       --rename wasi:cli/terminal-stdin@${wasip3-version}=terminal_stdin
       --rename wasi:cli/terminal-stdout@${wasip3-version}=terminal_stdout
       --rename wasi:cli/terminal-stderr@${wasip3-version}=terminal_stderr
-      ${wasip3_wit_dir}
+      ${CMAKE_SOURCE_DIR}/wasi/p3/wit
   COMMAND cmake -E copy wasip3.h ${bottom_half}/headers/public/wasi/__generated_wasip3.h
   COMMAND cmake -E copy wasip3_component_type.o ${bottom_half}/sources
   COMMAND cmake -E copy wasip3.c ${bottom_half}/sources

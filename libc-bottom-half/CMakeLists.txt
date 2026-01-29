@@ -215,8 +215,16 @@ if (WASI STREQUAL "p1")
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:crt1-command> ${crt_sysroot}/crt1-command.o
     DEPENDS crt1-command $<TARGET_OBJECTS:crt1-command>
   )
-elseif (WASI STREQUAL "p2")
-  # wasip2: crt1-command.o is modified from what CMake produces to
+else()
+  if (WASI STREQUAL "p2")
+    set(world wasi:cli/command@${wasip2-version})
+  elseif (WASI STREQUAL "p3")
+    set(world wasi:cli/command@${wasip3-version})
+  else()
+    message(FATAL_ERROR "Unknown WASI version: ${WASI}")
+  endif()
+
+  # wasip2+: crt1-command.o is modified from what CMake produces to
   # additionally have a custom section representing the type information needed
   # for its contained export. This is the `wasi:cli/run` interface, for example.
   #
@@ -238,25 +246,12 @@ elseif (WASI STREQUAL "p2")
     OUTPUT ${crt_sysroot}/crt1-command.o
     COMMAND
       ${wasm_tools} component embed
-        ${wasip2_wit_dir}
+        ${CMAKE_SOURCE_DIR}/wasi/${WASI}/wit
         $<TARGET_OBJECTS:crt1-command>
-        --world wasi:cli/command@0.2.0
+        --world ${world}
         -o ${crt_sysroot}/crt1-command.o
-    DEPENDS crt1-command wasip2-wits $<TARGET_OBJECTS:crt1-command> wasm-tools
+    DEPENDS crt1-command $<TARGET_OBJECTS:crt1-command> wasm-tools
   )
-elseif (WASI STREQUAL "p3")
-  add_custom_command(
-    OUTPUT ${crt_sysroot}/crt1-command.o
-    COMMAND
-      ${wasm_tools} component embed
-        ${wasip3_wit_dir}
-        $<TARGET_OBJECTS:crt1-command>
-        --world wasi:cli/command@0.3.0-rc-2026-01-06
-        -o ${crt_sysroot}/crt1-command.o
-    DEPENDS crt1-command wasip3-wits $<TARGET_OBJECTS:crt1-command> wasm-tools
-  )
-else()
-  message(FATAL_ERROR "Unknown WASI version: ${WASI}")
 endif()
 
 # Provide a plain crt1.o for toolchain compatibility, identical to

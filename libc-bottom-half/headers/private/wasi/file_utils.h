@@ -49,6 +49,9 @@ static int wasip2_handle_write_error(streams_stream_error_t error) {
 // Returns -1 and sets errno to `ENOENT` if `s` is not valid utf-8.
 int wasip2_string_from_c(const char *s, wasip2_string_t* out);
 #endif
+#ifdef __wasip3__
+int wasip3_string_from_c(const char *s, wasip3_string_t* out);
+#endif
 
 #if defined(__wasip2__) || defined(__wasip3__)
 // Succeed only if fd is bound to a file handle in the descriptor table
@@ -77,6 +80,10 @@ int __wasilibc_read_stream(int fd,
                            off_t **off,
                            poll_borrow_pollable_t *pollable);
 #endif
+#ifdef __wasip3__
+int __wasilibc_write_stream3(int fildes, wasip3_write_t **write_end, off_t **off);
+int __wasilibc_read_stream3(int fildes, filesystem_tuple2_stream_u8_future_result_void_error_code_t **stream, off_t **off);
+#endif
 
 #if defined(__wasip2__) || defined(__wasip3__)
 static unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
@@ -102,15 +109,6 @@ static unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
   }
 }
 
-#endif
-
-#ifdef __wasip3__
-#include <wasi/descriptor_table.h>
-
-int wasip3_string_from_c(const char *s, wasip3_string_t* out);
-
-ssize_t __wasilibc_write_stream3(int fildes, wasip3_write_t **write_end, off_t **off);
-ssize_t __wasilibc_read_stream3(int fildes, filesystem_tuple2_stream_u8_future_result_void_error_code_t **stream, off_t **off);
 #endif
 
 #endif

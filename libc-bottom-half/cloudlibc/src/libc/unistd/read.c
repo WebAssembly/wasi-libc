@@ -63,7 +63,7 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
     return -1;
   wasip3_waitable_status_t status =
       filesystem_stream_u8_read(stream->f0, buf, nbyte);
-  ssize_t amount = wasip3_waitable_block_on(status, stream->f0);
+  size_t amount = wasip3_waitable_block_on(status, stream->f0);
   if (amount > 0) {
     if (off)
       *off += amount;

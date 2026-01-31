@@ -29,7 +29,7 @@ off_t __lseek(int fildes, off_t offset, int whence) {
     return -1;
   }
   return new_offset;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Look up a stream for fildes
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
   if (!entry)
@@ -39,10 +39,6 @@ off_t __lseek(int fildes, off_t offset, int whence) {
     return -1;
   }
   return entry->vtable->seek(entry->data, offset, whence);
-#elif defined(__wasip3__)
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
 #else
 # error "Unknown WASI version"
 #endif

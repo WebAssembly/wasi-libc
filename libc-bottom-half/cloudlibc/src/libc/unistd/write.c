@@ -85,7 +85,7 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
     // the stream is still active
     wasip3_waitable_status_t status =
         filesystem_stream_u8_write(write_end->output, buf, nbyte);
-    ssize_t amount = wasip3_waitable_block_on(status, write_end->output);
+    size_t amount = wasip3_waitable_block_on(status, write_end->output);
     if (amount > 0) {
       if (off)
         *off += amount;

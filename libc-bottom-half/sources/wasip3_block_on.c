@@ -24,8 +24,8 @@ void wasip3_subtask_block_on(wasip3_subtask_status_t status) {
   }
 }
 
-ssize_t wasip3_waitable_block_on(wasip3_waitable_status_t status,
-                                 waitable_t stream) {
+size_t wasip3_waitable_block_on(wasip3_waitable_status_t status,
+                                waitable_t stream) {
   if (status == WASIP3_WAITABLE_STATUS_BLOCKED) {
     wasip3_waitable_set_t set = wasip3_waitable_set_new();
     wasip3_waitable_join(stream, set);
@@ -38,13 +38,14 @@ ssize_t wasip3_waitable_block_on(wasip3_waitable_status_t status,
     // remove from set
     wasip3_waitable_join(stream, 0);
     wasip3_waitable_set_drop(set);
-    ssize_t amount = event.event == WASIP3_EVENT_FUTURE_READ ? 1 : event.code;
+    size_t amount = event.event == WASIP3_EVENT_FUTURE_READ ? 1 : event.code;
     return amount;
   } else if (WASIP3_WAITABLE_STATE(status) == WASIP3_WAITABLE_COMPLETED ||
              WASIP3_WAITABLE_STATE(status) == WASIP3_WAITABLE_DROPPED) {
-    ssize_t amount = WASIP3_WAITABLE_COUNT(status);
+    size_t amount = WASIP3_WAITABLE_COUNT(status);
     return amount;
   } else {
+    // other status (e.g. cancelled) shouldn't occur
     abort();
   }
 }

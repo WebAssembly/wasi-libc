@@ -336,6 +336,7 @@ __wasilibc_open_nomode
 __wasilibc_populate_preopens
 __wasilibc_pthread_self
 __wasilibc_random
+__wasilibc_read_stream3
 __wasilibc_rename_newat
 __wasilibc_rename_oldat
 __wasilibc_reset_preopens
@@ -344,6 +345,7 @@ __wasilibc_stat
 __wasilibc_tell
 __wasilibc_unlinkat
 __wasilibc_utimens
+__wasilibc_write_stream3
 __wasm_call_dtors
 __wcscoll_l
 __wcsftime_l
@@ -1479,6 +1481,7 @@ wasip3_subtask_drop
 wasip3_task_cancel
 wasip3_thread_yield
 wasip3_tuple2_string_string_free
+wasip3_waitable_block_on
 wasip3_waitable_join
 wasip3_waitable_set_drop
 wasip3_waitable_set_new

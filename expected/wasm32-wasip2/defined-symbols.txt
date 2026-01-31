@@ -1,4 +1,3 @@
-NS_PER_S
 _CLOCK_MONOTONIC
 _CLOCK_REALTIME
 _Exit
@@ -343,6 +342,8 @@ __wasilibc_rmdirat
 __wasilibc_sockaddr_to_wasi
 __wasilibc_sockaddr_validate
 __wasilibc_stat
+__wasilibc_tcp_getsockopt
+__wasilibc_tcp_setsockopt
 __wasilibc_tell
 __wasilibc_unlinkat
 __wasilibc_unspecified_addr
@@ -1384,7 +1385,6 @@ tcp_result_u32_error_code_free
 tcp_result_u64_error_code_free
 tcp_result_u8_error_code_free
 tcp_result_void_error_code_free
-tcp_setsockopt
 tcp_tcp_socket_drop_own
 tdelete
 tdestroy

@@ -23,11 +23,13 @@ static void file_close_streams(void *data) {
     filesystem_stream_u8_drop_readable(file->read.f0);
     file->read.f0 = 0;
     filesystem_future_result_void_error_code_drop_readable(file->read.f1);
+    file->read.f1 = 0;
   }
   if (file->write.output != 0) {
     filesystem_stream_u8_drop_writable(file->write.output);
     file->write.output = 0;
     wasip3_subtask_block_on(file->write.subtask);
+    file->write.subtask = WASIP3_SUBTASK_RETURNED;
     if (file->write.pending_result.is_err) {
       translate_error(file->write.pending_result.val.err);
     }
@@ -153,7 +155,6 @@ static int file_write_stream(void *data, wasip3_write_t **out, off_t **offs) {
     file->write.subtask = filesystem_method_descriptor_write_via_stream(
         filesystem_borrow_descriptor(file->file_handle), write_read,
         file->offset, &file->write.pending_result);
-    // filesystem_stream_u8_drop_readable(write_read);
   }
   *out = &file->write;
   *offs = &file->offset;

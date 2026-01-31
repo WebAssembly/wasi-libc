@@ -161,7 +161,7 @@ int __wasilibc_init_stdio() {
     return -1;
   // assuming that stdout and stderr functions are compatible
   if (stdio3_add_output(
-          (wasip3_subtask_status_t (*)(
+          (wasip3_subtask_status_t(*)(
               stdin_stream_u8_t,
               stdout_result_void_error_code_t *))stderr_write_via_stream,
           terminal_stderr_get_terminal_stderr) < 0)

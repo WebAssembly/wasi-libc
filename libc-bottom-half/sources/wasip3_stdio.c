@@ -23,7 +23,10 @@ typedef struct {
   wasip3_write_t output;
   // tristate: zero=unknown, valid handle=yes, -1=no
   terminal_output_own_terminal_output_t terminal_out;
-  // function to determine whether this is a terminal
+  // stream creation function (delayed)
+  wasip3_subtask_status_t (*stream_func)(
+      stdin_stream_u8_t data, stdout_result_void_error_code_t *result);
+  // function to determine whether this is a terminal (delayed)
   bool (*terminal_func)(terminal_stdout_own_terminal_output_t *ret);
 } stdout3_t;
 
@@ -52,8 +55,11 @@ static void stdout3_free(void *data) {
 static int stdout3_write(void *data, wasip3_write_t **out, off_t **offs) {
   stdout3_t *stdio = (stdout3_t *)data;
   if (!stdio->output.output) {
-    errno = EOPNOTSUPP;
-    return -1;
+    stdin_stream_u8_t read_side = stdin_stream_u8_new(&stdio->output.output);
+    stdio->output.subtask = (*stdio->stream_func)(
+        read_side,
+        (stdout_result_void_error_code_t *)&stdio->output.pending_result);
+    // subtask will be checked by write for error before writing
   }
   *out = &stdio->output;
   *offs = NULL;
@@ -66,8 +72,7 @@ stdin3_read(void *data,
             off_t **offs) {
   stdin3_t *stdio = (stdin3_t *)data;
   if (!stdio->input.f0) {
-    errno = EOPNOTSUPP;
-    return -1;
+    stdin_read_via_stream(&stdio->input);
   }
   *out = (filesystem_tuple2_stream_u8_future_result_void_error_code_t *)&stdio
              ->input;
@@ -124,9 +129,6 @@ static int stdio_add_input() {
     errno = ENOMEM;
     return -1;
   }
-  stdin_tuple2_stream_u8_future_result_void_error_code_t stdin;
-  stdin_read_via_stream(&stdio->input);
-
   descriptor_table_entry_t entry;
   entry.vtable = &stdin3_vtable;
   entry.data = stdio;
@@ -134,20 +136,15 @@ static int stdio_add_input() {
 }
 
 static int stdio3_add_output(
-    wasip3_subtask_status_t (*func)(stdin_stream_u8_t data,
-                                    stdout_result_void_error_code_t *result),
+    wasip3_subtask_status_t (*stream_func)(
+        stdin_stream_u8_t data, stdout_result_void_error_code_t *result),
     bool (*terminal_func)(terminal_stdout_own_terminal_output_t *ret)) {
   stdout3_t *stdio = calloc(1, sizeof(stdout3_t));
   if (!stdio) {
     errno = ENOMEM;
     return -1;
   }
-  stdin_stream_u8_t read_side = stdin_stream_u8_new(&stdio->output.output);
-  stdio->output.subtask =
-      (*func)(read_side,
-              (stdout_result_void_error_code_t *)&stdio->output.pending_result);
-  // subtask will be checked by write for error before writing
-
+  stdio->stream_func = stream_func;
   stdio->terminal_func = terminal_func;
 
   descriptor_table_entry_t entry;

@@ -28,8 +28,7 @@ struct _DIR {
   size_t skip;
   size_t offset;
 #elif defined(__wasip3__)
-  filesystem_stream_directory_entry_t stream;
-  filesystem_future_result_void_error_code_t future;
+  filesystem_tuple2_stream_directory_entry_future_result_void_error_code_t stream;
   size_t skip;
   size_t offset;
 #else

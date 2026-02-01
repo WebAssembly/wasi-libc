@@ -163,15 +163,10 @@ static int ensure_has_directory_stream(DIR *dirp, filesystem_borrow_descriptor_t
     return -1;
   }
 #elif defined(__wasip3__)
-  if (dirp->stream != 0)
-    return 0;
-
-  filesystem_tuple2_stream_directory_entry_future_result_void_error_code_t result;
-  wasip3_subtask_status_t status = filesystem_method_descriptor_read_directory(*handle,
-                                                        &result);
-  wasip3_subtask_block_on(status);
-  dirp->stream = result.f0;
-  dirp->future = result.f1;
+  if (dirp->stream.f0 == 0) {
+    wasip3_subtask_status_t status = filesystem_method_descriptor_read_directory(*handle, &dirp->stream);
+    wasip3_subtask_block_on(status);
+  }
 #endif
   return 0;
 }
@@ -246,8 +241,8 @@ static struct dirent *readdir_next(DIR *dirp) {
 
 #elif defined(__wasip3__)
   filesystem_directory_entry_t dir_entry;
-  wasip3_waitable_status_t status = filesystem_stream_directory_entry_read(dirp->stream, &dir_entry, 1);
-  ssize_t amount = wasip3_waitable_block_on(status, dirp->stream);
+  wasip3_waitable_status_t status = filesystem_stream_directory_entry_read(dirp->stream.f0, &dir_entry, 1);
+  ssize_t amount = wasip3_waitable_block_on(status, dirp->stream.f0);
   if (amount<1)
     return NULL;
 #endif

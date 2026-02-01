@@ -76,12 +76,8 @@ DIR *fdopendir(int fd) {
 
   dirp->stream = result;
 #elif defined(__wasip3__)
-  filesystem_tuple2_stream_directory_entry_future_result_void_error_code_t result;
-  wasip3_subtask_status_t status = filesystem_method_descriptor_read_directory(file_handle,
-                                                        &result);
+  wasip3_subtask_status_t status = filesystem_method_descriptor_read_directory(file_handle, &dirp->stream);
   wasip3_subtask_block_on(status);
-  dirp->stream = result.f0;
-  dirp->future = result.f1;
 #endif
   dirp->fd = fd;
   dirp->skip = 0;

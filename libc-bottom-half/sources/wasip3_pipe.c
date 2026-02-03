@@ -1,0 +1,102 @@
+#include <wasi/version.h>
+
+#ifdef __wasip3__
+#include <common/errors.h>
+#include <stdlib.h>
+#include <wasi/api.h>
+#include <wasi/descriptor_table.h>
+
+typedef struct {
+  wasip3_write_t output;
+} pipe3w_t;
+
+typedef struct {
+  filesystem_tuple2_stream_u8_future_result_void_error_code_t input;
+} pipe3r_t;
+
+static int pipe_read_stream(
+    void *data,
+    filesystem_tuple2_stream_u8_future_result_void_error_code_t **out,
+    off_t **offs) {
+  pipe3r_t *file = (pipe3r_t *)data;
+  *out = &file->input;
+  *offs = 0;
+  return 0;
+}
+
+static void pipe_r_free(void *data) {
+  pipe3r_t *file = (pipe3r_t *)data;
+  filesystem_stream_u8_drop_readable(file->input.f0);
+  free(file);
+}
+
+static int pipe_write_stream(void *data, wasip3_write_t **out, off_t **offs) {
+  pipe3w_t *file = (pipe3w_t *)data;
+  *out = &file->output;
+  *offs = 0;
+  return 0;
+}
+
+static void pipe_w_free(void *data) {
+  pipe3w_t *file = (pipe3w_t *)data;
+  filesystem_stream_u8_drop_writable(file->output.output);
+  free(file);
+}
+
+static descriptor_vtable_t pipe_r_vtable = {
+    .free = pipe_r_free,
+    .get_read_stream3 = pipe_read_stream,
+};
+
+static descriptor_vtable_t pipe_w_vtable = {
+    .free = pipe_w_free,
+    .get_write_stream3 = pipe_write_stream,
+};
+
+int pipe(int pipefd[2]) {
+  pipe3w_t *writehandle = calloc(1, sizeof(pipe3w_t));
+  if (!writehandle) {
+    errno = ENOMEM;
+    return -1;
+  }
+  pipe3r_t *readhandle = calloc(1, sizeof(pipe3r_t));
+  if (!readhandle) {
+    free(writehandle);
+    errno = ENOMEM;
+    return -1;
+  }
+  readhandle->input.f0 = filesystem_stream_u8_new(&writehandle->output.output);
+  descriptor_table_entry_t entry;
+  entry.vtable = &pipe_r_vtable;
+  entry.data = readhandle;
+  int pipefd0 = descriptor_table_insert(entry);
+  if (pipefd0 < 0) {
+    pipe_r_free(readhandle);
+    pipe_w_free(writehandle);
+    return -1;
+  }
+  entry.vtable = &pipe_w_vtable;
+  entry.data = writehandle;
+  int pipefd1 = descriptor_table_insert(entry);
+  if (pipefd1 < 0) {
+    pipe_r_free(readhandle);
+    pipe_w_free(writehandle);
+    descriptor_table_remove(pipefd0);
+    return -1;
+  }
+  // signal non-eof condition
+  writehandle->output.subtask = WASIP3_SUBTASK_STARTING;
+  pipefd[0] = pipefd0;
+  pipefd[1] = pipefd1;
+  return 0;
+}
+
+int pipe2(int pipefd[2], int flags) {
+  if (flags != 0) {
+    errno = EOPNOTSUPP;
+    return -1;
+  }
+  return pipe(pipefd);
+}
+
+#endif

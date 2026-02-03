@@ -76,7 +76,7 @@ network_borrow_network_t __wasi_sockets_utils__borrow_network() {
 }
 #endif
 
-int __wasi_sockets_utils__map_error(sockets_error_code_t wasi_error) {
+int __wasilibc_map_socket_error(sockets_error_code_t wasi_error) {
   switch (wasi_error) {
   case SOCKETS_ERROR_CODE_ACCESS_DENIED:
     return EACCES;
@@ -134,24 +134,24 @@ int __wasi_sockets_utils__map_error(sockets_error_code_t wasi_error) {
   }
 }
 
-bool __wasi_sockets_utils__parse_address(
-    sockets_ip_address_family_t expected_family, const struct sockaddr *address,
-    socklen_t len, sockets_ip_socket_address_t *result, int *error) {
+int __wasilibc_sockaddr_to_wasi(sockets_ip_address_family_t expected_family,
+                                const struct sockaddr *address, socklen_t len,
+                                sockets_ip_socket_address_t *result) {
   if (address == NULL || len < sizeof(struct sockaddr)) {
-    *error = EINVAL;
-    return false;
+    errno = EINVAL;
+    return -1;
   }
 
   switch (expected_family) {
   case SOCKETS_IP_ADDRESS_FAMILY_IPV4: {
     if (address->sa_family != AF_INET) {
-      *error = EAFNOSUPPORT;
-      return false;
+      errno = EAFNOSUPPORT;
+      return -1;
     }
 
     if (len < sizeof(struct sockaddr_in)) {
-      *error = EINVAL;
-      return false;
+      errno = EINVAL;
+      return -1;
     }
 
     struct sockaddr_in *ipv4 = (struct sockaddr_in *)address;
@@ -166,17 +166,17 @@ bool __wasi_sockets_utils__parse_address(
                                     (ip >> 16) & 0xFF, ip >> 24},
                     }},
     };
-    return true;
+    return 0;
   }
   case SOCKETS_IP_ADDRESS_FAMILY_IPV6: {
     if (address->sa_family != AF_INET6) {
-      *error = EAFNOSUPPORT;
-      return false;
+      errno = EAFNOSUPPORT;
+      return -1;
     }
 
     if (len < sizeof(struct sockaddr_in6)) {
-      *error = EINVAL;
-      return false;
+      errno = EINVAL;
+      return -1;
     }
 
     struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)address;
@@ -201,26 +201,27 @@ bool __wasi_sockets_utils__parse_address(
                     .flow_info = ipv6->sin6_flowinfo,
                     .scope_id = ipv6->sin6_scope_id,
                 }}};
-    return true;
+    return 0;
   }
   default: /* unreachable */
     abort();
   }
 }
 
-bool __wasi_sockets_utils__output_addr_validate(
-    sockets_ip_address_family_t expected_family, struct sockaddr *addr,
-    socklen_t *addrlen, output_sockaddr_t *result) {
+int __wasilibc_sockaddr_validate(sockets_ip_address_family_t expected_family,
+                                 struct sockaddr *addr, socklen_t *addrlen,
+                                 output_sockaddr_t *result) {
   // The address parameters must be either both null or both _not_ null.
 
   if (addr == NULL && addrlen == NULL) {
     *result = (output_sockaddr_t){.tag = OUTPUT_SOCKADDR_NULL, .null = {}};
-    return true;
+    return 0;
 
   } else if (addr != NULL && addrlen != NULL) {
     if (expected_family == SOCKETS_IP_ADDRESS_FAMILY_IPV4) {
       if (*addrlen < sizeof(struct sockaddr_in)) {
-        return false;
+        errno = EINVAL;
+        return -1;
       }
 
       *result = (output_sockaddr_t){.tag = OUTPUT_SOCKADDR_V4,
@@ -228,11 +229,12 @@ bool __wasi_sockets_utils__output_addr_validate(
                                         .addr = (struct sockaddr_in *)addr,
                                         .addrlen = addrlen,
                                     }};
-      return true;
+      return 0;
 
     } else if (expected_family == SOCKETS_IP_ADDRESS_FAMILY_IPV6) {
       if (*addrlen < sizeof(struct sockaddr_in6)) {
-        return false;
+        errno = EINVAL;
+        return -1;
       }
 
       *result = (output_sockaddr_t){.tag = OUTPUT_SOCKADDR_V6,
@@ -240,19 +242,20 @@ bool __wasi_sockets_utils__output_addr_validate(
                                         .addr = (struct sockaddr_in6 *)addr,
                                         .addrlen = addrlen,
                                     }};
-      return true;
+      return 0;
 
     } else {
       abort();
     }
 
   } else {
-    return false;
+    errno = EINVAL;
+    return -1;
   }
 }
 
-void __wasi_sockets_utils__output_addr_write(
-    const sockets_ip_socket_address_t input, output_sockaddr_t *output) {
+void __wasilibc_wasi_to_sockaddr(const sockets_ip_socket_address_t input,
+                                 output_sockaddr_t *output) {
   switch (input.tag) {
   case SOCKETS_IP_SOCKET_ADDRESS_IPV4: {
     if (output->tag != OUTPUT_SOCKADDR_V4) {
@@ -313,8 +316,7 @@ void __wasi_sockets_utils__output_addr_write(
   }
 }
 
-int __wasi_sockets_utils__posix_family(
-    sockets_ip_address_family_t wasi_family) {
+int __wasilibc_wasi_family_to_libc(sockets_ip_address_family_t wasi_family) {
   switch (wasi_family) {
   case SOCKETS_IP_ADDRESS_FAMILY_IPV4:
     return AF_INET;
@@ -325,30 +327,23 @@ int __wasi_sockets_utils__posix_family(
   }
 }
 
-sockets_ip_socket_address_t
-__wasi_sockets_utils__any_addr(sockets_ip_address_family_t family) {
+void __wasilibc_unspecified_addr(sockets_ip_address_family_t family,
+                                 sockets_ip_socket_address_t *out) {
   switch (family) {
   case SOCKETS_IP_ADDRESS_FAMILY_IPV4:
-    return (sockets_ip_socket_address_t){.tag = SOCKETS_IP_SOCKET_ADDRESS_IPV4,
-                                         .val = {.ipv4 = {
-                                                     .port = 0,
-                                                     .address = {0, 0, 0, 0},
-                                                 }}};
+    out->tag = SOCKETS_IP_SOCKET_ADDRESS_IPV4;
+    memset(&out->val.ipv4, 0, sizeof(out->val.ipv4));
+    break;
   case SOCKETS_IP_ADDRESS_FAMILY_IPV6:
-    return (sockets_ip_socket_address_t){
-        .tag = SOCKETS_IP_SOCKET_ADDRESS_IPV6,
-        .val = {.ipv6 = {
-                    .port = 0,
-                    .address = {0, 0, 0, 0, 0, 0, 0, 0},
-                    .flow_info = 0,
-                    .scope_id = 0,
-                }}};
+    out->tag = SOCKETS_IP_SOCKET_ADDRESS_IPV6;
+    memset(&out->val.ipv6, 0, sizeof(out->val.ipv6));
+    break;
   default: /* unreachable */
     abort();
   }
 }
 
-int __wasi_sockets_utils__parse_port(const char *restrict port_str) {
+int __wasilibc_parse_port(const char *restrict port_str) {
   char *end = NULL;
   errno = 0;
   long port = strtol(port_str, &end, 10);
@@ -367,8 +362,7 @@ int __wasi_sockets_utils__parse_port(const char *restrict port_str) {
   return (int)port;
 }
 
-const service_entry_t *
-__wasi_sockets_utils__get_service_entry_by_name(const char *name) {
+const service_entry_t *__wasilibc_get_service_entry_by_name(const char *name) {
   if (!name) {
     return NULL;
   }
@@ -385,7 +379,7 @@ __wasi_sockets_utils__get_service_entry_by_name(const char *name) {
 }
 
 const service_entry_t *
-__wasi_sockets_utils__get_service_entry_by_port(const uint16_t port) {
+__wasilibc_get_service_entry_by_port(const uint16_t port) {
   const service_entry_t *entry = __wasi_sockets_services_db;
   while (entry->s_name) {
     if (entry->port == port) {

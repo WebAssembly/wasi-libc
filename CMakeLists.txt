@@ -41,7 +41,7 @@ set(TARGET_TRIPLE "wasm32-wasip1" CACHE STRING "WASI target to test")
 # - https://github.com/llvm/llvm-project/issues/91700
 # - https://github.com/llvm/llvm-project/issues/91711
 set(LTO "" CACHE STRING "LTO mode to use")
-set(MALLOC "dlmalloc" CACHE STRING "Malloc implementation to use (dlmalloc, jemalloc, or none)")
+set(MALLOC "dlmalloc" CACHE STRING "Malloc implementation to use (dlmalloc, emmalloc, or none)")
 set(BUILTINS_LIB "" CACHE STRING "Path to precompiled compiler-rt builtins library")
 set(BULK_MEMORY_THRESHOLD "32" CACHE STRING "Threshold to compile code with")
 option(SETJMP "Build setjmp/longjmp support" ON)

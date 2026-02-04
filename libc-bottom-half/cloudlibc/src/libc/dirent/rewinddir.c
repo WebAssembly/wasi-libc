@@ -18,7 +18,14 @@ void rewinddir(DIR *dirp) {
   dirp->skip = 0;
   dirp->offset = 0;
 #elif defined(__wasip3__)
-  dirp->stream = 0;
+  if (dirp->stream.f0 != 0) {
+    filesystem_stream_directory_entry_drop_readable(dirp->stream.f0);
+    dirp->stream.f0 = 0;
+  }
+  if (dirp->stream.f1 != 0) {
+    filesystem_future_result_void_error_code_drop_readable(dirp->stream.f1);
+    dirp->stream.f1 = 0;
+  }
   dirp->skip = 0;
   dirp->offset = 0;
 #else

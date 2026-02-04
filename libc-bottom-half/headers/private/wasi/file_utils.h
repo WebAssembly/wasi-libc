@@ -49,6 +49,9 @@ static int wasip2_handle_write_error(streams_stream_error_t error) {
 // Returns -1 and sets errno to `ENOENT` if `s` is not valid utf-8.
 int wasip2_string_from_c(const char *s, wasip2_string_t* out);
 #endif
+#ifdef __wasip3__
+int wasip3_string_from_c(const char *s, wasip3_string_t* out);
+#endif
 
 #if defined(__wasip2__) || defined(__wasip3__)
 // Succeed only if fd is bound to a file handle in the descriptor table

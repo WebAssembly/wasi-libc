@@ -145,6 +145,7 @@ else()
     sources/socket.c
     sources/sockets_utils.c
     sources/sockopt.c
+    sources/tcp_sockopt.c
   )
 endif()
 

@@ -47,8 +47,8 @@ int main() {
   int client = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
   TEST2(client != -1);
 
-  // Connect a client socket.  This should put the socket in a "connecting"
-  // state since the server isn't accepting connections yet.
+  // Connect a client socket.  This may or may not complete immediately; if not,
+  // we'll poll and finish connecting later.
   TEST(connect(client, (const struct sockaddr *)&server_address,
                sizeof(server_address)) != -1 ||
        errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS);

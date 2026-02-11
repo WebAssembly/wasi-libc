@@ -441,35 +441,35 @@ if (THREADS)
 else()
   # pthreads stubs for single-threaded environment
   list(APPEND top_half_sources
-    musl/src/thread/wasi-threads/pthread_barrier_destroy.c
-    musl/src/thread/wasi-threads/pthread_barrier_init.c
-    musl/src/thread/wasi-threads/pthread_barrier_wait.c
-    musl/src/thread/wasi-threads/pthread_cond_broadcast.c
-    musl/src/thread/wasi-threads/pthread_cond_destroy.c
-    musl/src/thread/wasi-threads/pthread_cond_init.c
-    musl/src/thread/wasi-threads/pthread_cond_signal.c
-    musl/src/thread/wasi-threads/pthread_cond_timedwait.c
-    musl/src/thread/wasi-threads/pthread_cond_wait.c
-    musl/src/thread/wasi-threads/pthread_create.c
-    musl/src/thread/wasi-threads/pthread_detach.c
-    musl/src/thread/wasi-threads/pthread_join.c
-    musl/src/thread/wasi-threads/pthread_mutex_consistent.c
-    musl/src/thread/wasi-threads/pthread_mutex_getprioceiling.c
-    musl/src/thread/wasi-threads/pthread_mutex_lock.c
-    musl/src/thread/wasi-threads/pthread_mutex_timedlock.c
-    musl/src/thread/wasi-threads/pthread_mutex_trylock.c
-    musl/src/thread/wasi-threads/pthread_mutex_unlock.c
-    musl/src/thread/wasi-threads/pthread_once.c
-    musl/src/thread/wasi-threads/pthread_rwlock_rdlock.c
-    musl/src/thread/wasi-threads/pthread_rwlock_timedrdlock.c
-    musl/src/thread/wasi-threads/pthread_rwlock_timedwrlock.c
-    musl/src/thread/wasi-threads/pthread_rwlock_tryrdlock.c
-    musl/src/thread/wasi-threads/pthread_rwlock_trywrlock.c
-    musl/src/thread/wasi-threads/pthread_rwlock_unlock.c
-    musl/src/thread/wasi-threads/pthread_rwlock_wrlock.c
-    musl/src/thread/wasi-threads/pthread_spin_lock.c
-    musl/src/thread/wasi-threads/pthread_spin_trylock.c
-    musl/src/thread/wasi-threads/pthread_spin_unlock.c
+    musl/src/thread/stub/pthread_barrier_destroy.c
+    musl/src/thread/stub/pthread_barrier_init.c
+    musl/src/thread/stub/pthread_barrier_wait.c
+    musl/src/thread/stub/pthread_cond_broadcast.c
+    musl/src/thread/stub/pthread_cond_destroy.c
+    musl/src/thread/stub/pthread_cond_init.c
+    musl/src/thread/stub/pthread_cond_signal.c
+    musl/src/thread/stub/pthread_cond_timedwait.c
+    musl/src/thread/stub/pthread_cond_wait.c
+    musl/src/thread/stub/pthread_create.c
+    musl/src/thread/stub/pthread_detach.c
+    musl/src/thread/stub/pthread_join.c
+    musl/src/thread/stub/pthread_mutex_consistent.c
+    musl/src/thread/stub/pthread_mutex_getprioceiling.c
+    musl/src/thread/stub/pthread_mutex_lock.c
+    musl/src/thread/stub/pthread_mutex_timedlock.c
+    musl/src/thread/stub/pthread_mutex_trylock.c
+    musl/src/thread/stub/pthread_mutex_unlock.c
+    musl/src/thread/stub/pthread_once.c
+    musl/src/thread/stub/pthread_rwlock_rdlock.c
+    musl/src/thread/stub/pthread_rwlock_timedrdlock.c
+    musl/src/thread/stub/pthread_rwlock_timedwrlock.c
+    musl/src/thread/stub/pthread_rwlock_tryrdlock.c
+    musl/src/thread/stub/pthread_rwlock_trywrlock.c
+    musl/src/thread/stub/pthread_rwlock_unlock.c
+    musl/src/thread/stub/pthread_rwlock_wrlock.c
+    musl/src/thread/stub/pthread_spin_lock.c
+    musl/src/thread/stub/pthread_spin_trylock.c
+    musl/src/thread/stub/pthread_spin_unlock.c
   )
 endif()
 

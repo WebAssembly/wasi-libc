@@ -306,6 +306,7 @@ endif()
 # ========= sockets-related tests ===============================
 
 if (NOT (WASI STREQUAL "p1"))
+  add_wasilibc_test(poll-connect.c NETWORK FAILP3)
   add_wasilibc_test(poll-nonblocking-socket.c NETWORK FAILP3)
   add_wasilibc_test(setsockopt.c NETWORK FAILP3)
   add_wasilibc_test(sockets-nonblocking-udp.c NETWORK FAILP3)

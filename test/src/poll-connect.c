@@ -1,0 +1,124 @@
+#include "test.h"
+#include <errno.h>
+#include <netinet/in.h>
+#include <poll.h>
+#include <sys/socket.h>
+
+#define TEST(c)                                                                \
+  do {                                                                         \
+    errno = 0;                                                                 \
+    if (!(c))                                                                  \
+      t_error("%s failed (errno = %d)\n", #c, errno);                          \
+  } while (0)
+
+#define TEST2(c)                                                               \
+  do {                                                                         \
+    if (!(c))                                                                  \
+      t_error("%s failed (errno = %d)\n", #c, errno);                          \
+  } while (0)
+
+#define ASSERT(c)                                                              \
+  do {                                                                         \
+    if (!(c))                                                                  \
+      t_error("%s failed\n", #c);                                              \
+  } while (0)
+
+int main() {
+  errno = 0;
+  int server = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+  TEST2(server != -1);
+
+  // Bind to any available port on the loopback address.
+  struct sockaddr_in server_address;
+  server_address.sin_family = AF_INET;
+  server_address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  server_address.sin_port = htons(0);
+  TEST(bind(server, (struct sockaddr *)&server_address,
+            sizeof(server_address)) != -1);
+
+  // Get the port we bound to.
+  socklen_t server_address_len = sizeof(server_address);
+  TEST(getsockname(server, (struct sockaddr *)&server_address,
+                   &server_address_len) != -1);
+
+  TEST(listen(server, 1) != -1);
+
+  errno = 0;
+  int client = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+  TEST2(client != -1);
+
+  // Connect a client socket.  This may or may not complete immediately; if not,
+  // we'll poll and finish connecting later.
+  TEST(connect(client, (const struct sockaddr *)&server_address,
+               sizeof(server_address)) != -1 ||
+       errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS);
+
+  // Start accepting connections.  This may or may not complete immediately; if
+  // not, we'll poll and accept again later.
+  socklen_t client_len = sizeof(struct sockaddr_in);
+  struct sockaddr_in client_address;
+  errno = 0;
+  int server_client =
+      accept(server, (struct sockaddr *)&client_address, &client_len);
+  TEST2(server_client != -1 || errno == EAGAIN || errno == EWOULDBLOCK ||
+        errno == EINPROGRESS);
+
+  struct pollfd client_fd = {
+      .fd = client, .events = POLLWRNORM | POLLRDNORM, .revents = 0};
+
+  struct pollfd fds[2];
+  fds[0] = client_fd;
+
+  // Poll until the client socket finished connecting and the server socket
+  // finishes accepting.
+  int loop_count = 0;
+  while ((server_client == -1 || fds[0].events) && loop_count < 10) {
+    ++loop_count;
+
+    int fd_count = 1;
+    if (server_client == -1) {
+      struct pollfd server_fd = {
+          .fd = server, .events = POLLWRNORM | POLLRDNORM, .revents = 0};
+      fds[1] = server_fd;
+      fd_count = 2;
+    }
+
+    TEST(poll(fds, fd_count, 100) != -1);
+    if (fds[0].revents) {
+      // The newly-connected client socket should be writable but not yet
+      // readable:
+      ASSERT((fds[0].revents & POLLRDNORM) == 0);
+      ASSERT((fds[0].revents & POLLWRNORM) != 0);
+      fds[0].events = 0;
+    }
+
+    if (server_client == -1 && fds[1].revents) {
+      errno = 0;
+      server_client =
+          accept(server, (struct sockaddr *)&client_address, &client_len);
+      TEST2(server_client != -1);
+    }
+  }
+  ASSERT(loop_count < 10);
+
+  // Send some data from the server to the client.
+  uint8_t data[5] = {1, 2, 3, 4, 5};
+  TEST(send(server_client, data, sizeof(data), 0) == sizeof(data));
+
+  fds[0].events = POLLRDNORM;
+  errno = 0;
+  int count = poll(fds, 1, 100);
+  TEST2(count == 1);
+  // Now the server has sent something, so the client socket should be readable.
+  ASSERT((fds[0].revents & POLLRDNORM) != 0);
+
+  uint8_t received[sizeof(data)];
+  TEST(recv(client, received, sizeof(data), 0) == sizeof(data));
+
+  // Assert that what was received matches what was sent.
+  for (int i = 0; i < sizeof(data); ++i) {
+    ASSERT(received[i] == data[i]);
+  }
+
+  return t_status;
+}

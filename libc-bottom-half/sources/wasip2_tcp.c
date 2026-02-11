@@ -1211,7 +1211,9 @@ static int tcp_poll_finish(void *data, poll_state_t *state, short events) {
     memset(&socket->state.connected, 0, sizeof(socket->state.connected));
     socket->state.connected.input = tuple.f0;
     socket->state.connected.output = tuple.f1;
-    __wasilibc_poll_ready(state, events);
+    // Now that it's connected, it's immediately writable but not necessarily
+    // immediately readable:
+    __wasilibc_poll_ready(state, events & POLLWRNORM);
   } else if (error == NETWORK_ERROR_CODE_WOULD_BLOCK) {
     // No events yet -- application will need to poll again
   } else {

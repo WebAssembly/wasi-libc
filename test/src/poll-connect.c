@@ -76,6 +76,9 @@ int main() {
   // finishes accepting.
   int loop_count = 0;
   while ((server_client == -1 || fds[0].events) && loop_count < 10) {
+    if (t_status)
+      exit(t_status);
+
     ++loop_count;
 
     int fd_count = 1;
@@ -152,6 +155,9 @@ int main() {
     // Write until we hit backpressure
     ssize_t write_total = 0;
     while (1) {
+      if (t_status)
+        exit(t_status);
+
       errno = 0;
       ssize_t count = write(server_client, data, data_len);
       if (count == -1) {
@@ -167,6 +173,9 @@ int main() {
     // Read what we wrote
     ssize_t read_total = 0;
     while (1) {
+      if (t_status)
+        exit(t_status);
+
       {
         errno = 0;
         int count = poll(fds, 1, 100);

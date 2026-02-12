@@ -29,11 +29,17 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
   }
   return bytes_written;
 #elif defined(__wasip2__)
+  // First, check to see if this is a socket, in which case we defer to `sendto`:
+  descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
+  if (!entry)
+    return -1;
+  if (entry->vtable->sendto != NULL)
+    return entry->vtable->sendto(entry->data, buf, nbyte, 0, NULL, 0);
+
   streams_borrow_output_stream_t output_stream;
   poll_borrow_pollable_t pollable;
   bool ok = false;
   filesystem_error_code_t error_code;
-  descriptor_table_entry_t* entry = 0;
 
   // Translate the file descriptor to an internal handle
   off_t *off;

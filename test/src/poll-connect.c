@@ -2,7 +2,10 @@
 #include <errno.h>
 #include <netinet/in.h>
 #include <poll.h>
+#include <stdlib.h>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 #define TEST(c)                                                                \
   do {                                                                         \
@@ -101,23 +104,91 @@ int main() {
   }
   ASSERT(loop_count < 10);
 
-  // Send some data from the server to the client.
-  uint8_t data[5] = {1, 2, 3, 4, 5};
-  TEST(send(server_client, data, sizeof(data), 0) == sizeof(data));
+  int one = 1;
+  TEST(ioctl(server_client, FIONBIO, &one) != -1);
 
-  fds[0].events = POLLRDNORM;
-  errno = 0;
-  int count = poll(fds, 1, 100);
-  TEST2(count == 1);
-  // Now the server has sent something, so the client socket should be readable.
-  ASSERT((fds[0].revents & POLLRDNORM) != 0);
+  // Test that we can `recv` what we `send`
+  {
+    // Send some data from the server to the client.
+    uint8_t data[5] = {1, 2, 3, 4, 5};
+    TEST(send(server_client, data, sizeof(data), 0) == sizeof(data));
 
-  uint8_t received[sizeof(data)];
-  TEST(recv(client, received, sizeof(data), 0) == sizeof(data));
+    fds[0].events = POLLRDNORM;
+    errno = 0;
+    int count = poll(fds, 1, 100);
+    TEST2(count == 1);
+    // Now the server has sent something, so the client socket should be
+    // readable.
+    ASSERT((fds[0].revents & POLLRDNORM) != 0);
 
-  // Assert that what was received matches what was sent.
-  for (int i = 0; i < sizeof(data); ++i) {
-    ASSERT(received[i] == data[i]);
+    uint8_t received[sizeof(data)];
+    TEST(recv(client, received, sizeof(data), 0) == sizeof(data));
+
+    // Assert that what was received matches what was sent.
+    for (int i = 0; i < sizeof(data); ++i) {
+      ASSERT(received[i] == data[i]);
+    }
+  }
+
+  // Test that we can `read` what we `write` and that neither of them block.
+  {
+    size_t data_len = 16 * 1024;
+    errno = 0;
+    uint8_t *received = malloc(data_len);
+    TEST2(received != NULL);
+
+    // Nothing should be readable, yet.
+    TEST(read(client, received, data_len) == -1 &&
+         (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS));
+
+    errno = 0;
+    uint8_t *data = malloc(data_len);
+    TEST2(data != NULL);
+
+    for (size_t i = 0; i < data_len; ++i) {
+      data[i] = 42;
+    }
+
+    // Write until we hit backpressure
+    ssize_t write_total = 0;
+    while (1) {
+      errno = 0;
+      ssize_t count = write(server_client, data, data_len);
+      if (count == -1) {
+        TEST2(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS);
+        break;
+      } else {
+        write_total += count;
+      }
+    }
+
+    fds[0].events = POLLRDNORM;
+
+    // Read what we wrote
+    ssize_t read_total = 0;
+    while (1) {
+      {
+        errno = 0;
+        int count = poll(fds, 1, 100);
+        TEST2(count == 1);
+        ASSERT((fds[0].revents & POLLRDNORM) != 0);
+      }
+
+      errno = 0;
+      ssize_t count = read(client, received, data_len);
+      TEST2(count != -1 || errno == EAGAIN || errno == EWOULDBLOCK ||
+            errno == EINPROGRESS);
+
+      if (count > 0) {
+        read_total += count;
+        for (ssize_t i = 0; i < count; ++i) {
+          ASSERT(received[i] == 42);
+        }
+        if (read_total == data_len) {
+          break;
+        }
+      }
+    }
   }
 
   return t_status;

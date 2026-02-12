@@ -28,6 +28,13 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
   }
   return bytes_read;
 #elif defined(__wasip2__)
+  // First, check to see if this is a socket, in which case we defer to `recvfrom`:
+  descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
+  if (!entry)
+    return -1;
+  if (entry->vtable->recvfrom != NULL)
+    return entry->vtable->recvfrom(entry->data, buf, nbyte, 0, NULL, NULL);
+
   bool ok = false;
 
   // Translate the file descriptor to an internal handle

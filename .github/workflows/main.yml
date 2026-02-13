@@ -301,3 +301,36 @@ jobs:
           -DCMAKE_C_COMPILER=$WASI_SDK_PATH/bin/clang
     - name: Build and test python
       run: ninja -C build -v python
+
+  # This is a "join node" which depends on all prior workflows. The merge queue,
+  # for example, gates on this to ensure that everything has executed
+  # successfully. This enables decoupling the set of CI jobs specified in this
+  # file with what should be gated on in the repository configuration. With a
+  # join node here it means, for example, that adding a new CI job doesn't
+  # require updating repository configuration and this can be updated directly
+  # here.
+  #
+  # Note that this currently always runs to always report a status, even on
+  # cancellation and even if dependency steps fail. Each dependency tries to
+  # cancel the whole run if it fails, so if a test matrix entry fails, for
+  # example, it cancels the build matrix entries too. This step then tries to
+  # fail on cancellation to ensure that the dependency failures are propagated
+  # correctly.
+  ci-status:
+    name: Record the result of this workflow
+    runs-on: ubuntu-latest
+    needs:
+      - buildlibc
+      - headerstest
+      - clang-format
+      - rustfmt
+      - bindings
+      - python
+    if: always()
+    steps:
+    # Calculate the exit status of the whole CI workflow.
+    # If all dependent jobs were successful, this exits with 0 (and the
+    # outcome job continues successfully). If a some dependent job has
+    # failed, this exits with 1.
+    - name: calculate the correct exit status
+      run: jq --exit-status 'all(.result == "success" or .result == "skipped")' <<< '${{ toJson(needs) }}'

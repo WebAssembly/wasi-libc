@@ -71,6 +71,19 @@ void test_udp_client() {
   // Write to socket
   ssize_t bytes_sent = send(socket_fd, message, len + 1, 0);
 
+  // Wait for server to be read-ready.
+  while (1) {
+    if (t_status)
+      exit(t_status);
+
+    struct pollfd poll_fd = {
+        .fd = server_socket_fd, .events = POLLRDNORM, .revents = 0};
+    TEST(poll(&poll_fd, 1, 100) != -1);
+    if (poll_fd.revents) {
+      break;
+    }
+  }
+
   // Receive from client
   struct sockaddr_in sockaddr_client;
   socklen_t sockaddr_client_len = sizeof(sockaddr_in);
@@ -78,15 +91,7 @@ void test_udp_client() {
       recvfrom(server_socket_fd, server_buffer, BUFSIZE, 0,
                (struct sockaddr *)&sockaddr_client, &sockaddr_client_len);
   if (bytes_received == -1)
-    if (errno != EWOULDBLOCK)
-      t_error("recvfrom failed (errno = %d)\n", errno);
-
-  while (bytes_received == -1) {
-    struct pollfd poll_fd = {
-        .fd = server_socket_fd, .events = POLLRDNORM, .revents = 0};
-    poll(&poll_fd, 1, 100);
-    bytes_received = recv(server_socket_fd, server_buffer, BUFSIZE, 0);
-  }
+    t_error("recvfrom failed (errno = %d)\n", errno);
 
   TEST(bytes_sent == len + 1);
   TEST(bytes_received == len + 1);
@@ -116,6 +121,14 @@ void test_udp_client() {
   // Message received should be the same as message sent
   if (bytes_sent == bytes_received)
     TEST(strcmp(message, client_buffer) == 0);
+
+  int value = -1;
+  socklen_t length = sizeof(value);
+  TEST(getsockopt(socket_fd, SOL_SOCKET, SO_ERROR, &value, &length) == 0 &&
+       value == 0);
+  TEST(getsockopt(server_socket_fd, SOL_SOCKET, SO_ERROR, &value, &length) ==
+           0 &&
+       value == 0);
 
   // Shut down client
   close(socket_fd);

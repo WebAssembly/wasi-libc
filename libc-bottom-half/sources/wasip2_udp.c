@@ -627,6 +627,11 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
       value = __wasi_sockets_utils__posix_family(socket->family);
       break;
     }
+
+    case SO_ERROR:
+      value = 0;
+      break;
+
     case SO_RCVBUF: {
       uint64_t result;
       if (!udp_method_udp_socket_receive_buffer_size(socket_borrow, &result,
@@ -825,9 +830,17 @@ static int udp_poll_register(void *data, poll_state_t *state, short events) {
   udp_socket_t *socket = (udp_socket_t *)data;
   switch (socket->state.tag) {
   case UDP_SOCKET_STATE_UNBOUND:
-  case UDP_SOCKET_STATE_BOUND_NOSTREAMS:
+    // In the unbound case, all we can do is assume immediate read and write
+    // readiness:
     __wasilibc_poll_ready(state, events);
     break;
+
+  case UDP_SOCKET_STATE_BOUND_NOSTREAMS:
+    // We can't know the true state of read and write readiness until we have
+    // stream handles, so let's add those now:
+    if (udp_create_streams(socket, NULL) < 0)
+      return -1;
+    // Deliberately fall through to next case:
 
   case UDP_SOCKET_STATE_BOUND_STREAMING:
   case UDP_SOCKET_STATE_CONNECTED: {

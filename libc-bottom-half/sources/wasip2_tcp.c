@@ -1159,9 +1159,15 @@ int tcp_setsockopt(void *data, int level, int optname, const void *optval,
 static int tcp_poll_register(void *data, poll_state_t *state, short events) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
   switch (socket->state.tag) {
-  case TCP_SOCKET_STATE_CONNECTING:
-  case TCP_SOCKET_STATE_LISTENING: {
+  case TCP_SOCKET_STATE_CONNECTING: {
     if ((events & (POLLRDNORM | POLLWRNORM)) != 0)
+      return __wasilibc_poll_add(state, events, tcp_pollable(socket));
+    break;
+  }
+
+  case TCP_SOCKET_STATE_LISTENING: {
+    // Listening sockets can only be ready to read, not write.
+    if ((events & POLLRDNORM) != 0)
       return __wasilibc_poll_add(state, events, tcp_pollable(socket));
     break;
   }
@@ -1198,7 +1204,14 @@ static int tcp_poll_register(void *data, poll_state_t *state, short events) {
 static int tcp_poll_finish(void *data, poll_state_t *state, short events) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
 
-  if (socket->state.tag != TCP_SOCKET_STATE_CONNECTING) {
+  switch (socket->state.tag) {
+  case TCP_SOCKET_STATE_CONNECTING:
+    break;
+  case TCP_SOCKET_STATE_LISTENING:
+    // Listening sockets can only be ready to read, not write.
+    __wasilibc_poll_ready(state, events & POLLRDNORM);
+    return 0;
+  default:
     __wasilibc_poll_ready(state, events);
     return 0;
   }

@@ -99,6 +99,9 @@ int main() {
     }
 
     if (server_client == -1 && fds[1].revents) {
+      // A listening socket should be readable but not writable:
+      ASSERT((fds[1].revents & POLLRDNORM) != 0);
+      ASSERT((fds[1].revents & POLLWRNORM) == 0);
       errno = 0;
       server_client =
           accept(server, (struct sockaddr *)&client_address, &client_len);

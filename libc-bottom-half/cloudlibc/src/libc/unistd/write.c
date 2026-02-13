@@ -29,58 +29,18 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
   }
   return bytes_written;
 #elif defined(__wasip2__)
-  // First, check to see if this is a socket, in which case we defer to `sendto`:
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
   if (!entry)
     return -1;
-  if (entry->vtable->sendto != NULL)
-    return entry->vtable->sendto(entry->data, buf, nbyte, 0, NULL, 0);
-
-  streams_borrow_output_stream_t output_stream;
-  poll_borrow_pollable_t pollable;
-  bool ok = false;
-  filesystem_error_code_t error_code;
-
-  // Translate the file descriptor to an internal handle
-  off_t *off;
-  if (__wasilibc_write_stream(fildes, &output_stream, &off, &pollable) < 0)
+  if (!entry->vtable->get_write_stream) {
+    errno = EOPNOTSUPP;
     return -1;
-
-  // Check readiness for writing
-  uint64_t num_bytes_permitted = 0;
-  streams_stream_error_t stream_error;
-  while (num_bytes_permitted == 0) {
-    ok = streams_method_output_stream_check_write(output_stream,
-                                                  &num_bytes_permitted,
-                                                  &stream_error);
-    if (!ok)
-      return wasip2_handle_write_error(stream_error);
-
-    if (num_bytes_permitted == 0)
-      poll_method_pollable_block(pollable);
   }
+  wasip2_write_t write;
+  if (entry->vtable->get_write_stream(entry->data, &write) < 0)
+    return -1;
+  return __wasilibc_write(&write, buf, nbyte);
 
-  // Convert the buffer to a WASI list of bytes
-  wasip2_list_u8_t contents;
-  contents.len = num_bytes_permitted < nbyte ? num_bytes_permitted : nbyte;
-  contents.ptr = (uint8_t*) buf;
-
-  // Write the bytes to the stream
-  ok = streams_method_output_stream_write(output_stream,
-                                          &contents,
-                                          &stream_error);
-  if (!ok)
-    return wasip2_handle_write_error(stream_error);
-
-  ok = streams_method_output_stream_blocking_flush(output_stream,
-                                                   &stream_error);
-  if (!ok)
-    return wasip2_handle_write_error(stream_error);
-
-
-  if (off)
-    *off += contents.len;
-  return contents.len;
 #elif defined(__wasip3__)
   wasip3_write_t *write_end;
   off_t *off;

@@ -65,39 +65,33 @@ static void tcp_free(void *data) {
   free(tcp);
 }
 
-static int tcp_get_read_stream(void *data,
-                               streams_borrow_input_stream_t *out_stream,
-                               off_t **out_offset,
-                               poll_own_pollable_t **out_pollable) {
+static int tcp_get_read_stream(void *data, wasip2_read_t *read) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
 
   if (tcp->state.tag != TCP_SOCKET_STATE_CONNECTED) {
     errno = ENOTCONN;
     return -1;
   }
-  *out_stream = streams_borrow_input_stream(tcp->state.connected.input);
-  if (out_offset)
-    *out_offset = NULL;
-  if (out_pollable)
-    *out_pollable = &tcp->state.connected.input_pollable;
+  read->input = streams_borrow_input_stream(tcp->state.connected.input);
+  read->offset = NULL;
+  read->pollable = &tcp->state.connected.input_pollable;
+  read->timeout = tcp->recv_timeout;
+  read->blocking = tcp->blocking;
   return 0;
 }
 
-static int tcp_get_write_stream(void *data,
-                                streams_borrow_output_stream_t *out_stream,
-                                off_t **out_offset,
-                                poll_own_pollable_t **out_pollable) {
+static int tcp_get_write_stream(void *data, wasip2_write_t *write) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
 
   if (tcp->state.tag != TCP_SOCKET_STATE_CONNECTED) {
     errno = ENOTCONN;
     return -1;
   }
-  *out_stream = streams_borrow_output_stream(tcp->state.connected.output);
-  if (out_offset)
-    *out_offset = NULL;
-  if (out_pollable)
-    *out_pollable = &tcp->state.connected.output_pollable;
+  write->output = streams_borrow_output_stream(tcp->state.connected.output);
+  write->offset = NULL;
+  write->pollable = &tcp->state.connected.output_pollable;
+  write->timeout = tcp->send_timeout;
+  write->blocking = tcp->blocking;
   return 0;
 }
 
@@ -462,68 +456,14 @@ static ssize_t tcp_recvfrom(void *data, void *buffer, size_t length, int flags,
     return -1;
   }
 
-  if (socket->state.tag != TCP_SOCKET_STATE_CONNECTED) {
-    errno = ENOTCONN;
+  wasip2_read_t read;
+  if (tcp_get_read_stream(data, &read) < 0)
     return -1;
-  }
-  tcp_socket_state_connected_t *connection = &socket->state.connected;
 
-  bool should_block = socket->blocking;
-  if ((flags & MSG_DONTWAIT) != 0) {
-    should_block = false;
-  }
+  if ((flags & MSG_DONTWAIT) != 0)
+    read.blocking = false;
 
-  streams_borrow_input_stream_t rx_borrow =
-      streams_borrow_input_stream(connection->input);
-  while (true) {
-    wasip2_list_u8_t result;
-    streams_stream_error_t error;
-    if (!streams_method_input_stream_read(rx_borrow, length, &result, &error))
-      // TODO wasi-sockets: wasi-sockets has no way to recover TCP stream errors
-      // yet.
-      return wasip2_handle_read_error(error);
-
-    if (result.len) {
-      memcpy(buffer, result.ptr, result.len);
-      wasip2_list_u8_free(&result);
-      return result.len;
-    }
-    if (!should_block) {
-      errno = EWOULDBLOCK;
-      return -1;
-    }
-
-    if (connection->input_pollable.__handle == 0)
-      connection->input_pollable =
-          streams_method_input_stream_subscribe(rx_borrow);
-    poll_borrow_pollable_t pollable_borrow =
-        poll_borrow_pollable(connection->input_pollable);
-
-    if (socket->recv_timeout != 0) {
-      poll_own_pollable_t timeout_pollable =
-          monotonic_clock_subscribe_duration(socket->recv_timeout);
-      poll_list_borrow_pollable_t pollables;
-      poll_borrow_pollable_t pollables_ptr[2];
-      pollables.ptr = pollables_ptr;
-      pollables.ptr[0] = pollable_borrow;
-      pollables.ptr[1] = poll_borrow_pollable(timeout_pollable);
-      pollables.len = 2;
-      wasip2_list_u32_t ret;
-      poll_poll(&pollables, &ret);
-      poll_pollable_drop_own(timeout_pollable);
-      for (size_t i = 0; i < ret.len; i++) {
-        if (ret.ptr[i] == 1) {
-          // Timed out
-          errno = EWOULDBLOCK;
-          wasip2_list_u32_free(&ret);
-          return -1;
-        }
-      }
-      wasip2_list_u32_free(&ret);
-    } else {
-      poll_method_pollable_block(pollable_borrow);
-    }
-  }
+  return __wasilibc_read(&read, buffer, length);
 }
 
 static ssize_t tcp_sendto(void *data, const void *buffer, size_t length,
@@ -541,18 +481,12 @@ static ssize_t tcp_sendto(void *data, const void *buffer, size_t length,
     return -1;
   }
 
-  tcp_socket_state_connected_t *connection;
-  if (socket->state.tag == TCP_SOCKET_STATE_CONNECTED) {
-    connection = &socket->state.connected;
-  } else {
-    errno = ENOTCONN;
+  wasip2_write_t write;
+  if (tcp_get_write_stream(data, &write) < 0)
     return -1;
-  }
 
-  bool should_block = socket->blocking;
-  if ((flags & MSG_DONTWAIT) != 0) {
-    should_block = false;
-  }
+  if ((flags & MSG_DONTWAIT) != 0)
+    write.blocking = false;
 
   if ((flags & MSG_NOSIGNAL) != 0) {
     // Ignore it. WASI has no Unix-style signals. So effectively,
@@ -560,63 +494,7 @@ static ssize_t tcp_sendto(void *data, const void *buffer, size_t length,
     // requested or not.
   }
 
-  streams_borrow_output_stream_t tx_borrow =
-      streams_borrow_output_stream(connection->output);
-  while (true) {
-    streams_stream_error_t error;
-    uint64_t count;
-    if (!streams_method_output_stream_check_write(tx_borrow, &count, &error))
-      // TODO wasi-sockets: wasi-sockets has no way to recover stream errors
-      // yet.
-      return wasip2_handle_write_error(error);
-
-    if (count) {
-      count = count < length ? count : length;
-      wasip2_list_u8_t list = {.ptr = (uint8_t *)buffer, .len = count};
-      if (!streams_method_output_stream_write(tx_borrow, &list, &error)) {
-        // TODO wasi-sockets: wasi-sockets has no way to recover TCP stream
-        // errors yet.
-        return wasip2_handle_write_error(error);
-      } else {
-        return count;
-      }
-    }
-    if (!should_block) {
-      errno = EWOULDBLOCK;
-      return -1;
-    }
-
-    if (connection->output_pollable.__handle == 0)
-      connection->output_pollable =
-          streams_method_output_stream_subscribe(tx_borrow);
-    poll_borrow_pollable_t pollable_borrow =
-        poll_borrow_pollable(connection->output_pollable);
-
-    if (socket->send_timeout != 0) {
-      monotonic_clock_own_pollable_t timeout_pollable =
-          monotonic_clock_subscribe_duration(socket->send_timeout);
-      poll_list_borrow_pollable_t pollables;
-      poll_borrow_pollable_t pollables_ptr[2];
-      pollables.ptr = pollables_ptr;
-      pollables.ptr[0] = pollable_borrow;
-      pollables.ptr[1] = poll_borrow_pollable(timeout_pollable);
-      pollables.len = 2;
-      wasip2_list_u32_t ret;
-      poll_poll(&pollables, &ret);
-      poll_pollable_drop_own(timeout_pollable);
-      for (size_t i = 0; i < ret.len; i++) {
-        if (ret.ptr[i] == 1) {
-          // Timed out
-          errno = EWOULDBLOCK;
-          wasip2_list_u32_free(&ret);
-          return -1;
-        }
-      }
-      wasip2_list_u32_free(&ret);
-    } else {
-      poll_method_pollable_block(pollable_borrow);
-    }
-  }
+  return __wasilibc_write(&write, buffer, length);
 }
 
 static int tcp_shutdown(void *data, int posix_how) {

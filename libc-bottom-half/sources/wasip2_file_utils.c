@@ -2,6 +2,7 @@
 #include <common/errors.h>
 #include <errno.h>
 #include <stddef.h>
+#include <string.h>
 #include <wasi/file_utils.h>
 
 #ifdef __wasip2__
@@ -82,50 +83,146 @@ int wasip2_string_from_c(const char *s, wasip2_string_t *out) {
   return 0;
 }
 
-// Gets an `output-stream` borrow from the `fd` provided.
-int __wasilibc_write_stream(int fd, streams_borrow_output_stream_t *out,
-                            off_t **off, poll_borrow_pollable_t *pollable) {
-  descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
-  if (!entry)
-    return -1;
-  if (!entry->vtable->get_write_stream) {
-    errno = EOPNOTSUPP;
-    return -1;
-  }
-  poll_own_pollable_t *own_pollable;
-  if (entry->vtable->get_write_stream(entry->data, out, off, &own_pollable) < 0)
-    return -1;
-  assert(out->__handle != 0);
-  if (pollable) {
-    if (own_pollable->__handle == 0) {
-      *own_pollable = streams_method_output_stream_subscribe(*out);
+ssize_t __wasilibc_write(wasip2_write_t *write, const void *buffer,
+                         size_t length) {
+  assert(write->output.__handle != 0);
+  while (true) {
+    streams_stream_error_t error;
+    uint64_t count;
+
+    // See how many bytes can be written to this stream, if any.
+    if (!streams_method_output_stream_check_write(write->output, &count,
+                                                  &error))
+      return wasip2_handle_write_error(error);
+
+    if (count) {
+      // If bytes can be written to the stream, then attempt the write.
+      count = count < length ? count : length;
+      wasip2_list_u8_t list = {.ptr = (uint8_t *)buffer, .len = count};
+      if (!streams_method_output_stream_write(write->output, &list, &error))
+        return wasip2_handle_write_error(error);
+
+      // For blocking writes additionally perform a blocking flush to ensure
+      // that the data makes its way to the destination.
+      if (write->blocking) {
+        bool ok =
+            streams_method_output_stream_blocking_flush(write->output, &error);
+        if (!ok)
+          return wasip2_handle_write_error(error);
+      }
+
+      // Update the offset if this stream is tracking that.
+      if (write->offset)
+        *write->offset += count;
+
+      return count;
     }
-    *pollable = poll_borrow_pollable(*own_pollable);
+
+    // This stream isn't currently writable, and this is a non-blocking
+    // operation, so bail out.
+    if (!write->blocking) {
+      errno = EWOULDBLOCK;
+      return -1;
+    }
+
+    // Lazily initialize the pollable if one hasn't already been created yet.
+    if (write->pollable->__handle == 0)
+      *write->pollable = streams_method_output_stream_subscribe(write->output);
+    poll_borrow_pollable_t pollable_borrow =
+        poll_borrow_pollable(*write->pollable);
+
+    // Either wait for a timeout or indefinitely for this stream to become
+    // writable. Once this is done loop around back to the beginning.
+    if (write->timeout != 0) {
+      monotonic_clock_own_pollable_t timeout_pollable =
+          monotonic_clock_subscribe_duration(write->timeout);
+      poll_list_borrow_pollable_t pollables;
+      poll_borrow_pollable_t pollables_ptr[2];
+      pollables.ptr = pollables_ptr;
+      pollables.ptr[0] = pollable_borrow;
+      pollables.ptr[1] = poll_borrow_pollable(timeout_pollable);
+      pollables.len = 2;
+      wasip2_list_u32_t ret;
+      poll_poll(&pollables, &ret);
+      poll_pollable_drop_own(timeout_pollable);
+      for (size_t i = 0; i < ret.len; i++) {
+        if (ret.ptr[i] == 1) {
+          // Timed out
+          errno = EWOULDBLOCK;
+          wasip2_list_u32_free(&ret);
+          return -1;
+        }
+      }
+      wasip2_list_u32_free(&ret);
+    } else {
+      poll_method_pollable_block(pollable_borrow);
+    }
   }
-  return 0;
 }
 
-// Gets an `input-stream` borrow from the `fd` provided.
-int __wasilibc_read_stream(int fd, streams_borrow_input_stream_t *out,
-                           off_t **off, poll_borrow_pollable_t *pollable) {
-  descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
-  if (!entry)
-    return -1;
-  if (!entry->vtable->get_read_stream) {
-    errno = EOPNOTSUPP;
-    return -1;
-  }
-  poll_own_pollable_t *own_pollable;
-  if (entry->vtable->get_read_stream(entry->data, out, off, &own_pollable) < 0)
-    return -1;
-  assert(out->__handle != 0);
-  if (pollable) {
-    if (own_pollable->__handle == 0) {
-      *own_pollable = streams_method_input_stream_subscribe(*out);
+ssize_t __wasilibc_read(wasip2_read_t *read, void *buffer, size_t length) {
+  while (true) {
+    wasip2_list_u8_t result;
+    streams_stream_error_t error;
+
+    // Attempt a read for the `length` we were passed in.
+    if (!streams_method_input_stream_read(read->input, length, &result, &error))
+      return wasip2_handle_read_error(error);
+
+    // For empty reads after performing a successful 0-length read go ahead and
+    // bail out.
+    if (length == 0)
+      return 0;
+
+    // If bytes were read then copy those to the output `buffer`, deallocate
+    // the list that the canonical ABI allocated, and return.
+    if (result.len) {
+      size_t len = result.len;
+      memcpy(buffer, result.ptr, len);
+      wasip2_list_u8_free(&result);
+      if (read->offset)
+        *read->offset += len;
+      return len;
     }
-    *pollable = poll_borrow_pollable(*own_pollable);
+
+    // Nonblocking reads bail out here as all that's left to do is block.
+    if (!read->blocking) {
+      errno = EWOULDBLOCK;
+      return -1;
+    }
+
+    // Lazily initialize the pollable for this input stream.
+    if (read->pollable->__handle == 0)
+      *read->pollable = streams_method_input_stream_subscribe(read->input);
+    poll_borrow_pollable_t pollable_borrow =
+        poll_borrow_pollable(*read->pollable);
+
+    // Wait either with a timeout or indefinitely for this read to complete.
+    if (read->timeout != 0) {
+      poll_own_pollable_t timeout_pollable =
+          monotonic_clock_subscribe_duration(read->timeout);
+      poll_list_borrow_pollable_t pollables;
+      poll_borrow_pollable_t pollables_ptr[2];
+      pollables.ptr = pollables_ptr;
+      pollables.ptr[0] = pollable_borrow;
+      pollables.ptr[1] = poll_borrow_pollable(timeout_pollable);
+      pollables.len = 2;
+      wasip2_list_u32_t ret;
+      poll_poll(&pollables, &ret);
+      poll_pollable_drop_own(timeout_pollable);
+      for (size_t i = 0; i < ret.len; i++) {
+        if (ret.ptr[i] == 1) {
+          // Timed out
+          errno = EWOULDBLOCK;
+          wasip2_list_u32_free(&ret);
+          return -1;
+        }
+      }
+      wasip2_list_u32_free(&ret);
+    } else {
+      poll_method_pollable_block(pollable_borrow);
+    }
   }
-  return 0;
 }
 
 #endif // __wasip2__

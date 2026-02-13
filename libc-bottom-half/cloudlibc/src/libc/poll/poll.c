@@ -218,10 +218,10 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
       if (entry->vtable->get_read_stream) {
         streams_borrow_input_stream_t input;
         poll_own_pollable_t *pollable;
-        if (entry->vtable->get_read_stream(entry->data, &input, NULL,
-                                           &pollable) < 0)
+        wasip2_read_t read;
+        if (entry->vtable->get_read_stream(entry->data, &read) < 0)
           return -1;
-        if (__wasilibc_poll_add_input_stream(&state, input, pollable) < 0)
+        if (__wasilibc_poll_add_input_stream(&state, read.input, read.pollable) < 0)
           return -1;
       } else {
         errno = EOPNOTSUPP;
@@ -231,12 +231,10 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
 
     if (pollfd->events & POLLWRNORM) {
       if (entry->vtable->get_write_stream) {
-        streams_borrow_output_stream_t output;
-        poll_own_pollable_t *pollable;
-        if (entry->vtable->get_write_stream(entry->data, &output, NULL,
-                                            &pollable) < 0)
+        wasip2_write_t write;
+        if (entry->vtable->get_write_stream(entry->data, &write) < 0)
           return -1;
-        if (__wasilibc_poll_add_output_stream(&state, output, pollable) < 0)
+        if (__wasilibc_poll_add_output_stream(&state, write.output, write.pollable) < 0)
           return -1;
       } else {
         errno = EOPNOTSUPP;

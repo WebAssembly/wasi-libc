@@ -12,9 +12,8 @@
       t_error("%s failed (errno = %d)\n", #c, errno);                          \
   } while (0)
 
-static void test_elapsed(struct timespec *start_time,
-                                      struct timespec *end_time,
-                                      long ns_to_sleep) {
+static void test_elapsed(struct timespec *start_time, struct timespec *end_time,
+                         long ns_to_sleep) {
   TEST(end_time->tv_sec - start_time->tv_sec <= 1);
 
   long nanoseconds_elapsed = (end_time->tv_sec - start_time->tv_sec) * 1E9 -

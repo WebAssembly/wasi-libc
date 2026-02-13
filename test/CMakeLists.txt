@@ -34,6 +34,10 @@ else()
   add_custom_target(engine)
 endif()
 
+# All tests are compiled against the wasi-libc sysroot
+add_compile_options(--sysroot ${SYSROOT})
+add_link_options(--sysroot ${SYSROOT})
+
 # ========= libc-test defined tests =============================
 
 function(add_wasilibc_flags target)
@@ -295,6 +299,7 @@ add_wasilibc_test(seekdir.c FS FAILP3)
 add_wasilibc_test(usleep.c)
 add_wasilibc_test(nanosleep.c)
 add_wasilibc_test(write.c FS FAILP3)
+add_wasilibc_test(wasi-defines.c)
 
 if (TARGET_TRIPLE MATCHES "-threads")
   add_wasilibc_test(busywait.c)

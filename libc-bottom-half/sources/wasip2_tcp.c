@@ -1237,6 +1237,25 @@ static int tcp_poll_finish(void *data, poll_state_t *state, short events) {
   return 0;
 }
 
+static int tcp_fcntl_getfl(void *data) {
+  tcp_socket_t *socket = (tcp_socket_t *)data;
+  int flags = 0;
+  if (!socket->blocking) {
+    flags |= O_NONBLOCK;
+  }
+  return flags;
+}
+
+static int tcp_fcntl_setfl(void *data, int flags) {
+  tcp_socket_t *socket = (tcp_socket_t *)data;
+  if (flags & O_NONBLOCK) {
+    socket->blocking = false;
+  } else {
+    socket->blocking = true;
+  }
+  return 0;
+}
+
 static descriptor_vtable_t tcp_vtable = {
     .free = tcp_free,
 
@@ -1259,6 +1278,9 @@ static descriptor_vtable_t tcp_vtable = {
 
     .poll_register = tcp_poll_register,
     .poll_finish = tcp_poll_finish,
+
+    .fcntl_getfl = tcp_fcntl_getfl,
+    .fcntl_setfl = tcp_fcntl_setfl,
 };
 
 #endif // __wasip2__

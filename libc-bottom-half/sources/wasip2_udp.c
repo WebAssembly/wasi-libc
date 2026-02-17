@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
@@ -869,6 +870,25 @@ static int udp_poll_register(void *data, poll_state_t *state, short events) {
   return 0;
 }
 
+static int udp_fcntl_getfl(void *data) {
+  udp_socket_t *socket = (udp_socket_t *)data;
+  int flags = 0;
+  if (!socket->blocking) {
+    flags |= O_NONBLOCK;
+  }
+  return flags;
+}
+
+static int udp_fcntl_setfl(void *data, int flags) {
+  udp_socket_t *socket = (udp_socket_t *)data;
+  if (flags & O_NONBLOCK) {
+    socket->blocking = false;
+  } else {
+    socket->blocking = true;
+  }
+  return 0;
+}
+
 static descriptor_vtable_t udp_vtable = {
     .free = udp_free,
 
@@ -885,6 +905,9 @@ static descriptor_vtable_t udp_vtable = {
     .setsockopt = udp_setsockopt,
 
     .poll_register = udp_poll_register,
+
+    .fcntl_getfl = udp_fcntl_getfl,
+    .fcntl_setfl = udp_fcntl_setfl,
 };
 
 #endif // __wasip2__

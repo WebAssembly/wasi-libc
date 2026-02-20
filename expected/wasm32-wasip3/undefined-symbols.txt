@@ -41,10 +41,7 @@ __thread_yield
 __thread_yield_cancellable
 __thread_yield_to_suspended
 __thread_yield_to_suspended_cancellable
-<<<<<<< sy/wasip3-locks
 __tls_align
-=======
->>>>>>> main
 __trunctfdf2
 __trunctfsf2
 __unordtf2

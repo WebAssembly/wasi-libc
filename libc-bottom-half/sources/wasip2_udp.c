@@ -109,11 +109,8 @@ static int udp_create_streams(udp_socket_t *socket,
 
   network_error_code_t error;
   udp_tuple2_own_incoming_datagram_stream_own_outgoing_datagram_stream_t io;
-  if (!udp_method_udp_socket_stream(socket_borrow, remote_address, &io,
-                                    &error)) {
-    errno = __wasi_sockets_utils__map_error(error);
-    return -1;
-  }
+  if (!udp_method_udp_socket_stream(socket_borrow, remote_address, &io, &error))
+    return __wasilibc_socket_error_to_errno(error);
 
   dst->incoming = io.f0;
   dst->outgoing = io.f1;
@@ -201,8 +198,7 @@ static int udp_handle_error(udp_socket_t *socket, network_error_code_t error) {
   if (error == NETWORK_ERROR_CODE_WOULD_BLOCK && socket->blocking) {
     poll_method_pollable_block(udp_pollable(socket));
   } else {
-    errno = __wasi_sockets_utils__map_error(error);
-    return -1;
+    return __wasilibc_socket_error_to_errno(error);
   }
 
   return 0;
@@ -221,10 +217,8 @@ static int udp_do_bind(udp_socket_t *socket,
   udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
 
   if (!udp_method_udp_socket_start_bind(socket_borrow, network_borrow, address,
-                                        &error)) {
-    errno = __wasi_sockets_utils__map_error(error);
-    return -1;
-  }
+                                        &error))
+    return __wasilibc_socket_error_to_errno(error);
 
   // Bind has successfully started. Attempt to finish it:
   while (!udp_method_udp_socket_finish_bind(socket_borrow, &error)) {
@@ -241,12 +235,9 @@ static int udp_bind(void *data, const struct sockaddr *addr,
                     socklen_t addrlen) {
   udp_socket_t *socket = (udp_socket_t *)data;
   network_ip_socket_address_t local_address;
-  int parse_err;
-  if (!__wasi_sockets_utils__parse_address(socket->family, addr, addrlen,
-                                           &local_address, &parse_err)) {
-    errno = parse_err;
+  if (__wasilibc_sockaddr_to_wasi(socket->family, addr, addrlen,
+                                  &local_address) < 0)
     return -1;
-  }
   return udp_do_bind(socket, &local_address);
 }
 
@@ -262,22 +253,18 @@ static int udp_connect(void *data, const struct sockaddr *addr,
 
   network_ip_socket_address_t remote_address;
   bool has_remote_address = (addr->sa_family != AF_UNSPEC);
-  if (has_remote_address) {
-    int parse_err;
-    if (!__wasi_sockets_utils__parse_address(socket->family, addr, addrlen,
-                                             &remote_address, &parse_err)) {
-      errno = parse_err;
-      return -1;
-    }
-  }
+  if (has_remote_address &&
+      __wasilibc_sockaddr_to_wasi(socket->family, addr, addrlen,
+                                  &remote_address) < 0)
+    return -1;
 
   // Prepare the socket; binding it if not bound yet, and disconnecting it if
   // connected.
   switch (socket->state.tag) {
   case UDP_SOCKET_STATE_UNBOUND: {
     // Socket is not explicitly bound by the user. We'll do it for them:
-    network_ip_socket_address_t any =
-        __wasi_sockets_utils__any_addr(socket->family);
+    network_ip_socket_address_t any;
+    __wasilibc_unspecified_addr(socket->family, &any);
     if (udp_do_bind(socket, &any) < 0)
       return -1;
     break;
@@ -309,11 +296,9 @@ static int udp_getsockname(void *data, struct sockaddr *addr,
                            socklen_t *addrlen) {
   udp_socket_t *socket = (udp_socket_t *)data;
   output_sockaddr_t output_addr;
-  if (!__wasi_sockets_utils__output_addr_validate(socket->family, addr, addrlen,
-                                                  &output_addr)) {
-    errno = EINVAL;
+  if (__wasilibc_sockaddr_validate(socket->family, addr, addrlen,
+                                   &output_addr) < 0)
     return -1;
-  }
 
   if (output_addr.tag == OUTPUT_SOCKADDR_NULL) {
     errno = EINVAL;
@@ -338,12 +323,10 @@ static int udp_getsockname(void *data, struct sockaddr *addr,
   network_error_code_t error;
   network_ip_socket_address_t result;
   udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
-  if (!udp_method_udp_socket_local_address(socket_borrow, &result, &error)) {
-    errno = __wasi_sockets_utils__map_error(error);
-    return -1;
-  }
+  if (!udp_method_udp_socket_local_address(socket_borrow, &result, &error))
+    return __wasilibc_socket_error_to_errno(error);
 
-  __wasi_sockets_utils__output_addr_write(result, &output_addr);
+  __wasilibc_wasi_to_sockaddr(result, &output_addr);
   return 0;
 }
 
@@ -351,11 +334,9 @@ static int udp_getpeername(void *data, struct sockaddr *addr,
                            socklen_t *addrlen) {
   udp_socket_t *socket = (udp_socket_t *)data;
   output_sockaddr_t output_addr;
-  if (!__wasi_sockets_utils__output_addr_validate(socket->family, addr, addrlen,
-                                                  &output_addr)) {
-    errno = EINVAL;
+  if (__wasilibc_sockaddr_validate(socket->family, addr, addrlen,
+                                   &output_addr) < 0)
     return -1;
-  }
 
   if (output_addr.tag == OUTPUT_SOCKADDR_NULL) {
     errno = EINVAL;
@@ -380,12 +361,10 @@ static int udp_getpeername(void *data, struct sockaddr *addr,
   network_error_code_t error;
   network_ip_socket_address_t result;
   udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
-  if (!udp_method_udp_socket_remote_address(socket_borrow, &result, &error)) {
-    errno = __wasi_sockets_utils__map_error(error);
-    return -1;
-  }
+  if (!udp_method_udp_socket_remote_address(socket_borrow, &result, &error))
+    return __wasilibc_socket_error_to_errno(error);
 
-  __wasi_sockets_utils__output_addr_write(result, &output_addr);
+  __wasilibc_wasi_to_sockaddr(result, &output_addr);
   return 0;
 }
 
@@ -403,11 +382,9 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
   }
 
   output_sockaddr_t output_addr;
-  if (!__wasi_sockets_utils__output_addr_validate(socket->family, addr, addrlen,
-                                                  &output_addr)) {
-    errno = EINVAL;
+  if (__wasilibc_sockaddr_validate(socket->family, addr, addrlen,
+                                   &output_addr) < 0)
     return -1;
-  }
 
   network_error_code_t error;
   udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
@@ -448,20 +425,16 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
   while (true) {
     udp_list_incoming_datagram_t datagrams;
     if (!udp_method_incoming_datagram_stream_receive(incoming_borrow, 1,
-                                                     &datagrams, &error)) {
-      errno = __wasi_sockets_utils__map_error(error);
-      return -1;
-    }
+                                                     &datagrams, &error))
+      return __wasilibc_socket_error_to_errno(error);
 
     if (datagrams.len) {
       udp_incoming_datagram_t datagram = datagrams.ptr[0];
       size_t datagram_size = datagram.data.len;
       size_t bytes_to_copy = datagram_size < length ? datagram_size : length;
 
-      if (output_addr.tag != OUTPUT_SOCKADDR_NULL) {
-        __wasi_sockets_utils__output_addr_write(datagram.remote_address,
-                                                &output_addr);
-      }
+      if (output_addr.tag != OUTPUT_SOCKADDR_NULL)
+        __wasilibc_wasi_to_sockaddr(datagram.remote_address, &output_addr);
 
       memcpy(buffer, datagram.data.ptr, bytes_to_copy);
       udp_list_incoming_datagram_free(&datagrams);
@@ -495,12 +468,9 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
       return -1;
     }
 
-    int parse_err;
-    if (!__wasi_sockets_utils__parse_address(socket->family, addr, addrlen,
-                                             &remote_address, &parse_err)) {
-      errno = parse_err;
+    if (__wasilibc_sockaddr_to_wasi(socket->family, addr, addrlen,
+                                    &remote_address) < 0)
       return -1;
-    }
   } else {
     if (addrlen != 0) {
       errno = EINVAL;
@@ -518,8 +488,8 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
 
   // If the socket is not explicitly bound by the user we'll do it for them
   if (socket->state.tag == UDP_SOCKET_STATE_UNBOUND) {
-    network_ip_socket_address_t any =
-        __wasi_sockets_utils__any_addr(socket->family);
+    network_ip_socket_address_t any;
+    __wasilibc_unspecified_addr(socket->family, &any);
     if (udp_do_bind(socket, &any) < 0)
       return -1;
   }
@@ -575,18 +545,14 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
   while (true) {
     uint64_t allowed;
     if (!udp_method_outgoing_datagram_stream_check_send(outgoing_borrow,
-                                                        &allowed, &error)) {
-      errno = __wasi_sockets_utils__map_error(error);
-      return -1;
-    }
+                                                        &allowed, &error))
+      return __wasilibc_socket_error_to_errno(error);
 
     if (allowed) {
       uint64_t datagrams_sent;
       if (!udp_method_outgoing_datagram_stream_send(outgoing_borrow, &list,
-                                                    &datagrams_sent, &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
+                                                    &datagrams_sent, &error))
+        return __wasilibc_socket_error_to_errno(error);
 
       if (datagrams_sent != 0 && datagrams_sent != 1) {
         abort();
@@ -625,7 +591,7 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
       break;
     }
     case SO_DOMAIN: {
-      value = __wasi_sockets_utils__posix_family(socket->family);
+      value = __wasilibc_wasi_family_to_libc(socket->family);
       break;
     }
 
@@ -636,10 +602,8 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
     case SO_RCVBUF: {
       uint64_t result;
       if (!udp_method_udp_socket_receive_buffer_size(socket_borrow, &result,
-                                                     &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
+                                                     &error))
+        return __wasilibc_socket_error_to_errno(error);
 
       if (result > INT_MAX) {
         abort();
@@ -651,10 +615,8 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
     case SO_SNDBUF: {
       uint64_t result;
       if (!udp_method_udp_socket_send_buffer_size(socket_borrow, &result,
-                                                  &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
+                                                  &error))
+        return __wasilibc_socket_error_to_errno(error);
 
       if (result > INT_MAX) {
         abort();
@@ -681,10 +643,8 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
 
       uint8_t result;
       if (!udp_method_udp_socket_unicast_hop_limit(socket_borrow, &result,
-                                                   &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
+                                                   &error))
+        return __wasilibc_socket_error_to_errno(error);
 
       value = result;
       break;
@@ -705,10 +665,8 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
 
       uint8_t result;
       if (!udp_method_udp_socket_unicast_hop_limit(socket_borrow, &result,
-                                                   &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
+                                                   &error))
+        return __wasilibc_socket_error_to_errno(error);
 
       value = result;
       break;
@@ -743,19 +701,15 @@ static int udp_setsockopt(void *data, int level, int optname,
     switch (optname) {
     case SO_RCVBUF: {
       if (!udp_method_udp_socket_set_receive_buffer_size(socket_borrow, intval,
-                                                         &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
+                                                         &error))
+        return __wasilibc_socket_error_to_errno(error);
 
       return 0;
     }
     case SO_SNDBUF: {
       if (!udp_method_udp_socket_set_send_buffer_size(socket_borrow, intval,
-                                                      &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
+                                                      &error))
+        return __wasilibc_socket_error_to_errno(error);
 
       return 0;
     }
@@ -781,10 +735,8 @@ static int udp_setsockopt(void *data, int level, int optname,
       }
 
       if (!udp_method_udp_socket_set_unicast_hop_limit(socket_borrow, intval,
-                                                       &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
+                                                       &error))
+        return __wasilibc_socket_error_to_errno(error);
 
       return 0;
     }
@@ -808,10 +760,8 @@ static int udp_setsockopt(void *data, int level, int optname,
       }
 
       if (!udp_method_udp_socket_set_unicast_hop_limit(socket_borrow, intval,
-                                                       &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
+                                                       &error))
+        return __wasilibc_socket_error_to_errno(error);
 
       return 0;
     }

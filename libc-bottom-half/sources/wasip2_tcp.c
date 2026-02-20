@@ -12,67 +12,6 @@
 
 #ifdef __wasip2__
 
-const uint64_t NS_PER_S = 1000000000;
-
-typedef struct {
-  int dummy;
-} tcp_socket_state_unbound_t;
-typedef struct {
-  int dummy;
-} tcp_socket_state_bound_t;
-typedef struct {
-  int dummy;
-} tcp_socket_state_connecting_t;
-typedef struct {
-  int dummy;
-} tcp_socket_state_listening_t;
-
-// Pollables here are lazily initialized on-demand.
-typedef struct {
-  streams_own_input_stream_t input;
-  poll_own_pollable_t input_pollable;
-  streams_own_output_stream_t output;
-  poll_own_pollable_t output_pollable;
-} tcp_socket_state_connected_t;
-
-typedef struct {
-  network_error_code_t error_code;
-} tcp_socket_state_connect_failed_t;
-
-// This is a tagged union. When adding/removing/renaming cases, be sure to keep
-// the tag and union definitions in sync.
-typedef struct {
-  enum {
-    TCP_SOCKET_STATE_UNBOUND,
-    TCP_SOCKET_STATE_BOUND,
-    TCP_SOCKET_STATE_CONNECTING,
-    TCP_SOCKET_STATE_CONNECTED,
-    TCP_SOCKET_STATE_CONNECT_FAILED,
-    TCP_SOCKET_STATE_LISTENING,
-  } tag;
-  union {
-    tcp_socket_state_unbound_t unbound;
-    tcp_socket_state_bound_t bound;
-    tcp_socket_state_connecting_t connecting;
-    tcp_socket_state_connected_t connected;
-    tcp_socket_state_connect_failed_t connect_failed;
-    tcp_socket_state_listening_t listening;
-  };
-} tcp_socket_state_t;
-
-typedef struct {
-  tcp_own_tcp_socket_t socket;
-  // This pollable is lazily initialized on-demand.
-  poll_own_pollable_t socket_pollable;
-  bool blocking;
-  bool fake_nodelay;
-  bool fake_reuseaddr;
-  network_ip_address_family_t family;
-  tcp_socket_state_t state;
-  monotonic_clock_duration_t send_timeout;
-  monotonic_clock_duration_t recv_timeout;
-} tcp_socket_t;
-
 static descriptor_vtable_t tcp_vtable;
 
 static int tcp_add(tcp_own_tcp_socket_t socket,
@@ -188,8 +127,7 @@ static int tcp_handle_error(tcp_socket_t *socket, network_error_code_t error) {
   if (error == NETWORK_ERROR_CODE_WOULD_BLOCK && socket->blocking) {
     poll_method_pollable_block(tcp_pollable(socket));
   } else {
-    errno = __wasi_sockets_utils__map_error(error);
-    return -1;
+    return __wasilibc_socket_error_to_errno(error);
   }
 
   return 0;
@@ -199,9 +137,8 @@ static int tcp_accept4(void *data, struct sockaddr *addr, socklen_t *addrlen,
                        int flags) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
   output_sockaddr_t output_addr;
-  if (!__wasi_sockets_utils__output_addr_validate(socket->family, addr, addrlen,
-                                                  &output_addr)) {
-    errno = EINVAL;
+  if (__wasilibc_sockaddr_validate(socket->family, addr, addrlen,
+                                   &output_addr) < 0) {
     return -1;
   }
 
@@ -235,7 +172,7 @@ static int tcp_accept4(void *data, struct sockaddr *addr, socklen_t *addrlen,
       abort();
     }
 
-    __wasi_sockets_utils__output_addr_write(remote_address, &output_addr);
+    __wasilibc_wasi_to_sockaddr(remote_address, &output_addr);
   }
 
   tcp_socket_t *client_socket;
@@ -270,8 +207,7 @@ static int tcp_do_bind(tcp_socket_t *socket,
 
   if (!tcp_method_tcp_socket_start_bind(socket_borrow, network_borrow, address,
                                         &error)) {
-    errno = __wasi_sockets_utils__map_error(error);
-    return -1;
+    return __wasilibc_socket_error_to_errno(error);
   }
 
   // Bind has successfully started. Attempt to finish it:
@@ -289,12 +225,9 @@ static int tcp_bind(void *data, const struct sockaddr *addr,
                     socklen_t addrlen) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
   network_ip_socket_address_t local_address;
-  int parse_err;
-  if (!__wasi_sockets_utils__parse_address(socket->family, addr, addrlen,
-                                           &local_address, &parse_err)) {
-    errno = parse_err;
+  if (__wasilibc_sockaddr_to_wasi(socket->family, addr, addrlen,
+                                  &local_address) < 0)
     return -1;
-  }
   return tcp_do_bind(socket, &local_address);
 }
 
@@ -302,12 +235,9 @@ static int tcp_connect(void *data, const struct sockaddr *addr,
                        socklen_t addrlen) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
   network_ip_socket_address_t remote_address;
-  int parse_err;
-  if (!__wasi_sockets_utils__parse_address(socket->family, addr, addrlen,
-                                           &remote_address, &parse_err)) {
-    errno = parse_err;
+  if (__wasilibc_sockaddr_to_wasi(socket->family, addr, addrlen,
+                                  &remote_address) < 0)
     return -1;
-  }
 
   switch (socket->state.tag) {
   case TCP_SOCKET_STATE_UNBOUND:
@@ -339,8 +269,7 @@ static int tcp_connect(void *data, const struct sockaddr *addr,
 
   if (!tcp_method_tcp_socket_start_connect(socket_borrow, network_borrow,
                                            &remote_address, &error)) {
-    errno = __wasi_sockets_utils__map_error(error);
-    return -1;
+    return __wasilibc_socket_error_to_errno(error);
   }
 
   // Connect has successfully started.
@@ -376,11 +305,9 @@ static int tcp_getsockname(void *data, struct sockaddr *addr,
                            socklen_t *addrlen) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
   output_sockaddr_t output_addr;
-  if (!__wasi_sockets_utils__output_addr_validate(socket->family, addr, addrlen,
-                                                  &output_addr)) {
-    errno = EINVAL;
+  if (__wasilibc_sockaddr_validate(socket->family, addr, addrlen,
+                                   &output_addr) < 0)
     return -1;
-  }
 
   if (output_addr.tag == OUTPUT_SOCKADDR_NULL) {
     errno = EINVAL;
@@ -407,23 +334,19 @@ static int tcp_getsockname(void *data, struct sockaddr *addr,
   network_error_code_t error;
   network_ip_socket_address_t result;
   tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
-  if (!tcp_method_tcp_socket_local_address(socket_borrow, &result, &error)) {
-    errno = __wasi_sockets_utils__map_error(error);
-    return -1;
-  }
+  if (!tcp_method_tcp_socket_local_address(socket_borrow, &result, &error))
+    return __wasilibc_socket_error_to_errno(error);
 
-  __wasi_sockets_utils__output_addr_write(result, &output_addr);
+  __wasilibc_wasi_to_sockaddr(result, &output_addr);
   return 0;
 }
 
 int tcp_getpeername(void *data, struct sockaddr *addr, socklen_t *addrlen) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
   output_sockaddr_t output_addr;
-  if (!__wasi_sockets_utils__output_addr_validate(socket->family, addr, addrlen,
-                                                  &output_addr)) {
-    errno = EINVAL;
+  if (__wasilibc_sockaddr_validate(socket->family, addr, addrlen,
+                                   &output_addr) < 0)
     return -1;
-  }
 
   if (output_addr.tag == OUTPUT_SOCKADDR_NULL) {
     errno = EINVAL;
@@ -450,12 +373,10 @@ int tcp_getpeername(void *data, struct sockaddr *addr, socklen_t *addrlen) {
   network_error_code_t error;
   network_ip_socket_address_t result;
   tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
-  if (!tcp_method_tcp_socket_remote_address(socket_borrow, &result, &error)) {
-    errno = __wasi_sockets_utils__map_error(error);
-    return -1;
-  }
+  if (!tcp_method_tcp_socket_remote_address(socket_borrow, &result, &error))
+    return __wasilibc_socket_error_to_errno(error);
 
-  __wasi_sockets_utils__output_addr_write(result, &output_addr);
+  __wasilibc_wasi_to_sockaddr(result, &output_addr);
   return 0;
 }
 
@@ -468,8 +389,8 @@ static int tcp_listen(void *data, int backlog) {
   case TCP_SOCKET_STATE_UNBOUND: {
     // Socket is not explicitly bound by the user. We'll do it for them:
 
-    network_ip_socket_address_t any =
-        __wasi_sockets_utils__any_addr(socket->family);
+    network_ip_socket_address_t any;
+    __wasilibc_unspecified_addr(socket->family, &any);
     if (tcp_do_bind(socket, &any) < 0)
       return -1;
 
@@ -495,8 +416,7 @@ static int tcp_listen(void *data, int backlog) {
 
   if (!tcp_method_tcp_socket_set_listen_backlog_size(socket_borrow, backlog,
                                                      &error)) {
-    errno = __wasi_sockets_utils__map_error(error);
-    return -1;
+    return __wasilibc_socket_error_to_errno(error);
   }
 
   if (socket->state.tag == TCP_SOCKET_STATE_LISTENING) {
@@ -507,8 +427,7 @@ static int tcp_listen(void *data, int backlog) {
   network_borrow_network_t network_borrow =
       __wasi_sockets_utils__borrow_network();
   if (!tcp_method_tcp_socket_start_listen(socket_borrow, &error)) {
-    errno = __wasi_sockets_utils__map_error(error);
-    return -1;
+    return __wasilibc_socket_error_to_errno(error);
   }
 
   // Listen has successfully started. Attempt to finish it:
@@ -729,8 +648,7 @@ static int tcp_shutdown(void *data, int posix_how) {
   network_error_code_t error;
   tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
   if (!tcp_method_tcp_socket_shutdown(socket_borrow, wasi_how, &error)) {
-    errno = __wasi_sockets_utils__map_error(error);
-    return -1;
+    return __wasilibc_socket_error_to_errno(error);
   }
 
   if (posix_how == SHUT_RD || posix_how == SHUT_RDWR) {
@@ -744,416 +662,6 @@ static int tcp_shutdown(void *data, int posix_how) {
   }
 
   return 0;
-}
-
-static int tcp_getsockopt(void *data, int level, int optname,
-                          void *restrict optval, socklen_t *restrict optlen) {
-  tcp_socket_t *socket = (tcp_socket_t *)data;
-  int value = 0;
-
-  network_error_code_t error;
-  tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
-
-  switch (level) {
-  case SOL_SOCKET:
-    switch (optname) {
-    case SO_TYPE:
-      value = SOCK_STREAM;
-      break;
-    case SO_PROTOCOL:
-      value = IPPROTO_TCP;
-      break;
-
-    case SO_DOMAIN:
-      value = __wasi_sockets_utils__posix_family(socket->family);
-      break;
-
-    case SO_ERROR:
-      if (socket->state.tag == TCP_SOCKET_STATE_CONNECT_FAILED) {
-        value = __wasi_sockets_utils__map_error(
-            socket->state.connect_failed.error_code);
-        socket->state.connect_failed.error_code = 0;
-      } else if (socket->state.tag == TCP_SOCKET_STATE_CONNECTING) {
-        value = EINPROGRESS;
-      } else {
-        value = 0;
-      }
-      break;
-
-    case SO_ACCEPTCONN: {
-      bool is_listening = socket->state.tag == TCP_SOCKET_STATE_LISTENING;
-      // Sanity check.
-      if (is_listening != tcp_method_tcp_socket_is_listening(socket_borrow)) {
-        abort();
-      }
-      value = is_listening;
-      break;
-    }
-    case SO_KEEPALIVE: {
-      bool result;
-      if (!tcp_method_tcp_socket_keep_alive_enabled(socket_borrow, &result,
-                                                    &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-      value = result;
-      break;
-    }
-    case SO_RCVBUF: {
-      uint64_t result;
-      if (!tcp_method_tcp_socket_receive_buffer_size(socket_borrow, &result,
-                                                     &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-
-      if (result > INT_MAX) {
-        abort();
-      }
-
-      value = result;
-      break;
-    }
-    case SO_SNDBUF: {
-      uint64_t result;
-      if (!tcp_method_tcp_socket_send_buffer_size(socket_borrow, &result,
-                                                  &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-
-      if (result > INT_MAX) {
-        abort();
-      }
-
-      value = result;
-      break;
-    }
-    case SO_REUSEADDR:
-      value = socket->fake_reuseaddr;
-      break;
-    case SO_RCVTIMEO: {
-      struct timeval tv = duration_to_timeval(socket->recv_timeout);
-      memcpy(optval, &tv,
-             *optlen < sizeof(struct timeval) ? *optlen
-                                              : sizeof(struct timeval));
-      *optlen = sizeof(struct timeval);
-      return 0;
-    }
-    case SO_SNDTIMEO: {
-      struct timeval tv = duration_to_timeval(socket->send_timeout);
-      memcpy(optval, &tv,
-             *optlen < sizeof(struct timeval) ? *optlen
-                                              : sizeof(struct timeval));
-      *optlen = sizeof(struct timeval);
-      return 0;
-    }
-    default:
-      errno = ENOPROTOOPT;
-      return -1;
-    }
-    break;
-
-  case SOL_IP:
-    switch (optname) {
-    case IP_TTL: {
-      if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV4) {
-        errno = EAFNOSUPPORT;
-        return -1;
-      }
-
-      uint8_t result;
-      if (!tcp_method_tcp_socket_hop_limit(socket_borrow, &result, &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-
-      value = result;
-      break;
-    }
-    default:
-      errno = ENOPROTOOPT;
-      return -1;
-    }
-    break;
-
-  case SOL_IPV6:
-    switch (optname) {
-    case IPV6_UNICAST_HOPS: {
-      if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV6) {
-        errno = EAFNOSUPPORT;
-        return -1;
-      }
-
-      uint8_t result;
-      if (!tcp_method_tcp_socket_hop_limit(socket_borrow, &result, &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-
-      value = result;
-      break;
-    }
-    default:
-      errno = ENOPROTOOPT;
-      return -1;
-    }
-    break;
-
-  case SOL_TCP:
-    switch (optname) {
-    case TCP_NODELAY: {
-      value = socket->fake_nodelay;
-      break;
-    }
-    case TCP_KEEPIDLE: {
-      tcp_duration_t result_ns;
-      if (!tcp_method_tcp_socket_keep_alive_idle_time(socket_borrow, &result_ns,
-                                                      &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-
-      uint64_t result_s = result_ns / NS_PER_S;
-      if (result_s == 0) {
-        result_s = 1; // Value was rounded down to zero. Round it up instead,
-                      // because 0 is an invalid value for this socket option.
-      }
-
-      if (result_s > INT_MAX) {
-        abort();
-      }
-
-      value = result_s;
-      break;
-    }
-    case TCP_KEEPINTVL: {
-      tcp_duration_t result_ns;
-      if (!tcp_method_tcp_socket_keep_alive_interval(socket_borrow, &result_ns,
-                                                     &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-
-      uint64_t result_s = result_ns / NS_PER_S;
-      if (result_s == 0) {
-        result_s = 1; // Value was rounded down to zero. Round it up instead,
-                      // because 0 is an invalid value for this socket option.
-      }
-
-      if (result_s > INT_MAX) {
-        abort();
-      }
-
-      value = result_s;
-      break;
-    }
-    case TCP_KEEPCNT: {
-      uint32_t result;
-      if (!tcp_method_tcp_socket_keep_alive_count(socket_borrow, &result,
-                                                  &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-
-      if (result > INT_MAX) {
-        abort();
-      }
-
-      value = result;
-      break;
-    }
-    default:
-      errno = ENOPROTOOPT;
-      return -1;
-    }
-    break;
-
-  default:
-    errno = ENOPROTOOPT;
-    return -1;
-  }
-
-  // Copy out integer value.
-  memcpy(optval, &value, *optlen < sizeof(int) ? *optlen : sizeof(int));
-  *optlen = sizeof(int);
-  return 0;
-}
-
-int tcp_setsockopt(void *data, int level, int optname, const void *optval,
-                   socklen_t optlen) {
-  tcp_socket_t *socket = (tcp_socket_t *)data;
-  int intval = *(int *)optval;
-
-  network_error_code_t error;
-  tcp_borrow_tcp_socket_t socket_borrow = tcp_borrow_tcp_socket(socket->socket);
-
-  switch (level) {
-  case SOL_SOCKET:
-    switch (optname) {
-    case SO_KEEPALIVE: {
-      if (!tcp_method_tcp_socket_set_keep_alive_enabled(socket_borrow,
-                                                        intval != 0, &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-
-      return 0;
-    }
-    case SO_RCVBUF: {
-      if (!tcp_method_tcp_socket_set_receive_buffer_size(socket_borrow, intval,
-                                                         &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-
-      return 0;
-    }
-    case SO_SNDBUF: {
-      if (!tcp_method_tcp_socket_set_send_buffer_size(socket_borrow, intval,
-                                                      &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-
-      return 0;
-    }
-    case SO_REUSEADDR: {
-      // As of this writing, WASI has no support for changing SO_REUSEADDR
-      // -- it's enabled by default and cannot be disabled.  To keep
-      // applications happy, we pretend to support enabling and disabling
-      // it.
-      socket->fake_reuseaddr = (intval != 0);
-      return 0;
-    }
-    case SO_RCVTIMEO: {
-      struct timeval *tv = (struct timeval *)optval;
-      if (!timeval_to_duration(tv, &socket->recv_timeout)) {
-        errno = EINVAL;
-        return -1;
-      }
-      return 0;
-    }
-    case SO_SNDTIMEO: {
-      struct timeval *tv = (struct timeval *)optval;
-      if (!timeval_to_duration(tv, &socket->send_timeout)) {
-        errno = EINVAL;
-        return -1;
-      }
-      return 0;
-    }
-    default:
-      errno = ENOPROTOOPT;
-      return -1;
-    }
-    break;
-
-  case SOL_IP:
-    switch (optname) {
-    case IP_TTL: {
-      if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV4) {
-        errno = EAFNOSUPPORT;
-        return -1;
-      }
-
-      if (intval < 0 || intval > UINT8_MAX) {
-        errno = EINVAL;
-        return -1;
-      }
-
-      if (!tcp_method_tcp_socket_set_hop_limit(socket_borrow, intval, &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-
-      return 0;
-    }
-    default:
-      errno = ENOPROTOOPT;
-      return -1;
-    }
-    break;
-
-  case SOL_IPV6:
-    switch (optname) {
-    case IPV6_UNICAST_HOPS: {
-      if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV6) {
-        errno = EAFNOSUPPORT;
-        return -1;
-      }
-
-      if (intval < 0 || intval > UINT8_MAX) {
-        errno = EINVAL;
-        return -1;
-      }
-
-      if (!tcp_method_tcp_socket_set_hop_limit(socket_borrow, intval, &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-
-      return 0;
-    }
-    default:
-      errno = ENOPROTOOPT;
-      return -1;
-    }
-    break;
-
-  case SOL_TCP:
-    switch (optname) {
-    case TCP_NODELAY: {
-      // At the time of writing, WASI has no support for TCP_NODELAY.
-      // Yet, many applications expect this option to be implemented.
-      // To ensure those applications can run on WASI at all, we fake
-      // support for it by recording the value, but not doing anything
-      // with it.
-      // If/when WASI adds true support, we can remove this workaround
-      // and implement it properly. From the application's perspective
-      // the "worst" thing that can then happen is that it automagically
-      // becomes faster.
-      socket->fake_nodelay = (intval != 0);
-      return 0;
-    }
-    case TCP_KEEPIDLE: {
-      tcp_duration_t duration = intval * NS_PER_S;
-      if (!tcp_method_tcp_socket_set_keep_alive_idle_time(socket_borrow,
-                                                          duration, &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-
-      return 0;
-    }
-    case TCP_KEEPINTVL: {
-      tcp_duration_t duration = intval * NS_PER_S;
-      if (!tcp_method_tcp_socket_set_keep_alive_interval(socket_borrow,
-                                                         duration, &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-
-      return 0;
-    }
-    case TCP_KEEPCNT: {
-      if (!tcp_method_tcp_socket_set_keep_alive_count(socket_borrow, intval,
-                                                      &error)) {
-        errno = __wasi_sockets_utils__map_error(error);
-        return -1;
-      }
-
-      return 0;
-    }
-    default:
-      errno = ENOPROTOOPT;
-      return -1;
-    }
-    break;
-
-  default:
-    errno = ENOPROTOOPT;
-    return -1;
-  }
 }
 
 static int tcp_poll_register(void *data, poll_state_t *state, short events) {
@@ -1273,8 +781,8 @@ static descriptor_vtable_t tcp_vtable = {
     .recvfrom = tcp_recvfrom,
     .sendto = tcp_sendto,
     .shutdown = tcp_shutdown,
-    .getsockopt = tcp_getsockopt,
-    .setsockopt = tcp_setsockopt,
+    .getsockopt = __wasilibc_tcp_getsockopt,
+    .setsockopt = __wasilibc_tcp_setsockopt,
 
     .poll_register = tcp_poll_register,
     .poll_finish = tcp_poll_finish,

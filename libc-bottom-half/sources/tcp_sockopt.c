@@ -413,6 +413,9 @@ int __wasilibc_tcp_setsockopt(void *data, int level, int optname,
     errno = ENOPROTOOPT;
     return -1;
   }
+
+  // should not be reachable, all cases above should return
+  abort();
 }
 
 #endif // not(__wasip1__)

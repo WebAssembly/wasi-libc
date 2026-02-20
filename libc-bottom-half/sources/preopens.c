@@ -220,11 +220,11 @@ static bool prefix_matches(const char *prefix, size_t prefix_len,
 /// This function takes ownership of `prefix`.
 static int internal_register_preopened_fd(__wasi_fd_t fd,
                                           const char *relprefix) {
-  STRONG_LOCK(lock);
+  LOCK(lock);
 
   int r = internal_register_preopened_fd_unlocked(fd, relprefix);
 
-  STRONG_UNLOCK(lock);
+  UNLOCK(lock);
 
   return r;
 }
@@ -263,7 +263,7 @@ int __wasilibc_find_abspath(const char *path, const char **abs_prefix,
   // recently added preopens take precedence over less recently addded ones.
   size_t match_len = 0;
   int fd = -1;
-  STRONG_LOCK(lock);
+  LOCK(lock);
   for (size_t i = num_preopens; i > 0; --i) {
     const preopen *pre = &preopens[i - 1];
     const char *prefix = pre->prefix;
@@ -278,7 +278,7 @@ int __wasilibc_find_abspath(const char *path, const char **abs_prefix,
       *abs_prefix = prefix;
     }
   }
-  STRONG_UNLOCK(lock);
+  UNLOCK(lock);
 
   if (fd == -1) {
     errno = ENOENT;
@@ -306,11 +306,11 @@ void __wasilibc_populate_preopens(void) {
     return;
   }
 
-  STRONG_LOCK(lock);
+  LOCK(lock);
 
   // Check whether another thread initialized the preopens already.
   if (preopens_populated) {
-    STRONG_UNLOCK(lock);
+    UNLOCK(lock);
     return;
   }
 
@@ -381,7 +381,7 @@ void __wasilibc_populate_preopens(void) {
   // Preopens are now initialized.
   preopens_populated = true;
 
-  STRONG_UNLOCK(lock);
+  UNLOCK(lock);
 
   return;
 #ifdef __wasip1__
@@ -393,7 +393,7 @@ software:
 }
 
 void __wasilibc_reset_preopens(void) {
-  STRONG_LOCK(lock);
+  LOCK(lock);
 
   if (num_preopens) {
     for (int i = 0; i < num_preopens; ++i) {
@@ -410,5 +410,5 @@ void __wasilibc_reset_preopens(void) {
 
   assert_invariants();
 
-  STRONG_UNLOCK(lock);
+  UNLOCK(lock);
 }

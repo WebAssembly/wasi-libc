@@ -14,39 +14,43 @@
 
 
 #ifdef __wasi_cooperative_threads__
-struct __waitlist_node;
-struct __coop_lock {
-	int owner;  // tid of owning thread, or 0 if unlocked
-	struct __waitlist_node *waiters;
-};
+    struct __waitlist_node;
+    struct __coop_lock {
+    	int owner;  // tid of owning thread, or 0 if unlocked
+    	struct __waitlist_node *waiters;
+    };
+    
+    typedef struct __coop_lock __lock_t;
+    typedef struct __coop_lock *__lock_ptr_t;
+    #define __COOP_LOCK_INIT {0, NULL}
+    #define __LOCK_INIT __COOP_LOCK_INIT
+    
+    hidden void __lock(struct __coop_lock *lock);
+    hidden void __unlock(struct __coop_lock *lock);
 
-typedef struct __coop_lock __lock_t;
-typedef struct __coop_lock *__lock_ptr_t;
-#define __COOP_LOCK_INIT {0, NULL}
-#define __LOCK_INIT __COOP_LOCK_INIT
-
-hidden void __lock(struct __coop_lock *lock);
-hidden void __unlock(struct __coop_lock *lock);
-#define STRONG_LOCK(x) __lock(x)
-#define STRONG_UNLOCK(x) __unlock(x)
-#define WEAK_LOCK(x) ((void)0)
-#define WEAK_UNLOCK(x) ((void)0)
+    #define STRONG_LOCK(x) __lock(x)
+    #define STRONG_UNLOCK(x) __unlock(x)
+    #define WEAK_LOCK(x) ((void)0)
+    #define WEAK_UNLOCK(x) ((void)0)
 #elif defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-typedef volatile int __lock_t;
-typedef volatile int *__lock_ptr_t;
-#define __LOCK_INIT {0}
-hidden void __lock(volatile int *);
-hidden void __unlock(volatile int *);
-#define STRONG_LOCK(x) __lock(x)
-#define STRONG_UNLOCK(x) __unlock(x)
-#define WEAK_LOCK(x) __lock(x)
-#define WEAK_UNLOCK(x) __unlock(x)
+    typedef volatile int __lock_t;
+    typedef volatile int *__lock_ptr_t;
+
+    #define __LOCK_INIT {0}
+    
+    hidden void __lock(volatile int *);
+    hidden void __unlock(volatile int *);
+    
+    #define STRONG_LOCK(x) __lock(x)
+    #define STRONG_UNLOCK(x) __unlock(x)
+    #define WEAK_LOCK(x) __lock(x)
+    #define WEAK_UNLOCK(x) __unlock(x)
 #else
-// No locking needed.
-#define STRONG_LOCK(x) ((void)0)
-#define STRONG_UNLOCK(x) ((void)0)
-#define WEAK_LOCK(x) ((void)0)
-#define WEAK_UNLOCK(x) ((void)0)
+    // No locking needed.
+    #define STRONG_LOCK(x) ((void)0)
+    #define STRONG_UNLOCK(x) ((void)0)
+    #define WEAK_LOCK(x) ((void)0)
+    #define WEAK_UNLOCK(x) ((void)0)
 #endif
 
 #endif

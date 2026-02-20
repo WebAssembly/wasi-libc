@@ -50,6 +50,7 @@ __waitable_set_drop
 __waitable_set_new
 __waitable_set_poll
 __waitable_set_wait
+__wasm_call_ctors
 __wasm_import_environment_get_arguments
 __wasm_import_environment_get_environment
 __wasm_import_environment_get_initial_cwd

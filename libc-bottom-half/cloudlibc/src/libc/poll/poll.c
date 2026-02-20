@@ -288,7 +288,6 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
 #elif defined(__wasip3__)
 
 static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
-  // TODO(wasip3)
   errno = ENOTSUP;
   return -1;
 }

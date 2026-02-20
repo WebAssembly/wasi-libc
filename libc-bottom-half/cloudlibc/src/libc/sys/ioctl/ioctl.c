@@ -89,7 +89,7 @@ int ioctl(int fildes, int request, ...) {
         return -1;
       }
       return 0;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__) 
       descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
       va_list ap;
       va_start(ap, request);
@@ -101,10 +101,6 @@ int ioctl(int fildes, int request, ...) {
         return -1;
       }
       return entry->vtable->set_blocking(entry->data, blocking);
-#elif defined(__wasip3__)
-      // TODO(wasip3)
-      errno = ENOTSUP;
-      return -1;
 #else
 # error "Unknown WASI version"
 #endif

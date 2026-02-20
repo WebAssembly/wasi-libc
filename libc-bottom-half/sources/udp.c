@@ -836,6 +836,7 @@ static int udp_poll_register(void *data, poll_state_t *state, short events) {
   }
   return 0;
 }
+#endif
 
 static int udp_fcntl_getfl(void *data) {
   udp_socket_t *socket = (udp_socket_t *)data;
@@ -855,7 +856,6 @@ static int udp_fcntl_setfl(void *data, int flags) {
   }
   return 0;
 }
-#endif
 
 static descriptor_vtable_t udp_vtable = {
     .free = udp_free,
@@ -874,8 +874,8 @@ static descriptor_vtable_t udp_vtable = {
     .setsockopt = udp_setsockopt,
 
     .poll_register = udp_poll_register,
+#endif
 
     .fcntl_getfl = udp_fcntl_getfl,
     .fcntl_setfl = udp_fcntl_setfl,
-#endif
 };

@@ -342,6 +342,8 @@ __wasilibc_rename_oldat
 __wasilibc_reset_preopens
 __wasilibc_rmdirat
 __wasilibc_stat
+__wasilibc_tcp_getsockopt
+__wasilibc_tcp_setsockopt
 __wasilibc_tell
 __wasilibc_unlinkat
 __wasilibc_utimens

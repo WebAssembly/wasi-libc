@@ -1734,6 +1734,8 @@
 #define SEEK_SET 0
 #define SEGSIZE 512
 #define SEM_FAILED ((sem_t *)0)
+#define SEM_NSEMS_MAX 256
+#define SEM_VALUE_MAX 0x7fffffff
 #define SERVFAIL ns_r_servfail
 #define SHORTBITS (sizeof(short) * 8)
 #define SHRT_MAX 0x7fff
@@ -2429,6 +2431,7 @@
 #define _POSIX_VERSION 200809L
 #define _PTHREAD_H 
 #define _PTRDIFF_T 
+#define _REENTRANT 1
 #define _REGEX_H 
 #define _SCHED_H 
 #define _SC_2_CHAR_TERM 95
@@ -3133,6 +3136,7 @@
 #define __va_copy(d,s) __builtin_va_copy(d, s)
 #define __wasi__ 1
 #define __wasi_api_h 
+#define __wasi_cooperative_threads__ 
 #define __wasi_libc_busywait_h 
 #define __wasi_libc_environ_h 
 #define __wasi_libc_find_relpath_h 

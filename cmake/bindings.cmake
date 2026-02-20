@@ -15,8 +15,8 @@ if(WIT_BINDGEN_EXECUTABLE)
     OUTPUT_VARIABLE WIT_BINDGEN_VERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  if (NOT (WIT_BINDGEN_VERSION MATCHES "0\\.51\\.0"))
-    message(WARNING "wit-bindgen version 0.51.0 is required, found: ${WIT_BINDGEN_VERSION}")
+  if (NOT (WIT_BINDGEN_VERSION MATCHES "0\\.53\\.1"))
+    message(WARNING "wit-bindgen version 0.53.1 is required, found: ${WIT_BINDGEN_VERSION}")
     set(WIT_BINDGEN_EXECUTABLE "")
   endif()
 endif()
@@ -26,7 +26,7 @@ if (NOT WIT_BINDGEN_EXECUTABLE)
   ba_download(
     wit-bindgen
     "https://github.com/bytecodealliance/wit-bindgen"
-    "0.51.0"
+    "0.53.1"
   )
   ExternalProject_Get_Property(wit-bindgen SOURCE_DIR)
   set(wit_bindgen "${SOURCE_DIR}/wit-bindgen")
@@ -87,6 +87,7 @@ add_custom_target(
       --rename-world wasip3
       --type-section-suffix __wasi_libc
       --world wasi:cli/imports@${wasip3-version}
+      --generate-threading-helpers
       --rename wasi:clocks/monotonic-clock@${wasip3-version}=monotonic_clock
       --rename wasi:clocks/system-clock@${wasip3-version}=system_clock
       --rename wasi:filesystem/preopens@${wasip3-version}=filesystem_preopens

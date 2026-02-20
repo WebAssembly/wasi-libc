@@ -15,7 +15,6 @@ int sched_yield(void) {
     #error "Unknown WASI version"
   #endif
 #elif defined(__wasip1__)
-#ifdef __wasip1__
   __wasi_errno_t error = __wasi_sched_yield();
   if (error != 0) {
     errno = error;

@@ -9,6 +9,7 @@
 #define UNGET 8
 
 #include "lock.h"
+#include <wasi/version.h>
 
 #ifdef __wasi_cooperative_threads__
 #define FFINALLOCK(f) __lockfile((f))

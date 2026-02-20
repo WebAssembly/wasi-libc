@@ -1,6 +1,7 @@
 #include "stdio_impl.h"
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #include "pthread_impl.h"
+#include <wasi/api.h>
 
 #ifdef __GNUC__
 __attribute__((__noinline__))
@@ -25,12 +26,7 @@ static int locking_putc(int c, FILE *f)
 static inline int do_putc(int c, FILE *f)
 {
 #ifdef __wasi_cooperative_threads__
-	#ifdef __wasip3__
-	int tid = wasip3_thread_index();
-	#else
-	#error "Unknown WASI version"
-	#endif
-	if (f->lock.owner == tid)
+	if (f->lock.owner == __pthread_self()->tid)
 		return putc_unlocked(c, f);
 	return locking_putc(c, f);
 #elif defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)

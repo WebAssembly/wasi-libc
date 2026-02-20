@@ -1,6 +1,8 @@
 #ifndef LOCK_H
 #define LOCK_H
 
+#include <wasi/version.h>
+
 // Defines internal locking primitives. The main elements defined here are:
 // - __lock_t: the type of a lock variable
 // - __lock_ptr_t: the type of a pointer to a lock variable

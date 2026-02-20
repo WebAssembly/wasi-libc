@@ -36,12 +36,7 @@ void __register_locked_file(FILE *f, pthread_t self)
 #ifdef __wasi_cooperative_threads__
 int ftrylockfile(FILE *f)
 {
-	#ifdef __wasip3__
-	uint32_t self_tid = wasip3_thread_index();
-	#else
-	#error "Unknown WASI version"
-	#endif
-
+	int self_tid = __pthread_self()->tid;
 	if (f->lock.owner == self_tid) {
 		if (f->lockcount == LONG_MAX)
 			return -1;

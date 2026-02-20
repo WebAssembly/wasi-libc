@@ -8,7 +8,7 @@
 void __waitlist_wait_on(struct __waitlist_node **list)
 {
     struct __waitlist_node node = {
-        .tid = wasip3_thread_index(),
+        .tid = __pthread_self()->tid,
         .next = *list,
     };
     *list = &node;

@@ -5,14 +5,8 @@
 #include "lock.h"
 int __lockfile(FILE *f)
 {
-	#ifdef __wasip3__
-	int tid = wasip3_thread_index();
-	#else
-	#error "Unknown WASI version"
-	#endif
-
 	// Allow recursive locking
-	if (f->lock.owner == tid)
+	if (f->lock.owner == __pthread_self()->tid)
 		return 0;
 
 	STRONG_LOCK(&f->lock);

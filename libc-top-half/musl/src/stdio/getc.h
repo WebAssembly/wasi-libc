@@ -1,6 +1,7 @@
 #include "stdio_impl.h"
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #include "pthread_impl.h"
+#include <wasi/api.h>
 
 #ifdef __GNUC__
 __attribute__((__noinline__))
@@ -25,7 +26,7 @@ static int locking_getc(FILE *f)
 static inline int do_getc(FILE *f)
 {
 #ifdef __wasi_cooperative_threads__
-	if (f->lock.owner == wasip3_thread_index())
+	if (f->lock.owner == __pthread_self()->tid)
 		return getc_unlocked(f);
 	return locking_getc(f);
 #elif defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)

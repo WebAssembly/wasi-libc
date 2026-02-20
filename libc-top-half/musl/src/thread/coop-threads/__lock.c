@@ -8,8 +8,7 @@
 
 void __lock(struct __coop_lock *lock)
 {
-	int tid = wasip3_thread_index();
-	if (lock->owner == tid) {
+	if (lock->owner == __pthread_self()->tid) {
 		/* Trap on recursive locking. */
 		__builtin_trap();
 	}
@@ -21,12 +20,12 @@ void __lock(struct __coop_lock *lock)
 		 * thread that was scheduled before us, so loop back. */
 	}
 	
-	lock->owner = tid;
+	lock->owner = __pthread_self()->tid;
 }
 
 void __unlock(struct __coop_lock *lock)
 {
-	int tid = wasip3_thread_index();
+	int tid = __pthread_self()->tid;
 	if (lock->owner != tid) {
 		/* We're trying to unlock a lock we don't own. */
 		__builtin_trap();

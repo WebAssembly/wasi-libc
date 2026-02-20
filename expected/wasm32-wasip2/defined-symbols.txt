@@ -566,7 +566,6 @@ explicit_bzero
 expm1
 expm1f
 expm1l
-exports_wasi_cli_run_run
 fabs
 fabsf
 fabsl
@@ -1504,6 +1503,7 @@ wasip2_list_u32_free
 wasip2_list_u8_free
 wasip2_option_string_free
 wasip2_string_dup
+wasip2_string_dup_n
 wasip2_string_free
 wasip2_string_from_c
 wasip2_string_set

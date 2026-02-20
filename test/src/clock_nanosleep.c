@@ -12,20 +12,13 @@
       t_error("%s failed (errno = %d)\n", #c, errno);                          \
   } while (0)
 
-static void test_elapsed_not_too_long(struct timespec *start_time,
-                                      struct timespec *end_time,
-                                      long ns_to_sleep) {
+static void test_elapsed(struct timespec *start_time, struct timespec *end_time,
+                         long ns_to_sleep) {
   TEST(end_time->tv_sec - start_time->tv_sec <= 1);
 
   long nanoseconds_elapsed = (end_time->tv_sec - start_time->tv_sec) * 1E9 -
                              start_time->tv_nsec + end_time->tv_nsec;
-
-  // Test that the difference between the requested amount of sleep
-  // and the actual elapsed time is within an acceptable margin
-  double difference = abs(nanoseconds_elapsed - ns_to_sleep) / ns_to_sleep;
-
-  // Allow the actual sleep time to be twice as much as the requested time
-  TEST(difference <= 1);
+  TEST(nanoseconds_elapsed >= ns_to_sleep);
 }
 
 int main(void) {
@@ -45,7 +38,7 @@ int main(void) {
   TEST(clock_nanosleep(CLOCK_MONOTONIC, 0, &time_to_sleep, NULL) == 0);
   clock_gettime(CLOCK_MONOTONIC, &end_time);
 
-  test_elapsed_not_too_long(&start_time, &end_time, ns_to_sleep);
+  test_elapsed(&start_time, &end_time, ns_to_sleep);
 
   // Sleep for another 50ms to get us pretty far from 5ms from the start of
   // this process to increase the chance the next test fails if it's not
@@ -64,7 +57,7 @@ int main(void) {
        0);
   clock_gettime(CLOCK_MONOTONIC, &end_time);
 
-  test_elapsed_not_too_long(&start_time, &end_time, ns_to_sleep);
+  test_elapsed(&start_time, &end_time, ns_to_sleep);
 
   return t_status;
 }

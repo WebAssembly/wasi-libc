@@ -1,0 +1,10 @@
+package wasi-libc:wasip3;
+
+world wasip3 {
+    include wasi:cli/command@${wasip3-version};
+    include wasi:clocks/imports@${wasip3-version};
+    include wasi:filesystem/imports@${wasip3-version};
+    include wasi:http/middleware@${wasip3-version};
+    include wasi:random/imports@${wasip3-version};
+    include wasi:sockets/imports@${wasip3-version};
+}

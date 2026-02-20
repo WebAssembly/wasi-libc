@@ -1,6 +1,6 @@
 #include <wasi/api.h>
 
-#ifdef __wasip2__
+#if defined(__wasip2__) || defined(__wasip3__)
 #include <errno.h>
 #include <stdlib.h>
 
@@ -9,9 +9,11 @@ static void translate_error(filesystem_error_code_t error) {
     case FILESYSTEM_ERROR_CODE_ACCESS:
         errno = EACCES;
         break;
+#ifdef __wasip2__
     case FILESYSTEM_ERROR_CODE_WOULD_BLOCK:
         errno = EAGAIN;
         break;
+#endif
     case FILESYSTEM_ERROR_CODE_ALREADY:
         errno = EALREADY;
         break;

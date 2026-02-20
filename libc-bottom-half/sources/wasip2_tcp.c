@@ -1159,9 +1159,15 @@ int tcp_setsockopt(void *data, int level, int optname, const void *optval,
 static int tcp_poll_register(void *data, poll_state_t *state, short events) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
   switch (socket->state.tag) {
-  case TCP_SOCKET_STATE_CONNECTING:
-  case TCP_SOCKET_STATE_LISTENING: {
+  case TCP_SOCKET_STATE_CONNECTING: {
     if ((events & (POLLRDNORM | POLLWRNORM)) != 0)
+      return __wasilibc_poll_add(state, events, tcp_pollable(socket));
+    break;
+  }
+
+  case TCP_SOCKET_STATE_LISTENING: {
+    // Listening sockets can only be ready to read, not write.
+    if ((events & POLLRDNORM) != 0)
       return __wasilibc_poll_add(state, events, tcp_pollable(socket));
     break;
   }
@@ -1198,7 +1204,14 @@ static int tcp_poll_register(void *data, poll_state_t *state, short events) {
 static int tcp_poll_finish(void *data, poll_state_t *state, short events) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
 
-  if (socket->state.tag != TCP_SOCKET_STATE_CONNECTING) {
+  switch (socket->state.tag) {
+  case TCP_SOCKET_STATE_CONNECTING:
+    break;
+  case TCP_SOCKET_STATE_LISTENING:
+    // Listening sockets can only be ready to read, not write.
+    __wasilibc_poll_ready(state, events & POLLRDNORM);
+    return 0;
+  default:
     __wasilibc_poll_ready(state, events);
     return 0;
   }
@@ -1211,13 +1224,34 @@ static int tcp_poll_finish(void *data, poll_state_t *state, short events) {
     memset(&socket->state.connected, 0, sizeof(socket->state.connected));
     socket->state.connected.input = tuple.f0;
     socket->state.connected.output = tuple.f1;
-    __wasilibc_poll_ready(state, events);
+    // Now that it's connected, it's immediately writable but not necessarily
+    // immediately readable:
+    __wasilibc_poll_ready(state, events & POLLWRNORM);
   } else if (error == NETWORK_ERROR_CODE_WOULD_BLOCK) {
     // No events yet -- application will need to poll again
   } else {
     socket->state.tag = TCP_SOCKET_STATE_CONNECT_FAILED;
     socket->state.connect_failed.error_code = error;
     __wasilibc_poll_ready(state, events);
+  }
+  return 0;
+}
+
+static int tcp_fcntl_getfl(void *data) {
+  tcp_socket_t *socket = (tcp_socket_t *)data;
+  int flags = 0;
+  if (!socket->blocking) {
+    flags |= O_NONBLOCK;
+  }
+  return flags;
+}
+
+static int tcp_fcntl_setfl(void *data, int flags) {
+  tcp_socket_t *socket = (tcp_socket_t *)data;
+  if (flags & O_NONBLOCK) {
+    socket->blocking = false;
+  } else {
+    socket->blocking = true;
   }
   return 0;
 }
@@ -1244,6 +1278,9 @@ static descriptor_vtable_t tcp_vtable = {
 
     .poll_register = tcp_poll_register,
     .poll_finish = tcp_poll_finish,
+
+    .fcntl_getfl = tcp_fcntl_getfl,
+    .fcntl_setfl = tcp_fcntl_setfl,
 };
 
 #endif // __wasip2__

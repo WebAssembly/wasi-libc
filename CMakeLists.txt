@@ -41,7 +41,7 @@ set(TARGET_TRIPLE "wasm32-wasip1" CACHE STRING "WASI target to test")
 # - https://github.com/llvm/llvm-project/issues/91700
 # - https://github.com/llvm/llvm-project/issues/91711
 set(LTO "" CACHE STRING "LTO mode to use")
-set(MALLOC "dlmalloc" CACHE STRING "Malloc implementation to use (dlmalloc, jemalloc, or none)")
+set(MALLOC "dlmalloc" CACHE STRING "Malloc implementation to use (dlmalloc, emmalloc, or none)")
 set(BUILTINS_LIB "" CACHE STRING "Path to precompiled compiler-rt builtins library")
 set(BULK_MEMORY_THRESHOLD "32" CACHE STRING "Threshold to compile code with")
 option(SETJMP "Build setjmp/longjmp support" ON)
@@ -119,8 +119,10 @@ if(LTO)
   set(SYSROOT_LIB ${SYSROOT_LIB}/llvm-lto/${clang_version})
   if(LTO STREQUAL "thin")
     add_compile_options(-flto=thin)
+    add_link_options(-flto=thin)
   elseif(LTO STREQUAL "full")
     add_compile_options(-flto)
+    add_link_options(-flto)
   else()
     message(FATAL_ERROR "Unknown LTO mode: ${LTO}")
   endif()
@@ -141,6 +143,9 @@ else()
   message(FATAL_ERROR "Unknown WASI version: ${WASI}")
 endif()
 
+set(wasip2-version 0.2.0)
+set(wasip3-version 0.3.0-rc-2026-01-06)
+
 include(bindings)
 include(builtins)
 if (NOT (WASI STREQUAL "p1"))
@@ -149,6 +154,7 @@ endif()
 include(check-symbols)
 include(clang-format)
 include(wasm-tools)
+include(wasi-wits)
 
 # =============================================================================
 # Generic top-level build flags/settings

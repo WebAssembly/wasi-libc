@@ -3,14 +3,16 @@
 
 #include <wasi/version.h>
 
-#ifdef __wasip2__
+#if defined(__wasip2__) || defined(__wasip3__)
 #include <assert.h>
 #include <wasi/wasip2.h>
 #include <wasi/descriptor_table.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <errno.h>
+#endif
 
+#ifdef __wasip2__
 /// Handles a `wasi:io/streams.stream-error` for a `read`-style operation.
 ///
 /// If the error indicates "closed" then 0 is returned to mean EOF. Otherwise
@@ -46,7 +48,9 @@ static int wasip2_handle_write_error(streams_stream_error_t error) {
 // Returns 0 if `s` is valid utf-8.
 // Returns -1 and sets errno to `ENOENT` if `s` is not valid utf-8.
 int wasip2_string_from_c(const char *s, wasip2_string_t* out);
+#endif
 
+#if defined(__wasip2__) || defined(__wasip3__)
 // Succeed only if fd is bound to a file handle in the descriptor table
 static int fd_to_file_handle(int fd, filesystem_borrow_descriptor_t* result) {
   descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
@@ -58,7 +62,9 @@ static int fd_to_file_handle(int fd, filesystem_borrow_descriptor_t* result) {
   }
   return entry->vtable->get_file(entry->data, result);
 }
+#endif
 
+#ifdef __wasip2__
 // Gets an `output-stream` borrow from the `fd` provided.
 int __wasilibc_write_stream(int fd,
                             streams_borrow_output_stream_t *out,
@@ -70,7 +76,13 @@ int __wasilibc_read_stream(int fd,
                            streams_borrow_input_stream_t *out,
                            off_t **off,
                            poll_borrow_pollable_t *pollable);
+#endif
+#ifdef __wasip3__
+int __wasilibc_write_stream3(int fildes, wasip3_write_t **write_end, off_t **off);
+int __wasilibc_read_stream3(int fildes, filesystem_tuple2_stream_u8_future_result_void_error_code_t **stream, off_t **off);
+#endif
 
+#if defined(__wasip2__) || defined(__wasip3__)
 static unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
   switch(ty) {
   case FILESYSTEM_DESCRIPTOR_TYPE_UNKNOWN:

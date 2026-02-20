@@ -163,10 +163,12 @@ int __wasilibc_poll_add(poll_state_t *state, short events,
 }
 
 void __wasilibc_poll_ready(poll_state_t *state, short events) {
-  if (state->pollfd->revents == 0) {
-    ++state->event_count;
+  if (events != 0) {
+    if (state->pollfd->revents == 0) {
+      ++state->event_count;
+    }
+    state->pollfd->revents |= events;
   }
-  state->pollfd->revents |= events;
 }
 
 static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {

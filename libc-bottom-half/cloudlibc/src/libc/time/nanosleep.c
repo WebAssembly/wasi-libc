@@ -7,7 +7,7 @@
 #include <wasi/version.h>
 
 int nanosleep(const struct timespec *rqtp, struct timespec *rem) {
-#ifdef __wasip2__
+#if defined(__wasip2__) || defined(__wasip3__)
   // FIXME(WebAssembly/WASI#857): wasip2 only supports the monotonic clock for
   // sleeping.
   clockid_t clock = CLOCK_MONOTONIC;

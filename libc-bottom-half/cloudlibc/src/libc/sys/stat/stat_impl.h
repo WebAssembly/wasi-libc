@@ -66,6 +66,9 @@ static inline void to_public_stat(const __wasi_filestat_t *in,
    }
 }
 #elif defined(__wasip2__) || defined(__wasip3__)
+#ifdef __wasip3__
+typedef filesystem_instant_t filesystem_datetime_t;
+#endif 
 static inline void to_public_stat(const filesystem_metadata_hash_value_t *metadata,
                                   const filesystem_descriptor_stat_t *in,
                                   struct stat *out) {

@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
@@ -627,6 +628,11 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
       value = __wasi_sockets_utils__posix_family(socket->family);
       break;
     }
+
+    case SO_ERROR:
+      value = 0;
+      break;
+
     case SO_RCVBUF: {
       uint64_t result;
       if (!udp_method_udp_socket_receive_buffer_size(socket_borrow, &result,
@@ -825,9 +831,17 @@ static int udp_poll_register(void *data, poll_state_t *state, short events) {
   udp_socket_t *socket = (udp_socket_t *)data;
   switch (socket->state.tag) {
   case UDP_SOCKET_STATE_UNBOUND:
-  case UDP_SOCKET_STATE_BOUND_NOSTREAMS:
+    // In the unbound case, all we can do is assume immediate read and write
+    // readiness:
     __wasilibc_poll_ready(state, events);
     break;
+
+  case UDP_SOCKET_STATE_BOUND_NOSTREAMS:
+    // We can't know the true state of read and write readiness until we have
+    // stream handles, so let's add those now:
+    if (udp_create_streams(socket, NULL) < 0)
+      return -1;
+    // Deliberately fall through to next case:
 
   case UDP_SOCKET_STATE_BOUND_STREAMING:
   case UDP_SOCKET_STATE_CONNECTED: {
@@ -856,6 +870,25 @@ static int udp_poll_register(void *data, poll_state_t *state, short events) {
   return 0;
 }
 
+static int udp_fcntl_getfl(void *data) {
+  udp_socket_t *socket = (udp_socket_t *)data;
+  int flags = 0;
+  if (!socket->blocking) {
+    flags |= O_NONBLOCK;
+  }
+  return flags;
+}
+
+static int udp_fcntl_setfl(void *data, int flags) {
+  udp_socket_t *socket = (udp_socket_t *)data;
+  if (flags & O_NONBLOCK) {
+    socket->blocking = false;
+  } else {
+    socket->blocking = true;
+  }
+  return 0;
+}
+
 static descriptor_vtable_t udp_vtable = {
     .free = udp_free,
 
@@ -872,6 +905,9 @@ static descriptor_vtable_t udp_vtable = {
     .setsockopt = udp_setsockopt,
 
     .poll_register = udp_poll_register,
+
+    .fcntl_getfl = udp_fcntl_getfl,
+    .fcntl_setfl = udp_fcntl_setfl,
 };
 
 #endif // __wasip2__

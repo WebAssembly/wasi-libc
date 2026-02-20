@@ -21,6 +21,12 @@
 #include <wasi/file_utils.h>
 #endif
 
+/// Access to the the above preopen must be protected in the presence of
+/// threads.
+#ifdef _REENTRANT
+static __lock_t lock[1];
+#endif
+
 #if defined(__wasip1__)
 typedef struct {
   __wasi_fd_t fd;
@@ -95,12 +101,6 @@ static _Atomic _Bool preopens_populated = false;
 static preopen *preopens;
 static size_t num_preopens;
 static size_t preopen_capacity;
-
-/// Access to the the above preopen must be protected in the presence of
-/// threads.
-#ifdef _REENTRANT
-static volatile int lock[1];
-#endif
 
 #ifdef NDEBUG
 #define assert_invariants() // assertions disabled
@@ -220,11 +220,11 @@ static bool prefix_matches(const char *prefix, size_t prefix_len,
 /// This function takes ownership of `prefix`.
 static int internal_register_preopened_fd(__wasi_fd_t fd,
                                           const char *relprefix) {
-  LOCK(lock);
+  STRONG_LOCK(lock);
 
   int r = internal_register_preopened_fd_unlocked(fd, relprefix);
 
-  UNLOCK(lock);
+  STRONG_UNLOCK(lock);
 
   return r;
 }
@@ -263,7 +263,7 @@ int __wasilibc_find_abspath(const char *path, const char **abs_prefix,
   // recently added preopens take precedence over less recently addded ones.
   size_t match_len = 0;
   int fd = -1;
-  LOCK(lock);
+  STRONG_LOCK(lock);
   for (size_t i = num_preopens; i > 0; --i) {
     const preopen *pre = &preopens[i - 1];
     const char *prefix = pre->prefix;
@@ -278,7 +278,7 @@ int __wasilibc_find_abspath(const char *path, const char **abs_prefix,
       *abs_prefix = prefix;
     }
   }
-  UNLOCK(lock);
+  STRONG_UNLOCK(lock);
 
   if (fd == -1) {
     errno = ENOENT;
@@ -306,11 +306,11 @@ void __wasilibc_populate_preopens(void) {
     return;
   }
 
-  LOCK(lock);
+  STRONG_LOCK(lock);
 
   // Check whether another thread initialized the preopens already.
   if (preopens_populated) {
-    UNLOCK(lock);
+    STRONG_UNLOCK(lock);
     return;
   }
 
@@ -381,7 +381,7 @@ void __wasilibc_populate_preopens(void) {
   // Preopens are now initialized.
   preopens_populated = true;
 
-  UNLOCK(lock);
+  STRONG_UNLOCK(lock);
 
   return;
 #ifdef __wasip1__
@@ -393,7 +393,7 @@ software:
 }
 
 void __wasilibc_reset_preopens(void) {
-  LOCK(lock);
+  STRONG_LOCK(lock);
 
   if (num_preopens) {
     for (int i = 0; i < num_preopens; ++i) {
@@ -410,5 +410,5 @@ void __wasilibc_reset_preopens(void) {
 
   assert_invariants();
 
-  UNLOCK(lock);
+  STRONG_UNLOCK(lock);
 }

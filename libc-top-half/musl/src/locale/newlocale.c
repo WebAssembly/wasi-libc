@@ -63,9 +63,9 @@ static locale_t do_newlocale(int mask, const char *name, locale_t loc)
 
 locale_t __newlocale(int mask, const char *name, locale_t loc)
 {
-	LOCK(__locale_lock);
+	STRONG_LOCK(__locale_lock);
 	loc = do_newlocale(mask, name, loc);
-	UNLOCK(__locale_lock);
+	STRONG_UNLOCK(__locale_lock);
 	return loc;
 }
 

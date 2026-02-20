@@ -317,7 +317,7 @@ if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(sockets-nonblocking-udp.c NETWORK FAILP3)
   add_wasilibc_test(sockets-nonblocking-multiple.c NETWORK FAILP3)
   add_wasilibc_test(sockets-nonblocking-udp-multiple.c NETWORK FAILP3)
-  add_wasilibc_test(sockets-fcntl.c NETWORK FAILP3)
+  add_wasilibc_test(sockets-fcntl.c NETWORK)
 
   # TODO: flaky tests
   # add_wasilibc_test(sockets-nonblocking.c NETWORK)

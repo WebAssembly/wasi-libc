@@ -441,6 +441,10 @@ if (THREADS)
 elseif(WASI STREQUAL "p3")
   # cooperative threads implementation for WASI Preview 3
   list(APPEND top_half_sources
+    musl/src/stdio/__lockfile.c
+    musl/src/stdio/flockfile.c
+    musl/src/stdio/ftrylockfile.c
+    musl/src/stdio/funlockfile.c
     musl/src/thread/coop-threads/__lock.c
     musl/src/thread/coop-threads/__wait.c
     musl/src/thread/coop-threads/__wasi_coop_thread_start.s
@@ -448,9 +452,7 @@ elseif(WASI STREQUAL "p3")
     musl/src/thread/coop-threads/mtx_trylock.c
     musl/src/thread/coop-threads/pthread_barrier_destroy.c
     musl/src/thread/coop-threads/pthread_barrier_init.c
-    musl/src/thread/coop-threads/pthread_barrier_setpshared.c
     musl/src/thread/coop-threads/pthread_barrier_wait.c
-    musl/src/thread/coop-threads/pthread_cancel.c
     musl/src/thread/coop-threads/pthread_cond_broadcast.c
     musl/src/thread/coop-threads/pthread_cond_destroy.c
     musl/src/thread/coop-threads/pthread_cond_init.c
@@ -469,7 +471,6 @@ elseif(WASI STREQUAL "p3")
     musl/src/thread/coop-threads/pthread_mutex_trylock.c
     musl/src/thread/coop-threads/pthread_mutex_unlock.c
     musl/src/thread/coop-threads/pthread_once.c
-    musl/src/thread/coop-threads/pthread_rwlock_init.c
     musl/src/thread/coop-threads/pthread_rwlock_timedrdlock.c
     musl/src/thread/coop-threads/pthread_rwlock_timedwrlock.c
     musl/src/thread/coop-threads/pthread_rwlock_tryrdlock.c

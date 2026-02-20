@@ -12,9 +12,11 @@
 #include "libc.h"
 #include "atomic.h"
 #include "syscall.h"
+#include <wasi/api.h>
+#include "lock.h"
 
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-volatile int __thread_list_lock;
+__lock_t __thread_list_lock;
 #endif
 
 #ifndef __wasilibc_unmodified_upstream
@@ -40,6 +42,26 @@ struct stack_bounds {
 	size_t size;
 };
 
+static inline unsigned char *get_stack_pointer() {
+  unsigned char *sp;
+#ifdef __wasm_component_model_thread_context__
+  __asm__(
+      ".functype   __wasm_component_model_builtin_context_get_0 () -> (i32)\n"
+      ".import_module __wasm_component_model_builtin_context_get_0, \"$root\"\n"
+      ".import_name __wasm_component_model_builtin_context_get_0, "
+      "\"[context-get-0]\"\n"
+      "call __wasm_component_model_builtin_context_get_0\n"
+      "local.set %0\n"
+      : "=r"(sp));
+#else
+  __asm__(".globaltype __stack_pointer, i32\n"
+          "global.get __stack_pointer\n"
+          "local.set %0\n"
+          : "=r"(sp));
+#endif
+  return sp;
+}
+
 static inline struct stack_bounds get_stack_bounds()
 {
 	struct stack_bounds bounds;
@@ -52,19 +74,14 @@ static inline struct stack_bounds get_stack_bounds()
 		 * how wasm-ld lays out things. For pic, just give up.
 		 */
 #if !defined(__pic__)
-		unsigned char *sp;
-		__asm__(
-			".globaltype __stack_pointer, i32\n"
-			"global.get __stack_pointer\n"
-			"local.set %0\n"
-			: "=r"(sp));
-		if (sp > &__global_base) {
-			bounds.base = &__heap_base;
-			bounds.size = &__heap_base - &__data_end;
-		} else {
-			bounds.base = &__global_base;
-			bounds.size = (size_t)&__global_base;
-		}
+		unsigned char *sp = get_stack_pointer();
+    	if (sp > &__global_base) {
+    	  bounds.base = &__heap_base;
+    	  bounds.size = &__heap_base - &__data_end;
+    	} else {
+    	  bounds.base = &__global_base;
+    	  bounds.size = (size_t)&__global_base;
+    	}
 #else
 		bounds.base = 0;
 		bounds.size = 0;
@@ -97,20 +114,27 @@ int __init_tp(void *p)
 	td->stack = bounds.base;
 	td->stack_size = bounds.size;
 	td->guard_size = 0;
-#ifdef _REENTRANT
-	td->detach_state = DT_JOINABLE;
-	/*
-	 * Initialize the TID to a value which doesn't conflict with
-	 * host-allocated TIDs, so that TID-based locks can work.
-	 *
-	 * Note:
-	 * - Host-allocated TIDs range from 1 to 0x1fffffff. (inclusive)
-	 * - __tl_lock and __lockfile uses TID 0 as "unlocked".
-	 * - __lockfile relies on the fact the most significant two bits
-	 *   of TIDs are 0.
-	 */
-	td->tid = 0x3fffffff;
-#endif
+	#if defined(__wasi_cooperative_threads__)
+	  td->detach_state = DT_JOINABLE;
+	  #ifdef __wasip3__
+	  td->tid = wasip3_thread_index();
+	  #else
+	  #error "Unknown WASI version"
+	  #endif
+	#elif defined(_REENTRANT)
+	  td->detach_state = DT_JOINABLE;
+	  /*
+	   * Initialize the TID to a value which doesn't conflict with
+	   * host-allocated TIDs, so that TID-based locks can work.
+	   *
+	   * Note:
+	   * - Host-allocated TIDs range from 1 to 0x1fffffff. (inclusive)
+	   * - __tl_lock and __lockfile uses TID 0 as "unlocked".
+	   * - __lockfile relies on the fact the most significant two bits
+	   *   of TIDs are 0.
+	   */
+	  td->tid = 0x3fffffff;
+	#endif
 #endif
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	td->locale = &libc.global_locale;
@@ -178,9 +202,11 @@ void *__copy_tls(unsigned char *mem)
 	mem += tls_align;
 	mem -= (uintptr_t)mem & (tls_align-1);
 	__wasm_init_tls(mem);
+	#ifndef __wasm_component_model_thread_context__
   	__asm__("local.get %0\n"
 			"global.set __tls_base\n"
 			:: "r"(tls_base));
+	#endif
 	return mem;
 #endif
 }

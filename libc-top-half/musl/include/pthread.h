@@ -55,9 +55,16 @@ extern "C" {
 #define PTHREAD_PROCESS_SHARED 1
 
 
+#ifdef __wasi_cooperative_threads__
+#define PTHREAD_MUTEX_INITIALIZER {0, 0, 0, 0}
+#define PTHREAD_RWLOCK_INITIALIZER {0, 0}
+#define PTHREAD_COND_INITIALIZER {0}
+#define PTHREAD_BARRIER_INITIALIZER {0, 0, 0}
+#else
 #define PTHREAD_MUTEX_INITIALIZER {{{0}}}
 #define PTHREAD_RWLOCK_INITIALIZER {{{0}}}
 #define PTHREAD_COND_INITIALIZER {{{0}}}
+#endif
 #define PTHREAD_ONCE_INIT 0
 
 
@@ -107,11 +114,13 @@ int pthread_equal(pthread_t, pthread_t);
 int pthread_setcancelstate(int, int *);
 int pthread_setcanceltype(int, int *);
 void pthread_testcancel(void);
-#ifdef __wasilibc_unmodified_upstream /* WASI has no cancellation support. */
+/* wasi-threads takes the approach of not declaring unsupported functions.
+   For greater compatibility, we stub them for cooperative threading. */
+#ifdef __wasi_cooperative_threads__ /* WASI has no cancellation support. */
 int pthread_cancel(pthread_t);
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no CPU scheduling support. */
+#ifdef __wasi_cooperative_threads__ /* WASI has no CPU scheduling support. */
 int pthread_getschedparam(pthread_t, int *__restrict, struct sched_param *__restrict);
 int pthread_setschedparam(pthread_t, int, const struct sched_param *);
 #endif
@@ -177,7 +186,7 @@ int pthread_attr_getscope(const pthread_attr_t *__restrict, int *__restrict);
 int pthread_attr_setscope(pthread_attr_t *, int);
 int pthread_attr_getschedpolicy(const pthread_attr_t *__restrict, int *__restrict);
 int pthread_attr_setschedpolicy(pthread_attr_t *, int);
-#ifdef __wasilibc_unmodified_upstream /* WASI has no CPU scheduling support. */
+#ifdef __wasi_cooperative_threads__ /* WASI has no CPU scheduling support. */
 int pthread_attr_getschedparam(const pthread_attr_t *__restrict, struct sched_param *__restrict);
 int pthread_attr_setschedparam(pthread_attr_t *__restrict, const struct sched_param *__restrict);
 #endif

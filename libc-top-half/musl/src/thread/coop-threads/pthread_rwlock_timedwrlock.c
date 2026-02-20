@@ -31,4 +31,3 @@ int __pthread_rwlock_timedwrlock(pthread_rwlock_t *restrict rw, const struct tim
 	return 0;
 }
 
-#endif

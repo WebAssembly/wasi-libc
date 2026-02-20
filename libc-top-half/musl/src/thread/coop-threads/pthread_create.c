@@ -174,12 +174,6 @@ int __pthread_create(pthread_t *restrict res,
   self = __pthread_self();
   
   if (!libc.threaded) {
-    for (FILE *f = *__ofl_lock(); f; f = f->next)
-      init_file_lock(f);
-    __ofl_unlock();
-    init_file_lock(__stdin_used);
-    init_file_lock(__stdout_used);
-    init_file_lock(__stderr_used);
     self->tsd = (void **)__pthread_tsd_main;
     libc.threaded = 1;
   }

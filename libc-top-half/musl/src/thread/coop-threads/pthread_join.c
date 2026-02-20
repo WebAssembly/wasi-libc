@@ -22,6 +22,11 @@ static int __pthread_timedjoin_np(pthread_t t, void **res, const struct timespec
 		return ETIMEDOUT;
 	}
 	
+    if (t->joiner_waiters) {
+        // Only one thread can wait to join at a time
+        return EINVAL;
+    }
+
 	__waitlist_wait_on(&t->joiner_waiters);
 
 	if (res) *res = t->result;

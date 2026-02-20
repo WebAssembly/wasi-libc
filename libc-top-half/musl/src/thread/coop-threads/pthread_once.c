@@ -3,7 +3,7 @@ enum {
     PTHREAD_ONCE_STATE_NOT_RUN = 0,
     PTHREAD_ONCE_STATE_RUNNING = 1,
     PTHREAD_ONCE_STATE_COMPLETED = 2
-}
+};
 
 static struct {
 	pthread_once_t *control;

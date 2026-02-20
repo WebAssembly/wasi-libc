@@ -6,7 +6,7 @@ int vdprintf(int fd, const char *restrict fmt, va_list ap)
 		.fd = fd, .lbf = EOF, .write = __stdio_write,
 		.buf = (void *)fmt, .buf_size = 0,
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-		.lock = -1
+		.lock = __STDIO_LOCK_INIT,
 #endif
 	};
 	return vfprintf(&f, fmt, ap);

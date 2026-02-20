@@ -14,9 +14,17 @@ extern "C" {
 
 #define SEM_FAILED ((sem_t *)0)
 
+#ifdef __wasi_cooperative_threads__
+struct __waitlist_node;
+typedef struct {
+	int __count;
+	struct __waitlist_node *__waiters;
+} sem_t;
+#else
 typedef struct {
 	volatile int __val[4*sizeof(long)/sizeof(int)];
 } sem_t;
+#endif
 
 int    sem_close(sem_t *);
 int    sem_destroy(sem_t *);

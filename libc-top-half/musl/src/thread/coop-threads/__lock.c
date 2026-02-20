@@ -1,5 +1,6 @@
 #include "pthread_impl.h"
 #include "lock.h"
+#include <wasi/api.h>
 
 #ifndef __wasip3__
 #error "Unknown WASI version"

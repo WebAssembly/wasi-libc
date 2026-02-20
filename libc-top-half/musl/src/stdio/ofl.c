@@ -10,11 +10,11 @@ __lock_t *const __stdio_ofl_lockptr = ofl_lock;
 
 FILE **__ofl_lock()
 {
-	STRONG_LOCK(ofl_lock);
+	LOCK(ofl_lock);
 	return &ofl_head;
 }
 
 void __ofl_unlock()
 {
-	STRONG_UNLOCK(ofl_lock);
+	UNLOCK(ofl_lock);
 }

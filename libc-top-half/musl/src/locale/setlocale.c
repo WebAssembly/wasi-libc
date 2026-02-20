@@ -13,7 +13,7 @@ char *setlocale(int cat, const char *name)
 
 	if ((unsigned)cat > LC_ALL) return 0;
 
-	STRONG_LOCK(__locale_lock);
+	LOCK(__locale_lock);
 
 	/* For LC_ALL, setlocale is required to return a string which
 	 * encodes the current setting for all categories. The format of
@@ -35,7 +35,7 @@ char *setlocale(int cat, const char *name)
 				}
 				lm = __get_locale(i, part);
 				if (lm == LOC_MAP_FAILED) {
-					STRONG_UNLOCK(__locale_lock);
+					UNLOCK(__locale_lock);
 					return 0;
 				}
 				tmp_locale.cat[i] = lm;
@@ -56,14 +56,14 @@ char *setlocale(int cat, const char *name)
 			s += l+1;
 		}
 		*--s = 0;
-		STRONG_UNLOCK(__locale_lock);
+		UNLOCK(__locale_lock);
 		return same==LC_ALL ? (char *)part : buf;
 	}
 
 	if (name) {
 		lm = __get_locale(cat, name);
 		if (lm == LOC_MAP_FAILED) {
-			STRONG_UNLOCK(__locale_lock);
+			UNLOCK(__locale_lock);
 			return 0;
 		}
 		libc.global_locale.cat[cat] = lm;
@@ -72,7 +72,7 @@ char *setlocale(int cat, const char *name)
 	}
 	char *ret = lm ? (char *)lm->name : "C";
 
-	STRONG_UNLOCK(__locale_lock);
+	UNLOCK(__locale_lock);
 
 	return ret;
 }

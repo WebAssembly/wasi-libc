@@ -9,13 +9,13 @@ int __lockfile(FILE *f)
 	if (f->lock.owner == __pthread_self()->tid)
 		return 0;
 
-	STRONG_LOCK(&f->lock);
+	LOCK(&f->lock);
 	return 1;
 }
 
 void __unlockfile(FILE *f)
 {
-	STRONG_UNLOCK(&f->lock);
+	UNLOCK(&f->lock);
 }
 #else
 int __lockfile(FILE *f)

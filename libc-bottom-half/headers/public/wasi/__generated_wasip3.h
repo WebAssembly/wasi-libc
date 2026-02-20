@@ -914,7 +914,7 @@ extern bool environment_get_initial_cwd(wasip3_string_t *ret);
 
 // Imported Functions from `wasi:cli/exit@0.3.0-rc-2025-09-16`
 // Exit the current instance and any linked instances.
-_Noreturn extern void exit_exit(exit_result_void_void_t *status);
+extern void exit_exit(exit_result_void_void_t *status);
 
 // Imported Functions from `wasi:cli/stdin@0.3.0-rc-2025-09-16`
 // Return a stream for reading from stdin.

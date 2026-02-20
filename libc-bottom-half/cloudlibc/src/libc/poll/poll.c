@@ -287,8 +287,11 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
 
 #elif defined(__wasip3__)
 
+#include <stdlib.h>
+
 static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
-  // TODO(wasip3)
+  // TODO(wasip3): `abort()` is here temporarily to avoid timeouts in tests
+  abort();
   errno = ENOTSUP;
   return -1;
 }

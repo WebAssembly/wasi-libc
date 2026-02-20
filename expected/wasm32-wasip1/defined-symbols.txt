@@ -75,6 +75,7 @@ __ftello
 __ftello_unlocked
 __funcs_on_exit
 __funcs_on_quick_exit
+__futexwait
 __futimesat
 __fwritable
 __fwritex
@@ -285,6 +286,7 @@ __uflow
 __unlist_locked_file
 __uselocale
 __utc
+__wait
 __wasi_args_get
 __wasi_args_sizes_get
 __wasi_clock_res_get

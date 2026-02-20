@@ -26,7 +26,7 @@ static int slot;
 
 // All locks here can be weak, because the locking is only needed to protect against
 // concurrent manipulation of the handler table, which hits no context switch points.
-__lock_t lock[1];
+static __lock_t lock[1];
 __lock_t *const __atexit_lockptr = lock;
 #endif
 

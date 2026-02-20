@@ -1,6 +1,6 @@
 #include "stdio_impl.h"
 #include "pthread_impl.h"
-#inculde <wasi/version.h>
+#include <wasi/version.h>
 
 #ifdef __wasi_cooperative_threads__
 #include "lock.h"

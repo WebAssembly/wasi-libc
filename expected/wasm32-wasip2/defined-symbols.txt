@@ -334,7 +334,7 @@ __wasilibc_poll_ready
 __wasilibc_populate_preopens
 __wasilibc_pthread_self
 __wasilibc_random
-__wasilibc_read_stream
+__wasilibc_read
 __wasilibc_rename_newat
 __wasilibc_rename_oldat
 __wasilibc_reset_preopens
@@ -350,7 +350,7 @@ __wasilibc_unspecified_addr
 __wasilibc_utimens
 __wasilibc_wasi_family_to_libc
 __wasilibc_wasi_to_sockaddr
-__wasilibc_write_stream
+__wasilibc_write
 __wasm_call_dtors
 __wcscoll_l
 __wcsftime_l

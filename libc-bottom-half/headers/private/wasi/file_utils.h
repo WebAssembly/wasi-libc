@@ -65,18 +65,16 @@ static int fd_to_file_handle(int fd, filesystem_borrow_descriptor_t* result) {
 #endif
 
 #ifdef __wasip2__
-// Gets an `output-stream` borrow from the `fd` provided.
-int __wasilibc_write_stream(int fd,
-                            streams_borrow_output_stream_t *out,
-                            off_t **off,
-                            poll_borrow_pollable_t *pollable);
-
-// Gets an `input-stream` borrow from the `fd` provided.
-int __wasilibc_read_stream(int fd,
-                           streams_borrow_input_stream_t *out,
-                           off_t **off,
-                           poll_borrow_pollable_t *pollable);
+// Reads from `read` into `buf`/`len`
+//
+// This perform the read configured by `read`, e.g. whether it's blocking or
+// not, and places the result in the specified buffer. Used to implement
+// `read` and `recvfrom`, for example.
+ssize_t __wasilibc_read(wasip2_read_t *read, void *buf, size_t len);
+// Same as `__wasilibc_read`, but for writes.
+ssize_t __wasilibc_write(wasip2_write_t *write, const void *buf, size_t len);
 #endif
+
 #ifdef __wasip3__
 int __wasilibc_write_stream3(int fildes, wasip3_write_t **write_end, off_t **off);
 int __wasilibc_read_stream3(int fildes, filesystem_tuple2_stream_u8_future_result_void_error_code_t **stream, off_t **off);

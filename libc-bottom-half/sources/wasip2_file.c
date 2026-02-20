@@ -54,10 +54,7 @@ static void file_free(void *data) {
   free(file);
 }
 
-static int file_get_read_stream(void *data,
-                                streams_borrow_input_stream_t *out_stream,
-                                off_t **out_offset,
-                                poll_own_pollable_t **out_pollable) {
+static int file_get_read_stream(void *data, wasip2_read_t *read) {
   file_t *file = (file_t *)data;
   if (file->read_stream.__handle == 0) {
     filesystem_error_code_t error_code;
@@ -69,18 +66,15 @@ static int file_get_read_stream(void *data,
       return -1;
     }
   }
-  *out_stream = streams_borrow_input_stream(file->read_stream);
-  if (out_offset)
-    *out_offset = &file->offset;
-  if (out_pollable)
-    *out_pollable = &file->read_pollable;
+  read->input = streams_borrow_input_stream(file->read_stream);
+  read->offset = &file->offset;
+  read->pollable = &file->read_pollable;
+  read->timeout = 0;
+  read->blocking = true;
   return 0;
 }
 
-static int file_get_write_stream(void *data,
-                                 streams_borrow_output_stream_t *out_stream,
-                                 off_t **out_offset,
-                                 poll_own_pollable_t **out_pollable) {
+static int file_get_write_stream(void *data, wasip2_write_t *write) {
   file_t *file = (file_t *)data;
   if (file->write_stream.__handle == 0) {
     filesystem_error_code_t error_code;
@@ -100,11 +94,11 @@ static int file_get_write_stream(void *data,
       return -1;
     }
   }
-  *out_stream = streams_borrow_output_stream(file->write_stream);
-  if (out_offset)
-    *out_offset = &file->offset;
-  if (out_pollable)
-    *out_pollable = &file->write_pollable;
+  write->output = streams_borrow_output_stream(file->write_stream);
+  write->offset = &file->offset;
+  write->pollable = &file->write_pollable;
+  write->timeout = 0;
+  write->blocking = true;
   return 0;
 }
 

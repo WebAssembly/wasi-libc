@@ -109,11 +109,7 @@ int __wasilibc_tcp_getsockopt(void *data, int level, int optname,
                                                              &result, &error))
         return __wasilibc_socket_error_to_errno(error);
 
-      if (result > INT_MAX) {
-        abort();
-      }
-
-      value = result;
+      value = result > INT_MAX ? INT_MAX : result;
       break;
     }
     case SO_SNDBUF: {
@@ -122,11 +118,7 @@ int __wasilibc_tcp_getsockopt(void *data, int level, int optname,
                                                           &result, &error))
         return __wasilibc_socket_error_to_errno(error);
 
-      if (result > INT_MAX) {
-        abort();
-      }
-
-      value = result;
+      value = result > INT_MAX ? INT_MAX : result;
       break;
     }
     case SO_REUSEADDR:
@@ -216,11 +208,7 @@ int __wasilibc_tcp_getsockopt(void *data, int level, int optname,
                       // because 0 is an invalid value for this socket option.
       }
 
-      if (result_s > INT_MAX) {
-        abort();
-      }
-
-      value = result_s;
+      value = result_s > INT_MAX ? INT_MAX : result_s;
       break;
     }
     case TCP_KEEPINTVL: {
@@ -235,11 +223,7 @@ int __wasilibc_tcp_getsockopt(void *data, int level, int optname,
                       // because 0 is an invalid value for this socket option.
       }
 
-      if (result_s > INT_MAX) {
-        abort();
-      }
-
-      value = result_s;
+      value = result_s > INT_MAX ? INT_MAX : result_s;
       break;
     }
     case TCP_KEEPCNT: {
@@ -248,11 +232,7 @@ int __wasilibc_tcp_getsockopt(void *data, int level, int optname,
                                                           &result, &error))
         return __wasilibc_socket_error_to_errno(error);
 
-      if (result > INT_MAX) {
-        abort();
-      }
-
-      value = result;
+      value = result > INT_MAX ? INT_MAX : result;
       break;
     }
     default:

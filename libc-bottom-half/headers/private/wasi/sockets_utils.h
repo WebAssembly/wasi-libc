@@ -55,21 +55,36 @@ typedef enum {
 network_borrow_network_t __wasi_sockets_utils__borrow_network();
 #endif
 
-int __wasi_sockets_utils__map_error(sockets_error_code_t wasi_error);
-bool __wasi_sockets_utils__parse_address(
+int __wasilibc_map_socket_error(sockets_error_code_t wasi_error);
+
+static inline int __wasilibc_socket_error_to_errno(sockets_error_code_t wasi_error) {
+  errno = __wasilibc_map_socket_error(wasi_error);
+  return -1;
+}
+
+// Conversion from a libc-based `sockaddr` + `socklen_t` to a WASI address.
+int __wasilibc_sockaddr_to_wasi(
 	sockets_ip_address_family_t expected_family,
 	const struct sockaddr *address, socklen_t len,
-	sockets_ip_socket_address_t *result, int *error);
-bool __wasi_sockets_utils__output_addr_validate(
+	sockets_ip_socket_address_t *result);
+
+// Conversion from a WASI address to a libc-based `sockaddr`.
+//
+// This is done in two stages. First the user-provided `sockaddr` is validated
+// along with its lenght to ensure it's large enough to hold `expected_family`.
+// Next once the address is available `__wasilibc_wasi_to_sockaddr` is used
+// to write the output value.
+int __wasilibc_sockaddr_validate(
 	sockets_ip_address_family_t expected_family, struct sockaddr *addr,
 	socklen_t *addrlen, output_sockaddr_t *result);
-void __wasi_sockets_utils__output_addr_write(
+void __wasilibc_wasi_to_sockaddr(
 	const sockets_ip_socket_address_t input, output_sockaddr_t *output);
-int __wasi_sockets_utils__posix_family(sockets_ip_address_family_t wasi_family);
-sockets_ip_socket_address_t __wasi_sockets_utils__any_addr(sockets_ip_address_family_t family);
-int __wasi_sockets_utils__parse_port(const char *port);
-const service_entry_t *__wasi_sockets_utils__get_service_entry_by_name(const char *name);
-const service_entry_t *__wasi_sockets_utils__get_service_entry_by_port(const uint16_t port);
+
+int __wasilibc_wasi_family_to_libc(sockets_ip_address_family_t wasi_family);
+void __wasilibc_unspecified_addr(sockets_ip_address_family_t family, sockets_ip_socket_address_t *out);
+int __wasilibc_parse_port(const char *port);
+const service_entry_t *__wasilibc_get_service_entry_by_name(const char *name);
+const service_entry_t *__wasilibc_get_service_entry_by_port(const uint16_t port);
 
 #endif // not(__wasip1__)
 

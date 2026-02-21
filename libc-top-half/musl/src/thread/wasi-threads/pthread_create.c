@@ -349,7 +349,9 @@ weak_alias(dummy_file, __stderr_used);
 
 static void init_file_lock(FILE *f)
 {
+#ifndef __wasi_cooperative_threads__
 	if (f && f->lock<0) f->lock = 0;
+#endif
 }
 
 int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict attrp, void *(*entry)(void *), void *restrict arg)

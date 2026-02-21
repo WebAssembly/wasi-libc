@@ -19,6 +19,7 @@ extern "C" {
 #define SEEK_HOLE 4
 #else
 #include <__header_unistd.h>
+#include <wasi/version.h> // for pipe availability
 #endif
 
 #ifdef __wasilibc_unmodified_upstream /* Use the compiler's definition of NULL */
@@ -45,7 +46,7 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no pipe */
+#if defined(__wasilibc_unmodified_upstream) || defined(__wasip3__) /* WASI<0.3 has no pipe */
 int pipe(int [2]);
 int pipe2(int [2], int);
 #endif

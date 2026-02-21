@@ -41,7 +41,7 @@ int vsnprintf(char *restrict s, size_t n, const char *restrict fmt, va_list ap)
 		.lbf = EOF,
 		.write = sn_write,
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-		.lock = -1,
+		.lock = __STDIO_LOCK_INIT,
 #endif
 		.buf = buf,
 		.cookie = &c,

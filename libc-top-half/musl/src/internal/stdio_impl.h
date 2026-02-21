@@ -84,8 +84,9 @@ extern hidden FILE *volatile __stdout_used;
 extern hidden FILE *volatile __stderr_used;
 
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-hidden int __lockfile(FILE *);
-hidden void __unlockfile(FILE *);
+// Needs to be unhidden because they're used by the emulated signal implementation
+int __lockfile(FILE *);
+void __unlockfile(FILE *);
 #endif
 
 hidden size_t __stdio_read(FILE *, unsigned char *, size_t);

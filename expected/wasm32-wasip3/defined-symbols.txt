@@ -1478,6 +1478,7 @@ wasip3_option_string_free
 wasip3_string_dup
 wasip3_string_dup_n
 wasip3_string_free
+wasip3_string_from_c
 wasip3_string_set
 wasip3_subtask_block_on
 wasip3_subtask_cancel

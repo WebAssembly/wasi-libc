@@ -24,8 +24,8 @@ static int i = 3;
 static int j = 0;
 static uint32_t *x = init+1;
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-static volatile int lock[1];
-volatile int *const __random_lockptr = lock;
+static __lock_t lock[1];
+__lock_t *const __random_lockptr = lock;
 #endif
 
 static uint32_t lcg31(uint32_t x) {
@@ -67,9 +67,11 @@ static void __srandom(unsigned seed) {
 }
 
 void srandom(unsigned seed) {
-	LOCK(lock);
+	// The random number generator does not hit any context switch points, 
+	// so we can use weak locks here.
+	WEAK_LOCK(lock);
 	__srandom(seed);
-	UNLOCK(lock);
+	WEAK_UNLOCK(lock);
 }
 
 char *initstate(unsigned seed, char *state, size_t size) {
@@ -77,7 +79,7 @@ char *initstate(unsigned seed, char *state, size_t size) {
 
 	if (size < 8)
 		return 0;
-	LOCK(lock);
+	WEAK_LOCK(lock);
 	old = savestate();
 	if (size < 32)
 		n = 0;
@@ -92,24 +94,24 @@ char *initstate(unsigned seed, char *state, size_t size) {
 	x = (uint32_t*)state + 1;
 	__srandom(seed);
 	savestate();
-	UNLOCK(lock);
+	WEAK_UNLOCK(lock);
 	return old;
 }
 
 char *setstate(char *state) {
 	void *old;
 
-	LOCK(lock);
+	WEAK_LOCK(lock);
 	old = savestate();
 	loadstate((uint32_t*)state);
-	UNLOCK(lock);
+	WEAK_UNLOCK(lock);
 	return old;
 }
 
 long random(void) {
 	long k;
 
-	LOCK(lock);
+	WEAK_LOCK(lock);
 	if (n == 0) {
 		k = x[0] = lcg31(x[0]);
 		goto end;
@@ -121,6 +123,6 @@ long random(void) {
 	if (++j == n)
 		j = 0;
 end:
-	UNLOCK(lock);
+	WEAK_UNLOCK(lock);
 	return k;
 }

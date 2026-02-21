@@ -12,6 +12,7 @@
 #include "libc.h"
 #include "atomic.h"
 #include "syscall.h"
+#include <wasi/api.h>
 
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 volatile int __thread_list_lock;
@@ -97,7 +98,14 @@ int __init_tp(void *p)
 	td->stack = bounds.base;
 	td->stack_size = bounds.size;
 	td->guard_size = 0;
-#ifdef _REENTRANT
+#ifdef __wasi_cooperative_threads__
+	td->detach_state = DT_JOINABLE;
+	#ifdef __wasip3__
+	td->tid = wasip3_thread_index();
+	#else
+	#error "Unknown WASI version"
+	#endif
+#elif defined(_REENTRANT)
 	td->detach_state = DT_JOINABLE;
 	/*
 	 * Initialize the TID to a value which doesn't conflict with

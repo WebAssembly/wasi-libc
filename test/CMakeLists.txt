@@ -126,6 +126,7 @@ function(register_test test_name executable_name)
   endif()
   if (WASI STREQUAL "p3")
     list(APPEND wasmtime_args --wasm component-model-async)
+    list(APPEND wasmtime_args --wasm component-model-threading)
     list(APPEND wasmtime_args --wasi p3)
   endif()
 

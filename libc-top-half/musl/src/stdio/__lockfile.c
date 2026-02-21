@@ -1,6 +1,24 @@
 #include "stdio_impl.h"
 #include "pthread_impl.h"
+#include <wasi/version.h>
 
+#ifdef __wasi_cooperative_threads__
+#include "lock.h"
+int __lockfile(FILE *f)
+{
+	// Allow recursive locking
+	if (f->lock.owner == __pthread_self()->tid)
+		return 0;
+
+	LOCK(&f->lock);
+	return 1;
+}
+
+void __unlockfile(FILE *f)
+{
+	UNLOCK(&f->lock);
+}
+#else
 int __lockfile(FILE *f)
 {
 	int owner = f->lock, tid = __pthread_self()->tid;
@@ -21,3 +39,4 @@ void __unlockfile(FILE *f)
 	if (a_swap(&f->lock, 0) & MAYBE_WAITERS)
 		__wake(&f->lock, 1, 1);
 }
+#endif

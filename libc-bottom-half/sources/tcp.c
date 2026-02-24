@@ -421,7 +421,8 @@ static int tcp_getsockname(void *data, struct sockaddr *addr,
   return 0;
 }
 
-int tcp_getpeername(void *data, struct sockaddr *addr, socklen_t *addrlen) {
+static int tcp_getpeername(void *data, struct sockaddr *addr,
+                           socklen_t *addrlen) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
   output_sockaddr_t output_addr;
   if (__wasilibc_sockaddr_validate(socket->family, addr, addrlen,
@@ -853,9 +854,8 @@ static int tcp_fcntl_setfl(void *data, int flags) {
   return 0;
 }
 
-int __wasilibc_tcp_getsockopt(void *data, int level, int optname,
-                              void *restrict optval,
-                              socklen_t *restrict optlen) {
+static int tcp_getsockopt(void *data, int level, int optname,
+                          void *restrict optval, socklen_t *restrict optlen) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
   int value = 0;
 
@@ -1056,8 +1056,8 @@ int __wasilibc_tcp_getsockopt(void *data, int level, int optname,
   return 0;
 }
 
-int __wasilibc_tcp_setsockopt(void *data, int level, int optname,
-                              const void *optval, socklen_t optlen) {
+static int tcp_setsockopt(void *data, int level, int optname,
+                          const void *optval, socklen_t optlen) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
   int intval = *(int *)optval;
 
@@ -1245,8 +1245,8 @@ static descriptor_vtable_t tcp_vtable = {
     .sendto = tcp_sendto,
     .shutdown = tcp_shutdown,
 #endif // __wasip2__
-    .getsockopt = __wasilibc_tcp_getsockopt,
-    .setsockopt = __wasilibc_tcp_setsockopt,
+    .getsockopt = tcp_getsockopt,
+    .setsockopt = tcp_setsockopt,
 
 #ifdef __wasip2__
     .poll_register = tcp_poll_register,

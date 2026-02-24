@@ -339,8 +339,6 @@ __wasilibc_rmdirat
 __wasilibc_sockaddr_to_wasi
 __wasilibc_sockaddr_validate
 __wasilibc_stat
-__wasilibc_tcp_getsockopt
-__wasilibc_tcp_setsockopt
 __wasilibc_tell
 __wasilibc_unlinkat
 __wasilibc_unspecified_addr

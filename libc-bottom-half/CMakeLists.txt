@@ -145,7 +145,7 @@ else()
     sources/socket.c
     sources/sockets_utils.c
     sources/sockopt.c
-    sources/tcp_sockopt.c
+    sources/tcp.c
   )
 endif()
 
@@ -156,7 +156,6 @@ if(WASI STREQUAL "p2")
     sources/wasip2_file.c
     sources/wasip2_file_utils.c
     sources/wasip2_stdio.c
-    sources/wasip2_tcp.c
     sources/wasip2_udp.c
   )
 endif()
@@ -168,7 +167,6 @@ if (WASI STREQUAL "p3")
     sources/wasip3_file.c
     sources/wasip3_file_utils.c
     sources/wasip3_stdio.c
-    sources/wasip3_tcp.c
     sources/wasip3_udp.c
   )
 endif()

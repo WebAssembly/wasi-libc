@@ -1394,6 +1394,7 @@ tanh
 tanhf
 tanhl
 tanl
+tcp_getpeername
 tdelete
 tdestroy
 telldir

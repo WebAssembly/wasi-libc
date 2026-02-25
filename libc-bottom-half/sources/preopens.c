@@ -21,6 +21,12 @@
 #include <wasi/file_utils.h>
 #endif
 
+/// Access to the the above preopen must be protected in the presence of
+/// threads.
+#ifdef _REENTRANT
+static __lock_t lock[1];
+#endif
+
 #if defined(__wasip1__)
 typedef struct {
   __wasi_fd_t fd;
@@ -95,12 +101,6 @@ static _Atomic _Bool preopens_populated = false;
 static preopen *preopens;
 static size_t num_preopens;
 static size_t preopen_capacity;
-
-/// Access to the the above preopen must be protected in the presence of
-/// threads.
-#ifdef _REENTRANT
-static volatile int lock[1];
-#endif
 
 #ifdef NDEBUG
 #define assert_invariants() // assertions disabled

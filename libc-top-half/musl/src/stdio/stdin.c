@@ -12,7 +12,7 @@ hidden FILE __stdin_FILE = {
 	.seek = __stdio_seek,
 	.close = __stdio_close,
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-	.lock = -1,
+	.lock = __STDIO_LOCK_INIT,
 #endif
 };
 FILE *const stdin = &__stdin_FILE;

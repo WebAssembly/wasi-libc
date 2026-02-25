@@ -44,7 +44,7 @@ int vswprintf(wchar_t *restrict s, size_t n, const wchar_t *restrict fmt, va_lis
 		.lbf = EOF,
 		.write = sw_write,
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-		.lock = -1,
+		.lock = __STDIO_LOCK_INIT,
 #endif
 		.buf = buf,
 		.buf_size = sizeof buf,

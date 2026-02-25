@@ -473,6 +473,15 @@ else()
   )
 endif()
 
+# Cooperative threading lock/waiting primitives
+if (WASI STREQUAL "p3")
+  list(APPEND top_half_sources
+    musl/src/stdio/__lockfile.c
+    musl/src/thread/coop-threads/__lock.c
+    musl/src/thread/coop-threads/__wait.c
+  )
+endif()
+
 add_object_library(top-half ${top_half_sources})
 foreach(obj top-half-shared top-half-static)
   target_link_libraries(${obj} PUBLIC musl-top-half-interface)

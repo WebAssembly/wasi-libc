@@ -31,8 +31,8 @@ static const char envvars[][12] = {
 };
 
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-volatile int __locale_lock[1];
-volatile int *const __locale_lockptr = __locale_lock;
+__lock_t __locale_lock[1];
+__lock_t *const __locale_lockptr = __locale_lock;
 #endif
 
 const struct __locale_map *__get_locale(int cat, const char *val)

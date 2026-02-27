@@ -122,7 +122,7 @@ static void tcp_free(void *data) {
 }
 
 #ifdef __wasip2__
-static int tcp_get_read_stream(void *data, wasip2_read_t *read) {
+static int tcp_get_read_stream(void *data, wasi_read_t *read) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
 
   if (tcp->state.tag != TCP_SOCKET_STATE_CONNECTED) {
@@ -137,7 +137,7 @@ static int tcp_get_read_stream(void *data, wasip2_read_t *read) {
   return 0;
 }
 
-static int tcp_get_write_stream(void *data, wasip2_write_t *write) {
+static int tcp_get_write_stream(void *data, wasi_write_t *write) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
 
   if (tcp->state.tag != TCP_SOCKET_STATE_CONNECTED) {
@@ -531,7 +531,7 @@ static ssize_t tcp_recvfrom(void *data, void *buffer, size_t length, int flags,
     return -1;
   }
 
-  wasip2_read_t read;
+  wasi_read_t read;
   if (tcp_get_read_stream(data, &read) < 0)
     return -1;
 
@@ -555,7 +555,7 @@ static ssize_t tcp_sendto(void *data, const void *buffer, size_t length,
     return -1;
   }
 
-  wasip2_write_t write;
+  wasi_write_t write;
   if (tcp_get_write_stream(data, &write) < 0)
     return -1;
 

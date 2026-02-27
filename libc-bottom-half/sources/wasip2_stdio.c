@@ -36,7 +36,7 @@ static void stdio_free(void *data) {
   free(stdio);
 }
 
-static int stdio_get_read_stream(void *data, wasip2_read_t *read) {
+static int stdio_get_read_stream(void *data, wasi_read_t *read) {
   stdio_t *stdio = (stdio_t *)data;
   if (stdio->fd != 0) {
     errno = EOPNOTSUPP;
@@ -52,7 +52,7 @@ static int stdio_get_read_stream(void *data, wasip2_read_t *read) {
   return 0;
 }
 
-static int stdio_get_write_stream(void *data, wasip2_write_t *write) {
+static int stdio_get_write_stream(void *data, wasi_write_t *write) {
   stdio_t *stdio = (stdio_t *)data;
   if (stdio->output.__handle == 0) {
     if (stdio->fd == 1) {

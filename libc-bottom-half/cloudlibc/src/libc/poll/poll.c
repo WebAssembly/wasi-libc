@@ -216,7 +216,7 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
 
     if (pollfd->events & POLLRDNORM) {
       if (entry->vtable->get_read_stream) {
-        wasip2_read_t read;
+        wasi_read_t read;
         if (entry->vtable->get_read_stream(entry->data, &read) < 0)
           return -1;
         if (__wasilibc_poll_add_input_stream(&state, read.input, read.pollable) < 0)
@@ -229,7 +229,7 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
 
     if (pollfd->events & POLLWRNORM) {
       if (entry->vtable->get_write_stream) {
-        wasip2_write_t write;
+        wasi_write_t write;
         if (entry->vtable->get_write_stream(entry->data, &write) < 0)
           return -1;
         if (__wasilibc_poll_add_output_stream(&state, write.output, write.pollable) < 0)

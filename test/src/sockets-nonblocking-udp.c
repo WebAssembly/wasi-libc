@@ -59,12 +59,15 @@ void test_udp_client() {
   int connect_result =
       connect(socket_fd, (struct sockaddr *)&sockaddr_in, sizeof(sockaddr_in));
   while (connect_result == -1) {
+    if (t_status)
+      exit(t_status);
+
     connect_result = connect(socket_fd, (struct sockaddr *)&sockaddr_in,
                              sizeof(sockaddr_in));
     if (connect_result == -1) {
       struct pollfd poll_fd = {
           .fd = socket_fd, .events = POLLWRNORM, .revents = 0};
-      poll(&poll_fd, 1, 100);
+      TEST(poll(&poll_fd, 1, 100) != -1);
     }
   }
 
@@ -104,12 +107,12 @@ void test_udp_client() {
   if (bytes_sent == -1) {
     struct pollfd poll_fd = {
         .fd = server_socket_fd, .events = POLLWRNORM, .revents = 0};
-    poll(&poll_fd, 1, 100);
+    TEST(poll(&poll_fd, 1, 100) != -1);
   }
   if (bytes_received == -1) {
     struct pollfd poll_fd = {
         .fd = socket_fd, .events = POLLRDNORM, .revents = 0};
-    poll(&poll_fd, 1, 100);
+    TEST(poll(&poll_fd, 1, 100) != -1);
     // Retry
     bytes_received = recv(socket_fd, client_buffer, BUFSIZE, 0);
   }

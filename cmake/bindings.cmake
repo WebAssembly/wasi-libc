@@ -117,6 +117,7 @@ add_custom_target(
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.get-flags"
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.open-at"
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.read-directory"
+      "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.create-directory-at"
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.remove-directory-at"
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.unlink-file-at"
       "--async=-wasi:clocks/monotonic-clock@${wasip3-version}#wait-until"

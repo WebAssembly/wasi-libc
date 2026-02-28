@@ -94,8 +94,8 @@ extern void __wasm_import_filesystem_method_descriptor_get_flags(int32_t, uint8_
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.get-type")))
 extern int32_t __wasm_import_filesystem_method_descriptor_get_type(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.set-size")))
-extern int32_t __wasm_import_filesystem_method_descriptor_set_size(int32_t, int64_t, uint8_t *);
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.set-size")))
+extern void __wasm_import_filesystem_method_descriptor_set_size(int32_t, int64_t, uint8_t *);
 
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.set-times")))
 extern int32_t __wasm_import_filesystem_method_descriptor_set_times(uint8_t *, uint8_t *);
@@ -1507,8 +1507,29 @@ wasip3_subtask_status_t filesystem_method_descriptor_get_type(filesystem_borrow_
   return __wasm_import_filesystem_method_descriptor_get_type((self).__handle, (uint8_t*) result);
 }
 
-wasip3_subtask_status_t filesystem_method_descriptor_set_size(filesystem_borrow_descriptor_t self, filesystem_filesize_t size, filesystem_result_void_error_code_t *result) {
-  return __wasm_import_filesystem_method_descriptor_set_size((self).__handle, (int64_t) (size), (uint8_t*) result);
+bool filesystem_method_descriptor_set_size(filesystem_borrow_descriptor_t self, filesystem_filesize_t size, filesystem_error_code_t *err) {
+  __attribute__((__aligned__(1)))
+  uint8_t ret_area[2];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_filesystem_method_descriptor_set_size((self).__handle, (int64_t) (size), ptr);
+  filesystem_result_void_error_code_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
 }
 
 wasip3_subtask_status_t filesystem_method_descriptor_set_times(filesystem_method_descriptor_set_times_args_t *args, filesystem_result_void_error_code_t *result) {

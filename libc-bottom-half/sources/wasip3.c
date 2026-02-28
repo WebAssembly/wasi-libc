@@ -82,8 +82,8 @@ extern int32_t __wasm_import_filesystem_method_descriptor_write_via_stream(int32
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.append-via-stream")))
 extern int32_t __wasm_import_filesystem_method_descriptor_append_via_stream(int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.advise")))
-extern int32_t __wasm_import_filesystem_method_descriptor_advise(int32_t, int64_t, int64_t, int32_t, uint8_t *);
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.advise")))
+extern void __wasm_import_filesystem_method_descriptor_advise(int32_t, int64_t, int64_t, int32_t, uint8_t *);
 
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.sync-data")))
 extern int32_t __wasm_import_filesystem_method_descriptor_sync_data(int32_t, uint8_t *);
@@ -1426,8 +1426,29 @@ wasip3_subtask_status_t filesystem_method_descriptor_append_via_stream(filesyste
   return __wasm_import_filesystem_method_descriptor_append_via_stream((self).__handle, ((int32_t) data), (uint8_t*) result);
 }
 
-wasip3_subtask_status_t filesystem_method_descriptor_advise(filesystem_borrow_descriptor_t self, filesystem_filesize_t offset, filesystem_filesize_t length, filesystem_advice_t advice, filesystem_result_void_error_code_t *result) {
-  return __wasm_import_filesystem_method_descriptor_advise((self).__handle, (int64_t) (offset), (int64_t) (length), (int32_t) advice, (uint8_t*) result);
+bool filesystem_method_descriptor_advise(filesystem_borrow_descriptor_t self, filesystem_filesize_t offset, filesystem_filesize_t length, filesystem_advice_t advice, filesystem_error_code_t *err) {
+  __attribute__((__aligned__(1)))
+  uint8_t ret_area[2];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_filesystem_method_descriptor_advise((self).__handle, (int64_t) (offset), (int64_t) (length), (int32_t) advice, ptr);
+  filesystem_result_void_error_code_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
 }
 
 wasip3_subtask_status_t filesystem_method_descriptor_sync_data(filesystem_borrow_descriptor_t self, filesystem_result_void_error_code_t *result) {

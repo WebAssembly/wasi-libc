@@ -30,7 +30,7 @@ int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
 
 #if defined(__wasip1__)
   return __wasi_fd_advise(fd, offset, len, advice);
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fd, &file_handle) < 0)
     return EBADF;
@@ -71,12 +71,6 @@ int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
     return errno;
   }
   return 0;
-#elif defined(__wasip3__)
-  (void) fd;
-  (void) advice;
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return ENOTSUP;
 #else
 # error "Unsupported WASI version"
 #endif

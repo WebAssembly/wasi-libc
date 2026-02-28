@@ -1066,7 +1066,7 @@ extern wasip3_subtask_status_t filesystem_method_descriptor_append_via_stream(fi
 // Provide file advisory information on a descriptor.
 // 
 // This is similar to `posix_fadvise` in POSIX.
-extern wasip3_subtask_status_t filesystem_method_descriptor_advise(filesystem_borrow_descriptor_t self, filesystem_filesize_t offset, filesystem_filesize_t length, filesystem_advice_t advice, filesystem_result_void_error_code_t *result);
+extern bool filesystem_method_descriptor_advise(filesystem_borrow_descriptor_t self, filesystem_filesize_t offset, filesystem_filesize_t length, filesystem_advice_t advice, filesystem_error_code_t *err);
 // Synchronize the data of a file to disk.
 // 
 // This function succeeds with no effect if the file descriptor is not

@@ -599,11 +599,6 @@ typedef struct filesystem_method_descriptor_rename_at_args {
   filesystem_borrow_descriptor_t new_descriptor;
   wasip3_string_t new_path;
 } filesystem_method_descriptor_rename_at_args_t;
-typedef struct filesystem_method_descriptor_symlink_at_args {
-  filesystem_borrow_descriptor_t self;
-  wasip3_string_t old_path;
-  wasip3_string_t new_path;
-} filesystem_method_descriptor_symlink_at_args_t;
 
 typedef filesystem_own_descriptor_t filesystem_preopens_own_descriptor_t;
 
@@ -1196,7 +1191,7 @@ extern wasip3_subtask_status_t filesystem_method_descriptor_rename_at(filesystem
 // `error-code::not-permitted`.
 // 
 // Note: This is similar to `symlinkat` in POSIX.
-extern wasip3_subtask_status_t filesystem_method_descriptor_symlink_at(filesystem_method_descriptor_symlink_at_args_t *args, filesystem_result_void_error_code_t *result);
+extern bool filesystem_method_descriptor_symlink_at(filesystem_borrow_descriptor_t self, wasip3_string_t *old_path, wasip3_string_t *new_path, filesystem_error_code_t *err);
 // Unlink a filesystem object that is not a directory.
 // 
 // Return `error-code::is-directory` if the path refers to a directory.

@@ -178,10 +178,16 @@ static int file_get_write_stream(void *data, wasi_write_t *write) {
   if (file->write == 0) {
     assert(file->write_subtask == 0);
     filesystem_stream_u8_t write_read = filesystem_stream_u8_new(&file->write);
-    wasip3_subtask_status_t status =
-        filesystem_method_descriptor_write_via_stream(
-            filesystem_borrow_descriptor(file->file_handle), write_read,
-            file->offset, &file->write_pending_result);
+    wasip3_subtask_status_t status;
+    if (file->oflag & O_APPEND) {
+      status = filesystem_method_descriptor_append_via_stream(
+          filesystem_borrow_descriptor(file->file_handle), write_read,
+          &file->write_pending_result);
+    } else {
+      status = filesystem_method_descriptor_write_via_stream(
+          filesystem_borrow_descriptor(file->file_handle), write_read,
+          file->offset, &file->write_pending_result);
+    }
     if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED)
       file->write_subtask = WASIP3_SUBTASK_HANDLE(status);
   }

@@ -1122,7 +1122,7 @@ extern void filesystem_method_descriptor_read_directory(filesystem_borrow_descri
 // opened for writing.
 // 
 // Note: This is similar to `fsync` in POSIX.
-extern wasip3_subtask_status_t filesystem_method_descriptor_sync(filesystem_borrow_descriptor_t self, filesystem_result_void_error_code_t *result);
+extern bool filesystem_method_descriptor_sync(filesystem_borrow_descriptor_t self, filesystem_error_code_t *err);
 // Create a directory.
 // 
 // Note: This is similar to `mkdirat` in POSIX.

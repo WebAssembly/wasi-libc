@@ -103,8 +103,8 @@ extern int32_t __wasm_import_filesystem_method_descriptor_set_times(uint8_t *, u
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.read-directory")))
 extern void __wasm_import_filesystem_method_descriptor_read_directory(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.sync")))
-extern int32_t __wasm_import_filesystem_method_descriptor_sync(int32_t, uint8_t *);
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.sync")))
+extern void __wasm_import_filesystem_method_descriptor_sync(int32_t, uint8_t *);
 
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.create-directory-at")))
 extern void __wasm_import_filesystem_method_descriptor_create_directory_at(int32_t, uint8_t *, size_t, uint8_t *);
@@ -1526,8 +1526,29 @@ void filesystem_method_descriptor_read_directory(filesystem_borrow_descriptor_t 
   };
 }
 
-wasip3_subtask_status_t filesystem_method_descriptor_sync(filesystem_borrow_descriptor_t self, filesystem_result_void_error_code_t *result) {
-  return __wasm_import_filesystem_method_descriptor_sync((self).__handle, (uint8_t*) result);
+bool filesystem_method_descriptor_sync(filesystem_borrow_descriptor_t self, filesystem_error_code_t *err) {
+  __attribute__((__aligned__(1)))
+  uint8_t ret_area[2];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_filesystem_method_descriptor_sync((self).__handle, ptr);
+  filesystem_result_void_error_code_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
 }
 
 bool filesystem_method_descriptor_create_directory_at(filesystem_borrow_descriptor_t self, wasip3_string_t *path, filesystem_error_code_t *err) {

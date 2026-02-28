@@ -574,18 +574,6 @@ typedef struct {
     filesystem_error_code_t err;
   } val;
 } filesystem_result_metadata_hash_value_error_code_t;
-typedef struct filesystem_method_descriptor_set_times_args {
-  filesystem_borrow_descriptor_t self;
-  filesystem_new_timestamp_t data_access_timestamp;
-  filesystem_new_timestamp_t data_modification_timestamp;
-} filesystem_method_descriptor_set_times_args_t;
-typedef struct filesystem_method_descriptor_set_times_at_args {
-  filesystem_borrow_descriptor_t self;
-  filesystem_path_flags_t path_flags;
-  wasip3_string_t path;
-  filesystem_new_timestamp_t data_access_timestamp;
-  filesystem_new_timestamp_t data_modification_timestamp;
-} filesystem_method_descriptor_set_times_at_args_t;
 
 typedef filesystem_own_descriptor_t filesystem_preopens_own_descriptor_t;
 
@@ -1084,7 +1072,7 @@ extern bool filesystem_method_descriptor_set_size(filesystem_borrow_descriptor_t
 // Note: This is similar to `futimens` in POSIX.
 // 
 // Note: This was called `fd_filestat_set_times` in earlier versions of WASI.
-extern wasip3_subtask_status_t filesystem_method_descriptor_set_times(filesystem_method_descriptor_set_times_args_t *args, filesystem_result_void_error_code_t *result);
+extern bool filesystem_method_descriptor_set_times(filesystem_borrow_descriptor_t self, filesystem_new_timestamp_t *data_access_timestamp, filesystem_new_timestamp_t *data_modification_timestamp, filesystem_error_code_t *err);
 // Read directory entries from a directory.
 // 
 // On filesystems where directories contain entries referring to themselves
@@ -1133,7 +1121,7 @@ extern bool filesystem_method_descriptor_stat_at(filesystem_borrow_descriptor_t 
 // 
 // Note: This was called `path_filestat_set_times` in earlier versions of
 // WASI.
-extern wasip3_subtask_status_t filesystem_method_descriptor_set_times_at(filesystem_method_descriptor_set_times_at_args_t *args, filesystem_result_void_error_code_t *result);
+extern bool filesystem_method_descriptor_set_times_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t *path, filesystem_new_timestamp_t *data_access_timestamp, filesystem_new_timestamp_t *data_modification_timestamp, filesystem_error_code_t *err);
 // Create a hard link.
 // 
 // Fails with `error-code::no-entry` if the old path does not exist,

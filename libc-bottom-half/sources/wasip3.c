@@ -97,8 +97,8 @@ extern int32_t __wasm_import_filesystem_method_descriptor_get_type(int32_t, uint
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.set-size")))
 extern void __wasm_import_filesystem_method_descriptor_set_size(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.set-times")))
-extern int32_t __wasm_import_filesystem_method_descriptor_set_times(uint8_t *, uint8_t *);
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.set-times")))
+extern void __wasm_import_filesystem_method_descriptor_set_times(int32_t, int32_t, int64_t, int32_t, int32_t, int64_t, int32_t, uint8_t *);
 
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.read-directory")))
 extern void __wasm_import_filesystem_method_descriptor_read_directory(int32_t, uint8_t *);
@@ -115,8 +115,8 @@ extern void __wasm_import_filesystem_method_descriptor_stat(int32_t, uint8_t *);
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.stat-at")))
 extern void __wasm_import_filesystem_method_descriptor_stat_at(int32_t, int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.set-times-at")))
-extern int32_t __wasm_import_filesystem_method_descriptor_set_times_at(uint8_t *, uint8_t *);
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.set-times-at")))
+extern void __wasm_import_filesystem_method_descriptor_set_times_at(int32_t, int32_t, uint8_t *, size_t, int32_t, int64_t, int32_t, int32_t, int64_t, int32_t, uint8_t *);
 
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.link-at")))
 extern void __wasm_import_filesystem_method_descriptor_link_at(int32_t, int32_t, uint8_t *, size_t, int32_t, uint8_t *, size_t, uint8_t *);
@@ -1532,8 +1532,77 @@ bool filesystem_method_descriptor_set_size(filesystem_borrow_descriptor_t self, 
   }
 }
 
-wasip3_subtask_status_t filesystem_method_descriptor_set_times(filesystem_method_descriptor_set_times_args_t *args, filesystem_result_void_error_code_t *result) {
-  return __wasm_import_filesystem_method_descriptor_set_times((uint8_t*) args, (uint8_t*) result);
+bool filesystem_method_descriptor_set_times(filesystem_borrow_descriptor_t self, filesystem_new_timestamp_t *data_access_timestamp, filesystem_new_timestamp_t *data_modification_timestamp, filesystem_error_code_t *err) {
+  __attribute__((__aligned__(1)))
+  uint8_t ret_area[2];
+  int32_t variant;
+  int64_t variant2;
+  int32_t variant3;
+  switch ((int32_t) (*data_access_timestamp).tag) {
+    case 0: {
+      variant = 0;
+      variant2 = 0;
+      variant3 = 0;
+      break;
+    }
+    case 1: {
+      variant = 1;
+      variant2 = 0;
+      variant3 = 0;
+      break;
+    }
+    case 2: {
+      const filesystem_instant_t *payload1 = &(*data_access_timestamp).val.timestamp;
+      variant = 2;
+      variant2 = (*payload1).seconds;
+      variant3 = (int32_t) ((*payload1).nanoseconds);
+      break;
+    }
+  }
+  int32_t variant7;
+  int64_t variant8;
+  int32_t variant9;
+  switch ((int32_t) (*data_modification_timestamp).tag) {
+    case 0: {
+      variant7 = 0;
+      variant8 = 0;
+      variant9 = 0;
+      break;
+    }
+    case 1: {
+      variant7 = 1;
+      variant8 = 0;
+      variant9 = 0;
+      break;
+    }
+    case 2: {
+      const filesystem_instant_t *payload6 = &(*data_modification_timestamp).val.timestamp;
+      variant7 = 2;
+      variant8 = (*payload6).seconds;
+      variant9 = (int32_t) ((*payload6).nanoseconds);
+      break;
+    }
+  }
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_filesystem_method_descriptor_set_times((self).__handle, variant, variant2, variant3, variant7, variant8, variant9, ptr);
+  filesystem_result_void_error_code_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
 }
 
 void filesystem_method_descriptor_read_directory(filesystem_borrow_descriptor_t self, filesystem_tuple2_stream_directory_entry_future_result_void_error_code_t *ret) {
@@ -1757,8 +1826,77 @@ bool filesystem_method_descriptor_stat_at(filesystem_borrow_descriptor_t self, f
   }
 }
 
-wasip3_subtask_status_t filesystem_method_descriptor_set_times_at(filesystem_method_descriptor_set_times_at_args_t *args, filesystem_result_void_error_code_t *result) {
-  return __wasm_import_filesystem_method_descriptor_set_times_at((uint8_t*) args, (uint8_t*) result);
+bool filesystem_method_descriptor_set_times_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t *path, filesystem_new_timestamp_t *data_access_timestamp, filesystem_new_timestamp_t *data_modification_timestamp, filesystem_error_code_t *err) {
+  __attribute__((__aligned__(1)))
+  uint8_t ret_area[2];
+  int32_t variant;
+  int64_t variant2;
+  int32_t variant3;
+  switch ((int32_t) (*data_access_timestamp).tag) {
+    case 0: {
+      variant = 0;
+      variant2 = 0;
+      variant3 = 0;
+      break;
+    }
+    case 1: {
+      variant = 1;
+      variant2 = 0;
+      variant3 = 0;
+      break;
+    }
+    case 2: {
+      const filesystem_instant_t *payload1 = &(*data_access_timestamp).val.timestamp;
+      variant = 2;
+      variant2 = (*payload1).seconds;
+      variant3 = (int32_t) ((*payload1).nanoseconds);
+      break;
+    }
+  }
+  int32_t variant7;
+  int64_t variant8;
+  int32_t variant9;
+  switch ((int32_t) (*data_modification_timestamp).tag) {
+    case 0: {
+      variant7 = 0;
+      variant8 = 0;
+      variant9 = 0;
+      break;
+    }
+    case 1: {
+      variant7 = 1;
+      variant8 = 0;
+      variant9 = 0;
+      break;
+    }
+    case 2: {
+      const filesystem_instant_t *payload6 = &(*data_modification_timestamp).val.timestamp;
+      variant7 = 2;
+      variant8 = (*payload6).seconds;
+      variant9 = (int32_t) ((*payload6).nanoseconds);
+      break;
+    }
+  }
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_filesystem_method_descriptor_set_times_at((self).__handle, path_flags, (uint8_t *) (*path).ptr, (*path).len, variant, variant2, variant3, variant7, variant8, variant9, ptr);
+  filesystem_result_void_error_code_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
 }
 
 bool filesystem_method_descriptor_link_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t old_path_flags, wasip3_string_t *old_path, filesystem_borrow_descriptor_t new_descriptor, wasip3_string_t *new_path, filesystem_error_code_t *err) {

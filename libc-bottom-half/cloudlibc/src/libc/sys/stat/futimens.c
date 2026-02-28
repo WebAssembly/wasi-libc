@@ -29,7 +29,7 @@ int futimens(int fd, const struct timespec *times) {
     errno = error;
     return -1;
   }
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fd, &file_handle) < 0)
@@ -52,12 +52,6 @@ int futimens(int fd, const struct timespec *times) {
     translate_error(error);
     return -1;
   }
-#elif defined(__wasip3__)
-  (void) fd;
-  (void) times;
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

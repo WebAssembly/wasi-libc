@@ -1144,7 +1144,7 @@ extern bool filesystem_method_descriptor_stat(filesystem_borrow_descriptor_t sel
 // discussion of alternatives.
 // 
 // Note: This was called `path_filestat_get` in earlier versions of WASI.
-extern wasip3_subtask_status_t filesystem_method_descriptor_stat_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t path, filesystem_result_descriptor_stat_error_code_t *result);
+extern bool filesystem_method_descriptor_stat_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t *path, filesystem_descriptor_stat_t *ret, filesystem_error_code_t *err);
 // Adjust the timestamps of a file or directory.
 // 
 // Note: This is similar to `utimensat` in POSIX.
@@ -1185,7 +1185,7 @@ extern wasip3_subtask_status_t filesystem_method_descriptor_readlink_at(filesyst
 // Return `error-code::not-empty` if the directory is not empty.
 // 
 // Note: This is similar to `unlinkat(fd, path, AT_REMOVEDIR)` in POSIX.
-extern wasip3_subtask_status_t filesystem_method_descriptor_remove_directory_at(filesystem_borrow_descriptor_t self, wasip3_string_t path, filesystem_result_void_error_code_t *result);
+extern bool filesystem_method_descriptor_remove_directory_at(filesystem_borrow_descriptor_t self, wasip3_string_t *path, filesystem_error_code_t *err);
 // Rename a filesystem object.
 // 
 // Note: This is similar to `renameat` in POSIX.
@@ -1201,7 +1201,7 @@ extern wasip3_subtask_status_t filesystem_method_descriptor_symlink_at(filesyste
 // 
 // Return `error-code::is-directory` if the path refers to a directory.
 // Note: This is similar to `unlinkat(fd, path, 0)` in POSIX.
-extern wasip3_subtask_status_t filesystem_method_descriptor_unlink_file_at(filesystem_borrow_descriptor_t self, wasip3_string_t path, filesystem_result_void_error_code_t *result);
+extern bool filesystem_method_descriptor_unlink_file_at(filesystem_borrow_descriptor_t self, wasip3_string_t *path, filesystem_error_code_t *err);
 // Test whether two descriptors refer to the same filesystem object.
 // 
 // In POSIX, this corresponds to testing whether the two descriptors have the

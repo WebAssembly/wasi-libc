@@ -1073,7 +1073,7 @@ extern bool filesystem_method_descriptor_advise(filesystem_borrow_descriptor_t s
 // opened for writing.
 // 
 // Note: This is similar to `fdatasync` in POSIX.
-extern wasip3_subtask_status_t filesystem_method_descriptor_sync_data(filesystem_borrow_descriptor_t self, filesystem_result_void_error_code_t *result);
+extern bool filesystem_method_descriptor_sync_data(filesystem_borrow_descriptor_t self, filesystem_error_code_t *err);
 // Get flags associated with a descriptor.
 // 
 // Note: This returns similar flags to `fcntl(fd, F_GETFL)` in POSIX.

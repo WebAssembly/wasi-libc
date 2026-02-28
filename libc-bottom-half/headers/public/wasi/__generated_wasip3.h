@@ -586,13 +586,6 @@ typedef struct filesystem_method_descriptor_set_times_at_args {
   filesystem_new_timestamp_t data_access_timestamp;
   filesystem_new_timestamp_t data_modification_timestamp;
 } filesystem_method_descriptor_set_times_at_args_t;
-typedef struct filesystem_method_descriptor_link_at_args {
-  filesystem_borrow_descriptor_t self;
-  filesystem_path_flags_t old_path_flags;
-  wasip3_string_t old_path;
-  filesystem_borrow_descriptor_t new_descriptor;
-  wasip3_string_t new_path;
-} filesystem_method_descriptor_link_at_args_t;
 typedef struct filesystem_method_descriptor_rename_at_args {
   filesystem_borrow_descriptor_t self;
   wasip3_string_t old_path;
@@ -1154,7 +1147,7 @@ extern wasip3_subtask_status_t filesystem_method_descriptor_set_times_at(filesys
 // `error-code::not-permitted` if the old path is not a file.
 // 
 // Note: This is similar to `linkat` in POSIX.
-extern wasip3_subtask_status_t filesystem_method_descriptor_link_at(filesystem_method_descriptor_link_at_args_t *args, filesystem_result_void_error_code_t *result);
+extern bool filesystem_method_descriptor_link_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t old_path_flags, wasip3_string_t *old_path, filesystem_borrow_descriptor_t new_descriptor, wasip3_string_t *new_path, filesystem_error_code_t *err);
 // Open a file or directory.
 // 
 // If `flags` contains `descriptor-flags::mutate-directory`, and the base

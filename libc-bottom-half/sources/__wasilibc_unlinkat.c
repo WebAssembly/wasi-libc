@@ -16,7 +16,7 @@ int __wasilibc_nocwd___wasilibc_unlinkat(int fd, const char *path) {
     return -1;
   }
   return 0;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Translate the file descriptor to an internal handle
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
   if (!entry)
@@ -33,7 +33,7 @@ int __wasilibc_nocwd___wasilibc_unlinkat(int fd, const char *path) {
     return -1;
 
   // Create a Wasm string from the path
-  wasip2_string_t wasi_path;
+  wasi_string_t wasi_path;
   if (wasi_string_from_c(path, &wasi_path) < 0)
     return -1;
 
@@ -47,12 +47,6 @@ int __wasilibc_nocwd___wasilibc_unlinkat(int fd, const char *path) {
   }
 
   return 0;
-#elif defined(__wasip3__)
-  (void)fd;
-  (void)path;
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
 #else
 #error "Unknown WASI version"
 #endif

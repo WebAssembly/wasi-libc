@@ -113,9 +113,12 @@ add_custom_target(
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.metadata-hash"
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.metadata-hash-at"
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.stat"
+      "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.stat-at"
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.get-flags"
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.open-at"
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.read-directory"
+      "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.remove-directory-at"
+      "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.unlink-file-at"
       "--async=-wasi:clocks/monotonic-clock@${wasip3-version}#wait-until"
       "--async=-wasi:clocks/monotonic-clock@${wasip3-version}#wait-for"
       ${CMAKE_SOURCE_DIR}/wasi/p3/wit

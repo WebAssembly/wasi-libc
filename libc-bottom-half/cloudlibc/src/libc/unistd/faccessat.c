@@ -55,7 +55,7 @@ int __wasilibc_nocwd_faccessat(int fd, const char *path, int amode, int flag) {
       return -1;
     }
   }
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Translate the file descriptor to an internal handle
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
@@ -63,7 +63,7 @@ int __wasilibc_nocwd_faccessat(int fd, const char *path, int amode, int flag) {
     return -1;
 
   // Convert the string into a WASI string
-  wasip2_string_t wasi_path;
+  wasi_string_t wasi_path;
   if (wasi_string_from_c(path, &wasi_path) < 0)
     return -1;
 
@@ -109,12 +109,6 @@ int __wasilibc_nocwd_faccessat(int fd, const char *path, int amode, int flag) {
       return -1;
     }
   }
-#elif defined(__wasip3__)
-  (void) fd;
-  (void) path;
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

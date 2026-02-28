@@ -124,8 +124,8 @@ extern void __wasm_import_filesystem_method_descriptor_link_at(int32_t, int32_t,
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.open-at")))
 extern void __wasm_import_filesystem_method_descriptor_open_at(int32_t, int32_t, uint8_t *, size_t, int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.readlink-at")))
-extern int32_t __wasm_import_filesystem_method_descriptor_readlink_at(int32_t, uint8_t *, size_t, uint8_t *);
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.readlink-at")))
+extern void __wasm_import_filesystem_method_descriptor_readlink_at(int32_t, uint8_t *, size_t, uint8_t *);
 
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.remove-directory-at")))
 extern void __wasm_import_filesystem_method_descriptor_remove_directory_at(int32_t, uint8_t *, size_t, uint8_t *);
@@ -1813,8 +1813,31 @@ bool filesystem_method_descriptor_open_at(filesystem_borrow_descriptor_t self, f
   }
 }
 
-wasip3_subtask_status_t filesystem_method_descriptor_readlink_at(filesystem_borrow_descriptor_t self, wasip3_string_t path, filesystem_result_string_error_code_t *result) {
-  return __wasm_import_filesystem_method_descriptor_readlink_at((self).__handle, (uint8_t *) (path).ptr, (path).len, (uint8_t*) result);
+bool filesystem_method_descriptor_readlink_at(filesystem_borrow_descriptor_t self, wasip3_string_t *path, wasip3_string_t *ret, filesystem_error_code_t *err) {
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(3*sizeof(void*))];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_filesystem_method_descriptor_readlink_at((self).__handle, (uint8_t *) (*path).ptr, (*path).len, ptr);
+  filesystem_result_string_error_code_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + sizeof(void*)))), (*((size_t*) (ptr + (2*sizeof(void*))))) };
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
 }
 
 bool filesystem_method_descriptor_remove_directory_at(filesystem_borrow_descriptor_t self, wasip3_string_t *path, filesystem_error_code_t *err) {

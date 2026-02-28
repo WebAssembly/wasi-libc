@@ -1167,7 +1167,7 @@ extern bool filesystem_method_descriptor_open_at(filesystem_borrow_descriptor_t 
 // filesystem, this function fails with `error-code::not-permitted`.
 // 
 // Note: This is similar to `readlinkat` in POSIX.
-extern wasip3_subtask_status_t filesystem_method_descriptor_readlink_at(filesystem_borrow_descriptor_t self, wasip3_string_t path, filesystem_result_string_error_code_t *result);
+extern bool filesystem_method_descriptor_readlink_at(filesystem_borrow_descriptor_t self, wasip3_string_t *path, wasip3_string_t *ret, filesystem_error_code_t *err);
 // Remove a directory.
 // 
 // Return `error-code::not-empty` if the directory is not empty.

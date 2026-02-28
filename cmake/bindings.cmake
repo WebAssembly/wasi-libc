@@ -126,6 +126,7 @@ add_custom_target(
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.set-size"
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.symlink-at"
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.link-at"
+      "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.readlink-at"
       "--async=-wasi:clocks/monotonic-clock@${wasip3-version}#wait-until"
       "--async=-wasi:clocks/monotonic-clock@${wasip3-version}#wait-for"
       ${CMAKE_SOURCE_DIR}/wasi/p3/wit

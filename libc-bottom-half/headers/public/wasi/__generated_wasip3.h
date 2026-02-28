@@ -1096,7 +1096,7 @@ extern wasip3_subtask_status_t filesystem_method_descriptor_get_type(filesystem_
 // extra bytes are filled with zeros.
 // 
 // Note: This was called `fd_filestat_set_size` in earlier versions of WASI.
-extern wasip3_subtask_status_t filesystem_method_descriptor_set_size(filesystem_borrow_descriptor_t self, filesystem_filesize_t size, filesystem_result_void_error_code_t *result);
+extern bool filesystem_method_descriptor_set_size(filesystem_borrow_descriptor_t self, filesystem_filesize_t size, filesystem_error_code_t *err);
 // Adjust the timestamps of an open file or directory.
 // 
 // Note: This is similar to `futimens` in POSIX.

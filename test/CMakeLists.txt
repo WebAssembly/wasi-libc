@@ -275,6 +275,7 @@ add_wasilibc_test(memchr.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680
 add_wasilibc_test(memcmp.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680)
 add_wasilibc_test(opendir.c FS FAILP3 ARGV /)
 add_wasilibc_test(open_relative_path.c FS FAILP3 ARGV /)
+add_wasilibc_test(pipe.c)
 add_wasilibc_test(poll.c FS FAILP3)
 add_wasilibc_test(preadvwritev.c FS FAILP3)
 add_wasilibc_test(preadwrite.c FS FAILP3)

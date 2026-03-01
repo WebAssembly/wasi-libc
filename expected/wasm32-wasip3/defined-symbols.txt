@@ -1005,6 +1005,7 @@ optopt
 optreset
 pathconf
 perror
+pipe
 poll
 posix_close
 posix_fadvise

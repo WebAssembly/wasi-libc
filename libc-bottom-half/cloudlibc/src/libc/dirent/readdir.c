@@ -88,7 +88,7 @@ struct dirent *readdir(DIR *dirp) {
     // Return the next directory entry. Ensure that the dirent is large
     // enough to fit the filename.
     if (grow(&dirp->dirent, &dirp->dirent_size,
-         offsetof(struct dirent, d_name) + entry.d_namlen + 1))
+         offsetof(struct dirent, d_name) + entry.d_namlen + 1) == NULL)
       return NULL;
     struct dirent *dirent = dirp->dirent;
     dirent->d_type = entry.d_type;

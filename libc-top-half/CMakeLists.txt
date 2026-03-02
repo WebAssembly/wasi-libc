@@ -225,6 +225,7 @@ set(top_half_sources
   musl/src/network/ntohs.c
   musl/src/stat/futimesat.c
   musl/src/thread/common/default_attr.c
+  musl/src/thread/common/lock_ptc.c
   musl/src/thread/common/pthread_attr_destroy.c
   musl/src/thread/common/pthread_attr_get.c
   musl/src/thread/common/pthread_attr_init.c
@@ -458,6 +459,7 @@ elseif(WASI STREQUAL "p3")
     musl/src/thread/coop-threads/pthread_cond_init.c
     musl/src/thread/coop-threads/pthread_cond_signal.c
     musl/src/thread/coop-threads/pthread_cond_timedwait.c
+    musl/src/thread/coop-threads/pthread_cond_wait.c
     musl/src/thread/coop-threads/pthread_create.c
     musl/src/thread/coop-threads/pthread_detach.c
     musl/src/thread/coop-threads/pthread_getcpuclockid.c
@@ -466,11 +468,13 @@ elseif(WASI STREQUAL "p3")
     musl/src/thread/coop-threads/pthread_join.c
     musl/src/thread/coop-threads/pthread_kill.c
     musl/src/thread/coop-threads/pthread_mutex_consistent.c
+    musl/src/thread/coop-threads/pthread_mutex_lock.c
     musl/src/thread/coop-threads/pthread_mutex_setprioceiling.c
     musl/src/thread/coop-threads/pthread_mutex_timedlock.c
     musl/src/thread/coop-threads/pthread_mutex_trylock.c
     musl/src/thread/coop-threads/pthread_mutex_unlock.c
     musl/src/thread/coop-threads/pthread_once.c
+    musl/src/thread/wasi-threads/pthread_rwlock_rdlock.c
     musl/src/thread/coop-threads/pthread_rwlock_timedrdlock.c
     musl/src/thread/coop-threads/pthread_rwlock_timedwrlock.c
     musl/src/thread/coop-threads/pthread_rwlock_tryrdlock.c

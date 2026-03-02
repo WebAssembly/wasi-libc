@@ -297,7 +297,6 @@ int __pthread_create(pthread_t *restrict res,
   *res = new;
   return 0;
 fail:
-  __release_ptc();
   return EAGAIN;
 }
 

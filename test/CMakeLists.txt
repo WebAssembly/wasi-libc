@@ -544,7 +544,7 @@ if (WASI STREQUAL "p3")
   # unsupported(signals): conformance/interfaces/pthread_cond_init/4-2.c
 
   add_posix_test(conformance/interfaces/pthread_cond_signal/1-1.c)
-  # temporarily unsupported(clocks): conformance/interfaces/pthread_cond_signal/1-2.c
+  # temporarily unsupported(timed waits): conformance/interfaces/pthread_cond_signal/1-2.c
   add_posix_test(conformance/interfaces/pthread_cond_signal/2-1.c)
   # temporarily unsupported(timed waits): conformance/interfaces/pthread_cond_signal/2-2.c
   add_posix_test(conformance/interfaces/pthread_cond_signal/4-1.c)

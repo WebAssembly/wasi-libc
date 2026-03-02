@@ -7,15 +7,6 @@
 #include <wasi/libc-environ.h>
 #endif
 
-#ifdef __wasm_component_model_thread_context__
-/* Ensure __wasm_init_task and __wasm_init_async_task are always linked.
- *  These assembly functions are required for wasip3 initialization. */
-void __wasm_init_task(void);
-void __wasm_init_async_task(void);
-__attribute__((used)) hidden static void *__wasm_init_task_reference = __wasm_init_task;
-__attribute__((used)) hidden static void *__wasm_init_async_task_reference = __wasm_init_async_task;
-#endif
-
 // The user's `main` function, expecting arguments.
 //
 // Note that we make this a weak symbol so that it will have a

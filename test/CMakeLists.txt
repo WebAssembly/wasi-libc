@@ -21,8 +21,8 @@ message(STATUS "libc-test source directory: ${LIBC_TEST}")
 
 FetchContent_Declare(
   posix-testsuite
-  GIT_REPOSITORY https://github.com/tartanllama/open-posix-test-suite
-  GIT_TAG 78b3bc8386ef3d933c7f41c95c89cd80e60e60a9
+  GIT_REPOSITORY https://github.com/bytecodealliance/open-posix-test-suite
+  GIT_TAG 18321461ce8381c359b439f5231908208718d230
   GIT_SHALLOW true
 )
 FetchContent_MakeAvailable(posix-testsuite)
@@ -37,7 +37,7 @@ if(NOT ENGINE OR ENGINE STREQUAL "")
   ba_download(
     wasmtime
     "https://github.com/bytecodealliance/wasmtime"
-    "v41.0.0"
+    "v42.0.1"
   )
   ExternalProject_Get_Property(wasmtime SOURCE_DIR)
   set(ENGINE "${SOURCE_DIR}/wasmtime")
@@ -139,6 +139,7 @@ function(register_test test_name executable_name)
   endif()
   if (WASI STREQUAL "p3")
     list(APPEND wasmtime_args --wasm component-model-async)
+    list(APPEND wasmtime_args --wasm component-model-threading)
     list(APPEND wasmtime_args --wasi p3)
   endif()
 

@@ -489,6 +489,7 @@ elseif(WASI STREQUAL "p3")
     musl/src/thread/coop-threads/pthread_spin_lock.c
     musl/src/thread/coop-threads/pthread_spin_trylock.c
     musl/src/thread/coop-threads/pthread_spin_unlock.c
+    musl/src/thread/coop-threads/sem_destroy.c
     musl/src/thread/coop-threads/sem_getvalue.c
     musl/src/thread/coop-threads/sem_init.c
     musl/src/thread/coop-threads/sem_open.c

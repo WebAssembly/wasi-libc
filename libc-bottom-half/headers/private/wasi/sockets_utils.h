@@ -11,8 +11,13 @@
 typedef network_error_code_t sockets_error_code_t;
 typedef network_ip_address_family_t sockets_ip_address_family_t;
 typedef network_ip_socket_address_t sockets_ip_socket_address_t;
-typedef tcp_own_tcp_socket_t sockets_own_tcp_socket_t;
-typedef udp_own_udp_socket_t sockets_own_udp_socket_t;
+
+#define sockets_error_code_t network_error_code_t
+#define sockets_ip_address_family_t network_ip_address_family_t
+#define sockets_ip_socket_address_t network_ip_socket_address_t
+
+#define SOCKETS_IP_ADDRESS_FAMILY_IPV4 NETWORK_IP_ADDRESS_FAMILY_IPV4
+#define SOCKETS_IP_ADDRESS_FAMILY_IPV6 NETWORK_IP_ADDRESS_FAMILY_IPV6
 #elif defined(__wasip3__)
 // already defines `sockets_*` types
 #else

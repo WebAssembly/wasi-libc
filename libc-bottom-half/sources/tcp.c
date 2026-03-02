@@ -56,14 +56,9 @@
 
 #define sockets_borrow_tcp_socket tcp_borrow_tcp_socket
 #define sockets_borrow_tcp_socket_t tcp_borrow_tcp_socket_t
-#define sockets_error_code_t network_error_code_t
-#define sockets_ip_address_family_t network_ip_address_family_t
-#define sockets_ip_socket_address_t network_ip_socket_address_t
 #define sockets_own_tcp_socket_t tcp_own_tcp_socket_t
 #define sockets_tcp_socket_drop_own tcp_tcp_socket_drop_own
 
-#define SOCKETS_IP_ADDRESS_FAMILY_IPV4 NETWORK_IP_ADDRESS_FAMILY_IPV4
-#define SOCKETS_IP_ADDRESS_FAMILY_IPV6 NETWORK_IP_ADDRESS_FAMILY_IPV6
 typedef tcp_duration_t sockets_duration_t;
 #endif // __wasip2__
 

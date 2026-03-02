@@ -8,14 +8,18 @@
 #include <wasi/udp.h>
 #include <wasi/wasip2.h>
 
-#ifdef __wasip2__
-
 // Pollables here are lazily initialized as-needed.
 typedef struct {
+#if defined(__wasip2__)
   udp_own_incoming_datagram_stream_t incoming;
   poll_own_pollable_t incoming_pollable;
   udp_own_outgoing_datagram_stream_t outgoing;
   poll_own_pollable_t outgoing_pollable;
+#elif defined(__wasip3__)
+  int dummy;
+#else
+#error "Unsupported WASI version"
+#endif
 } udp_socket_streams_t;
 
 typedef struct {
@@ -55,22 +59,24 @@ typedef struct {
 } udp_socket_state_t;
 
 typedef struct {
-  udp_own_udp_socket_t socket;
+  sockets_own_udp_socket_t socket;
+#ifdef __wasip2__
   // Lazily initialized as-needed pollable.
   poll_own_pollable_t socket_pollable;
+#endif
   bool blocking;
-  network_ip_address_family_t family;
+  sockets_ip_address_family_t family;
   udp_socket_state_t state;
 } udp_socket_t;
 
 static descriptor_vtable_t udp_vtable;
 
-int __wasilibc_add_udp_socket(udp_own_udp_socket_t socket,
-                              network_ip_address_family_t family,
+int __wasilibc_add_udp_socket(sockets_own_udp_socket_t socket,
+                              sockets_ip_address_family_t family,
                               bool blocking) {
   udp_socket_t *udp = calloc(1, sizeof(udp_socket_t));
   if (!udp) {
-    udp_udp_socket_drop_own(socket);
+    sockets_udp_socket_drop_own(socket);
     errno = ENOMEM;
     return -1;
   }
@@ -86,7 +92,7 @@ int __wasilibc_add_udp_socket(udp_own_udp_socket_t socket,
 }
 
 static int udp_create_streams(udp_socket_t *socket,
-                              network_ip_socket_address_t *remote_address) {
+                              sockets_ip_socket_address_t *remote_address) {
   // Assert that:
   // - We're already bound. This is required by WASI.
   // - We have no active streams. From WASI:
@@ -96,7 +102,8 @@ static int udp_create_streams(udp_socket_t *socket,
     abort();
   }
 
-  udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
+  sockets_borrow_udp_socket_t socket_borrow =
+      sockets_borrow_udp_socket(socket->socket);
 
   udp_socket_streams_t *dst;
   if (remote_address != NULL) {
@@ -107,7 +114,8 @@ static int udp_create_streams(udp_socket_t *socket,
 
   memset(dst, 0, sizeof(*dst));
 
-  network_error_code_t error;
+  sockets_error_code_t error;
+#ifdef __wasip2__
   udp_tuple2_own_incoming_datagram_stream_own_outgoing_datagram_stream_t io;
   if (!udp_method_udp_socket_stream(socket_borrow, remote_address, &io, &error))
     return __wasilibc_socket_error_to_errno(error);
@@ -121,16 +129,22 @@ static int udp_create_streams(udp_socket_t *socket,
     socket->state.tag = UDP_SOCKET_STATE_BOUND_STREAMING;
   }
 
-  return true;
+  return 0;
+#else
+  errno = ENOTSUP;
+  return -1;
+#endif
 }
 
 static void udp_close_streams(udp_socket_streams_t *streams) {
+#ifdef __wasip2__
   if (streams->incoming_pollable.__handle != 0)
     poll_pollable_drop_own(streams->incoming_pollable);
   udp_incoming_datagram_stream_drop_own(streams->incoming);
   if (streams->outgoing_pollable.__handle != 0)
     poll_pollable_drop_own(streams->outgoing_pollable);
   udp_outgoing_datagram_stream_drop_own(streams->outgoing);
+#endif
 }
 
 static void udp_free(void *data) {
@@ -147,9 +161,11 @@ static void udp_free(void *data) {
     break;
   }
 
+#ifdef __wasip2__
   if (udp->socket_pollable.__handle != 0)
     poll_pollable_drop_own(udp->socket_pollable);
-  udp_udp_socket_drop_own(udp->socket);
+#endif
+  sockets_udp_socket_drop_own(udp->socket);
 
   free(udp);
 }
@@ -167,6 +183,7 @@ static int udp_fstat(void *data, struct stat *buf) {
   return 0;
 }
 
+#ifdef __wasip2__
 static poll_borrow_pollable_t udp_pollable(udp_socket_t *socket) {
   if (socket->socket_pollable.__handle == 0) {
     udp_borrow_udp_socket_t socket_borrow =
@@ -194,7 +211,7 @@ udp_outgoing_pollable(udp_socket_streams_t *streams) {
   return poll_borrow_pollable(streams->outgoing_pollable);
 }
 
-static int udp_handle_error(udp_socket_t *socket, network_error_code_t error) {
+static int udp_handle_error(udp_socket_t *socket, sockets_error_code_t error) {
   if (error == NETWORK_ERROR_CODE_WOULD_BLOCK && socket->blocking) {
     poll_method_pollable_block(udp_pollable(socket));
   } else {
@@ -205,13 +222,13 @@ static int udp_handle_error(udp_socket_t *socket, network_error_code_t error) {
 }
 
 static int udp_do_bind(udp_socket_t *socket,
-                       network_ip_socket_address_t *address) {
+                       sockets_ip_socket_address_t *address) {
   if (socket->state.tag != UDP_SOCKET_STATE_UNBOUND) {
     errno = EINVAL;
     return -1;
   }
 
-  network_error_code_t error;
+  sockets_error_code_t error;
   network_borrow_network_t network_borrow =
       __wasi_sockets_utils__borrow_network();
   udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
@@ -838,6 +855,7 @@ static int udp_fcntl_setfl(void *data, int flags) {
   }
   return 0;
 }
+#endif
 
 static descriptor_vtable_t udp_vtable = {
     .free = udp_free,
@@ -845,6 +863,7 @@ static descriptor_vtable_t udp_vtable = {
     .set_blocking = udp_set_blocking,
     .fstat = udp_fstat,
 
+#ifdef __wasip2__
     .bind = udp_bind,
     .connect = udp_connect,
     .getsockname = udp_getsockname,
@@ -858,6 +877,5 @@ static descriptor_vtable_t udp_vtable = {
 
     .fcntl_getfl = udp_fcntl_getfl,
     .fcntl_setfl = udp_fcntl_setfl,
+#endif
 };
-
-#endif // __wasip2__

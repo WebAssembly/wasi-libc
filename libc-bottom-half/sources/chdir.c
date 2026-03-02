@@ -7,14 +7,9 @@
 #include <unistd.h>
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc.h>
+#include "lock.h"
 
-#ifdef _REENTRANT
-void __wasilibc_cwd_lock(void);
-void __wasilibc_cwd_unlock(void);
-#else
-#define __wasilibc_cwd_lock() (void)0
-#define __wasilibc_cwd_unlock() (void)0
-#endif
+extern __lock_t __wasilibc_cwd_lock;
 extern char *__wasilibc_cwd;
 static int __wasilibc_cwd_mallocd = 0;
 
@@ -64,10 +59,10 @@ int chdir(const char *path) {
 
   // And set our new malloc'd buffer into the global cwd, freeing the
   // previous one if necessary.
-  __wasilibc_cwd_lock();
+  WEAK_LOCK(__wasilibc_cwd_lock);
   char *prev_cwd = __wasilibc_cwd;
   __wasilibc_cwd = new_cwd;
-  __wasilibc_cwd_unlock();
+  WEAK_UNLOCK(__wasilibc_cwd_lock);
   if (__wasilibc_cwd_mallocd)
     free(prev_cwd);
   __wasilibc_cwd_mallocd = 1;
@@ -98,23 +93,23 @@ static const char *make_absolute(const char *path) {
   // Otherwise we'll take the current directory, add a `/`, and then add the
   // input `path`. Note that this doesn't do any normalization (like removing
   // `/./`).
-  __wasilibc_cwd_lock();
+  WEAK_LOCK(__wasilibc_cwd_lock);
   size_t cwd_len = strlen(__wasilibc_cwd);
   size_t path_len = path ? strlen(path) : 0;
-  __wasilibc_cwd_unlock();
+  WEAK_UNLOCK(__wasilibc_cwd_lock);
   int need_slash = __wasilibc_cwd[cwd_len - 1] == '/' ? 0 : 1;
   size_t alloc_len = cwd_len + path_len + 1 + need_slash;
   if (alloc_len > make_absolute_len) {
     char *tmp = realloc(make_absolute_buf, alloc_len);
     if (tmp == NULL) {
-      __wasilibc_cwd_unlock();
+      WEAK_UNLOCK(__wasilibc_cwd_lock);
       return NULL;
     }
     make_absolute_buf = tmp;
     make_absolute_len = alloc_len;
   }
   strcpy(make_absolute_buf, __wasilibc_cwd);
-  __wasilibc_cwd_unlock();
+  WEAK_UNLOCK(__wasilibc_cwd_lock);
 
 #ifdef _REENTRANT
   if (path[0] == 0 || !strcmp(path, ".") || !strcmp(path, "./")) {

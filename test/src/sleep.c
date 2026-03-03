@@ -20,8 +20,8 @@
 #endif
 
 int main(void) {
-  // Sleep for a total of 2 seconds
-  unsigned int seconds_to_sleep = 2;
+  // Sleep for a total of 1 second
+  unsigned int seconds_to_sleep = 1;
 
   struct timespec start_time, end_time;
   clock_gettime(CLOCK, &start_time);

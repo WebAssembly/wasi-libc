@@ -4,6 +4,7 @@
 
 #include <time.h>
 #include <unistd.h>
+#include <wasi/version.h>
 
 unsigned int sleep(unsigned int seconds) {
   struct timespec ts = {.tv_sec = seconds, .tv_nsec = 0};

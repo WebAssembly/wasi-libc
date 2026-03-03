@@ -18,7 +18,7 @@ int fsync(int fildes) {
     errno = error == ENOTCAPABLE ? EINVAL : error;
     return -1;
   }
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fildes, &file_handle) < 0)
@@ -30,11 +30,6 @@ int fsync(int fildes) {
     translate_error(error_code);
     return -1;
   }
-#elif defined(__wasip3__)
-  (void) fildes;
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

@@ -19,7 +19,7 @@ int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char 
     errno = error;
     return -1;
   }
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Translate the file descriptors to internal handles
   filesystem_borrow_descriptor_t old_file_handle;
   if (fd_to_file_handle(oldfd, &old_file_handle) < 0)
@@ -30,7 +30,7 @@ int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char 
     return -1;
 
   // Convert the strings into WASI strings
-  wasip2_string_t old_path, new_path;
+  wasi_string_t old_path, new_path;
   if (wasi_string_from_c(old, &old_path) < 0)
     return -1;
   if (wasi_string_from_c(new, &new_path) < 0)
@@ -47,14 +47,6 @@ int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char 
     translate_error(error_code);
     return -1;
   }
-#elif defined(__wasip3__)
-  (void) oldfd;
-  (void) old;
-  (void) newfd;
-  (void) new;
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
 #else
 # error "Unknown WASI version"
 #endif

@@ -29,6 +29,7 @@ struct _DIR {
   size_t offset;
 #elif defined(__wasip3__)
   filesystem_tuple2_stream_directory_entry_future_result_void_error_code_t stream;
+  bool stream_done;
   size_t skip;
   size_t offset;
 #else
@@ -53,6 +54,7 @@ static inline void dirent_close_streams(DIR *dirp) {
   if (dirp->stream.f0 != 0) {
     filesystem_stream_directory_entry_drop_readable(dirp->stream.f0);
     dirp->stream.f0 = 0;
+    dirp->stream_done = false;
   }
   if (dirp->stream.f1 != 0) {
     filesystem_future_result_void_error_code_drop_readable(dirp->stream.f1);

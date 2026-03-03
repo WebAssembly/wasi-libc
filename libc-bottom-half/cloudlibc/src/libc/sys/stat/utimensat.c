@@ -38,7 +38,7 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
     errno = error;
     return -1;
   }
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fd, &file_handle) < 0)
@@ -58,7 +58,7 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
     lookup_flags |= FILESYSTEM_PATH_FLAGS_SYMLINK_FOLLOW;
 
   // Convert the string into a Wasm string
-  wasip2_string_t path_wasm_string;
+  wasi_string_t path_wasm_string;
   if (wasi_string_from_c(path, &path_wasm_string) < 0)
     return -1;
 
@@ -74,14 +74,6 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
     translate_error(error);
     return -1;
   }
-#elif defined(__wasip3__)
-  (void) fd;
-  (void) path;
-  (void) times;
-  (void) flag;
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

@@ -43,8 +43,11 @@ int __wasilibc_nocwd_linkat(int fd1, const char *path1, int fd2, const char *pat
 
   // Create the link
   filesystem_error_code_t error_code;
+  filesystem_path_flags_t flags = 0;
+  if ((flag & AT_SYMLINK_FOLLOW) != 0)
+    flags |= FILESYSTEM_PATH_FLAGS_SYMLINK_FOLLOW;
   bool ok = filesystem_method_descriptor_link_at(file_handle1,
-                                                 0,
+                                                 flags,
                                                  &path1_wasi,
                                                  file_handle2,
                                                  &path2_wasi,
@@ -54,6 +57,11 @@ int __wasilibc_nocwd_linkat(int fd1, const char *path1, int fd2, const char *pat
     return -1;
   }
 #elif defined(__wasip3__)
+  (void) fd1;
+  (void) path1;
+  (void) fd2;
+  (void) path2;
+  (void) flag;
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;

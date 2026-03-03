@@ -19,17 +19,13 @@
       t_error("%s failed (errno = %d)\n", #c, errno);                          \
   } while (0)
 
-// #define _DEBUG 1
+#define _DEBUG 0
 
-#ifdef _DEBUG
 #define DEBUG_PRINT(...)                                                       \
-  fprintf(stderr, __VA_ARGS__);                                                \
-  fflush(stdout)
-#else
-#define DEBUG_PRINT(...)                                                       \
-  do {                                                                         \
-  } while (0)
-#endif
+  if (_DEBUG) {                                                                \
+    fprintf(stderr, __VA_ARGS__);                                              \
+    fflush(stdout);                                                            \
+  }
 
 #define BUFSIZE 256
 size_t MAX_CONNECTIONS = 10;
@@ -79,11 +75,8 @@ void test_tcp_client() {
             sizeof(server_address)) != -1);
 
   // Listen on socket
-  char buffer[BUFSIZE];
   socklen_t client_len = sizeof(struct sockaddr_in);
-  int client_socket_fd = -1;
   struct sockaddr_in client_address;
-  int32_t bytes_read = 0, total_bytes_read = 0;
   TEST(listen(server_socket_fd, 1) != -1);
 
   // Prepare client sockets
@@ -125,13 +118,13 @@ void test_tcp_client() {
   poll_fd_server[0].fd = server_socket_fd;
   poll_fd_server[0].events = POLLRDNORM;
   poll_fd_server[0].revents = 0;
-  int next_client = 0;
+  size_t next_client = 0;
   bool failure = false;
 
   while (!done(client_outgoing, client_incoming) &&
          (next_client < MAX_CONNECTIONS * 2)) {
 
-    DEBUG_PRINT("============== next_client = %d ================\n",
+    DEBUG_PRINT("============== next_client = %zu ================\n",
                 next_client);
 
     // One client tries to connect
@@ -146,8 +139,8 @@ void test_tcp_client() {
         struct pollfd poll_fd = {.fd = client_sockets[next_client],
                                  .events = POLLWRNORM,
                                  .revents = 0};
-        int getsockopt_result = getsockopt(client_sockets[next_client],
-                                           SOL_SOCKET, SO_ERROR, &error, &len);
+        getsockopt(client_sockets[next_client], SOL_SOCKET, SO_ERROR, &error,
+                   &len);
         poll(&poll_fd, 1, 100);
         // Check if socket has become writable
         TEST(getsockopt(client_sockets[next_client], SOL_SOCKET, SO_ERROR,
@@ -159,7 +152,7 @@ void test_tcp_client() {
           poll_fd_client[next_client - 1].fd = client_sockets[next_client - 1];
           poll_fd_client[next_client - 1].events = POLLWRNORM;
           poll_fd_server[next_client - 1].revents = 0;
-          DEBUG_PRINT("Client [#%d] = %d connected\n", next_client - 1,
+          DEBUG_PRINT("Client [#%zu] = %d connected\n", next_client - 1,
                       client_sockets[next_client - 1]);
         }
       } else {
@@ -175,7 +168,7 @@ void test_tcp_client() {
     // Server polls for new connections and activity on existing connections,
     // simultaneously
     poll(poll_fd_server, next_server_socket + 1, 100);
-    int to_poll = next_server_socket + 1;
+    size_t to_poll = next_server_socket + 1;
     bool recv_failed = false;
     DEBUG_PRINT("Server looping through poll events errno = %s\n",
                 strerror(errno));
@@ -225,8 +218,8 @@ void test_tcp_client() {
 
     // All connected clients try to send
     bool send_failed = false;
-    for (int32_t i = 0; i < next_client; i++) {
-      DEBUG_PRINT("client_outgoing[%d] %s\n", i,
+    for (size_t i = 0; i < next_client; i++) {
+      DEBUG_PRINT("client_outgoing[%zu] %s\n", i,
                   client_outgoing[i].sent ? "sent" : "not sent");
       if (!client_outgoing[i].sent) {
         client_outgoing[i].sent = true;
@@ -264,13 +257,13 @@ void test_tcp_client() {
 
     // All connected clients try to receive
     if (next_client > 0) {
-      for (int32_t i = 0; i < next_client; i++)
+      for (size_t i = 0; i < next_client; i++)
         poll_fd_client[i].events = POLLRDNORM;
       poll(poll_fd_client, next_client, 100);
     }
     DEBUG_PRINT("Looping through poll events\n");
-    for (int32_t i = 0; i < next_client; i++) {
-      DEBUG_PRINT("poll_fd_client[%d].revents = %d\n", i,
+    for (size_t i = 0; i < next_client; i++) {
+      DEBUG_PRINT("poll_fd_client[%zu].revents = %d\n", i,
                   poll_fd_client[i].revents);
       if (poll_fd_client[i].revents & POLLRDNORM) {
         int bytes_received =

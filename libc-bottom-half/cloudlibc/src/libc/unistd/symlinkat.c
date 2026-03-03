@@ -45,6 +45,9 @@ int __wasilibc_nocwd_symlinkat(const char *path1, int fd, const char *path2) {
     return -1;
   }
 #elif defined(__wasip3__)
+  (void) path1;
+  (void) path2;
+  (void) fd;
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;

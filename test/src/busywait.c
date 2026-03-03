@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 #include <assert.h>
 #include <errno.h>
 #include <pthread.h>

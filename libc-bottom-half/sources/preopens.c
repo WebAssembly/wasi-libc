@@ -29,13 +29,16 @@ typedef struct {
 typedef __wasi_fd_t preopen_t;
 
 static void assert_preopen_valid(preopen_t fd) {
+  (void)fd;
   assert(fd != AT_FDCWD);
   assert(fd != -1);
 }
 
+#ifndef NDEBUG
 static void preopen_state_assert_open(const preopen_state_t *state) {
   assert(state->fd != -1);
 }
+#endif
 
 static int preopen_state_initialize(preopen_state_t *state, preopen_t fd) {
   state->fd = fd;
@@ -46,7 +49,7 @@ static int preopen_state_get_fd(const preopen_state_t *state) {
   return state->fd;
 }
 
-static void preopen_state_close(preopen_state_t *state) {}
+static void preopen_state_close(preopen_state_t *state) { (void)state; }
 
 #elif defined(__wasip2__) || defined(__wasip3__)
 
@@ -56,11 +59,16 @@ typedef struct {
 
 typedef filesystem_preopens_own_descriptor_t preopen_t;
 
-static void assert_preopen_valid(preopen_t fd) { assert(fd.__handle != 0); }
+static void assert_preopen_valid(preopen_t fd) {
+  (void)fd;
+  assert(fd.__handle != 0);
+}
 
+#ifndef NDEBUG
 static void preopen_state_assert_open(const preopen_state_t *state) {
   assert(state->libc_fd != -1);
 }
+#endif
 
 static int preopen_state_initialize(preopen_state_t *state, preopen_t fd) {
   state->libc_fd = __wasilibc_add_file(fd, O_RDWR);
@@ -396,7 +404,7 @@ void __wasilibc_reset_preopens(void) {
   LOCK(lock);
 
   if (num_preopens) {
-    for (int i = 0; i < num_preopens; ++i) {
+    for (unsigned i = 0; i < num_preopens; ++i) {
       free((void *)preopens[i].prefix);
       preopen_state_close(&preopens[i].state);
     }

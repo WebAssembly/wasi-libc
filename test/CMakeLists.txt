@@ -60,6 +60,13 @@ add_library(libc_test_support STATIC
 )
 target_include_directories(libc_test_support PUBLIC "${LIBC_TEST}/src/common")
 add_wasilibc_flags(libc_test_support)
+# Disable some warnings in this third-party code
+target_compile_options(libc_test_support PRIVATE
+  -Wno-unused-variable
+  -Wno-unused-parameter
+  -Wno-unused-function
+  -Wno-sign-compare
+)
 
 # Adds a new test executable to build
 #
@@ -177,6 +184,13 @@ function(add_libc_test test_file)
 
   add_test_executable(${test_name} "${test_file}" ${ARGN})
   register_test(${test_name} ${test_name} ${ARGN})
+  # Disable some warnings in this third-party code
+  target_compile_options(${test_name} PRIVATE
+    -Wno-sign-compare
+    -Wno-missing-braces
+    -Wno-unused-variable
+    -Wno-unused-parameter
+  )
 endfunction()
 
 add_libc_test(functional/argv.c)
@@ -306,7 +320,11 @@ if (TARGET_TRIPLE MATCHES "-threads")
   add_wasilibc_test(busywait.c)
   add_wasilibc_test(pthread_cond_busywait.c)
   add_wasilibc_test(pthread_tsd_busywait.c)
+
+  # This test #include's a test whose source is not controlled here, so disable
+  # some extra warnings.
   add_wasilibc_test(pthread_mutex_busywait.c)
+  target_compile_options(pthread_mutex_busywait.wasm PRIVATE -Wno-unused-variable)
 endif()
 
 # ========= sockets-related tests ===============================

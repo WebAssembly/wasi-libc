@@ -40,6 +40,9 @@ off_t __lseek(int fildes, off_t offset, int whence) {
   }
   return entry->vtable->seek(entry->data, offset, whence);
 #elif defined(__wasip3__)
+  (void) fildes;
+  (void) offset;
+  (void) whence;
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;

@@ -40,7 +40,6 @@ typedef network_ipv6_address_t sockets_ipv6_address_t;
 typedef network_ip_socket_address_t sockets_ip_socket_address_t;
 #endif
 
-static bool global_network_initialized = false;
 static const service_entry_t global_services[] = {
     {"domain", 53, SERVICE_PROTOCOL_TCP | SERVICE_PROTOCOL_UDP},
     {"ftp", 21, SERVICE_PROTOCOL_TCP},
@@ -65,6 +64,7 @@ weak_alias(global_services, __wasi_sockets_services_db);
 
 #ifdef __wasip2__
 static network_own_network_t global_network;
+static bool global_network_initialized = false;
 
 network_borrow_network_t __wasi_sockets_utils__borrow_network() {
   if (!global_network_initialized) {

@@ -39,20 +39,6 @@ static void checkStrptime(const char *s, const char *format,
   }
 }
 
-static void checkStrptimeTz(const char *s, int h, int m) {
-  long int expected = h * 3600 + m * 60;
-  struct tm tm = {};
-  const char *ret;
-
-  ret = strptime(s, "%z", &tm);
-  if (!ret || *ret != '\0') {
-    t_error("\"%%z\": failed to parse \"%s\"\n", s);
-  } else if (tm.tm_gmtoff != expected) {
-    t_error("\"%%z\": for \"%s\" expected tm_gmtoff %ld but got %ld\n", s,
-            tm.tm_gmtoff, expected);
-  }
-}
-
 static struct tm tm1 = {
     .tm_sec = 8,
     .tm_min = 57,

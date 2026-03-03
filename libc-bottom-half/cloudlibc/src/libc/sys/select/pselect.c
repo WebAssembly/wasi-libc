@@ -13,6 +13,7 @@
 int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
             fd_set *restrict errorfds, const struct timespec *restrict timeout,
             const sigset_t *sigmask) {
+  (void) sigmask;
   // Negative file descriptor upperbound.
   if (nfds < 0) {
     errno = EINVAL;

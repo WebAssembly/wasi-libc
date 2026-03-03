@@ -162,6 +162,9 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
   // Update the descriptor table with the new handle
   return __wasilibc_add_file(new_handle, oflag);
 #elif defined(__wasip3__)
+  (void) fd;
+  (void) path;
+  (void) oflag;
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;

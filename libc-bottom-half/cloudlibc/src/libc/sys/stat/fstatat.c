@@ -81,6 +81,10 @@ int __wasilibc_nocwd_fstatat(int fd, const char *restrict path, struct stat *res
   to_public_stat(&metadata, &internal_stat, buf);
   return 0;
 #elif defined(__wasip3__)
+  (void) fd;
+  (void) path;
+  (void) buf;
+  (void) flag;
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;

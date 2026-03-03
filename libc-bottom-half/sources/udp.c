@@ -91,6 +91,7 @@ int __wasilibc_add_udp_socket(sockets_own_udp_socket_t socket,
   return descriptor_table_insert(entry);
 }
 
+#ifdef __wasip2__
 static int udp_create_streams(udp_socket_t *socket,
                               sockets_ip_socket_address_t *remote_address) {
   // Assert that:
@@ -102,9 +103,6 @@ static int udp_create_streams(udp_socket_t *socket,
     abort();
   }
 
-  sockets_borrow_udp_socket_t socket_borrow =
-      sockets_borrow_udp_socket(socket->socket);
-
   udp_socket_streams_t *dst;
   if (remote_address != NULL) {
     dst = &socket->state.connected.streams;
@@ -115,7 +113,8 @@ static int udp_create_streams(udp_socket_t *socket,
   memset(dst, 0, sizeof(*dst));
 
   sockets_error_code_t error;
-#ifdef __wasip2__
+  sockets_borrow_udp_socket_t socket_borrow =
+      sockets_borrow_udp_socket(socket->socket);
   udp_tuple2_own_incoming_datagram_stream_own_outgoing_datagram_stream_t io;
   if (!udp_method_udp_socket_stream(socket_borrow, remote_address, &io, &error))
     return __wasilibc_socket_error_to_errno(error);
@@ -130,11 +129,8 @@ static int udp_create_streams(udp_socket_t *socket,
   }
 
   return 0;
-#else
-  errno = ENOTSUP;
-  return -1;
-#endif
 }
+#endif
 
 static void udp_close_streams(udp_socket_streams_t *streams) {
 #ifdef __wasip2__
@@ -144,6 +140,8 @@ static void udp_close_streams(udp_socket_streams_t *streams) {
   if (streams->outgoing_pollable.__handle != 0)
     poll_pollable_drop_own(streams->outgoing_pollable);
   udp_outgoing_datagram_stream_drop_own(streams->outgoing);
+#else
+  (void)streams;
 #endif
 }
 
@@ -177,7 +175,7 @@ static int udp_set_blocking(void *data, bool blocking) {
 }
 
 static int udp_fstat(void *data, struct stat *buf) {
-  udp_socket_t *udp = (udp_socket_t *)data;
+  (void)data;
   memset(buf, 0, sizeof(struct stat));
   buf->st_mode = S_IFSOCK;
   return 0;
@@ -404,7 +402,6 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
     return -1;
 
   network_error_code_t error;
-  udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
 
   // Make sure the streams are available.
   if (socket->state.tag == UDP_SOCKET_STATE_BOUND_NOSTREAMS)
@@ -501,7 +498,6 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
   }
 
   network_error_code_t error;
-  udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
 
   // If the socket is not explicitly bound by the user we'll do it for them
   if (socket->state.tag == UDP_SOCKET_STATE_UNBOUND) {
@@ -708,6 +704,10 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
 static int udp_setsockopt(void *data, int level, int optname,
                           const void *optval, socklen_t optlen) {
   udp_socket_t *socket = (udp_socket_t *)data;
+  if (optlen < sizeof(int)) {
+    errno = EINVAL;
+    return -1;
+  }
   int intval = *(int *)optval;
 
   network_error_code_t error;

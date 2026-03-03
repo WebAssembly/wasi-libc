@@ -50,6 +50,10 @@ ssize_t __wasilibc_nocwd_readlinkat(int fd, const char *restrict path, char *res
   memcpy(buf, link_source.ptr, bufused);
   wasip2_string_free(&link_source);
 #elif defined(__wasip3__)
+  (void) fd;
+  (void) path;
+  (void) buf;
+  (void) bufsize;
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;

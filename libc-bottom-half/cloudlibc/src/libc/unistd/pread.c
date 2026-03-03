@@ -66,6 +66,9 @@ ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
 
   return bytes_read;
 #elif defined(__wasip3__)
+  (void) fildes;
+  (void) buf;
+  (void) nbyte;
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;

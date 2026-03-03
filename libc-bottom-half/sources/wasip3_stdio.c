@@ -81,13 +81,20 @@ stdin3_read(void *data,
 }
 
 static int stdio3_fstat(void *data, struct stat *buf) {
+  (void)data;
   memset(buf, 0, sizeof(*buf));
   return 0;
 }
 
-static int stdin3_fcntl_getfl(void *data) { return O_RDONLY; }
+static int stdin3_fcntl_getfl(void *data) {
+  (void)data;
+  return O_RDONLY;
+}
 
-static int stdout3_fcntl_getfl(void *data) { return O_WRONLY; }
+static int stdout3_fcntl_getfl(void *data) {
+  (void)data;
+  return O_WRONLY;
+}
 
 static int stdin3_isatty(void *data) {
   stdin3_t *stdio = (stdin3_t *)data;

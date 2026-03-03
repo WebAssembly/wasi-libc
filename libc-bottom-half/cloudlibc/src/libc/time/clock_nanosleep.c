@@ -19,6 +19,7 @@ static_assert(TIMER_ABSTIME == __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME,
 
 int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
                     struct timespec *rmtp) {
+  (void) rmtp;
   if ((flags & ~TIMER_ABSTIME) != 0)
     return EINVAL;
 
@@ -38,7 +39,6 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
   __wasi_errno_t error = __wasi_poll_oneoff(&sub, &ev, 1, &nevents);
   return error == 0 && ev.error == 0 ? 0 : ENOTSUP;
 #elif defined(__wasip2__) || defined(__wasip3__)
-  // Note: rmtp is ignored
 
   if (clock_id != CLOCK_MONOTONIC) {
     // wasip{2,3} only provide a pollable for monotonic clocks

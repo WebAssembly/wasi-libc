@@ -73,6 +73,7 @@ static int stdio_get_write_stream(void *data, wasip2_write_t *write) {
 }
 
 static int stdio_fstat(void *data, struct stat *buf) {
+  (void)data;
   memset(buf, 0, sizeof(*buf));
   return 0;
 }

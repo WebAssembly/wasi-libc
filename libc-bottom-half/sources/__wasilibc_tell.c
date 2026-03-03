@@ -30,6 +30,7 @@ off_t __wasilibc_tell(int fildes) {
   }
   return entry->vtable->seek(entry->data, 0, SEEK_CUR);
 #elif defined(__wasip3__)
+  (void)fildes;
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;

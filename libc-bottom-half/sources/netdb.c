@@ -250,22 +250,34 @@ void freeaddrinfo(struct addrinfo *p) {
 int getnameinfo(const struct sockaddr *restrict sa, socklen_t salen,
                 char *restrict host, socklen_t hostlen, char *restrict serv,
                 socklen_t servlen, int flags) {
+  (void)sa;
+  (void)salen;
+  (void)host;
+  (void)hostlen;
+  (void)serv;
+  (void)servlen;
+  (void)flags;
   // TODO wasi-sockets
   errno = EOPNOTSUPP;
   return EAI_SYSTEM;
 }
 
 struct hostent *gethostbyname(const char *name) {
+  (void)name;
   // TODO wasi-sockets
   return NULL;
 }
 
 struct hostent *gethostbyaddr(const void *addr, socklen_t len, int type) {
+  (void)addr;
+  (void)len;
+  (void)type;
   // TODO wasi-sockets
   return NULL;
 }
 
 const char *hstrerror(int err) {
+  (void)err;
   // TODO wasi-sockets
   return "hstrerror: TODO";
 }
@@ -288,6 +300,7 @@ struct servent *getservbyport(int port, const char *proto) {
 }
 
 struct protoent *getprotobyname(const char *name) {
+  (void)name;
   // TODO wasi-sockets
   return NULL;
 }

@@ -25,6 +25,8 @@ int fstat(int fildes, struct stat *buf) {
     return -1;
   return entry->vtable->fstat(entry->data, buf);
 #elif defined(__wasip3__)
+  (void) fildes;
+  (void) buf;
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;

@@ -47,7 +47,7 @@ jobs:
             os: ubuntu-22.04
             clang_version: 11
             upload: linux-x86_64-clang-11
-            args: -DSETJMP=OFF -DBUILD_SHARED=OFF
+            args: -DSETJMP=OFF -DBUILD_SHARED=OFF -DENABLE_WERROR=OFF
           - name: Build with LLVM 18
             os: ubuntu-24.04
             clang_version: 18
@@ -177,7 +177,7 @@ jobs:
 
     - name: Configure testing
       if: matrix.test
-      run: cmake -S . -B build -DBUILD_TESTS=ON -DENGINE=${{ env.ENGINE }}
+      run: cmake -S . -B build -DENABLE_WERROR=ON -DBUILD_TESTS=ON -DENGINE=${{ env.ENGINE }}
 
     - name: Build
       run: ninja -C build -v

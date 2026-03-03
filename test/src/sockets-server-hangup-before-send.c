@@ -35,11 +35,9 @@ void run_tcp_server() {
             sizeof(server_address)) != -1);
 
   // Listen on socket
-  char buffer[BUFSIZE];
   socklen_t client_len = sizeof(struct sockaddr_in);
   int client_socket_fd;
   struct sockaddr_in client_address;
-  int32_t bytes_read = 0, total_bytes_read = 0;
   TEST(listen(server_socket_fd, 1) != -1);
 
   // Server accepts connection

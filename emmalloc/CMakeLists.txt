@@ -1,3 +1,5 @@
+# Disable some warnings in this third-party code.
+add_compile_options(-Wno-unused-function)
 add_object_library(emmalloc emmalloc.c)
 
 # emmalloc uses a lot of pointer type-punning, which is UB under strict

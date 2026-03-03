@@ -25,7 +25,7 @@ typedef struct {
   // Dynamically allocated array of `cap` entries.
   descriptor_table_item_t *entries;
   // Next free entry.
-  int next;
+  size_t next;
   // Number of `entries` that are initialized.
   size_t len;
   // Dynamic length of `entries`.
@@ -34,7 +34,6 @@ typedef struct {
 
 static descriptor_table_t global_table = {
     .entries = NULL, .next = 0, .len = 0, .cap = 0};
-static int global_table_stdio_initialized = 0;
 
 /**
  * Allocates a new `descriptor_table_entry_t` in the `table` provided.

@@ -32,21 +32,21 @@ static_assert(DT_UNKNOWN == __WASI_FILETYPE_UNKNOWN, "Value mismatch");
 #endif
 
 // Grows a buffer to be large enough to hold a certain amount of data.
-#define GROW(buffer, buffer_size, target_size)      \
-  do {                                              \
-    if ((buffer_size) < (target_size)) {            \
-      size_t new_size = (buffer_size);              \
-      while (new_size < (target_size))              \
-        new_size *= 2;                              \
-      void *new_buffer = realloc(buffer, new_size); \
-      if (new_buffer == NULL) {                     \
-        errno = ENOMEM;                             \
-        return NULL;                                \
-      }                                             \
-      (buffer) = new_buffer;                        \
-      (buffer_size) = new_size;                     \
-    }                                               \
-  } while (0)
+static struct dirent* grow(struct dirent **buffer, size_t *buffer_size, size_t target_size) {
+  if (*buffer_size < target_size) {
+    size_t new_size = *buffer_size;
+    while (new_size < target_size)
+      new_size *= 2;
+    void *new_buffer = realloc(*buffer, new_size);
+    if (new_buffer == NULL) {
+      errno = ENOMEM;
+      return NULL;
+    }
+    *buffer = new_buffer;
+    *buffer_size = new_size;
+  }
+  return *buffer;
+}
 
 #if defined(__wasip1__)
 struct dirent *readdir(DIR *dirp) {
@@ -73,7 +73,8 @@ struct dirent *readdir(DIR *dirp) {
     // the entry another time. Ensure that the read buffer is large
     // enough to fit at least this single entry.
     if (buffer_left < entry_size) {
-      GROW(dirp->buffer, dirp->buffer_size, entry_size);
+      if (grow((struct dirent**) &dirp->buffer, &dirp->buffer_size, entry_size) == NULL)
+        return NULL;
       goto read_entries;
     }
 
@@ -86,8 +87,9 @@ struct dirent *readdir(DIR *dirp) {
 
     // Return the next directory entry. Ensure that the dirent is large
     // enough to fit the filename.
-    GROW(dirp->dirent, dirp->dirent_size,
-         offsetof(struct dirent, d_name) + entry.d_namlen + 1);
+    if (grow(&dirp->dirent, &dirp->dirent_size,
+         offsetof(struct dirent, d_name) + entry.d_namlen + 1) == NULL)
+      return NULL;
     struct dirent *dirent = dirp->dirent;
     dirent->d_type = entry.d_type;
     memcpy(dirent->d_name, name, entry.d_namlen);
@@ -172,7 +174,8 @@ static struct dirent *readdir_next(DIR *dirp) {
   // hash of the directory itself.
   if (dirp->offset == 0) {
     dirp->offset += 1;
-    GROW(dirp->dirent, dirp->dirent_size, offsetof(struct dirent, d_name) + 2);
+    if (grow(&dirp->dirent, &dirp->dirent_size, offsetof(struct dirent, d_name) + 2) == NULL)
+      return NULL;
     bool ok = filesystem_method_descriptor_metadata_hash(dir_handle,
                                                          &metadata,
                                                          &error_code);
@@ -191,7 +194,8 @@ static struct dirent *readdir_next(DIR *dirp) {
   // avoid opening the parent directory here.
   if (dirp->offset == 1) {
     dirp->offset += 1;
-    GROW(dirp->dirent, dirp->dirent_size, offsetof(struct dirent, d_name) + 3);
+    if (grow(&dirp->dirent, &dirp->dirent_size, offsetof(struct dirent, d_name) + 3) == NULL)
+      return NULL;
     dirp->dirent->d_ino = 0;
     dirp->dirent->d_type = DT_DIR;
     dirp->dirent->d_name[0] = '.';
@@ -218,7 +222,10 @@ static struct dirent *readdir_next(DIR *dirp) {
 
   // Ensure that the dirent is large enough to fit the filename
   size_t the_size = offsetof(struct dirent, d_name);
-  GROW(dirp->dirent, dirp->dirent_size, the_size + dir_entry.name.len + 1);
+  if (grow(&dirp->dirent, &dirp->dirent_size, the_size + dir_entry.name.len + 1) == NULL) {
+    wasip2_string_free(&dir_entry.name);
+    return NULL;
+  }
 
   // Fill out `d_type` and `d_name`
   dirp->dirent->d_type = dir_entry_type_to_d_type(dir_entry.type);

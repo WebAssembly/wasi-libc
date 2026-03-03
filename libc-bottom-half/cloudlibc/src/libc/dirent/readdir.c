@@ -234,21 +234,24 @@ static struct dirent *readdir_next(DIR *dirp) {
 #elif defined(__wasip3__)
   filesystem_directory_entry_t dir_entry;
 
+  // Don't try to keep reading once the stream is closed.
+  if (dirp->stream_done)
+    return NULL;
+
   // Loop until at least one stream entry is read, or until the stream is closed.
-  bool closed = false;
-  while (1) {
+  while (!dirp->stream_done) {
     size_t amount =
       wasip3_stream_block_on(
           filesystem_stream_directory_entry_read(dirp->stream.f0, &dir_entry, 1),
           dirp->stream.f0,
-          &closed);
+          &dirp->stream_done);
 
     // If something was read, then break out and process that below.
     if (amount > 0)
       break;
 
     // If nothing was read and the stream isn't finished yet, try again.
-    if (!closed)
+    if (!dirp->stream_done)
       continue;
 
     // If the stream's result future hasn't been read yet, do so here.
@@ -263,8 +266,8 @@ static struct dirent *readdir_next(DIR *dirp) {
         translate_error(result.val.err);
     }
 
-    // The stream is closed, so return NULL. This'll set `errno` based on the
-    // result of the future above.
+    // The stream is closed, so return NULL. If `errno` needs to be set it'll
+    // have been done above with `f1`.
     return NULL;
   }
 #else

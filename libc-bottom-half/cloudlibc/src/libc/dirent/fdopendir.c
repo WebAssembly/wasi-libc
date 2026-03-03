@@ -73,6 +73,7 @@ DIR *fdopendir(int fd) {
   dirp->stream = result;
 #elif defined(__wasip3__)
   filesystem_method_descriptor_read_directory(file_handle, &dirp->stream);
+  dirp->stream_done = false;
 #endif
   dirp->fd = fd;
   dirp->skip = 0;

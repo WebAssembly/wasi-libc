@@ -7,7 +7,7 @@
 
 unsigned int sleep(unsigned int seconds) {
   struct timespec ts = {.tv_sec = seconds, .tv_nsec = 0};
-  // FIXME(WebAssembly/WASI#857): wasip{2,3} only support the monotonic clock for
+  // FIXME(WebAssembly/WASI#857): wasip2/p3 only supports the monotonic clock for
   // sleeping.
   #if defined(__wasip1__)
   clockid_t clock_id = CLOCK_REALTIME;

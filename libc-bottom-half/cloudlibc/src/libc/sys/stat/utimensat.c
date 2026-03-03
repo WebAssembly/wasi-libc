@@ -59,7 +59,7 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
 
   // Convert the string into a Wasm string
   wasip2_string_t path_wasm_string;
-  if (wasip2_string_from_c(path, &path_wasm_string) < 0)
+  if (wasi_string_from_c(path, &path_wasm_string) < 0)
     return -1;
 
   // Perform system call.

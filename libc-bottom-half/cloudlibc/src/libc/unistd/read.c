@@ -13,10 +13,6 @@
 #include <string.h>
 #endif
 
-#ifdef __wasip3__
-#include <wasi/wasip3_block.h>
-#endif
-
 ssize_t read(int fildes, void *buf, size_t nbyte) {
 #if defined(__wasip1__)
   __wasi_iovec_t iov = {.buf = buf, .buf_len = nbyte};

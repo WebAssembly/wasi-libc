@@ -107,6 +107,17 @@ add_custom_target(
       --rename wasi:cli/terminal-stdin@${wasip3-version}=terminal_stdin
       --rename wasi:cli/terminal-stdout@${wasip3-version}=terminal_stdout
       --rename wasi:cli/terminal-stderr@${wasip3-version}=terminal_stderr
+
+      # Disable async bindings generation for some functions which are only
+      # ever called synchronously within libc.
+      "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.metadata-hash"
+      "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.metadata-hash-at"
+      "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.stat"
+      "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.get-flags"
+      "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.open-at"
+      "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.read-directory"
+      "--async=-wasi:clocks/monotonic-clock@${wasip3-version}#wait-until"
+      "--async=-wasi:clocks/monotonic-clock@${wasip3-version}#wait-for"
       ${CMAKE_SOURCE_DIR}/wasi/p3/wit
   COMMAND cmake -E copy wasip3.h ${bottom_half}/headers/public/wasi/__generated_wasip3.h
   COMMAND cmake -E copy wasip3_component_type.o ${bottom_half}/sources

@@ -57,11 +57,11 @@ extern int64_t __wasm_import_monotonic_clock_now(void);
 __attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06"), __import_name__("get-resolution")))
 extern int64_t __wasm_import_monotonic_clock_get_resolution(void);
 
-__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06"), __import_name__("[async-lower]wait-until")))
-extern int32_t __wasm_import_monotonic_clock_wait_until(int64_t);
+__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06"), __import_name__("wait-until")))
+extern void __wasm_import_monotonic_clock_wait_until(int64_t);
 
-__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06"), __import_name__("[async-lower]wait-for")))
-extern int32_t __wasm_import_monotonic_clock_wait_for(int64_t);
+__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06"), __import_name__("wait-for")))
+extern void __wasm_import_monotonic_clock_wait_for(int64_t);
 
 // Imported Functions from `wasi:clocks/system-clock@0.3.0-rc-2026-01-06`
 
@@ -88,8 +88,8 @@ extern int32_t __wasm_import_filesystem_method_descriptor_advise(int32_t, int64_
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.sync-data")))
 extern int32_t __wasm_import_filesystem_method_descriptor_sync_data(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.get-flags")))
-extern int32_t __wasm_import_filesystem_method_descriptor_get_flags(int32_t, uint8_t *);
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.get-flags")))
+extern void __wasm_import_filesystem_method_descriptor_get_flags(int32_t, uint8_t *);
 
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.get-type")))
 extern int32_t __wasm_import_filesystem_method_descriptor_get_type(int32_t, uint8_t *);
@@ -100,8 +100,8 @@ extern int32_t __wasm_import_filesystem_method_descriptor_set_size(int32_t, int6
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.set-times")))
 extern int32_t __wasm_import_filesystem_method_descriptor_set_times(uint8_t *, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.read-directory")))
-extern int32_t __wasm_import_filesystem_method_descriptor_read_directory(int32_t, uint8_t *);
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.read-directory")))
+extern void __wasm_import_filesystem_method_descriptor_read_directory(int32_t, uint8_t *);
 
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.sync")))
 extern int32_t __wasm_import_filesystem_method_descriptor_sync(int32_t, uint8_t *);
@@ -109,8 +109,8 @@ extern int32_t __wasm_import_filesystem_method_descriptor_sync(int32_t, uint8_t 
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.create-directory-at")))
 extern int32_t __wasm_import_filesystem_method_descriptor_create_directory_at(int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.stat")))
-extern int32_t __wasm_import_filesystem_method_descriptor_stat(int32_t, uint8_t *);
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.stat")))
+extern void __wasm_import_filesystem_method_descriptor_stat(int32_t, uint8_t *);
 
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.stat-at")))
 extern int32_t __wasm_import_filesystem_method_descriptor_stat_at(int32_t, int32_t, uint8_t *, size_t, uint8_t *);
@@ -121,8 +121,8 @@ extern int32_t __wasm_import_filesystem_method_descriptor_set_times_at(uint8_t *
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.link-at")))
 extern int32_t __wasm_import_filesystem_method_descriptor_link_at(uint8_t *, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.open-at")))
-extern int32_t __wasm_import_filesystem_method_descriptor_open_at(uint8_t *, uint8_t *);
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.open-at")))
+extern void __wasm_import_filesystem_method_descriptor_open_at(int32_t, int32_t, uint8_t *, size_t, int32_t, int32_t, uint8_t *);
 
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.readlink-at")))
 extern int32_t __wasm_import_filesystem_method_descriptor_readlink_at(int32_t, uint8_t *, size_t, uint8_t *);
@@ -142,11 +142,11 @@ extern int32_t __wasm_import_filesystem_method_descriptor_unlink_file_at(int32_t
 __attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.is-same-object")))
 extern int32_t __wasm_import_filesystem_method_descriptor_is_same_object(int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.metadata-hash")))
-extern int32_t __wasm_import_filesystem_method_descriptor_metadata_hash(int32_t, uint8_t *);
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.metadata-hash")))
+extern void __wasm_import_filesystem_method_descriptor_metadata_hash(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.metadata-hash-at")))
-extern int32_t __wasm_import_filesystem_method_descriptor_metadata_hash_at(int32_t, int32_t, uint8_t *, size_t, uint8_t *);
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.metadata-hash-at")))
+extern void __wasm_import_filesystem_method_descriptor_metadata_hash_at(int32_t, int32_t, uint8_t *, size_t, uint8_t *);
 
 // Imported Functions from `wasi:filesystem/preopens@0.3.0-rc-2026-01-06`
 
@@ -1383,12 +1383,12 @@ monotonic_clock_duration_t monotonic_clock_get_resolution(void) {
   return (uint64_t) (ret);
 }
 
-wasip3_subtask_status_t monotonic_clock_wait_until(monotonic_clock_mark_t when) {
-  return __wasm_import_monotonic_clock_wait_until((int64_t) (when));
+void monotonic_clock_wait_until(monotonic_clock_mark_t when) {
+  __wasm_import_monotonic_clock_wait_until((int64_t) (when));
 }
 
-wasip3_subtask_status_t monotonic_clock_wait_for(monotonic_clock_duration_t how_long) {
-  return __wasm_import_monotonic_clock_wait_for((int64_t) (how_long));
+void monotonic_clock_wait_for(monotonic_clock_duration_t how_long) {
+  __wasm_import_monotonic_clock_wait_for((int64_t) (how_long));
 }
 
 void system_clock_now(system_clock_instant_t *ret) {
@@ -1434,8 +1434,31 @@ wasip3_subtask_status_t filesystem_method_descriptor_sync_data(filesystem_borrow
   return __wasm_import_filesystem_method_descriptor_sync_data((self).__handle, (uint8_t*) result);
 }
 
-wasip3_subtask_status_t filesystem_method_descriptor_get_flags(filesystem_borrow_descriptor_t self, filesystem_result_descriptor_flags_error_code_t *result) {
-  return __wasm_import_filesystem_method_descriptor_get_flags((self).__handle, (uint8_t*) result);
+bool filesystem_method_descriptor_get_flags(filesystem_borrow_descriptor_t self, filesystem_descriptor_flags_t *ret, filesystem_error_code_t *err) {
+  __attribute__((__aligned__(1)))
+  uint8_t ret_area[2];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_filesystem_method_descriptor_get_flags((self).__handle, ptr);
+  filesystem_result_descriptor_flags_error_code_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (int32_t) *((uint8_t*) (ptr + 1));
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
 }
 
 wasip3_subtask_status_t filesystem_method_descriptor_get_type(filesystem_borrow_descriptor_t self, filesystem_result_descriptor_type_error_code_t *result) {
@@ -1450,8 +1473,15 @@ wasip3_subtask_status_t filesystem_method_descriptor_set_times(filesystem_method
   return __wasm_import_filesystem_method_descriptor_set_times((uint8_t*) args, (uint8_t*) result);
 }
 
-wasip3_subtask_status_t filesystem_method_descriptor_read_directory(filesystem_borrow_descriptor_t self, filesystem_tuple2_stream_directory_entry_future_result_void_error_code_t *result) {
-  return __wasm_import_filesystem_method_descriptor_read_directory((self).__handle, (uint8_t*) result);
+void filesystem_method_descriptor_read_directory(filesystem_borrow_descriptor_t self, filesystem_tuple2_stream_directory_entry_future_result_void_error_code_t *ret) {
+  __attribute__((__aligned__(4)))
+  uint8_t ret_area[8];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_filesystem_method_descriptor_read_directory((self).__handle, ptr);
+  *ret = (filesystem_tuple2_stream_directory_entry_future_result_void_error_code_t) {
+    (filesystem_stream_directory_entry_t) ((uint32_t) *((int32_t*) (ptr + 0))),
+    (filesystem_future_result_void_error_code_t) ((uint32_t) *((int32_t*) (ptr + 4))),
+  };
 }
 
 wasip3_subtask_status_t filesystem_method_descriptor_sync(filesystem_borrow_descriptor_t self, filesystem_result_void_error_code_t *result) {
@@ -1462,8 +1492,84 @@ wasip3_subtask_status_t filesystem_method_descriptor_create_directory_at(filesys
   return __wasm_import_filesystem_method_descriptor_create_directory_at((self).__handle, (uint8_t *) (path).ptr, (path).len, (uint8_t*) result);
 }
 
-wasip3_subtask_status_t filesystem_method_descriptor_stat(filesystem_borrow_descriptor_t self, filesystem_result_descriptor_stat_error_code_t *result) {
-  return __wasm_import_filesystem_method_descriptor_stat((self).__handle, (uint8_t*) result);
+bool filesystem_method_descriptor_stat(filesystem_borrow_descriptor_t self, filesystem_descriptor_stat_t *ret, filesystem_error_code_t *err) {
+  __attribute__((__aligned__(8)))
+  uint8_t ret_area[104];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_filesystem_method_descriptor_stat((self).__handle, ptr);
+  filesystem_result_descriptor_stat_error_code_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      filesystem_option_instant_t option;
+      switch ((int32_t) *((uint8_t*) (ptr + 32))) {
+        case 0: {
+          option.is_some = false;
+          break;
+        }
+        case 1: {
+          option.is_some = true;
+          option.val = (system_clock_instant_t) {
+            (int64_t) *((int64_t*) (ptr + 40)),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 48))),
+          };
+          break;
+        }
+      }
+      filesystem_option_instant_t option0;
+      switch ((int32_t) *((uint8_t*) (ptr + 56))) {
+        case 0: {
+          option0.is_some = false;
+          break;
+        }
+        case 1: {
+          option0.is_some = true;
+          option0.val = (system_clock_instant_t) {
+            (int64_t) *((int64_t*) (ptr + 64)),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 72))),
+          };
+          break;
+        }
+      }
+      filesystem_option_instant_t option1;
+      switch ((int32_t) *((uint8_t*) (ptr + 80))) {
+        case 0: {
+          option1.is_some = false;
+          break;
+        }
+        case 1: {
+          option1.is_some = true;
+          option1.val = (system_clock_instant_t) {
+            (int64_t) *((int64_t*) (ptr + 88)),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 96))),
+          };
+          break;
+        }
+      }
+
+      result.val.ok = (filesystem_descriptor_stat_t) {
+        (filesystem_descriptor_type_t) (int32_t) *((uint8_t*) (ptr + 8)),
+        (filesystem_link_count_t) (uint64_t) (*((int64_t*) (ptr + 16))),
+        (filesystem_filesize_t) (uint64_t) (*((int64_t*) (ptr + 24))),
+        (filesystem_option_instant_t) option,
+        (filesystem_option_instant_t) option0,
+        (filesystem_option_instant_t) option1,
+      };
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) *((uint8_t*) (ptr + 8));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
 }
 
 wasip3_subtask_status_t filesystem_method_descriptor_stat_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t path, filesystem_result_descriptor_stat_error_code_t *result) {
@@ -1478,8 +1584,31 @@ wasip3_subtask_status_t filesystem_method_descriptor_link_at(filesystem_method_d
   return __wasm_import_filesystem_method_descriptor_link_at((uint8_t*) args, (uint8_t*) result);
 }
 
-wasip3_subtask_status_t filesystem_method_descriptor_open_at(filesystem_method_descriptor_open_at_args_t *args, filesystem_result_own_descriptor_error_code_t *result) {
-  return __wasm_import_filesystem_method_descriptor_open_at((uint8_t*) args, (uint8_t*) result);
+bool filesystem_method_descriptor_open_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t *path, filesystem_open_flags_t open_flags, filesystem_descriptor_flags_t flags, filesystem_own_descriptor_t *ret, filesystem_error_code_t *err) {
+  __attribute__((__aligned__(4)))
+  uint8_t ret_area[8];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_filesystem_method_descriptor_open_at((self).__handle, path_flags, (uint8_t *) (*path).ptr, (*path).len, open_flags, flags, ptr);
+  filesystem_result_own_descriptor_error_code_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (filesystem_own_descriptor_t) { *((int32_t*) (ptr + 4)) };
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) *((uint8_t*) (ptr + 4));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
 }
 
 wasip3_subtask_status_t filesystem_method_descriptor_readlink_at(filesystem_borrow_descriptor_t self, wasip3_string_t path, filesystem_result_string_error_code_t *result) {
@@ -1506,12 +1635,64 @@ wasip3_subtask_status_t filesystem_method_descriptor_is_same_object(filesystem_b
   return __wasm_import_filesystem_method_descriptor_is_same_object((self).__handle, (other).__handle, (uint8_t*) result);
 }
 
-wasip3_subtask_status_t filesystem_method_descriptor_metadata_hash(filesystem_borrow_descriptor_t self, filesystem_result_metadata_hash_value_error_code_t *result) {
-  return __wasm_import_filesystem_method_descriptor_metadata_hash((self).__handle, (uint8_t*) result);
+bool filesystem_method_descriptor_metadata_hash(filesystem_borrow_descriptor_t self, filesystem_metadata_hash_value_t *ret, filesystem_error_code_t *err) {
+  __attribute__((__aligned__(8)))
+  uint8_t ret_area[24];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_filesystem_method_descriptor_metadata_hash((self).__handle, ptr);
+  filesystem_result_metadata_hash_value_error_code_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (filesystem_metadata_hash_value_t) {
+        (uint64_t) (uint64_t) (*((int64_t*) (ptr + 8))),
+        (uint64_t) (uint64_t) (*((int64_t*) (ptr + 16))),
+      };
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) *((uint8_t*) (ptr + 8));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
 }
 
-wasip3_subtask_status_t filesystem_method_descriptor_metadata_hash_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t path, filesystem_result_metadata_hash_value_error_code_t *result) {
-  return __wasm_import_filesystem_method_descriptor_metadata_hash_at((self).__handle, path_flags, (uint8_t *) (path).ptr, (path).len, (uint8_t*) result);
+bool filesystem_method_descriptor_metadata_hash_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t *path, filesystem_metadata_hash_value_t *ret, filesystem_error_code_t *err) {
+  __attribute__((__aligned__(8)))
+  uint8_t ret_area[24];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_filesystem_method_descriptor_metadata_hash_at((self).__handle, path_flags, (uint8_t *) (*path).ptr, (*path).len, ptr);
+  filesystem_result_metadata_hash_value_error_code_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (filesystem_metadata_hash_value_t) {
+        (uint64_t) (uint64_t) (*((int64_t*) (ptr + 8))),
+        (uint64_t) (uint64_t) (*((int64_t*) (ptr + 16))),
+      };
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) *((uint8_t*) (ptr + 8));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
 }
 
 void filesystem_preopens_get_directories(filesystem_preopens_list_tuple2_own_descriptor_string_t *ret) {

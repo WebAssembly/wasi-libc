@@ -140,6 +140,7 @@ else()
     sources/getsockpeername.c
     sources/listen.c
     sources/file_utils.c
+    sources/file.c
     sources/recv.c
     sources/send.c
     sources/shutdown.c
@@ -155,7 +156,6 @@ if(WASI STREQUAL "p2")
   list(APPEND bottom_half_sources
     sources/netdb.c
     sources/wasip2.c
-    sources/wasip2_file.c
     sources/wasip2_stdio.c
   )
 endif()
@@ -164,7 +164,6 @@ if (WASI STREQUAL "p3")
   list(APPEND bottom_half_sources
     sources/wasip3.c
     sources/wasip3_block_on.c
-    sources/wasip3_file.c
     sources/wasip3_stdio.c
   )
 endif()

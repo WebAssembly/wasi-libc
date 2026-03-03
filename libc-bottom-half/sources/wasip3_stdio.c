@@ -23,7 +23,8 @@ typedef struct {
   // contains stream, result storage and result subtask
   wasip3_subtask_t subtask;
   stdin_stream_u8_writer_t output;
-  stdin_result_void_error_code_t pending_result;
+  bool output_done;
+  stdout_result_void_error_code_t pending_result;
   // tristate: zero=unknown, valid handle=yes, -1=no
   terminal_output_own_terminal_output_t terminal_out;
   // stream creation function (delayed)
@@ -32,6 +33,23 @@ typedef struct {
   // function to determine whether this is a terminal (delayed)
   bool (*terminal_func)(terminal_stdout_own_terminal_output_t *ret);
 } stdout3_t;
+
+static void translate_error(wasi_cli_types_error_code_t err) {
+  switch (err) {
+  case WASI_CLI_TYPES_ERROR_CODE_IO:
+    errno = EIO;
+    break;
+  case WASI_CLI_TYPES_ERROR_CODE_ILLEGAL_BYTE_SEQUENCE:
+    errno = EILSEQ;
+    break;
+  case WASI_CLI_TYPES_ERROR_CODE_PIPE:
+    errno = EPIPE;
+    break;
+  default:
+    assert(0);
+    break;
+  }
+}
 
 static void stdin3_free(void *data) {
   stdin3_t *stdio = (stdin3_t *)data;
@@ -51,8 +69,21 @@ static void stdout3_free(void *data) {
   if (stdio->output)
     stdin_stream_u8_drop_writable(stdio->output);
   if (stdio->subtask)
-    wasip3_subtask_block_on(stdio->subtask);
+    wasip3_subtask_block_on_and_drop(stdio->subtask);
   free(stdio);
+}
+
+static int stdout3_write_eof(void *data) {
+  stdout3_t *stdio = (stdout3_t *)data;
+  if (stdio->subtask != 0) {
+    wasip3_subtask_block_on_and_drop(stdio->subtask);
+    stdio->subtask = 0;
+  }
+  if (stdio->pending_result.is_err) {
+    translate_error(stdio->pending_result.val.err);
+    return -1;
+  }
+  return 0;
 }
 
 static int stdout3_write(void *data, wasi_write_t *out) {
@@ -60,44 +91,35 @@ static int stdout3_write(void *data, wasi_write_t *out) {
   if (!stdio->output) {
     assert(!stdio->subtask);
     stdin_stream_u8_t read_side = stdin_stream_u8_new(&stdio->output);
-    stdio->subtask = (*stdio->stream_func)(
-        read_side, (stdout_result_void_error_code_t *)&stdio->pending_result);
-    // subtask will be checked by write for error before writing
+    wasip3_subtask_status_t status = (*stdio->stream_func)(
+        read_side, &stdio->pending_result);
+    if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED)
+      stdio->subtask = WASIP3_SUBTASK_HANDLE(status);
   }
   out->offset = NULL;
   out->blocking = true;
   out->timeout = 0;
   out->output = stdio->output;
+  out->done = &stdio->output_done;
+  out->eof = stdout3_write_eof;
+  out->eof_data = data;
   return 0;
 }
 
 static int stdin3_read_eof(void *data) {
   stdin3_t *stdio = (stdin3_t *)data;
 
-  stdin_result_void_error_code_t result;
-  wasip3_waitable_status_t status =
-      stdin_future_result_void_error_code_read(stdio->input.f1, &result);
-  size_t amt = wasip3_waitable_block_on(status, stdio->input.f1);
-  assert(amt == 1);
-  (void) amt;
-  stdin_future_result_void_error_code_drop_readable(stdio->input.f1);
-  stdio->input.f1 = 0;
-  if (result.is_err) {
-    switch (result.val.err) {
-    case WASI_CLI_TYPES_ERROR_CODE_IO:
-      errno = EIO;
-      break;
-    case WASI_CLI_TYPES_ERROR_CODE_ILLEGAL_BYTE_SEQUENCE:
-      errno = EILSEQ;
-      break;
-    case WASI_CLI_TYPES_ERROR_CODE_PIPE:
-      errno = EPIPE;
-      break;
-    default:
-      assert(0);
-      break;
+  if (stdio->input.f1 != 0) {
+    stdin_result_void_error_code_t result;
+    wasip3_future_block_on(
+        stdin_future_result_void_error_code_read(stdio->input.f1, &result),
+        stdio->input.f1);
+    stdin_future_result_void_error_code_drop_readable(stdio->input.f1);
+    stdio->input.f1 = 0;
+    if (result.is_err) {
+      translate_error(result.val.err);
+      return -1;
     }
-    return -1;
   }
   return 0;
 }

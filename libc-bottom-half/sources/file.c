@@ -5,30 +5,38 @@
 #include <wasi/descriptor_table.h>
 #include <wasi/file.h>
 #include <wasi/wasip2.h>
-
-#ifdef __wasip2__
+#include <wasi/wasip3_block.h>
 
 #include "libc/sys/stat/stat_impl.h"
 
 typedef struct {
   filesystem_own_descriptor_t file_handle;
+  // Current position in stream, relative to the beginning of the
+  // *file_handle*, measured in bytes
+  off_t offset;
+  int oflag;
+#ifdef __wasip2__
   // Lazily initialized read/write streams which track the current position
   // in the file. Seeking will close these streams and cause them to be
   // reopened on the next operation, for example.
   streams_own_input_stream_t read_stream;
   streams_own_output_stream_t write_stream;
-  // Current position in stream, relative to the beginning of the
-  // *file_handle*, measured in bytes
-  off_t offset;
   // Used for checking readiness to read/write to stream. Lazily initialized
   // and initially set to 0.
   streams_own_pollable_t read_pollable;
   streams_own_pollable_t write_pollable;
-  int oflag;
+#else
+  filesystem_tuple2_stream_u8_future_result_void_error_code_t read;
+  filesystem_stream_u8_writer_t write;
+  wasip3_subtask_t write_subtask;
+  filesystem_result_void_error_code_t write_pending_result;
+  bool write_done;
+#endif
 } file_t;
 
 static void file_close_streams(void *data) {
   file_t *file = (file_t *)data;
+#ifdef __wasip2__
   if (file->read_pollable.__handle != 0) {
     poll_pollable_drop_own(file->read_pollable);
     file->read_pollable.__handle = 0;
@@ -45,6 +53,28 @@ static void file_close_streams(void *data) {
     streams_output_stream_drop_own(file->write_stream);
     file->write_stream.__handle = 0;
   }
+#else
+  if (file->read.f0 != 0) {
+    filesystem_stream_u8_drop_readable(file->read.f0);
+    file->read.f0 = 0;
+  }
+  if (file->read.f1 != 0) {
+    filesystem_future_result_void_error_code_drop_readable(file->read.f1);
+    file->read.f1 = 0;
+  }
+  if (file->write != 0) {
+    filesystem_stream_u8_drop_writable(file->write);
+    file->write = 0;
+  }
+  if (file->write_subtask != 0) {
+    // TODO: this should use `wasip3_subtask_cancel` but right now that's buggy
+    // in Wasmtime. For now assume closign the stream above is enough to have
+    // the subtask here finish promptly, so block on the result.
+    wasip3_subtask_block_on_and_drop(file->write_subtask);
+    file->write_subtask = 0;
+  }
+  file->write_done = false;
+#endif
 }
 
 static void file_free(void *data) {
@@ -54,8 +84,29 @@ static void file_free(void *data) {
   free(file);
 }
 
+#ifndef __wasip2__
+static int file_read_eof(void *data) {
+  file_t *file = (file_t *)data;
+
+  if (file->read.f1 != 0) {
+    filesystem_result_void_error_code_t result;
+    wasip3_future_block_on(
+        filesystem_future_result_void_error_code_read(file->read.f1, &result),
+        file->read.f1);
+    filesystem_future_result_void_error_code_drop_readable(file->read.f1);
+    file->read.f1 = 0;
+    if (result.is_err) {
+      translate_error(result.val.err);
+      return -1;
+    }
+  }
+  return 0;
+}
+#endif
+
 static int file_get_read_stream(void *data, wasi_read_t *read) {
   file_t *file = (file_t *)data;
+#ifdef __wasip2__
   if (file->read_stream.__handle == 0) {
     filesystem_error_code_t error_code;
     bool ok = filesystem_method_descriptor_read_via_stream(
@@ -67,15 +118,42 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
     }
   }
   read->input = streams_borrow_input_stream(file->read_stream);
-  read->offset = &file->offset;
   read->pollable = &file->read_pollable;
+#else
+  if (file->read.f0 == 0) {
+    filesystem_method_descriptor_read_via_stream(
+        filesystem_borrow_descriptor(file->file_handle), file->offset,
+        &file->read);
+  }
+  read->stream = file->read.f0;
+  read->eof = file_read_eof;
+  read->eof_data = data;
+#endif
+  read->offset = &file->offset;
   read->timeout = 0;
   read->blocking = true;
   return 0;
 }
 
+#ifndef __wasip2__
+static int file_write_eof(void *data) {
+  file_t *file = (file_t *)data;
+
+  if (file->write_subtask != 0) {
+    wasip3_subtask_block_on_and_drop(file->write_subtask);
+    file->write_subtask = 0;
+  }
+  if (file->write_pending_result.is_err) {
+    translate_error(file->write_pending_result.val.err);
+    return -1;
+  }
+  return 0;
+}
+#endif
+
 static int file_get_write_stream(void *data, wasi_write_t *write) {
   file_t *file = (file_t *)data;
+#ifdef __wasip2__
   if (file->write_stream.__handle == 0) {
     filesystem_error_code_t error_code;
     bool ok;
@@ -95,8 +173,24 @@ static int file_get_write_stream(void *data, wasi_write_t *write) {
     }
   }
   write->output = streams_borrow_output_stream(file->write_stream);
-  write->offset = &file->offset;
   write->pollable = &file->write_pollable;
+#else
+  if (file->write == 0) {
+    assert(file->write_subtask == 0);
+    filesystem_stream_u8_t write_read = filesystem_stream_u8_new(&file->write);
+    wasip3_subtask_status_t status =
+        filesystem_method_descriptor_write_via_stream(
+            filesystem_borrow_descriptor(file->file_handle), write_read,
+            file->offset, &file->write_pending_result);
+    if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED)
+      file->write_subtask = WASIP3_SUBTASK_HANDLE(status);
+  }
+  write->output = file->write;
+  write->eof = file_write_eof;
+  write->eof_data = data;
+  write->done = &file->write_done;
+#endif
+  write->offset = &file->offset;
   write->timeout = 0;
   write->blocking = true;
   return 0;
@@ -257,5 +351,3 @@ int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
   entry.data = file;
   return descriptor_table_insert(entry);
 }
-
-#endif // __wasip2__

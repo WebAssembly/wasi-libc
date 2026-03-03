@@ -31,7 +31,7 @@ ssize_t __wasilibc_nocwd_readlinkat(int fd, const char *restrict path, char *res
 
   // Convert the path into a WASI path
   wasip2_string_t wasi_path, link_source;
-  if (wasip2_string_from_c(path, &wasi_path) < 0)
+  if (wasi_string_from_c(path, &wasi_path) < 0)
     return -1;
 
   // Read the link

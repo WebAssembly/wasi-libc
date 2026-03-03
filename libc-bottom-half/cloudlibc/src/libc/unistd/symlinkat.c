@@ -27,9 +27,9 @@ int __wasilibc_nocwd_symlinkat(const char *path1, int fd, const char *path2) {
 
   // Convert the paths into WASI paths
   wasip2_string_t path1_wasi, path2_wasi;
-  if (wasip2_string_from_c(path1, &path1_wasi) < 0)
+  if (wasi_string_from_c(path1, &path1_wasi) < 0)
     return -1;
-  if (wasip2_string_from_c(path2, &path2_wasi) < 0)
+  if (wasi_string_from_c(path2, &path2_wasi) < 0)
     return -1;
 
   // Construct the link

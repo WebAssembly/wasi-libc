@@ -38,16 +38,22 @@ static inline int wasip2_handle_write_error(streams_stream_error_t error) {
   errno = EIO;
   return -1;
 }
+#endif
+
+#ifdef __wasip2__
+typedef wasip2_string_t wasi_string_t;
+#else
+typedef wasip3_string_t wasi_string_t;
+#endif
 
 // Converts the C string `s` into a WASI string stored in `out`.
 //
-// The returned `wasip2_string_t` should not be deallocated or free'd, and it
+// The returned `wasip{2,3}_string_t` should not be deallocated or free'd, and it
 // can only be used while `s` is also valid.
 //
 // Returns 0 if `s` is valid utf-8.
 // Returns -1 and sets errno to `ENOENT` if `s` is not valid utf-8.
-int wasip2_string_from_c(const char *s, wasip2_string_t* out);
-#endif
+int wasi_string_from_c(const char *s, wasi_string_t* out);
 
 // Succeed only if fd is bound to a file handle in the descriptor table
 static inline int fd_to_file_handle(int fd, filesystem_borrow_descriptor_t* result) {

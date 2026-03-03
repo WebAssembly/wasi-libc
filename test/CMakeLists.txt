@@ -263,42 +263,41 @@ add_wasilibc_test(append.c FS FAILP3)
 add_wasilibc_test(argv_two_args.c ARGV foo bar)
 add_wasilibc_test(clock_nanosleep.c)
 add_wasilibc_test(chdir.c FS FAILP3)
-add_wasilibc_test(close.c FS FAILP3)
+add_wasilibc_test(close.c FS)
 add_wasilibc_test(external_env.c ENV VAR1=foo VAR2=bar)
 add_wasilibc_test(fadvise.c FS FAILP3)
 add_wasilibc_test(fallocate.c FS FAILP3)
 add_wasilibc_test(fcntl.c FS FAILP3)
 add_wasilibc_test(fdatasync.c FS FAILP3)
 add_wasilibc_test(fdopen.c FS FAILP3)
-add_wasilibc_test(feof.c FS FAILP3)
+add_wasilibc_test(feof.c FS)
 add_wasilibc_test(file_permissions.c FS FAILP3)
-add_wasilibc_test(file_nonblocking.c FS FAILP3)
+add_wasilibc_test(file_nonblocking.c FS)
 add_wasilibc_test(fseek.c FS FAILP3)
 add_wasilibc_test(fstat.c FS FAILP3)
 add_wasilibc_test(fsync.c FS FAILP3)
 add_wasilibc_test(ftruncate.c FS FAILP3)
 add_wasilibc_test(fts.c FS FAILP3)
-add_wasilibc_test(fwscanf.c FS FAILP3)
+add_wasilibc_test(fwscanf.c FS)
 add_wasilibc_test(getentropy.c)
 add_wasilibc_test(hello.c PASS_REGULAR_EXPRESSION "Hello, World!")
 add_wasilibc_test(ioctl.c FS FAILP3)
 add_wasilibc_test(isatty.c FS FAILP3)
 add_wasilibc_test(link.c FS FAILP3)
-add_wasilibc_test(lseek.c FS FAILP3)
+add_wasilibc_test(lseek.c FS)
 add_wasilibc_test(memchr.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680)
 add_wasilibc_test(memcmp.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680)
-add_wasilibc_test(opendir.c FS FAILP3 ARGV /)
+add_wasilibc_test(opendir.c FS ARGV /)
 add_wasilibc_test(open_relative_path.c FS FAILP3 ARGV /)
 add_wasilibc_test(poll.c FS FAILP3)
 add_wasilibc_test(preadvwritev.c FS FAILP3)
 add_wasilibc_test(preadwrite.c FS FAILP3)
 add_wasilibc_test(readlink.c FS FAILP3)
-add_wasilibc_test(readv.c FS FAILP3)
+add_wasilibc_test(readv.c FS)
 add_wasilibc_test(rename.c FS FAILP3)
 add_wasilibc_test(rmdir.c FS FAILP3)
 add_wasilibc_test(scandir.c FS FAILP3)
 add_wasilibc_test(stat.c FS FAILP3)
-add_wasilibc_test(stdio.c FS)
 add_wasilibc_test(strchrnul.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680)
 add_wasilibc_test(strlen.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680)
 add_wasilibc_test(strptime.c)
@@ -315,6 +314,30 @@ add_wasilibc_test(nanosleep.c)
 add_wasilibc_test(sleep.c)
 add_wasilibc_test(write.c FS FAILP3)
 add_wasilibc_test(wasi-defines.c)
+add_wasilibc_test(close-stdio.c)
+
+# Testing stdio is a bit special so handle it specially here. A single
+# executable is built which is then piped into itself in a few situations to
+# test stdio.
+add_test_executable(stdio.wasm src/stdio.c)
+add_test(
+  NAME stdio-close-output
+  COMMAND
+    ${CMAKE_COMMAND}
+      -DENGINE=${ENGINE}
+      -DWASM=$<TARGET_FILE:stdio.wasm>
+      -DARG=close-output
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/stdio-test.cmake
+)
+add_test(
+  NAME stdio-close-input
+  COMMAND
+    ${CMAKE_COMMAND}
+      -DENGINE=${ENGINE}
+      -DWASM=$<TARGET_FILE:stdio.wasm>
+      -DARG=close-input
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/stdio-test.cmake
+)
 
 if (TARGET_TRIPLE MATCHES "-threads")
   add_wasilibc_test(busywait.c)

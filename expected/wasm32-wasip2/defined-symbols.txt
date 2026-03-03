@@ -1494,6 +1494,7 @@ vwprintf
 vwscanf
 wall_clock_now
 wall_clock_resolution
+wasi_string_from_c
 wasip2_list_string_free
 wasip2_list_tuple2_string_string_free
 wasip2_list_u32_free
@@ -1502,7 +1503,6 @@ wasip2_option_string_free
 wasip2_string_dup
 wasip2_string_dup_n
 wasip2_string_free
-wasip2_string_from_c
 wasip2_string_set
 wasip2_tuple2_string_string_free
 wcpcpy

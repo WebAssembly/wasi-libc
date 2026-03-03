@@ -45,11 +45,14 @@ typedef struct wasi_write_t {
   streams_borrow_output_stream_t output;
   poll_own_pollable_t *pollable;
 #else
+  // The actual stream that is being written to.
   filesystem_stream_u8_writer_t output;
-  // contents will be filled by host (once write has an error)
-  filesystem_result_void_error_code_t pending_result;
-  // this task gets ready on error or eof
-  wasip3_subtask_t *subtask;
+  // An indicator if `output` has been closed/dropped.
+  bool *done;
+  // A callback/ptr pair to invoke when EOF is reached to set errno and return
+  // an error code.
+  int (*eof)(void*);
+  void *eof_data;
 #endif
 } wasi_write_t;
 

@@ -13,10 +13,6 @@
 #include <time.h>
 #endif
 
-#ifdef __wasip3__
-#include <wasi/wasip3_block.h>
-#endif
-
 ssize_t write(int fildes, const void *buf, size_t nbyte) {
 #if defined(__wasip1__)
   __wasi_ciovec_t iov = {.buf = buf, .buf_len = nbyte};

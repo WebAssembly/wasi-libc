@@ -30,7 +30,7 @@ int __wasilibc_nocwd_mkdirat_nomode(int fd, const char *path) {
   // Create the directory
   filesystem_error_code_t error;
   wasip2_string_t path2;
-  if (wasip2_string_from_c(path, &path2) < 0)
+  if (wasi_string_from_c(path, &path2) < 0)
     return -1;
   bool ok = filesystem_method_descriptor_create_directory_at(file_handle,
                                                              &path2,

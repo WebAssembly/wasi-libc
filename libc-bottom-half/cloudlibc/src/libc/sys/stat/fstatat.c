@@ -43,7 +43,7 @@ int __wasilibc_nocwd_fstatat(int fd, const char *restrict path, struct stat *res
 
   // Convert the string into a Wasm string
   wasip2_string_t path_wasm_string;
-  if (wasip2_string_from_c(path, &path_wasm_string) < 0)
+  if (wasi_string_from_c(path, &path_wasm_string) < 0)
     return -1;
 
   // Get the metadata hash for this file

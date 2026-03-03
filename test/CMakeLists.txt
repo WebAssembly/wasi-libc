@@ -308,7 +308,7 @@ add_wasilibc_test(time_and_times.c
   LDFLAGS -lwasi-emulated-process-clocks)
 add_wasilibc_test(time.c)
 add_wasilibc_test(utime.c FS)
-add_wasilibc_test(rewinddir.c FS FAILP3)
+add_wasilibc_test(rewinddir.c FS)
 add_wasilibc_test(seekdir.c FS)
 add_wasilibc_test(usleep.c)
 add_wasilibc_test(nanosleep.c)

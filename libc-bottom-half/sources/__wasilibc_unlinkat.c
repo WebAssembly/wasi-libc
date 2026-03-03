@@ -34,7 +34,7 @@ int __wasilibc_nocwd___wasilibc_unlinkat(int fd, const char *path) {
 
   // Create a Wasm string from the path
   wasip2_string_t wasi_path;
-  if (wasip2_string_from_c(path, &wasi_path) < 0)
+  if (wasi_string_from_c(path, &wasi_path) < 0)
     return -1;
 
   // Unlink the file

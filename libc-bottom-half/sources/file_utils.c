@@ -6,7 +6,6 @@
 #include <wasi/file_utils.h>
 #include <wasi/wasip3_block.h>
 
-#ifdef __wasip2__
 /**
  * Validates that `ptr_signed` is a valid utf-8 string.
  *
@@ -72,7 +71,7 @@ static int validate_utf8(const char *ptr_signed) {
   return i;
 }
 
-int wasip2_string_from_c(const char *s, wasip2_string_t *out) {
+int wasi_string_from_c(const char *s, wasi_string_t *out) {
   int len = validate_utf8(s);
   if (len < 0) {
     errno = EILSEQ;
@@ -82,7 +81,6 @@ int wasip2_string_from_c(const char *s, wasip2_string_t *out) {
   out->len = len;
   return 0;
 }
-#endif
 
 ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
                          size_t length) {
@@ -161,28 +159,22 @@ ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
     }
   }
 #elif defined(__wasip3__)
-  if (WASIP3_SUBTASK_STATE(*write->subtask) == WASIP3_SUBTASK_STARTING ||
-      WASIP3_SUBTASK_STATE(*write->subtask) == WASIP3_SUBTASK_STARTED) {
-    // the stream is still active
-    wasip3_waitable_status_t status =
-        filesystem_stream_u8_write(write->output, buffer, length);
-    size_t amount = wasip3_waitable_block_on(status, write->output);
+  assert(write->blocking);     // TODO(wasip3)
+  assert(write->timeout == 0); // TODO(wasip3)
+
+  // Perform writes until either a non-zero-length write completes or the stream
+  // is closed.
+  while (!*write->done) {
+    size_t amount = __wasilibc_stream_block_on(
+        filesystem_stream_u8_write(write->output, buffer, length),
+        write->output, write->done);
     if (amount > 0 || length == 0) {
       if (write->offset)
         *write->offset += amount;
       return amount;
     }
-    // error or eof
-    wasip3_subtask_block_on(*write->subtask);
-    wasip3_subtask_drop(*write->subtask);
-    *write->subtask = WASIP3_SUBTASK_RETURNED;
   }
-  if (write->pending_result.is_err) {
-    translate_error(write->pending_result.val.err);
-    return -1;
-  }
-  // EOF
-  return 0;
+  return write->eof(write->eof_data);
 #else
 #error "Unknown WASI version"
 #endif
@@ -253,13 +245,21 @@ ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
     }
   }
 #elif defined(__wasip3__)
-  wasip3_waitable_status_t status =
-      filesystem_stream_u8_read(read->stream, buffer, length);
-  size_t amount = wasip3_waitable_block_on(status, read->stream);
-  if (amount > 0 || length == 0) {
-    if (read->offset)
-      *read->offset += amount;
-    return amount;
+  assert(read->blocking);     // TODO(wasip3)
+  assert(read->timeout == 0); // TODO(wasip3)
+
+  // Attempt reads until a nonzero-length read is encountered or the stream is
+  // closed.
+  bool closed = false;
+  while (!closed) {
+    size_t amount = __wasilibc_stream_block_on(
+        filesystem_stream_u8_read(read->stream, buffer, length), read->stream,
+        &closed);
+    if (amount > 0 || length == 0) {
+      if (read->offset)
+        *read->offset += amount;
+      return amount;
+    }
   }
   return read->eof(read->eof_data);
 #else

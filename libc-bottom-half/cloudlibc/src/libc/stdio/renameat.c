@@ -31,9 +31,9 @@ int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char 
 
   // Convert the strings into WASI strings
   wasip2_string_t old_path, new_path;
-  if (wasip2_string_from_c(old, &old_path) < 0)
+  if (wasi_string_from_c(old, &old_path) < 0)
     return -1;
-  if (wasip2_string_from_c(new, &new_path) < 0)
+  if (wasi_string_from_c(new, &new_path) < 0)
     return -1;
 
   // Rename the file

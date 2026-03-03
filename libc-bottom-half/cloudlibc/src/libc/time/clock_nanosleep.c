@@ -8,9 +8,6 @@
 #include <wasi/api.h>
 #include <errno.h>
 #include <time.h>
-#ifdef __wasip3__
-#include <wasi/wasip3_block.h>
-#endif
 
 #ifdef __wasip1__
 static_assert(TIMER_ABSTIME == __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME,
@@ -61,13 +58,11 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
 
   poll_pollable_drop_own(pollable);
 #else // defined(__wasip3__)
-  wasip3_subtask_status_t status;
   if (flags & TIMER_ABSTIME) {
-    status = monotonic_clock_wait_until(duration);
+    monotonic_clock_wait_until(duration);
   } else {
-    status = monotonic_clock_wait_for(duration);
+    monotonic_clock_wait_for(duration);
   }
-  wasip3_subtask_block_on(status);
 #endif
   return 0;
 

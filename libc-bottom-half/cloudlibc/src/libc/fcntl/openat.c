@@ -87,7 +87,7 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
     return -1;
   }
   return newfd;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Set up path flags
   filesystem_path_flags_t lookup_flags = 0;
   if ((oflag & O_NOFOLLOW) == 0)
@@ -140,8 +140,8 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
     return -1;
 
   // Construct a WASI string for the path
-  wasip2_string_t path2;
-  if (wasip2_string_from_c(path, &path2) < 0)
+  wasi_string_t wasi_path;
+  if (wasi_string_from_c(path, &wasi_path) < 0)
     return -1;
 
   // Open the file, yielding a new handle
@@ -149,7 +149,7 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
   filesystem_error_code_t error_code;
   bool ok = filesystem_method_descriptor_open_at(file_handle,
                                                  lookup_flags,
-                                                 &path2,
+                                                 &wasi_path,
                                                  open_flags,
                                                  fs_flags,
                                                  &new_handle,
@@ -161,13 +161,6 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
 
   // Update the descriptor table with the new handle
   return __wasilibc_add_file(new_handle, oflag);
-#elif defined(__wasip3__)
-  (void) fd;
-  (void) path;
-  (void) oflag;
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

@@ -593,13 +593,6 @@ typedef struct filesystem_method_descriptor_link_at_args {
   filesystem_borrow_descriptor_t new_descriptor;
   wasip3_string_t new_path;
 } filesystem_method_descriptor_link_at_args_t;
-typedef struct filesystem_method_descriptor_open_at_args {
-  filesystem_borrow_descriptor_t self;
-  filesystem_path_flags_t path_flags;
-  wasip3_string_t path;
-  filesystem_open_flags_t open_flags;
-  filesystem_descriptor_flags_t flags;
-} filesystem_method_descriptor_open_at_args_t;
 typedef struct filesystem_method_descriptor_rename_at_args {
   filesystem_borrow_descriptor_t self;
   wasip3_string_t old_path;
@@ -1014,9 +1007,9 @@ extern monotonic_clock_mark_t monotonic_clock_now(void);
 // corresponding to a clock tick.
 extern monotonic_clock_duration_t monotonic_clock_get_resolution(void);
 // Wait until the specified mark has occurred.
-extern wasip3_subtask_status_t monotonic_clock_wait_until(monotonic_clock_mark_t when);
+extern void monotonic_clock_wait_until(monotonic_clock_mark_t when);
 // Wait for the specified duration to elapse.
-extern wasip3_subtask_status_t monotonic_clock_wait_for(monotonic_clock_duration_t how_long);
+extern void monotonic_clock_wait_for(monotonic_clock_duration_t how_long);
 
 // Imported Functions from `wasi:clocks/system-clock@0.3.0-rc-2026-01-06`
 // Read the current value of the clock.
@@ -1087,7 +1080,7 @@ extern wasip3_subtask_status_t filesystem_method_descriptor_sync_data(filesystem
 // 
 // Note: This returns the value that was the `fs_flags` value returned
 // from `fdstat_get` in earlier versions of WASI.
-extern wasip3_subtask_status_t filesystem_method_descriptor_get_flags(filesystem_borrow_descriptor_t self, filesystem_result_descriptor_flags_error_code_t *result);
+extern bool filesystem_method_descriptor_get_flags(filesystem_borrow_descriptor_t self, filesystem_descriptor_flags_t *ret, filesystem_error_code_t *err);
 // Get the dynamic type of a descriptor.
 // 
 // Note: This returns the same value as the `type` field of the `fd-stat`
@@ -1122,7 +1115,7 @@ extern wasip3_subtask_status_t filesystem_method_descriptor_set_times(filesystem
 // 
 // This function returns a future, which will resolve to an error code if
 // reading full contents of the directory fails.
-extern wasip3_subtask_status_t filesystem_method_descriptor_read_directory(filesystem_borrow_descriptor_t self, filesystem_tuple2_stream_directory_entry_future_result_void_error_code_t *result);
+extern void filesystem_method_descriptor_read_directory(filesystem_borrow_descriptor_t self, filesystem_tuple2_stream_directory_entry_future_result_void_error_code_t *ret);
 // Synchronize the data and metadata of a file to disk.
 // 
 // This function succeeds with no effect if the file descriptor is not
@@ -1143,7 +1136,7 @@ extern wasip3_subtask_status_t filesystem_method_descriptor_create_directory_at(
 // modified, use `metadata-hash`.
 // 
 // Note: This was called `fd_filestat_get` in earlier versions of WASI.
-extern wasip3_subtask_status_t filesystem_method_descriptor_stat(filesystem_borrow_descriptor_t self, filesystem_result_descriptor_stat_error_code_t *result);
+extern bool filesystem_method_descriptor_stat(filesystem_borrow_descriptor_t self, filesystem_descriptor_stat_t *ret, filesystem_error_code_t *err);
 // Return the attributes of a file or directory.
 // 
 // Note: This is similar to `fstatat` in POSIX, except that it does not
@@ -1179,7 +1172,7 @@ extern wasip3_subtask_status_t filesystem_method_descriptor_link_at(filesystem_m
 // `error-code::read-only`.
 // 
 // Note: This is similar to `openat` in POSIX.
-extern wasip3_subtask_status_t filesystem_method_descriptor_open_at(filesystem_method_descriptor_open_at_args_t *args, filesystem_result_own_descriptor_error_code_t *result);
+extern bool filesystem_method_descriptor_open_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t *path, filesystem_open_flags_t open_flags, filesystem_descriptor_flags_t flags, filesystem_own_descriptor_t *ret, filesystem_error_code_t *err);
 // Read the contents of a symbolic link.
 // 
 // If the contents contain an absolute or rooted path in the underlying
@@ -1235,12 +1228,12 @@ extern wasip3_subtask_status_t filesystem_method_descriptor_is_same_object(files
 //    computed hash.
 // 
 // However, none of these is required.
-extern wasip3_subtask_status_t filesystem_method_descriptor_metadata_hash(filesystem_borrow_descriptor_t self, filesystem_result_metadata_hash_value_error_code_t *result);
+extern bool filesystem_method_descriptor_metadata_hash(filesystem_borrow_descriptor_t self, filesystem_metadata_hash_value_t *ret, filesystem_error_code_t *err);
 // Return a hash of the metadata associated with a filesystem object referred
 // to by a directory descriptor and a relative path.
 // 
 // This performs the same hash computation as `metadata-hash`.
-extern wasip3_subtask_status_t filesystem_method_descriptor_metadata_hash_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t path, filesystem_result_metadata_hash_value_error_code_t *result);
+extern bool filesystem_method_descriptor_metadata_hash_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t *path, filesystem_metadata_hash_value_t *ret, filesystem_error_code_t *err);
 
 // Imported Functions from `wasi:filesystem/preopens@0.3.0-rc-2026-01-06`
 // Return the set of preopened directories, and their paths.

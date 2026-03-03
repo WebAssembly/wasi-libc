@@ -79,6 +79,7 @@ static int stdin3_read_eof(void *data) {
       stdin_future_result_void_error_code_read(stdio->input.f1, &result);
   size_t amt = wasip3_waitable_block_on(status, stdio->input.f1);
   assert(amt == 1);
+  (void) amt;
   stdin_future_result_void_error_code_drop_readable(stdio->input.f1);
   stdio->input.f1 = 0;
   if (result.is_err) {

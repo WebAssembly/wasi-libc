@@ -298,6 +298,7 @@ add_wasilibc_test(rewinddir.c FS FAILP3)
 add_wasilibc_test(seekdir.c FS FAILP3)
 add_wasilibc_test(usleep.c)
 add_wasilibc_test(nanosleep.c)
+add_wasilibc_test(sleep.c)
 add_wasilibc_test(write.c FS FAILP3)
 add_wasilibc_test(wasi-defines.c)
 

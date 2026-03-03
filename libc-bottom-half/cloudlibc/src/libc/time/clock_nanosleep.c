@@ -41,7 +41,7 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
   // Note: rmtp is ignored
 
   if (clock_id != CLOCK_MONOTONIC) {
-    // wasip2 only provides a pollable for monotonic clocks
+    // wasip{2,3} only provide a pollable for monotonic clocks
     return ENOTSUP;
   }
 

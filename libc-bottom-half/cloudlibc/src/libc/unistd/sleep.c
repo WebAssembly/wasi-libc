@@ -7,7 +7,7 @@
 
 unsigned int sleep(unsigned int seconds) {
   struct timespec ts = {.tv_sec = seconds, .tv_nsec = 0};
-  if (clock_nanosleep(CLOCK_REALTIME, 0, &ts, NULL) != 0)
+  if (clock_nanosleep(CLOCK_MONOTONIC, 0, &ts, NULL) != 0)
     return seconds;
   return 0;
 }

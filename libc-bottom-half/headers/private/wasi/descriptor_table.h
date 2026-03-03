@@ -8,6 +8,34 @@
 #include <sys/stat.h>
 #include <netinet/in.h>
 
+#ifdef __wasip2__
+// Metadata for WASI reads which is used to delegate to `__wasilibc_read(...)`
+// to perform the actual read of a stream.
+typedef struct wasip2_read_t {
+  // The `wasi:io/streams.input-stream` that this is reading from.
+  streams_borrow_input_stream_t input;
+  // An optional pointer to the internal offset of this stream, updated on
+  // successful reads.
+  off_t *offset;
+  // A required pointer to an owned pollable for `input`. This is lazily
+  // initialized as-necessary.
+  poll_own_pollable_t *pollable;
+  // Whether or not this read will use blocking I/O.
+  bool blocking;
+  // The timeout, in nanoseconds, for this operation.
+  monotonic_clock_duration_t timeout;
+} wasip2_read_t;
+
+// Same as `wasip2_read_t`, but for writes.
+typedef struct wasip2_write_t {
+  streams_borrow_output_stream_t output;
+  off_t *offset;
+  poll_own_pollable_t *pollable;
+  bool blocking;
+  monotonic_clock_duration_t timeout;
+} wasip2_write_t;
+#endif
+
 #ifdef __wasip3__
 // create an alias to distinguish the handle type in the API
 typedef uint32_t waitable_t;
@@ -44,14 +72,12 @@ typedef struct descriptor_vtable_t {
   // Generic I/O
 
 #ifdef __wasip2__
-  /// Looks up a `wasi:io/streams.input-stream` object and stores it in
-  /// the first argument. If provide also stores a pointer to the internal
-  /// `off_t` offset and `pollable` for this object. The returned pointers
-  /// point within the descriptor itself.
-  int (*get_read_stream)(void*, streams_borrow_input_stream_t*, off_t**, poll_own_pollable_t**);
-
+  /// Looks up metadata to perform a read operation for this stream. This is used
+  /// to implement the `read` syscall, for example, and is also used with `poll`
+  /// when waiting for readability.
+  int (*get_read_stream)(void*, wasip2_read_t*);
   /// Same as `get_read_stream`, but for output streams.
-  int (*get_write_stream)(void*, streams_borrow_output_stream_t*, off_t**, poll_own_pollable_t**);
+  int (*get_write_stream)(void*, wasip2_write_t*);
 #endif
 #ifdef __wasip3__
   int (*get_read_stream3)(void*, filesystem_tuple2_stream_u8_future_result_void_error_code_t **out, off_t** off);

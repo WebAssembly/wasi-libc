@@ -36,10 +36,7 @@ static void stdio_free(void *data) {
   free(stdio);
 }
 
-static int stdio_get_read_stream(void *data,
-                                 streams_borrow_input_stream_t *out_stream,
-                                 off_t **out_offset,
-                                 poll_own_pollable_t **out_pollable) {
+static int stdio_get_read_stream(void *data, wasip2_read_t *read) {
   stdio_t *stdio = (stdio_t *)data;
   if (stdio->fd != 0) {
     errno = EOPNOTSUPP;
@@ -47,18 +44,15 @@ static int stdio_get_read_stream(void *data,
   }
   if (stdio->input.__handle == 0)
     stdio->input = stdin_get_stdin();
-  *out_stream = streams_borrow_input_stream(stdio->input);
-  if (out_offset)
-    *out_offset = NULL;
-  if (out_pollable)
-    *out_pollable = &stdio->input_pollable;
+  read->input = streams_borrow_input_stream(stdio->input);
+  read->offset = NULL;
+  read->pollable = &stdio->input_pollable;
+  read->timeout = 0;
+  read->blocking = true;
   return 0;
 }
 
-static int stdio_get_write_stream(void *data,
-                                  streams_borrow_output_stream_t *out_stream,
-                                  off_t **out_offset,
-                                  poll_own_pollable_t **out_pollable) {
+static int stdio_get_write_stream(void *data, wasip2_write_t *write) {
   stdio_t *stdio = (stdio_t *)data;
   if (stdio->output.__handle == 0) {
     if (stdio->fd == 1) {
@@ -70,11 +64,11 @@ static int stdio_get_write_stream(void *data,
       return -1;
     }
   }
-  *out_stream = streams_borrow_output_stream(stdio->output);
-  if (out_offset)
-    *out_offset = NULL;
-  if (out_pollable)
-    *out_pollable = &stdio->output_pollable;
+  write->output = streams_borrow_output_stream(stdio->output);
+  write->offset = NULL;
+  write->pollable = &stdio->output_pollable;
+  write->blocking = true;
+  write->timeout = 0;
   return 0;
 }
 

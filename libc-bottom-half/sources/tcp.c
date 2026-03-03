@@ -160,7 +160,7 @@ static int tcp_set_blocking(void *data, bool blocking) {
 }
 
 static int tcp_fstat(void *data, struct stat *buf) {
-  tcp_socket_t *tcp = (tcp_socket_t *)data;
+  (void)data;
   memset(buf, 0, sizeof(struct stat));
   buf->st_mode = S_IFSOCK;
   return 0;
@@ -195,10 +195,7 @@ static int tcp_accept4(void *data, struct sockaddr *addr, socklen_t *addrlen,
     return -1;
   }
 
-  tcp_socket_state_listening_t listener;
-  if (socket->state.tag == TCP_SOCKET_STATE_LISTENING) {
-    listener = socket->state.listening;
-  } else {
+  if (socket->state.tag != TCP_SOCKET_STATE_LISTENING) {
     errno = EINVAL;
     return -1;
   }
@@ -325,11 +322,10 @@ static int tcp_connect(void *data, const struct sockaddr *addr,
     return -1;
   }
 
-  sockets_error_code_t error;
+#ifdef __wasip2__
   sockets_borrow_tcp_socket_t socket_borrow =
       sockets_borrow_tcp_socket(socket->socket);
-
-#ifdef __wasip2__
+  sockets_error_code_t error;
   network_borrow_network_t network_borrow =
       __wasi_sockets_utils__borrow_network();
 
@@ -498,8 +494,6 @@ static int tcp_listen(void *data, int backlog) {
   }
 
 #ifdef __wasip2__
-  network_borrow_network_t network_borrow =
-      __wasi_sockets_utils__borrow_network();
   if (!tcp_method_tcp_socket_start_listen(socket_borrow, &error)) {
     return __wasilibc_socket_error_to_errno(error);
   }
@@ -519,7 +513,6 @@ static int tcp_listen(void *data, int backlog) {
 #ifdef __wasip2__
 static ssize_t tcp_recvfrom(void *data, void *buffer, size_t length, int flags,
                             struct sockaddr *addr, socklen_t *addrlen) {
-  tcp_socket_t *socket = (tcp_socket_t *)data;
   // TODO wasi-sockets: flags:
   // - MSG_WAITALL: we can probably support these relatively easy.
   // - MSG_OOB: could be shimmed by always responding that no OOB data is
@@ -551,7 +544,6 @@ static ssize_t tcp_recvfrom(void *data, void *buffer, size_t length, int flags,
 static ssize_t tcp_sendto(void *data, const void *buffer, size_t length,
                           int flags, const struct sockaddr *addr,
                           socklen_t addrlen) {
-  tcp_socket_t *socket = (tcp_socket_t *)data;
   const int supported_flags = MSG_DONTWAIT | MSG_NOSIGNAL;
   if ((flags & supported_flags) != flags) {
     errno = EOPNOTSUPP;
@@ -597,10 +589,7 @@ static int tcp_shutdown(void *data, int posix_how) {
     return -1;
   }
 
-  tcp_socket_state_connected_t *connection;
-  if (socket->state.tag == TCP_SOCKET_STATE_CONNECTED) {
-    connection = &socket->state.connected;
-  } else {
+  if (socket->state.tag != TCP_SOCKET_STATE_CONNECTED) {
     errno = ENOTCONN;
     return -1;
   }
@@ -932,6 +921,10 @@ static int tcp_getsockopt(void *data, int level, int optname,
 static int tcp_setsockopt(void *data, int level, int optname,
                           const void *optval, socklen_t optlen) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+  if (optlen < sizeof(int)) {
+    errno = EINVAL;
+    return -1;
+  }
   int intval = *(int *)optval;
 
   sockets_error_code_t error;
@@ -971,6 +964,10 @@ static int tcp_setsockopt(void *data, int level, int optname,
       return 0;
     }
     case SO_RCVTIMEO: {
+      if (optlen < sizeof(struct timeval)) {
+        errno = EINVAL;
+        return -1;
+      }
       struct timeval *tv = (struct timeval *)optval;
       if (!timeval_to_duration(tv, &socket->recv_timeout)) {
         errno = EINVAL;
@@ -979,6 +976,10 @@ static int tcp_setsockopt(void *data, int level, int optname,
       return 0;
     }
     case SO_SNDTIMEO: {
+      if (optlen < sizeof(struct timeval)) {
+        errno = EINVAL;
+        return -1;
+      }
       struct timeval *tv = (struct timeval *)optval;
       if (!timeval_to_duration(tv, &socket->send_timeout)) {
         errno = EINVAL;

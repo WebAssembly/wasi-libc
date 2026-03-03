@@ -1,3 +1,4 @@
+add_compile_options(-Wno-unused-function)
 add_internal_object_library(top-half-emulated-signal
     ../../libc-top-half/musl/src/signal/psignal.c
     ../../libc-top-half/musl/src/string/strsignal.c)

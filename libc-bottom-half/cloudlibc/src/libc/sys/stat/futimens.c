@@ -53,6 +53,8 @@ int futimens(int fd, const struct timespec *times) {
     return -1;
   }
 #elif defined(__wasip3__)
+  (void) fd;
+  (void) times;
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;

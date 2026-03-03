@@ -131,7 +131,7 @@ int main() {
     TEST(recv(client, received, sizeof(data), 0) == sizeof(data));
 
     // Assert that what was received matches what was sent.
-    for (int i = 0; i < sizeof(data); ++i) {
+    for (size_t i = 0; i < sizeof(data); ++i) {
       ASSERT(received[i] == data[i]);
     }
   }
@@ -156,7 +156,6 @@ int main() {
     }
 
     // Write until we hit backpressure
-    ssize_t write_total = 0;
     while (1) {
       if (t_status)
         exit(t_status);
@@ -166,8 +165,6 @@ int main() {
       if (count == -1) {
         TEST2(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS);
         break;
-      } else {
-        write_total += count;
       }
     }
 
@@ -196,7 +193,7 @@ int main() {
         for (ssize_t i = 0; i < count; ++i) {
           ASSERT(received[i] == 42);
         }
-        if (read_total == data_len) {
+        if ((size_t)read_total == data_len) {
           break;
         }
       }

@@ -35,6 +35,8 @@ int __wasilibc_nocwd___wasilibc_rmdirat(int fd, const char *path) {
     return -1;
   }
 #elif defined(__wasip3__)
+  (void)fd;
+  (void)path;
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;

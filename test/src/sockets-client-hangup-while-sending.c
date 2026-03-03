@@ -46,7 +46,6 @@ void test_tcp_client() {
   // Connect from client
   char message[] = "There's gonna be a party when the wolf comes home";
   int len = strlen(message);
-  char client_buffer[BUFSIZE];
 
   int socket_fd = wait_for_server(&sockaddr_in);
 

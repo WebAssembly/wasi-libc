@@ -188,6 +188,8 @@ static inline void __wake(volatile void *addr, int cnt, int priv)
 #else
 #ifdef _REENTRANT
 	__builtin_wasm_memory_atomic_notify((int*)addr, cnt);
+#else
+        (void) addr;
 #endif
 #endif
 }

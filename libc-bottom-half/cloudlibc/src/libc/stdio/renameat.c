@@ -48,6 +48,10 @@ int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char 
     return -1;
   }
 #elif defined(__wasip3__)
+  (void) oldfd;
+  (void) old;
+  (void) newfd;
+  (void) new;
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;

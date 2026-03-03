@@ -31,6 +31,7 @@ int fsync(int fildes) {
     return -1;
   }
 #elif defined(__wasip3__)
+  (void) fildes;
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;

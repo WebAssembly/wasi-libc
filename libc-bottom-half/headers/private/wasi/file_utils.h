@@ -17,7 +17,7 @@
 ///
 /// If the error indicates "closed" then 0 is returned to mean EOF. Otherwise
 /// the last-operation-failed handle is closed and errno is set to EIO.
-static int wasip2_handle_read_error(streams_stream_error_t error) {
+static inline int wasip2_handle_read_error(streams_stream_error_t error) {
   if (error.tag == STREAMS_STREAM_ERROR_CLOSED) {
     return 0;
   }
@@ -29,7 +29,7 @@ static int wasip2_handle_read_error(streams_stream_error_t error) {
 
 /// Same as `wasip2_handle_read_error` except "closed" now returns EPIPE
 /// instead of 0.
-static int wasip2_handle_write_error(streams_stream_error_t error) {
+static inline int wasip2_handle_write_error(streams_stream_error_t error) {
   if (error.tag == STREAMS_STREAM_ERROR_CLOSED) {
     errno = EPIPE;
     return -1;
@@ -52,7 +52,7 @@ int wasip2_string_from_c(const char *s, wasip2_string_t* out);
 
 #if defined(__wasip2__) || defined(__wasip3__)
 // Succeed only if fd is bound to a file handle in the descriptor table
-static int fd_to_file_handle(int fd, filesystem_borrow_descriptor_t* result) {
+static inline int fd_to_file_handle(int fd, filesystem_borrow_descriptor_t* result) {
   descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
   if (entry == NULL)
     return -1;
@@ -81,7 +81,7 @@ int __wasilibc_read_stream3(int fildes, filesystem_tuple2_stream_u8_future_resul
 #endif
 
 #if defined(__wasip2__) || defined(__wasip3__)
-static unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
+static inline unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
   switch(ty) {
   case FILESYSTEM_DESCRIPTOR_TYPE_UNKNOWN:
     return DT_UNKNOWN;

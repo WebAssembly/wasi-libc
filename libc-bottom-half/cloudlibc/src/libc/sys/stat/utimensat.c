@@ -75,6 +75,10 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
     return -1;
   }
 #elif defined(__wasip3__)
+  (void) fd;
+  (void) path;
+  (void) times;
+  (void) flag;
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;

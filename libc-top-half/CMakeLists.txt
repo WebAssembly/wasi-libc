@@ -1,3 +1,22 @@
+# Disable some warnings in this third-party code.
+add_compile_options(
+  -Wno-bitwise-op-parentheses
+  -Wno-dangling-else
+  -Wno-ignored-attributes
+  -Wno-ignored-pragmas
+  -Wno-logical-op-parentheses
+  -Wno-missing-braces
+  -Wno-parentheses
+  -Wno-shift-op-parentheses
+  -Wno-sign-compare
+  -Wno-string-plus-int
+  -Wno-unknown-pragmas
+  -Wno-unused-but-set-variable
+  -Wno-unused-function
+  -Wno-unused-parameter
+  -Wno-unused-variable
+)
+
 # Dummy interface library which helps configure headers/options for internal
 # libraries below.
 add_library(musl-top-half-interface INTERFACE)
@@ -7,14 +26,6 @@ target_include_directories(musl-top-half-interface INTERFACE
   musl/arch/wasm32
   musl/arch/generic
   headers/private)
-target_compile_options(musl-top-half-interface INTERFACE
-  -Wno-parentheses
-  -Wno-shift-op-parentheses
-  -Wno-bitwise-op-parentheses
-  -Wno-logical-op-parentheses
-  -Wno-string-plus-int
-  -Wno-dangling-else
-  -Wno-unknown-pragmas)
 add_dependencies(musl-top-half-interface sysroot_inc)
 
 # =============================================================================

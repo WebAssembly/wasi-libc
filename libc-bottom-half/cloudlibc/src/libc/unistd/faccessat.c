@@ -110,6 +110,8 @@ int __wasilibc_nocwd_faccessat(int fd, const char *path, int amode, int flag) {
     }
   }
 #elif defined(__wasip3__)
+  (void) fd;
+  (void) path;
   // TODO(wasip3)
   errno = ENOTSUP;
   return -1;

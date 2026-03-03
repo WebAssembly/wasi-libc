@@ -72,6 +72,8 @@ int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
   }
   return 0;
 #elif defined(__wasip3__)
+  (void) fd;
+  (void) advice;
   // TODO(wasip3)
   errno = ENOTSUP;
   return ENOTSUP;

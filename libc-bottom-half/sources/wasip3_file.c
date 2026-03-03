@@ -4,6 +4,8 @@
 #ifdef __wasip3__
 
 int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
+  (void)file_handle;
+  (void)oflag;
   // TODO(wasip3)
   errno = EOPNOTSUPP;
   return -1;

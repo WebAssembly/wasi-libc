@@ -59,7 +59,7 @@ void test_tcp_client() {
                   sizeof(tv)) == 0);
 
   // Client reads from server
-  int32_t bytes_received = recv(socket_fd, client_buffer, len, 0);
+  recv(socket_fd, client_buffer, len, 0);
 
   // Shut down client
   close(socket_fd);

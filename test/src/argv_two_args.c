@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
 
   for (int i = 0; i < argc; i++) {
     TEST(argv[i][0] != 0, "argument should not be empty\n");
-    TEST(snprintf(buf, sizeof buf, "%s", argv[i]) < sizeof buf,
+    TEST(snprintf(buf, sizeof buf, "%s", argv[i]) < (ssize_t)sizeof buf,
          "argument is not a valid path\n");
   }
   return t_status;

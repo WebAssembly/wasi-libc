@@ -157,7 +157,6 @@ void __expect_child_ftsent(FTSENT *p, const char *name, short level, int info,
 
 void test_fts_children(int base_options) {
   FTS *ftsp;
-  FTSENT *p;
 
   mkdir("t3", 0755);
   touch("t3/file1");
@@ -186,8 +185,8 @@ void test_fts_children(int base_options) {
 
 int main(void) {
   int base_options_set[] = {FTS_PHYSICAL, FTS_NOCHDIR};
-  for (int i = 0; i < sizeof(base_options_set) / sizeof(base_options_set[0]);
-       i++) {
+  for (unsigned i = 0;
+       i < sizeof(base_options_set) / sizeof(base_options_set[0]); i++) {
     test_fts_info(base_options_set[i]);
     test_symlink_fts_info(base_options_set[i]);
     test_fts_children(base_options_set[i]);

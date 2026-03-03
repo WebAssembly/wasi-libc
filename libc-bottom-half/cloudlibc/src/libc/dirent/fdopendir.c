@@ -77,6 +77,7 @@ DIR *fdopendir(int fd) {
   dirp->dirent_size = 1;
   return dirp;
 #elif defined(__wasip3__)
+  (void) fd;
   // TODO(wasip3)
   errno = ENOTSUP;
   free(dirp);

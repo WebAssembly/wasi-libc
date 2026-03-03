@@ -32,6 +32,7 @@ static_assert(DT_UNKNOWN == __WASI_FILETYPE_UNKNOWN, "Value mismatch");
 #endif
 
 // Grows a buffer to be large enough to hold a certain amount of data.
+#ifndef __wasip3__
 static struct dirent* grow(struct dirent **buffer, size_t *buffer_size, size_t target_size) {
   if (*buffer_size < target_size) {
     size_t new_size = *buffer_size;
@@ -47,6 +48,7 @@ static struct dirent* grow(struct dirent **buffer, size_t *buffer_size, size_t t
   }
   return *buffer;
 }
+#endif
 
 #if defined(__wasip1__)
 struct dirent *readdir(DIR *dirp) {

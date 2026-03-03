@@ -50,6 +50,7 @@ option(SIMD "Whether or not to build simd-enabled intrinsics into wasi-libc" OFF
 option(BUILD_SHARED "Whether or not to build shared libraries" ON)
 option(CHECK_SYMBOLS "Whether or not to check the exported symbols of libc.a" OFF)
 set(WASI_SDK_VERSION "" CACHE STRING "Version information for wasi-sdk to embed in headers")
+option(ENABLE_WERROR "Whether to compile with `-Werror`" OFF)
 
 if(TARGET_TRIPLE MATCHES "-threads$")
   set(WASI p1)
@@ -195,24 +196,18 @@ add_compile_options(
   # TODO: Add -fno-signaling-nans when the compiler supports it.
   -fno-trapping-math
 
-  # Add all warnings, but disable a few which occur in third-party code.
-  -Wall -Wextra -Werror
-  -Wno-null-pointer-arithmetic
-  -Wno-unused-parameter
-  -Wno-sign-compare
-  -Wno-unused-variable
-  -Wno-unused-function
-  -Wno-ignored-attributes
-  -Wno-missing-braces
-  -Wno-ignored-pragmas
-  -Wno-unused-but-set-variable
-  -Wno-unknown-warning-option
-  -Wno-unterminated-string-initialization
+  # Add all warnings. Note that third-party code is compiled with extra flags
+  # to disable warnings that crop up.
+  -Wall -Wextra
 
   # Compiling assembly flags lots of arguments as unused but that's not too
   # interesting so just ignore that.
   $<$<COMPILE_LANGUAGE:ASM>:-Wno-unused-command-line-argument>
 )
+
+if (ENABLE_WERROR)
+  add_compile_options(-Werror)
+endif()
 
 # =============================================================================
 # Helper functions for adding libraries.

@@ -216,7 +216,6 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
 
     if (pollfd->events & POLLRDNORM) {
       if (entry->vtable->get_read_stream) {
-        streams_borrow_input_stream_t input;
         wasip2_read_t read;
         if (entry->vtable->get_read_stream(entry->data, &read) < 0)
           return -1;
@@ -285,6 +284,9 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
 #elif defined(__wasip3__)
 
 static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
+  (void) fds;
+  (void) nfds;
+  (void) timeout;
   errno = ENOTSUP;
   return -1;
 }

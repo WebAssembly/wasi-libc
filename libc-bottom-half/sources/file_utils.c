@@ -4,9 +4,9 @@
 #include <stddef.h>
 #include <string.h>
 #include <wasi/file_utils.h>
+#include <wasi/wasip3_block.h>
 
 #ifdef __wasip2__
-
 /**
  * Validates that `ptr_signed` is a valid utf-8 string.
  *
@@ -82,9 +82,11 @@ int wasip2_string_from_c(const char *s, wasip2_string_t *out) {
   out->len = len;
   return 0;
 }
+#endif
 
-ssize_t __wasilibc_write(wasip2_write_t *write, const void *buffer,
+ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
                          size_t length) {
+#if defined(__wasip2__)
   assert(write->output.__handle != 0);
   while (true) {
     streams_stream_error_t error;
@@ -158,9 +160,36 @@ ssize_t __wasilibc_write(wasip2_write_t *write, const void *buffer,
       poll_method_pollable_block(pollable_borrow);
     }
   }
+#elif defined(__wasip3__)
+  if (WASIP3_SUBTASK_STATE(*write->subtask) == WASIP3_SUBTASK_STARTING ||
+      WASIP3_SUBTASK_STATE(*write->subtask) == WASIP3_SUBTASK_STARTED) {
+    // the stream is still active
+    wasip3_waitable_status_t status =
+        filesystem_stream_u8_write(write->output, buffer, length);
+    size_t amount = wasip3_waitable_block_on(status, write->output);
+    if (amount > 0 || length == 0) {
+      if (write->offset)
+        *write->offset += amount;
+      return amount;
+    }
+    // error or eof
+    wasip3_subtask_block_on(*write->subtask);
+    wasip3_subtask_drop(*write->subtask);
+    *write->subtask = WASIP3_SUBTASK_RETURNED;
+  }
+  if (write->pending_result.is_err) {
+    translate_error(write->pending_result.val.err);
+    return -1;
+  }
+  // EOF
+  return 0;
+#else
+#error "Unknown WASI version"
+#endif
 }
 
-ssize_t __wasilibc_read(wasip2_read_t *read, void *buffer, size_t length) {
+ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
+#if defined(__wasip2__)
   while (true) {
     wasip2_list_u8_t result;
     streams_stream_error_t error;
@@ -223,6 +252,17 @@ ssize_t __wasilibc_read(wasip2_read_t *read, void *buffer, size_t length) {
       poll_method_pollable_block(pollable_borrow);
     }
   }
+#elif defined(__wasip3__)
+  wasip3_waitable_status_t status =
+      filesystem_stream_u8_read(read->stream, buffer, length);
+  size_t amount = wasip3_waitable_block_on(status, read->stream);
+  if (amount > 0 || length == 0) {
+    if (read->offset)
+      *read->offset += amount;
+    return amount;
+  }
+  return read->eof(read->eof_data);
+#else
+#error "Unknown WASI version"
+#endif
 }
-
-#endif // __wasip2__

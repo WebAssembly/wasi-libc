@@ -54,7 +54,7 @@ static void file_free(void *data) {
   free(file);
 }
 
-static int file_get_read_stream(void *data, wasip2_read_t *read) {
+static int file_get_read_stream(void *data, wasi_read_t *read) {
   file_t *file = (file_t *)data;
   if (file->read_stream.__handle == 0) {
     filesystem_error_code_t error_code;
@@ -74,7 +74,7 @@ static int file_get_read_stream(void *data, wasip2_read_t *read) {
   return 0;
 }
 
-static int file_get_write_stream(void *data, wasip2_write_t *write) {
+static int file_get_write_stream(void *data, wasi_write_t *write) {
   file_t *file = (file_t *)data;
   if (file->write_stream.__handle == 0) {
     filesystem_error_code_t error_code;

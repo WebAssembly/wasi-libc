@@ -27,12 +27,12 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
     return -1;
   }
   return bytes_read;
-#elif defined(__wasip2__)
+#else
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
   if (!entry)
     return -1;
   if (entry->vtable->get_read_stream) {
-    wasip2_read_t read;
+    wasi_read_t read;
     if (entry->vtable->get_read_stream(entry->data, &read) < 0)
       return -1;
     return __wasilibc_read(&read, buf, nbyte);
@@ -41,30 +41,5 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
     return entry->vtable->recvfrom(entry->data, buf, nbyte, 0, NULL, NULL);
   errno = EOPNOTSUPP;
   return -1;
-#elif defined(__wasip3__)
-  filesystem_tuple2_stream_u8_future_result_void_error_code_t *stream;
-  off_t *off;
-  if (__wasilibc_read_stream3(fildes, &stream, &off)<0)
-    return -1;
-  wasip3_waitable_status_t status =
-      filesystem_stream_u8_read(stream->f0, buf, nbyte);
-  size_t amount = wasip3_waitable_block_on(status, stream->f0);
-  if (amount > 0 || nbyte == 0) {
-    if (off)
-      *off += amount;
-    return amount;
-  } else {
-    filesystem_result_void_error_code_t error;
-    status = filesystem_future_result_void_error_code_read(stream->f1, &error);
-    amount = wasip3_waitable_block_on(status, stream->f1);
-    if (amount > 0 && error.is_err) {
-      translate_error(error.val.err);
-      return -1;
-    }
-    // EOF
-    return 0;
-  }
-#else
-# error "Unsupported WASI version"
 #endif
 }

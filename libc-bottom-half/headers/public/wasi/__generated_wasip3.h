@@ -979,7 +979,7 @@ extern monotonic_clock_duration_t monotonic_clock_get_resolution(void);
 // Wait until the specified mark has occurred.
 extern void monotonic_clock_wait_until(monotonic_clock_mark_t when);
 // Wait for the specified duration to elapse.
-extern void monotonic_clock_wait_for(monotonic_clock_duration_t how_long);
+extern wasip3_subtask_status_t monotonic_clock_wait_for(monotonic_clock_duration_t how_long);
 
 // Imported Functions from `wasi:clocks/system-clock@0.3.0-rc-2026-01-06`
 // Read the current value of the clock.

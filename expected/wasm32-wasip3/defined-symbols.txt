@@ -302,7 +302,7 @@ __wasilibc_fd_renumber
 __wasilibc_find_abspath
 __wasilibc_find_relpath
 __wasilibc_find_relpath_alloc
-__wasilibc_future_block_on
+__wasilibc_future_block_on_timeout
 __wasilibc_get_environ
 __wasilibc_get_service_entry_by_name
 __wasilibc_get_service_entry_by_port
@@ -340,7 +340,7 @@ __wasilibc_rmdirat
 __wasilibc_sockaddr_to_wasi
 __wasilibc_sockaddr_validate
 __wasilibc_stat
-__wasilibc_stream_block_on
+__wasilibc_stream_block_on_timeout
 __wasilibc_subtask_await_nonblocking
 __wasilibc_subtask_block_on_and_drop
 __wasilibc_tell

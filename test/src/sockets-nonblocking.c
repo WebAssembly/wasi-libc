@@ -65,6 +65,14 @@ void test_tcp_client() {
                sizeof(sockaddr_in)) != -1 ||
        errno == EINPROGRESS);
 
+  // Wait for server to be ready to accept a client. Also test that `poll`
+  // works.
+  {
+    struct pollfd poll_fd = {
+        .fd = server_socket_fd, .events = POLLRDNORM, .revents = 0};
+    TEST(poll(&poll_fd, 1, -1) != -1);
+  }
+
   // Accept a client, turning the loop while it's not ready.
   while (!t_status) {
     TEST((client_socket_fd =

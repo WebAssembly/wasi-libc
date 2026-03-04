@@ -1,8 +1,3 @@
-// TODO(wasip3) these are load-bearing assertions functionality-wise, but once
-// the assertions below are removed and the implementation is filled in then
-// this should be removed.
-#undef NDEBUG
-
 #include <assert.h>
 #include <common/errors.h>
 #include <errno.h>
@@ -164,15 +159,15 @@ ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
     }
   }
 #elif defined(__wasip3__)
-  assert(write->blocking);     // TODO(wasip3)
-  assert(write->timeout == 0); // TODO(wasip3)
+  assert(write->blocking); // TODO(wasip3)
 
   // Perform writes until either a non-zero-length write completes or the stream
   // is closed.
-  while (!*write->done) {
-    size_t amount = __wasilibc_stream_block_on(
-        filesystem_stream_u8_write(write->output, buffer, length),
-        write->output, write->done);
+  while (!write->state->done) {
+    ssize_t amount = __wasilibc_stream_block_on_timeout(
+        filesystem_stream_u8_write(write->state->stream, buffer, length),
+        write->state->stream, &write->state->done, write->timeout,
+        filesystem_stream_u8_cancel_write);
     if (amount > 0 || length == 0) {
       if (write->offset)
         *write->offset += amount;
@@ -250,16 +245,15 @@ ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
     }
   }
 #elif defined(__wasip3__)
-  assert(read->blocking);     // TODO(wasip3)
-  assert(read->timeout == 0); // TODO(wasip3)
+  assert(read->blocking); // TODO(wasip3)
 
   // Attempt reads until a nonzero-length read is encountered or the stream is
   // closed.
-  bool closed = false;
-  while (!closed) {
-    size_t amount = __wasilibc_stream_block_on(
-        filesystem_stream_u8_read(read->stream, buffer, length), read->stream,
-        &closed);
+  while (!read->state->done) {
+    size_t amount = __wasilibc_stream_block_on_timeout(
+        filesystem_stream_u8_read(read->state->stream, buffer, length),
+        read->state->stream, &read->state->done, read->timeout,
+        filesystem_stream_u8_cancel_read);
     if (amount > 0 || length == 0) {
       if (read->offset)
         *read->offset += amount;

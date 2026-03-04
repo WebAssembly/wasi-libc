@@ -12,6 +12,7 @@
 #include <wasi/file_utils.h>
 #include <wasi/sockets_utils.h>
 #include <wasi/tcp.h>
+#include <wasi/wasip3_block.h>
 
 // Normalize names on WASIp2 to the WASIp3-based names
 #ifdef __wasip2__
@@ -98,16 +99,51 @@ static void tcp_free(void *data) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
 
   switch (tcp->state.tag) {
-  case TCP_SOCKET_STATE_CONNECTED:
-#ifdef __wasip2__
-    if (tcp->state.connected.input_pollable.__handle != 0)
-      poll_pollable_drop_own(tcp->state.connected.input_pollable);
-    if (tcp->state.connected.output_pollable.__handle != 0)
-      poll_pollable_drop_own(tcp->state.connected.output_pollable);
-    streams_input_stream_drop_own(tcp->state.connected.input);
-    streams_output_stream_drop_own(tcp->state.connected.output);
-#endif // __wasip2__
+#ifdef __wasip3__
+  case TCP_SOCKET_STATE_CONNECTING: {
+    tcp_socket_state_connecting_t *state = &tcp->state.connecting;
+    if (state->subtask != 0) {
+      wasip3_subtask_cancel(state->subtask);
+      wasip3_subtask_drop(state->subtask);
+    }
     break;
+  }
+
+  case TCP_SOCKET_STATE_LISTENING: {
+    tcp_socket_state_listening_t *state = &tcp->state.listening;
+    if (state->stream != 0)
+      sockets_stream_own_tcp_socket_drop_readable(state->stream);
+    break;
+  }
+#endif
+
+  case TCP_SOCKET_STATE_CONNECTED: {
+    tcp_socket_state_connected_t *state = &tcp->state.connected;
+
+#ifdef __wasip2__
+    if (state->input_pollable.__handle != 0)
+      poll_pollable_drop_own(state->input_pollable);
+    if (state->output_pollable.__handle != 0)
+      poll_pollable_drop_own(state->output_pollable);
+    streams_input_stream_drop_own(state->input);
+    streams_output_stream_drop_own(state->output);
+#else
+    if (state->receive != 0)
+      sockets_stream_u8_drop_readable(state->receive);
+    if (state->receive_result != 0)
+      sockets_future_result_void_error_code_drop_readable(
+          state->receive_result);
+    if (state->send != 0)
+      sockets_stream_u8_drop_writable(state->send);
+    // TODO: when wasmtime 43.0.0 is released this should be changed to
+    // cancelling the subtask and dropping it, but that doesn't work well in 42
+    // which is currently released.
+    if (state->send_subtask != 0)
+      __wasilibc_subtask_block_on_and_drop(state->send_subtask);
+#endif
+    break;
+  }
+
   default:
     break;
   }
@@ -121,7 +157,25 @@ static void tcp_free(void *data) {
   free(tcp);
 }
 
-#ifdef __wasip2__
+#ifndef __wasip2__
+static int tcp_read_eof(void *data) {
+  tcp_socket_t *tcp = (tcp_socket_t *)data;
+  assert(tcp->state.tag == TCP_SOCKET_STATE_CONNECTED);
+  tcp_socket_state_connected_t *state = &tcp->state.connected;
+
+  if (state->receive_result) {
+    assert(tcp->blocking);
+    sockets_result_void_error_code_t result;
+    __wasilibc_future_block_on(sockets_future_result_void_error_code_read(
+                                   state->receive_result, &result),
+                               state->receive_result);
+    if (result.is_err)
+      return __wasilibc_socket_error_to_errno(result.val.err);
+  }
+  return 0;
+}
+#endif
+
 static int tcp_get_read_stream(void *data, wasi_read_t *read) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
 
@@ -129,13 +183,36 @@ static int tcp_get_read_stream(void *data, wasi_read_t *read) {
     errno = ENOTCONN;
     return -1;
   }
-  read->input = streams_borrow_input_stream(tcp->state.connected.input);
+  tcp_socket_state_connected_t *state = &tcp->state.connected;
+#ifdef __wasip2__
+  read->input = streams_borrow_input_stream(state->input);
+  read->pollable = &state->input_pollable;
+#else
+  read->stream = state->receive;
+  read->eof = tcp_read_eof;
+  read->eof_data = data;
+#endif
   read->offset = NULL;
-  read->pollable = &tcp->state.connected.input_pollable;
   read->timeout = tcp->recv_timeout;
   read->blocking = tcp->blocking;
   return 0;
 }
+
+#ifndef __wasip2__
+static int tcp_write_eof(void *data) {
+  tcp_socket_t *tcp = (tcp_socket_t *)data;
+  assert(tcp->state.tag == TCP_SOCKET_STATE_CONNECTED);
+  tcp_socket_state_connected_t *state = &tcp->state.connected;
+
+  if (state->send_subtask) {
+    __wasilibc_subtask_block_on_and_drop(state->send_subtask);
+    state->send_subtask = 0;
+  }
+  if (state->send_result.is_err)
+    return __wasilibc_socket_error_to_errno(state->send_result.val.err);
+  return 0;
+}
+#endif
 
 static int tcp_get_write_stream(void *data, wasi_write_t *write) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
@@ -144,14 +221,21 @@ static int tcp_get_write_stream(void *data, wasi_write_t *write) {
     errno = ENOTCONN;
     return -1;
   }
-  write->output = streams_borrow_output_stream(tcp->state.connected.output);
+  tcp_socket_state_connected_t *state = &tcp->state.connected;
+#ifdef __wasip2__
+  write->output = streams_borrow_output_stream(state->output);
+  write->pollable = &state->output_pollable;
+#else
+  write->output = state->send;
+  write->eof = tcp_write_eof;
+  write->eof_data = data;
+  write->done = &state->send_done;
+#endif
   write->offset = NULL;
-  write->pollable = &tcp->state.connected.output_pollable;
   write->timeout = tcp->send_timeout;
   write->blocking = tcp->blocking;
   return 0;
 }
-#endif // __wasip2__
 
 static int tcp_set_blocking(void *data, bool blocking) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
@@ -186,6 +270,30 @@ static int tcp_handle_error(tcp_socket_t *socket, sockets_error_code_t error) {
   return 0;
 }
 
+#else
+
+// Setup the `TCP_SOCKET_STATE_CONNECTED` fields for a wasip3-connected socket.
+static void tcp_setup_connected_state_wasip3(tcp_socket_t *socket) {
+  sockets_borrow_tcp_socket_t socket_borrow =
+      sockets_borrow_tcp_socket(socket->socket);
+
+  socket->state.tag = TCP_SOCKET_STATE_CONNECTED;
+  tcp_socket_state_connected_t *state = &socket->state.connected;
+
+  sockets_tuple2_stream_u8_future_result_void_error_code_t receive_result;
+  sockets_method_tcp_socket_receive(socket_borrow, &receive_result);
+  state->receive = receive_result.f0;
+  state->receive_result = receive_result.f1;
+
+  state->send_done = false;
+  sockets_stream_u8_t reader = sockets_stream_u8_new(&state->send);
+  wasip3_subtask_status_t status = sockets_method_tcp_socket_send(
+      socket_borrow, reader, &state->send_result);
+  if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED)
+    state->send_subtask = WASIP3_SUBTASK_HANDLE(status);
+}
+#endif
+
 static int tcp_accept4(void *data, struct sockaddr *addr, socklen_t *addrlen,
                        int flags) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
@@ -200,33 +308,22 @@ static int tcp_accept4(void *data, struct sockaddr *addr, socklen_t *addrlen,
     return -1;
   }
 
+  tcp_socket_t *client_socket;
+  sockets_error_code_t error;
+
+#ifdef __wasip2__
   sockets_borrow_tcp_socket_t socket_borrow =
       sockets_borrow_tcp_socket(socket->socket);
-
   tcp_tuple3_own_tcp_socket_own_input_stream_own_output_stream_t client_and_io;
-  sockets_error_code_t error;
   while (!tcp_method_tcp_socket_accept(socket_borrow, &client_and_io, &error)) {
     if (tcp_handle_error(socket, error) < 0)
       return -1;
   }
 
   sockets_own_tcp_socket_t client = client_and_io.f0;
-  sockets_borrow_tcp_socket_t client_borrow = sockets_borrow_tcp_socket(client);
   streams_own_input_stream_t input = client_and_io.f1;
   streams_own_output_stream_t output = client_and_io.f2;
 
-  if (output_addr.tag != OUTPUT_SOCKADDR_NULL) {
-    sockets_ip_socket_address_t remote_address;
-    if (!sockets_method_tcp_socket_get_remote_address(
-            client_borrow, &remote_address, &error)) {
-      // TODO wasi-sockets: How to recover from this in a POSIX compatible way?
-      abort();
-    }
-
-    __wasilibc_wasi_to_sockaddr(remote_address, &output_addr);
-  }
-
-  tcp_socket_t *client_socket;
   int client_fd = tcp_add(client, socket->family, (flags & SOCK_NONBLOCK) == 0,
                           &client_socket);
   if (client_fd < 0) {
@@ -240,10 +337,49 @@ static int tcp_accept4(void *data, struct sockaddr *addr, socklen_t *addrlen,
          sizeof(client_socket->state.connected));
   client_socket->state.connected.input = input;
   client_socket->state.connected.output = output;
+#else
+  tcp_socket_state_listening_t *state = &socket->state.listening;
+  assert(socket->blocking);
+  sockets_own_tcp_socket_t result;
+  while (1) {
+    // It's not clear what the correct error code to return here is, if any,
+    // since in theory sockets being accepted are infinite until the socket is
+    // closed. Handle this with at least some error for now.
+    if (state->done) {
+      errno = ENOTSUP;
+      return -1;
+    }
+
+    // Wait on a socket to be accepted, and then break out of the loop. Turn
+    // again on 0-length reads.
+    size_t amt = __wasilibc_stream_block_on(
+        sockets_stream_own_tcp_socket_read(state->stream, &result, 1),
+        state->stream, &state->done);
+    if (amt > 0)
+      break;
+  }
+  int client_fd = tcp_add(result, socket->family, (flags & SOCK_NONBLOCK) == 0,
+                          &client_socket);
+  if (client_fd < 0)
+    return -1;
+  tcp_setup_connected_state_wasip3(client_socket);
+#endif
+
+  sockets_borrow_tcp_socket_t client_borrow =
+      sockets_borrow_tcp_socket(client_socket->socket);
+  if (output_addr.tag != OUTPUT_SOCKADDR_NULL) {
+    sockets_ip_socket_address_t remote_address;
+    if (!sockets_method_tcp_socket_get_remote_address(
+            client_borrow, &remote_address, &error)) {
+      // TODO wasi-sockets: How to recover from this in a POSIX compatible way?
+      abort();
+    }
+
+    __wasilibc_wasi_to_sockaddr(remote_address, &output_addr);
+  }
   client_socket->fake_nodelay = socket->fake_nodelay;
   return client_fd;
 }
-#endif // __wasip2__
 
 static int tcp_do_bind(tcp_socket_t *socket,
                        sockets_ip_socket_address_t *address) {
@@ -322,9 +458,10 @@ static int tcp_connect(void *data, const struct sockaddr *addr,
     return -1;
   }
 
-#ifdef __wasip2__
   sockets_borrow_tcp_socket_t socket_borrow =
       sockets_borrow_tcp_socket(socket->socket);
+
+#ifdef __wasip2__
   sockets_error_code_t error;
   network_borrow_network_t network_borrow =
       __wasi_sockets_utils__borrow_network();
@@ -359,7 +496,48 @@ static int tcp_connect(void *data, const struct sockaddr *addr,
   memset(&socket->state.connected, 0, sizeof(socket->state.connected));
   socket->state.connected.input = input;
   socket->state.connected.output = output;
-#endif // __wasip2__
+#else
+  // Setup the arguments to the `connect` function as well as initializing the
+  // `subtask` field of the `connecting` state to zero as we're not sure we'll
+  // get a subtask just yet.
+  socket->state.connecting.args.self = socket_borrow;
+  socket->state.connecting.args.remote_address = remote_address;
+  socket->state.connecting.subtask = 0;
+
+  wasip3_subtask_status_t status = sockets_method_tcp_socket_connect(
+      &socket->state.connecting.args, &socket->state.connecting.result);
+
+  // If the subtask hasn't returned yet then its arguments/results are stored
+  // in the `TCP_SOCKET_STATE_CONNECTING` state that we're in right now, as
+  // stable addresses. Here if the socket is in blocking mode we block on the
+  // result of the task, and otherwise this returns that the connect is in
+  // progress and otherwise bails out.
+  if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED) {
+    wasip3_subtask_t subtask = WASIP3_SUBTASK_HANDLE(status);
+    if (socket->blocking) {
+      __wasilibc_subtask_block_on_and_drop(subtask);
+    } else {
+      socket->state.connecting.subtask = subtask;
+      errno = EINPROGRESS;
+      return -1;
+    }
+  }
+
+  // The connect subtask has completed at this point, so check to see what the
+  // result was.
+  assert(socket->state.connecting.subtask == 0);
+  if (socket->state.connecting.result.is_err) {
+    sockets_error_code_t error = socket->state.connecting.result.val.err;
+    __wasilibc_socket_error_to_errno(error);
+    socket->state.tag = TCP_SOCKET_STATE_CONNECT_FAILED;
+    socket->state.connect_failed.error_code = error;
+    return -1;
+  }
+
+  // Our socket is now connected, so establish the send/receive streams that
+  // will be used for data transmission.
+  tcp_setup_connected_state_wasip3(socket);
+#endif
 
   return 0;
 }
@@ -503,14 +681,21 @@ static int tcp_listen(void *data, int backlog) {
     if (tcp_handle_error(socket, error) < 0)
       return -1;
   }
-#endif // __wasip2__
 
-  // Listen successful.
   socket->state.tag = TCP_SOCKET_STATE_LISTENING;
+#else
+  sockets_stream_own_tcp_socket_t stream;
+  if (!sockets_method_tcp_socket_listen(socket_borrow, &stream, &error))
+    return __wasilibc_socket_error_to_errno(error);
+
+  socket->state.tag = TCP_SOCKET_STATE_LISTENING;
+  socket->state.listening.stream = stream;
+  socket->state.listening.done = false;
+#endif
+
   return 0;
 }
 
-#ifdef __wasip2__
 static ssize_t tcp_recvfrom(void *data, void *buffer, size_t length, int flags,
                             struct sockaddr *addr, socklen_t *addrlen) {
   // TODO wasi-sockets: flags:
@@ -573,6 +758,13 @@ static ssize_t tcp_sendto(void *data, const void *buffer, size_t length,
 
 static int tcp_shutdown(void *data, int posix_how) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+
+  if (socket->state.tag != TCP_SOCKET_STATE_CONNECTED) {
+    errno = ENOTCONN;
+    return -1;
+  }
+
+#ifdef __wasip2__
   tcp_shutdown_type_t wasi_how;
   switch (posix_how) {
   case SHUT_RD:
@@ -586,11 +778,6 @@ static int tcp_shutdown(void *data, int posix_how) {
     break;
   default:
     errno = EINVAL;
-    return -1;
-  }
-
-  if (socket->state.tag != TCP_SOCKET_STATE_CONNECTED) {
-    errno = ENOTCONN;
     return -1;
   }
 
@@ -610,10 +797,28 @@ static int tcp_shutdown(void *data, int posix_how) {
     // TODO wasi-sockets: drop output stream (if not already). And
     // update `send` to take dropped output streams into account.
   }
+#else
+  tcp_socket_state_connected_t *state = &socket->state.connected;
+  if (posix_how == SHUT_RD || posix_how == SHUT_RDWR) {
+    if (state->receive != 0) {
+      sockets_stream_u8_drop_readable(state->receive);
+      state->receive = 0;
+    }
+  }
+
+  if (posix_how == SHUT_WR || posix_how == SHUT_RDWR) {
+    if (state->send != 0) {
+      sockets_stream_u8_drop_writable(state->send);
+      state->send = 0;
+      state->send_done = true;
+    }
+  }
+#endif
 
   return 0;
 }
 
+#ifdef __wasip2__
 static int tcp_poll_register(void *data, poll_state_t *state, short events) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
   switch (socket->state.tag) {
@@ -1099,26 +1304,20 @@ static int tcp_setsockopt(void *data, int level, int optname,
 static descriptor_vtable_t tcp_vtable = {
     .free = tcp_free,
 
-#ifdef __wasip2__
     .get_read_stream = tcp_get_read_stream,
     .get_write_stream = tcp_get_write_stream,
-#endif // __wasip2__
     .set_blocking = tcp_set_blocking,
     .fstat = tcp_fstat,
 
-#ifdef __wasip2__
     .accept4 = tcp_accept4,
-#endif // __wasip2__
     .bind = tcp_bind,
     .connect = tcp_connect,
     .getsockname = tcp_getsockname,
     .getpeername = tcp_getpeername,
     .listen = tcp_listen,
-#ifdef __wasip2__
     .recvfrom = tcp_recvfrom,
     .sendto = tcp_sendto,
     .shutdown = tcp_shutdown,
-#endif // __wasip2__
     .getsockopt = tcp_getsockopt,
     .setsockopt = tcp_setsockopt,
 

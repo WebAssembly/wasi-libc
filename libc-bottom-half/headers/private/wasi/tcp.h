@@ -24,10 +24,25 @@ typedef struct {
   int dummy;
 } tcp_socket_state_bound_t;
 typedef struct {
+#ifdef __wasip2__
   int dummy;
+#else
+  // Arguments, results, and subtask connected to `[method]tcp-socket.connect`
+  // while it's in-progress. Note that `subtask` may be 0 in which case it means
+  // that `result` is valid as it's been filled in.
+  sockets_method_tcp_socket_connect_args_t args;
+  sockets_result_void_error_code_t result;
+  wasip3_subtask_t subtask;
+#endif
 } tcp_socket_state_connecting_t;
 typedef struct {
+#ifdef __wasip2__
   int dummy;
+#else
+  // The `stream<tcp-socket>` that this is reading to receive accepted sockets.
+  sockets_stream_own_tcp_socket_t stream;
+  bool done;
+#endif
 } tcp_socket_state_listening_t;
 
 // Pollables here are lazily initialized on-demand.
@@ -38,7 +53,19 @@ typedef struct {
   streams_own_output_stream_t output;
   poll_own_pollable_t output_pollable;
 #else
-  int dummy; // TODO(wasip3)
+  // The bytes that are being received on this socket in addition to the future
+  // of the result to read when the socket hits EOF to see if there's an error.
+  sockets_stream_u8_t receive;
+  sockets_future_result_void_error_code_t receive_result;
+
+  // The stream to write to in order to send out bytes, along with the `send`
+  // subtask that was created connected to the other half of `send`. The
+  // result of the subtask at `send_result` will get filled in when
+  // `send_subtask` is finished.
+  sockets_stream_u8_writer_t send;
+  wasip3_subtask_t send_subtask;
+  sockets_result_void_error_code_t send_result;
+  bool send_done;
 #endif
 } tcp_socket_state_connected_t;
 

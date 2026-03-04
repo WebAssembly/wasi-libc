@@ -37,6 +37,8 @@ void run_udp_server() {
   server_address.sin_port = htons(server_port);
   TEST(bind(server_socket_fd, (struct sockaddr *)&server_address,
             sizeof(server_address)) != -1);
+  if (t_status != 0)
+    return;
 
   struct sockaddr_in client_address;
   socklen_t address_len = sizeof(client_address);

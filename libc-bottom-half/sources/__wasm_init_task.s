@@ -7,7 +7,6 @@
     .globaltype __init_tls_base, i32
     .globaltype __tls_size, i32, immutable
     .globaltype __tls_align, i32, immutable
-    .globl __default_stacksize
 
     .functype   __wasm_component_model_builtin_context_set_0 (i32) -> ()
     .import_module __wasm_component_model_builtin_context_set_0, "$root"
@@ -84,7 +83,10 @@ __wasm_init_async_task:
     call __wasm_component_model_builtin_context_set_1
 
     # Allocate a new stack
-    i32.const  __default_stacksize
+    # Constant copied from __default_stacksize, TODO(wasip3) find a way
+    # to reference this constant without linking failing for shared libraries,
+    # i.e. a position-independent data reference. 
+    i32.const 131072 
     call malloc
     call __wasm_component_model_builtin_context_set_0
 

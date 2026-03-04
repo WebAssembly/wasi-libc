@@ -21,7 +21,7 @@ int __wasilibc_nocwd_mkdirat_nomode(int fd, const char *path) {
     return -1;
   }
   return 0;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
   if (fd_to_file_handle(fd, &file_handle) < 0)
@@ -29,8 +29,8 @@ int __wasilibc_nocwd_mkdirat_nomode(int fd, const char *path) {
 
   // Create the directory
   filesystem_error_code_t error;
-  wasip2_string_t path2;
-  if (wasip2_string_from_c(path, &path2) < 0)
+  wasi_string_t path2;
+  if (wasi_string_from_c(path, &path2) < 0)
     return -1;
   bool ok = filesystem_method_descriptor_create_directory_at(file_handle,
                                                              &path2,
@@ -40,10 +40,6 @@ int __wasilibc_nocwd_mkdirat_nomode(int fd, const char *path) {
     return -1;
   }
   return 0;
-#elif defined(__wasip3__)
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

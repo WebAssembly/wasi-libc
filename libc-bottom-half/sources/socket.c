@@ -15,10 +15,8 @@
 static int tcp_socket(sockets_ip_address_family_t family, bool blocking) {
   sockets_error_code_t error;
   sockets_own_tcp_socket_t socket;
-  if (!sockets_static_tcp_socket_create(family, &socket, &error)) {
-    errno = __wasi_sockets_utils__map_error(error);
-    return -1;
-  }
+  if (!sockets_static_tcp_socket_create(family, &socket, &error))
+    return __wasilibc_socket_error_to_errno(error);
 
   return __wasilibc_add_tcp_socket(socket, family, blocking);
 }
@@ -26,10 +24,8 @@ static int tcp_socket(sockets_ip_address_family_t family, bool blocking) {
 static int udp_socket(sockets_ip_address_family_t family, bool blocking) {
   sockets_error_code_t error;
   sockets_own_udp_socket_t socket;
-  if (!sockets_static_udp_socket_create(family, &socket, &error)) {
-    errno = __wasi_sockets_utils__map_error(error);
-    return -1;
-  }
+  if (!sockets_static_udp_socket_create(family, &socket, &error))
+    return __wasilibc_socket_error_to_errno(error);
 
   return __wasilibc_add_udp_socket(socket, family, blocking);
 }

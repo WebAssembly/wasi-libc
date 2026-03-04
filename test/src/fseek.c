@@ -27,7 +27,7 @@ static FILE *make_temp_file() {
 
 static FILE *writetemp(const char *data) {
   FILE *f = make_temp_file();
-  size_t n = strlen(data);
+  ssize_t n = strlen(data);
   if (!f)
     return 0;
   if (write(fileno(f), data, n) != n) {

@@ -20,7 +20,7 @@
   } while (0)
 
 int BUFSIZE = 256;
-int EXPECTED_CONNECTIONS = 10;
+size_t EXPECTED_CONNECTIONS = 10;
 int TIMEOUT = 100;
 
 size_t respond_to_client(int client_fd) {
@@ -55,7 +55,7 @@ void run_tcp_server() {
   socklen_t client_len = sizeof(struct sockaddr_in);
   int client_socket_fd;
   struct sockaddr_in client_address;
-  int32_t bytes_read = 0, total_bytes_read = 0;
+  int32_t total_bytes_read = 0;
   TEST(listen(server_socket_fd, 1) != -1);
 
   // Server accepts connection
@@ -72,9 +72,8 @@ void run_tcp_server() {
 
   // Poll on the array of client file descriptors and respond to
   // any that are ready
-  size_t connections = 0;
   while (poll(client_fds, EXPECTED_CONNECTIONS, TIMEOUT) != 0) {
-    for (int i = 0; i < EXPECTED_CONNECTIONS; i++) {
+    for (size_t i = 0; i < EXPECTED_CONNECTIONS; i++) {
       if (client_fds[i].revents | POLLIN) {
         total_bytes_read += respond_to_client(client_fds[i].fd);
         // If fd is negative, revents will be set to 0 on the next call

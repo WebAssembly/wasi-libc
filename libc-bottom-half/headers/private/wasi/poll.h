@@ -33,7 +33,7 @@ int __wasilibc_poll_add(poll_state_t *state,
 
 /// Helper function to lazily subscribe to an input stream and call
 /// `__wasilibc_poll_add`.
-static int __wasilibc_poll_add_input_stream(
+static inline int __wasilibc_poll_add_input_stream(
     poll_state_t *state,
     streams_borrow_input_stream_t input_stream,
     poll_own_pollable_t *pollable) {
@@ -44,7 +44,7 @@ static int __wasilibc_poll_add_input_stream(
 
 /// Helper function to lazily subscribe to an output stream and call
 /// `__wasilibc_poll_add`.
-static int __wasilibc_poll_add_output_stream(
+static inline int __wasilibc_poll_add_output_stream(
     poll_state_t *state,
     streams_borrow_output_stream_t output_stream,
     poll_own_pollable_t *pollable) {

@@ -139,12 +139,16 @@ else()
     sources/descriptor_table.c
     sources/getsockpeername.c
     sources/listen.c
+    sources/file_utils.c
+    sources/file.c
     sources/recv.c
     sources/send.c
     sources/shutdown.c
     sources/socket.c
     sources/sockets_utils.c
     sources/sockopt.c
+    sources/tcp.c
+    sources/udp.c
   )
 endif()
 
@@ -152,11 +156,7 @@ if(WASI STREQUAL "p2")
   list(APPEND bottom_half_sources
     sources/netdb.c
     sources/wasip2.c
-    sources/wasip2_file.c
-    sources/wasip2_file_utils.c
     sources/wasip2_stdio.c
-    sources/wasip2_tcp.c
-    sources/wasip2_udp.c
   )
 endif()
 
@@ -165,11 +165,7 @@ if (WASI STREQUAL "p3")
     sources/__wasm_init_task.s
     sources/wasip3.c
     sources/wasip3_block_on.c
-    sources/wasip3_file.c
-    sources/wasip3_file_utils.c
     sources/wasip3_stdio.c
-    sources/wasip3_tcp.c
-    sources/wasip3_udp.c
   )
 endif()
 

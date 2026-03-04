@@ -39,7 +39,7 @@ void run_tcp_server() {
   socklen_t client_len = sizeof(struct sockaddr_in);
   int client_socket_fd;
   struct sockaddr_in client_address;
-  int32_t bytes_read = 0, total_bytes_read = 0;
+  int32_t bytes_read = 0;
   TEST(listen(server_socket_fd, 1) != -1);
 
   // Server accepts connection
@@ -58,7 +58,6 @@ void run_tcp_server() {
   // Server waits for input and echoes message back to client
   // The server shuts down after the client closes the connection
   while ((bytes_read = recv(client_socket_fd, buffer, BUFSIZE, 0)) > 0) {
-    total_bytes_read += bytes_read;
     // Echo back the data received from the client
     send(client_socket_fd, buffer, bytes_read, 0);
   }

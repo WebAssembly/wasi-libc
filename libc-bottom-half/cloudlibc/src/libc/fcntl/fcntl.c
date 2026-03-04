@@ -13,7 +13,7 @@
 #endif
 
 int fcntl(int fildes, int cmd, ...) {
-#ifdef __wasip2__
+#if defined(__wasip2__) || defined(__wasip3__)
   descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
   if (entry == NULL)
     return -1;
@@ -51,16 +51,12 @@ int fcntl(int fildes, int cmd, ...) {
         oflags |= O_SEARCH;
       }
       return oflags;
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__) 
       if (!entry->vtable->fcntl_getfl) {
         errno = EINVAL;
         return -1;
       }
       return entry->vtable->fcntl_getfl(entry->data);
-#elif defined(__wasip3__)
-      // TODO(wasip3)
-      errno = ENOTSUP;
-      return -1;
 #else
 # error "Unknown WASI version"
 #endif
@@ -80,16 +76,12 @@ int fcntl(int fildes, int cmd, ...) {
         errno = error;
         return -1;
       }
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
       if (!entry->vtable->fcntl_setfl) {
         errno = EINVAL;
         return -1;
       }
       return entry->vtable->fcntl_setfl(entry->data, flags);
-#elif defined(__wasip3__)
-      // TODO(wasip3)
-      errno = ENOTSUP;
-      return -1;
 #else
 # error "Unknown WASI version"
 #endif

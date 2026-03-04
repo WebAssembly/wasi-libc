@@ -32,7 +32,7 @@
 #endif
 
 #define BUFSIZE 256
-int MAX_CONNECTIONS = 10;
+size_t MAX_CONNECTIONS = 10;
 
 struct response {
   bool responded;
@@ -119,10 +119,9 @@ void test_udp_client() {
 
   struct pollfd server_pollfd = {
       .fd = server_socket_fd, .events = POLLRDNORM, .revents = 0};
-  struct pollfd server_client_pollfds[MAX_CONNECTIONS];
   size_t next_client = 0;
   size_t server_client_index = 0;
-  int32_t tries = 0;
+  size_t tries = 0;
   while (!done(client_outgoing, client_incoming) &&
          (tries < (MAX_CONNECTIONS * 2))) {
     DEBUG_PRINT("server polling for new messages\n");

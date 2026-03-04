@@ -2,22 +2,21 @@
 #define __wasi_file_utils_h
 
 #include <wasi/version.h>
-
 #if defined(__wasip2__) || defined(__wasip3__)
+
 #include <assert.h>
 #include <wasi/wasip2.h>
 #include <wasi/descriptor_table.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <errno.h>
-#endif
 
 #ifdef __wasip2__
 /// Handles a `wasi:io/streams.stream-error` for a `read`-style operation.
 ///
 /// If the error indicates "closed" then 0 is returned to mean EOF. Otherwise
 /// the last-operation-failed handle is closed and errno is set to EIO.
-static int wasip2_handle_read_error(streams_stream_error_t error) {
+static inline int wasip2_handle_read_error(streams_stream_error_t error) {
   if (error.tag == STREAMS_STREAM_ERROR_CLOSED) {
     return 0;
   }
@@ -29,7 +28,7 @@ static int wasip2_handle_read_error(streams_stream_error_t error) {
 
 /// Same as `wasip2_handle_read_error` except "closed" now returns EPIPE
 /// instead of 0.
-static int wasip2_handle_write_error(streams_stream_error_t error) {
+static inline int wasip2_handle_write_error(streams_stream_error_t error) {
   if (error.tag == STREAMS_STREAM_ERROR_CLOSED) {
     errno = EPIPE;
     return -1;
@@ -39,20 +38,25 @@ static int wasip2_handle_write_error(streams_stream_error_t error) {
   errno = EIO;
   return -1;
 }
+#endif
+
+#ifdef __wasip2__
+typedef wasip2_string_t wasi_string_t;
+#else
+typedef wasip3_string_t wasi_string_t;
+#endif
 
 // Converts the C string `s` into a WASI string stored in `out`.
 //
-// The returned `wasip2_string_t` should not be deallocated or free'd, and it
+// The returned `wasip{2,3}_string_t` should not be deallocated or free'd, and it
 // can only be used while `s` is also valid.
 //
 // Returns 0 if `s` is valid utf-8.
 // Returns -1 and sets errno to `ENOENT` if `s` is not valid utf-8.
-int wasip2_string_from_c(const char *s, wasip2_string_t* out);
-#endif
+int wasi_string_from_c(const char *s, wasi_string_t* out);
 
-#if defined(__wasip2__) || defined(__wasip3__)
 // Succeed only if fd is bound to a file handle in the descriptor table
-static int fd_to_file_handle(int fd, filesystem_borrow_descriptor_t* result) {
+static inline int fd_to_file_handle(int fd, filesystem_borrow_descriptor_t* result) {
   descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
   if (entry == NULL)
     return -1;
@@ -62,28 +66,17 @@ static int fd_to_file_handle(int fd, filesystem_borrow_descriptor_t* result) {
   }
   return entry->vtable->get_file(entry->data, result);
 }
-#endif
 
-#ifdef __wasip2__
-// Gets an `output-stream` borrow from the `fd` provided.
-int __wasilibc_write_stream(int fd,
-                            streams_borrow_output_stream_t *out,
-                            off_t **off,
-                            poll_borrow_pollable_t *pollable);
+// Reads from `read` into `buf`/`len`
+//
+// This perform the read configured by `read`, e.g. whether it's blocking or
+// not, and places the result in the specified buffer. Used to implement
+// `read` and `recvfrom`, for example.
+ssize_t __wasilibc_read(wasi_read_t *read, void *buf, size_t len);
+// Same as `__wasilibc_read`, but for writes.
+ssize_t __wasilibc_write(wasi_write_t *write, const void *buf, size_t len);
 
-// Gets an `input-stream` borrow from the `fd` provided.
-int __wasilibc_read_stream(int fd,
-                           streams_borrow_input_stream_t *out,
-                           off_t **off,
-                           poll_borrow_pollable_t *pollable);
-#endif
-#ifdef __wasip3__
-int __wasilibc_write_stream3(int fildes, wasip3_write_t **write_end, off_t **off);
-int __wasilibc_read_stream3(int fildes, filesystem_tuple2_stream_u8_future_result_void_error_code_t **stream, off_t **off);
-#endif
-
-#if defined(__wasip2__) || defined(__wasip3__)
-static unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
+static inline unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
   switch(ty) {
   case FILESYSTEM_DESCRIPTOR_TYPE_UNKNOWN:
     return DT_UNKNOWN;
@@ -106,6 +99,6 @@ static unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
   }
 }
 
-#endif
+#endif // __wasip2__ || __wasip3__
 
-#endif
+#endif // __wasi_file_utils_h

@@ -26,7 +26,7 @@ static int map_error(ip_name_lookup_error_code_t error) {
     return EAI_FAIL;
 
   default:
-    errno = __wasi_sockets_utils__map_error(error);
+    __wasilibc_socket_error_to_errno(error);
     return EAI_SYSTEM;
   }
 }
@@ -185,10 +185,10 @@ int getaddrinfo(const char *restrict host, const char *restrict serv,
   int port = 0;
   uint16_t protocol = SERVICE_PROTOCOL_TCP;
   if (serv != NULL) {
-    port = __wasi_sockets_utils__parse_port(serv);
+    port = __wasilibc_parse_port(serv);
     if (port < 0) {
       const service_entry_t *service =
-          __wasi_sockets_utils__get_service_entry_by_name(serv);
+          __wasilibc_get_service_entry_by_name(serv);
       if (service) {
         port = service->port;
         protocol = service->protocol;
@@ -250,29 +250,40 @@ void freeaddrinfo(struct addrinfo *p) {
 int getnameinfo(const struct sockaddr *restrict sa, socklen_t salen,
                 char *restrict host, socklen_t hostlen, char *restrict serv,
                 socklen_t servlen, int flags) {
+  (void)sa;
+  (void)salen;
+  (void)host;
+  (void)hostlen;
+  (void)serv;
+  (void)servlen;
+  (void)flags;
   // TODO wasi-sockets
   errno = EOPNOTSUPP;
   return EAI_SYSTEM;
 }
 
 struct hostent *gethostbyname(const char *name) {
+  (void)name;
   // TODO wasi-sockets
   return NULL;
 }
 
 struct hostent *gethostbyaddr(const void *addr, socklen_t len, int type) {
+  (void)addr;
+  (void)len;
+  (void)type;
   // TODO wasi-sockets
   return NULL;
 }
 
 const char *hstrerror(int err) {
+  (void)err;
   // TODO wasi-sockets
   return "hstrerror: TODO";
 }
 
 struct servent *getservbyname(const char *name, const char *proto) {
-  const service_entry_t *entry =
-      __wasi_sockets_utils__get_service_entry_by_name(name);
+  const service_entry_t *entry = __wasilibc_get_service_entry_by_name(name);
   if (!set_global_serv_entry(entry, proto)) {
     return NULL;
   }
@@ -281,7 +292,7 @@ struct servent *getservbyname(const char *name, const char *proto) {
 
 struct servent *getservbyport(int port, const char *proto) {
   const service_entry_t *entry =
-      __wasi_sockets_utils__get_service_entry_by_port(htons(port));
+      __wasilibc_get_service_entry_by_port(htons(port));
   if (!set_global_serv_entry(entry, proto)) {
     return NULL;
   }
@@ -289,6 +300,7 @@ struct servent *getservbyport(int port, const char *proto) {
 }
 
 struct protoent *getprotobyname(const char *name) {
+  (void)name;
   // TODO wasi-sockets
   return NULL;
 }

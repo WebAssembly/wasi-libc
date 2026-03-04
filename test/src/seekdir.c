@@ -46,9 +46,7 @@ int main(void) {
 
   DIR *dir = opendir("test");
   TEST(dir != NULL);
-  struct dirent *entry;
 
-  int is_end;
   while (1) {
     positions[count] = telldir(dir);
     if (readdir(dir) == NULL)

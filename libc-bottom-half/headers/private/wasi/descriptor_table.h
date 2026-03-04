@@ -8,20 +8,57 @@
 #include <sys/stat.h>
 #include <netinet/in.h>
 
+// Metadata for WASI reads which is used to delegate to `__wasilibc_read(...)`
+// to perform the actual read of a stream.
+typedef struct wasi_read_t {
+  // An optional pointer to the internal offset of this stream, updated on
+  // successful reads.
+  off_t *offset;
+  // Whether or not this read will use blocking I/O.
+  bool blocking;
+  // The timeout, in nanoseconds, for this operation.
+  monotonic_clock_duration_t timeout;
+#ifdef __wasip2__
+  // The `wasi:io/streams.input-stream` that this is reading from.
+  streams_borrow_input_stream_t input;
+  // A required pointer to an owned pollable for `input`. This is lazily
+  // initialized as-necessary.
+  poll_own_pollable_t *pollable;
+#else
+  // The `stream<u8>` that's being read.
+  filesystem_stream_u8_t stream;
+
+  // A callback/ptr pair to invoke when EOF is reached to set errno and return
+  // an error code.
+  int (*eof)(void*);
+  void *eof_data;
+#endif
+} wasi_read_t;
+
+// Same as `wasip_read_t`, but for writes.
+typedef struct wasi_write_t {
+  off_t *offset;
+  bool blocking;
+  monotonic_clock_duration_t timeout;
+
+#ifdef __wasip2__
+  streams_borrow_output_stream_t output;
+  poll_own_pollable_t *pollable;
+#else
+  // The actual stream that is being written to.
+  filesystem_stream_u8_writer_t output;
+  // An indicator if `output` has been closed/dropped.
+  bool *done;
+  // A callback/ptr pair to invoke when EOF is reached to set errno and return
+  // an error code.
+  int (*eof)(void*);
+  void *eof_data;
+#endif
+} wasi_write_t;
+
 #ifdef __wasip3__
 // create an alias to distinguish the handle type in the API
 typedef uint32_t waitable_t;
-
-/**
- * This data structure represents the write end of a file
- */
-typedef struct wasip3_write_t {
-  filesystem_stream_u8_writer_t output;
-  // contents will be filled by host (once write has an error)
-  filesystem_result_void_error_code_t pending_result;
-  // this task gets ready on error or eof
-  wasip3_subtask_t subtask;
-} wasip3_write_t;
 #endif
 
 /**
@@ -43,20 +80,12 @@ typedef struct descriptor_vtable_t {
   // =====================================================================
   // Generic I/O
 
-#ifdef __wasip2__
-  /// Looks up a `wasi:io/streams.input-stream` object and stores it in
-  /// the first argument. If provide also stores a pointer to the internal
-  /// `off_t` offset and `pollable` for this object. The returned pointers
-  /// point within the descriptor itself.
-  int (*get_read_stream)(void*, streams_borrow_input_stream_t*, off_t**, poll_own_pollable_t**);
-
+  /// Looks up metadata to perform a read operation for this stream. This is used
+  /// to implement the `read` syscall, for example, and is also used with `poll`
+  /// when waiting for readability.
+  int (*get_read_stream)(void*, wasi_read_t*);
   /// Same as `get_read_stream`, but for output streams.
-  int (*get_write_stream)(void*, streams_borrow_output_stream_t*, off_t**, poll_own_pollable_t**);
-#endif
-#ifdef __wasip3__
-  int (*get_read_stream3)(void*, filesystem_tuple2_stream_u8_future_result_void_error_code_t **out, off_t** off);
-  int (*get_write_stream3)(void*, wasip3_write_t **write_end, off_t**);
-#endif
+  int (*get_write_stream)(void*, wasi_write_t*);
 
   /// Sets the nonblocking flag for this object to the specified value.
   int (*set_blocking)(void*, bool);

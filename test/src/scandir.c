@@ -29,7 +29,6 @@ int compare(const struct dirent **dirent1, const struct dirent **dirent2) {
 }
 
 int main(void) {
-  char tmp[] = "testsuite-XXXXXX";
   int fd;
   int flags = 0;
 

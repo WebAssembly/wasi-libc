@@ -30,6 +30,7 @@ static int doit_futimens(int fd, const struct timespec times[2]) {
 }
 
 static int doit_utimensat(int fd, const struct timespec times[2]) {
+  (void)fd;
   return utimensat(AT_FDCWD, "temp_file", times, 0);
 }
 

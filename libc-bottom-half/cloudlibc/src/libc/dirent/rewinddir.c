@@ -13,12 +13,8 @@ void rewinddir(DIR *dirp) {
   dirp->cookie = __WASI_DIRCOOKIE_START;
   // Mark entire buffer as processed to force a read of new data.
   dirp->buffer_used = dirp->buffer_processed = dirp->buffer_size;
-#elif defined(__wasip2__)
-  dirp->stream.__handle = 0;
-  dirp->skip = 0;
-  dirp->offset = 0;
-#elif defined(__wasip3__)
-  dirp->stream = 0;
+#elif defined(__wasip2__) || defined(__wasip3__)
+  dirent_close_streams(dirp);
   dirp->skip = 0;
   dirp->offset = 0;
 #else

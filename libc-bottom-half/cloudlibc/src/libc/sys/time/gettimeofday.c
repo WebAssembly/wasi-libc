@@ -7,6 +7,7 @@
 #include <wasi/api.h>
 
 int gettimeofday(struct timeval *restrict tp, void *tz) {
+  (void) tz;
   if (tp != NULL) {
 #if defined(__wasip1__)
     __wasi_timestamp_t ts = 0;

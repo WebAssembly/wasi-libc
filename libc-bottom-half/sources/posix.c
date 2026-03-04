@@ -211,6 +211,7 @@ int remove(const char *path) {
 }
 
 int mkdir(const char *path, mode_t mode) {
+  (void)mode;
   char *relative_path;
   int dirfd = find_relpath(path, &relative_path);
 
@@ -302,6 +303,8 @@ int rename(const char *old, const char *new) {
 }
 
 int chmod(const char *path, mode_t mode) {
+  (void)path;
+  (void)mode;
   // TODO: We plan to support this eventually in WASI, but not yet.
   // Meanwhile, we provide a stub so that libc++'s `<filesystem>`
   // implementation will build unmodified.
@@ -310,6 +313,8 @@ int chmod(const char *path, mode_t mode) {
 }
 
 int fchmod(int fd, mode_t mode) {
+  (void)fd;
+  (void)mode;
   // TODO: We plan to support this eventually in WASI, but not yet.
   // Meanwhile, we provide a stub so that libc++'s `<filesystem>`
   // implementation will build unmodified.
@@ -318,6 +323,10 @@ int fchmod(int fd, mode_t mode) {
 }
 
 int fchmodat(int fd, const char *path, mode_t mode, int flag) {
+  (void)fd;
+  (void)path;
+  (void)mode;
+  (void)flag;
   // TODO: We plan to support this eventually in WASI, but not yet.
   // Meanwhile, we provide a stub so that libc++'s `<filesystem>`
   // implementation will build unmodified.
@@ -326,6 +335,8 @@ int fchmodat(int fd, const char *path, mode_t mode, int flag) {
 }
 
 int statvfs(const char *__restrict path, struct statvfs *__restrict buf) {
+  (void)path;
+  (void)buf;
   // TODO: We plan to support this eventually in WASI, but not yet.
   // Meanwhile, we provide a stub so that libc++'s `<filesystem>`
   // implementation will build unmodified.
@@ -334,6 +345,8 @@ int statvfs(const char *__restrict path, struct statvfs *__restrict buf) {
 }
 
 int fstatvfs(int fd, struct statvfs *buf) {
+  (void)fd;
+  (void)buf;
   // TODO: We plan to support this eventually in WASI, but not yet.
   // Meanwhile, we provide a stub so that libc++'s `<filesystem>`
   // implementation will build unmodified.

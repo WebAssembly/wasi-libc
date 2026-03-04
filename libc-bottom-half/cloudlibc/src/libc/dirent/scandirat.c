@@ -8,10 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int sel_true(const struct dirent *de) {
-  return 1;
-}
-
 int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***res,
                                int (*sel)(const struct dirent *),
                                int (*cmp)(const struct dirent **, const struct dirent **)) {

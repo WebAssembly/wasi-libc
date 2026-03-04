@@ -14,10 +14,14 @@
 #include <string.h>
 
 void __SIG_IGN(int sig) {
+  (void)sig;
   // do nothing
 }
 
-_Noreturn void __SIG_ERR(int sig) { __builtin_trap(); }
+_Noreturn void __SIG_ERR(int sig) {
+  (void)sig;
+  __builtin_trap();
+}
 
 _Noreturn static void core_handler(int sig) {
   fprintf(stderr, "Program received fatal signal: %s\n", strsignal(sig));
@@ -35,6 +39,7 @@ _Noreturn static void stop_handler(int sig) {
 }
 
 static void continue_handler(int sig) {
+  (void)sig;
   // do nothing
 }
 

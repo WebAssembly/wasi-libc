@@ -1,3 +1,6 @@
+# Disable some warnings in this third-party code.
+add_compile_options(-Wno-unused-parameter -Wno-unused-variable)
+
 add_internal_object_library(fts musl-fts/fts.c)
 foreach(obj fts-shared fts-static)
   target_include_directories(${obj} PRIVATE . musl-fts)

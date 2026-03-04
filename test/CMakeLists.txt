@@ -73,6 +73,13 @@ add_library(libc_test_support STATIC
 )
 target_include_directories(libc_test_support PUBLIC "${LIBC_TEST}/src/common")
 add_wasilibc_flags(libc_test_support)
+# Disable some warnings in this third-party code
+target_compile_options(libc_test_support PRIVATE
+  -Wno-unused-variable
+  -Wno-unused-parameter
+  -Wno-unused-function
+  -Wno-sign-compare
+)
 
 # Adds a new test executable to build
 #
@@ -191,6 +198,13 @@ function(add_libc_test test_file)
 
   add_test_executable(${test_name} "${test_file}" ${ARGN})
   register_test(${test_name} ${test_name} ${ARGN})
+  # Disable some warnings in this third-party code
+  target_compile_options(${test_name} PRIVATE
+    -Wno-sign-compare
+    -Wno-missing-braces
+    -Wno-unused-variable
+    -Wno-unused-parameter
+  )
 endfunction()
 
 add_libc_test(functional/argv.c)
@@ -257,47 +271,47 @@ endfunction()
 # TODO: this test fails with `-Sthreads` in Wasmtime since that uses a different
 # implementation of WASI which causes this test to fail.
 if (NOT TARGET_TRIPLE MATCHES "-threads")
-  add_wasilibc_test(access.c FS FAILP3)
+  add_wasilibc_test(access.c FS)
 endif()
-add_wasilibc_test(append.c FS FAILP3)
+add_wasilibc_test(append.c FS)
 add_wasilibc_test(argv_two_args.c ARGV foo bar)
 add_wasilibc_test(clock_nanosleep.c)
-add_wasilibc_test(chdir.c FS FAILP3)
-add_wasilibc_test(close.c FS FAILP3)
+add_wasilibc_test(chdir.c FS)
+add_wasilibc_test(close.c FS)
 add_wasilibc_test(external_env.c ENV VAR1=foo VAR2=bar)
-add_wasilibc_test(fadvise.c FS FAILP3)
-add_wasilibc_test(fallocate.c FS FAILP3)
-add_wasilibc_test(fcntl.c FS FAILP3)
-add_wasilibc_test(fdatasync.c FS FAILP3)
-add_wasilibc_test(fdopen.c FS FAILP3)
-add_wasilibc_test(feof.c FS FAILP3)
-add_wasilibc_test(file_permissions.c FS FAILP3)
-add_wasilibc_test(file_nonblocking.c FS FAILP3)
-add_wasilibc_test(fseek.c FS FAILP3)
-add_wasilibc_test(fstat.c FS FAILP3)
-add_wasilibc_test(fsync.c FS FAILP3)
-add_wasilibc_test(ftruncate.c FS FAILP3)
-add_wasilibc_test(fts.c FS FAILP3)
-add_wasilibc_test(fwscanf.c FS FAILP3)
+add_wasilibc_test(fadvise.c FS)
+add_wasilibc_test(fallocate.c FS)
+add_wasilibc_test(fcntl.c FS)
+add_wasilibc_test(fdatasync.c FS)
+add_wasilibc_test(fdopen.c FS)
+add_wasilibc_test(feof.c FS)
+add_wasilibc_test(file_permissions.c FS)
+add_wasilibc_test(file_nonblocking.c FS)
+add_wasilibc_test(fseek.c FS)
+add_wasilibc_test(fstat.c FS)
+add_wasilibc_test(fsync.c FS)
+add_wasilibc_test(ftruncate.c FS)
+add_wasilibc_test(fts.c FS)
+add_wasilibc_test(fwscanf.c FS)
 add_wasilibc_test(getentropy.c)
 add_wasilibc_test(hello.c PASS_REGULAR_EXPRESSION "Hello, World!")
-add_wasilibc_test(ioctl.c FS FAILP3)
-add_wasilibc_test(isatty.c FS FAILP3)
-add_wasilibc_test(link.c FS FAILP3)
-add_wasilibc_test(lseek.c FS FAILP3)
+add_wasilibc_test(ioctl.c FS)
+add_wasilibc_test(isatty.c FS)
+add_wasilibc_test(link.c FS)
+add_wasilibc_test(lseek.c FS)
 add_wasilibc_test(memchr.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680)
 add_wasilibc_test(memcmp.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680)
-add_wasilibc_test(opendir.c FS FAILP3 ARGV /)
-add_wasilibc_test(open_relative_path.c FS FAILP3 ARGV /)
+add_wasilibc_test(opendir.c FS ARGV /)
+add_wasilibc_test(open_relative_path.c FS ARGV /)
 add_wasilibc_test(poll.c FS FAILP3)
-add_wasilibc_test(preadvwritev.c FS FAILP3)
-add_wasilibc_test(preadwrite.c FS FAILP3)
-add_wasilibc_test(readlink.c FS FAILP3)
-add_wasilibc_test(readv.c FS FAILP3)
-add_wasilibc_test(rename.c FS FAILP3)
-add_wasilibc_test(rmdir.c FS FAILP3)
-add_wasilibc_test(scandir.c FS FAILP3)
-add_wasilibc_test(stat.c FS FAILP3)
+add_wasilibc_test(preadvwritev.c FS)
+add_wasilibc_test(preadwrite.c FS)
+add_wasilibc_test(readlink.c FS)
+add_wasilibc_test(readv.c FS)
+add_wasilibc_test(rename.c FS)
+add_wasilibc_test(rmdir.c FS)
+add_wasilibc_test(scandir.c FS)
+add_wasilibc_test(stat.c FS)
 add_wasilibc_test(stdio.c FS)
 add_wasilibc_test(strchrnul.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680)
 add_wasilibc_test(strlen.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680)
@@ -307,19 +321,24 @@ add_wasilibc_test(time_and_times.c
   CFLAGS -D_WASI_EMULATED_PROCESS_CLOCKS
   LDFLAGS -lwasi-emulated-process-clocks)
 add_wasilibc_test(time.c)
-add_wasilibc_test(utime.c FS FAILP3)
-add_wasilibc_test(rewinddir.c FS FAILP3)
-add_wasilibc_test(seekdir.c FS FAILP3)
+add_wasilibc_test(utime.c FS)
+add_wasilibc_test(rewinddir.c FS)
+add_wasilibc_test(seekdir.c FS)
 add_wasilibc_test(usleep.c)
 add_wasilibc_test(nanosleep.c)
-add_wasilibc_test(write.c FS FAILP3)
+add_wasilibc_test(sleep.c)
+add_wasilibc_test(write.c FS)
 add_wasilibc_test(wasi-defines.c)
 
 if (TARGET_TRIPLE MATCHES "-threads")
   add_wasilibc_test(busywait.c)
   add_wasilibc_test(pthread_cond_busywait.c)
   add_wasilibc_test(pthread_tsd_busywait.c)
+
+  # This test #include's a test whose source is not controlled here, so disable
+  # some extra warnings.
   add_wasilibc_test(pthread_mutex_busywait.c)
+  target_compile_options(pthread_mutex_busywait.wasm PRIVATE -Wno-unused-variable)
 endif()
 
 # ========= sockets-related tests ===============================
@@ -327,11 +346,12 @@ endif()
 if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(poll-connect.c NETWORK FAILP3)
   add_wasilibc_test(poll-nonblocking-socket.c NETWORK FAILP3)
-  add_wasilibc_test(setsockopt.c NETWORK FAILP3)
+  add_wasilibc_test(setsockopt.c NETWORK)
   add_wasilibc_test(sockets-nonblocking-udp.c NETWORK FAILP3)
   add_wasilibc_test(sockets-nonblocking-multiple.c NETWORK FAILP3)
   add_wasilibc_test(sockets-nonblocking-udp-multiple.c NETWORK FAILP3)
-  add_wasilibc_test(sockets-fcntl.c NETWORK FAILP3)
+  add_wasilibc_test(sockets-fcntl.c NETWORK)
+  add_wasilibc_test(sockets-udp-connected.c NETWORK FAILP3)
 
   # TODO: flaky tests
   # add_wasilibc_test(sockets-nonblocking.c NETWORK)

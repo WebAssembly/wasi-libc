@@ -4,7 +4,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
-static void translate_error(filesystem_error_code_t error) {
+static inline void translate_error(filesystem_error_code_t error) {
     switch (error) {
     case FILESYSTEM_ERROR_CODE_ACCESS:
         errno = EACCES;

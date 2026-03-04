@@ -31,22 +31,26 @@ static_assert(DT_REG == __WASI_FILETYPE_REGULAR_FILE, "Value mismatch");
 static_assert(DT_UNKNOWN == __WASI_FILETYPE_UNKNOWN, "Value mismatch");
 #endif
 
+#ifdef __wasip3__
+#include <wasi/wasip3_block.h>
+#endif
+
 // Grows a buffer to be large enough to hold a certain amount of data.
-#define GROW(buffer, buffer_size, target_size)      \
-  do {                                              \
-    if ((buffer_size) < (target_size)) {            \
-      size_t new_size = (buffer_size);              \
-      while (new_size < (target_size))              \
-        new_size *= 2;                              \
-      void *new_buffer = realloc(buffer, new_size); \
-      if (new_buffer == NULL) {                     \
-        errno = ENOMEM;                             \
-        return NULL;                                \
-      }                                             \
-      (buffer) = new_buffer;                        \
-      (buffer_size) = new_size;                     \
-    }                                               \
-  } while (0)
+static struct dirent* grow(struct dirent **buffer, size_t *buffer_size, size_t target_size) {
+  if (*buffer_size < target_size) {
+    size_t new_size = *buffer_size;
+    while (new_size < target_size)
+      new_size *= 2;
+    void *new_buffer = realloc(*buffer, new_size);
+    if (new_buffer == NULL) {
+      errno = ENOMEM;
+      return NULL;
+    }
+    *buffer = new_buffer;
+    *buffer_size = new_size;
+  }
+  return *buffer;
+}
 
 #if defined(__wasip1__)
 struct dirent *readdir(DIR *dirp) {
@@ -73,7 +77,8 @@ struct dirent *readdir(DIR *dirp) {
     // the entry another time. Ensure that the read buffer is large
     // enough to fit at least this single entry.
     if (buffer_left < entry_size) {
-      GROW(dirp->buffer, dirp->buffer_size, entry_size);
+      if (grow((struct dirent**) &dirp->buffer, &dirp->buffer_size, entry_size) == NULL)
+        return NULL;
       goto read_entries;
     }
 
@@ -86,8 +91,9 @@ struct dirent *readdir(DIR *dirp) {
 
     // Return the next directory entry. Ensure that the dirent is large
     // enough to fit the filename.
-    GROW(dirp->dirent, dirp->dirent_size,
-         offsetof(struct dirent, d_name) + entry.d_namlen + 1);
+    if (grow(&dirp->dirent, &dirp->dirent_size,
+         offsetof(struct dirent, d_name) + entry.d_namlen + 1) == NULL)
+      return NULL;
     struct dirent *dirent = dirp->dirent;
     dirent->d_type = entry.d_type;
     memcpy(dirent->d_name, name, entry.d_namlen);
@@ -140,12 +146,13 @@ struct dirent *readdir(DIR *dirp) {
   }
 }
 
-#elif defined(__wasip2__)
+#elif defined(__wasip2__) || defined(__wasip3__)
 
 static int ensure_has_directory_stream(DIR *dirp, filesystem_borrow_descriptor_t *handle) {
   if (fd_to_file_handle(dirp->fd, handle) < 0)
     return -1;
 
+#ifdef __wasip2__
   if (dirp->stream.__handle != 0)
     return 0;
 
@@ -157,10 +164,15 @@ static int ensure_has_directory_stream(DIR *dirp, filesystem_borrow_descriptor_t
     translate_error(error_code);
     return -1;
   }
+#elif defined(__wasip3__)
+  if (dirp->stream.f0 == 0)
+    filesystem_method_descriptor_read_directory(*handle, &dirp->stream);
+#endif
   return 0;
 }
 
 static struct dirent *readdir_next(DIR *dirp) {
+  bool ok;
   filesystem_metadata_hash_value_t metadata;
   filesystem_error_code_t error_code;
   filesystem_borrow_descriptor_t dir_handle;
@@ -172,10 +184,11 @@ static struct dirent *readdir_next(DIR *dirp) {
   // hash of the directory itself.
   if (dirp->offset == 0) {
     dirp->offset += 1;
-    GROW(dirp->dirent, dirp->dirent_size, offsetof(struct dirent, d_name) + 2);
-    bool ok = filesystem_method_descriptor_metadata_hash(dir_handle,
-                                                         &metadata,
-                                                         &error_code);
+    if (grow(&dirp->dirent, &dirp->dirent_size, offsetof(struct dirent, d_name) + 2) == NULL)
+      return NULL;
+    ok = filesystem_method_descriptor_metadata_hash(dir_handle,
+                                                    &metadata,
+                                                    &error_code);
     if (!ok) {
       translate_error(error_code);
       return NULL;
@@ -191,7 +204,8 @@ static struct dirent *readdir_next(DIR *dirp) {
   // avoid opening the parent directory here.
   if (dirp->offset == 1) {
     dirp->offset += 1;
-    GROW(dirp->dirent, dirp->dirent_size, offsetof(struct dirent, d_name) + 3);
+    if (grow(&dirp->dirent, &dirp->dirent_size, offsetof(struct dirent, d_name) + 3) == NULL)
+      return NULL;
     dirp->dirent->d_ino = 0;
     dirp->dirent->d_type = DT_DIR;
     dirp->dirent->d_name[0] = '.';
@@ -200,11 +214,12 @@ static struct dirent *readdir_next(DIR *dirp) {
     return dirp->dirent;
   }
 
+#if defined(__wasip2__)
   filesystem_borrow_directory_entry_stream_t stream = filesystem_borrow_directory_entry_stream(dirp->stream);
   filesystem_option_directory_entry_t dir_entry_optional;
-  bool ok = filesystem_method_directory_entry_stream_read_directory_entry(stream,
-                                                                          &dir_entry_optional,
-                                                                          &error_code);
+  ok = filesystem_method_directory_entry_stream_read_directory_entry(stream,
+                                                                     &dir_entry_optional,
+                                                                     &error_code);
   if (!ok) {
     translate_error(error_code);
     return NULL;
@@ -216,9 +231,59 @@ static struct dirent *readdir_next(DIR *dirp) {
 
   filesystem_directory_entry_t dir_entry = dir_entry_optional.val;
 
+#elif defined(__wasip3__)
+  filesystem_directory_entry_t dir_entry;
+
+  // Don't try to keep reading once the stream is closed.
+  if (dirp->stream_done)
+    return NULL;
+
+  // Loop until at least one stream entry is read, or until the stream is closed.
+  while (!dirp->stream_done) {
+    size_t amount =
+      __wasilibc_stream_block_on(
+          filesystem_stream_directory_entry_read(dirp->stream.f0, &dir_entry, 1),
+          dirp->stream.f0,
+          &dirp->stream_done);
+
+    // If something was read, then break out and process that below.
+    if (amount > 0)
+      break;
+
+    // If nothing was read and the stream isn't finished yet, try again.
+    if (!dirp->stream_done)
+      continue;
+
+    // If the stream's result future hasn't been read yet, do so here.
+    if (dirp->stream.f1) {
+      filesystem_result_void_error_code_t result;
+      __wasilibc_future_block_on(
+          filesystem_future_result_void_error_code_read(dirp->stream.f1, &result),
+          dirp->stream.f1);
+      filesystem_future_result_void_error_code_drop_readable(dirp->stream.f1);
+      dirp->stream.f1 = 0;
+      if (result.is_err)
+        translate_error(result.val.err);
+    }
+
+    // The stream is closed, so return NULL. If `errno` needs to be set it'll
+    // have been done above with `f1`.
+    return NULL;
+  }
+#else
+#error "Unknown WASI version"
+#endif
+
   // Ensure that the dirent is large enough to fit the filename
   size_t the_size = offsetof(struct dirent, d_name);
-  GROW(dirp->dirent, dirp->dirent_size, the_size + dir_entry.name.len + 1);
+  if (grow(&dirp->dirent, &dirp->dirent_size, the_size + dir_entry.name.len + 1) == NULL) {
+#ifdef __wasip2__
+    wasip2_string_free(&dir_entry.name);
+#else
+    wasip3_string_free(&dir_entry.name);
+#endif
+    return NULL;
+  }
 
   // Fill out `d_type` and `d_name`
   dirp->dirent->d_type = dir_entry_type_to_d_type(dir_entry.type);
@@ -232,7 +297,11 @@ static struct dirent *readdir_next(DIR *dirp) {
                                                      &dir_entry.name,
                                                      &metadata,
                                                      &error_code);
+#ifdef __wasip2__
   wasip2_string_free(&dir_entry.name);
+#else
+  wasip3_string_free(&dir_entry.name);
+#endif
   if (!ok) {
     translate_error(error_code);
     return NULL;
@@ -250,13 +319,6 @@ struct dirent *readdir(DIR *dirp) {
     result = readdir_next(dirp);
   }
   return result;
-}
-#elif defined(__wasip3__)
-struct dirent *readdir(DIR *dirp) {
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  free(dirp);
-  return NULL;
 }
 #else
 # error "Unknown WASI version"

@@ -1,3 +1,8 @@
+// TODO(wasip3) these are load-bearing assertions functionality-wise, but once
+// the assertions below are removed and the implementation is filled in then
+// this should be removed.
+#undef NDEBUG
+
 #include <assert.h>
 #include <common/errors.h>
 #include <errno.h>

@@ -85,7 +85,7 @@ ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
     &closed);
   filesystem_stream_u8_drop_readable(io.f0);
 
-  // If zero bytes were written then read the provided future to see
+  // If zero bytes were read then read the provided future to see
   // what happened. Otherwise close the future as we won't be reading the
   // result.
   if (ret == 0) {

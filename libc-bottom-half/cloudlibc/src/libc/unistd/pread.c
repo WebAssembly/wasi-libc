@@ -12,6 +12,10 @@
 #include <common/errors.h>
 #endif
 
+#ifdef __wasip3__
+#include <wasi/wasip3_block.h>
+#endif
+
 ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
   if (offset < 0) {
     errno = EINVAL;
@@ -66,12 +70,38 @@ ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
 
   return bytes_read;
 #elif defined(__wasip3__)
-  (void) fildes;
-  (void) buf;
-  (void) nbyte;
-  // TODO(wasip3)
-  errno = ENOTSUP;
-  return -1;
+  filesystem_borrow_descriptor_t file_handle;
+  if (fd_to_file_handle(fildes, &file_handle) < 0)
+    return -1;
+
+  // Use `read-via-stream` to acquire a stream of data at this specified file
+  // offset, then issue a read and wait for it to finish.
+  filesystem_tuple2_stream_u8_future_result_void_error_code_t io;
+  filesystem_method_descriptor_read_via_stream(file_handle, offset, &io);
+  bool closed;
+  size_t ret = __wasilibc_stream_block_on(
+    filesystem_stream_u8_read(io.f0, buf, nbyte),
+    io.f0,
+    &closed);
+  filesystem_stream_u8_drop_readable(io.f0);
+
+  // If zero bytes were read then read the provided future to see
+  // what happened. Otherwise close the future as we won't be reading the
+  // result.
+  if (ret == 0) {
+    filesystem_result_void_error_code_t result;
+    __wasilibc_future_block_on(
+      filesystem_future_result_void_error_code_read(io.f1, &result),
+      io.f1);
+    filesystem_future_result_void_error_code_drop_readable(io.f1);
+    if (result.is_err) {
+      translate_error(result.val.err);
+      return -1;
+    }
+  } else {
+    filesystem_future_result_void_error_code_drop_readable(io.f1);
+  }
+  return ret;
 #else
 # error "Unknown WASI version"
 #endif

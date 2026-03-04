@@ -12,8 +12,8 @@ if(WKG_EXECUTABLE)
     OUTPUT_VARIABLE WKG_VERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  if (NOT (WKG_VERSION MATCHES "0\\.13\\.0"))
-    message(WARNING "wkg version 0.13.0 is required, found: ${WKG_VERSION}")
+  if (NOT (WKG_VERSION MATCHES "0\\.15\\.0"))
+    message(WARNING "wkg version 0.15.0 is required, found: ${WKG_VERSION}")
     set(WKG_EXECUTABLE "")
   endif()
 endif()
@@ -23,7 +23,7 @@ if (NOT WKG_EXECUTABLE)
   ba_download(
     wkg
     "https://github.com/bytecodealliance/wasm-pkg-tools"
-    "0.13.0"
+    "0.15.0"
   )
   ExternalProject_Get_Property(wkg DOWNLOADED_FILE)
   set(wkg_bin ${DOWNLOADED_FILE})

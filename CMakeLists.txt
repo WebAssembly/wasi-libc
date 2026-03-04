@@ -150,7 +150,7 @@ else()
 endif()
 
 set(wasip2-version 0.2.0)
-set(wasip3-version 0.3.0-rc-2026-01-06)
+set(wasip3-version 0.3.0-rc-2026-02-09)
 
 include(bindings)
 include(builtins)

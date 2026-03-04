@@ -75,8 +75,8 @@ ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
   filesystem_stream_u8_writer_t writer;
   filesystem_stream_u8_t reader = filesystem_stream_u8_new(&writer);
   filesystem_result_void_error_code_t result;
-  wasip3_subtask_status_t subtask_status =
-    filesystem_method_descriptor_write_via_stream(file_handle, reader, offset, &result);
+  filesystem_future_result_void_error_code_t future =
+    filesystem_method_descriptor_write_via_stream(file_handle, reader, offset);
   bool closed;
   size_t ret = __wasilibc_stream_block_on(
     filesystem_stream_u8_write(writer, buf, nbyte),
@@ -84,11 +84,13 @@ ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
     &closed);
   filesystem_stream_u8_drop_writable(writer);
 
-  // Wait for the subtask to resolve now that the writer half is closed and if
+  // Wait for the future to resolve now that the writer half is closed and if
   // we failed to write bytes (0 bytes written) and the result is an error we
   // can return -1.
-  if (WASIP3_SUBTASK_STATE(subtask_status) != WASIP3_SUBTASK_RETURNED)
-    __wasilibc_subtask_block_on_and_drop(WASIP3_SUBTASK_HANDLE(subtask_status));
+  __wasilibc_future_block_on(
+    filesystem_future_result_void_error_code_read(future, &result), 
+    future);
+  filesystem_future_result_void_error_code_drop_readable(future);
   if (ret == 0 && result.is_err) {
     translate_error(result.val.err);
     return -1;

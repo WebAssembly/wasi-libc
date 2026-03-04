@@ -157,6 +157,8 @@ typedef struct {
   } val;
 } stdout_result_void_error_code_t;
 
+typedef uint32_t stdout_future_result_void_error_code_t;
+
 typedef wasi_cli_types_error_code_t stderr_error_code_t;
 
 typedef struct {
@@ -165,6 +167,8 @@ typedef struct {
     stderr_error_code_t err;
   } val;
 } stderr_result_void_error_code_t;
+
+typedef uint32_t stderr_future_result_void_error_code_t;
 
 typedef struct terminal_input_own_terminal_input_t {
   int32_t __handle;
@@ -889,7 +893,7 @@ typedef struct {
   uint64_t f1;
 } wasip3_tuple2_u64_u64_t;
 
-// Imported Functions from `wasi:cli/environment@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/environment@0.3.0-rc-2026-02-09`
 // Get the POSIX-style environment variables.
 // 
 // Each environment variable is provided as a pair of string variable names
@@ -905,11 +909,11 @@ extern void environment_get_arguments(wasip3_list_string_t *ret);
 // directory, interpreting `.` as shorthand for this.
 extern bool environment_get_initial_cwd(wasip3_string_t *ret);
 
-// Imported Functions from `wasi:cli/exit@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/exit@0.3.0-rc-2026-02-09`
 // Exit the current instance and any linked instances.
 _Noreturn extern void exit_exit(exit_result_void_void_t *status);
 
-// Imported Functions from `wasi:cli/stdin@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/stdin@0.3.0-rc-2026-02-09`
 // Return a stream for reading from stdin.
 // 
 // This function returns a stream which provides data read from stdin,
@@ -925,7 +929,7 @@ _Noreturn extern void exit_exit(exit_result_void_void_t *status);
 // reads is implementation-specific.
 extern void stdin_read_via_stream(stdin_tuple2_stream_u8_future_result_void_error_code_t *ret);
 
-// Imported Functions from `wasi:cli/stdout@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/stdout@0.3.0-rc-2026-02-09`
 // Write the given stream to stdout.
 // 
 // If the stream's writable end is dropped this function will either return
@@ -934,9 +938,9 @@ extern void stdin_read_via_stream(stdin_tuple2_stream_u8_future_result_void_erro
 // 
 // Otherwise if there is an error the readable end of the stream will be
 // dropped and this function will return an error-code.
-extern wasip3_subtask_status_t stdout_write_via_stream(stdin_stream_u8_t data, stdout_result_void_error_code_t *result);
+extern stdout_future_result_void_error_code_t stdout_write_via_stream(stdin_stream_u8_t data);
 
-// Imported Functions from `wasi:cli/stderr@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/stderr@0.3.0-rc-2026-02-09`
 // Write the given stream to stderr.
 // 
 // If the stream's writable end is dropped this function will either return
@@ -945,24 +949,24 @@ extern wasip3_subtask_status_t stdout_write_via_stream(stdin_stream_u8_t data, s
 // 
 // Otherwise if there is an error the readable end of the stream will be
 // dropped and this function will return an error-code.
-extern wasip3_subtask_status_t stderr_write_via_stream(stdin_stream_u8_t data, stderr_result_void_error_code_t *result);
+extern stderr_future_result_void_error_code_t stderr_write_via_stream(stdin_stream_u8_t data);
 
-// Imported Functions from `wasi:cli/terminal-stdin@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/terminal-stdin@0.3.0-rc-2026-02-09`
 // If stdin is connected to a terminal, return a `terminal-input` handle
 // allowing further interaction with it.
 extern bool terminal_stdin_get_terminal_stdin(terminal_stdin_own_terminal_input_t *ret);
 
-// Imported Functions from `wasi:cli/terminal-stdout@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/terminal-stdout@0.3.0-rc-2026-02-09`
 // If stdout is connected to a terminal, return a `terminal-output` handle
 // allowing further interaction with it.
 extern bool terminal_stdout_get_terminal_stdout(terminal_stdout_own_terminal_output_t *ret);
 
-// Imported Functions from `wasi:cli/terminal-stderr@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/terminal-stderr@0.3.0-rc-2026-02-09`
 // If stderr is connected to a terminal, return a `terminal-output` handle
 // allowing further interaction with it.
 extern bool terminal_stderr_get_terminal_stderr(terminal_stderr_own_terminal_output_t *ret);
 
-// Imported Functions from `wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:clocks/monotonic-clock@0.3.0-rc-2026-02-09`
 // Read the current value of the clock.
 // 
 // The clock is monotonic, therefore calling this function repeatedly will
@@ -981,7 +985,7 @@ extern void monotonic_clock_wait_until(monotonic_clock_mark_t when);
 // Wait for the specified duration to elapse.
 extern void monotonic_clock_wait_for(monotonic_clock_duration_t how_long);
 
-// Imported Functions from `wasi:clocks/system-clock@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:clocks/system-clock@0.3.0-rc-2026-02-09`
 // Read the current value of the clock.
 // 
 // This clock is not monotonic, therefore calling this function repeatedly
@@ -993,7 +997,7 @@ extern void system_clock_now(system_clock_instant_t *ret);
 // that the implementation permits distinguishing.
 extern system_clock_duration_t system_clock_get_resolution(void);
 
-// Imported Functions from `wasi:filesystem/types@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:filesystem/types@0.3.0-rc-2026-02-09`
 // Return a stream for reading from a file.
 // 
 // Multiple read, write, and append streams may be active on the same open
@@ -1023,7 +1027,7 @@ extern void filesystem_method_descriptor_read_via_stream(filesystem_borrow_descr
 // written or an error is encountered.
 // 
 // Note: This is similar to `pwrite` in POSIX.
-extern wasip3_subtask_status_t filesystem_method_descriptor_write_via_stream(filesystem_borrow_descriptor_t self, filesystem_stream_u8_t data, filesystem_filesize_t offset, filesystem_result_void_error_code_t *result);
+extern filesystem_future_result_void_error_code_t filesystem_method_descriptor_write_via_stream(filesystem_borrow_descriptor_t self, filesystem_stream_u8_t data, filesystem_filesize_t offset);
 // Return a stream for appending to a file, if available.
 // 
 // May fail with an error-code describing why the file cannot be appended.
@@ -1032,7 +1036,7 @@ extern wasip3_subtask_status_t filesystem_method_descriptor_write_via_stream(fil
 // written or an error is encountered.
 // 
 // Note: This is similar to `write` with `O_APPEND` in POSIX.
-extern wasip3_subtask_status_t filesystem_method_descriptor_append_via_stream(filesystem_borrow_descriptor_t self, filesystem_stream_u8_t data, filesystem_result_void_error_code_t *result);
+extern filesystem_future_result_void_error_code_t filesystem_method_descriptor_append_via_stream(filesystem_borrow_descriptor_t self, filesystem_stream_u8_t data);
 // Provide file advisory information on a descriptor.
 // 
 // This is similar to `posix_fadvise` in POSIX.
@@ -1205,11 +1209,11 @@ extern bool filesystem_method_descriptor_metadata_hash(filesystem_borrow_descrip
 // This performs the same hash computation as `metadata-hash`.
 extern bool filesystem_method_descriptor_metadata_hash_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t *path, filesystem_metadata_hash_value_t *ret, filesystem_error_code_t *err);
 
-// Imported Functions from `wasi:filesystem/preopens@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:filesystem/preopens@0.3.0-rc-2026-02-09`
 // Return the set of preopened directories, and their paths.
 extern void filesystem_preopens_get_directories(filesystem_preopens_list_tuple2_own_descriptor_string_t *ret);
 
-// Imported Functions from `wasi:sockets/types@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:sockets/types@0.3.0-rc-2026-02-09`
 // Create a new TCP socket.
 // 
 // Similar to `socket(AF_INET or AF_INET6, SOCK_STREAM, IPPROTO_TCP)` in POSIX.
@@ -1342,6 +1346,12 @@ extern wasip3_subtask_status_t sockets_method_tcp_socket_connect(sockets_method_
 // In either case, the stream returned by this `listen` method remains
 // operational.
 // 
+// WASI requires `listen` to perform an implicit bind if the socket
+// has not already been bound. Not all platforms (notably Windows)
+// exhibit this behavior out of the box. On platforms that require it,
+// the WASI implementation can emulate this behavior by performing
+// the bind itself if the guest hasn't already done so.
+// 
 // # References
 // - <https://pubs.opengroup.org/onlinepubs/9699919799/functions/listen.html>
 // - <https://pubs.opengroup.org/onlinepubs/9699919799/functions/accept.html>
@@ -1372,7 +1382,7 @@ extern bool sockets_method_tcp_socket_listen(sockets_borrow_tcp_socket_t self, s
 // - <https://man7.org/linux/man-pages/man2/send.2.html>
 // - <https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-send>
 // - <https://man.freebsd.org/cgi/man.cgi?query=send&sektion=2>
-extern wasip3_subtask_status_t sockets_method_tcp_socket_send(sockets_borrow_tcp_socket_t self, sockets_stream_u8_t data, sockets_result_void_error_code_t *result);
+extern sockets_future_result_void_error_code_t sockets_method_tcp_socket_send(sockets_borrow_tcp_socket_t self, sockets_stream_u8_t data);
 // Read data from peer.
 // 
 // This function returns a `stream` which provides the data received from the
@@ -1722,7 +1732,7 @@ extern bool sockets_method_udp_socket_set_receive_buffer_size(sockets_borrow_udp
 extern bool sockets_method_udp_socket_get_send_buffer_size(sockets_borrow_udp_socket_t self, uint64_t *ret, sockets_error_code_t *err);
 extern bool sockets_method_udp_socket_set_send_buffer_size(sockets_borrow_udp_socket_t self, uint64_t value, sockets_error_code_t *err);
 
-// Imported Functions from `wasi:sockets/ip-name-lookup@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:sockets/ip-name-lookup@0.3.0-rc-2026-02-09`
 // Resolve an internet host name to a list of IP addresses.
 // 
 // Unicode domain names are automatically converted to ASCII using IDNA encoding.
@@ -1747,7 +1757,7 @@ extern bool sockets_method_udp_socket_set_send_buffer_size(sockets_borrow_udp_so
 // - <https://man.freebsd.org/cgi/man.cgi?query=getaddrinfo&sektion=3>
 extern wasip3_subtask_status_t ip_name_lookup_resolve_addresses(wasip3_string_t name, ip_name_lookup_result_list_ip_address_error_code_t *result);
 
-// Imported Functions from `wasi:random/random@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:random/random@0.3.0-rc-2026-02-09`
 // Return `len` cryptographically-secure random or pseudo-random bytes.
 // 
 // This function must produce data at least as cryptographically secure and
@@ -1767,7 +1777,7 @@ extern void random_get_random_bytes(uint64_t len, wasip3_list_u8_t *ret);
 // represented as a `u64`.
 extern uint64_t random_get_random_u64(void);
 
-// Imported Functions from `wasi:random/insecure@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:random/insecure@0.3.0-rc-2026-02-09`
 // Return `len` insecure pseudo-random bytes.
 // 
 // This function is not cryptographically secure. Do not use it for
@@ -1783,7 +1793,7 @@ extern void random_insecure_get_insecure_random_bytes(uint64_t len, wasip3_list_
 // `get-insecure-random-bytes`, represented as a `u64`.
 extern uint64_t random_insecure_get_insecure_random_u64(void);
 
-// Imported Functions from `wasi:random/insecure-seed@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:random/insecure-seed@0.3.0-rc-2026-02-09`
 // Return a 128-bit value that may contain a pseudo-random value.
 // 
 // The returned value is not required to be computed from a CSPRNG, and may
@@ -1841,7 +1851,29 @@ void stdin_future_result_void_error_code_drop_writable(stdin_future_result_void_
 
 void stdout_result_void_error_code_free(stdout_result_void_error_code_t *ptr);
 
+typedef uint32_t stdout_future_result_void_error_code_writer_t;
+
+stdout_future_result_void_error_code_t stdout_future_result_void_error_code_new(stdout_future_result_void_error_code_writer_t *writer);
+wasip3_waitable_status_t stdout_future_result_void_error_code_read(stdout_future_result_void_error_code_t reader, stdout_result_void_error_code_t *buf);
+wasip3_waitable_status_t stdout_future_result_void_error_code_write(stdout_future_result_void_error_code_writer_t writer, const stdout_result_void_error_code_t *buf);
+wasip3_waitable_status_t stdout_future_result_void_error_code_cancel_read(stdout_future_result_void_error_code_t reader);
+wasip3_waitable_status_t stdout_future_result_void_error_code_cancel_write(stdout_future_result_void_error_code_writer_t writer);
+void stdout_future_result_void_error_code_drop_readable(stdout_future_result_void_error_code_t reader);
+void stdout_future_result_void_error_code_drop_writable(stdout_future_result_void_error_code_writer_t writer);
+
+
 void stderr_result_void_error_code_free(stderr_result_void_error_code_t *ptr);
+
+typedef uint32_t stderr_future_result_void_error_code_writer_t;
+
+stderr_future_result_void_error_code_t stderr_future_result_void_error_code_new(stderr_future_result_void_error_code_writer_t *writer);
+wasip3_waitable_status_t stderr_future_result_void_error_code_read(stderr_future_result_void_error_code_t reader, stderr_result_void_error_code_t *buf);
+wasip3_waitable_status_t stderr_future_result_void_error_code_write(stderr_future_result_void_error_code_writer_t writer, const stderr_result_void_error_code_t *buf);
+wasip3_waitable_status_t stderr_future_result_void_error_code_cancel_read(stderr_future_result_void_error_code_t reader);
+wasip3_waitable_status_t stderr_future_result_void_error_code_cancel_write(stderr_future_result_void_error_code_writer_t writer);
+void stderr_future_result_void_error_code_drop_readable(stderr_future_result_void_error_code_t reader);
+void stderr_future_result_void_error_code_drop_writable(stderr_future_result_void_error_code_writer_t writer);
+
 
 extern void terminal_input_terminal_input_drop_own(terminal_input_own_terminal_input_t handle);
 

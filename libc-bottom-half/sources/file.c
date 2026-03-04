@@ -28,7 +28,7 @@ typedef struct {
 #else
   filesystem_tuple2_stream_u8_future_result_void_error_code_t read;
   filesystem_stream_u8_writer_t write;
-  wasip3_subtask_t write_subtask;
+  filesystem_future_result_void_error_code_t write_future;
   filesystem_result_void_error_code_t write_pending_result;
   bool write_done;
 #endif
@@ -66,15 +66,9 @@ static void file_close_streams(void *data) {
     filesystem_stream_u8_drop_writable(file->write);
     file->write = 0;
   }
-  if (file->write_subtask != 0) {
-    // TODO: this should use `wasip3_subtask_cancel` but right now that's buggy
-    // in Wasmtime. For now assume closing the stream above is enough to have
-    // the subtask here finish promptly, so block on the result.
-    //
-    // Once Wasmtime 43.0.0 is released and used in wasi-libc's CI that can be
-    // used here instead.
-    __wasilibc_subtask_block_on_and_drop(file->write_subtask);
-    file->write_subtask = 0;
+  if (file->write_future != 0) {
+    filesystem_future_result_void_error_code_drop_readable(file->write_future);
+    file->write_future = 0;
   }
   file->write_done = false;
 #endif
@@ -142,9 +136,11 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
 static int file_write_eof(void *data) {
   file_t *file = (file_t *)data;
 
-  if (file->write_subtask != 0) {
-    __wasilibc_subtask_block_on_and_drop(file->write_subtask);
-    file->write_subtask = 0;
+  if (file->write_future != 0) {
+    __wasilibc_future_block_on(
+      filesystem_future_result_void_error_code_read(file->write_future, &file->write_pending_result), 
+      file->write_future);
+    file->write_future = 0;
   }
   if (file->write_pending_result.is_err) {
     translate_error(file->write_pending_result.val.err);
@@ -179,20 +175,18 @@ static int file_get_write_stream(void *data, wasi_write_t *write) {
   write->pollable = &file->write_pollable;
 #else
   if (file->write == 0) {
-    assert(file->write_subtask == 0);
+    assert(file->write_future == 0);
     filesystem_stream_u8_t write_read = filesystem_stream_u8_new(&file->write);
-    wasip3_subtask_status_t status;
+    filesystem_future_result_void_error_code_t future;
     if (file->oflag & O_APPEND) {
-      status = filesystem_method_descriptor_append_via_stream(
-          filesystem_borrow_descriptor(file->file_handle), write_read,
-          &file->write_pending_result);
+      future = filesystem_method_descriptor_append_via_stream(
+          filesystem_borrow_descriptor(file->file_handle), write_read);
     } else {
-      status = filesystem_method_descriptor_write_via_stream(
+      future = filesystem_method_descriptor_write_via_stream(
           filesystem_borrow_descriptor(file->file_handle), write_read,
-          file->offset, &file->write_pending_result);
+          file->offset);
     }
-    if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED)
-      file->write_subtask = WASIP3_SUBTASK_HANDLE(status);
+    file->write_future = future;
   }
   write->output = file->write;
   write->eof = file_write_eof;

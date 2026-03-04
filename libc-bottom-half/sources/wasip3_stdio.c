@@ -20,16 +20,16 @@ typedef struct {
 } stdin3_t;
 
 typedef struct {
-  // contains stream, result storage and result subtask
-  wasip3_subtask_t subtask;
+  // contains stream, result storage and result future
+  stdout_future_result_void_error_code_t future;
   stdin_stream_u8_writer_t output;
   bool output_done;
   stdout_result_void_error_code_t pending_result;
   // tristate: zero=unknown, valid handle=yes, -1=no
   terminal_output_own_terminal_output_t terminal_out;
   // stream creation function (delayed)
-  wasip3_subtask_status_t (*stream_func)(
-      stdin_stream_u8_t data, stdout_result_void_error_code_t *result);
+  stdout_future_result_void_error_code_t (*stream_func)(
+      stdin_stream_u8_t data);
   // function to determine whether this is a terminal (delayed)
   bool (*terminal_func)(terminal_stdout_own_terminal_output_t *ret);
 } stdout3_t;
@@ -68,16 +68,18 @@ static void stdout3_free(void *data) {
     terminal_output_terminal_output_drop_own(stdio->terminal_out);
   if (stdio->output)
     stdin_stream_u8_drop_writable(stdio->output);
-  if (stdio->subtask)
-    __wasilibc_subtask_block_on_and_drop(stdio->subtask);
+  if (stdio->future) {
+    stdout_future_result_void_error_code_drop_readable(stdio->future);
+    stdio->future = 0;
+  }
   free(stdio);
 }
 
 static int stdout3_write_eof(void *data) {
   stdout3_t *stdio = (stdout3_t *)data;
-  if (stdio->subtask != 0) {
-    __wasilibc_subtask_block_on_and_drop(stdio->subtask);
-    stdio->subtask = 0;
+  if (stdio->future != 0) {
+    stdout_future_result_void_error_code_drop_readable(stdio->future);
+    stdio->future = 0;
   }
   if (stdio->pending_result.is_err) {
     translate_error(stdio->pending_result.val.err);
@@ -89,12 +91,9 @@ static int stdout3_write_eof(void *data) {
 static int stdout3_write(void *data, wasi_write_t *out) {
   stdout3_t *stdio = (stdout3_t *)data;
   if (!stdio->output) {
-    assert(!stdio->subtask);
+    assert(!stdio->future);
     stdin_stream_u8_t read_side = stdin_stream_u8_new(&stdio->output);
-    wasip3_subtask_status_t status =
-        (*stdio->stream_func)(read_side, &stdio->pending_result);
-    if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED)
-      stdio->subtask = WASIP3_SUBTASK_HANDLE(status);
+    stdio->future = (*stdio->stream_func)(read_side);
   }
   out->offset = NULL;
   out->blocking = true;
@@ -202,8 +201,8 @@ static int stdio_add_input() {
 }
 
 static int stdio3_add_output(
-    wasip3_subtask_status_t (*stream_func)(
-        stdin_stream_u8_t data, stdout_result_void_error_code_t *result),
+    stdout_future_result_void_error_code_t (*stream_func)(
+        stdin_stream_u8_t data),
     bool (*terminal_func)(terminal_stdout_own_terminal_output_t *ret)) {
   stdout3_t *stdio = calloc(1, sizeof(stdout3_t));
   if (!stdio) {
@@ -227,9 +226,8 @@ int __wasilibc_init_stdio() {
     return -1;
   // assuming that stdout and stderr functions are compatible
   if (stdio3_add_output(
-          (wasip3_subtask_status_t(*)(
-              stdin_stream_u8_t,
-              stdout_result_void_error_code_t *))stderr_write_via_stream,
+          (stdout_future_result_void_error_code_t(*)(
+              stdin_stream_u8_t))stderr_write_via_stream,
           terminal_stderr_get_terminal_stderr) < 0)
     return -1;
   return 0;

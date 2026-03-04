@@ -16,7 +16,7 @@ void __wasilibc_subtask_block_on_and_drop(wasip3_subtask_t status);
 /// This function will block if `status` indicates that the future is blocked,
 /// and this function won't return until the future has become ready again. This is
 /// suitable, for example, for waiting for future reads to complete.
-void __wasilibc_future_block_on(wasip3_subtask_status_t status, uint32_t future);
+void __wasilibc_future_block_on(wasip3_waitable_status_t status, uint32_t future);
 
 /// Waits for `stream` to be resolved after a previous operation yielded
 /// `status` as a result.

@@ -55,13 +55,13 @@ void run_tcp_server() {
   while ((bytes_read = recv(client_socket_fd, buffer, BUFSIZE, 0)) > 0) {
     total_bytes_read += bytes_read;
     // Echo back the data received from the client
-    send(client_socket_fd, buffer, bytes_read, 0);
+    TEST(send(client_socket_fd, buffer, bytes_read, 0) == bytes_read);
   }
 
   TEST(total_bytes_read > 0);
 
-  close(client_socket_fd);
-  close(server_socket_fd);
+  TEST(close(client_socket_fd) == 0);
+  TEST(close(server_socket_fd) == 0);
 }
 
 int main() {

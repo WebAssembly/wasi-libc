@@ -52,6 +52,8 @@ void test_udp_client() {
   // Synchronize the UDP port being bound by waiting for a TCP connection to
   // go through.
   close(wait_for_server(&sockaddr_in));
+  if (t_status != 0)
+    return;
 
   // Connect from client
   char message[] = "There's gonna be a party when the wolf comes home";

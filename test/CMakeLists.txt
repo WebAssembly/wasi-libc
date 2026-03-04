@@ -392,7 +392,7 @@ if (NOT (WASI STREQUAL "p1"))
     endif()
   endfunction()
 
-  sockets_test(sockets sockets-client.wasm sockets-server.wasm FAILP3)
+  sockets_test(sockets sockets-client.wasm sockets-server.wasm)
   sockets_test(sockets-udp-blocking sockets-client-udp-blocking.wasm
     sockets-server-udp-blocking.wasm FAILP3)
   sockets_test(sockets-multiple sockets-multiple-client.wasm sockets-multiple-server.wasm
@@ -400,14 +400,12 @@ if (NOT (WASI STREQUAL "p1"))
 
   # Various forms of client hangups
   sockets_test(sockets-client-hangup-after-connect
-    sockets-client-hangup-after-connect.wasm sockets-server-handle-hangups.wasm
-    FAILP3)
+    sockets-client-hangup-after-connect.wasm sockets-server-handle-hangups.wasm)
   sockets_test(sockets-client-hangup-while-sending
     sockets-client-hangup-while-sending.wasm sockets-server-handle-hangups.wasm
     FAILP3)
   sockets_test(sockets-client-hangup-after-sending
-    sockets-client-hangup-after-sending.wasm sockets-server-handle-hangups.wasm
-    FAILP3)
+    sockets-client-hangup-after-sending.wasm sockets-server-handle-hangups.wasm)
   sockets_test(sockets-client-hangup-while-receiving
     sockets-client-hangup-while-receiving.wasm sockets-server-handle-hangups.wasm
     FAILP3)
@@ -426,8 +424,7 @@ if (NOT (WASI STREQUAL "p1"))
     sockets-client-handle-hangups.wasm sockets-server-hangup-during-recv.wasm
     FAILP3)
   sockets_test(sockets-client-handle-hangups
-    sockets-client-handle-hangups.wasm hello.wasm
-    FAILP3)
+    sockets-client-handle-hangups.wasm hello.wasm)
 endif()
 
 # Flag some tests as failing in V8

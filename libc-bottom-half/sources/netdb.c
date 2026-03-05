@@ -3,11 +3,21 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wasi/file_utils.h>
 #include <wasi/sockets_utils.h>
 
 #ifdef __wasip1__
 static_assert(SOCK_DGRAM == __WASI_FILETYPE_SOCKET_DGRAM, "value mismatch");
 static_assert(SOCK_STREAM == __WASI_FILETYPE_SOCKET_STREAM, "value mismatch");
+#endif
+
+#ifdef __wasip2__
+#define IP_NAME_LOOKUP_ERROR_CODE_NAME_UNRESOLVABLE                            \
+  NETWORK_ERROR_CODE_NAME_UNRESOLVABLE
+#define IP_NAME_LOOKUP_ERROR_CODE_TEMPORARY_RESOLVER_FAILURE                   \
+  NETWORK_ERROR_CODE_TEMPORARY_RESOLVER_FAILURE
+#define IP_NAME_LOOKUP_ERROR_CODE_PERMANENT_RESOLVER_FAILURE                   \
+  NETWORK_ERROR_CODE_PERMANENT_RESOLVER_FAILURE
 #endif
 
 _Thread_local int h_errno = 0;
@@ -16,35 +26,50 @@ static struct servent global_serv = {0};
 
 static int map_error(ip_name_lookup_error_code_t error) {
   switch (error) {
+#ifdef __wasip2__
   case NETWORK_ERROR_CODE_OUT_OF_MEMORY:
     return EAI_MEMORY;
-  case NETWORK_ERROR_CODE_NAME_UNRESOLVABLE:
+#endif
+  case IP_NAME_LOOKUP_ERROR_CODE_NAME_UNRESOLVABLE:
     return EAI_NONAME;
-  case NETWORK_ERROR_CODE_TEMPORARY_RESOLVER_FAILURE:
+  case IP_NAME_LOOKUP_ERROR_CODE_TEMPORARY_RESOLVER_FAILURE:
     return EAI_AGAIN;
-  case NETWORK_ERROR_CODE_PERMANENT_RESOLVER_FAILURE:
+  case IP_NAME_LOOKUP_ERROR_CODE_PERMANENT_RESOLVER_FAILURE:
     return EAI_FAIL;
+#ifdef __wasip3__
+  case IP_NAME_LOOKUP_ERROR_CODE_UNKNOWN:
+    errno = EIO;
+    return EAI_SYSTEM;
+  case IP_NAME_LOOKUP_ERROR_CODE_ACCESS_DENIED:
+    errno = EACCES;
+    return EAI_SYSTEM;
+  case IP_NAME_LOOKUP_ERROR_CODE_INVALID_ARGUMENT:
+    errno = EINVAL;
+    return EAI_SYSTEM;
+#endif
 
   default:
+#ifdef __wasip2__
     __wasilibc_socket_error_to_errno(error);
+#endif
     return EAI_SYSTEM;
   }
 }
 
-static int add_addr(ip_name_lookup_option_ip_address_t address, in_port_t port,
-                    int socktype, const struct addrinfo *restrict hint,
+static int add_addr(sockets_ip_address_t address, in_port_t port, int socktype,
+                    const struct addrinfo *restrict hint,
                     struct addrinfo **restrict current,
                     struct addrinfo **restrict res) {
   int family;
   struct sockaddr *addr;
   socklen_t addrlen;
-  switch (address.val.tag) {
-  case NETWORK_IP_ADDRESS_IPV4: {
+  switch (address.tag) {
+  case SOCKETS_IP_ADDRESS_IPV4: {
     if (hint && hint->ai_family != AF_UNSPEC && hint->ai_family != AF_INET) {
       return 0;
     }
 
-    network_ipv4_address_t ip = address.val.val.ipv4;
+    sockets_ipv4_address_t ip = address.val.ipv4;
 
     family = PF_INET;
     addrlen = sizeof(struct sockaddr_in);
@@ -63,12 +88,12 @@ static int add_addr(ip_name_lookup_option_ip_address_t address, in_port_t port,
     memcpy(addr, &sockaddr, addrlen);
     break;
   }
-  case NETWORK_IP_ADDRESS_IPV6: {
+  case SOCKETS_IP_ADDRESS_IPV6: {
     if (hint && hint->ai_family != AF_UNSPEC && hint->ai_family != AF_INET6) {
       return 0;
     }
 
-    network_ipv6_address_t ip = address.val.val.ipv6;
+    sockets_ipv6_address_t ip = address.val.ipv6;
 
     family = PF_INET6;
     addrlen = sizeof(struct sockaddr_in6);
@@ -171,16 +196,25 @@ int getaddrinfo(const char *restrict host, const char *restrict serv,
 
   *res = NULL;
   struct addrinfo *current = NULL;
-  wasip2_string_t name = {.ptr = (uint8_t *)host, .len = strlen(host)};
-  ip_name_lookup_own_resolve_address_stream_t stream;
+  wasi_string_t name = {.ptr = (uint8_t *)host, .len = strlen(host)};
   ip_name_lookup_error_code_t error;
+#ifdef __wasip2__
+  ip_name_lookup_own_resolve_address_stream_t stream;
   if (!ip_name_lookup_resolve_addresses(__wasi_sockets_utils__borrow_network(),
                                         &name, &stream, &error))
     return map_error(error);
-
-  int ret = 0;
   ip_name_lookup_borrow_resolve_address_stream_t stream_borrow =
       ip_name_lookup_borrow_resolve_address_stream(stream);
+  poll_own_pollable_t pollable;
+  pollable.__handle = 0;
+#else
+  ip_name_lookup_list_ip_address_t addresses;
+  if (!ip_name_lookup_resolve_addresses(&name, &addresses, &error))
+    return map_error(error);
+  size_t next = 0;
+#endif
+
+  int ret = 0;
   // The 'serv' parameter can be either a port number or a service name.
   int port = 0;
   uint16_t protocol = SERVICE_PROTOCOL_TCP;
@@ -198,13 +232,11 @@ int getaddrinfo(const char *restrict host, const char *restrict serv,
     }
   }
 
-  poll_own_pollable_t pollable;
-  pollable.__handle = 0;
-
   while (ret == 0) {
-    ip_name_lookup_option_ip_address_t address;
+#ifdef __wasip2__
+    ip_name_lookup_option_ip_address_t maybe_address;
     if (!ip_name_lookup_method_resolve_address_stream_resolve_next_address(
-            stream_borrow, &address, &error)) {
+            stream_borrow, &maybe_address, &error)) {
       if (error != NETWORK_ERROR_CODE_WOULD_BLOCK) {
         freeaddrinfo(*res);
         ret = map_error(error);
@@ -218,8 +250,15 @@ int getaddrinfo(const char *restrict host, const char *restrict serv,
       poll_method_pollable_block(poll_borrow_pollable(pollable));
       continue;
     }
-    if (!address.is_some)
+    if (!maybe_address.is_some)
       break;
+    sockets_ip_address_t address = maybe_address.val;
+
+#else
+    if (next == addresses.len)
+      break;
+    sockets_ip_address_t address = addresses.ptr[next++];
+#endif
     if (protocol & SERVICE_PROTOCOL_TCP) {
       ret = add_addr(address, htons(port), SOCK_STREAM, hint, &current, res);
       if (ret)
@@ -232,9 +271,13 @@ int getaddrinfo(const char *restrict host, const char *restrict serv,
     }
   }
 
+#ifdef __wasip2__
   if (pollable.__handle != 0)
     poll_pollable_drop_own(pollable);
   ip_name_lookup_resolve_address_stream_drop_own(stream);
+#else
+  ip_name_lookup_list_ip_address_free(&addresses);
+#endif
   return ret;
 }
 

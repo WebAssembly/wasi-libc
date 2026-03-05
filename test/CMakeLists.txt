@@ -135,6 +135,7 @@ function(register_test test_name executable_name)
     list(APPEND wasmtime_args --wasm component-model-async)
     list(APPEND wasmtime_args --wasi p3)
   endif()
+  list(APPEND wasmtime_args --wasi allow-ip-name-lookup)
 
   add_test(
     NAME "${test_name}"
@@ -339,6 +340,7 @@ if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(sockets-nonblocking-udp-multiple.c NETWORK FAILP3)
   add_wasilibc_test(sockets-fcntl.c NETWORK)
   add_wasilibc_test(sockets-udp-connected.c NETWORK FAILP3)
+  add_wasilibc_test(getaddrinfo.c NETWORK)
 
   # TODO: flaky tests
   # add_wasilibc_test(sockets-nonblocking.c NETWORK)

@@ -37,7 +37,6 @@ typedef network_ipv4_socket_address_t sockets_ipv4_socket_address_t;
 typedef network_ipv4_address_t sockets_ipv4_address_t;
 typedef network_ipv6_socket_address_t sockets_ipv6_socket_address_t;
 typedef network_ipv6_address_t sockets_ipv6_address_t;
-typedef network_ip_socket_address_t sockets_ip_socket_address_t;
 #endif
 
 static const service_entry_t global_services[] = {

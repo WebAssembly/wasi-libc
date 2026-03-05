@@ -1745,7 +1745,7 @@ extern bool sockets_method_udp_socket_set_send_buffer_size(sockets_borrow_udp_so
 // - <https://man7.org/linux/man-pages/man3/getaddrinfo.3.html>
 // - <https://learn.microsoft.com/en-us/windows/win32/api/ws2tcpip/nf-ws2tcpip-getaddrinfo>
 // - <https://man.freebsd.org/cgi/man.cgi?query=getaddrinfo&sektion=3>
-extern wasip3_subtask_status_t ip_name_lookup_resolve_addresses(wasip3_string_t name, ip_name_lookup_result_list_ip_address_error_code_t *result);
+extern bool ip_name_lookup_resolve_addresses(wasip3_string_t *name, ip_name_lookup_list_ip_address_t *ret, ip_name_lookup_error_code_t *err);
 
 // Imported Functions from `wasi:random/random@0.3.0-rc-2026-01-06`
 // Return `len` cryptographically-secure random or pseudo-random bytes.

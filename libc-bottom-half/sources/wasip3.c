@@ -277,8 +277,8 @@ extern void __wasm_import_sockets_method_udp_socket_set_send_buffer_size(int32_t
 
 // Imported Functions from `wasi:sockets/ip-name-lookup@0.3.0-rc-2026-01-06`
 
-__attribute__((__import_module__("wasi:sockets/ip-name-lookup@0.3.0-rc-2026-01-06"), __import_name__("[async-lower]resolve-addresses")))
-extern int32_t __wasm_import_ip_name_lookup_resolve_addresses(uint8_t *, size_t, uint8_t *);
+__attribute__((__import_module__("wasi:sockets/ip-name-lookup@0.3.0-rc-2026-01-06"), __import_name__("resolve-addresses")))
+extern void __wasm_import_ip_name_lookup_resolve_addresses(uint8_t *, size_t, uint8_t *);
 
 // Imported Functions from `wasi:random/random@0.3.0-rc-2026-01-06`
 
@@ -3304,8 +3304,31 @@ bool sockets_method_udp_socket_set_send_buffer_size(sockets_borrow_udp_socket_t 
   }
 }
 
-wasip3_subtask_status_t ip_name_lookup_resolve_addresses(wasip3_string_t name, ip_name_lookup_result_list_ip_address_error_code_t *result) {
-  return __wasm_import_ip_name_lookup_resolve_addresses((uint8_t *) (name).ptr, (name).len, (uint8_t*) result);
+bool ip_name_lookup_resolve_addresses(wasip3_string_t *name, ip_name_lookup_list_ip_address_t *ret, ip_name_lookup_error_code_t *err) {
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(3*sizeof(void*))];
+  uint8_t *ptr = (uint8_t *) &ret_area;
+  __wasm_import_ip_name_lookup_resolve_addresses((uint8_t *) (*name).ptr, (*name).len, ptr);
+  ip_name_lookup_result_list_ip_address_error_code_t result;
+  switch ((int32_t) *((uint8_t*) (ptr + 0))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (ip_name_lookup_list_ip_address_t) { (ip_name_lookup_ip_address_t*)(*((uint8_t **) (ptr + sizeof(void*)))), (*((size_t*) (ptr + (2*sizeof(void*))))) };
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
 }
 
 void random_get_random_bytes(uint64_t len, wasip3_list_u8_t *ret) {

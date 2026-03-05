@@ -149,12 +149,12 @@ else()
     sources/sockopt.c
     sources/tcp.c
     sources/udp.c
+    sources/netdb.c
   )
 endif()
 
 if(WASI STREQUAL "p2")
   list(APPEND bottom_half_sources
-    sources/netdb.c
     sources/wasip2.c
     sources/wasip2_stdio.c
   )

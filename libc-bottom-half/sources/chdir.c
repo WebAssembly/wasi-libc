@@ -101,7 +101,6 @@ static const char *make_absolute(const char *path) {
   __wasilibc_cwd_lock();
   size_t cwd_len = strlen(__wasilibc_cwd);
   size_t path_len = path ? strlen(path) : 0;
-  __wasilibc_cwd_unlock();
   int need_slash = __wasilibc_cwd[cwd_len - 1] == '/' ? 0 : 1;
   size_t alloc_len = cwd_len + path_len + 1 + need_slash;
   if (alloc_len > make_absolute_len) {

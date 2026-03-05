@@ -108,6 +108,8 @@ software:
   // Allocate memory for the array of pointers. This uses `calloc` both to
   // handle overflow and to initialize the NULL pointer at the end.
   char **environ_ptrs = calloc(num_ptrs, sizeof(char *));
+  if (!environ_ptrs)
+    goto software;
 
   // Copy the environment variables
   for (size_t i = 0; i < environ_count; i++) {

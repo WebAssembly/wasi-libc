@@ -8,7 +8,28 @@
 #include <wasi/descriptor_table.h> // for waitable_t
 
 // Waits for a subtask to return
-void __wasilibc_subtask_block_on_and_drop(wasip3_subtask_t status);
+void __wasilibc_subtask_block_on_and_drop(wasip3_subtask_t subtask);
+
+// Blocks the current thread until the subtask invocation indicated by `status`
+// has completed.
+//
+// This will block the current thread until the `status`'s subtask, if present,
+// has completed. This function takes ownership of the subtask indicated by
+// `subtask`.
+static inline void __wasilibc_subtask_await(wasip3_subtask_status_t status) {
+  if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED)
+    __wasilibc_subtask_block_on_and_drop(WASIP3_SUBTASK_HANDLE(status));
+}
+
+// Attempts to see if `status` indicates a completed task. If it does not then
+// the task is cancelled.
+//
+// This method is unlike `__wasilibc_subtask_await` in that it will not block
+// the current thread.
+//
+// This function returns 0 if the subtask completed, and otherwise returns -1
+// and sets `errno` to `EWOULDBLOCK` if the subtask was successfully cancelled.
+int __wasilibc_subtask_await_nonblocking(wasip3_subtask_status_t status);
 
 /// Waits for `future` to be resolved after a previous operation yielded
 /// `status` as a result.

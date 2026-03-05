@@ -2,6 +2,7 @@
 
 #ifdef __wasip3__
 #include <assert.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <wasi/wasip3_block.h>
 
@@ -21,6 +22,21 @@ void __wasilibc_subtask_block_on_and_drop(wasip3_subtask_t handle) {
   assert(event.waitable == handle);
   assert(event.code == WASIP3_SUBTASK_RETURNED);
   wasip3_subtask_drop(handle);
+}
+
+int __wasilibc_subtask_await_nonblocking(wasip3_subtask_status_t status) {
+  if (WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_RETURNED)
+    return 0;
+  wasip3_subtask_t subtask = WASIP3_SUBTASK_HANDLE(status);
+  status = wasip3_subtask_cancel(subtask);
+  wasip3_subtask_drop(subtask);
+  if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED) {
+    assert(WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_STARTED_CANCELLED ||
+           WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_RETURNED_CANCELLED);
+    errno = EWOULDBLOCK;
+    return -1;
+  }
+  return 0;
 }
 
 void __wasilibc_future_block_on(wasip3_waitable_status_t status,

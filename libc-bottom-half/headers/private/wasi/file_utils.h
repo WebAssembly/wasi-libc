@@ -5,11 +5,11 @@
 #if defined(__wasip2__) || defined(__wasip3__)
 
 #include <assert.h>
-#include <wasi/wasip2.h>
-#include <wasi/descriptor_table.h>
 #include <dirent.h>
-#include <fcntl.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <wasi/descriptor_table.h>
+#include <wasi/wasip2.h>
 
 #ifdef __wasip2__
 /// Handles a `wasi:io/streams.stream-error` for a `read`-style operation.
@@ -48,16 +48,17 @@ typedef wasip3_string_t wasi_string_t;
 
 // Converts the C string `s` into a WASI string stored in `out`.
 //
-// The returned `wasip{2,3}_string_t` should not be deallocated or free'd, and it
-// can only be used while `s` is also valid.
+// The returned `wasip{2,3}_string_t` should not be deallocated or free'd, and
+// it can only be used while `s` is also valid.
 //
 // Returns 0 if `s` is valid utf-8.
 // Returns -1 and sets errno to `ENOENT` if `s` is not valid utf-8.
-int wasi_string_from_c(const char *s, wasi_string_t* out);
+int wasi_string_from_c(const char *s, wasi_string_t *out);
 
 // Succeed only if fd is bound to a file handle in the descriptor table
-static inline int fd_to_file_handle(int fd, filesystem_borrow_descriptor_t* result) {
-  descriptor_table_entry_t* entry = descriptor_table_get_ref(fd);
+static inline int fd_to_file_handle(int fd,
+                                    filesystem_borrow_descriptor_t *result) {
+  descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
   if (entry == NULL)
     return -1;
   if (!entry->vtable->get_file) {
@@ -76,8 +77,9 @@ ssize_t __wasilibc_read(wasi_read_t *read, void *buf, size_t len);
 // Same as `__wasilibc_read`, but for writes.
 ssize_t __wasilibc_write(wasi_write_t *write, const void *buf, size_t len);
 
-static inline unsigned dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
-  switch(ty) {
+static inline unsigned
+dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
+  switch (ty) {
   case FILESYSTEM_DESCRIPTOR_TYPE_UNKNOWN:
     return DT_UNKNOWN;
   case FILESYSTEM_DESCRIPTOR_TYPE_BLOCK_DEVICE:

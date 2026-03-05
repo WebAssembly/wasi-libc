@@ -4,9 +4,9 @@
 #include <wasi/api.h>
 
 #ifndef __wasip1__
-#include <wasi/poll.h>
-#include <sys/stat.h>
 #include <netinet/in.h>
+#include <sys/stat.h>
+#include <wasi/poll.h>
 
 // Metadata for WASI reads which is used to delegate to `__wasilibc_read(...)`
 // to perform the actual read of a stream.
@@ -30,7 +30,7 @@ typedef struct wasi_read_t {
 
   // A callback/ptr pair to invoke when EOF is reached to set errno and return
   // an error code.
-  int (*eof)(void*);
+  int (*eof)(void *);
   void *eof_data;
 #endif
 } wasi_read_t;
@@ -51,7 +51,7 @@ typedef struct wasi_write_t {
   bool *done;
   // A callback/ptr pair to invoke when EOF is reached to set errno and return
   // an error code.
-  int (*eof)(void*);
+  int (*eof)(void *);
   void *eof_data;
 #endif
 } wasi_write_t;
@@ -75,73 +75,73 @@ typedef uint32_t waitable_t;
  */
 typedef struct descriptor_vtable_t {
   /// Deallocates the parameter provided, closing all resources as well.
-  void (*free)(void*);
+  void (*free)(void *);
 
   // =====================================================================
   // Generic I/O
 
-  /// Looks up metadata to perform a read operation for this stream. This is used
-  /// to implement the `read` syscall, for example, and is also used with `poll`
-  /// when waiting for readability.
-  int (*get_read_stream)(void*, wasi_read_t*);
+  /// Looks up metadata to perform a read operation for this stream. This is
+  /// used to implement the `read` syscall, for example, and is also used with
+  /// `poll` when waiting for readability.
+  int (*get_read_stream)(void *, wasi_read_t *);
   /// Same as `get_read_stream`, but for output streams.
-  int (*get_write_stream)(void*, wasi_write_t*);
+  int (*get_write_stream)(void *, wasi_write_t *);
 
   /// Sets the nonblocking flag for this object to the specified value.
-  int (*set_blocking)(void*, bool);
+  int (*set_blocking)(void *, bool);
 
   /// Implementation of `fstat` the function call, used to learn about file
   /// descriptors.
-  int (*fstat)(void*, struct stat*);
+  int (*fstat)(void *, struct stat *);
 
   // =====================================================================
   // File-related APIs
 
   /// Looks up a `wasi:filesystem/types.descriptor`, if present, from this
   /// object.
-  int (*get_file)(void*, filesystem_borrow_descriptor_t*);
+  int (*get_file)(void *, filesystem_borrow_descriptor_t *);
   /// Implementation of `lseek`-the-function.
-  off_t (*seek)(void*, off_t, int);
+  off_t (*seek)(void *, off_t, int);
   /// Used during `unlinkat` to ensure that all internal stremas are
   /// closed before deleting the file to ensure there are no open references to
   /// it.
-  void (*close_streams)(void*);
+  void (*close_streams)(void *);
   /// Implementation of `fnctl(fd, F_GETFL)`.
-  int (*fcntl_getfl)(void*);
+  int (*fcntl_getfl)(void *);
   /// Implementation of `fnctl(fd, F_SETFL)`.
-  int (*fcntl_setfl)(void*, int);
+  int (*fcntl_setfl)(void *, int);
   /// Implementation of `isatty`-the-function.
-  int (*isatty)(void*);
+  int (*isatty)(void *);
 
   // =====================================================================
   // Sockets-related APIs
 
   /// Implementation of `accept4`-the-function.
-  int (*accept4)(void*, struct sockaddr *addr, socklen_t *addrlen, int flags);
+  int (*accept4)(void *, struct sockaddr *addr, socklen_t *addrlen, int flags);
   /// Implementation of `bind`-the-function.
-  int (*bind)(void*, const struct sockaddr *addr, socklen_t addrlen);
+  int (*bind)(void *, const struct sockaddr *addr, socklen_t addrlen);
   /// Implementation of `connect`-the-function.
-  int (*connect)(void*, const struct sockaddr *addr, socklen_t addrlen);
+  int (*connect)(void *, const struct sockaddr *addr, socklen_t addrlen);
   /// Implementation of `getsockname`-the-function.
-  int (*getsockname)(void*, struct sockaddr *addr, socklen_t *addrlen);
+  int (*getsockname)(void *, struct sockaddr *addr, socklen_t *addrlen);
   /// Implementation of `getpeername`-the-function.
-  int (*getpeername)(void*, struct sockaddr *addr, socklen_t *addrlen);
+  int (*getpeername)(void *, struct sockaddr *addr, socklen_t *addrlen);
   /// Implementation of `listen`-the-function.
-  int (*listen)(void*, int backlog);
+  int (*listen)(void *, int backlog);
   /// Implementation of `recvfrom`-the-function.
-  ssize_t (*recvfrom)(void*, void *buffer, size_t length, int flags,
+  ssize_t (*recvfrom)(void *, void *buffer, size_t length, int flags,
                       struct sockaddr *addr, socklen_t *addrlen);
   /// Implementation of `sendto`-the-function.
-  ssize_t (*sendto)(void*, const void *buffer, size_t length, int flags,
+  ssize_t (*sendto)(void *, const void *buffer, size_t length, int flags,
                     const struct sockaddr *addr, socklen_t addrlen);
   /// Implementation of `shutdown`-the-function.
-  int (*shutdown)(void*, int how);
+  int (*shutdown)(void *, int how);
   /// Implementation of `getsockopt`-the-function.
-  int (*getsockopt)(void*, int level, int optname,
-                    void *optval, socklen_t *optlen);
+  int (*getsockopt)(void *, int level, int optname, void *optval,
+                    socklen_t *optlen);
   /// Implementation of `setsockopt`-the-function.
-  int (*setsockopt)(void*, int level, int optname,
-                    const void *optval, socklen_t optlen);
+  int (*setsockopt)(void *, int level, int optname, const void *optval,
+                    socklen_t optlen);
 
   // =====================================================================
   // `poll`-related APIs
@@ -154,7 +154,7 @@ typedef struct descriptor_vtable_t {
   ///
   /// If this function is not provided then `poll` will use `get_read_stream`
   /// and `get_write_stream`, if present, to handle `POLL{RD,WR}NORM` events.
-  int (*poll_register)(void*, poll_state_t *state, short events);
+  int (*poll_register)(void *, poll_state_t *state, short events);
 
   /// Invoked when `poll` has already run and detected that this object was
   /// ready. The `events` provided are the same as those provided to
@@ -164,7 +164,7 @@ typedef struct descriptor_vtable_t {
   ///
   /// If this function is not provided then `events` will automatically
   /// be placed into the `revents` field of `pollfd`.
-  int (*poll_finish)(void*, poll_state_t *state, short events);
+  int (*poll_finish)(void *, poll_state_t *state, short events);
 } descriptor_vtable_t;
 
 /// A "fat pointer" which is placed inside of the descriptor table.

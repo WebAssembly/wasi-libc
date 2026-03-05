@@ -5,8 +5,8 @@
 
 #ifndef __wasip1__
 
-#include <wasi/sockets_utils.h>
 #include <sys/socket.h>
+#include <wasi/sockets_utils.h>
 
 // Normalize names on WASIp2 to the WASIp3-based names
 #ifdef __wasip2__
@@ -110,7 +110,8 @@ typedef struct {
 } tcp_socket_t;
 
 int __wasilibc_tcp_getsockopt(void *data, int level, int optname,
-                              void *restrict optval, socklen_t *restrict optlen);
+                              void *restrict optval,
+                              socklen_t *restrict optlen);
 int __wasilibc_tcp_setsockopt(void *data, int level, int optname,
                               const void *optval, socklen_t optlen);
 

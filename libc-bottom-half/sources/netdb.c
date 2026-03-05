@@ -3,8 +3,8 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include <string.h>
-#include <wasi/sockets_utils.h>
 #include <wasi/file_utils.h>
+#include <wasi/sockets_utils.h>
 
 #ifdef __wasip1__
 static_assert(SOCK_DGRAM == __WASI_FILETYPE_SOCKET_DGRAM, "value mismatch");
@@ -12,12 +12,12 @@ static_assert(SOCK_STREAM == __WASI_FILETYPE_SOCKET_STREAM, "value mismatch");
 #endif
 
 #ifdef __wasip2__
-#define IP_NAME_LOOKUP_ERROR_CODE_NAME_UNRESOLVABLE \
-    NETWORK_ERROR_CODE_NAME_UNRESOLVABLE
-#define IP_NAME_LOOKUP_ERROR_CODE_TEMPORARY_RESOLVER_FAILURE \
-    NETWORK_ERROR_CODE_TEMPORARY_RESOLVER_FAILURE
-#define IP_NAME_LOOKUP_ERROR_CODE_PERMANENT_RESOLVER_FAILURE \
-    NETWORK_ERROR_CODE_PERMANENT_RESOLVER_FAILURE
+#define IP_NAME_LOOKUP_ERROR_CODE_NAME_UNRESOLVABLE                            \
+  NETWORK_ERROR_CODE_NAME_UNRESOLVABLE
+#define IP_NAME_LOOKUP_ERROR_CODE_TEMPORARY_RESOLVER_FAILURE                   \
+  NETWORK_ERROR_CODE_TEMPORARY_RESOLVER_FAILURE
+#define IP_NAME_LOOKUP_ERROR_CODE_PERMANENT_RESOLVER_FAILURE                   \
+  NETWORK_ERROR_CODE_PERMANENT_RESOLVER_FAILURE
 #endif
 
 _Thread_local int h_errno = 0;
@@ -56,8 +56,8 @@ static int map_error(ip_name_lookup_error_code_t error) {
   }
 }
 
-static int add_addr(sockets_ip_address_t address, in_port_t port,
-                    int socktype, const struct addrinfo *restrict hint,
+static int add_addr(sockets_ip_address_t address, in_port_t port, int socktype,
+                    const struct addrinfo *restrict hint,
                     struct addrinfo **restrict current,
                     struct addrinfo **restrict res) {
   int family;
@@ -231,7 +231,6 @@ int getaddrinfo(const char *restrict host, const char *restrict serv,
       }
     }
   }
-
 
   while (ret == 0) {
 #ifdef __wasip2__

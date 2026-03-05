@@ -341,6 +341,7 @@ __wasilibc_sockaddr_to_wasi
 __wasilibc_sockaddr_validate
 __wasilibc_stat
 __wasilibc_stream_block_on
+__wasilibc_subtask_await_nonblocking
 __wasilibc_subtask_block_on_and_drop
 __wasilibc_tell
 __wasilibc_unlinkat

@@ -339,7 +339,7 @@ if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(sockets-nonblocking-multiple.c NETWORK FAILP3)
   add_wasilibc_test(sockets-nonblocking-udp-multiple.c NETWORK FAILP3)
   add_wasilibc_test(sockets-fcntl.c NETWORK)
-  add_wasilibc_test(sockets-udp-connected.c NETWORK FAILP3)
+  add_wasilibc_test(sockets-udp-connected.c NETWORK)
   add_wasilibc_test(getaddrinfo.c NETWORK)
 
   # TODO: flaky tests
@@ -396,7 +396,7 @@ if (NOT (WASI STREQUAL "p1"))
 
   sockets_test(sockets sockets-client.wasm sockets-server.wasm)
   sockets_test(sockets-udp-blocking sockets-client-udp-blocking.wasm
-    sockets-server-udp-blocking.wasm FAILP3)
+    sockets-server-udp-blocking.wasm)
   sockets_test(sockets-multiple sockets-multiple-client.wasm sockets-multiple-server.wasm
     NCLIENTS 10 FAILP3)
 

@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -7,6 +8,27 @@
 #include <wasi/sockets_utils.h>
 #include <wasi/udp.h>
 #include <wasi/wasip2.h>
+#include <wasi/wasip3_block.h>
+
+// Normalize on some wasip3 names
+#ifdef __wasip2__
+#define sockets_method_udp_socket_get_local_address                            \
+  udp_method_udp_socket_local_address
+#define sockets_method_udp_socket_get_remote_address                           \
+  udp_method_udp_socket_remote_address
+#define sockets_method_udp_socket_get_receive_buffer_size                      \
+  udp_method_udp_socket_receive_buffer_size
+#define sockets_method_udp_socket_get_send_buffer_size                         \
+  udp_method_udp_socket_send_buffer_size
+#define sockets_method_udp_socket_get_unicast_hop_limit                        \
+  udp_method_udp_socket_unicast_hop_limit
+#define sockets_method_udp_socket_set_receive_buffer_size                      \
+  udp_method_udp_socket_set_receive_buffer_size
+#define sockets_method_udp_socket_set_send_buffer_size                         \
+  udp_method_udp_socket_set_send_buffer_size
+#define sockets_method_udp_socket_set_unicast_hop_limit                        \
+  udp_method_udp_socket_set_unicast_hop_limit
+#endif
 
 // Pollables here are lazily initialized as-needed.
 typedef struct {
@@ -91,7 +113,6 @@ int __wasilibc_add_udp_socket(sockets_own_udp_socket_t socket,
   return descriptor_table_insert(entry);
 }
 
-#ifdef __wasip2__
 static int udp_create_streams(udp_socket_t *socket,
                               sockets_ip_socket_address_t *remote_address) {
   // Assert that:
@@ -112,15 +133,21 @@ static int udp_create_streams(udp_socket_t *socket,
 
   memset(dst, 0, sizeof(*dst));
 
-  sockets_error_code_t error;
   sockets_borrow_udp_socket_t socket_borrow =
       sockets_borrow_udp_socket(socket->socket);
+  sockets_error_code_t error;
+#ifdef __wasip2__
   udp_tuple2_own_incoming_datagram_stream_own_outgoing_datagram_stream_t io;
   if (!udp_method_udp_socket_stream(socket_borrow, remote_address, &io, &error))
     return __wasilibc_socket_error_to_errno(error);
 
   dst->incoming = io.f0;
   dst->outgoing = io.f1;
+#else
+  if (remote_address &&
+      !sockets_method_udp_socket_connect(socket_borrow, remote_address, &error))
+    return __wasilibc_socket_error_to_errno(error);
+#endif
 
   if (remote_address != NULL) {
     socket->state.tag = UDP_SOCKET_STATE_CONNECTED;
@@ -130,7 +157,6 @@ static int udp_create_streams(udp_socket_t *socket,
 
   return 0;
 }
-#endif
 
 static void udp_close_streams(udp_socket_streams_t *streams) {
 #ifdef __wasip2__
@@ -218,6 +244,7 @@ static int udp_handle_error(udp_socket_t *socket, sockets_error_code_t error) {
 
   return 0;
 }
+#endif
 
 static int udp_do_bind(udp_socket_t *socket,
                        sockets_ip_socket_address_t *address) {
@@ -227,6 +254,7 @@ static int udp_do_bind(udp_socket_t *socket,
   }
 
   sockets_error_code_t error;
+#ifdef __wasip2__
   network_borrow_network_t network_borrow =
       __wasi_sockets_utils__borrow_network();
   udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
@@ -240,6 +268,13 @@ static int udp_do_bind(udp_socket_t *socket,
     if (udp_handle_error(socket, error) < 0)
       return -1;
   }
+#else
+  sockets_borrow_udp_socket_t socket_borrow =
+      sockets_borrow_udp_socket(socket->socket);
+  if (!sockets_method_udp_socket_bind(socket_borrow, address, &error))
+    return __wasilibc_socket_error_to_errno(error);
+
+#endif
 
   // Bind successful.
   socket->state.tag = UDP_SOCKET_STATE_BOUND_NOSTREAMS;
@@ -249,7 +284,7 @@ static int udp_do_bind(udp_socket_t *socket,
 static int udp_bind(void *data, const struct sockaddr *addr,
                     socklen_t addrlen) {
   udp_socket_t *socket = (udp_socket_t *)data;
-  network_ip_socket_address_t local_address;
+  sockets_ip_socket_address_t local_address;
   if (__wasilibc_sockaddr_to_wasi(socket->family, addr, addrlen,
                                   &local_address) < 0)
     return -1;
@@ -266,7 +301,7 @@ static int udp_connect(void *data, const struct sockaddr *addr,
     return -1;
   }
 
-  network_ip_socket_address_t remote_address;
+  sockets_ip_socket_address_t remote_address;
   bool has_remote_address = (addr->sa_family != AF_UNSPEC);
   if (has_remote_address &&
       __wasilibc_sockaddr_to_wasi(socket->family, addr, addrlen,
@@ -278,7 +313,7 @@ static int udp_connect(void *data, const struct sockaddr *addr,
   switch (socket->state.tag) {
   case UDP_SOCKET_STATE_UNBOUND: {
     // Socket is not explicitly bound by the user. We'll do it for them:
-    network_ip_socket_address_t any;
+    sockets_ip_socket_address_t any;
     __wasilibc_unspecified_addr(socket->family, &any);
     if (udp_do_bind(socket, &any) < 0)
       return -1;
@@ -335,10 +370,12 @@ static int udp_getsockname(void *data, struct sockaddr *addr,
     abort();
   }
 
-  network_error_code_t error;
-  network_ip_socket_address_t result;
-  udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
-  if (!udp_method_udp_socket_local_address(socket_borrow, &result, &error))
+  sockets_error_code_t error;
+  sockets_ip_socket_address_t result;
+  sockets_borrow_udp_socket_t socket_borrow =
+      sockets_borrow_udp_socket(socket->socket);
+  if (!sockets_method_udp_socket_get_local_address(socket_borrow, &result,
+                                                   &error))
     return __wasilibc_socket_error_to_errno(error);
 
   __wasilibc_wasi_to_sockaddr(result, &output_addr);
@@ -373,10 +410,12 @@ static int udp_getpeername(void *data, struct sockaddr *addr,
     abort();
   }
 
-  network_error_code_t error;
-  network_ip_socket_address_t result;
-  udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
-  if (!udp_method_udp_socket_remote_address(socket_borrow, &result, &error))
+  sockets_error_code_t error;
+  sockets_ip_socket_address_t result;
+  sockets_borrow_udp_socket_t socket_borrow =
+      sockets_borrow_udp_socket(socket->socket);
+  if (!sockets_method_udp_socket_get_remote_address(socket_borrow, &result,
+                                                    &error))
     return __wasilibc_socket_error_to_errno(error);
 
   __wasilibc_wasi_to_sockaddr(result, &output_addr);
@@ -400,8 +439,6 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
   if (__wasilibc_sockaddr_validate(socket->family, addr, addrlen,
                                    &output_addr) < 0)
     return -1;
-
-  network_error_code_t error;
 
   // Make sure the streams are available.
   if (socket->state.tag == UDP_SOCKET_STATE_BOUND_NOSTREAMS)
@@ -434,6 +471,8 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
     should_block = false;
   }
 
+#ifdef __wasip2__
+  sockets_error_code_t error;
   udp_borrow_incoming_datagram_stream_t incoming_borrow =
       udp_borrow_incoming_datagram_stream(streams->incoming);
   while (true) {
@@ -461,6 +500,35 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
 
     poll_method_pollable_block(udp_incoming_pollable(streams));
   }
+#else
+  (void)streams;
+
+  sockets_result_tuple2_list_u8_ip_socket_address_error_code_t result;
+  wasip3_subtask_status_t status = sockets_method_udp_socket_receive(
+      sockets_borrow_udp_socket(socket->socket), &result);
+
+  if (should_block) {
+    __wasilibc_subtask_await(status);
+  } else {
+    if (__wasilibc_subtask_await_nonblocking(status) < 0)
+      return -1;
+  }
+
+  // If the operation failed, just translate its error and return.
+  if (result.is_err)
+    return __wasilibc_socket_error_to_errno(result.val.err);
+
+  // Fill in the source address if requested.
+  if (output_addr.tag != OUTPUT_SOCKADDR_NULL)
+    __wasilibc_wasi_to_sockaddr(result.val.ok.f1, &output_addr);
+
+  // Copy out the datagram to the caller.
+  size_t datagram_size = result.val.ok.f0.len;
+  size_t bytes_to_copy = datagram_size < length ? datagram_size : length;
+  memcpy(buffer, result.val.ok.f0.ptr, bytes_to_copy);
+  wasip3_list_u8_free(&result.val.ok.f0);
+  return return_real_size ? datagram_size : bytes_to_copy;
+#endif
 }
 
 static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
@@ -473,7 +541,7 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
     return -1;
   }
 
-  network_ip_socket_address_t remote_address;
+  sockets_ip_socket_address_t remote_address;
   bool has_remote_address = (addr != NULL);
 
   if (has_remote_address) {
@@ -497,11 +565,9 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
     }
   }
 
-  network_error_code_t error;
-
   // If the socket is not explicitly bound by the user we'll do it for them
   if (socket->state.tag == UDP_SOCKET_STATE_UNBOUND) {
-    network_ip_socket_address_t any;
+    sockets_ip_socket_address_t any;
     __wasilibc_unspecified_addr(socket->family, &any);
     if (udp_do_bind(socket, &any) < 0)
       return -1;
@@ -536,6 +602,7 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
     should_block = false;
   }
 
+#ifdef __wasip2__
   udp_outgoing_datagram_t datagrams[1] = {{
       .remote_address =
           {
@@ -553,6 +620,7 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
       .ptr = datagrams,
   };
 
+  sockets_error_code_t error;
   udp_borrow_outgoing_datagram_stream_t outgoing_borrow =
       udp_borrow_outgoing_datagram_stream(streams->outgoing);
   while (true) {
@@ -582,6 +650,33 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
     }
     poll_method_pollable_block(udp_outgoing_pollable(streams));
   }
+#else
+  (void)streams;
+
+  sockets_method_udp_socket_send_args_t args;
+  args.self = sockets_borrow_udp_socket(socket->socket);
+  args.data.ptr = (uint8_t *)buffer;
+  args.data.len = length;
+  args.remote_address.is_some = has_remote_address;
+  if (has_remote_address)
+    args.remote_address.val = remote_address;
+  sockets_result_void_error_code_t result;
+  wasip3_subtask_status_t status =
+      sockets_method_udp_socket_send(&args, &result);
+
+  if (should_block) {
+    __wasilibc_subtask_await(status);
+  } else {
+    if (__wasilibc_subtask_await_nonblocking(status) < 0)
+      return -1;
+  }
+
+  // If the operation failed, just translate its error and return.
+  if (result.is_err)
+    return __wasilibc_socket_error_to_errno(result.val.err);
+
+  return length;
+#endif
 }
 
 static int udp_getsockopt(void *data, int level, int optname, void *optval,
@@ -589,8 +684,9 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
   udp_socket_t *socket = (udp_socket_t *)data;
   int value;
 
-  network_error_code_t error;
-  udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
+  sockets_error_code_t error;
+  sockets_borrow_udp_socket_t socket_borrow =
+      sockets_borrow_udp_socket(socket->socket);
 
   switch (level) {
   case SOL_SOCKET:
@@ -614,8 +710,8 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
 
     case SO_RCVBUF: {
       uint64_t result;
-      if (!udp_method_udp_socket_receive_buffer_size(socket_borrow, &result,
-                                                     &error))
+      if (!sockets_method_udp_socket_get_receive_buffer_size(socket_borrow,
+                                                             &result, &error))
         return __wasilibc_socket_error_to_errno(error);
 
       if (result > INT_MAX) {
@@ -627,8 +723,8 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
     }
     case SO_SNDBUF: {
       uint64_t result;
-      if (!udp_method_udp_socket_send_buffer_size(socket_borrow, &result,
-                                                  &error))
+      if (!sockets_method_udp_socket_get_send_buffer_size(socket_borrow,
+                                                          &result, &error))
         return __wasilibc_socket_error_to_errno(error);
 
       if (result > INT_MAX) {
@@ -649,14 +745,14 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
   case SOL_IP:
     switch (optname) {
     case IP_TTL: {
-      if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV4) {
+      if (socket->family != SOCKETS_IP_ADDRESS_FAMILY_IPV4) {
         errno = EAFNOSUPPORT;
         return -1;
       }
 
       uint8_t result;
-      if (!udp_method_udp_socket_unicast_hop_limit(socket_borrow, &result,
-                                                   &error))
+      if (!sockets_method_udp_socket_get_unicast_hop_limit(socket_borrow,
+                                                           &result, &error))
         return __wasilibc_socket_error_to_errno(error);
 
       value = result;
@@ -671,14 +767,14 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
   case SOL_IPV6:
     switch (optname) {
     case IPV6_UNICAST_HOPS: {
-      if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV6) {
+      if (socket->family != SOCKETS_IP_ADDRESS_FAMILY_IPV6) {
         errno = EAFNOSUPPORT;
         return -1;
       }
 
       uint8_t result;
-      if (!udp_method_udp_socket_unicast_hop_limit(socket_borrow, &result,
-                                                   &error))
+      if (!sockets_method_udp_socket_get_unicast_hop_limit(socket_borrow,
+                                                           &result, &error))
         return __wasilibc_socket_error_to_errno(error);
 
       value = result;
@@ -710,22 +806,23 @@ static int udp_setsockopt(void *data, int level, int optname,
   }
   int intval = *(int *)optval;
 
-  network_error_code_t error;
-  udp_borrow_udp_socket_t socket_borrow = udp_borrow_udp_socket(socket->socket);
+  sockets_error_code_t error;
+  sockets_borrow_udp_socket_t socket_borrow =
+      sockets_borrow_udp_socket(socket->socket);
 
   switch (level) {
   case SOL_SOCKET:
     switch (optname) {
     case SO_RCVBUF: {
-      if (!udp_method_udp_socket_set_receive_buffer_size(socket_borrow, intval,
-                                                         &error))
+      if (!sockets_method_udp_socket_set_receive_buffer_size(socket_borrow,
+                                                             intval, &error))
         return __wasilibc_socket_error_to_errno(error);
 
       return 0;
     }
     case SO_SNDBUF: {
-      if (!udp_method_udp_socket_set_send_buffer_size(socket_borrow, intval,
-                                                      &error))
+      if (!sockets_method_udp_socket_set_send_buffer_size(socket_borrow, intval,
+                                                          &error))
         return __wasilibc_socket_error_to_errno(error);
 
       return 0;
@@ -741,7 +838,7 @@ static int udp_setsockopt(void *data, int level, int optname,
   case SOL_IP:
     switch (optname) {
     case IP_TTL: {
-      if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV4) {
+      if (socket->family != SOCKETS_IP_ADDRESS_FAMILY_IPV4) {
         errno = EAFNOSUPPORT;
         return -1;
       }
@@ -751,8 +848,8 @@ static int udp_setsockopt(void *data, int level, int optname,
         return -1;
       }
 
-      if (!udp_method_udp_socket_set_unicast_hop_limit(socket_borrow, intval,
-                                                       &error))
+      if (!sockets_method_udp_socket_set_unicast_hop_limit(socket_borrow,
+                                                           intval, &error))
         return __wasilibc_socket_error_to_errno(error);
 
       return 0;
@@ -766,7 +863,7 @@ static int udp_setsockopt(void *data, int level, int optname,
   case SOL_IPV6:
     switch (optname) {
     case IPV6_UNICAST_HOPS: {
-      if (socket->family != NETWORK_IP_ADDRESS_FAMILY_IPV6) {
+      if (socket->family != SOCKETS_IP_ADDRESS_FAMILY_IPV6) {
         errno = EAFNOSUPPORT;
         return -1;
       }
@@ -776,8 +873,8 @@ static int udp_setsockopt(void *data, int level, int optname,
         return -1;
       }
 
-      if (!udp_method_udp_socket_set_unicast_hop_limit(socket_borrow, intval,
-                                                       &error))
+      if (!sockets_method_udp_socket_set_unicast_hop_limit(socket_borrow,
+                                                           intval, &error))
         return __wasilibc_socket_error_to_errno(error);
 
       return 0;
@@ -793,6 +890,8 @@ static int udp_setsockopt(void *data, int level, int optname,
     return -1;
   }
 }
+
+#ifdef __wasip2__
 
 static int udp_poll_register(void *data, poll_state_t *state, short events) {
   udp_socket_t *socket = (udp_socket_t *)data;
@@ -863,7 +962,6 @@ static descriptor_vtable_t udp_vtable = {
     .set_blocking = udp_set_blocking,
     .fstat = udp_fstat,
 
-#ifdef __wasip2__
     .bind = udp_bind,
     .connect = udp_connect,
     .getsockname = udp_getsockname,
@@ -873,6 +971,7 @@ static descriptor_vtable_t udp_vtable = {
     .getsockopt = udp_getsockopt,
     .setsockopt = udp_setsockopt,
 
+#ifdef __wasip2__
     .poll_register = udp_poll_register,
 #endif
 

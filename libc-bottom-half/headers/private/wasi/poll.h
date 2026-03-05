@@ -27,30 +27,31 @@ void __wasilibc_poll_ready(poll_state_t *state, short events);
 /// `revents` in the final `pollfd`.
 ///
 /// The `state` value internally tracks which `pollfd` is being used.
-int __wasilibc_poll_add(poll_state_t *state,
-                        short events,
+int __wasilibc_poll_add(poll_state_t *state, short events,
                         poll_borrow_pollable_t pollable);
 
 /// Helper function to lazily subscribe to an input stream and call
 /// `__wasilibc_poll_add`.
-static inline int __wasilibc_poll_add_input_stream(
-    poll_state_t *state,
-    streams_borrow_input_stream_t input_stream,
-    poll_own_pollable_t *pollable) {
+static inline int
+__wasilibc_poll_add_input_stream(poll_state_t *state,
+                                 streams_borrow_input_stream_t input_stream,
+                                 poll_own_pollable_t *pollable) {
   if (pollable->__handle == 0)
     *pollable = streams_method_input_stream_subscribe(input_stream);
-  return __wasilibc_poll_add(state, POLLRDNORM, poll_borrow_pollable(*pollable));
+  return __wasilibc_poll_add(state, POLLRDNORM,
+                             poll_borrow_pollable(*pollable));
 }
 
 /// Helper function to lazily subscribe to an output stream and call
 /// `__wasilibc_poll_add`.
-static inline int __wasilibc_poll_add_output_stream(
-    poll_state_t *state,
-    streams_borrow_output_stream_t output_stream,
-    poll_own_pollable_t *pollable) {
+static inline int
+__wasilibc_poll_add_output_stream(poll_state_t *state,
+                                  streams_borrow_output_stream_t output_stream,
+                                  poll_own_pollable_t *pollable) {
   if (pollable->__handle == 0)
     *pollable = streams_method_output_stream_subscribe(output_stream);
-  return __wasilibc_poll_add(state, POLLWRNORM, poll_borrow_pollable(*pollable));
+  return __wasilibc_poll_add(state, POLLWRNORM,
+                             poll_borrow_pollable(*pollable));
 }
 
 #endif // __wasip2__

@@ -36,6 +36,17 @@ foreach(header ${globbed_headers})
   add_sysroot_header(${header} ${dst})
 endforeach()
 
+file(
+  GLOB_RECURSE globbed_private_headers
+  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+  CONFIGURE_DEPENDS
+  headers/private/*.h
+)
+
+foreach(header ${globbed_private_headers})
+  clang_format_file(${header})
+endforeach()
+
 # =============================================================================
 # building bottom-half sources
 #

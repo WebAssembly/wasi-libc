@@ -21,8 +21,6 @@
 int BUFSIZE = 256;
 
 void test_udp_client() {
-  // Prepare server socket
-  int server_port = 4001;
   // Use non-blocking sockets
   int server_socket_fd = socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, 0);
   TEST(server_socket_fd != -1);
@@ -31,11 +29,16 @@ void test_udp_client() {
 
   // Bind server to socket
   struct sockaddr_in server_address;
+  socklen_t server_address_len = sizeof(server_address);
   server_address.sin_family = AF_INET;
   server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-  server_address.sin_port = htons(server_port);
+  server_address.sin_port = 0;
   TEST(bind(server_socket_fd, (struct sockaddr *)&server_address,
             sizeof(server_address)) != -1);
+
+  TEST(getsockname(server_socket_fd, (struct sockaddr *)&server_address,
+                   &server_address_len) != -1);
+  int server_port = ntohs(server_address.sin_port);
 
   // Prepare client socket
   // Use non-blocking sockets
@@ -56,23 +59,21 @@ void test_udp_client() {
   int len = strlen(message);
   char client_buffer[BUFSIZE];
   char server_buffer[BUFSIZE];
-  int connect_result =
-      connect(socket_fd, (struct sockaddr *)&sockaddr_in, sizeof(sockaddr_in));
-  while (connect_result == -1) {
-    if (t_status)
-      exit(t_status);
-
-    connect_result = connect(socket_fd, (struct sockaddr *)&sockaddr_in,
-                             sizeof(sockaddr_in));
-    if (connect_result == -1) {
-      struct pollfd poll_fd = {
-          .fd = socket_fd, .events = POLLWRNORM, .revents = 0};
-      TEST(poll(&poll_fd, 1, 100) != -1);
-    }
-  }
+  TEST(connect(socket_fd, (struct sockaddr *)&sockaddr_in,
+               sizeof(sockaddr_in)) != -1);
 
   // Write to socket
-  ssize_t bytes_sent = send(socket_fd, message, len + 1, 0);
+  ssize_t bytes_sent;
+  while (!t_status) {
+    bytes_sent = send(socket_fd, message, len + 1, 0);
+    if (bytes_sent != -1)
+      break;
+    if (errno != EWOULDBLOCK)
+      t_error("sendto failed (errno = %d)\n", errno);
+    struct pollfd poll_fd = {
+        .fd = socket_fd, .events = POLLWRNORM, .revents = 0};
+    TEST(poll(&poll_fd, 1, -1) != -1);
+  }
 
   // Wait for server to be read-ready.
   while (1) {
@@ -81,7 +82,7 @@ void test_udp_client() {
 
     struct pollfd poll_fd = {
         .fd = server_socket_fd, .events = POLLRDNORM, .revents = 0};
-    TEST(poll(&poll_fd, 1, 100) != -1);
+    TEST(poll(&poll_fd, 1, -1) != -1);
     if (poll_fd.revents) {
       break;
     }
@@ -107,12 +108,12 @@ void test_udp_client() {
   if (bytes_sent == -1) {
     struct pollfd poll_fd = {
         .fd = server_socket_fd, .events = POLLWRNORM, .revents = 0};
-    TEST(poll(&poll_fd, 1, 100) != -1);
+    TEST(poll(&poll_fd, 1, -1) != -1);
   }
   if (bytes_received == -1) {
     struct pollfd poll_fd = {
         .fd = socket_fd, .events = POLLRDNORM, .revents = 0};
-    TEST(poll(&poll_fd, 1, 100) != -1);
+    TEST(poll(&poll_fd, 1, -1) != -1);
     // Retry
     bytes_received = recv(socket_fd, client_buffer, BUFSIZE, 0);
   }

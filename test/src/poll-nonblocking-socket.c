@@ -26,11 +26,22 @@ void test_tcp_client() {
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
   TEST(socket_fd != -1);
 
-  int server_port = 4001;
+  // Bind a temporary socket to get a free port, then close it so we have
+  // a port that nothing is listening on.
+  int tmp_fd = socket(AF_INET, SOCK_STREAM, 0);
+  struct sockaddr_in tmp_addr;
+  socklen_t tmp_addr_len = sizeof(tmp_addr);
+  tmp_addr.sin_family = AF_INET;
+  tmp_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  tmp_addr.sin_port = 0;
+  TEST(bind(tmp_fd, (struct sockaddr *)&tmp_addr, sizeof(tmp_addr)) != -1);
+  TEST(getsockname(tmp_fd, (struct sockaddr *)&tmp_addr, &tmp_addr_len) != -1);
+  int server_port = ntohs(tmp_addr.sin_port);
+  TEST(close(tmp_fd) == 0);
 
   // Check that if a non-blocking socket is in progress, poll() indicates the
   // right result
-  socket_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+  TEST((socket_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) != -1);
   struct sockaddr_in sockaddr_in;
   // Doesn't matter what address we connect to, since we only attempt to connect
   // once
@@ -44,14 +55,14 @@ void test_tcp_client() {
 
   // Poll the socket for writability
   struct pollfd poll_fd = {.fd = socket_fd, .events = POLLWRNORM, .revents = 0};
-  poll(&poll_fd, 1, 10);
+  TEST(poll(&poll_fd, 1, 10) != -1);
 
   // Socket should not be writable
   int32_t error = -1;
   socklen_t len = -1;
   TEST(getsockopt(socket_fd, SOL_SOCKET, SO_ERROR, &error, &len) == 0);
   TEST(error == ECONNREFUSED);
-  close(socket_fd);
+  TEST(close(socket_fd) == 0);
 }
 
 int main(void) {

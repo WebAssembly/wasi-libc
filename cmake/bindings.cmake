@@ -131,7 +131,6 @@ add_custom_target(
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.set-times-at"
       "--async=-wasi:filesystem/types@${wasip3-version}#[method]descriptor.set-times"
       "--async=-wasi:clocks/monotonic-clock@${wasip3-version}#wait-until"
-      "--async=-wasi:clocks/monotonic-clock@${wasip3-version}#wait-for"
       "--async=-wasi:sockets/ip-name-lookup@${wasip3-version}#resolve-addresses"
       ${CMAKE_SOURCE_DIR}/wasi/p3/wit
   COMMAND cmake -E copy wasip3.h ${bottom_half}/headers/public/wasi/__generated_wasip3.h

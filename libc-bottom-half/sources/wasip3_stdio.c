@@ -13,8 +13,8 @@
 #define KNOWN_NOT_A_TERMINAL -1
 
 typedef struct {
-  // input stream and future for result<_, error-code-t>
-  stdin_tuple2_stream_u8_future_result_void_error_code_t input;
+  wasip3_io_state_t input;
+  stdin_future_result_void_error_code_t input_result;
   // tristate: zero=unknown, valid handle=yes, -1=no
   terminal_input_own_terminal_input_t terminal_in;
 } stdin3_t;
@@ -22,8 +22,7 @@ typedef struct {
 typedef struct {
   // contains stream, result storage and result subtask
   wasip3_subtask_t subtask;
-  stdin_stream_u8_writer_t output;
-  bool output_done;
+  wasip3_io_state_t output;
   stdout_result_void_error_code_t pending_result;
   // tristate: zero=unknown, valid handle=yes, -1=no
   terminal_output_own_terminal_output_t terminal_out;
@@ -55,10 +54,9 @@ static void stdin3_free(void *data) {
   stdin3_t *stdio = (stdin3_t *)data;
   if (stdio->terminal_in.__handle > 0)
     terminal_input_terminal_input_drop_own(stdio->terminal_in);
-  if (stdio->input.f1)
-    stdin_future_result_void_error_code_drop_readable(stdio->input.f1);
-  if (stdio->input.f0)
-    stdin_stream_u8_drop_readable(stdio->input.f0);
+  wasip3_read_state_close(&stdio->input);
+  if (stdio->input_result)
+    stdin_stream_u8_drop_readable(stdio->input_result);
   free(stdio);
 }
 
@@ -66,8 +64,7 @@ static void stdout3_free(void *data) {
   stdout3_t *stdio = (stdout3_t *)data;
   if (stdio->terminal_out.__handle > 0)
     terminal_output_terminal_output_drop_own(stdio->terminal_out);
-  if (stdio->output)
-    stdin_stream_u8_drop_writable(stdio->output);
+  wasip3_write_state_close(&stdio->output);
   if (stdio->subtask)
     __wasilibc_subtask_block_on_and_drop(stdio->subtask);
   free(stdio);
@@ -88,19 +85,20 @@ static int stdout3_write_eof(void *data) {
 
 static int stdout3_write(void *data, wasi_write_t *out) {
   stdout3_t *stdio = (stdout3_t *)data;
-  if (!stdio->output) {
+  if (!wasip3_io_state_present(&stdio->output)) {
     assert(!stdio->subtask);
-    stdin_stream_u8_t read_side = stdin_stream_u8_new(&stdio->output);
+    stdin_stream_u8_writer_t writer;
+    stdin_stream_u8_t read_side = stdin_stream_u8_new(&writer);
     wasip3_subtask_status_t status =
         (*stdio->stream_func)(read_side, &stdio->pending_result);
     if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED)
       stdio->subtask = WASIP3_SUBTASK_HANDLE(status);
+    wasip3_io_state_init(&stdio->output, writer);
   }
   out->offset = NULL;
   out->blocking = true;
   out->timeout = 0;
-  out->output = stdio->output;
-  out->done = &stdio->output_done;
+  out->state = &stdio->output;
   out->eof = stdout3_write_eof;
   out->eof_data = data;
   return 0;
@@ -109,13 +107,13 @@ static int stdout3_write(void *data, wasi_write_t *out) {
 static int stdin3_read_eof(void *data) {
   stdin3_t *stdio = (stdin3_t *)data;
 
-  if (stdio->input.f1 != 0) {
+  if (stdio->input_result != 0) {
     stdin_result_void_error_code_t result;
     __wasilibc_future_block_on(
-        stdin_future_result_void_error_code_read(stdio->input.f1, &result),
-        stdio->input.f1);
-    stdin_future_result_void_error_code_drop_readable(stdio->input.f1);
-    stdio->input.f1 = 0;
+        stdin_future_result_void_error_code_read(stdio->input_result, &result),
+        stdio->input_result);
+    stdin_future_result_void_error_code_drop_readable(stdio->input_result);
+    stdio->input_result = 0;
     if (result.is_err) {
       translate_error(result.val.err);
       return -1;
@@ -126,11 +124,14 @@ static int stdin3_read_eof(void *data) {
 
 static int stdin3_read(void *data, wasi_read_t *read) {
   stdin3_t *stdio = (stdin3_t *)data;
-  if (!stdio->input.f0) {
-    assert(!stdio->input.f1);
-    stdin_read_via_stream(&stdio->input);
+  if (!wasip3_io_state_present(&stdio->input)) {
+    assert(!stdio->input_result);
+    stdin_tuple2_stream_u8_future_result_void_error_code_t result;
+    stdin_read_via_stream(&result);
+    wasip3_io_state_init(&stdio->input, result.f0);
+    stdio->input_result = result.f1;
   }
-  read->stream = stdio->input.f0;
+  read->state = &stdio->input;
   read->offset = NULL;
   read->blocking = true;
   read->timeout = 0;

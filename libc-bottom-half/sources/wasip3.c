@@ -60,8 +60,8 @@ extern int64_t __wasm_import_monotonic_clock_get_resolution(void);
 __attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06"), __import_name__("wait-until")))
 extern void __wasm_import_monotonic_clock_wait_until(int64_t);
 
-__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06"), __import_name__("wait-for")))
-extern void __wasm_import_monotonic_clock_wait_for(int64_t);
+__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06"), __import_name__("[async-lower]wait-for")))
+extern int32_t __wasm_import_monotonic_clock_wait_for(int64_t);
 
 // Imported Functions from `wasi:clocks/system-clock@0.3.0-rc-2026-01-06`
 
@@ -1387,8 +1387,8 @@ void monotonic_clock_wait_until(monotonic_clock_mark_t when) {
   __wasm_import_monotonic_clock_wait_until((int64_t) (when));
 }
 
-void monotonic_clock_wait_for(monotonic_clock_duration_t how_long) {
-  __wasm_import_monotonic_clock_wait_for((int64_t) (how_long));
+wasip3_subtask_status_t monotonic_clock_wait_for(monotonic_clock_duration_t how_long) {
+  return __wasm_import_monotonic_clock_wait_for((int64_t) (how_long));
 }
 
 void system_clock_now(system_clock_instant_t *ret) {

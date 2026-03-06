@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <wasi/descriptor_table.h> // for waitable_t
 
+typedef wasip3_waitable_status_t (*wasip3_cancel_t)(uint32_t);
+
 // Waits for a subtask to return
 void __wasilibc_subtask_block_on_and_drop(wasip3_subtask_t subtask);
 
@@ -37,8 +39,22 @@ int __wasilibc_subtask_await_nonblocking(wasip3_subtask_status_t status);
 /// This function will block if `status` indicates that the future is blocked,
 /// and this function won't return until the future has become ready again. This
 /// is suitable, for example, for waiting for future reads to complete.
-void __wasilibc_future_block_on(wasip3_subtask_status_t status,
-                                uint32_t future);
+///
+/// If `timeout` is nonzero then this function will block for at most that
+/// amount of time. The `cancel` callback must be set when `timeout` is set and
+/// that will be used to cancel the in-flight operation on this future.
+int __wasilibc_future_block_on_timeout(wasip3_waitable_status_t status,
+                                       uint32_t future,
+                                       monotonic_clock_duration_t timeout,
+                                       wasip3_cancel_t cancel);
+
+// Convenience wrapper around `*_timeout` above which doesn't take a timeout.
+static inline void __wasilibc_future_block_on(wasip3_waitable_status_t status,
+                                              uint32_t future) {
+  ssize_t ret = __wasilibc_future_block_on_timeout(status, future, 0, NULL);
+  (void)ret;
+  assert(ret >= 0);
+}
 
 /// Waits for `stream` to be resolved after a previous operation yielded
 /// `status` as a result.
@@ -49,8 +65,24 @@ void __wasilibc_future_block_on(wasip3_subtask_status_t status,
 ///
 /// The `closed` variable is set based on the result of the operation to
 /// communicate what was received from the component model.
-size_t __wasilibc_stream_block_on(wasip3_subtask_status_t status,
-                                  uint32_t stream, bool *closed);
-#endif
+///
+/// If `timeout` is nonzero then this function will block for at most that
+/// amount of time. The `cancel` callback must be set when `timeout` is set and
+/// that will be used to cancel the in-flight operation on this stream.
+ssize_t __wasilibc_stream_block_on_timeout(wasip3_waitable_status_t status,
+                                           uint32_t stream, bool *closed,
+                                           monotonic_clock_duration_t timeout,
+                                           wasip3_cancel_t cancel);
+
+// Convenience wrapper around `*_timeout` above which doesn't take a timeout.
+static inline size_t __wasilibc_stream_block_on(wasip3_waitable_status_t status,
+                                                uint32_t stream, bool *closed) {
+  ssize_t ret =
+      __wasilibc_stream_block_on_timeout(status, stream, closed, 0, NULL);
+  assert(ret >= 0);
+  return ret;
+}
+
+#endif // __wasip3__
 
 #endif // WASI_WASIP3_BLOCK_H

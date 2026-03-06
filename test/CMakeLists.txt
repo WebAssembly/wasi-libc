@@ -123,7 +123,7 @@ function(register_test test_name executable_name)
     list(APPEND wasmtime_args --dir ${fsdir}::/)
   endif()
   if (arg_NETWORK)
-    list(APPEND wasmtime_args -Sinherit-network)
+    list(APPEND wasmtime_args -Sinherit-network,allow-ip-name-lookup)
   endif()
   foreach(env IN LISTS arg_ENV)
     list(APPEND wasmtime_args --env ${env})
@@ -135,7 +135,6 @@ function(register_test test_name executable_name)
     list(APPEND wasmtime_args --wasm component-model-async)
     list(APPEND wasmtime_args --wasi p3)
   endif()
-  list(APPEND wasmtime_args --wasi allow-ip-name-lookup)
 
   add_test(
     NAME "${test_name}"
@@ -153,12 +152,6 @@ function(register_test test_name executable_name)
     set_tests_properties("setup_${test_name}" PROPERTIES FIXTURES_SETUP "fs_${test_name}")
     set_tests_properties("cleanup_${test_name}" PROPERTIES FIXTURES_CLEANUP "fs_${test_name}")
     set_tests_properties("${test_name}" PROPERTIES FIXTURES_REQUIRED "fs_${test_name}")
-  endif()
-
-  # All sockets tests use the same port right now, so only one can run at a
-  # time.
-  if (arg_NETWORK)
-    set_tests_properties(${test_name} PROPERTIES RESOURCE_LOCK socket-test)
   endif()
 
   if (arg_PASS_REGULAR_EXPRESSION)
@@ -341,10 +334,8 @@ if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(sockets-fcntl.c NETWORK)
   add_wasilibc_test(sockets-udp-connected.c NETWORK)
   add_wasilibc_test(getaddrinfo.c NETWORK)
-
-  # TODO: flaky tests
-  # add_wasilibc_test(sockets-nonblocking.c NETWORK)
-  # add_wasilibc_test(sockets-nonblocking-udp-no-connection.c NETWORK)
+  add_wasilibc_test(sockets-nonblocking.c NETWORK FAILP3)
+  add_wasilibc_test(sockets-nonblocking-udp-no-connection.c NETWORK FAILP3)
 
   # Define executables for server/client tests, and they're paired together in
   # various combinations below for various tests.
@@ -387,7 +378,6 @@ if (NOT (WASI STREQUAL "p1"))
           -DNCLIENTS=${arg_NCLIENTS}
           -P ${CMAKE_CURRENT_SOURCE_DIR}/socket-test.cmake
     )
-    set_tests_properties(${test_name} PROPERTIES RESOURCE_LOCK socket-test)
 
     if (arg_FAILP3 AND (WASI STREQUAL "p3"))
       set_tests_properties(${test_name} PROPERTIES WILL_FAIL TRUE)
@@ -404,27 +394,21 @@ if (NOT (WASI STREQUAL "p1"))
   sockets_test(sockets-client-hangup-after-connect
     sockets-client-hangup-after-connect.wasm sockets-server-handle-hangups.wasm)
   sockets_test(sockets-client-hangup-while-sending
-    sockets-client-hangup-while-sending.wasm sockets-server-handle-hangups.wasm
-    FAILP3)
+    sockets-client-hangup-while-sending.wasm sockets-server-handle-hangups.wasm)
   sockets_test(sockets-client-hangup-after-sending
     sockets-client-hangup-after-sending.wasm sockets-server-handle-hangups.wasm)
   sockets_test(sockets-client-hangup-while-receiving
-    sockets-client-hangup-while-receiving.wasm sockets-server-handle-hangups.wasm
-    FAILP3)
+    sockets-client-hangup-while-receiving.wasm sockets-server-handle-hangups.wasm)
 
   # Various forms of server hangups, including when there's no server at all
   sockets_test(sockets-server-hangup-before-send
-    sockets-client-handle-hangups.wasm sockets-server-hangup-before-send.wasm
-    FAILP3)
+    sockets-client-handle-hangups.wasm sockets-server-hangup-before-send.wasm)
   sockets_test(sockets-server-hangup-during-send
-    sockets-client-handle-hangups.wasm sockets-server-hangup-during-send.wasm
-    FAILP3)
+    sockets-client-handle-hangups.wasm sockets-server-hangup-during-send.wasm)
   sockets_test(sockets-server-hangup-before-recv
-    sockets-client-handle-hangups.wasm sockets-server-hangup-before-recv.wasm
-    FAILP3)
+    sockets-client-handle-hangups.wasm sockets-server-hangup-before-recv.wasm)
   sockets_test(sockets-server-hangup-during-recv
-    sockets-client-handle-hangups.wasm sockets-server-hangup-during-recv.wasm
-    FAILP3)
+    sockets-client-handle-hangups.wasm sockets-server-hangup-during-recv.wasm)
   sockets_test(sockets-client-handle-hangups
     sockets-client-handle-hangups.wasm hello.wasm)
 endif()

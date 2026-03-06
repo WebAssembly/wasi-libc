@@ -21,7 +21,6 @@
 
 int BUFSIZE = 256;
 size_t EXPECTED_CONNECTIONS = 10;
-int TIMEOUT = 100;
 
 size_t respond_to_client(int client_fd) {
   char buffer[BUFSIZE];
@@ -35,8 +34,6 @@ size_t respond_to_client(int client_fd) {
 }
 
 void run_tcp_server() {
-  // Prepare server socket
-  int server_port = 4001;
   // Use blocking sockets
   int server_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
   TEST(server_socket_fd != -1);
@@ -45,18 +42,23 @@ void run_tcp_server() {
 
   // Bind server to socket
   struct sockaddr_in server_address;
+  socklen_t server_address_len = sizeof(server_address);
   server_address.sin_family = AF_INET;
   server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-  server_address.sin_port = htons(server_port);
+  server_address.sin_port = 0;
   TEST(bind(server_socket_fd, (struct sockaddr *)&server_address,
             sizeof(server_address)) != -1);
+
+  TEST(getsockname(server_socket_fd, (struct sockaddr *)&server_address,
+                   &server_address_len) != -1);
 
   // Listen on socket
   socklen_t client_len = sizeof(struct sockaddr_in);
   int client_socket_fd;
   struct sockaddr_in client_address;
   int32_t total_bytes_read = 0;
-  TEST(listen(server_socket_fd, 1) != -1);
+  TEST(listen(server_socket_fd, EXPECTED_CONNECTIONS) != -1);
+  printf("%d\n", ntohs(server_address.sin_port));
 
   // Server accepts connection
   struct pollfd client_fds[EXPECTED_CONNECTIONS];
@@ -67,17 +69,20 @@ void run_tcp_server() {
                               (struct sockaddr *)&client_address, &client_len);
     TEST(client_socket_fd != -1);
     client_fds[i].fd = client_socket_fd;
-    client_fds[i].events &= POLLIN;
+    client_fds[i].events = POLLIN;
   }
 
   // Poll on the array of client file descriptors and respond to
   // any that are ready
-  while (poll(client_fds, EXPECTED_CONNECTIONS, TIMEOUT) != 0) {
+  unsigned done = 0;
+  while (done < EXPECTED_CONNECTIONS) {
+    TEST(poll(client_fds, EXPECTED_CONNECTIONS, -1) > 0);
     for (size_t i = 0; i < EXPECTED_CONNECTIONS; i++) {
-      if (client_fds[i].revents | POLLIN) {
+      if (client_fds[i].revents & POLLIN) {
         total_bytes_read += respond_to_client(client_fds[i].fd);
         // If fd is negative, revents will be set to 0 on the next call
         client_fds[i].fd = ~client_fds[i].fd;
+        done++;
       }
     }
   }

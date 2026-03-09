@@ -109,8 +109,7 @@ void test_udp_client() {
     else
       pfds[0].events = POLLIN;
 
-    int ready;
-    TEST((ready = poll(pfds, MAX_CONNECTIONS + 1, -1)) != -1);
+    TEST(poll(pfds, MAX_CONNECTIONS + 1, -1) != -1);
 
     // Handle server: receive datagrams and enqueue for echo
     if (pfds[0].revents & POLLIN) {

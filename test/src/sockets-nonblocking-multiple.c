@@ -130,8 +130,7 @@ void test_tcp_client() {
   // Turn this event loop until all clients have been handled.
   while (t_status == 0 && clients_done < MAX_CONNECTIONS) {
     // Wait for something to be ready, we'll iterate over the results below.
-    int ready;
-    TEST((ready = poll(pfds, nfds, -1)) != -1);
+    TEST(poll(pfds, nfds, -1) != -1);
 
     for (int i = 0; i < (int)nfds; i++) {
       // Skip this pfd if it doesn't have any events ready.

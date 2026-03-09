@@ -123,7 +123,7 @@ function(register_test test_name executable_name)
     list(APPEND wasmtime_args --dir ${fsdir}::/)
   endif()
   if (arg_NETWORK)
-    list(APPEND wasmtime_args -Sinherit-network)
+    list(APPEND wasmtime_args -Sinherit-network,allow-ip-name-lookup)
   endif()
   foreach(env IN LISTS arg_ENV)
     list(APPEND wasmtime_args --env ${env})
@@ -135,7 +135,6 @@ function(register_test test_name executable_name)
     list(APPEND wasmtime_args --wasm component-model-async)
     list(APPEND wasmtime_args --wasi p3)
   endif()
-  list(APPEND wasmtime_args --wasi allow-ip-name-lookup)
 
   add_test(
     NAME "${test_name}"
@@ -153,12 +152,6 @@ function(register_test test_name executable_name)
     set_tests_properties("setup_${test_name}" PROPERTIES FIXTURES_SETUP "fs_${test_name}")
     set_tests_properties("cleanup_${test_name}" PROPERTIES FIXTURES_CLEANUP "fs_${test_name}")
     set_tests_properties("${test_name}" PROPERTIES FIXTURES_REQUIRED "fs_${test_name}")
-  endif()
-
-  # All sockets tests use the same port right now, so only one can run at a
-  # time.
-  if (arg_NETWORK)
-    set_tests_properties(${test_name} PROPERTIES RESOURCE_LOCK socket-test)
   endif()
 
   if (arg_PASS_REGULAR_EXPRESSION)
@@ -341,10 +334,8 @@ if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(sockets-fcntl.c NETWORK)
   add_wasilibc_test(sockets-udp-connected.c NETWORK)
   add_wasilibc_test(getaddrinfo.c NETWORK)
-
-  # TODO: flaky tests
-  # add_wasilibc_test(sockets-nonblocking.c NETWORK)
-  # add_wasilibc_test(sockets-nonblocking-udp-no-connection.c NETWORK)
+  add_wasilibc_test(sockets-nonblocking.c NETWORK FAILP3)
+  add_wasilibc_test(sockets-nonblocking-udp-no-connection.c NETWORK FAILP3)
 
   # Define executables for server/client tests, and they're paired together in
   # various combinations below for various tests.
@@ -387,7 +378,6 @@ if (NOT (WASI STREQUAL "p1"))
           -DNCLIENTS=${arg_NCLIENTS}
           -P ${CMAKE_CURRENT_SOURCE_DIR}/socket-test.cmake
     )
-    set_tests_properties(${test_name} PROPERTIES RESOURCE_LOCK socket-test)
 
     if (arg_FAILP3 AND (WASI STREQUAL "p3"))
       set_tests_properties(${test_name} PROPERTIES WILL_FAIL TRUE)

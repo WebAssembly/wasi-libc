@@ -21,24 +21,27 @@
 int BUFSIZE = 16;
 
 void run_tcp_server() {
-  // Prepare server socket
-  int server_port = 4001;
   // Use blocking sockets
   int server_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 
   // Bind server to socket
   struct sockaddr_in server_address;
+  socklen_t server_address_len = sizeof(server_address);
   server_address.sin_family = AF_INET;
   server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-  server_address.sin_port = htons(server_port);
+  server_address.sin_port = 0;
   TEST(bind(server_socket_fd, (struct sockaddr *)&server_address,
             sizeof(server_address)) != -1);
+
+  TEST(getsockname(server_socket_fd, (struct sockaddr *)&server_address,
+                   &server_address_len) != -1);
 
   // Listen on socket
   socklen_t client_len = sizeof(struct sockaddr_in);
   int client_socket_fd;
   struct sockaddr_in client_address;
   TEST(listen(server_socket_fd, 1) != -1);
+  printf("%d\n", ntohs(server_address.sin_port));
 
   // Server accepts connection
   client_socket_fd =

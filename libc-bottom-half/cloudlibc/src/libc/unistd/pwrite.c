@@ -87,8 +87,7 @@ ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
   // Wait for the subtask to resolve now that the writer half is closed and if
   // we failed to write bytes (0 bytes written) and the result is an error we
   // can return -1.
-  if (WASIP3_SUBTASK_STATE(subtask_status) != WASIP3_SUBTASK_RETURNED)
-    __wasilibc_subtask_block_on_and_drop(WASIP3_SUBTASK_HANDLE(subtask_status));
+  __wasilibc_subtask_await(subtask_status);
   if (ret == 0 && result.is_err) {
     translate_error(result.val.err);
     return -1;

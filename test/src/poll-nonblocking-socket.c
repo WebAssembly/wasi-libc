@@ -56,7 +56,6 @@ void test_tcp_client() {
   struct pollfd poll_fd = {.fd = socket_fd, .events = POLLWRNORM, .revents = 0};
   TEST(poll(&poll_fd, 1, 10) != -1);
 
-
   // Socket should not be writable
   int32_t error = -1;
   socklen_t len = -1;

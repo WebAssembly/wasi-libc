@@ -4,9 +4,57 @@
 #include <wasi/api.h>
 
 #ifndef __wasip1__
+#include <assert.h>
 #include <netinet/in.h>
 #include <sys/stat.h>
 #include <wasi/poll.h>
+
+#ifdef __wasip3__
+
+/// Helper structure to package up state related to a wasip3 `stream<u8>`.
+///
+/// This is used by various helpers to coordinate reading/writing/etc on a
+/// stream. This simultaneously represents both readers and writers.
+typedef struct wasip3_io_state_t {
+  uint32_t stream;
+  bool done;
+} wasip3_io_state_t;
+
+/// Initializes `state` with the `stream` provided.
+static inline void wasip3_io_state_init(wasip3_io_state_t *state,
+                                        uint32_t stream) {
+  assert(stream != 0);
+  state->stream = stream;
+  state->done = false;
+}
+
+/// Tests whether `state` has been initialized with a stream yet.
+static inline bool wasip3_io_state_present(wasip3_io_state_t *state) {
+  return state->stream != 0;
+}
+
+/// Closes out the streams/etc internal to `state`.
+///
+/// Internally the stream must be a reader-half of a `stream<u8>`.
+static inline void wasip3_read_state_close(wasip3_io_state_t *state) {
+  if (state->stream != 0) {
+    filesystem_stream_u8_drop_readable(state->stream);
+    state->stream = 0;
+  }
+  state->done = false;
+}
+
+/// Closes out the streams/etc internal to `state`.
+///
+/// Internally the stream must be a writer-half of a `stream<u8>`.
+static inline void wasip3_write_state_close(wasip3_io_state_t *state) {
+  if (state->stream != 0) {
+    filesystem_stream_u8_drop_writable(state->stream);
+    state->stream = 0;
+  }
+  state->done = false;
+}
+#endif
 
 // Metadata for WASI reads which is used to delegate to `__wasilibc_read(...)`
 // to perform the actual read of a stream.
@@ -25,8 +73,7 @@ typedef struct wasi_read_t {
   // initialized as-necessary.
   poll_own_pollable_t *pollable;
 #else
-  // The `stream<u8>` that's being read.
-  filesystem_stream_u8_t stream;
+  wasip3_io_state_t *state;
 
   // A callback/ptr pair to invoke when EOF is reached to set errno and return
   // an error code.
@@ -45,21 +92,13 @@ typedef struct wasi_write_t {
   streams_borrow_output_stream_t output;
   poll_own_pollable_t *pollable;
 #else
-  // The actual stream that is being written to.
-  filesystem_stream_u8_writer_t output;
-  // An indicator if `output` has been closed/dropped.
-  bool *done;
+  wasip3_io_state_t *state;
   // A callback/ptr pair to invoke when EOF is reached to set errno and return
   // an error code.
   int (*eof)(void *);
   void *eof_data;
 #endif
 } wasi_write_t;
-
-#ifdef __wasip3__
-// create an alias to distinguish the handle type in the API
-typedef uint32_t waitable_t;
-#endif
 
 /**
  * Operations that are required of all descriptors registered as file

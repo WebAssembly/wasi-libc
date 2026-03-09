@@ -394,27 +394,21 @@ if (NOT (WASI STREQUAL "p1"))
   sockets_test(sockets-client-hangup-after-connect
     sockets-client-hangup-after-connect.wasm sockets-server-handle-hangups.wasm)
   sockets_test(sockets-client-hangup-while-sending
-    sockets-client-hangup-while-sending.wasm sockets-server-handle-hangups.wasm
-    FAILP3)
+    sockets-client-hangup-while-sending.wasm sockets-server-handle-hangups.wasm)
   sockets_test(sockets-client-hangup-after-sending
     sockets-client-hangup-after-sending.wasm sockets-server-handle-hangups.wasm)
   sockets_test(sockets-client-hangup-while-receiving
-    sockets-client-hangup-while-receiving.wasm sockets-server-handle-hangups.wasm
-    FAILP3)
+    sockets-client-hangup-while-receiving.wasm sockets-server-handle-hangups.wasm)
 
   # Various forms of server hangups, including when there's no server at all
   sockets_test(sockets-server-hangup-before-send
-    sockets-client-handle-hangups.wasm sockets-server-hangup-before-send.wasm
-    FAILP3)
+    sockets-client-handle-hangups.wasm sockets-server-hangup-before-send.wasm)
   sockets_test(sockets-server-hangup-during-send
-    sockets-client-handle-hangups.wasm sockets-server-hangup-during-send.wasm
-    FAILP3)
+    sockets-client-handle-hangups.wasm sockets-server-hangup-during-send.wasm)
   sockets_test(sockets-server-hangup-before-recv
-    sockets-client-handle-hangups.wasm sockets-server-hangup-before-recv.wasm
-    FAILP3)
+    sockets-client-handle-hangups.wasm sockets-server-hangup-before-recv.wasm)
   sockets_test(sockets-server-hangup-during-recv
-    sockets-client-handle-hangups.wasm sockets-server-hangup-during-recv.wasm
-    FAILP3)
+    sockets-client-handle-hangups.wasm sockets-server-hangup-during-recv.wasm)
   sockets_test(sockets-client-handle-hangups
     sockets-client-handle-hangups.wasm hello.wasm)
 endif()

@@ -128,13 +128,11 @@ static void tcp_free(void *data) {
     streams_input_stream_drop_own(state->input);
     streams_output_stream_drop_own(state->output);
 #else
-    if (state->receive != 0)
-      sockets_stream_u8_drop_readable(state->receive);
+    wasip3_read_state_close(&state->receive);
     if (state->receive_result != 0)
       sockets_future_result_void_error_code_drop_readable(
           state->receive_result);
-    if (state->send != 0)
-      sockets_stream_u8_drop_writable(state->send);
+    wasip3_write_state_close(&state->send);
     // TODO: when wasmtime 43.0.0 is released this should be changed to
     // cancelling the subtask and dropping it, but that doesn't work well in 42
     // which is currently released.
@@ -169,6 +167,7 @@ static int tcp_read_eof(void *data) {
     __wasilibc_future_block_on(sockets_future_result_void_error_code_read(
                                    state->receive_result, &result),
                                state->receive_result);
+    state->receive_result = 0;
     if (result.is_err)
       return __wasilibc_socket_error_to_errno(result.val.err);
   }
@@ -188,7 +187,7 @@ static int tcp_get_read_stream(void *data, wasi_read_t *read) {
   read->input = streams_borrow_input_stream(state->input);
   read->pollable = &state->input_pollable;
 #else
-  read->stream = state->receive;
+  read->state = &state->receive;
   read->eof = tcp_read_eof;
   read->eof_data = data;
 #endif
@@ -226,10 +225,9 @@ static int tcp_get_write_stream(void *data, wasi_write_t *write) {
   write->output = streams_borrow_output_stream(state->output);
   write->pollable = &state->output_pollable;
 #else
-  write->output = state->send;
+  write->state = &state->send;
   write->eof = tcp_write_eof;
   write->eof_data = data;
-  write->done = &state->send_done;
 #endif
   write->offset = NULL;
   write->timeout = tcp->send_timeout;
@@ -282,11 +280,12 @@ static void tcp_setup_connected_state_wasip3(tcp_socket_t *socket) {
 
   sockets_tuple2_stream_u8_future_result_void_error_code_t receive_result;
   sockets_method_tcp_socket_receive(socket_borrow, &receive_result);
-  state->receive = receive_result.f0;
+  wasip3_io_state_init(&state->receive, receive_result.f0);
   state->receive_result = receive_result.f1;
 
-  state->send_done = false;
-  sockets_stream_u8_t reader = sockets_stream_u8_new(&state->send);
+  sockets_stream_u8_writer_t send;
+  sockets_stream_u8_t reader = sockets_stream_u8_new(&send);
+  wasip3_io_state_init(&state->send, send);
   wasip3_subtask_status_t status = sockets_method_tcp_socket_send(
       socket_borrow, reader, &state->send_result);
   if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED)
@@ -800,18 +799,11 @@ static int tcp_shutdown(void *data, int posix_how) {
 #else
   tcp_socket_state_connected_t *state = &socket->state.connected;
   if (posix_how == SHUT_RD || posix_how == SHUT_RDWR) {
-    if (state->receive != 0) {
-      sockets_stream_u8_drop_readable(state->receive);
-      state->receive = 0;
-    }
+    wasip3_read_state_close(&state->receive);
   }
 
   if (posix_how == SHUT_WR || posix_how == SHUT_RDWR) {
-    if (state->send != 0) {
-      sockets_stream_u8_drop_writable(state->send);
-      state->send = 0;
-      state->send_done = true;
-    }
+    wasip3_write_state_close(&state->send);
   }
 #endif
 

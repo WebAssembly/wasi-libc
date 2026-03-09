@@ -26,11 +26,11 @@ typedef struct {
   streams_own_pollable_t read_pollable;
   streams_own_pollable_t write_pollable;
 #else
-  filesystem_tuple2_stream_u8_future_result_void_error_code_t read;
-  filesystem_stream_u8_writer_t write;
+  wasip3_io_state_t read;
+  filesystem_future_result_void_error_code_t read_result;
+  wasip3_io_state_t write;
   wasip3_subtask_t write_subtask;
   filesystem_result_void_error_code_t write_pending_result;
-  bool write_done;
 #endif
 } file_t;
 
@@ -54,17 +54,11 @@ static void file_close_streams(void *data) {
     file->write_stream.__handle = 0;
   }
 #else
-  if (file->read.f0 != 0) {
-    filesystem_stream_u8_drop_readable(file->read.f0);
-    file->read.f0 = 0;
-  }
-  if (file->read.f1 != 0) {
-    filesystem_future_result_void_error_code_drop_readable(file->read.f1);
-    file->read.f1 = 0;
-  }
-  if (file->write != 0) {
-    filesystem_stream_u8_drop_writable(file->write);
-    file->write = 0;
+  wasip3_read_state_close(&file->read);
+  wasip3_write_state_close(&file->write);
+  if (file->read_result != 0) {
+    filesystem_future_result_void_error_code_drop_readable(file->read_result);
+    file->read_result = 0;
   }
   if (file->write_subtask != 0) {
     // TODO: this should use `wasip3_subtask_cancel` but right now that's buggy
@@ -76,7 +70,6 @@ static void file_close_streams(void *data) {
     __wasilibc_subtask_block_on_and_drop(file->write_subtask);
     file->write_subtask = 0;
   }
-  file->write_done = false;
 #endif
 }
 
@@ -91,13 +84,13 @@ static void file_free(void *data) {
 static int file_read_eof(void *data) {
   file_t *file = (file_t *)data;
 
-  if (file->read.f1 != 0) {
+  if (file->read_result != 0) {
     filesystem_result_void_error_code_t result;
-    __wasilibc_future_block_on(
-        filesystem_future_result_void_error_code_read(file->read.f1, &result),
-        file->read.f1);
-    filesystem_future_result_void_error_code_drop_readable(file->read.f1);
-    file->read.f1 = 0;
+    __wasilibc_future_block_on(filesystem_future_result_void_error_code_read(
+                                   file->read_result, &result),
+                               file->read_result);
+    filesystem_future_result_void_error_code_drop_readable(file->read_result);
+    file->read_result = 0;
     if (result.is_err) {
       translate_error(result.val.err);
       return -1;
@@ -123,12 +116,15 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
   read->input = streams_borrow_input_stream(file->read_stream);
   read->pollable = &file->read_pollable;
 #else
-  if (file->read.f0 == 0) {
+  if (!wasip3_io_state_present(&file->read)) {
+    assert(!file->read_result);
+    filesystem_tuple2_stream_u8_future_result_void_error_code_t result;
     filesystem_method_descriptor_read_via_stream(
-        filesystem_borrow_descriptor(file->file_handle), file->offset,
-        &file->read);
+        filesystem_borrow_descriptor(file->file_handle), file->offset, &result);
+    wasip3_io_state_init(&file->read, result.f0);
+    file->read_result = result.f1;
   }
-  read->stream = file->read.f0;
+  read->state = &file->read;
   read->eof = file_read_eof;
   read->eof_data = data;
 #endif
@@ -178,9 +174,10 @@ static int file_get_write_stream(void *data, wasi_write_t *write) {
   write->output = streams_borrow_output_stream(file->write_stream);
   write->pollable = &file->write_pollable;
 #else
-  if (file->write == 0) {
+  if (!wasip3_io_state_present(&file->write)) {
     assert(file->write_subtask == 0);
-    filesystem_stream_u8_t write_read = filesystem_stream_u8_new(&file->write);
+    filesystem_stream_u8_writer_t writer;
+    filesystem_stream_u8_t write_read = filesystem_stream_u8_new(&writer);
     wasip3_subtask_status_t status;
     if (file->oflag & O_APPEND) {
       status = filesystem_method_descriptor_append_via_stream(
@@ -193,11 +190,11 @@ static int file_get_write_stream(void *data, wasi_write_t *write) {
     }
     if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED)
       file->write_subtask = WASIP3_SUBTASK_HANDLE(status);
+    wasip3_io_state_init(&file->write, writer);
   }
-  write->output = file->write;
+  write->state = &file->write;
   write->eof = file_write_eof;
   write->eof_data = data;
-  write->done = &file->write_done;
 #endif
   write->offset = &file->offset;
   write->timeout = 0;

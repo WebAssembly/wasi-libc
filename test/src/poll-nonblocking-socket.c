@@ -26,8 +26,8 @@ void test_tcp_client() {
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
   TEST(socket_fd != -1);
 
-  // Bind a temporary socket to get a free port, then close it so we have
-  // a port that nothing is listening on.
+  // Bind a socket to get a free port, and leave it open. Note that `listen`
+  // is specifically not used to refuse future `connect`s.
   int tmp_fd = socket(AF_INET, SOCK_STREAM, 0);
   struct sockaddr_in tmp_addr;
   socklen_t tmp_addr_len = sizeof(tmp_addr);
@@ -37,7 +37,6 @@ void test_tcp_client() {
   TEST(bind(tmp_fd, (struct sockaddr *)&tmp_addr, sizeof(tmp_addr)) != -1);
   TEST(getsockname(tmp_fd, (struct sockaddr *)&tmp_addr, &tmp_addr_len) != -1);
   int server_port = ntohs(tmp_addr.sin_port);
-  TEST(close(tmp_fd) == 0);
 
   // Check that if a non-blocking socket is in progress, poll() indicates the
   // right result
@@ -57,12 +56,16 @@ void test_tcp_client() {
   struct pollfd poll_fd = {.fd = socket_fd, .events = POLLWRNORM, .revents = 0};
   TEST(poll(&poll_fd, 1, 10) != -1);
 
+
   // Socket should not be writable
   int32_t error = -1;
   socklen_t len = -1;
   TEST(getsockopt(socket_fd, SOL_SOCKET, SO_ERROR, &error, &len) == 0);
   TEST(error == ECONNREFUSED);
   TEST(close(socket_fd) == 0);
+
+  // Release our port which is now no longer needed.
+  TEST(close(tmp_fd) == 0);
 }
 
 int main(void) {

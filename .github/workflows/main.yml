@@ -150,6 +150,18 @@ jobs:
             test: true
             args: -DLTO=full -DTARGET_TRIPLE=wasm32-wasip2 -DCHECK_SYMBOLS=OFF
 
+          - name: Test wasip2 on macOS
+            os: macos-15
+            clang_version: wasi-sdk-30
+            test: true
+            args: -DTARGET_TRIPLE=wasm32-wasip2 -DCMAKE_C_COMPILER_WORKS=ON
+
+          - name: Test wasip2 on Windows
+            os: windows-2025
+            clang_version: 20.1.8
+            test: true
+            args: -DTARGET_TRIPLE=wasm32-wasip2
+
     steps:
     - uses: actions/checkout@v6
       with:

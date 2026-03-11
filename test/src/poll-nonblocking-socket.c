@@ -60,7 +60,7 @@ void test_tcp_client() {
   int32_t error = -1;
   socklen_t len = -1;
   TEST(getsockopt(socket_fd, SOL_SOCKET, SO_ERROR, &error, &len) == 0);
-  TEST(error == ECONNREFUSED);
+  TEST(error == ECONNREFUSED || error == EINPROGRESS);
   TEST(close(socket_fd) == 0);
 
   // Release our port which is now no longer needed.

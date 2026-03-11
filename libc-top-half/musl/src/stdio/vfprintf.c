@@ -166,7 +166,7 @@ static void pad(FILE *f, char c, int w, int l, int fl)
 	out(f, pad, l);
 }
 
-static const char xdigits[16] = {
+static const char xdigits[17] = {
 	"0123456789ABCDEF"
 };
 
@@ -379,7 +379,7 @@ static int fmt_fp(FILE *f, long double y, int w, int p, int fl, int t)
 		if (z>d+1) z=d+1;
 	}
 	for (; z>a && !z[-1]; z--);
-	
+
 	if ((t|32)=='g') {
 		if (!p) p++;
 		if (p>e && e>=-4) {

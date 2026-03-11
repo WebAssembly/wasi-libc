@@ -35,7 +35,7 @@ int main(void) {
   TEST(posix_fadvise(fd, 42, 3, POSIX_FADV_NOREUSE) == 0);
   // Test in-bounds offset with out-of-bounds len (not an error)
   TEST(posix_fadvise(fd, 1, 42, POSIX_FADV_WILLNEED) == 0);
-  close(fd);
+  TEST(close(fd) == 0);
   // Test negative offset and len (error)
   TEST(posix_fadvise(fd, -1, 0, POSIX_FADV_WILLNEED) == EINVAL);
   TEST(posix_fadvise(fd, 0, -2, POSIX_FADV_WILLNEED) == EINVAL);
@@ -44,7 +44,7 @@ int main(void) {
   TEST((fd = open("t", flags | O_RDONLY) > 2));
   TEST(posix_fadvise(fd, 1, 42, POSIX_FADV_WILLNEED) == EBADF);
 
-  close(fd);
+  TEST(close(fd) == 0);
   TEST(unlink(tmp) != -1);
   TEST(rmdir("t") != -1);
 

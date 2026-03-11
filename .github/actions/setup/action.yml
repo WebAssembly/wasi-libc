@@ -35,8 +35,16 @@ runs:
     - name: Install LLVM tools (MacOS)
       shell: bash
       run: |
-        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.clang_version }}/clang+llvm-${{ inputs.clang_version }}-${{ inputs.llvm_asset_suffix }}.tar.xz | tar xJf -
-        export CLANG_DIR=`pwd`/clang+llvm-${{ inputs.clang_version }}-${{ inputs.llvm_asset_suffix }}/bin
+        case ${{ inputs.clang_version }} in
+          wasi-sdk-*)
+            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/${{ inputs.clang_version }}/${{ inputs.clang_version }}.0-arm64-macos.tar.gz | tar xzf -
+            export CLANG_DIR=`pwd`/${{ inputs.clang_version }}.0-arm64-macos/bin
+            ;;
+          *)
+            curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.clang_version }}/clang+llvm-${{ inputs.clang_version }}-${{ inputs.llvm_asset_suffix }}.tar.xz | tar xJf -
+            export CLANG_DIR=`pwd`/clang+llvm-${{ inputs.clang_version }}-${{ inputs.llvm_asset_suffix }}/bin
+            ;;
+        esac
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV

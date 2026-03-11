@@ -39,6 +39,7 @@ function(clang_format_file file)
   endif()
 
   string(REPLACE "/" "_" source_target ${file})
+  string(REPLACE ":" "_" source_target ${source_target})
   add_custom_target(format-${source_target}
     COMMAND ${CLANG_FORMAT} -i ${src})
   add_custom_target(format-check-${source_target}

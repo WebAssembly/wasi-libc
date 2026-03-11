@@ -199,7 +199,8 @@ int remove(const char *path) {
 
   // First try to remove it as a file.
   int r = __wasilibc_nocwd___wasilibc_unlinkat(dirfd, relative_path);
-  if (r != 0 && (errno == EISDIR || errno == ENOENT)) {
+  if (r != 0 && (errno == EISDIR || errno == ENOENT || errno == EACCES ||
+                 errno == EPERM)) {
     // That failed, but it might be a directory.
     r = __wasilibc_nocwd___wasilibc_rmdirat(dirfd, relative_path);
 

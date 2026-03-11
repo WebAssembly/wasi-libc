@@ -51,15 +51,22 @@ runs:
         echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
       if: runner.os == 'macOS'
 
-    # Note that this uses apt-based packages for installing Clang/tools to
-    # ensure that all various dependencies are also installed. Binaries from
-    # llvm-project depend on libtinfo.so and TBH I don't know what that is.
-    # Using apt-get should basically serve the same purpose though.
+    # Use apt repositories to install various clang versions on Linux as those
+    # generally work the best and are more available than per-release downloads
+    # of LLVM. Note that apt.llvm.org may be used for new enough versions of
+    # clang which aren't in Ubuntu 24.04.
     - name: Install LLVM tools (Linux)
       shell: bash
       run: |
         set -ex
         v=${{ inputs.clang_version }}
+        # For LLVM versions 21+ install from apt.llvm.org because the ubuntu
+        # 24.04 repositories don't have these binaries.
+        if [ $v -ge 21 ]; then
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          rel=$(lsb_release -cs)
+          sudo apt-add-repository "deb http://apt.llvm.org/$rel/ llvm-toolchain-$rel-$v main"
+        fi
         sudo apt-get update
         sudo apt-get install -y clang-$v clang-tools-$v lld-$v
         echo "CC=clang-$v" >> $GITHUB_ENV

@@ -162,6 +162,11 @@ jobs:
             test: true
             args: -DTARGET_TRIPLE=wasm32-wasip2
 
+          - name: Test LLVM 22
+            os: ubuntu-24.04
+            clang_version: 22
+            test: true
+            args: -DTARGET_TRIPLE=wasm32-wasip2
     steps:
     - uses: actions/checkout@v6
       with:

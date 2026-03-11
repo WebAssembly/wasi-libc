@@ -110,8 +110,9 @@ endfunction()
 # * `NETWORK` - this test uses the network and sockets.
 # * `PASS_REGULAR_EXPRESSION` - a regex that must match the test output to pass
 # * `FAILP3` - this test fails on wasip3 targets
+# * `SETJMP` - this test requires setjmp/longjmp
 function(register_test test_name executable_name)
-  set(options FS NETWORK FAILP3)
+  set(options FS NETWORK FAILP3 SETJMP)
   set(oneValueArgs CLIENT PASS_REGULAR_EXPRESSION)
   set(multiValueArgs ARGV ENV LDFLAGS CFLAGS)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
@@ -134,6 +135,18 @@ function(register_test test_name executable_name)
   if (WASI STREQUAL "p3")
     list(APPEND wasmtime_args --wasm component-model-async)
     list(APPEND wasmtime_args --wasi p3)
+  endif()
+  if (arg_SETJMP)
+    list(APPEND wasmtime_args --wasm exceptions)
+    target_compile_options(${executable_name} PRIVATE
+      "SHELL:-mllvm -wasm-enable-sjlj"
+      "SHELL:-mllvm -wasm-use-legacy-eh=false"
+    )
+    target_link_options(${executable_name} PRIVATE
+      -lsetjmp
+      $<$<BOOL:LTO>:-Wl,-mllvm=-wasm-enable-sjlj>
+      $<$<BOOL:LTO>:-Wl,-mllvm=-wasm-use-legacy-eh=false>
+    )
   endif()
 
   add_test(
@@ -310,6 +323,11 @@ add_wasilibc_test(nanosleep.c)
 add_wasilibc_test(sleep.c)
 add_wasilibc_test(write.c FS)
 add_wasilibc_test(wasi-defines.c)
+
+if (CMAKE_C_COMPILER_VERSION VERSION_GREATER 20.0)
+  add_wasilibc_test(setjmp.c SETJMP)
+  set_tests_properties(setjmp.wasm PROPERTIES LABELS v8fail)
+endif()
 
 if (TARGET_TRIPLE MATCHES "-threads")
   add_wasilibc_test(busywait.c)

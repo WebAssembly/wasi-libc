@@ -60,93 +60,93 @@ jobs:
           # but that can be expanded as necessary in the future too.
           - name: Test wasm32-wasi
             os: ubuntu-24.04
-            clang_version: 19
+            clang_version: 20
             test: true
             upload: wasm32-wasi
             args: -DTARGET_TRIPLE=wasm32-wasi
 
           - name: Test wasm32-wasip1
             os: ubuntu-24.04
-            clang_version: 19
+            clang_version: 20
             test: true
             upload: wasm32-wasip1
             args: -DTARGET_TRIPLE=wasm32-wasip1
 
           - name: Test wasm32-wasip2
             os: ubuntu-24.04
-            clang_version: 19
+            clang_version: 20
             test: true
             upload: wasm32-wasip2
             args: -DTARGET_TRIPLE=wasm32-wasip2
 
           - name: Test wasm32-wasip1-threads
             os: ubuntu-24.04
-            clang_version: 19
+            clang_version: 20
             test: true
             upload: wasm32-wasip1-threads
             args: -DTARGET_TRIPLE=wasm32-wasip1-threads
 
           - name: Test wasm32-wasip1 in V8
             os: ubuntu-24.04
-            clang_version: 19
+            clang_version: 20
             test: true
             test_with_v8: true
             args: -DTARGET_TRIPLE=wasm32-wasip1
 
           - name: Test wasm32-wasip1-threads in V8
             os: ubuntu-24.04
-            clang_version: 19
+            clang_version: 20
             test: true
             test_with_v8: true
             args: -DTARGET_TRIPLE=wasm32-wasip1-threads
 
           - name: Test wasm32-wasi-simd
             os: ubuntu-24.04
-            clang_version: 19
+            clang_version: 20
             test: true
             upload: wasm32-wasi-simd
             args: -DSIMD=ON -DCHECK_SYMBOLS=OFF
 
           - name: Test wasm32-wasip1 (debug)
             os: ubuntu-24.04
-            clang_version: 19
+            clang_version: 20
             test: true
             args: -DCMAKE_BUILD_TYPE=Debug
 
           - name: Test wasm32-wasip2 (debug)
             os: ubuntu-24.04
-            clang_version: 19
+            clang_version: 20
             test: true
             args: -DCMAKE_BUILD_TYPE=Debug -DTARGET_TRIPLE=wasm32-wasip2
 
           - name: Test wasm32-wasip1-threads (debug)
             os: ubuntu-24.04
-            clang_version: 19
+            clang_version: 20
             test: true
             args: -DCMAKE_BUILD_TYPE=Debug -DTARGET_TRIPLE=wasm32-wasip1-threads
 
           - name: Test wasm32-wasip3
             os: ubuntu-24.04
-            clang_version: 19
+            clang_version: 20
             test: true
             upload: wasm32-wasip3
             args: -DTARGET_TRIPLE=wasm32-wasip3
 
           - name: Test wasm32-wasip3 (debug)
             os: ubuntu-24.04
-            clang_version: 19
+            clang_version: 20
             test: true
             args: -DCMAKE_BUILD_TYPE=Debug -DTARGET_TRIPLE=wasm32-wasip3
 
           - name: Test emmalloc
             os: ubuntu-24.04
-            clang_version: 19
+            clang_version: 20
             test: true
             args: -DMALLOC=emmalloc
 
           - name: Test LTO
             os: ubuntu-24.04
-            clang_version: 19
+            clang_version: 20
             test: true
             args: -DLTO=full -DTARGET_TRIPLE=wasm32-wasip2 -DCHECK_SYMBOLS=OFF
 

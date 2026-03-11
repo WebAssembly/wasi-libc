@@ -151,7 +151,7 @@ jobs:
             args: -DLTO=full -DTARGET_TRIPLE=wasm32-wasip2 -DCHECK_SYMBOLS=OFF
 
     steps:
-    - uses: actions/checkout@v4.1.7
+    - uses: actions/checkout@v6
       with:
         submodules: true
 
@@ -186,7 +186,7 @@ jobs:
       if: matrix.test
       run: ctest --test-dir build/test --output-on-failure -j4 $CTEST_ARGS
 
-    - uses: actions/upload-artifact@v4.4.0
+    - uses: actions/upload-artifact@v6
       if: matrix.upload
       with:
         name: ${{ format( 'sysroot-{0}.tgz', matrix.upload) }}
@@ -204,7 +204,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-15, windows-2025]
     steps:
-    - uses: actions/checkout@v4.1.7
+    - uses: actions/checkout@v6
       with:
         submodules: true
     - name: Install Rust (rustup)
@@ -226,7 +226,7 @@ jobs:
     name: Clang Format
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4.1.7
+    - uses: actions/checkout@v6
       with:
         submodules: true
     - run: cmake -S . -B build -DBUILD_TESTS=ON -G Ninja -DCMAKE_C_COMPILER=clang
@@ -240,7 +240,7 @@ jobs:
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4.1.7
+    - uses: actions/checkout@v6
       with:
         submodules: true
     - name: Install Rust
@@ -252,7 +252,7 @@ jobs:
     name: Ensure wit-bingen bindings are up-to-date
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4.1.7
+    - uses: actions/checkout@v6
       with:
         submodules: true
     - run: CC=clang cmake -S . -B build -G Ninja
@@ -278,7 +278,7 @@ jobs:
           - name: wasm32-wasip2
             args: -DTARGET_TRIPLE=wasm32-wasip2
     steps:
-    - uses: actions/checkout@v4.1.7
+    - uses: actions/checkout@v6
       with:
         submodules: true
     - run: |

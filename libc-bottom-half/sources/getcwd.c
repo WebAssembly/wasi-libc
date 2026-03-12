@@ -5,7 +5,7 @@
 #include "lock.h"
 
 char *__wasilibc_cwd = "/";
-DECLARE_WEAK_LOCK(__wasilibc_cwd_lock, static);
+DECLARE_WEAK_LOCK(__wasilibc_cwd_lock);
 
 
 char *getcwd(char *buf, size_t size) {

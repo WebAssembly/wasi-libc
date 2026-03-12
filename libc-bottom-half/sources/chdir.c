@@ -9,7 +9,9 @@
 #include <wasi/libc.h>
 #include "lock.h"
 
+#ifdef _REENTRANT
 extern __lock_t __wasilibc_cwd_lock;
+#endif
 extern char *__wasilibc_cwd;
 static int __wasilibc_cwd_mallocd = 0;
 

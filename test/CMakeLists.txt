@@ -22,7 +22,7 @@ message(STATUS "libc-test source directory: ${LIBC_TEST}")
 FetchContent_Declare(
   posix-testsuite
   GIT_REPOSITORY https://github.com/bytecodealliance/open-posix-test-suite
-  GIT_TAG 18321461ce8381c359b439f5231908208718d230
+  GIT_TAG 7cbbe794ddcfec55b071776ed84a5dfa31331db9
   GIT_SHALLOW true
 )
 FetchContent_MakeAvailable(posix-testsuite)

@@ -40,7 +40,10 @@ hidden void __unlock(volatile int *);
 #define WEAK_LOCK(x) __lock(x)
 #define WEAK_UNLOCK(x) __unlock(x)
 #else
-// No locking needed.
+// No locking needed, typedefs defined to avoid needing to ifdef out all locks
+typedef volatile int __lock_t;
+typedef volatile int *__lock_ptr_t;
+#define __LOCK_INIT {0}
 #define STRONG_LOCK(x) ((void)0)
 #define STRONG_UNLOCK(x) ((void)0)
 #define WEAK_LOCK(x) ((void)0)

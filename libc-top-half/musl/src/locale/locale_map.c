@@ -30,10 +30,7 @@ static const char envvars[][12] = {
 	"LC_MESSAGES",
 };
 
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-__lock_t __locale_lock[1];
-__lock_t *const __locale_lockptr = __locale_lock;
-#endif
+DECLARE_WEAK_LOCK(__locale_lock);
 
 const struct __locale_map *__get_locale(int cat, const char *val)
 {

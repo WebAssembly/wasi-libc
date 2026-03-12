@@ -21,11 +21,7 @@ static struct fl
 
 static int slot;
 
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-#include "lock.h"
-__lock_t lock[1];
-__lock_t *const __atexit_lockptr = lock;
-#endif
+DECLARE_WEAK_LOCK(lock, static);
 
 void __funcs_on_exit()
 {

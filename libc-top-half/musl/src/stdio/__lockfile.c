@@ -12,16 +12,16 @@ int __lockfile(FILE *f)
 	#endif
 
 	// Allow recursive locking
-	if (f->lock.owner == tid)
+	if (f->lock->owner == tid)
 		return 0;
 
-	STRONG_LOCK(&f->lock);
+	STRONG_LOCK(f->lock);
 	return 1;
 }
 
 void __unlockfile(FILE *f)
 {
-	STRONG_UNLOCK(&f->lock);
+	STRONG_UNLOCK(f->lock);
 }
 #else
 int __lockfile(FILE *f)

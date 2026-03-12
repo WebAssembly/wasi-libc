@@ -7,10 +7,7 @@
 
 static void (*funcs[COUNT])(void);
 static int count;
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-static __lock_t lock[1];
-__lock_t *const __at_quick_exit_lockptr = lock;
-#endif
+DECLARE_STRONG_LOCK(lock, static);
 
 void __funcs_on_quick_exit()
 {

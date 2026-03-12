@@ -5,10 +5,8 @@
 #include "lock.h"
 
 char *__wasilibc_cwd = "/";
+DECLARE_WEAK_LOCK(__wasilibc_cwd_lock, static);
 
-#ifdef _REENTRANT
-static __lock_t __wasilibc_cwd_lock[1];
-#endif
 
 char *getcwd(char *buf, size_t size) {
   // Critical section contains no yield points, so we can use weak locks.

@@ -23,10 +23,7 @@ static int n = 31;
 static int i = 3;
 static int j = 0;
 static uint32_t *x = init+1;
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-static __lock_t lock[1];
-__lock_t *const __random_lockptr = lock;
-#endif
+DECLARE_WEAK_LOCK(lock, static);
 
 static uint32_t lcg31(uint32_t x) {
 	return (1103515245*x + 12345) & 0x7fffffff;

@@ -15,9 +15,7 @@
 #include <wasi/api.h>
 #include "lock.h"
 
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-__lock_t __thread_list_lock;
-#endif
+DECLARE_WEAK_LOCK(__thread_list_lock);
 
 #ifndef __wasilibc_unmodified_upstream
 

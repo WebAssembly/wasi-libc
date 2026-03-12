@@ -61,7 +61,7 @@ struct _IO_FILE {
 #endif
 	int mode;
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-	__lock_t lock;
+	DECLARE_STRONG_LOCK(lock);
 #endif
 	int lbf;
 	void *cookie;

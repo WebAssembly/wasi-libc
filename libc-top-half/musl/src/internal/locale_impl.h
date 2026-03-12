@@ -4,6 +4,7 @@
 #include <locale.h>
 #include <stdlib.h>
 #include "libc.h"
+#include "lock.h"
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #include "pthread_impl.h"
 #endif
@@ -17,10 +18,7 @@ struct __locale_map {
 	const struct __locale_map *next;
 };
 
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-#include "lock.h"
-extern hidden __lock_t __locale_lock[1];
-#endif
+DECLARE_WEAK_LOCK(__locale_lock, extern hidden);
 
 extern hidden const struct __locale_map __c_dot_utf8;
 extern hidden const struct __locale_struct __c_locale;

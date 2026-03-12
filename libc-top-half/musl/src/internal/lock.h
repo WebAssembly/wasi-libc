@@ -18,8 +18,8 @@ struct __coop_lock {
 	struct __waitlist_node *waiters;
 };
 
-typedef struct __coop_lock __lock_t;
-typedef struct __coop_lock *__lock_ptr_t;
+#define DECLARE_STRONG_LOCK(name, ...) __VA_ARGS__ struct __coop_lock name[1]
+#define DECLARE_WEAK_LOCK(name, ...)
 #define __COOP_LOCK_INIT {0, NULL}
 #define __LOCK_INIT __COOP_LOCK_INIT
 
@@ -27,11 +27,11 @@ hidden void __lock(struct __coop_lock *lock);
 hidden void __unlock(struct __coop_lock *lock);
 #define STRONG_LOCK(x) __lock(x)
 #define STRONG_UNLOCK(x) __unlock(x)
-#define WEAK_LOCK(x) ((void)x)
-#define WEAK_UNLOCK(x) ((void)x)
-#elif defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-typedef volatile int __lock_t;
-typedef volatile int *__lock_ptr_t;
+#define WEAK_LOCK(x) ((void)0)
+#define WEAK_UNLOCK(x) ((void)0)
+#elif defined(_REENTRANT)
+#define DECLARE_STRONG_LOCK(name, ...) __VA_ARGS__ volatile int name[1]
+#define DECLARE_WEAK_LOCK(name, ...) __VA_ARGS__ volatile int name[1]
 #define __LOCK_INIT {0}
 hidden void __lock(volatile int *);
 hidden void __unlock(volatile int *);
@@ -40,14 +40,13 @@ hidden void __unlock(volatile int *);
 #define WEAK_LOCK(x) __lock(x)
 #define WEAK_UNLOCK(x) __unlock(x)
 #else
-// No locking needed, typedefs defined to avoid needing to ifdef out all locks
-typedef volatile int __lock_t;
-typedef volatile int *__lock_ptr_t;
+#define DECLARE_STRONG_LOCK(name, ...)
+#define DECLARE_WEAK_LOCK(name, ...)
 #define __LOCK_INIT {0}
-#define STRONG_LOCK(x) ((void)x)
-#define STRONG_UNLOCK(x) ((void)x)
-#define WEAK_LOCK(x) ((void)x)
-#define WEAK_UNLOCK(x) ((void)x)
+#define STRONG_LOCK(x) ((void)0)
+#define STRONG_UNLOCK(x) ((void)0)
+#define WEAK_LOCK(x) ((void)0)
+#define WEAK_UNLOCK(x) ((void)0)
 #endif
 
 #endif

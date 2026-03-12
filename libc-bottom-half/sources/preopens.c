@@ -23,9 +23,8 @@
 
 /// Access to the the above preopen must be protected in the presence of
 /// threads.
-#ifdef _REENTRANT
-static __lock_t lock[1];
-#endif
+DECLARE_STRONG_LOCK(lock, static);
+
 
 #if defined(__wasip1__)
 typedef struct {

@@ -207,9 +207,8 @@ hidden void __tl_lock(void);
 hidden void __tl_unlock(void);
 hidden void __tl_sync(pthread_t);
 
-extern hidden __lock_t __thread_list_lock;
-
-extern hidden __lock_t __abort_lock[1];
+DECLARE_WEAK_LOCK(__thread_list_lock, extern hidden);
+DECLARE_STRONG_LOCK(__abort_lock, extern hidden);
 
 extern hidden unsigned __default_stacksize;
 extern hidden unsigned __default_guardsize;

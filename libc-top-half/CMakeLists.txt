@@ -236,7 +236,6 @@ set(top_half_sources
   musl/src/network/ntohs.c
   musl/src/stat/futimesat.c
   musl/src/thread/common/default_attr.c
-  musl/src/thread/common/lock_ptc.c
   musl/src/thread/common/pthread_attr_destroy.c
   musl/src/thread/common/pthread_attr_get.c
   musl/src/thread/common/pthread_attr_init.c
@@ -411,6 +410,7 @@ if (THREADS)
     musl/src/thread/wasi-threads/__lock.c
     musl/src/thread/wasi-threads/__wait.c
     musl/src/thread/wasi-threads/__timedwait.c
+    musl/src/thread/wasi-threads/lock_ptc.c
     musl/src/thread/wasi-threads/pthread_barrier_destroy.c
     musl/src/thread/wasi-threads/pthread_barrier_init.c
     musl/src/thread/wasi-threads/pthread_barrier_wait.c
@@ -460,6 +460,7 @@ elseif(WASI STREQUAL "p3")
     musl/src/thread/coop-threads/__lock.c
     musl/src/thread/coop-threads/__wait.c
     musl/src/thread/coop-threads/__wasi_coop_thread_start.s
+    musl/src/thread/coop-threads/lock_ptc.c
     musl/src/thread/coop-threads/mtx_lock.c
     musl/src/thread/coop-threads/mtx_trylock.c
     musl/src/thread/coop-threads/pthread_barrier_destroy.c

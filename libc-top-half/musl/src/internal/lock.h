@@ -27,8 +27,8 @@ hidden void __lock(struct __coop_lock *lock);
 hidden void __unlock(struct __coop_lock *lock);
 #define STRONG_LOCK(x) __lock(x)
 #define STRONG_UNLOCK(x) __unlock(x)
-#define WEAK_LOCK(x) ((void)0)
-#define WEAK_UNLOCK(x) ((void)0)
+#define WEAK_LOCK(x) ((void)x)
+#define WEAK_UNLOCK(x) ((void)x)
 #elif defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 typedef volatile int __lock_t;
 typedef volatile int *__lock_ptr_t;
@@ -44,10 +44,10 @@ hidden void __unlock(volatile int *);
 typedef volatile int __lock_t;
 typedef volatile int *__lock_ptr_t;
 #define __LOCK_INIT {0}
-#define STRONG_LOCK(x) ((void)0)
-#define STRONG_UNLOCK(x) ((void)0)
-#define WEAK_LOCK(x) ((void)0)
-#define WEAK_UNLOCK(x) ((void)0)
+#define STRONG_LOCK(x) ((void)x)
+#define STRONG_UNLOCK(x) ((void)x)
+#define WEAK_LOCK(x) ((void)x)
+#define WEAK_UNLOCK(x) ((void)x)
 #endif
 
 #endif

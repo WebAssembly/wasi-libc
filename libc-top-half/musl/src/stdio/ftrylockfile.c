@@ -69,7 +69,7 @@ int ftrylockfile(FILE *f)
 		f->lockcount++;
 		return 0;
 	}
-	if (owner < 0) f->lock = owner = 0;
+	if (owner < 0) *f->lock = owner = 0;
 	if (owner || a_cas(f->lock, 0, tid))
 		return -1;
 	__register_locked_file(f, self);

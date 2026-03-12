@@ -22,7 +22,7 @@ message(STATUS "libc-test source directory: ${LIBC_TEST}")
 FetchContent_Declare(
   posix-testsuite
   GIT_REPOSITORY https://github.com/bytecodealliance/open-posix-test-suite
-  GIT_TAG 7cbbe794ddcfec55b071776ed84a5dfa31331db9
+  GIT_TAG dc7c7d54fc4f6219bb4c7af348be2290335bf17e
   GIT_SHALLOW true
 )
 FetchContent_MakeAvailable(posix-testsuite)
@@ -37,7 +37,7 @@ if(NOT ENGINE OR ENGINE STREQUAL "")
   ba_download(
     wasmtime
     "https://github.com/bytecodealliance/wasmtime"
-    "v42.0.1"
+    "dev"
   )
   ExternalProject_Get_Property(wasmtime SOURCE_DIR)
   set(ENGINE "${SOURCE_DIR}/wasmtime")

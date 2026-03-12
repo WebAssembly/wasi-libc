@@ -3,7 +3,7 @@
 #include "fork_impl.h"
 
 static FILE *ofl_head;
-static DECLARE_STRONG_LOCK(ofl_lock);
+DECLARE_STRONG_LOCK(ofl_lock, static);
 
 FILE **__ofl_lock()
 {

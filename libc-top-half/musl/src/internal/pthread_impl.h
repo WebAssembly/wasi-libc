@@ -65,7 +65,7 @@ struct pthread {
 	int h_errno_val;
 	volatile int timer_id;
 	locale_t locale;
-	volatile int killlock[1];
+	DECLARE_WEAK_LOCK(killlock);
 	char *dlerror_buf;
 	void *stdio_locks;
 	#ifdef __wasi_cooperative_threads__

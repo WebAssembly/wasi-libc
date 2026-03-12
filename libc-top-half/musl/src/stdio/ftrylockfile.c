@@ -62,15 +62,15 @@ int ftrylockfile(FILE *f)
 {
 	pthread_t self = __pthread_self();
 	int tid = self->tid;
-	int owner = *f->lock;
+	int owner = f->lock;
 	if ((owner & ~MAYBE_WAITERS) == tid) {
 		if (f->lockcount == LONG_MAX)
 			return -1;
 		f->lockcount++;
 		return 0;
 	}
-	if (owner < 0) *f->lock = owner = 0;
-	if (owner || a_cas(f->lock, 0, tid))
+	if (owner < 0) f->lock = owner = 0;
+	if (owner || a_cas(&f->lock, 0, tid))
 		return -1;
 	__register_locked_file(f, self);
 	return 0;

@@ -6,6 +6,7 @@
 #ifndef __wasip1__
 
 #include <poll.h>
+#include <wasi/api.h>
 
 /// Opaque state that the `poll` function manages for itself.
 typedef struct poll_state_t poll_state_t;
@@ -17,8 +18,6 @@ typedef struct poll_state_t poll_state_t;
 void __wasilibc_poll_ready(poll_state_t *state, short events);
 
 #ifdef __wasip2__
-
-#include <wasi/wasip2.h>
 
 /// Adds the `pollable` to the `state` provided.
 ///
@@ -55,6 +54,19 @@ __wasilibc_poll_add_output_stream(poll_state_t *state,
 }
 
 #endif // __wasip2__
+
+#ifdef __wasip3__
+
+typedef void (*poll_ready_t)(void *data, poll_state_t *state, wasip3_event_t *event);
+
+/// Adds the `waitable` to the poll `state`.
+///
+/// When `waitable` receives an event it'll invoke `ready` with `ready_data`,
+/// the poll state, and the event that happened.
+int __wasilibc_poll_add(poll_state_t *state, uint32_t waitable,
+                        poll_ready_t ready, void *ready_data);
+
+#endif // __wasip3__
 
 #endif // not(__wasip1__)
 

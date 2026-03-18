@@ -11,8 +11,7 @@
 /// A `timeout` can optionally be specified as well. If the `timeout` is 0 then
 /// this function will block indefinitely for the `waitable`.
 static bool __wasilibc_waitable_block_on(uint32_t waitable,
-                                         wasip3_event_t *event,
-                                         monotonic_clock_duration_t timeout) {
+                                         wasip3_event_t *event, monotonic_clock_duration_t timeout) {
   // If a timeout is requested then create a subtask using the monotonic-clock
   // interface which'll get added to the waitable-set below. If the timeout has
   // immediately elapsed then go ahead and poll the waitable set to see if the
@@ -151,6 +150,15 @@ ssize_t __wasilibc_stream_block_on_timeout(wasip3_waitable_status_t status,
          WASIP3_WAITABLE_STATE(status) == WASIP3_WAITABLE_CANCELLED);
   *closed = WASIP3_WAITABLE_STATE(status) == WASIP3_WAITABLE_DROPPED;
   return WASIP3_WAITABLE_COUNT(status);
+}
+
+
+void __wasilibc_poll_waitable(uint32_t waitable, wasip3_event_t *event) {
+  wasip3_waitable_set_t set = wasip3_waitable_set_new();
+  wasip3_waitable_join(waitable, set);
+  wasip3_waitable_set_poll(set, event);
+  wasip3_waitable_join(waitable, 0);
+  wasip3_waitable_set_drop(set);
 }
 
 #endif

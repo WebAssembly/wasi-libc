@@ -2,6 +2,8 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/time.h>
+#include <time.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <poll.h>
@@ -39,6 +41,28 @@ void test_udp_client() {
   TEST(getsockname(server_socket_fd, (struct sockaddr *)&server_address,
                    &server_address_len) != -1);
   int server_port = ntohs(server_address.sin_port);
+
+  {
+    struct pollfd poll_fd = {
+        .fd = server_socket_fd, .events = POLLRDNORM, .revents = 0};
+
+    // This should immediately return with 0 events. Technically this should
+    // take 0 time, but we can't really test for that, so for now just test
+    // behavior.
+    TEST(poll(&poll_fd, 1, 0) == 0);
+
+    // Waiting with a timeout, specified in milliseconds to `poll`, should
+    // block for that amount of time but then return there are no events ready.
+    // This time though the wait time should be at least the timeout time.
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    TEST(poll(&poll_fd, 1, 10) == 0);
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+    long nanoseconds_elapsed = (end_time.tv_sec - start_time.tv_sec) * 1E9 -
+                               start_time.tv_nsec + end_time.tv_nsec;
+    TEST(nanoseconds_elapsed >= 10 * 1E6);
+
+  }
 
   // Prepare client socket
   // Use non-blocking sockets

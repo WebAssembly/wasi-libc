@@ -7,51 +7,51 @@ name = "wasi:cli"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.3.0-rc-2026-01-06"
-version = "0.3.0-rc-2026-01-06"
-digest = "sha256:295f741000493314dbb09ac659943fb70fa37510a71e97281859255656dd74b8"
+requirement = "=0.3.0-rc-2026-03-15"
+version = "0.3.0-rc-2026-03-15"
+digest = "sha256:104654cfcb218c34c21ea06ab95f0d6811508643e9692bb3db751cde5640365f"
 
 [[packages]]
 name = "wasi:clocks"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.3.0-rc-2026-01-06"
-version = "0.3.0-rc-2026-01-06"
-digest = "sha256:0e741d66b40dde06113adb4b0b0130d9572c219ef6dae2e89f2ad399ea7ef7e2"
+requirement = "=0.3.0-rc-2026-03-15"
+version = "0.3.0-rc-2026-03-15"
+digest = "sha256:10f8b2f42c5f8a731292977064788cbb8ca9164c83ae7f4a295565e7b926a313"
 
 [[packages]]
 name = "wasi:filesystem"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.3.0-rc-2026-01-06"
-version = "0.3.0-rc-2026-01-06"
-digest = "sha256:a346b1be8030480cd85b203dc77e323d666bcf93e0b68bf0092e206d43d6abd6"
+requirement = "=0.3.0-rc-2026-03-15"
+version = "0.3.0-rc-2026-03-15"
+digest = "sha256:d8e683409e17bbe06ce6560b67dc19414e6b21f62e88f22ca436f8967dfde188"
 
 [[packages]]
 name = "wasi:http"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.3.0-rc-2026-01-06"
-version = "0.3.0-rc-2026-01-06"
-digest = "sha256:7ad86c4dea99c4cd63790483f26903ac7538f7d8be4d3f4e6fb4ef10123dbdeb"
+requirement = "=0.3.0-rc-2026-03-15"
+version = "0.3.0-rc-2026-03-15"
+digest = "sha256:ed996ba07af24b216deb3d59bf56362f443d8bcfd1b07d1bfd80c49cb37df399"
 
 [[packages]]
 name = "wasi:random"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.3.0-rc-2026-01-06"
-version = "0.3.0-rc-2026-01-06"
-digest = "sha256:07196dc99781089c9732b29a202e3346e0bb2141fd76d89491af2087741bc7d2"
+requirement = "=0.3.0-rc-2026-03-15"
+version = "0.3.0-rc-2026-03-15"
+digest = "sha256:821a5c015d3833f748fb00f2279d4fccc360d38f204f37f7ae2af904fc1f7f13"
 
 [[packages]]
 name = "wasi:sockets"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.3.0-rc-2026-01-06"
-version = "0.3.0-rc-2026-01-06"
-digest = "sha256:59f03ca9048fa614fc99bfafc3bd61ebc821f78aa29a3da5f5b3df78dfab709f"
+requirement = "=0.3.0-rc-2026-03-15"
+version = "0.3.0-rc-2026-03-15"
+digest = "sha256:9944ecbee9950744290bb1ccb134aa2fc9821307fd6016cb01e6d617bc382cfe"

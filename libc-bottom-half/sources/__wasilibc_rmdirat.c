@@ -31,7 +31,7 @@ int __wasilibc_nocwd___wasilibc_rmdirat(int fd, const char *path) {
   bool ok = filesystem_method_descriptor_remove_directory_at(
       file_handle, &wasi_path, &error_code);
   if (!ok) {
-    translate_error(error_code);
+    translate_error(&error_code);
     return -1;
   }
 #else

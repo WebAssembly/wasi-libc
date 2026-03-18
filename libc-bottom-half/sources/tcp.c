@@ -133,11 +133,8 @@ static void tcp_free(void *data) {
       sockets_future_result_void_error_code_drop_readable(
           state->receive_result);
     wasip3_write_state_close(&state->send);
-    // TODO: when wasmtime 43.0.0 is released this should be changed to
-    // cancelling the subtask and dropping it, but that doesn't work well in 42
-    // which is currently released.
-    if (state->send_subtask != 0)
-      __wasilibc_subtask_block_on_and_drop(state->send_subtask);
+    if (state->send_result != 0)
+      sockets_future_result_void_error_code_drop_readable(state->send_result);
 #endif
     break;
   }
@@ -169,7 +166,7 @@ static int tcp_read_eof(void *data) {
                                state->receive_result);
     state->receive_result = 0;
     if (result.is_err)
-      return __wasilibc_socket_error_to_errno(result.val.err);
+      return __wasilibc_socket_error_to_errno(&result.val.err);
   }
   return 0;
 }
@@ -203,12 +200,15 @@ static int tcp_write_eof(void *data) {
   assert(tcp->state.tag == TCP_SOCKET_STATE_CONNECTED);
   tcp_socket_state_connected_t *state = &tcp->state.connected;
 
-  if (state->send_subtask) {
-    __wasilibc_subtask_block_on_and_drop(state->send_subtask);
-    state->send_subtask = 0;
+  if (state->send_result) {
+    sockets_result_void_error_code_t result;
+    __wasilibc_future_block_on(
+        sockets_future_result_void_error_code_read(state->send_result, &result),
+        state->send_result);
+    state->send_result = 0;
+    if (result.is_err)
+      return __wasilibc_socket_error_to_errno(&result.val.err);
   }
-  if (state->send_result.is_err)
-    return __wasilibc_socket_error_to_errno(state->send_result.val.err);
   return 0;
 }
 #endif
@@ -258,8 +258,8 @@ static poll_borrow_pollable_t tcp_pollable(tcp_socket_t *socket) {
   return poll_borrow_pollable(socket->socket_pollable);
 }
 
-static int tcp_handle_error(tcp_socket_t *socket, sockets_error_code_t error) {
-  if (error == NETWORK_ERROR_CODE_WOULD_BLOCK && socket->blocking) {
+static int tcp_handle_error(tcp_socket_t *socket, sockets_error_code_t *error) {
+  if (*error == NETWORK_ERROR_CODE_WOULD_BLOCK && socket->blocking) {
     poll_method_pollable_block(tcp_pollable(socket));
   } else {
     return __wasilibc_socket_error_to_errno(error);
@@ -286,10 +286,7 @@ static void tcp_setup_connected_state_wasip3(tcp_socket_t *socket) {
   sockets_stream_u8_writer_t send;
   sockets_stream_u8_t reader = sockets_stream_u8_new(&send);
   wasip3_io_state_init(&state->send, send);
-  wasip3_subtask_status_t status = sockets_method_tcp_socket_send(
-      socket_borrow, reader, &state->send_result);
-  if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED)
-    state->send_subtask = WASIP3_SUBTASK_HANDLE(status);
+  state->send_result = sockets_method_tcp_socket_send(socket_borrow, reader);
 }
 #endif
 
@@ -315,7 +312,7 @@ static int tcp_accept4(void *data, struct sockaddr *addr, socklen_t *addrlen,
       sockets_borrow_tcp_socket(socket->socket);
   tcp_tuple3_own_tcp_socket_own_input_stream_own_output_stream_t client_and_io;
   while (!tcp_method_tcp_socket_accept(socket_borrow, &client_and_io, &error)) {
-    if (tcp_handle_error(socket, error) < 0)
+    if (tcp_handle_error(socket, &error) < 0)
       return -1;
   }
 
@@ -397,17 +394,17 @@ static int tcp_do_bind(tcp_socket_t *socket,
 
   if (!tcp_method_tcp_socket_start_bind(socket_borrow, network_borrow, address,
                                         &error)) {
-    return __wasilibc_socket_error_to_errno(error);
+    return __wasilibc_socket_error_to_errno(&error);
   }
 
   // Bind has successfully started. Attempt to finish it:
   while (!tcp_method_tcp_socket_finish_bind(socket_borrow, &error)) {
-    if (tcp_handle_error(socket, error) < 0)
+    if (tcp_handle_error(socket, &error) < 0)
       return -1;
   }
 #elif defined(__wasip3__)
   if (!sockets_method_tcp_socket_bind(socket_borrow, address, &error)) {
-    return __wasilibc_socket_error_to_errno(error);
+    return __wasilibc_socket_error_to_errno(&error);
   }
 #endif
 
@@ -467,7 +464,7 @@ static int tcp_connect(void *data, const struct sockaddr *addr,
 
   if (!tcp_method_tcp_socket_start_connect(socket_borrow, network_borrow,
                                            &remote_address, &error)) {
-    return __wasilibc_socket_error_to_errno(error);
+    return __wasilibc_socket_error_to_errno(&error);
   }
 
   // Connect has successfully started.
@@ -476,7 +473,7 @@ static int tcp_connect(void *data, const struct sockaddr *addr,
   // Attempt to finish it:
   tcp_tuple2_own_input_stream_own_output_stream_t io;
   while (!tcp_method_tcp_socket_finish_connect(socket_borrow, &io, &error)) {
-    if (tcp_handle_error(socket, error) < 0) {
+    if (tcp_handle_error(socket, &error) < 0) {
       if (error == NETWORK_ERROR_CODE_WOULD_BLOCK) {
         errno = EINPROGRESS;
       } else {
@@ -527,7 +524,7 @@ static int tcp_connect(void *data, const struct sockaddr *addr,
   assert(socket->state.connecting.subtask == 0);
   if (socket->state.connecting.result.is_err) {
     sockets_error_code_t error = socket->state.connecting.result.val.err;
-    __wasilibc_socket_error_to_errno(error);
+    __wasilibc_socket_error_to_errno(&error);
     socket->state.tag = TCP_SOCKET_STATE_CONNECT_FAILED;
     socket->state.connect_failed.error_code = error;
     return -1;
@@ -577,7 +574,7 @@ static int tcp_getsockname(void *data, struct sockaddr *addr,
       sockets_borrow_tcp_socket(socket->socket);
   if (!sockets_method_tcp_socket_get_local_address(socket_borrow, &result,
                                                    &error))
-    return __wasilibc_socket_error_to_errno(error);
+    return __wasilibc_socket_error_to_errno(&error);
 
   __wasilibc_wasi_to_sockaddr(result, &output_addr);
   return 0;
@@ -619,7 +616,7 @@ static int tcp_getpeername(void *data, struct sockaddr *addr,
       sockets_borrow_tcp_socket(socket->socket);
   if (!sockets_method_tcp_socket_get_remote_address(socket_borrow, &result,
                                                     &error))
-    return __wasilibc_socket_error_to_errno(error);
+    return __wasilibc_socket_error_to_errno(&error);
 
   __wasilibc_wasi_to_sockaddr(result, &output_addr);
   return 0;
@@ -662,7 +659,7 @@ static int tcp_listen(void *data, int backlog) {
 
   if (!sockets_method_tcp_socket_set_listen_backlog_size(socket_borrow, backlog,
                                                          &error)) {
-    return __wasilibc_socket_error_to_errno(error);
+    return __wasilibc_socket_error_to_errno(&error);
   }
 
   if (socket->state.tag == TCP_SOCKET_STATE_LISTENING) {
@@ -672,12 +669,12 @@ static int tcp_listen(void *data, int backlog) {
 
 #ifdef __wasip2__
   if (!tcp_method_tcp_socket_start_listen(socket_borrow, &error)) {
-    return __wasilibc_socket_error_to_errno(error);
+    return __wasilibc_socket_error_to_errno(&error);
   }
 
   // Listen has successfully started. Attempt to finish it:
   while (!tcp_method_tcp_socket_finish_listen(socket_borrow, &error)) {
-    if (tcp_handle_error(socket, error) < 0)
+    if (tcp_handle_error(socket, &error) < 0)
       return -1;
   }
 
@@ -685,7 +682,7 @@ static int tcp_listen(void *data, int backlog) {
 #else
   sockets_stream_own_tcp_socket_t stream;
   if (!sockets_method_tcp_socket_listen(socket_borrow, &stream, &error))
-    return __wasilibc_socket_error_to_errno(error);
+    return __wasilibc_socket_error_to_errno(&error);
 
   socket->state.tag = TCP_SOCKET_STATE_LISTENING;
   socket->state.listening.stream = stream;
@@ -784,7 +781,7 @@ static int tcp_shutdown(void *data, int posix_how) {
   sockets_borrow_tcp_socket_t socket_borrow =
       sockets_borrow_tcp_socket(socket->socket);
   if (!tcp_method_tcp_socket_shutdown(socket_borrow, wasi_how, &error)) {
-    return __wasilibc_socket_error_to_errno(error);
+    return __wasilibc_socket_error_to_errno(&error);
   }
 
   if (posix_how == SHUT_RD || posix_how == SHUT_RDWR) {
@@ -939,8 +936,7 @@ static int tcp_getsockopt(void *data, int level, int optname,
     case SO_ERROR:
       if (socket->state.tag == TCP_SOCKET_STATE_CONNECT_FAILED) {
         value = __wasilibc_map_socket_error(
-            socket->state.connect_failed.error_code);
-        socket->state.connect_failed.error_code = 0;
+            &socket->state.connect_failed.error_code);
       } else if (socket->state.tag == TCP_SOCKET_STATE_CONNECTING) {
         value = EINPROGRESS;
       } else {
@@ -962,7 +958,7 @@ static int tcp_getsockopt(void *data, int level, int optname,
       bool result;
       if (!sockets_method_tcp_socket_get_keep_alive_enabled(socket_borrow,
                                                             &result, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
       value = result;
       break;
     }
@@ -970,7 +966,7 @@ static int tcp_getsockopt(void *data, int level, int optname,
       uint64_t result;
       if (!sockets_method_tcp_socket_get_receive_buffer_size(socket_borrow,
                                                              &result, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       value = result > INT_MAX ? INT_MAX : result;
       break;
@@ -979,7 +975,7 @@ static int tcp_getsockopt(void *data, int level, int optname,
       uint64_t result;
       if (!sockets_method_tcp_socket_get_send_buffer_size(socket_borrow,
                                                           &result, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       value = result > INT_MAX ? INT_MAX : result;
       break;
@@ -1020,7 +1016,7 @@ static int tcp_getsockopt(void *data, int level, int optname,
       uint8_t result;
       if (!sockets_method_tcp_socket_get_hop_limit(socket_borrow, &result,
                                                    &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       value = result;
       break;
@@ -1042,7 +1038,7 @@ static int tcp_getsockopt(void *data, int level, int optname,
       uint8_t result;
       if (!sockets_method_tcp_socket_get_hop_limit(socket_borrow, &result,
                                                    &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       value = result;
       break;
@@ -1063,7 +1059,7 @@ static int tcp_getsockopt(void *data, int level, int optname,
       sockets_duration_t result_ns;
       if (!sockets_method_tcp_socket_get_keep_alive_idle_time(
               socket_borrow, &result_ns, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       uint64_t result_s = result_ns / NS_PER_S;
       if (result_s == 0) {
@@ -1078,7 +1074,7 @@ static int tcp_getsockopt(void *data, int level, int optname,
       sockets_duration_t result_ns;
       if (!sockets_method_tcp_socket_get_keep_alive_interval(
               socket_borrow, &result_ns, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       uint64_t result_s = result_ns / NS_PER_S;
       if (result_s == 0) {
@@ -1093,7 +1089,7 @@ static int tcp_getsockopt(void *data, int level, int optname,
       uint32_t result;
       if (!sockets_method_tcp_socket_get_keep_alive_count(socket_borrow,
                                                           &result, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       value = result > INT_MAX ? INT_MAX : result;
       break;
@@ -1134,21 +1130,21 @@ static int tcp_setsockopt(void *data, int level, int optname,
     case SO_KEEPALIVE: {
       if (!sockets_method_tcp_socket_set_keep_alive_enabled(
               socket_borrow, intval != 0, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       return 0;
     }
     case SO_RCVBUF: {
       if (!sockets_method_tcp_socket_set_receive_buffer_size(socket_borrow,
                                                              intval, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       return 0;
     }
     case SO_SNDBUF: {
       if (!sockets_method_tcp_socket_set_send_buffer_size(socket_borrow, intval,
                                                           &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       return 0;
     }
@@ -1205,7 +1201,7 @@ static int tcp_setsockopt(void *data, int level, int optname,
 
       if (!sockets_method_tcp_socket_set_hop_limit(socket_borrow, intval,
                                                    &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       return 0;
     }
@@ -1230,7 +1226,7 @@ static int tcp_setsockopt(void *data, int level, int optname,
 
       if (!sockets_method_tcp_socket_set_hop_limit(socket_borrow, intval,
                                                    &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       return 0;
     }
@@ -1259,7 +1255,7 @@ static int tcp_setsockopt(void *data, int level, int optname,
       sockets_duration_t duration = intval * NS_PER_S;
       if (!sockets_method_tcp_socket_set_keep_alive_idle_time(socket_borrow,
                                                               duration, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       return 0;
     }
@@ -1267,14 +1263,14 @@ static int tcp_setsockopt(void *data, int level, int optname,
       sockets_duration_t duration = intval * NS_PER_S;
       if (!sockets_method_tcp_socket_set_keep_alive_interval(socket_borrow,
                                                              duration, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       return 0;
     }
     case TCP_KEEPCNT: {
       if (!sockets_method_tcp_socket_set_keep_alive_count(socket_borrow, intval,
                                                           &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       return 0;
     }

@@ -3,302 +3,302 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Imported Functions from `wasi:cli/environment@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/environment@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:cli/environment@0.3.0-rc-2026-01-06"), __import_name__("get-environment")))
+__attribute__((__import_module__("wasi:cli/environment@0.3.0-rc-2026-03-15"), __import_name__("get-environment")))
 extern void __wasm_import_environment_get_environment(uint8_t *);
 
-__attribute__((__import_module__("wasi:cli/environment@0.3.0-rc-2026-01-06"), __import_name__("get-arguments")))
+__attribute__((__import_module__("wasi:cli/environment@0.3.0-rc-2026-03-15"), __import_name__("get-arguments")))
 extern void __wasm_import_environment_get_arguments(uint8_t *);
 
-__attribute__((__import_module__("wasi:cli/environment@0.3.0-rc-2026-01-06"), __import_name__("get-initial-cwd")))
+__attribute__((__import_module__("wasi:cli/environment@0.3.0-rc-2026-03-15"), __import_name__("get-initial-cwd")))
 extern void __wasm_import_environment_get_initial_cwd(uint8_t *);
 
-// Imported Functions from `wasi:cli/exit@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/exit@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:cli/exit@0.3.0-rc-2026-01-06"), __import_name__("exit")))
+__attribute__((__import_module__("wasi:cli/exit@0.3.0-rc-2026-03-15"), __import_name__("exit")))
 _Noreturn extern void __wasm_import_exit_exit(int32_t);
 
-// Imported Functions from `wasi:cli/stdin@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/stdin@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-01-06"), __import_name__("read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("read-via-stream")))
 extern void __wasm_import_stdin_read_via_stream(uint8_t *);
 
-// Imported Functions from `wasi:cli/stdout@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/stdout@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-01-06"), __import_name__("[async-lower]write-via-stream")))
-extern int32_t __wasm_import_stdout_write_via_stream(int32_t, uint8_t *);
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("write-via-stream")))
+extern int32_t __wasm_import_stdout_write_via_stream(int32_t);
 
-// Imported Functions from `wasi:cli/stderr@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/stderr@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-01-06"), __import_name__("[async-lower]write-via-stream")))
-extern int32_t __wasm_import_stderr_write_via_stream(int32_t, uint8_t *);
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("write-via-stream")))
+extern int32_t __wasm_import_stderr_write_via_stream(int32_t);
 
-// Imported Functions from `wasi:cli/terminal-stdin@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/terminal-stdin@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:cli/terminal-stdin@0.3.0-rc-2026-01-06"), __import_name__("get-terminal-stdin")))
+__attribute__((__import_module__("wasi:cli/terminal-stdin@0.3.0-rc-2026-03-15"), __import_name__("get-terminal-stdin")))
 extern void __wasm_import_terminal_stdin_get_terminal_stdin(uint8_t *);
 
-// Imported Functions from `wasi:cli/terminal-stdout@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/terminal-stdout@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:cli/terminal-stdout@0.3.0-rc-2026-01-06"), __import_name__("get-terminal-stdout")))
+__attribute__((__import_module__("wasi:cli/terminal-stdout@0.3.0-rc-2026-03-15"), __import_name__("get-terminal-stdout")))
 extern void __wasm_import_terminal_stdout_get_terminal_stdout(uint8_t *);
 
-// Imported Functions from `wasi:cli/terminal-stderr@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:cli/terminal-stderr@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:cli/terminal-stderr@0.3.0-rc-2026-01-06"), __import_name__("get-terminal-stderr")))
+__attribute__((__import_module__("wasi:cli/terminal-stderr@0.3.0-rc-2026-03-15"), __import_name__("get-terminal-stderr")))
 extern void __wasm_import_terminal_stderr_get_terminal_stderr(uint8_t *);
 
-// Imported Functions from `wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:clocks/monotonic-clock@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06"), __import_name__("now")))
+__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-03-15"), __import_name__("now")))
 extern int64_t __wasm_import_monotonic_clock_now(void);
 
-__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06"), __import_name__("get-resolution")))
+__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-03-15"), __import_name__("get-resolution")))
 extern int64_t __wasm_import_monotonic_clock_get_resolution(void);
 
-__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06"), __import_name__("wait-until")))
+__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-03-15"), __import_name__("wait-until")))
 extern void __wasm_import_monotonic_clock_wait_until(int64_t);
 
-__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06"), __import_name__("[async-lower]wait-for")))
+__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-03-15"), __import_name__("[async-lower]wait-for")))
 extern int32_t __wasm_import_monotonic_clock_wait_for(int64_t);
 
-// Imported Functions from `wasi:clocks/system-clock@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:clocks/system-clock@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:clocks/system-clock@0.3.0-rc-2026-01-06"), __import_name__("now")))
+__attribute__((__import_module__("wasi:clocks/system-clock@0.3.0-rc-2026-03-15"), __import_name__("now")))
 extern void __wasm_import_system_clock_now(uint8_t *);
 
-__attribute__((__import_module__("wasi:clocks/system-clock@0.3.0-rc-2026-01-06"), __import_name__("get-resolution")))
+__attribute__((__import_module__("wasi:clocks/system-clock@0.3.0-rc-2026-03-15"), __import_name__("get-resolution")))
 extern int64_t __wasm_import_system_clock_get_resolution(void);
 
-// Imported Functions from `wasi:filesystem/types@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:filesystem/types@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.read-via-stream")))
 extern void __wasm_import_filesystem_method_descriptor_read_via_stream(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.write-via-stream")))
-extern int32_t __wasm_import_filesystem_method_descriptor_write_via_stream(int32_t, int32_t, int64_t, uint8_t *);
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.write-via-stream")))
+extern int32_t __wasm_import_filesystem_method_descriptor_write_via_stream(int32_t, int32_t, int64_t);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.append-via-stream")))
-extern int32_t __wasm_import_filesystem_method_descriptor_append_via_stream(int32_t, int32_t, uint8_t *);
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.append-via-stream")))
+extern int32_t __wasm_import_filesystem_method_descriptor_append_via_stream(int32_t, int32_t);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.advise")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.advise")))
 extern void __wasm_import_filesystem_method_descriptor_advise(int32_t, int64_t, int64_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.sync-data")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.sync-data")))
 extern void __wasm_import_filesystem_method_descriptor_sync_data(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.get-flags")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.get-flags")))
 extern void __wasm_import_filesystem_method_descriptor_get_flags(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.get-type")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][method]descriptor.get-type")))
 extern int32_t __wasm_import_filesystem_method_descriptor_get_type(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.set-size")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.set-size")))
 extern void __wasm_import_filesystem_method_descriptor_set_size(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.set-times")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.set-times")))
 extern void __wasm_import_filesystem_method_descriptor_set_times(int32_t, int32_t, int64_t, int32_t, int32_t, int64_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.read-directory")))
 extern void __wasm_import_filesystem_method_descriptor_read_directory(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.sync")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.sync")))
 extern void __wasm_import_filesystem_method_descriptor_sync(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.create-directory-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.create-directory-at")))
 extern void __wasm_import_filesystem_method_descriptor_create_directory_at(int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.stat")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.stat")))
 extern void __wasm_import_filesystem_method_descriptor_stat(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.stat-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.stat-at")))
 extern void __wasm_import_filesystem_method_descriptor_stat_at(int32_t, int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.set-times-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.set-times-at")))
 extern void __wasm_import_filesystem_method_descriptor_set_times_at(int32_t, int32_t, uint8_t *, size_t, int32_t, int64_t, int32_t, int32_t, int64_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.link-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.link-at")))
 extern void __wasm_import_filesystem_method_descriptor_link_at(int32_t, int32_t, uint8_t *, size_t, int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.open-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.open-at")))
 extern void __wasm_import_filesystem_method_descriptor_open_at(int32_t, int32_t, uint8_t *, size_t, int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.readlink-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.readlink-at")))
 extern void __wasm_import_filesystem_method_descriptor_readlink_at(int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.remove-directory-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.remove-directory-at")))
 extern void __wasm_import_filesystem_method_descriptor_remove_directory_at(int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.rename-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.rename-at")))
 extern void __wasm_import_filesystem_method_descriptor_rename_at(int32_t, uint8_t *, size_t, int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.symlink-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.symlink-at")))
 extern void __wasm_import_filesystem_method_descriptor_symlink_at(int32_t, uint8_t *, size_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.unlink-file-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.unlink-file-at")))
 extern void __wasm_import_filesystem_method_descriptor_unlink_file_at(int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]descriptor.is-same-object")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][method]descriptor.is-same-object")))
 extern int32_t __wasm_import_filesystem_method_descriptor_is_same_object(int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.metadata-hash")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.metadata-hash")))
 extern void __wasm_import_filesystem_method_descriptor_metadata_hash(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[method]descriptor.metadata-hash-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.metadata-hash-at")))
 extern void __wasm_import_filesystem_method_descriptor_metadata_hash_at(int32_t, int32_t, uint8_t *, size_t, uint8_t *);
 
-// Imported Functions from `wasi:filesystem/preopens@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:filesystem/preopens@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:filesystem/preopens@0.3.0-rc-2026-01-06"), __import_name__("get-directories")))
+__attribute__((__import_module__("wasi:filesystem/preopens@0.3.0-rc-2026-03-15"), __import_name__("get-directories")))
 extern void __wasm_import_filesystem_preopens_get_directories(uint8_t *);
 
-// Imported Functions from `wasi:sockets/types@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:sockets/types@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[static]tcp-socket.create")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[static]tcp-socket.create")))
 extern void __wasm_import_sockets_static_tcp_socket_create(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.bind")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.bind")))
 extern void __wasm_import_sockets_method_tcp_socket_bind(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]tcp-socket.connect")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][method]tcp-socket.connect")))
 extern int32_t __wasm_import_sockets_method_tcp_socket_connect(uint8_t *, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.listen")))
 extern void __wasm_import_sockets_method_tcp_socket_listen(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]tcp-socket.send")))
-extern int32_t __wasm_import_sockets_method_tcp_socket_send(int32_t, int32_t, uint8_t *);
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.send")))
+extern int32_t __wasm_import_sockets_method_tcp_socket_send(int32_t, int32_t);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.receive")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.receive")))
 extern void __wasm_import_sockets_method_tcp_socket_receive(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.get-local-address")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-local-address")))
 extern void __wasm_import_sockets_method_tcp_socket_get_local_address(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.get-remote-address")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-remote-address")))
 extern void __wasm_import_sockets_method_tcp_socket_get_remote_address(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.get-is-listening")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-is-listening")))
 extern int32_t __wasm_import_sockets_method_tcp_socket_get_is_listening(int32_t);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.get-address-family")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-address-family")))
 extern int32_t __wasm_import_sockets_method_tcp_socket_get_address_family(int32_t);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.set-listen-backlog-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-listen-backlog-size")))
 extern void __wasm_import_sockets_method_tcp_socket_set_listen_backlog_size(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.get-keep-alive-enabled")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-keep-alive-enabled")))
 extern void __wasm_import_sockets_method_tcp_socket_get_keep_alive_enabled(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.set-keep-alive-enabled")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-keep-alive-enabled")))
 extern void __wasm_import_sockets_method_tcp_socket_set_keep_alive_enabled(int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.get-keep-alive-idle-time")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-keep-alive-idle-time")))
 extern void __wasm_import_sockets_method_tcp_socket_get_keep_alive_idle_time(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.set-keep-alive-idle-time")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-keep-alive-idle-time")))
 extern void __wasm_import_sockets_method_tcp_socket_set_keep_alive_idle_time(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.get-keep-alive-interval")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-keep-alive-interval")))
 extern void __wasm_import_sockets_method_tcp_socket_get_keep_alive_interval(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.set-keep-alive-interval")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-keep-alive-interval")))
 extern void __wasm_import_sockets_method_tcp_socket_set_keep_alive_interval(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.get-keep-alive-count")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-keep-alive-count")))
 extern void __wasm_import_sockets_method_tcp_socket_get_keep_alive_count(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.set-keep-alive-count")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-keep-alive-count")))
 extern void __wasm_import_sockets_method_tcp_socket_set_keep_alive_count(int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.get-hop-limit")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-hop-limit")))
 extern void __wasm_import_sockets_method_tcp_socket_get_hop_limit(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.set-hop-limit")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-hop-limit")))
 extern void __wasm_import_sockets_method_tcp_socket_set_hop_limit(int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.get-receive-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-receive-buffer-size")))
 extern void __wasm_import_sockets_method_tcp_socket_get_receive_buffer_size(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.set-receive-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-receive-buffer-size")))
 extern void __wasm_import_sockets_method_tcp_socket_set_receive_buffer_size(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.get-send-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-send-buffer-size")))
 extern void __wasm_import_sockets_method_tcp_socket_get_send_buffer_size(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]tcp-socket.set-send-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-send-buffer-size")))
 extern void __wasm_import_sockets_method_tcp_socket_set_send_buffer_size(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[static]udp-socket.create")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[static]udp-socket.create")))
 extern void __wasm_import_sockets_static_udp_socket_create(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]udp-socket.bind")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.bind")))
 extern void __wasm_import_sockets_method_udp_socket_bind(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]udp-socket.connect")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.connect")))
 extern void __wasm_import_sockets_method_udp_socket_connect(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]udp-socket.disconnect")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.disconnect")))
 extern void __wasm_import_sockets_method_udp_socket_disconnect(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]udp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][method]udp-socket.send")))
 extern int32_t __wasm_import_sockets_method_udp_socket_send(uint8_t *, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][method]udp-socket.receive")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][method]udp-socket.receive")))
 extern int32_t __wasm_import_sockets_method_udp_socket_receive(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]udp-socket.get-local-address")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.get-local-address")))
 extern void __wasm_import_sockets_method_udp_socket_get_local_address(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]udp-socket.get-remote-address")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.get-remote-address")))
 extern void __wasm_import_sockets_method_udp_socket_get_remote_address(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]udp-socket.get-address-family")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.get-address-family")))
 extern int32_t __wasm_import_sockets_method_udp_socket_get_address_family(int32_t);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]udp-socket.get-unicast-hop-limit")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.get-unicast-hop-limit")))
 extern void __wasm_import_sockets_method_udp_socket_get_unicast_hop_limit(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]udp-socket.set-unicast-hop-limit")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.set-unicast-hop-limit")))
 extern void __wasm_import_sockets_method_udp_socket_set_unicast_hop_limit(int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]udp-socket.get-receive-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.get-receive-buffer-size")))
 extern void __wasm_import_sockets_method_udp_socket_get_receive_buffer_size(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]udp-socket.set-receive-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.set-receive-buffer-size")))
 extern void __wasm_import_sockets_method_udp_socket_set_receive_buffer_size(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]udp-socket.get-send-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.get-send-buffer-size")))
 extern void __wasm_import_sockets_method_udp_socket_get_send_buffer_size(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[method]udp-socket.set-send-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.set-send-buffer-size")))
 extern void __wasm_import_sockets_method_udp_socket_set_send_buffer_size(int32_t, int64_t, uint8_t *);
 
-// Imported Functions from `wasi:sockets/ip-name-lookup@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:sockets/ip-name-lookup@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:sockets/ip-name-lookup@0.3.0-rc-2026-01-06"), __import_name__("resolve-addresses")))
+__attribute__((__import_module__("wasi:sockets/ip-name-lookup@0.3.0-rc-2026-03-15"), __import_name__("resolve-addresses")))
 extern void __wasm_import_ip_name_lookup_resolve_addresses(uint8_t *, size_t, uint8_t *);
 
-// Imported Functions from `wasi:random/random@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:random/random@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:random/random@0.3.0-rc-2026-01-06"), __import_name__("get-random-bytes")))
+__attribute__((__import_module__("wasi:random/random@0.3.0-rc-2026-03-15"), __import_name__("get-random-bytes")))
 extern void __wasm_import_random_get_random_bytes(int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:random/random@0.3.0-rc-2026-01-06"), __import_name__("get-random-u64")))
+__attribute__((__import_module__("wasi:random/random@0.3.0-rc-2026-03-15"), __import_name__("get-random-u64")))
 extern int64_t __wasm_import_random_get_random_u64(void);
 
-// Imported Functions from `wasi:random/insecure@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:random/insecure@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:random/insecure@0.3.0-rc-2026-01-06"), __import_name__("get-insecure-random-bytes")))
+__attribute__((__import_module__("wasi:random/insecure@0.3.0-rc-2026-03-15"), __import_name__("get-insecure-random-bytes")))
 extern void __wasm_import_random_insecure_get_insecure_random_bytes(int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:random/insecure@0.3.0-rc-2026-01-06"), __import_name__("get-insecure-random-u64")))
+__attribute__((__import_module__("wasi:random/insecure@0.3.0-rc-2026-03-15"), __import_name__("get-insecure-random-u64")))
 extern int64_t __wasm_import_random_insecure_get_insecure_random_u64(void);
 
-// Imported Functions from `wasi:random/insecure-seed@0.3.0-rc-2026-01-06`
+// Imported Functions from `wasi:random/insecure-seed@0.3.0-rc-2026-03-15`
 
-__attribute__((__import_module__("wasi:random/insecure-seed@0.3.0-rc-2026-01-06"), __import_name__("get-insecure-seed")))
+__attribute__((__import_module__("wasi:random/insecure-seed@0.3.0-rc-2026-03-15"), __import_name__("get-insecure-seed")))
 extern void __wasm_import_random_insecure_seed_get_insecure_seed(uint8_t *);
 
 // Canonical ABI intrinsics
@@ -358,19 +358,19 @@ void stdin_result_void_error_code_free(stdin_result_void_error_code_t *ptr) {
   }
 }
 
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-01-06"), __import_name__("[stream-new-0]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[stream-new-0]read-via-stream")))
 extern uint64_t stdin_stream_u8__new(void);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][stream-read-0]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-read-0]read-via-stream")))
 extern uint32_t stdin_stream_u8__read(uint32_t, uint8_t*, size_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][stream-write-0]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-write-0]read-via-stream")))
 extern uint32_t stdin_stream_u8__write(uint32_t, const uint8_t*, size_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-01-06"), __import_name__("[stream-cancel-read-0]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-read-0]read-via-stream")))
 extern uint32_t stdin_stream_u8__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-01-06"), __import_name__("[stream-cancel-write-0]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-write-0]read-via-stream")))
 extern uint32_t stdin_stream_u8__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-01-06"), __import_name__("[stream-drop-readable-0]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-readable-0]read-via-stream")))
 extern void stdin_stream_u8__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-01-06"), __import_name__("[stream-drop-writable-0]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-writable-0]read-via-stream")))
 extern void stdin_stream_u8__drop_writable(uint32_t);
 
 stdin_stream_u8_t stdin_stream_u8_new(stdin_stream_u8_writer_t *writer) {
@@ -404,19 +404,19 @@ void stdin_stream_u8_drop_writable(stdin_stream_u8_writer_t writer) {
 }
 
 
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-01-06"), __import_name__("[future-new-1]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[future-new-1]read-via-stream")))
 extern uint64_t stdin_future_result_void_error_code__new(void);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][future-read-1]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-read-1]read-via-stream")))
 extern uint32_t stdin_future_result_void_error_code__read(uint32_t, uint8_t*);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][future-write-1]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-write-1]read-via-stream")))
 extern uint32_t stdin_future_result_void_error_code__write(uint32_t, const uint8_t*);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-01-06"), __import_name__("[future-cancel-read-1]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-read-1]read-via-stream")))
 extern uint32_t stdin_future_result_void_error_code__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-01-06"), __import_name__("[future-cancel-write-1]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-write-1]read-via-stream")))
 extern uint32_t stdin_future_result_void_error_code__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-01-06"), __import_name__("[future-drop-readable-1]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-readable-1]read-via-stream")))
 extern void stdin_future_result_void_error_code__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-01-06"), __import_name__("[future-drop-writable-1]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-writable-1]read-via-stream")))
 extern void stdin_future_result_void_error_code__drop_writable(uint32_t);
 
 stdin_future_result_void_error_code_t stdin_future_result_void_error_code_new(stdin_future_result_void_error_code_writer_t *writer) {
@@ -456,13 +456,105 @@ void stdout_result_void_error_code_free(stdout_result_void_error_code_t *ptr) {
   }
 }
 
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("[future-new-1]write-via-stream")))
+extern uint64_t stdout_future_result_void_error_code__new(void);
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-read-1]write-via-stream")))
+extern uint32_t stdout_future_result_void_error_code__read(uint32_t, uint8_t*);
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-write-1]write-via-stream")))
+extern uint32_t stdout_future_result_void_error_code__write(uint32_t, const uint8_t*);
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-read-1]write-via-stream")))
+extern uint32_t stdout_future_result_void_error_code__cancel_read(uint32_t);
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-write-1]write-via-stream")))
+extern uint32_t stdout_future_result_void_error_code__cancel_write(uint32_t);
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-readable-1]write-via-stream")))
+extern void stdout_future_result_void_error_code__drop_readable(uint32_t);
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-writable-1]write-via-stream")))
+extern void stdout_future_result_void_error_code__drop_writable(uint32_t);
+
+stdout_future_result_void_error_code_t stdout_future_result_void_error_code_new(stdout_future_result_void_error_code_writer_t *writer) {
+  uint64_t packed = stdout_future_result_void_error_code__new();
+  *writer = (uint32_t) (packed >> 32);
+  return (uint32_t) packed;
+}
+
+wasip3_waitable_status_t stdout_future_result_void_error_code_read(stdout_future_result_void_error_code_t reader, stdout_result_void_error_code_t *buf) {
+  return stdout_future_result_void_error_code__read(reader, (uint8_t*) buf);
+}
+
+wasip3_waitable_status_t stdout_future_result_void_error_code_write(stdout_future_result_void_error_code_writer_t writer, const stdout_result_void_error_code_t *buf) {
+  return stdout_future_result_void_error_code__write(writer, (const uint8_t*) buf);
+}
+
+wasip3_waitable_status_t stdout_future_result_void_error_code_cancel_read(stdout_future_result_void_error_code_t reader){
+  return stdout_future_result_void_error_code__cancel_read(reader);
+}
+
+wasip3_waitable_status_t stdout_future_result_void_error_code_cancel_write(stdout_future_result_void_error_code_writer_t writer) {
+  return stdout_future_result_void_error_code__cancel_write(writer);
+}
+
+void stdout_future_result_void_error_code_drop_readable(stdout_future_result_void_error_code_t reader){
+  stdout_future_result_void_error_code__drop_readable(reader);
+}
+
+void stdout_future_result_void_error_code_drop_writable(stdout_future_result_void_error_code_writer_t writer) {
+  stdout_future_result_void_error_code__drop_writable(writer);
+}
+
+
 void stderr_result_void_error_code_free(stderr_result_void_error_code_t *ptr) {
   if (!ptr->is_err) {
   } else {
   }
 }
 
-__attribute__((__import_module__("wasi:cli/terminal-input@0.3.0-rc-2026-01-06"), __import_name__("[resource-drop]terminal-input")))
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("[future-new-1]write-via-stream")))
+extern uint64_t stderr_future_result_void_error_code__new(void);
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-read-1]write-via-stream")))
+extern uint32_t stderr_future_result_void_error_code__read(uint32_t, uint8_t*);
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-write-1]write-via-stream")))
+extern uint32_t stderr_future_result_void_error_code__write(uint32_t, const uint8_t*);
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-read-1]write-via-stream")))
+extern uint32_t stderr_future_result_void_error_code__cancel_read(uint32_t);
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-write-1]write-via-stream")))
+extern uint32_t stderr_future_result_void_error_code__cancel_write(uint32_t);
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-readable-1]write-via-stream")))
+extern void stderr_future_result_void_error_code__drop_readable(uint32_t);
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-writable-1]write-via-stream")))
+extern void stderr_future_result_void_error_code__drop_writable(uint32_t);
+
+stderr_future_result_void_error_code_t stderr_future_result_void_error_code_new(stderr_future_result_void_error_code_writer_t *writer) {
+  uint64_t packed = stderr_future_result_void_error_code__new();
+  *writer = (uint32_t) (packed >> 32);
+  return (uint32_t) packed;
+}
+
+wasip3_waitable_status_t stderr_future_result_void_error_code_read(stderr_future_result_void_error_code_t reader, stderr_result_void_error_code_t *buf) {
+  return stderr_future_result_void_error_code__read(reader, (uint8_t*) buf);
+}
+
+wasip3_waitable_status_t stderr_future_result_void_error_code_write(stderr_future_result_void_error_code_writer_t writer, const stderr_result_void_error_code_t *buf) {
+  return stderr_future_result_void_error_code__write(writer, (const uint8_t*) buf);
+}
+
+wasip3_waitable_status_t stderr_future_result_void_error_code_cancel_read(stderr_future_result_void_error_code_t reader){
+  return stderr_future_result_void_error_code__cancel_read(reader);
+}
+
+wasip3_waitable_status_t stderr_future_result_void_error_code_cancel_write(stderr_future_result_void_error_code_writer_t writer) {
+  return stderr_future_result_void_error_code__cancel_write(writer);
+}
+
+void stderr_future_result_void_error_code_drop_readable(stderr_future_result_void_error_code_t reader){
+  stderr_future_result_void_error_code__drop_readable(reader);
+}
+
+void stderr_future_result_void_error_code_drop_writable(stderr_future_result_void_error_code_writer_t writer) {
+  stderr_future_result_void_error_code__drop_writable(writer);
+}
+
+
+__attribute__((__import_module__("wasi:cli/terminal-input@0.3.0-rc-2026-03-15"), __import_name__("[resource-drop]terminal-input")))
 extern void __wasm_import_terminal_input_terminal_input_drop(int32_t handle);
 
 void terminal_input_terminal_input_drop_own(terminal_input_own_terminal_input_t handle) {
@@ -473,7 +565,7 @@ terminal_input_borrow_terminal_input_t terminal_input_borrow_terminal_input(term
   return (terminal_input_borrow_terminal_input_t) { arg.__handle };
 }
 
-__attribute__((__import_module__("wasi:cli/terminal-output@0.3.0-rc-2026-01-06"), __import_name__("[resource-drop]terminal-output")))
+__attribute__((__import_module__("wasi:cli/terminal-output@0.3.0-rc-2026-03-15"), __import_name__("[resource-drop]terminal-output")))
 extern void __wasm_import_terminal_output_terminal_output_drop(int32_t handle);
 
 void terminal_output_terminal_output_drop_own(terminal_output_own_terminal_output_t handle) {
@@ -499,12 +591,21 @@ void terminal_stderr_option_own_terminal_output_free(terminal_stderr_option_own_
   }
 }
 
+void filesystem_descriptor_type_free(filesystem_descriptor_type_t *ptr) {
+  switch ((int32_t) ptr->tag) {
+    case 7: {
+      break;
+    }
+  }
+}
+
 void filesystem_option_instant_free(filesystem_option_instant_t *ptr) {
   if (ptr->is_some) {
   }
 }
 
 void filesystem_descriptor_stat_free(filesystem_descriptor_stat_t *ptr) {
+  filesystem_descriptor_type_free(&ptr->type);
   filesystem_option_instant_free(&ptr->data_access_timestamp);
   filesystem_option_instant_free(&ptr->data_modification_timestamp);
   filesystem_option_instant_free(&ptr->status_change_timestamp);
@@ -519,10 +620,19 @@ void filesystem_new_timestamp_free(filesystem_new_timestamp_t *ptr) {
 }
 
 void filesystem_directory_entry_free(filesystem_directory_entry_t *ptr) {
+  filesystem_descriptor_type_free(&ptr->type);
   wasip3_string_free(&ptr->name);
 }
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[resource-drop]descriptor")))
+void filesystem_error_code_free(filesystem_error_code_t *ptr) {
+  switch ((int32_t) ptr->tag) {
+    case 36: {
+      break;
+    }
+  }
+}
+
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[resource-drop]descriptor")))
 extern void __wasm_import_filesystem_descriptor_drop(int32_t handle);
 
 void filesystem_descriptor_drop_own(filesystem_own_descriptor_t handle) {
@@ -536,18 +646,22 @@ filesystem_borrow_descriptor_t filesystem_borrow_descriptor(filesystem_own_descr
 void filesystem_result_void_error_code_free(filesystem_result_void_error_code_t *ptr) {
   if (!ptr->is_err) {
   } else {
+    filesystem_error_code_free(&ptr->val.err);
   }
 }
 
 void filesystem_result_descriptor_flags_error_code_free(filesystem_result_descriptor_flags_error_code_t *ptr) {
   if (!ptr->is_err) {
   } else {
+    filesystem_error_code_free(&ptr->val.err);
   }
 }
 
 void filesystem_result_descriptor_type_error_code_free(filesystem_result_descriptor_type_error_code_t *ptr) {
   if (!ptr->is_err) {
+    filesystem_descriptor_type_free(&ptr->val.ok);
   } else {
+    filesystem_error_code_free(&ptr->val.err);
   }
 }
 
@@ -555,12 +669,14 @@ void filesystem_result_descriptor_stat_error_code_free(filesystem_result_descrip
   if (!ptr->is_err) {
     filesystem_descriptor_stat_free(&ptr->val.ok);
   } else {
+    filesystem_error_code_free(&ptr->val.err);
   }
 }
 
 void filesystem_result_own_descriptor_error_code_free(filesystem_result_own_descriptor_error_code_t *ptr) {
   if (!ptr->is_err) {
   } else {
+    filesystem_error_code_free(&ptr->val.err);
   }
 }
 
@@ -568,28 +684,30 @@ void filesystem_result_string_error_code_free(filesystem_result_string_error_cod
   if (!ptr->is_err) {
     wasip3_string_free(&ptr->val.ok);
   } else {
+    filesystem_error_code_free(&ptr->val.err);
   }
 }
 
 void filesystem_result_metadata_hash_value_error_code_free(filesystem_result_metadata_hash_value_error_code_t *ptr) {
   if (!ptr->is_err) {
   } else {
+    filesystem_error_code_free(&ptr->val.err);
   }
 }
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-new-0][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-new-0][method]descriptor.read-via-stream")))
 extern uint64_t filesystem_stream_u8__new(void);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][stream-read-0][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-read-0][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_stream_u8__read(uint32_t, uint8_t*, size_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][stream-write-0][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-write-0][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_stream_u8__write(uint32_t, const uint8_t*, size_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-cancel-read-0][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-read-0][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_stream_u8__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-cancel-write-0][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-write-0][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_stream_u8__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-drop-readable-0][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-readable-0][method]descriptor.read-via-stream")))
 extern void filesystem_stream_u8__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-drop-writable-0][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-writable-0][method]descriptor.read-via-stream")))
 extern void filesystem_stream_u8__drop_writable(uint32_t);
 
 filesystem_stream_u8_t filesystem_stream_u8_new(filesystem_stream_u8_writer_t *writer) {
@@ -623,19 +741,19 @@ void filesystem_stream_u8_drop_writable(filesystem_stream_u8_writer_t writer) {
 }
 
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[future-new-1][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[future-new-1][method]descriptor.read-via-stream")))
 extern uint64_t filesystem_future_result_void_error_code__new(void);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][future-read-1][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-read-1][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_future_result_void_error_code__read(uint32_t, uint8_t*);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][future-write-1][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-write-1][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_future_result_void_error_code__write(uint32_t, const uint8_t*);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[future-cancel-read-1][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-read-1][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_future_result_void_error_code__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[future-cancel-write-1][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-write-1][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_future_result_void_error_code__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[future-drop-readable-1][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-readable-1][method]descriptor.read-via-stream")))
 extern void filesystem_future_result_void_error_code__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[future-drop-writable-1][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-writable-1][method]descriptor.read-via-stream")))
 extern void filesystem_future_result_void_error_code__drop_writable(uint32_t);
 
 filesystem_future_result_void_error_code_t filesystem_future_result_void_error_code_new(filesystem_future_result_void_error_code_writer_t *writer) {
@@ -669,19 +787,19 @@ void filesystem_future_result_void_error_code_drop_writable(filesystem_future_re
 }
 
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-new-0][method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-new-0][method]descriptor.read-directory")))
 extern uint64_t filesystem_stream_directory_entry__new(void);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][stream-read-0][method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-read-0][method]descriptor.read-directory")))
 extern uint32_t filesystem_stream_directory_entry__read(uint32_t, uint8_t*, size_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][stream-write-0][method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-write-0][method]descriptor.read-directory")))
 extern uint32_t filesystem_stream_directory_entry__write(uint32_t, const uint8_t*, size_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-cancel-read-0][method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-read-0][method]descriptor.read-directory")))
 extern uint32_t filesystem_stream_directory_entry__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-cancel-write-0][method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-write-0][method]descriptor.read-directory")))
 extern uint32_t filesystem_stream_directory_entry__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-drop-readable-0][method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-readable-0][method]descriptor.read-directory")))
 extern void filesystem_stream_directory_entry__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-drop-writable-0][method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-writable-0][method]descriptor.read-directory")))
 extern void filesystem_stream_directory_entry__drop_writable(uint32_t);
 
 filesystem_stream_directory_entry_t filesystem_stream_directory_entry_new(filesystem_stream_directory_entry_writer_t *writer) {
@@ -730,6 +848,14 @@ void filesystem_preopens_list_tuple2_own_descriptor_string_free(filesystem_preop
   }
 }
 
+void sockets_error_code_free(sockets_error_code_t *ptr) {
+  switch ((int32_t) ptr->tag) {
+    case 14: {
+      break;
+    }
+  }
+}
+
 void sockets_ip_address_free(sockets_ip_address_t *ptr) {
   switch ((int32_t) ptr->tag) {
     case 0: {
@@ -752,7 +878,7 @@ void sockets_ip_socket_address_free(sockets_ip_socket_address_t *ptr) {
   }
 }
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[resource-drop]tcp-socket")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[resource-drop]tcp-socket")))
 extern void __wasm_import_sockets_tcp_socket_drop(int32_t handle);
 
 void sockets_tcp_socket_drop_own(sockets_own_tcp_socket_t handle) {
@@ -763,7 +889,7 @@ sockets_borrow_tcp_socket_t sockets_borrow_tcp_socket(sockets_own_tcp_socket_t a
   return (sockets_borrow_tcp_socket_t) { arg.__handle };
 }
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[resource-drop]udp-socket")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[resource-drop]udp-socket")))
 extern void __wasm_import_sockets_udp_socket_drop(int32_t handle);
 
 void sockets_udp_socket_drop_own(sockets_own_udp_socket_t handle) {
@@ -777,18 +903,21 @@ sockets_borrow_udp_socket_t sockets_borrow_udp_socket(sockets_own_udp_socket_t a
 void sockets_result_own_tcp_socket_error_code_free(sockets_result_own_tcp_socket_error_code_t *ptr) {
   if (!ptr->is_err) {
   } else {
+    sockets_error_code_free(&ptr->val.err);
   }
 }
 
 void sockets_result_void_error_code_free(sockets_result_void_error_code_t *ptr) {
   if (!ptr->is_err) {
   } else {
+    sockets_error_code_free(&ptr->val.err);
   }
 }
 
 void sockets_result_stream_own_tcp_socket_error_code_free(sockets_result_stream_own_tcp_socket_error_code_t *ptr) {
   if (!ptr->is_err) {
   } else {
+    sockets_error_code_free(&ptr->val.err);
   }
 }
 
@@ -796,42 +925,49 @@ void sockets_result_ip_socket_address_error_code_free(sockets_result_ip_socket_a
   if (!ptr->is_err) {
     sockets_ip_socket_address_free(&ptr->val.ok);
   } else {
+    sockets_error_code_free(&ptr->val.err);
   }
 }
 
 void sockets_result_bool_error_code_free(sockets_result_bool_error_code_t *ptr) {
   if (!ptr->is_err) {
   } else {
+    sockets_error_code_free(&ptr->val.err);
   }
 }
 
 void sockets_result_duration_error_code_free(sockets_result_duration_error_code_t *ptr) {
   if (!ptr->is_err) {
   } else {
+    sockets_error_code_free(&ptr->val.err);
   }
 }
 
 void sockets_result_u32_error_code_free(sockets_result_u32_error_code_t *ptr) {
   if (!ptr->is_err) {
   } else {
+    sockets_error_code_free(&ptr->val.err);
   }
 }
 
 void sockets_result_u8_error_code_free(sockets_result_u8_error_code_t *ptr) {
   if (!ptr->is_err) {
   } else {
+    sockets_error_code_free(&ptr->val.err);
   }
 }
 
 void sockets_result_u64_error_code_free(sockets_result_u64_error_code_t *ptr) {
   if (!ptr->is_err) {
   } else {
+    sockets_error_code_free(&ptr->val.err);
   }
 }
 
 void sockets_result_own_udp_socket_error_code_free(sockets_result_own_udp_socket_error_code_t *ptr) {
   if (!ptr->is_err) {
   } else {
+    sockets_error_code_free(&ptr->val.err);
   }
 }
 
@@ -860,22 +996,23 @@ void sockets_result_tuple2_list_u8_ip_socket_address_error_code_free(sockets_res
   if (!ptr->is_err) {
     sockets_tuple2_list_u8_ip_socket_address_free(&ptr->val.ok);
   } else {
+    sockets_error_code_free(&ptr->val.err);
   }
 }
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-new-0][method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-new-0][method]tcp-socket.listen")))
 extern uint64_t sockets_stream_own_tcp_socket__new(void);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][stream-read-0][method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-read-0][method]tcp-socket.listen")))
 extern uint32_t sockets_stream_own_tcp_socket__read(uint32_t, uint8_t*, size_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][stream-write-0][method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-write-0][method]tcp-socket.listen")))
 extern uint32_t sockets_stream_own_tcp_socket__write(uint32_t, const uint8_t*, size_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-cancel-read-0][method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-read-0][method]tcp-socket.listen")))
 extern uint32_t sockets_stream_own_tcp_socket__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-cancel-write-0][method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-write-0][method]tcp-socket.listen")))
 extern uint32_t sockets_stream_own_tcp_socket__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-drop-readable-0][method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-readable-0][method]tcp-socket.listen")))
 extern void sockets_stream_own_tcp_socket__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-drop-writable-0][method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-writable-0][method]tcp-socket.listen")))
 extern void sockets_stream_own_tcp_socket__drop_writable(uint32_t);
 
 sockets_stream_own_tcp_socket_t sockets_stream_own_tcp_socket_new(sockets_stream_own_tcp_socket_writer_t *writer) {
@@ -909,19 +1046,19 @@ void sockets_stream_own_tcp_socket_drop_writable(sockets_stream_own_tcp_socket_w
 }
 
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-new-0][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-new-0][method]tcp-socket.send")))
 extern uint64_t sockets_stream_u8__new(void);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][stream-read-0][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-read-0][method]tcp-socket.send")))
 extern uint32_t sockets_stream_u8__read(uint32_t, uint8_t*, size_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][stream-write-0][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-write-0][method]tcp-socket.send")))
 extern uint32_t sockets_stream_u8__write(uint32_t, const uint8_t*, size_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-cancel-read-0][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-read-0][method]tcp-socket.send")))
 extern uint32_t sockets_stream_u8__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-cancel-write-0][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-write-0][method]tcp-socket.send")))
 extern uint32_t sockets_stream_u8__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-drop-readable-0][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-readable-0][method]tcp-socket.send")))
 extern void sockets_stream_u8__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[stream-drop-writable-0][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-writable-0][method]tcp-socket.send")))
 extern void sockets_stream_u8__drop_writable(uint32_t);
 
 sockets_stream_u8_t sockets_stream_u8_new(sockets_stream_u8_writer_t *writer) {
@@ -955,19 +1092,19 @@ void sockets_stream_u8_drop_writable(sockets_stream_u8_writer_t writer) {
 }
 
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[future-new-1][method]tcp-socket.receive")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[future-new-1][method]tcp-socket.send")))
 extern uint64_t sockets_future_result_void_error_code__new(void);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][future-read-1][method]tcp-socket.receive")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-read-1][method]tcp-socket.send")))
 extern uint32_t sockets_future_result_void_error_code__read(uint32_t, uint8_t*);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[async-lower][future-write-1][method]tcp-socket.receive")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-write-1][method]tcp-socket.send")))
 extern uint32_t sockets_future_result_void_error_code__write(uint32_t, const uint8_t*);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[future-cancel-read-1][method]tcp-socket.receive")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-read-1][method]tcp-socket.send")))
 extern uint32_t sockets_future_result_void_error_code__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[future-cancel-write-1][method]tcp-socket.receive")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-write-1][method]tcp-socket.send")))
 extern uint32_t sockets_future_result_void_error_code__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[future-drop-readable-1][method]tcp-socket.receive")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-readable-1][method]tcp-socket.send")))
 extern void sockets_future_result_void_error_code__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-01-06"), __import_name__("[future-drop-writable-1][method]tcp-socket.receive")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-writable-1][method]tcp-socket.send")))
 extern void sockets_future_result_void_error_code__drop_writable(uint32_t);
 
 sockets_future_result_void_error_code_t sockets_future_result_void_error_code_new(sockets_future_result_void_error_code_writer_t *writer) {
@@ -1005,6 +1142,14 @@ void ip_name_lookup_ip_address_free(ip_name_lookup_ip_address_t *ptr) {
   sockets_ip_address_free(ptr);
 }
 
+void ip_name_lookup_error_code_free(ip_name_lookup_error_code_t *ptr) {
+  switch ((int32_t) ptr->tag) {
+    case 5: {
+      break;
+    }
+  }
+}
+
 void ip_name_lookup_list_ip_address_free(ip_name_lookup_list_ip_address_t *ptr) {
   size_t list_len = ptr->len;
   if (list_len > 0) {
@@ -1020,6 +1165,7 @@ void ip_name_lookup_result_list_ip_address_error_code_free(ip_name_lookup_result
   if (!ptr->is_err) {
     ip_name_lookup_list_ip_address_free(&ptr->val.ok);
   } else {
+    ip_name_lookup_error_code_free(&ptr->val.err);
   }
 }
 
@@ -1302,12 +1448,14 @@ void stdin_read_via_stream(stdin_tuple2_stream_u8_future_result_void_error_code_
   };
 }
 
-wasip3_subtask_status_t stdout_write_via_stream(stdin_stream_u8_t data, stdout_result_void_error_code_t *result) {
-  return __wasm_import_stdout_write_via_stream(((int32_t) data), (uint8_t*) result);
+stdout_future_result_void_error_code_t stdout_write_via_stream(stdin_stream_u8_t data) {
+  int32_t ret = __wasm_import_stdout_write_via_stream(((int32_t) data));
+  return ((uint32_t) ret);
 }
 
-wasip3_subtask_status_t stderr_write_via_stream(stdin_stream_u8_t data, stderr_result_void_error_code_t *result) {
-  return __wasm_import_stderr_write_via_stream(((int32_t) data), (uint8_t*) result);
+stderr_future_result_void_error_code_t stderr_write_via_stream(stdin_stream_u8_t data) {
+  int32_t ret = __wasm_import_stderr_write_via_stream(((int32_t) data));
+  return ((uint32_t) ret);
 }
 
 bool terminal_stdin_get_terminal_stdin(terminal_stdin_own_terminal_input_t *ret) {
@@ -1418,17 +1566,19 @@ void filesystem_method_descriptor_read_via_stream(filesystem_borrow_descriptor_t
   };
 }
 
-wasip3_subtask_status_t filesystem_method_descriptor_write_via_stream(filesystem_borrow_descriptor_t self, filesystem_stream_u8_t data, filesystem_filesize_t offset, filesystem_result_void_error_code_t *result) {
-  return __wasm_import_filesystem_method_descriptor_write_via_stream((self).__handle, ((int32_t) data), (int64_t) (offset), (uint8_t*) result);
+filesystem_future_result_void_error_code_t filesystem_method_descriptor_write_via_stream(filesystem_borrow_descriptor_t self, filesystem_stream_u8_t data, filesystem_filesize_t offset) {
+  int32_t ret = __wasm_import_filesystem_method_descriptor_write_via_stream((self).__handle, ((int32_t) data), (int64_t) (offset));
+  return ((uint32_t) ret);
 }
 
-wasip3_subtask_status_t filesystem_method_descriptor_append_via_stream(filesystem_borrow_descriptor_t self, filesystem_stream_u8_t data, filesystem_result_void_error_code_t *result) {
-  return __wasm_import_filesystem_method_descriptor_append_via_stream((self).__handle, ((int32_t) data), (uint8_t*) result);
+filesystem_future_result_void_error_code_t filesystem_method_descriptor_append_via_stream(filesystem_borrow_descriptor_t self, filesystem_stream_u8_t data) {
+  int32_t ret = __wasm_import_filesystem_method_descriptor_append_via_stream((self).__handle, ((int32_t) data));
+  return ((uint32_t) ret);
 }
 
 bool filesystem_method_descriptor_advise(filesystem_borrow_descriptor_t self, filesystem_filesize_t offset, filesystem_filesize_t length, filesystem_advice_t advice, filesystem_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_advise((self).__handle, (int64_t) (offset), (int64_t) (length), (int32_t) advice, ptr);
   filesystem_result_void_error_code_t result;
@@ -1439,7 +1589,136 @@ bool filesystem_method_descriptor_advise(filesystem_borrow_descriptor_t self, fi
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      filesystem_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -1452,8 +1731,8 @@ bool filesystem_method_descriptor_advise(filesystem_borrow_descriptor_t self, fi
 }
 
 bool filesystem_method_descriptor_sync_data(filesystem_borrow_descriptor_t self, filesystem_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_sync_data((self).__handle, ptr);
   filesystem_result_void_error_code_t result;
@@ -1464,7 +1743,136 @@ bool filesystem_method_descriptor_sync_data(filesystem_borrow_descriptor_t self,
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      filesystem_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -1477,20 +1885,149 @@ bool filesystem_method_descriptor_sync_data(filesystem_borrow_descriptor_t self,
 }
 
 bool filesystem_method_descriptor_get_flags(filesystem_borrow_descriptor_t self, filesystem_descriptor_flags_t *ret, filesystem_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_get_flags((self).__handle, ptr);
   filesystem_result_descriptor_flags_error_code_t result;
   switch ((int32_t) *((uint8_t*) (ptr + 0))) {
     case 0: {
       result.is_err = false;
-      result.val.ok = (int32_t) *((uint8_t*) (ptr + 1));
+      result.val.ok = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
       break;
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      filesystem_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -1508,8 +2045,8 @@ wasip3_subtask_status_t filesystem_method_descriptor_get_type(filesystem_borrow_
 }
 
 bool filesystem_method_descriptor_set_size(filesystem_borrow_descriptor_t self, filesystem_filesize_t size, filesystem_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_set_size((self).__handle, (int64_t) (size), ptr);
   filesystem_result_void_error_code_t result;
@@ -1520,7 +2057,136 @@ bool filesystem_method_descriptor_set_size(filesystem_borrow_descriptor_t self, 
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      filesystem_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -1533,8 +2199,8 @@ bool filesystem_method_descriptor_set_size(filesystem_borrow_descriptor_t self, 
 }
 
 bool filesystem_method_descriptor_set_times(filesystem_borrow_descriptor_t self, filesystem_new_timestamp_t *data_access_timestamp, filesystem_new_timestamp_t *data_modification_timestamp, filesystem_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   int32_t variant;
   int64_t variant2;
   int32_t variant3;
@@ -1593,7 +2259,136 @@ bool filesystem_method_descriptor_set_times(filesystem_borrow_descriptor_t self,
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      filesystem_error_code_t variant10;
+      variant10.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant10.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant10.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant10;
       break;
     }
   }
@@ -1617,8 +2412,8 @@ void filesystem_method_descriptor_read_directory(filesystem_borrow_descriptor_t 
 }
 
 bool filesystem_method_descriptor_sync(filesystem_borrow_descriptor_t self, filesystem_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_sync((self).__handle, ptr);
   filesystem_result_void_error_code_t result;
@@ -1629,7 +2424,136 @@ bool filesystem_method_descriptor_sync(filesystem_borrow_descriptor_t self, file
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      filesystem_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -1642,8 +2566,8 @@ bool filesystem_method_descriptor_sync(filesystem_borrow_descriptor_t self, file
 }
 
 bool filesystem_method_descriptor_create_directory_at(filesystem_borrow_descriptor_t self, wasip3_string_t *path, filesystem_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_create_directory_at((self).__handle, (uint8_t *) (*path).ptr, (*path).len, ptr);
   filesystem_result_void_error_code_t result;
@@ -1654,7 +2578,136 @@ bool filesystem_method_descriptor_create_directory_at(filesystem_borrow_descript
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      filesystem_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -1668,30 +2721,56 @@ bool filesystem_method_descriptor_create_directory_at(filesystem_borrow_descript
 
 bool filesystem_method_descriptor_stat(filesystem_borrow_descriptor_t self, filesystem_descriptor_stat_t *ret, filesystem_error_code_t *err) {
   __attribute__((__aligned__(8)))
-  uint8_t ret_area[104];
+  uint8_t ret_area[(96+4*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_stat((self).__handle, ptr);
   filesystem_result_descriptor_stat_error_code_t result;
   switch ((int32_t) *((uint8_t*) (ptr + 0))) {
     case 0: {
       result.is_err = false;
-      filesystem_option_instant_t option;
-      switch ((int32_t) *((uint8_t*) (ptr + 32))) {
+      filesystem_descriptor_type_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + 8));
+      switch ((int32_t) variant.tag) {
         case 0: {
-          option.is_some = false;
           break;
         }
         case 1: {
-          option.is_some = true;
-          option.val = (system_clock_instant_t) {
-            (int64_t) *((int64_t*) (ptr + 40)),
-            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 48))),
-          };
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (8+2*sizeof(void*))))), (*((size_t*) (ptr + (8+3*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
           break;
         }
       }
       filesystem_option_instant_t option0;
-      switch ((int32_t) *((uint8_t*) (ptr + 56))) {
+      switch ((int32_t) *((uint8_t*) (ptr + (24+4*sizeof(void*))))) {
         case 0: {
           option0.is_some = false;
           break;
@@ -1699,14 +2778,14 @@ bool filesystem_method_descriptor_stat(filesystem_borrow_descriptor_t self, file
         case 1: {
           option0.is_some = true;
           option0.val = (system_clock_instant_t) {
-            (int64_t) *((int64_t*) (ptr + 64)),
-            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 72))),
+            (int64_t) *((int64_t*) (ptr + (32+4*sizeof(void*)))),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + (40+4*sizeof(void*))))),
           };
           break;
         }
       }
       filesystem_option_instant_t option1;
-      switch ((int32_t) *((uint8_t*) (ptr + 80))) {
+      switch ((int32_t) *((uint8_t*) (ptr + (48+4*sizeof(void*))))) {
         case 0: {
           option1.is_some = false;
           break;
@@ -1714,26 +2793,170 @@ bool filesystem_method_descriptor_stat(filesystem_borrow_descriptor_t self, file
         case 1: {
           option1.is_some = true;
           option1.val = (system_clock_instant_t) {
-            (int64_t) *((int64_t*) (ptr + 88)),
-            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 96))),
+            (int64_t) *((int64_t*) (ptr + (56+4*sizeof(void*)))),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + (64+4*sizeof(void*))))),
+          };
+          break;
+        }
+      }
+      filesystem_option_instant_t option2;
+      switch ((int32_t) *((uint8_t*) (ptr + (72+4*sizeof(void*))))) {
+        case 0: {
+          option2.is_some = false;
+          break;
+        }
+        case 1: {
+          option2.is_some = true;
+          option2.val = (system_clock_instant_t) {
+            (int64_t) *((int64_t*) (ptr + (80+4*sizeof(void*)))),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + (88+4*sizeof(void*))))),
           };
           break;
         }
       }
 
       result.val.ok = (filesystem_descriptor_stat_t) {
-        (filesystem_descriptor_type_t) (int32_t) *((uint8_t*) (ptr + 8)),
-        (filesystem_link_count_t) (uint64_t) (*((int64_t*) (ptr + 16))),
-        (filesystem_filesize_t) (uint64_t) (*((int64_t*) (ptr + 24))),
-        (filesystem_option_instant_t) option,
+        (filesystem_descriptor_type_t) variant,
+        (filesystem_link_count_t) (uint64_t) (*((int64_t*) (ptr + (8+4*sizeof(void*))))),
+        (filesystem_filesize_t) (uint64_t) (*((int64_t*) (ptr + (16+4*sizeof(void*))))),
         (filesystem_option_instant_t) option0,
         (filesystem_option_instant_t) option1,
+        (filesystem_option_instant_t) option2,
       };
       break;
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 8));
+      filesystem_error_code_t variant4;
+      variant4.tag = (int32_t) *((uint8_t*) (ptr + 8));
+      switch ((int32_t) variant4.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option3;
+          switch ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))) {
+            case 0: {
+              option3.is_some = false;
+              break;
+            }
+            case 1: {
+              option3.is_some = true;
+              option3.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (8+2*sizeof(void*))))), (*((size_t*) (ptr + (8+3*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant4.val.other = option3;
+          break;
+        }
+      }
+
+      result.val.err = variant4;
       break;
     }
   }
@@ -1748,30 +2971,56 @@ bool filesystem_method_descriptor_stat(filesystem_borrow_descriptor_t self, file
 
 bool filesystem_method_descriptor_stat_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t *path, filesystem_descriptor_stat_t *ret, filesystem_error_code_t *err) {
   __attribute__((__aligned__(8)))
-  uint8_t ret_area[104];
+  uint8_t ret_area[(96+4*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_stat_at((self).__handle, path_flags, (uint8_t *) (*path).ptr, (*path).len, ptr);
   filesystem_result_descriptor_stat_error_code_t result;
   switch ((int32_t) *((uint8_t*) (ptr + 0))) {
     case 0: {
       result.is_err = false;
-      filesystem_option_instant_t option;
-      switch ((int32_t) *((uint8_t*) (ptr + 32))) {
+      filesystem_descriptor_type_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + 8));
+      switch ((int32_t) variant.tag) {
         case 0: {
-          option.is_some = false;
           break;
         }
         case 1: {
-          option.is_some = true;
-          option.val = (system_clock_instant_t) {
-            (int64_t) *((int64_t*) (ptr + 40)),
-            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 48))),
-          };
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (8+2*sizeof(void*))))), (*((size_t*) (ptr + (8+3*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
           break;
         }
       }
       filesystem_option_instant_t option0;
-      switch ((int32_t) *((uint8_t*) (ptr + 56))) {
+      switch ((int32_t) *((uint8_t*) (ptr + (24+4*sizeof(void*))))) {
         case 0: {
           option0.is_some = false;
           break;
@@ -1779,14 +3028,14 @@ bool filesystem_method_descriptor_stat_at(filesystem_borrow_descriptor_t self, f
         case 1: {
           option0.is_some = true;
           option0.val = (system_clock_instant_t) {
-            (int64_t) *((int64_t*) (ptr + 64)),
-            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 72))),
+            (int64_t) *((int64_t*) (ptr + (32+4*sizeof(void*)))),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + (40+4*sizeof(void*))))),
           };
           break;
         }
       }
       filesystem_option_instant_t option1;
-      switch ((int32_t) *((uint8_t*) (ptr + 80))) {
+      switch ((int32_t) *((uint8_t*) (ptr + (48+4*sizeof(void*))))) {
         case 0: {
           option1.is_some = false;
           break;
@@ -1794,26 +3043,170 @@ bool filesystem_method_descriptor_stat_at(filesystem_borrow_descriptor_t self, f
         case 1: {
           option1.is_some = true;
           option1.val = (system_clock_instant_t) {
-            (int64_t) *((int64_t*) (ptr + 88)),
-            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 96))),
+            (int64_t) *((int64_t*) (ptr + (56+4*sizeof(void*)))),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + (64+4*sizeof(void*))))),
+          };
+          break;
+        }
+      }
+      filesystem_option_instant_t option2;
+      switch ((int32_t) *((uint8_t*) (ptr + (72+4*sizeof(void*))))) {
+        case 0: {
+          option2.is_some = false;
+          break;
+        }
+        case 1: {
+          option2.is_some = true;
+          option2.val = (system_clock_instant_t) {
+            (int64_t) *((int64_t*) (ptr + (80+4*sizeof(void*)))),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + (88+4*sizeof(void*))))),
           };
           break;
         }
       }
 
       result.val.ok = (filesystem_descriptor_stat_t) {
-        (filesystem_descriptor_type_t) (int32_t) *((uint8_t*) (ptr + 8)),
-        (filesystem_link_count_t) (uint64_t) (*((int64_t*) (ptr + 16))),
-        (filesystem_filesize_t) (uint64_t) (*((int64_t*) (ptr + 24))),
-        (filesystem_option_instant_t) option,
+        (filesystem_descriptor_type_t) variant,
+        (filesystem_link_count_t) (uint64_t) (*((int64_t*) (ptr + (8+4*sizeof(void*))))),
+        (filesystem_filesize_t) (uint64_t) (*((int64_t*) (ptr + (16+4*sizeof(void*))))),
         (filesystem_option_instant_t) option0,
         (filesystem_option_instant_t) option1,
+        (filesystem_option_instant_t) option2,
       };
       break;
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 8));
+      filesystem_error_code_t variant4;
+      variant4.tag = (int32_t) *((uint8_t*) (ptr + 8));
+      switch ((int32_t) variant4.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option3;
+          switch ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))) {
+            case 0: {
+              option3.is_some = false;
+              break;
+            }
+            case 1: {
+              option3.is_some = true;
+              option3.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (8+2*sizeof(void*))))), (*((size_t*) (ptr + (8+3*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant4.val.other = option3;
+          break;
+        }
+      }
+
+      result.val.err = variant4;
       break;
     }
   }
@@ -1827,8 +3220,8 @@ bool filesystem_method_descriptor_stat_at(filesystem_borrow_descriptor_t self, f
 }
 
 bool filesystem_method_descriptor_set_times_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t *path, filesystem_new_timestamp_t *data_access_timestamp, filesystem_new_timestamp_t *data_modification_timestamp, filesystem_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   int32_t variant;
   int64_t variant2;
   int32_t variant3;
@@ -1887,7 +3280,136 @@ bool filesystem_method_descriptor_set_times_at(filesystem_borrow_descriptor_t se
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      filesystem_error_code_t variant10;
+      variant10.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant10.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant10.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant10;
       break;
     }
   }
@@ -1900,8 +3422,8 @@ bool filesystem_method_descriptor_set_times_at(filesystem_borrow_descriptor_t se
 }
 
 bool filesystem_method_descriptor_link_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t old_path_flags, wasip3_string_t *old_path, filesystem_borrow_descriptor_t new_descriptor, wasip3_string_t *new_path, filesystem_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_link_at((self).__handle, old_path_flags, (uint8_t *) (*old_path).ptr, (*old_path).len, (new_descriptor).__handle, (uint8_t *) (*new_path).ptr, (*new_path).len, ptr);
   filesystem_result_void_error_code_t result;
@@ -1912,7 +3434,136 @@ bool filesystem_method_descriptor_link_at(filesystem_borrow_descriptor_t self, f
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      filesystem_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -1925,20 +3576,149 @@ bool filesystem_method_descriptor_link_at(filesystem_borrow_descriptor_t self, f
 }
 
 bool filesystem_method_descriptor_open_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t *path, filesystem_open_flags_t open_flags, filesystem_descriptor_flags_t flags, filesystem_own_descriptor_t *ret, filesystem_error_code_t *err) {
-  __attribute__((__aligned__(4)))
-  uint8_t ret_area[8];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_open_at((self).__handle, path_flags, (uint8_t *) (*path).ptr, (*path).len, open_flags, flags, ptr);
   filesystem_result_own_descriptor_error_code_t result;
   switch ((int32_t) *((uint8_t*) (ptr + 0))) {
     case 0: {
       result.is_err = false;
-      result.val.ok = (filesystem_own_descriptor_t) { *((int32_t*) (ptr + 4)) };
+      result.val.ok = (filesystem_own_descriptor_t) { *((int32_t*) (ptr + sizeof(void*))) };
       break;
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 4));
+      filesystem_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -1953,7 +3733,7 @@ bool filesystem_method_descriptor_open_at(filesystem_borrow_descriptor_t self, f
 
 bool filesystem_method_descriptor_readlink_at(filesystem_borrow_descriptor_t self, wasip3_string_t *path, wasip3_string_t *ret, filesystem_error_code_t *err) {
   __attribute__((__aligned__(sizeof(void*))))
-  uint8_t ret_area[(3*sizeof(void*))];
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_readlink_at((self).__handle, (uint8_t *) (*path).ptr, (*path).len, ptr);
   filesystem_result_string_error_code_t result;
@@ -1965,7 +3745,136 @@ bool filesystem_method_descriptor_readlink_at(filesystem_borrow_descriptor_t sel
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      filesystem_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -1979,8 +3888,8 @@ bool filesystem_method_descriptor_readlink_at(filesystem_borrow_descriptor_t sel
 }
 
 bool filesystem_method_descriptor_remove_directory_at(filesystem_borrow_descriptor_t self, wasip3_string_t *path, filesystem_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_remove_directory_at((self).__handle, (uint8_t *) (*path).ptr, (*path).len, ptr);
   filesystem_result_void_error_code_t result;
@@ -1991,7 +3900,136 @@ bool filesystem_method_descriptor_remove_directory_at(filesystem_borrow_descript
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      filesystem_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2004,8 +4042,8 @@ bool filesystem_method_descriptor_remove_directory_at(filesystem_borrow_descript
 }
 
 bool filesystem_method_descriptor_rename_at(filesystem_borrow_descriptor_t self, wasip3_string_t *old_path, filesystem_borrow_descriptor_t new_descriptor, wasip3_string_t *new_path, filesystem_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_rename_at((self).__handle, (uint8_t *) (*old_path).ptr, (*old_path).len, (new_descriptor).__handle, (uint8_t *) (*new_path).ptr, (*new_path).len, ptr);
   filesystem_result_void_error_code_t result;
@@ -2016,7 +4054,136 @@ bool filesystem_method_descriptor_rename_at(filesystem_borrow_descriptor_t self,
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      filesystem_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2029,8 +4196,8 @@ bool filesystem_method_descriptor_rename_at(filesystem_borrow_descriptor_t self,
 }
 
 bool filesystem_method_descriptor_symlink_at(filesystem_borrow_descriptor_t self, wasip3_string_t *old_path, wasip3_string_t *new_path, filesystem_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_symlink_at((self).__handle, (uint8_t *) (*old_path).ptr, (*old_path).len, (uint8_t *) (*new_path).ptr, (*new_path).len, ptr);
   filesystem_result_void_error_code_t result;
@@ -2041,7 +4208,136 @@ bool filesystem_method_descriptor_symlink_at(filesystem_borrow_descriptor_t self
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      filesystem_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2054,8 +4350,8 @@ bool filesystem_method_descriptor_symlink_at(filesystem_borrow_descriptor_t self
 }
 
 bool filesystem_method_descriptor_unlink_file_at(filesystem_borrow_descriptor_t self, wasip3_string_t *path, filesystem_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_unlink_file_at((self).__handle, (uint8_t *) (*path).ptr, (*path).len, ptr);
   filesystem_result_void_error_code_t result;
@@ -2066,7 +4362,136 @@ bool filesystem_method_descriptor_unlink_file_at(filesystem_borrow_descriptor_t 
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      filesystem_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2084,7 +4509,7 @@ wasip3_subtask_status_t filesystem_method_descriptor_is_same_object(filesystem_b
 
 bool filesystem_method_descriptor_metadata_hash(filesystem_borrow_descriptor_t self, filesystem_metadata_hash_value_t *ret, filesystem_error_code_t *err) {
   __attribute__((__aligned__(8)))
-  uint8_t ret_area[24];
+  uint8_t ret_area[(8+4*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_metadata_hash((self).__handle, ptr);
   filesystem_result_metadata_hash_value_error_code_t result;
@@ -2099,7 +4524,136 @@ bool filesystem_method_descriptor_metadata_hash(filesystem_borrow_descriptor_t s
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 8));
+      filesystem_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + 8));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (8+2*sizeof(void*))))), (*((size_t*) (ptr + (8+3*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2114,7 +4668,7 @@ bool filesystem_method_descriptor_metadata_hash(filesystem_borrow_descriptor_t s
 
 bool filesystem_method_descriptor_metadata_hash_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t *path, filesystem_metadata_hash_value_t *ret, filesystem_error_code_t *err) {
   __attribute__((__aligned__(8)))
-  uint8_t ret_area[24];
+  uint8_t ret_area[(8+4*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_filesystem_method_descriptor_metadata_hash_at((self).__handle, path_flags, (uint8_t *) (*path).ptr, (*path).len, ptr);
   filesystem_result_metadata_hash_value_error_code_t result;
@@ -2129,7 +4683,136 @@ bool filesystem_method_descriptor_metadata_hash_at(filesystem_borrow_descriptor_
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 8));
+      filesystem_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + 8));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          break;
+        }
+        case 15: {
+          break;
+        }
+        case 16: {
+          break;
+        }
+        case 17: {
+          break;
+        }
+        case 18: {
+          break;
+        }
+        case 19: {
+          break;
+        }
+        case 20: {
+          break;
+        }
+        case 21: {
+          break;
+        }
+        case 22: {
+          break;
+        }
+        case 23: {
+          break;
+        }
+        case 24: {
+          break;
+        }
+        case 25: {
+          break;
+        }
+        case 26: {
+          break;
+        }
+        case 27: {
+          break;
+        }
+        case 28: {
+          break;
+        }
+        case 29: {
+          break;
+        }
+        case 30: {
+          break;
+        }
+        case 31: {
+          break;
+        }
+        case 32: {
+          break;
+        }
+        case 33: {
+          break;
+        }
+        case 34: {
+          break;
+        }
+        case 35: {
+          break;
+        }
+        case 36: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (8+2*sizeof(void*))))), (*((size_t*) (ptr + (8+3*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2151,20 +4834,83 @@ void filesystem_preopens_get_directories(filesystem_preopens_list_tuple2_own_des
 }
 
 bool sockets_static_tcp_socket_create(sockets_ip_address_family_t address_family, sockets_own_tcp_socket_t *ret, sockets_error_code_t *err) {
-  __attribute__((__aligned__(4)))
-  uint8_t ret_area[8];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_static_tcp_socket_create((int32_t) address_family, ptr);
   sockets_result_own_tcp_socket_error_code_t result;
   switch ((int32_t) *((uint8_t*) (ptr + 0))) {
     case 0: {
       result.is_err = false;
-      result.val.ok = (sockets_own_tcp_socket_t) { *((int32_t*) (ptr + 4)) };
+      result.val.ok = (sockets_own_tcp_socket_t) { *((int32_t*) (ptr + sizeof(void*))) };
       break;
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 4));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2178,8 +4924,8 @@ bool sockets_static_tcp_socket_create(sockets_ip_address_family_t address_family
 }
 
 bool sockets_method_tcp_socket_bind(sockets_borrow_tcp_socket_t self, sockets_ip_socket_address_t *local_address, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   int32_t variant;
   int32_t variant1;
   int32_t variant2;
@@ -2236,7 +4982,70 @@ bool sockets_method_tcp_socket_bind(sockets_borrow_tcp_socket_t self, sockets_ip
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant12;
+      variant12.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant12.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant12.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant12;
       break;
     }
   }
@@ -2253,20 +5062,83 @@ wasip3_subtask_status_t sockets_method_tcp_socket_connect(sockets_method_tcp_soc
 }
 
 bool sockets_method_tcp_socket_listen(sockets_borrow_tcp_socket_t self, sockets_stream_own_tcp_socket_t *ret, sockets_error_code_t *err) {
-  __attribute__((__aligned__(4)))
-  uint8_t ret_area[8];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_listen((self).__handle, ptr);
   sockets_result_stream_own_tcp_socket_error_code_t result;
   switch ((int32_t) *((uint8_t*) (ptr + 0))) {
     case 0: {
       result.is_err = false;
-      result.val.ok = ((uint32_t) *((int32_t*) (ptr + 4)));
+      result.val.ok = ((uint32_t) *((int32_t*) (ptr + sizeof(void*))));
       break;
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 4));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2279,8 +5151,9 @@ bool sockets_method_tcp_socket_listen(sockets_borrow_tcp_socket_t self, sockets_
   }
 }
 
-wasip3_subtask_status_t sockets_method_tcp_socket_send(sockets_borrow_tcp_socket_t self, sockets_stream_u8_t data, sockets_result_void_error_code_t *result) {
-  return __wasm_import_sockets_method_tcp_socket_send((self).__handle, ((int32_t) data), (uint8_t*) result);
+sockets_future_result_void_error_code_t sockets_method_tcp_socket_send(sockets_borrow_tcp_socket_t self, sockets_stream_u8_t data) {
+  int32_t ret = __wasm_import_sockets_method_tcp_socket_send((self).__handle, ((int32_t) data));
+  return ((uint32_t) ret);
 }
 
 void sockets_method_tcp_socket_receive(sockets_borrow_tcp_socket_t self, sockets_tuple2_stream_u8_future_result_void_error_code_t *ret) {
@@ -2295,8 +5168,8 @@ void sockets_method_tcp_socket_receive(sockets_borrow_tcp_socket_t self, sockets
 }
 
 bool sockets_method_tcp_socket_get_local_address(sockets_borrow_tcp_socket_t self, sockets_ip_socket_address_t *ret, sockets_error_code_t *err) {
-  __attribute__((__aligned__(4)))
-  uint8_t ret_area[36];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(32+1*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_get_local_address((self).__handle, ptr);
   sockets_result_ip_socket_address_error_code_t result;
@@ -2304,35 +5177,35 @@ bool sockets_method_tcp_socket_get_local_address(sockets_borrow_tcp_socket_t sel
     case 0: {
       result.is_err = false;
       sockets_ip_socket_address_t variant;
-      variant.tag = (int32_t) *((uint8_t*) (ptr + 4));
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
       switch ((int32_t) variant.tag) {
         case 0: {
           variant.val.ipv4 = (sockets_ipv4_socket_address_t) {
-            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 8))),
+            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (4+1*sizeof(void*))))),
             (sockets_ipv4_address_t) (sockets_ipv4_address_t) {
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 10))),
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 11))),
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 12))),
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 13))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (6+1*sizeof(void*))))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (7+1*sizeof(void*))))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (9+1*sizeof(void*))))),
             },
           };
           break;
         }
         case 1: {
           variant.val.ipv6 = (sockets_ipv6_socket_address_t) {
-            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 8))),
-            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 12))),
+            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (4+1*sizeof(void*))))),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + (8+1*sizeof(void*))))),
             (sockets_ipv6_address_t) (sockets_ipv6_address_t) {
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 16))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 18))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 20))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 22))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 24))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 26))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 28))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 30))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (12+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (14+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (16+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (18+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (20+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (22+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (24+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (26+1*sizeof(void*))))),
             },
-            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 32))),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + (28+1*sizeof(void*))))),
           };
           break;
         }
@@ -2343,7 +5216,70 @@ bool sockets_method_tcp_socket_get_local_address(sockets_borrow_tcp_socket_t sel
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 4));
+      sockets_error_code_t variant0;
+      variant0.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant0.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant0.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant0;
       break;
     }
   }
@@ -2357,8 +5293,8 @@ bool sockets_method_tcp_socket_get_local_address(sockets_borrow_tcp_socket_t sel
 }
 
 bool sockets_method_tcp_socket_get_remote_address(sockets_borrow_tcp_socket_t self, sockets_ip_socket_address_t *ret, sockets_error_code_t *err) {
-  __attribute__((__aligned__(4)))
-  uint8_t ret_area[36];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(32+1*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_get_remote_address((self).__handle, ptr);
   sockets_result_ip_socket_address_error_code_t result;
@@ -2366,35 +5302,35 @@ bool sockets_method_tcp_socket_get_remote_address(sockets_borrow_tcp_socket_t se
     case 0: {
       result.is_err = false;
       sockets_ip_socket_address_t variant;
-      variant.tag = (int32_t) *((uint8_t*) (ptr + 4));
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
       switch ((int32_t) variant.tag) {
         case 0: {
           variant.val.ipv4 = (sockets_ipv4_socket_address_t) {
-            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 8))),
+            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (4+1*sizeof(void*))))),
             (sockets_ipv4_address_t) (sockets_ipv4_address_t) {
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 10))),
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 11))),
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 12))),
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 13))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (6+1*sizeof(void*))))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (7+1*sizeof(void*))))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (9+1*sizeof(void*))))),
             },
           };
           break;
         }
         case 1: {
           variant.val.ipv6 = (sockets_ipv6_socket_address_t) {
-            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 8))),
-            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 12))),
+            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (4+1*sizeof(void*))))),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + (8+1*sizeof(void*))))),
             (sockets_ipv6_address_t) (sockets_ipv6_address_t) {
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 16))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 18))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 20))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 22))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 24))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 26))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 28))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 30))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (12+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (14+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (16+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (18+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (20+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (22+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (24+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (26+1*sizeof(void*))))),
             },
-            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 32))),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + (28+1*sizeof(void*))))),
           };
           break;
         }
@@ -2405,7 +5341,70 @@ bool sockets_method_tcp_socket_get_remote_address(sockets_borrow_tcp_socket_t se
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 4));
+      sockets_error_code_t variant0;
+      variant0.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant0.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant0.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant0;
       break;
     }
   }
@@ -2429,8 +5428,8 @@ sockets_ip_address_family_t sockets_method_tcp_socket_get_address_family(sockets
 }
 
 bool sockets_method_tcp_socket_set_listen_backlog_size(sockets_borrow_tcp_socket_t self, uint64_t value, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_set_listen_backlog_size((self).__handle, (int64_t) (value), ptr);
   sockets_result_void_error_code_t result;
@@ -2441,7 +5440,70 @@ bool sockets_method_tcp_socket_set_listen_backlog_size(sockets_borrow_tcp_socket
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2454,20 +5516,83 @@ bool sockets_method_tcp_socket_set_listen_backlog_size(sockets_borrow_tcp_socket
 }
 
 bool sockets_method_tcp_socket_get_keep_alive_enabled(sockets_borrow_tcp_socket_t self, bool *ret, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_get_keep_alive_enabled((self).__handle, ptr);
   sockets_result_bool_error_code_t result;
   switch ((int32_t) *((uint8_t*) (ptr + 0))) {
     case 0: {
       result.is_err = false;
-      result.val.ok = (int32_t) *((uint8_t*) (ptr + 1));
+      result.val.ok = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
       break;
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2481,8 +5606,8 @@ bool sockets_method_tcp_socket_get_keep_alive_enabled(sockets_borrow_tcp_socket_
 }
 
 bool sockets_method_tcp_socket_set_keep_alive_enabled(sockets_borrow_tcp_socket_t self, bool value, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_set_keep_alive_enabled((self).__handle, value, ptr);
   sockets_result_void_error_code_t result;
@@ -2493,7 +5618,70 @@ bool sockets_method_tcp_socket_set_keep_alive_enabled(sockets_borrow_tcp_socket_
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2507,7 +5695,7 @@ bool sockets_method_tcp_socket_set_keep_alive_enabled(sockets_borrow_tcp_socket_
 
 bool sockets_method_tcp_socket_get_keep_alive_idle_time(sockets_borrow_tcp_socket_t self, sockets_duration_t *ret, sockets_error_code_t *err) {
   __attribute__((__aligned__(8)))
-  uint8_t ret_area[16];
+  uint8_t ret_area[(8+4*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_get_keep_alive_idle_time((self).__handle, ptr);
   sockets_result_duration_error_code_t result;
@@ -2519,7 +5707,70 @@ bool sockets_method_tcp_socket_get_keep_alive_idle_time(sockets_borrow_tcp_socke
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 8));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + 8));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (8+2*sizeof(void*))))), (*((size_t*) (ptr + (8+3*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2533,8 +5784,8 @@ bool sockets_method_tcp_socket_get_keep_alive_idle_time(sockets_borrow_tcp_socke
 }
 
 bool sockets_method_tcp_socket_set_keep_alive_idle_time(sockets_borrow_tcp_socket_t self, sockets_duration_t value, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_set_keep_alive_idle_time((self).__handle, (int64_t) (value), ptr);
   sockets_result_void_error_code_t result;
@@ -2545,7 +5796,70 @@ bool sockets_method_tcp_socket_set_keep_alive_idle_time(sockets_borrow_tcp_socke
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2559,7 +5873,7 @@ bool sockets_method_tcp_socket_set_keep_alive_idle_time(sockets_borrow_tcp_socke
 
 bool sockets_method_tcp_socket_get_keep_alive_interval(sockets_borrow_tcp_socket_t self, sockets_duration_t *ret, sockets_error_code_t *err) {
   __attribute__((__aligned__(8)))
-  uint8_t ret_area[16];
+  uint8_t ret_area[(8+4*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_get_keep_alive_interval((self).__handle, ptr);
   sockets_result_duration_error_code_t result;
@@ -2571,7 +5885,70 @@ bool sockets_method_tcp_socket_get_keep_alive_interval(sockets_borrow_tcp_socket
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 8));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + 8));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (8+2*sizeof(void*))))), (*((size_t*) (ptr + (8+3*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2585,8 +5962,8 @@ bool sockets_method_tcp_socket_get_keep_alive_interval(sockets_borrow_tcp_socket
 }
 
 bool sockets_method_tcp_socket_set_keep_alive_interval(sockets_borrow_tcp_socket_t self, sockets_duration_t value, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_set_keep_alive_interval((self).__handle, (int64_t) (value), ptr);
   sockets_result_void_error_code_t result;
@@ -2597,7 +5974,70 @@ bool sockets_method_tcp_socket_set_keep_alive_interval(sockets_borrow_tcp_socket
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2610,20 +6050,83 @@ bool sockets_method_tcp_socket_set_keep_alive_interval(sockets_borrow_tcp_socket
 }
 
 bool sockets_method_tcp_socket_get_keep_alive_count(sockets_borrow_tcp_socket_t self, uint32_t *ret, sockets_error_code_t *err) {
-  __attribute__((__aligned__(4)))
-  uint8_t ret_area[8];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_get_keep_alive_count((self).__handle, ptr);
   sockets_result_u32_error_code_t result;
   switch ((int32_t) *((uint8_t*) (ptr + 0))) {
     case 0: {
       result.is_err = false;
-      result.val.ok = (uint32_t) (*((int32_t*) (ptr + 4)));
+      result.val.ok = (uint32_t) (*((int32_t*) (ptr + sizeof(void*))));
       break;
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 4));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2637,8 +6140,8 @@ bool sockets_method_tcp_socket_get_keep_alive_count(sockets_borrow_tcp_socket_t 
 }
 
 bool sockets_method_tcp_socket_set_keep_alive_count(sockets_borrow_tcp_socket_t self, uint32_t value, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_set_keep_alive_count((self).__handle, (int32_t) (value), ptr);
   sockets_result_void_error_code_t result;
@@ -2649,7 +6152,70 @@ bool sockets_method_tcp_socket_set_keep_alive_count(sockets_borrow_tcp_socket_t 
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2662,20 +6228,83 @@ bool sockets_method_tcp_socket_set_keep_alive_count(sockets_borrow_tcp_socket_t 
 }
 
 bool sockets_method_tcp_socket_get_hop_limit(sockets_borrow_tcp_socket_t self, uint8_t *ret, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_get_hop_limit((self).__handle, ptr);
   sockets_result_u8_error_code_t result;
   switch ((int32_t) *((uint8_t*) (ptr + 0))) {
     case 0: {
       result.is_err = false;
-      result.val.ok = (uint8_t) ((int32_t) *((uint8_t*) (ptr + 1)));
+      result.val.ok = (uint8_t) ((int32_t) *((uint8_t*) (ptr + sizeof(void*))));
       break;
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2689,8 +6318,8 @@ bool sockets_method_tcp_socket_get_hop_limit(sockets_borrow_tcp_socket_t self, u
 }
 
 bool sockets_method_tcp_socket_set_hop_limit(sockets_borrow_tcp_socket_t self, uint8_t value, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_set_hop_limit((self).__handle, (int32_t) (value), ptr);
   sockets_result_void_error_code_t result;
@@ -2701,7 +6330,70 @@ bool sockets_method_tcp_socket_set_hop_limit(sockets_borrow_tcp_socket_t self, u
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2715,7 +6407,7 @@ bool sockets_method_tcp_socket_set_hop_limit(sockets_borrow_tcp_socket_t self, u
 
 bool sockets_method_tcp_socket_get_receive_buffer_size(sockets_borrow_tcp_socket_t self, uint64_t *ret, sockets_error_code_t *err) {
   __attribute__((__aligned__(8)))
-  uint8_t ret_area[16];
+  uint8_t ret_area[(8+4*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_get_receive_buffer_size((self).__handle, ptr);
   sockets_result_u64_error_code_t result;
@@ -2727,7 +6419,70 @@ bool sockets_method_tcp_socket_get_receive_buffer_size(sockets_borrow_tcp_socket
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 8));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + 8));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (8+2*sizeof(void*))))), (*((size_t*) (ptr + (8+3*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2741,8 +6496,8 @@ bool sockets_method_tcp_socket_get_receive_buffer_size(sockets_borrow_tcp_socket
 }
 
 bool sockets_method_tcp_socket_set_receive_buffer_size(sockets_borrow_tcp_socket_t self, uint64_t value, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_set_receive_buffer_size((self).__handle, (int64_t) (value), ptr);
   sockets_result_void_error_code_t result;
@@ -2753,7 +6508,70 @@ bool sockets_method_tcp_socket_set_receive_buffer_size(sockets_borrow_tcp_socket
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2767,7 +6585,7 @@ bool sockets_method_tcp_socket_set_receive_buffer_size(sockets_borrow_tcp_socket
 
 bool sockets_method_tcp_socket_get_send_buffer_size(sockets_borrow_tcp_socket_t self, uint64_t *ret, sockets_error_code_t *err) {
   __attribute__((__aligned__(8)))
-  uint8_t ret_area[16];
+  uint8_t ret_area[(8+4*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_get_send_buffer_size((self).__handle, ptr);
   sockets_result_u64_error_code_t result;
@@ -2779,7 +6597,70 @@ bool sockets_method_tcp_socket_get_send_buffer_size(sockets_borrow_tcp_socket_t 
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 8));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + 8));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (8+2*sizeof(void*))))), (*((size_t*) (ptr + (8+3*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2793,8 +6674,8 @@ bool sockets_method_tcp_socket_get_send_buffer_size(sockets_borrow_tcp_socket_t 
 }
 
 bool sockets_method_tcp_socket_set_send_buffer_size(sockets_borrow_tcp_socket_t self, uint64_t value, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_tcp_socket_set_send_buffer_size((self).__handle, (int64_t) (value), ptr);
   sockets_result_void_error_code_t result;
@@ -2805,7 +6686,70 @@ bool sockets_method_tcp_socket_set_send_buffer_size(sockets_borrow_tcp_socket_t 
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2818,20 +6762,83 @@ bool sockets_method_tcp_socket_set_send_buffer_size(sockets_borrow_tcp_socket_t 
 }
 
 bool sockets_static_udp_socket_create(sockets_ip_address_family_t address_family, sockets_own_udp_socket_t *ret, sockets_error_code_t *err) {
-  __attribute__((__aligned__(4)))
-  uint8_t ret_area[8];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_static_udp_socket_create((int32_t) address_family, ptr);
   sockets_result_own_udp_socket_error_code_t result;
   switch ((int32_t) *((uint8_t*) (ptr + 0))) {
     case 0: {
       result.is_err = false;
-      result.val.ok = (sockets_own_udp_socket_t) { *((int32_t*) (ptr + 4)) };
+      result.val.ok = (sockets_own_udp_socket_t) { *((int32_t*) (ptr + sizeof(void*))) };
       break;
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 4));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -2845,8 +6852,8 @@ bool sockets_static_udp_socket_create(sockets_ip_address_family_t address_family
 }
 
 bool sockets_method_udp_socket_bind(sockets_borrow_udp_socket_t self, sockets_ip_socket_address_t *local_address, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   int32_t variant;
   int32_t variant1;
   int32_t variant2;
@@ -2903,7 +6910,70 @@ bool sockets_method_udp_socket_bind(sockets_borrow_udp_socket_t self, sockets_ip
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant12;
+      variant12.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant12.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant12.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant12;
       break;
     }
   }
@@ -2916,8 +6986,8 @@ bool sockets_method_udp_socket_bind(sockets_borrow_udp_socket_t self, sockets_ip
 }
 
 bool sockets_method_udp_socket_connect(sockets_borrow_udp_socket_t self, sockets_ip_socket_address_t *remote_address, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   int32_t variant;
   int32_t variant1;
   int32_t variant2;
@@ -2974,7 +7044,70 @@ bool sockets_method_udp_socket_connect(sockets_borrow_udp_socket_t self, sockets
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant12;
+      variant12.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant12.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant12.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant12;
       break;
     }
   }
@@ -2987,8 +7120,8 @@ bool sockets_method_udp_socket_connect(sockets_borrow_udp_socket_t self, sockets
 }
 
 bool sockets_method_udp_socket_disconnect(sockets_borrow_udp_socket_t self, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_udp_socket_disconnect((self).__handle, ptr);
   sockets_result_void_error_code_t result;
@@ -2999,7 +7132,70 @@ bool sockets_method_udp_socket_disconnect(sockets_borrow_udp_socket_t self, sock
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -3020,8 +7216,8 @@ wasip3_subtask_status_t sockets_method_udp_socket_receive(sockets_borrow_udp_soc
 }
 
 bool sockets_method_udp_socket_get_local_address(sockets_borrow_udp_socket_t self, sockets_ip_socket_address_t *ret, sockets_error_code_t *err) {
-  __attribute__((__aligned__(4)))
-  uint8_t ret_area[36];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(32+1*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_udp_socket_get_local_address((self).__handle, ptr);
   sockets_result_ip_socket_address_error_code_t result;
@@ -3029,35 +7225,35 @@ bool sockets_method_udp_socket_get_local_address(sockets_borrow_udp_socket_t sel
     case 0: {
       result.is_err = false;
       sockets_ip_socket_address_t variant;
-      variant.tag = (int32_t) *((uint8_t*) (ptr + 4));
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
       switch ((int32_t) variant.tag) {
         case 0: {
           variant.val.ipv4 = (sockets_ipv4_socket_address_t) {
-            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 8))),
+            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (4+1*sizeof(void*))))),
             (sockets_ipv4_address_t) (sockets_ipv4_address_t) {
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 10))),
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 11))),
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 12))),
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 13))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (6+1*sizeof(void*))))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (7+1*sizeof(void*))))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (9+1*sizeof(void*))))),
             },
           };
           break;
         }
         case 1: {
           variant.val.ipv6 = (sockets_ipv6_socket_address_t) {
-            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 8))),
-            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 12))),
+            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (4+1*sizeof(void*))))),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + (8+1*sizeof(void*))))),
             (sockets_ipv6_address_t) (sockets_ipv6_address_t) {
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 16))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 18))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 20))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 22))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 24))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 26))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 28))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 30))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (12+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (14+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (16+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (18+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (20+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (22+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (24+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (26+1*sizeof(void*))))),
             },
-            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 32))),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + (28+1*sizeof(void*))))),
           };
           break;
         }
@@ -3068,7 +7264,70 @@ bool sockets_method_udp_socket_get_local_address(sockets_borrow_udp_socket_t sel
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 4));
+      sockets_error_code_t variant0;
+      variant0.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant0.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant0.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant0;
       break;
     }
   }
@@ -3082,8 +7341,8 @@ bool sockets_method_udp_socket_get_local_address(sockets_borrow_udp_socket_t sel
 }
 
 bool sockets_method_udp_socket_get_remote_address(sockets_borrow_udp_socket_t self, sockets_ip_socket_address_t *ret, sockets_error_code_t *err) {
-  __attribute__((__aligned__(4)))
-  uint8_t ret_area[36];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(32+1*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_udp_socket_get_remote_address((self).__handle, ptr);
   sockets_result_ip_socket_address_error_code_t result;
@@ -3091,35 +7350,35 @@ bool sockets_method_udp_socket_get_remote_address(sockets_borrow_udp_socket_t se
     case 0: {
       result.is_err = false;
       sockets_ip_socket_address_t variant;
-      variant.tag = (int32_t) *((uint8_t*) (ptr + 4));
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
       switch ((int32_t) variant.tag) {
         case 0: {
           variant.val.ipv4 = (sockets_ipv4_socket_address_t) {
-            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 8))),
+            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (4+1*sizeof(void*))))),
             (sockets_ipv4_address_t) (sockets_ipv4_address_t) {
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 10))),
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 11))),
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 12))),
-              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + 13))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (6+1*sizeof(void*))))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (7+1*sizeof(void*))))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))),
+              (uint8_t) (uint8_t) ((int32_t) *((uint8_t*) (ptr + (9+1*sizeof(void*))))),
             },
           };
           break;
         }
         case 1: {
           variant.val.ipv6 = (sockets_ipv6_socket_address_t) {
-            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 8))),
-            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 12))),
+            (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (4+1*sizeof(void*))))),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + (8+1*sizeof(void*))))),
             (sockets_ipv6_address_t) (sockets_ipv6_address_t) {
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 16))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 18))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 20))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 22))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 24))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 26))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 28))),
-              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + 30))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (12+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (14+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (16+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (18+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (20+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (22+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (24+1*sizeof(void*))))),
+              (uint16_t) (uint16_t) ((int32_t) *((uint16_t*) (ptr + (26+1*sizeof(void*))))),
             },
-            (uint32_t) (uint32_t) (*((int32_t*) (ptr + 32))),
+            (uint32_t) (uint32_t) (*((int32_t*) (ptr + (28+1*sizeof(void*))))),
           };
           break;
         }
@@ -3130,7 +7389,70 @@ bool sockets_method_udp_socket_get_remote_address(sockets_borrow_udp_socket_t se
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 4));
+      sockets_error_code_t variant0;
+      variant0.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant0.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant0.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant0;
       break;
     }
   }
@@ -3149,20 +7471,83 @@ sockets_ip_address_family_t sockets_method_udp_socket_get_address_family(sockets
 }
 
 bool sockets_method_udp_socket_get_unicast_hop_limit(sockets_borrow_udp_socket_t self, uint8_t *ret, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_udp_socket_get_unicast_hop_limit((self).__handle, ptr);
   sockets_result_u8_error_code_t result;
   switch ((int32_t) *((uint8_t*) (ptr + 0))) {
     case 0: {
       result.is_err = false;
-      result.val.ok = (uint8_t) ((int32_t) *((uint8_t*) (ptr + 1)));
+      result.val.ok = (uint8_t) ((int32_t) *((uint8_t*) (ptr + sizeof(void*))));
       break;
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -3176,8 +7561,8 @@ bool sockets_method_udp_socket_get_unicast_hop_limit(sockets_borrow_udp_socket_t
 }
 
 bool sockets_method_udp_socket_set_unicast_hop_limit(sockets_borrow_udp_socket_t self, uint8_t value, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_udp_socket_set_unicast_hop_limit((self).__handle, (int32_t) (value), ptr);
   sockets_result_void_error_code_t result;
@@ -3188,7 +7573,70 @@ bool sockets_method_udp_socket_set_unicast_hop_limit(sockets_borrow_udp_socket_t
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -3202,7 +7650,7 @@ bool sockets_method_udp_socket_set_unicast_hop_limit(sockets_borrow_udp_socket_t
 
 bool sockets_method_udp_socket_get_receive_buffer_size(sockets_borrow_udp_socket_t self, uint64_t *ret, sockets_error_code_t *err) {
   __attribute__((__aligned__(8)))
-  uint8_t ret_area[16];
+  uint8_t ret_area[(8+4*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_udp_socket_get_receive_buffer_size((self).__handle, ptr);
   sockets_result_u64_error_code_t result;
@@ -3214,7 +7662,70 @@ bool sockets_method_udp_socket_get_receive_buffer_size(sockets_borrow_udp_socket
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 8));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + 8));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (8+2*sizeof(void*))))), (*((size_t*) (ptr + (8+3*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -3228,8 +7739,8 @@ bool sockets_method_udp_socket_get_receive_buffer_size(sockets_borrow_udp_socket
 }
 
 bool sockets_method_udp_socket_set_receive_buffer_size(sockets_borrow_udp_socket_t self, uint64_t value, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_udp_socket_set_receive_buffer_size((self).__handle, (int64_t) (value), ptr);
   sockets_result_void_error_code_t result;
@@ -3240,7 +7751,70 @@ bool sockets_method_udp_socket_set_receive_buffer_size(sockets_borrow_udp_socket
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -3254,7 +7828,7 @@ bool sockets_method_udp_socket_set_receive_buffer_size(sockets_borrow_udp_socket
 
 bool sockets_method_udp_socket_get_send_buffer_size(sockets_borrow_udp_socket_t self, uint64_t *ret, sockets_error_code_t *err) {
   __attribute__((__aligned__(8)))
-  uint8_t ret_area[16];
+  uint8_t ret_area[(8+4*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_udp_socket_get_send_buffer_size((self).__handle, ptr);
   sockets_result_u64_error_code_t result;
@@ -3266,7 +7840,70 @@ bool sockets_method_udp_socket_get_send_buffer_size(sockets_borrow_udp_socket_t 
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 8));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + 8));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (8+1*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (8+2*sizeof(void*))))), (*((size_t*) (ptr + (8+3*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -3280,8 +7917,8 @@ bool sockets_method_udp_socket_get_send_buffer_size(sockets_borrow_udp_socket_t 
 }
 
 bool sockets_method_udp_socket_set_send_buffer_size(sockets_borrow_udp_socket_t self, uint64_t value, sockets_error_code_t *err) {
-  __attribute__((__aligned__(1)))
-  uint8_t ret_area[2];
+  __attribute__((__aligned__(sizeof(void*))))
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_sockets_method_udp_socket_set_send_buffer_size((self).__handle, (int64_t) (value), ptr);
   sockets_result_void_error_code_t result;
@@ -3292,7 +7929,70 @@ bool sockets_method_udp_socket_set_send_buffer_size(sockets_borrow_udp_socket_t 
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + 1));
+      sockets_error_code_t variant;
+      variant.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          break;
+        }
+        case 6: {
+          break;
+        }
+        case 7: {
+          break;
+        }
+        case 8: {
+          break;
+        }
+        case 9: {
+          break;
+        }
+        case 10: {
+          break;
+        }
+        case 11: {
+          break;
+        }
+        case 12: {
+          break;
+        }
+        case 13: {
+          break;
+        }
+        case 14: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant;
       break;
     }
   }
@@ -3306,7 +8006,7 @@ bool sockets_method_udp_socket_set_send_buffer_size(sockets_borrow_udp_socket_t 
 
 bool ip_name_lookup_resolve_addresses(wasip3_string_t *name, ip_name_lookup_list_ip_address_t *ret, ip_name_lookup_error_code_t *err) {
   __attribute__((__aligned__(sizeof(void*))))
-  uint8_t ret_area[(3*sizeof(void*))];
+  uint8_t ret_area[(5*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
   __wasm_import_ip_name_lookup_resolve_addresses((uint8_t *) (*name).ptr, (*name).len, ptr);
   ip_name_lookup_result_list_ip_address_error_code_t result;
@@ -3318,7 +8018,43 @@ bool ip_name_lookup_resolve_addresses(wasip3_string_t *name, ip_name_lookup_list
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      ip_name_lookup_error_code_t variant0;
+      variant0.tag = (int32_t) *((uint8_t*) (ptr + sizeof(void*)));
+      switch ((int32_t) variant0.tag) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          break;
+        }
+        case 2: {
+          break;
+        }
+        case 3: {
+          break;
+        }
+        case 4: {
+          break;
+        }
+        case 5: {
+          wasip3_option_string_t option;
+          switch ((int32_t) *((uint8_t*) (ptr + (2*sizeof(void*))))) {
+            case 0: {
+              option.is_some = false;
+              break;
+            }
+            case 1: {
+              option.is_some = true;
+              option.val = (wasip3_string_t) { (uint8_t*)(*((uint8_t **) (ptr + (3*sizeof(void*))))), (*((size_t*) (ptr + (4*sizeof(void*))))) };
+              break;
+            }
+          }
+          variant0.val.other = option;
+          break;
+        }
+      }
+
+      result.val.err = variant0;
       break;
     }
   }
@@ -3331,11 +8067,11 @@ bool ip_name_lookup_resolve_addresses(wasip3_string_t *name, ip_name_lookup_list
   }
 }
 
-void random_get_random_bytes(uint64_t len, wasip3_list_u8_t *ret) {
+void random_get_random_bytes(uint64_t max_len, wasip3_list_u8_t *ret) {
   __attribute__((__aligned__(sizeof(void*))))
   uint8_t ret_area[(2*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
-  __wasm_import_random_get_random_bytes((int64_t) (len), ptr);
+  __wasm_import_random_get_random_bytes((int64_t) (max_len), ptr);
   *ret = (wasip3_list_u8_t) { (uint8_t*)(*((uint8_t **) (ptr + 0))), (*((size_t*) (ptr + sizeof(void*)))) };
 }
 
@@ -3344,11 +8080,11 @@ uint64_t random_get_random_u64(void) {
   return (uint64_t) (ret);
 }
 
-void random_insecure_get_insecure_random_bytes(uint64_t len, wasip3_list_u8_t *ret) {
+void random_insecure_get_insecure_random_bytes(uint64_t max_len, wasip3_list_u8_t *ret) {
   __attribute__((__aligned__(sizeof(void*))))
   uint8_t ret_area[(2*sizeof(void*))];
   uint8_t *ptr = (uint8_t *) &ret_area;
-  __wasm_import_random_insecure_get_insecure_random_bytes((int64_t) (len), ptr);
+  __wasm_import_random_insecure_get_insecure_random_bytes((int64_t) (max_len), ptr);
   *ret = (wasip3_list_u8_t) { (uint8_t*)(*((uint8_t **) (ptr + 0))), (*((size_t*) (ptr + sizeof(void*)))) };
 }
 

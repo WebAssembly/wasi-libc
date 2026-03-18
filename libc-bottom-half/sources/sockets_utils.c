@@ -26,7 +26,6 @@
 #define SOCKETS_ERROR_CODE_DATAGRAM_TOO_LARGE                                  \
   NETWORK_ERROR_CODE_DATAGRAM_TOO_LARGE
 #define SOCKETS_ERROR_CODE_INVALID_STATE NETWORK_ERROR_CODE_INVALID_STATE
-#define SOCKETS_ERROR_CODE_UNKNOWN NETWORK_ERROR_CODE_UNKNOWN
 
 #define SOCKETS_IP_ADDRESS_FAMILY_IPV4 NETWORK_IP_ADDRESS_FAMILY_IPV4
 #define SOCKETS_IP_ADDRESS_FAMILY_IPV6 NETWORK_IP_ADDRESS_FAMILY_IPV6
@@ -75,8 +74,12 @@ network_borrow_network_t __wasi_sockets_utils__borrow_network() {
 }
 #endif
 
-int __wasilibc_map_socket_error(sockets_error_code_t wasi_error) {
-  switch (wasi_error) {
+int __wasilibc_map_socket_error(sockets_error_code_t *wasi_error) {
+#ifdef __wasip2__
+  switch (*wasi_error) {
+#else
+  switch (wasi_error->tag) {
+#endif
   case SOCKETS_ERROR_CODE_ACCESS_DENIED:
     return EACCES;
   case SOCKETS_ERROR_CODE_NOT_SUPPORTED:
@@ -127,7 +130,18 @@ int __wasilibc_map_socket_error(sockets_error_code_t wasi_error) {
     break;
 #endif
 
-  case SOCKETS_ERROR_CODE_UNKNOWN:
+#ifdef __wasip3__
+  case SOCKETS_ERROR_CODE_OTHER:
+    if (wasi_error->val.other.is_some) {
+      wasip3_string_free(&wasi_error->val.other.val);
+      wasi_error->val.other.is_some = false;
+    }
+    return EIO;
+#endif
+
+#ifdef __wasip2__
+  case NETWORK_ERROR_CODE_UNKNOWN:
+#endif
   default:
     return EOPNOTSUPP;
   }

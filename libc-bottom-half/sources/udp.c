@@ -139,14 +139,14 @@ static int udp_create_streams(udp_socket_t *socket,
 #ifdef __wasip2__
   udp_tuple2_own_incoming_datagram_stream_own_outgoing_datagram_stream_t io;
   if (!udp_method_udp_socket_stream(socket_borrow, remote_address, &io, &error))
-    return __wasilibc_socket_error_to_errno(error);
+    return __wasilibc_socket_error_to_errno(&error);
 
   dst->incoming = io.f0;
   dst->outgoing = io.f1;
 #else
   if (remote_address &&
       !sockets_method_udp_socket_connect(socket_borrow, remote_address, &error))
-    return __wasilibc_socket_error_to_errno(error);
+    return __wasilibc_socket_error_to_errno(&error);
 #endif
 
   if (remote_address != NULL) {
@@ -235,8 +235,8 @@ udp_outgoing_pollable(udp_socket_streams_t *streams) {
   return poll_borrow_pollable(streams->outgoing_pollable);
 }
 
-static int udp_handle_error(udp_socket_t *socket, sockets_error_code_t error) {
-  if (error == NETWORK_ERROR_CODE_WOULD_BLOCK && socket->blocking) {
+static int udp_handle_error(udp_socket_t *socket, sockets_error_code_t *error) {
+  if (*error == NETWORK_ERROR_CODE_WOULD_BLOCK && socket->blocking) {
     poll_method_pollable_block(udp_pollable(socket));
   } else {
     return __wasilibc_socket_error_to_errno(error);
@@ -261,18 +261,18 @@ static int udp_do_bind(udp_socket_t *socket,
 
   if (!udp_method_udp_socket_start_bind(socket_borrow, network_borrow, address,
                                         &error))
-    return __wasilibc_socket_error_to_errno(error);
+    return __wasilibc_socket_error_to_errno(&error);
 
   // Bind has successfully started. Attempt to finish it:
   while (!udp_method_udp_socket_finish_bind(socket_borrow, &error)) {
-    if (udp_handle_error(socket, error) < 0)
+    if (udp_handle_error(socket, &error) < 0)
       return -1;
   }
 #else
   sockets_borrow_udp_socket_t socket_borrow =
       sockets_borrow_udp_socket(socket->socket);
   if (!sockets_method_udp_socket_bind(socket_borrow, address, &error))
-    return __wasilibc_socket_error_to_errno(error);
+    return __wasilibc_socket_error_to_errno(&error);
 
 #endif
 
@@ -376,7 +376,7 @@ static int udp_getsockname(void *data, struct sockaddr *addr,
       sockets_borrow_udp_socket(socket->socket);
   if (!sockets_method_udp_socket_get_local_address(socket_borrow, &result,
                                                    &error))
-    return __wasilibc_socket_error_to_errno(error);
+    return __wasilibc_socket_error_to_errno(&error);
 
   __wasilibc_wasi_to_sockaddr(result, &output_addr);
   return 0;
@@ -416,7 +416,7 @@ static int udp_getpeername(void *data, struct sockaddr *addr,
       sockets_borrow_udp_socket(socket->socket);
   if (!sockets_method_udp_socket_get_remote_address(socket_borrow, &result,
                                                     &error))
-    return __wasilibc_socket_error_to_errno(error);
+    return __wasilibc_socket_error_to_errno(&error);
 
   __wasilibc_wasi_to_sockaddr(result, &output_addr);
   return 0;
@@ -479,7 +479,7 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
     udp_list_incoming_datagram_t datagrams;
     if (!udp_method_incoming_datagram_stream_receive(incoming_borrow, 1,
                                                      &datagrams, &error))
-      return __wasilibc_socket_error_to_errno(error);
+      return __wasilibc_socket_error_to_errno(&error);
 
     if (datagrams.len) {
       udp_incoming_datagram_t datagram = datagrams.ptr[0];
@@ -516,7 +516,7 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
 
   // If the operation failed, just translate its error and return.
   if (result.is_err)
-    return __wasilibc_socket_error_to_errno(result.val.err);
+    return __wasilibc_socket_error_to_errno(&result.val.err);
 
   // Fill in the source address if requested.
   if (output_addr.tag != OUTPUT_SOCKADDR_NULL)
@@ -627,13 +627,13 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
     uint64_t allowed;
     if (!udp_method_outgoing_datagram_stream_check_send(outgoing_borrow,
                                                         &allowed, &error))
-      return __wasilibc_socket_error_to_errno(error);
+      return __wasilibc_socket_error_to_errno(&error);
 
     if (allowed) {
       uint64_t datagrams_sent;
       if (!udp_method_outgoing_datagram_stream_send(outgoing_borrow, &list,
                                                     &datagrams_sent, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       if (datagrams_sent != 0 && datagrams_sent != 1) {
         abort();
@@ -673,7 +673,7 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
 
   // If the operation failed, just translate its error and return.
   if (result.is_err)
-    return __wasilibc_socket_error_to_errno(result.val.err);
+    return __wasilibc_socket_error_to_errno(&result.val.err);
 
   return length;
 #endif
@@ -712,7 +712,7 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
       uint64_t result;
       if (!sockets_method_udp_socket_get_receive_buffer_size(socket_borrow,
                                                              &result, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       if (result > INT_MAX) {
         abort();
@@ -725,7 +725,7 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
       uint64_t result;
       if (!sockets_method_udp_socket_get_send_buffer_size(socket_borrow,
                                                           &result, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       if (result > INT_MAX) {
         abort();
@@ -753,7 +753,7 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
       uint8_t result;
       if (!sockets_method_udp_socket_get_unicast_hop_limit(socket_borrow,
                                                            &result, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       value = result;
       break;
@@ -775,7 +775,7 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
       uint8_t result;
       if (!sockets_method_udp_socket_get_unicast_hop_limit(socket_borrow,
                                                            &result, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       value = result;
       break;
@@ -816,14 +816,14 @@ static int udp_setsockopt(void *data, int level, int optname,
     case SO_RCVBUF: {
       if (!sockets_method_udp_socket_set_receive_buffer_size(socket_borrow,
                                                              intval, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       return 0;
     }
     case SO_SNDBUF: {
       if (!sockets_method_udp_socket_set_send_buffer_size(socket_borrow, intval,
                                                           &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       return 0;
     }
@@ -850,7 +850,7 @@ static int udp_setsockopt(void *data, int level, int optname,
 
       if (!sockets_method_udp_socket_set_unicast_hop_limit(socket_borrow,
                                                            intval, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       return 0;
     }
@@ -875,7 +875,7 @@ static int udp_setsockopt(void *data, int level, int optname,
 
       if (!sockets_method_udp_socket_set_unicast_hop_limit(socket_borrow,
                                                            intval, &error))
-        return __wasilibc_socket_error_to_errno(error);
+        return __wasilibc_socket_error_to_errno(&error);
 
       return 0;
     }

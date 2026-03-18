@@ -161,7 +161,7 @@ static int ensure_has_directory_stream(DIR *dirp, filesystem_borrow_descriptor_t
                                                         &dirp->stream,
                                                         &error_code);
   if (!ok) {
-    translate_error(error_code);
+    translate_error(&error_code);
     return -1;
   }
 #elif defined(__wasip3__)
@@ -190,7 +190,7 @@ static struct dirent *readdir_next(DIR *dirp) {
                                                     &metadata,
                                                     &error_code);
     if (!ok) {
-      translate_error(error_code);
+      translate_error(&error_code);
       return NULL;
     }
     dirp->dirent->d_ino = metadata.lower;
@@ -221,7 +221,7 @@ static struct dirent *readdir_next(DIR *dirp) {
                                                                      &dir_entry_optional,
                                                                      &error_code);
   if (!ok) {
-    translate_error(error_code);
+    translate_error(&error_code);
     return NULL;
   }
 
@@ -263,7 +263,7 @@ static struct dirent *readdir_next(DIR *dirp) {
       filesystem_future_result_void_error_code_drop_readable(dirp->stream.f1);
       dirp->stream.f1 = 0;
       if (result.is_err)
-        translate_error(result.val.err);
+        translate_error(&result.val.err);
     }
 
     // The stream is closed, so return NULL. If `errno` needs to be set it'll
@@ -277,16 +277,12 @@ static struct dirent *readdir_next(DIR *dirp) {
   // Ensure that the dirent is large enough to fit the filename
   size_t the_size = offsetof(struct dirent, d_name);
   if (grow(&dirp->dirent, &dirp->dirent_size, the_size + dir_entry.name.len + 1) == NULL) {
-#ifdef __wasip2__
-    wasip2_string_free(&dir_entry.name);
-#else
-    wasip3_string_free(&dir_entry.name);
-#endif
+    filesystem_directory_entry_free(&dir_entry);
     return NULL;
   }
 
   // Fill out `d_type` and `d_name`
-  dirp->dirent->d_type = dir_entry_type_to_d_type(dir_entry.type);
+  dirp->dirent->d_type = dir_entry_type_to_d_type(&dir_entry.type);
   memcpy(dirp->dirent->d_name, dir_entry.name.ptr, dir_entry.name.len);
   dirp->dirent->d_name[dir_entry.name.len] = '\0';
 
@@ -297,13 +293,9 @@ static struct dirent *readdir_next(DIR *dirp) {
                                                      &dir_entry.name,
                                                      &metadata,
                                                      &error_code);
-#ifdef __wasip2__
-  wasip2_string_free(&dir_entry.name);
-#else
-  wasip3_string_free(&dir_entry.name);
-#endif
+  filesystem_directory_entry_free(&dir_entry);
   if (!ok) {
-    translate_error(error_code);
+    translate_error(&error_code);
     return NULL;
   }
   dirp->dirent->d_ino = metadata.lower;

@@ -56,7 +56,7 @@ int __wasilibc_nocwd_fstatat(int fd, const char *restrict path, struct stat *res
                                                      &path_wasm_string,
                                                      &metadata,
                                                      &error)) {
-    translate_error(error);
+    translate_error(&error);
     return -1;
   }
 
@@ -73,7 +73,7 @@ int __wasilibc_nocwd_fstatat(int fd, const char *restrict path, struct stat *res
                                                           &internal_stat,
                                                           &error);
   if (!stat_result) {
-    translate_error(error);
+    translate_error(&error);
     return -1;
   }
 

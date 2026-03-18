@@ -58,13 +58,10 @@ typedef struct {
   wasip3_io_state_t receive;
   sockets_future_result_void_error_code_t receive_result;
 
-  // The stream to write to in order to send out bytes, along with the `send`
-  // subtask that was created connected to the other half of `send`. The
-  // result of the subtask at `send_result` will get filled in when
-  // `send_subtask` is finished.
+  // The stream to write to in order to send out bytes, along with the `future`
+  // that communicates the result of the send.
   wasip3_io_state_t send;
-  wasip3_subtask_t send_subtask;
-  sockets_result_void_error_code_t send_result;
+  sockets_future_result_void_error_code_t send_result;
 #endif
 } tcp_socket_state_connected_t;
 

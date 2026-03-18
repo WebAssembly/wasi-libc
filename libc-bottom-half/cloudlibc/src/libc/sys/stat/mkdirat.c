@@ -36,7 +36,7 @@ int __wasilibc_nocwd_mkdirat_nomode(int fd, const char *path) {
                                                              &path2,
                                                              &error);
   if (!ok) {
-    translate_error(error);
+    translate_error(&error);
     return -1;
   }
   return 0;

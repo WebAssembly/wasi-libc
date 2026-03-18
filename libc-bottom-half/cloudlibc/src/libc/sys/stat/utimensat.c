@@ -71,7 +71,7 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
                                                                     &new_timestamp_mtim,
                                                                     &error);
   if (!set_times_result) {
-    translate_error(error);
+    translate_error(&error);
     return -1;
   }
 #else

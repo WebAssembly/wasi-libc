@@ -49,7 +49,7 @@ int futimens(int fd, const struct timespec *times) {
                                               &new_timestamp_atim,
                                               &new_timestamp_mtim,
                                               &error)) {
-    translate_error(error);
+    translate_error(&error);
     return -1;
   }
 #else

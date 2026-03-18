@@ -286,8 +286,7 @@ static void tcp_setup_connected_state_wasip3(tcp_socket_t *socket) {
   sockets_stream_u8_writer_t send;
   sockets_stream_u8_t reader = sockets_stream_u8_new(&send);
   wasip3_io_state_init(&state->send, send);
-  state->send_result = sockets_method_tcp_socket_send(
-      socket_borrow, reader);
+  state->send_result = sockets_method_tcp_socket_send(socket_borrow, reader);
 }
 #endif
 

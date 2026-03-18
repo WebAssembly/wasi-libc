@@ -133,9 +133,9 @@ static int file_write_eof(void *data) {
 
   if (file->write_result) {
     filesystem_result_void_error_code_t result;
-    __wasilibc_future_block_on(
-        filesystem_future_result_void_error_code_read(file->write_result, &result),
-        file->write_result);
+    __wasilibc_future_block_on(filesystem_future_result_void_error_code_read(
+                                   file->write_result, &result),
+                               file->write_result);
     filesystem_future_result_void_error_code_drop_readable(file->write_result);
     file->write_result = 0;
 

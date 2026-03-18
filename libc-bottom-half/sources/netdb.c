@@ -24,8 +24,12 @@ _Thread_local int h_errno = 0;
 
 static struct servent global_serv = {0};
 
-static int map_error(ip_name_lookup_error_code_t error) {
-  switch (error) {
+static int map_error(ip_name_lookup_error_code_t *error) {
+#ifdef __wasip2__
+  switch (*error) {
+#else
+  switch (error->tag) {
+#endif
 #ifdef __wasip2__
   case NETWORK_ERROR_CODE_OUT_OF_MEMORY:
     return EAI_MEMORY;
@@ -37,7 +41,11 @@ static int map_error(ip_name_lookup_error_code_t error) {
   case IP_NAME_LOOKUP_ERROR_CODE_PERMANENT_RESOLVER_FAILURE:
     return EAI_FAIL;
 #ifdef __wasip3__
-  case IP_NAME_LOOKUP_ERROR_CODE_UNKNOWN:
+  case IP_NAME_LOOKUP_ERROR_CODE_OTHER:
+    if (error->val.other.is_some) {
+      wasip3_string_free(&error->val.other.val);
+      error->val.other.is_some = false;
+    }
     errno = EIO;
     return EAI_SYSTEM;
   case IP_NAME_LOOKUP_ERROR_CODE_ACCESS_DENIED:
@@ -202,7 +210,7 @@ int getaddrinfo(const char *restrict host, const char *restrict serv,
   ip_name_lookup_own_resolve_address_stream_t stream;
   if (!ip_name_lookup_resolve_addresses(__wasi_sockets_utils__borrow_network(),
                                         &name, &stream, &error))
-    return map_error(error);
+    return map_error(&error);
   ip_name_lookup_borrow_resolve_address_stream_t stream_borrow =
       ip_name_lookup_borrow_resolve_address_stream(stream);
   poll_own_pollable_t pollable;
@@ -210,7 +218,7 @@ int getaddrinfo(const char *restrict host, const char *restrict serv,
 #else
   ip_name_lookup_list_ip_address_t addresses;
   if (!ip_name_lookup_resolve_addresses(&name, &addresses, &error))
-    return map_error(error);
+    return map_error(&error);
   size_t next = 0;
 #endif
 
@@ -239,7 +247,7 @@ int getaddrinfo(const char *restrict host, const char *restrict serv,
             stream_borrow, &maybe_address, &error)) {
       if (error != NETWORK_ERROR_CODE_WOULD_BLOCK) {
         freeaddrinfo(*res);
-        ret = map_error(error);
+        ret = map_error(&error);
         break;
       }
 

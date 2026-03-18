@@ -29,8 +29,7 @@ typedef struct {
   wasip3_io_state_t read;
   filesystem_future_result_void_error_code_t read_result;
   wasip3_io_state_t write;
-  wasip3_subtask_t write_subtask;
-  filesystem_result_void_error_code_t write_pending_result;
+  filesystem_future_result_void_error_code_t write_result;
 #endif
 } file_t;
 
@@ -60,15 +59,9 @@ static void file_close_streams(void *data) {
     filesystem_future_result_void_error_code_drop_readable(file->read_result);
     file->read_result = 0;
   }
-  if (file->write_subtask != 0) {
-    // TODO: this should use `wasip3_subtask_cancel` but right now that's buggy
-    // in Wasmtime. For now assume closing the stream above is enough to have
-    // the subtask here finish promptly, so block on the result.
-    //
-    // Once Wasmtime 43.0.0 is released and used in wasi-libc's CI that can be
-    // used here instead.
-    __wasilibc_subtask_block_on_and_drop(file->write_subtask);
-    file->write_subtask = 0;
+  if (file->write_result != 0) {
+    filesystem_future_result_void_error_code_drop_readable(file->write_result);
+    file->write_result = 0;
   }
 #endif
 }
@@ -92,7 +85,7 @@ static int file_read_eof(void *data) {
     filesystem_future_result_void_error_code_drop_readable(file->read_result);
     file->read_result = 0;
     if (result.is_err) {
-      translate_error(result.val.err);
+      translate_error(&result.val.err);
       return -1;
     }
   }
@@ -109,7 +102,7 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
         filesystem_borrow_descriptor(file->file_handle), file->offset,
         &file->read_stream, &error_code);
     if (!ok) {
-      translate_error(error_code);
+      translate_error(&error_code);
       return -1;
     }
   }
@@ -138,14 +131,20 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
 static int file_write_eof(void *data) {
   file_t *file = (file_t *)data;
 
-  if (file->write_subtask != 0) {
-    __wasilibc_subtask_block_on_and_drop(file->write_subtask);
-    file->write_subtask = 0;
+  if (file->write_result) {
+    filesystem_result_void_error_code_t result;
+    __wasilibc_future_block_on(
+        filesystem_future_result_void_error_code_read(file->write_result, &result),
+        file->write_result);
+    filesystem_future_result_void_error_code_drop_readable(file->write_result);
+    file->write_result = 0;
+
+    if (result.is_err) {
+      translate_error(&result.val.err);
+      return -1;
+    }
   }
-  if (file->write_pending_result.is_err) {
-    translate_error(file->write_pending_result.val.err);
-    return -1;
-  }
+
   return 0;
 }
 #endif
@@ -167,7 +166,7 @@ static int file_get_write_stream(void *data, wasi_write_t *write) {
           &file->write_stream, &error_code);
     }
     if (!ok) {
-      translate_error(error_code);
+      translate_error(&error_code);
       return -1;
     }
   }
@@ -175,21 +174,17 @@ static int file_get_write_stream(void *data, wasi_write_t *write) {
   write->pollable = &file->write_pollable;
 #else
   if (!wasip3_io_state_present(&file->write)) {
-    assert(file->write_subtask == 0);
+    assert(file->write_result == 0);
     filesystem_stream_u8_writer_t writer;
     filesystem_stream_u8_t write_read = filesystem_stream_u8_new(&writer);
-    wasip3_subtask_status_t status;
     if (file->oflag & O_APPEND) {
-      status = filesystem_method_descriptor_append_via_stream(
-          filesystem_borrow_descriptor(file->file_handle), write_read,
-          &file->write_pending_result);
+      file->write_result = filesystem_method_descriptor_append_via_stream(
+          filesystem_borrow_descriptor(file->file_handle), write_read);
     } else {
-      status = filesystem_method_descriptor_write_via_stream(
+      file->write_result = filesystem_method_descriptor_write_via_stream(
           filesystem_borrow_descriptor(file->file_handle), write_read,
-          file->offset, &file->write_pending_result);
+          file->offset);
     }
-    if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED)
-      file->write_subtask = WASIP3_SUBTASK_HANDLE(status);
     wasip3_io_state_init(&file->write, writer);
   }
   write->state = &file->write;
@@ -215,7 +210,7 @@ static int file_fstat(void *data, struct stat *buf) {
   filesystem_error_code_t error;
   if (!filesystem_method_descriptor_metadata_hash(
           filesystem_borrow_descriptor(file->file_handle), &metadata, &error)) {
-    translate_error(error);
+    translate_error(&error);
     return -1;
   }
 
@@ -224,7 +219,7 @@ static int file_fstat(void *data, struct stat *buf) {
   bool stat_result = filesystem_method_descriptor_stat(
       filesystem_borrow_descriptor(file->file_handle), &internal_stat, &error);
   if (!stat_result) {
-    translate_error(error);
+    translate_error(&error);
     return -1;
   }
 
@@ -239,7 +234,7 @@ static int file_seek_end(file_t *file) {
   bool ok = filesystem_method_descriptor_stat(
       filesystem_borrow_descriptor(file->file_handle), &stat, &error);
   if (!ok) {
-    translate_error(error);
+    translate_error(&error);
     return -1;
   }
   file->offset = (off_t)stat.size;
@@ -303,7 +298,7 @@ static int file_fcntl_getfl(void *data) {
       filesystem_borrow_descriptor(file->file_handle);
   if (!filesystem_method_descriptor_get_flags(file_handle, &flags,
                                               &error_code)) {
-    translate_error(error_code);
+    translate_error(&error_code);
     return -1;
   }
 

@@ -66,10 +66,10 @@ typedef enum {
 network_borrow_network_t __wasi_sockets_utils__borrow_network();
 #endif
 
-int __wasilibc_map_socket_error(sockets_error_code_t wasi_error);
+int __wasilibc_map_socket_error(sockets_error_code_t *wasi_error);
 
 static inline int
-__wasilibc_socket_error_to_errno(sockets_error_code_t wasi_error) {
+__wasilibc_socket_error_to_errno(sockets_error_code_t *wasi_error) {
   errno = __wasilibc_map_socket_error(wasi_error);
   return -1;
 }

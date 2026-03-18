@@ -1,11 +1,16 @@
 #include <wasi/api.h>
 
 #if defined(__wasip2__) || defined(__wasip3__)
+#include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
 
-static inline void translate_error(filesystem_error_code_t error) {
-    switch (error) {
+static inline void translate_error(filesystem_error_code_t *error) {
+#ifdef __wasip2__
+    switch (*error) {
+#else
+    switch (error->tag) {
+#endif
     case FILESYSTEM_ERROR_CODE_ACCESS:
         errno = EACCES;
         break;
@@ -119,6 +124,16 @@ static inline void translate_error(filesystem_error_code_t error) {
     case FILESYSTEM_ERROR_CODE_CROSS_DEVICE:
         errno = EXDEV;
         break;
+#ifdef __wasip3__
+    case FILESYSTEM_ERROR_CODE_OTHER:
+        errno = EIO;
+        if (error->val.other.is_some) {
+          assert(error->val.other.val.ptr);
+          free(error->val.other.val.ptr);
+          error->val.other.is_some = false;
+        }
+        break;
+#endif
     default:
         abort(); // Unreachable
     }

@@ -68,9 +68,9 @@ static inline void to_public_stat(const __wasi_filestat_t *in,
 #elif defined(__wasip2__) || defined(__wasip3__)
 #ifdef __wasip3__
 typedef filesystem_instant_t filesystem_datetime_t;
-#endif 
+#endif
 static inline void to_public_stat(const filesystem_metadata_hash_value_t *metadata,
-                                  const filesystem_descriptor_stat_t *in,
+                                  filesystem_descriptor_stat_t *in,
                                   struct stat *out) {
   /*
    * The non-standard __st_filetype field appears to only be used for shared
@@ -100,7 +100,11 @@ static inline void to_public_stat(const filesystem_metadata_hash_value_t *metada
   };
 
   // Convert file type to legacy types encoded in st_mode.
+#ifdef __wasip2__
   switch (in->type) {
+#else
+  switch (in->type.tag) {
+#endif
     case FILESYSTEM_DESCRIPTOR_TYPE_BLOCK_DEVICE:
       out->st_mode |= S_IFBLK;
       break;
@@ -120,6 +124,7 @@ static inline void to_public_stat(const filesystem_metadata_hash_value_t *metada
       out->st_mode |= S_IFLNK;
       break;
   }
+  filesystem_descriptor_stat_free(in);
 }
 #else
 # error "Unsupported WASI version"

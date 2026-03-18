@@ -78,10 +78,28 @@ ssize_t __wasilibc_read(wasi_read_t *read, void *buf, size_t len);
 ssize_t __wasilibc_write(wasi_write_t *write, const void *buf, size_t len);
 
 static inline unsigned
-dir_entry_type_to_d_type(filesystem_descriptor_type_t ty) {
-  switch (ty) {
+dir_entry_type_to_d_type(filesystem_descriptor_type_t *ty) {
+#ifdef __wasip2__
+  switch (*ty) {
+#else
+  switch (ty->tag) {
+#endif
+
+#ifdef __wasip2__
   case FILESYSTEM_DESCRIPTOR_TYPE_UNKNOWN:
     return DT_UNKNOWN;
+#endif
+
+#ifdef __wasip3__
+  case FILESYSTEM_DESCRIPTOR_TYPE_OTHER:
+    if (ty->val.other.is_some) {
+      assert(ty->val.other.val.ptr);
+      wasip3_string_free(&ty->val.other.val);
+      ty->val.other.is_some = false;
+    }
+    return DT_UNKNOWN;
+#endif
+
   case FILESYSTEM_DESCRIPTOR_TYPE_BLOCK_DEVICE:
     return DT_BLK;
   case FILESYSTEM_DESCRIPTOR_TYPE_CHARACTER_DEVICE:

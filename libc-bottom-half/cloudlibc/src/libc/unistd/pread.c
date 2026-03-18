@@ -64,7 +64,7 @@ ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
 
   // Check for errors
   if (!ok) {
-    translate_error(error_code);
+    translate_error(&error_code);
     return -1;
   }
 
@@ -95,7 +95,7 @@ ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
       io.f1);
     filesystem_future_result_void_error_code_drop_readable(io.f1);
     if (result.is_err) {
-      translate_error(result.val.err);
+      translate_error(&result.val.err);
       return -1;
     }
   } else {

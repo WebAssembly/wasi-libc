@@ -14,7 +14,9 @@
  * consideration. POSIX has deprecated `getpagesize` in favor of
  * `sysconf(_SC_PAGESIZE)` which does not have this problem.
  */
-#if __clang_major__ >= 22
+// FIXME(#778): `__wasm_first_page_end` is broken for PIC as of this writing and
+// will likely require `wasm-ld` changes, at which point we can re-enable it.
+#if __clang_major__ >= 22 && !defined __pic__
 extern char __wasm_first_page_end;
 #define PAGESIZE ((unsigned long)&__wasm_first_page_end)
 #else

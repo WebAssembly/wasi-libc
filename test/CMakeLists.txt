@@ -330,6 +330,12 @@ add_wasilibc_test(sleep.c)
 add_wasilibc_test(write.c FS)
 add_wasilibc_test(wasi-defines.c)
 
+# This tests the behavior of the WASIp2+ descriptor table and won't succeed on
+# p1:
+if (NOT (WASI STREQUAL "p1"))
+  add_wasilibc_test(clear_fds.c FS)
+endif()
+
 if (CMAKE_C_COMPILER_VERSION VERSION_GREATER 20.0)
   add_wasilibc_test(setjmp.c SETJMP)
   set_tests_properties(setjmp.wasm PROPERTIES LABELS v8fail)

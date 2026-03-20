@@ -239,6 +239,9 @@ int descriptor_table_remove(int fd);
 /// errno on failure.
 int descriptor_table_renumber(int fd, int newfd);
 
+/// Removes all file descriptors from the table, running their destructors.
+void descriptor_table_clear();
+
 #endif // __wasip1__
 
 #endif // DESCRIPTOR_TABLE_H

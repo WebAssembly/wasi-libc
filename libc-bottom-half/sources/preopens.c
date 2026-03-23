@@ -418,5 +418,9 @@ void __wasilibc_reset_preopens(void) {
 
   assert_invariants();
 
+#ifndef __wasip1__
+  descriptor_table_clear();
+#endif
+
   UNLOCK(lock);
 }

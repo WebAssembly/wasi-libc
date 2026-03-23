@@ -335,6 +335,9 @@ if (CMAKE_C_COMPILER_VERSION VERSION_GREATER 20.0)
   set_tests_properties(setjmp.wasm PROPERTIES LABELS v8fail)
 endif()
 
+# This test works for single-threaded targets too
+add_wasilibc_test(pthread_recursive_mutex.c)
+
 if (TARGET_TRIPLE MATCHES "-threads")
   add_wasilibc_test(busywait.c)
   add_wasilibc_test(pthread_cond_busywait.c)

@@ -53,7 +53,7 @@ int __wasilibc_nocwd_linkat(int fd1, const char *path1, int fd2, const char *pat
                                                  &path2_wasi,
                                                  &error_code);
   if (!ok) {
-    translate_error(error_code);
+    translate_error(&error_code);
     return -1;
   }
 #else

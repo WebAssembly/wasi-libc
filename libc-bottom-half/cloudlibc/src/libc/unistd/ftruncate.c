@@ -32,7 +32,7 @@ int ftruncate(int fildes, off_t length) {
 
   filesystem_error_code_t error_code;
   if (!filesystem_method_descriptor_set_size(file_handle, length, &error_code)) {
-    translate_error(error_code);
+    translate_error(&error_code);
     return -1;
   }
 #else

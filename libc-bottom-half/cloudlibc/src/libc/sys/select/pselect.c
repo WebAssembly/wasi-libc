@@ -20,13 +20,6 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
     return -1;
   }
 
-  // This implementation does not support polling for exceptional
-  // conditions, such as out-of-band data on TCP sockets.
-  if (errorfds != NULL && errorfds->__nfds > 0) {
-    errno = ENOSYS;
-    return -1;
-  }
-
   // Replace NULL pointers by the empty set.
   fd_set empty;
   FD_ZERO(&empty);
@@ -34,8 +27,10 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
     readfds = &empty;
   if (writefds == NULL)
     writefds = &empty;
+  if (errorfds == NULL)
+    errorfds = &empty;
 
-  struct pollfd poll_fds[readfds->__nfds + writefds->__nfds];
+  struct pollfd poll_fds[readfds->__nfds + writefds->__nfds + errorfds->__nfds];
   size_t poll_nfds = 0;
 
   for (size_t i = 0; i < readfds->__nfds; ++i) {
@@ -55,6 +50,20 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
       poll_fds[poll_nfds++] = (struct pollfd){
           .fd = fd,
           .events = POLLWRNORM,
+          .revents = 0
+      };
+    }
+  }
+
+  // Thread exceptional conditions through as POLLPRI. WASI has no out-of-band
+  // data, so POLLPRI will never fire, but poll() will allow the call to proceed
+  // as long as there are other non-POLLPRI events to wait on.
+  for (size_t i = 0; i < errorfds->__nfds; ++i) {
+    int fd = errorfds->__fds[i];
+    if (fd < nfds) {
+      poll_fds[poll_nfds++] = (struct pollfd){
+          .fd = fd,
+          .events = POLLPRI,
           .revents = 0
       };
     }
@@ -92,6 +101,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
 
   FD_ZERO(readfds);
   FD_ZERO(writefds);
+  FD_ZERO(errorfds);
   for (size_t i = 0; i < poll_nfds; ++i) {
     struct pollfd* pollfd = poll_fds + i;
     if ((pollfd->revents & POLLRDNORM) != 0) {
@@ -100,7 +110,10 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
     if ((pollfd->revents & POLLWRNORM) != 0) {
       writefds->__fds[writefds->__nfds++] = pollfd->fd;
     }
+    if ((pollfd->revents & POLLPRI) != 0) {
+      errorfds->__fds[errorfds->__nfds++] = pollfd->fd;
+    }
   }
 
-  return readfds->__nfds + writefds->__nfds;
+  return readfds->__nfds + writefds->__nfds + errorfds->__nfds;
 }

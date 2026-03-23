@@ -78,6 +78,7 @@ foreach(symbol IN LISTS final_undefined_symbols)
   if(NOT symbol MATCHES "^__mul" AND
      NOT symbol STREQUAL "__memory_base" AND
      NOT symbol STREQUAL "__indirect_function_table" AND
+     NOT symbol STREQUAL "__wasm_first_page_end" AND
      NOT symbol STREQUAL "__tls_base")
     file(APPEND ${out_undefined_symbols} "${symbol}\n")
   endif()

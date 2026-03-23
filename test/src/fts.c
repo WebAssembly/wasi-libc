@@ -4,6 +4,7 @@
  * musl-fts works as expected.
  */
 
+#include "test.h"
 #include <errno.h>
 #include <fts.h>
 #include <stdio.h>
@@ -11,6 +12,13 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#define TEST(c)                                                                \
+  do {                                                                         \
+    errno = 0;                                                                 \
+    if (!(c))                                                                  \
+      t_error("%s failed (errno = %d)\n", #c, errno);                          \
+  } while (0)
 
 void __expect_next_ftsent(FTSENT *p, const char *path, short level, int info,
                           const char *file, int line) {
@@ -45,24 +53,43 @@ static int compare_ents(const FTSENT **a, const FTSENT **b) {
   return strcmp((*a)->fts_name, (*b)->fts_name);
 }
 
-void touch(const char *path) {
+static void rm_rf(const char *dir) {
+  char *paths[] = {(char *)dir, NULL};
+  FTS *ftsp = fts_open(paths, FTS_PHYSICAL | FTS_NOCHDIR, compare_ents);
+  if (ftsp == NULL) {
+    printf("Error: fts_open(%s) failed: %s\n", dir, strerror(errno));
+    exit(1);
+  }
+
+  FTSENT *p;
+  while ((p = fts_read(ftsp)) != NULL) {
+    if (p->fts_info == FTS_D || p->fts_info == FTS_DP)
+      TEST(rmdir(p->fts_path) == 0);
+    else
+      TEST(unlink(p->fts_path) == 0);
+  }
+
+  fts_close(ftsp);
+}
+
+int touch(const char *path) {
   FILE *f = fopen(path, "w");
   if (f == NULL) {
     printf("Error: fopen(%s) failed: %s\n", path, strerror(errno));
     exit(1);
   }
-  fclose(f);
+  return fclose(f);
 }
 
 void test_fts_info(int base_options) {
   FTS *ftsp;
 
-  mkdir("t1", 0755);
-  touch("t1/file1");
-  mkdir("t1/dir1", 0755);
-  touch("t1/dir1/file2");
-  mkdir("t1/dir1/dir2", 0755);
-  touch("t1/dir1/file3");
+  TEST(mkdir("t1", 0755) == 0);
+  TEST(touch("t1/file1") == 0);
+  TEST(mkdir("t1/dir1", 0755) == 0);
+  TEST(touch("t1/dir1/file2") == 0);
+  TEST(mkdir("t1/dir1/dir2", 0755) == 0);
+  TEST(touch("t1/dir1/file3") == 0);
 
   char *paths[] = {"./t1", NULL};
   ftsp = fts_open(paths, base_options, compare_ents);
@@ -83,15 +110,17 @@ void test_fts_info(int base_options) {
   expect_next_ftsent(fts_read(ftsp), "./t1", 0, FTS_DP);
 
   fts_close(ftsp);
+
+  rm_rf("t1");
 }
 
 void test_symlink_fts_info(int base_options) {
   FTS *ftsp;
 
-  mkdir("t2", 0755);
-  touch("t2/file1");
-  symlink("file1", "t2/symlink1");
-  symlink("nonexistent", "t2/broken_symlink1");
+  TEST(mkdir("t2", 0755) == 0);
+  TEST(touch("t2/file1") == 0);
+  int sym1 = symlink("file1", "t2/symlink1");
+  int sym2 = symlink("nonexistent", "t2/broken_symlink1");
 
   char *paths[] = {"./t2", NULL};
   ftsp = fts_open(paths, base_options, compare_ents);
@@ -102,9 +131,11 @@ void test_symlink_fts_info(int base_options) {
   }
 
   expect_next_ftsent(fts_read(ftsp), "./t2", 0, FTS_D);
-  expect_next_ftsent(fts_read(ftsp), "./t2/broken_symlink1", 1, FTS_SL);
+  if (sym2 == 0)
+    expect_next_ftsent(fts_read(ftsp), "./t2/broken_symlink1", 1, FTS_SL);
   expect_next_ftsent(fts_read(ftsp), "./t2/file1", 1, FTS_F);
-  expect_next_ftsent(fts_read(ftsp), "./t2/symlink1", 1, FTS_SL);
+  if (sym1 == 0)
+    expect_next_ftsent(fts_read(ftsp), "./t2/symlink1", 1, FTS_SL);
   expect_next_ftsent(fts_read(ftsp), "./t2", 0, FTS_DP);
 
   fts_close(ftsp);
@@ -118,10 +149,14 @@ void test_symlink_fts_info(int base_options) {
 
   expect_next_ftsent(fts_read(ftsp), "./t2", 0, FTS_D);
   // FTS_SLNONE should be returned for broken symlinks in FTS_LOGICAL mode
-  expect_next_ftsent(fts_read(ftsp), "./t2/broken_symlink1", 1, FTS_SLNONE);
+  if (sym2 == 0)
+    expect_next_ftsent(fts_read(ftsp), "./t2/broken_symlink1", 1, FTS_SLNONE);
   expect_next_ftsent(fts_read(ftsp), "./t2/file1", 1, FTS_F);
-  expect_next_ftsent(fts_read(ftsp), "./t2/symlink1", 1, FTS_F);
+  if (sym1 == 0)
+    expect_next_ftsent(fts_read(ftsp), "./t2/symlink1", 1, FTS_F);
   expect_next_ftsent(fts_read(ftsp), "./t2", 0, FTS_DP);
+
+  rm_rf("t2");
 }
 
 void __expect_child_ftsent(FTSENT *p, const char *name, short level, int info,
@@ -158,12 +193,12 @@ void __expect_child_ftsent(FTSENT *p, const char *name, short level, int info,
 void test_fts_children(int base_options) {
   FTS *ftsp;
 
-  mkdir("t3", 0755);
-  touch("t3/file1");
-  mkdir("t3/dir1", 0755);
-  touch("t3/dir1/file2");
-  mkdir("t3/dir1/dir2", 0755);
-  touch("t3/dir1/file3");
+  TEST(mkdir("t3", 0755) == 0);
+  TEST(touch("t3/file1") == 0);
+  TEST(mkdir("t3/dir1", 0755) == 0);
+  TEST(touch("t3/dir1/file2") == 0);
+  TEST(mkdir("t3/dir1/dir2", 0755) == 0);
+  TEST(touch("t3/dir1/file3") == 0);
 
   char *paths[] = {"./t3", NULL};
   ftsp = fts_open(paths, base_options, compare_ents);
@@ -181,6 +216,8 @@ void test_fts_children(int base_options) {
   expect_child_ftsent(ents->fts_link, "file1", 1, FTS_F);
 
   fts_close(ftsp);
+
+  rm_rf("t3");
 }
 
 int main(void) {

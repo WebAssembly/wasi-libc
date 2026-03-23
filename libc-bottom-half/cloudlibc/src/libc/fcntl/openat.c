@@ -155,7 +155,7 @@ int __wasilibc_nocwd_openat_nomode(int fd, const char *path, int oflag) {
                                                  &new_handle,
                                                  &error_code);
   if (!ok) {
-    translate_error(error_code);
+    translate_error(&error_code);
     return -1;
   }
 

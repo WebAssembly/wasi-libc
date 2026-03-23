@@ -5,8 +5,8 @@
 
 #ifndef __wasip1__
 
-#include <wasi/sockets_utils.h>
 #include <sys/socket.h>
+#include <wasi/sockets_utils.h>
 
 // Normalize names on WASIp2 to the WASIp3-based names
 #ifdef __wasip2__
@@ -24,10 +24,25 @@ typedef struct {
   int dummy;
 } tcp_socket_state_bound_t;
 typedef struct {
+#ifdef __wasip2__
   int dummy;
+#else
+  // Arguments, results, and subtask connected to `[method]tcp-socket.connect`
+  // while it's in-progress. Note that `subtask` may be 0 in which case it means
+  // that `result` is valid as it's been filled in.
+  sockets_method_tcp_socket_connect_args_t args;
+  sockets_result_void_error_code_t result;
+  wasip3_subtask_t subtask;
+#endif
 } tcp_socket_state_connecting_t;
 typedef struct {
+#ifdef __wasip2__
   int dummy;
+#else
+  // The `stream<tcp-socket>` that this is reading to receive accepted sockets.
+  sockets_stream_own_tcp_socket_t stream;
+  bool done;
+#endif
 } tcp_socket_state_listening_t;
 
 // Pollables here are lazily initialized on-demand.
@@ -38,7 +53,15 @@ typedef struct {
   streams_own_output_stream_t output;
   poll_own_pollable_t output_pollable;
 #else
-  int dummy; // TODO(wasip3)
+  // The bytes that are being received on this socket in addition to the future
+  // of the result to read when the socket hits EOF to see if there's an error.
+  wasip3_io_state_t receive;
+  sockets_future_result_void_error_code_t receive_result;
+
+  // The stream to write to in order to send out bytes, along with the `future`
+  // that communicates the result of the send.
+  wasip3_io_state_t send;
+  sockets_future_result_void_error_code_t send_result;
 #endif
 } tcp_socket_state_connected_t;
 
@@ -83,7 +106,8 @@ typedef struct {
 } tcp_socket_t;
 
 int __wasilibc_tcp_getsockopt(void *data, int level, int optname,
-                              void *restrict optval, socklen_t *restrict optlen);
+                              void *restrict optval,
+                              socklen_t *restrict optlen);
 int __wasilibc_tcp_setsockopt(void *data, int level, int optname,
                               const void *optval, socklen_t optlen);
 

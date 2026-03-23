@@ -1,105 +1,141 @@
+#include "test.h"
+#include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <netdb.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <poll.h>
-#include "test.h"
+#include <unistd.h>
 
-#define TEST(c) do { \
-	errno = 0; \
-	if (!(c)) \
-		t_error("%s failed (errno = %d)\n", #c, errno); \
-} while(0)
+#define TEST(c)                                                                \
+  do {                                                                         \
+    errno = 0;                                                                 \
+    if (!(c))                                                                  \
+      t_error("%s failed (errno = %d)\n", #c, errno);                          \
+  } while (0)
 
 int BUFSIZE = 256;
 
 void test_udp_client() {
-    // Prepare server socket
-    int server_port = 4001;
-    // Use non-blocking sockets
-    int server_socket_fd = socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, 0);
-    // Bind server to socket
-    struct sockaddr_in server_address;
-    server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_address.sin_port = htons(server_port);
-    TEST(bind(server_socket_fd, (struct sockaddr*)&server_address, sizeof(server_address)) != -1);
+  // Use non-blocking sockets
+  int server_socket_fd = socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, 0);
+  // Bind server to socket
+  struct sockaddr_in server_address;
+  socklen_t server_address_len = sizeof(server_address);
+  server_address.sin_family = AF_INET;
+  server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+  server_address.sin_port = 0;
+  TEST(bind(server_socket_fd, (struct sockaddr *)&server_address,
+            sizeof(server_address)) != -1);
 
-    // Prepare client socket
-    // Use non-blocking sockets
-    int socket_fd = socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, 0);
-    TEST(socket_fd != -1);
+  TEST(getsockname(server_socket_fd, (struct sockaddr *)&server_address,
+                   &server_address_len) != -1);
+  int server_port = ntohs(server_address.sin_port);
 
-    // Prepare sockaddr_in for client
-    struct sockaddr_in sockaddr_in;
-    sockaddr_in.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    sockaddr_in.sin_family = AF_INET;
-    sockaddr_in.sin_port = htons(server_port);
+  // Can `poll` on the server socket
+  {
+    struct pollfd poll_fd = {
+        .fd = server_socket_fd, .events = POLLWRNORM, .revents = 0};
+    TEST(poll(&poll_fd, 1, -1) != -1);
+  }
 
-    char message[] = "There's gonna be a party when the wolf comes home";
-    int len = strlen(message);
-    char client_buffer[BUFSIZE];
-    char server_buffer[BUFSIZE];
+  if (t_status)
+    return;
 
-    // Write to socket
-    ssize_t bytes_sent = sendto(socket_fd, message, len + 1, 0, (struct sockaddr*)&sockaddr_in, sizeof(sockaddr_in));
+  // Prepare client socket
+  // Use non-blocking sockets
+  int socket_fd = socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, 0);
+  TEST(socket_fd != -1);
 
-    // Receive from client
-    struct sockaddr_in sockaddr_client;
-    socklen_t sockaddr_client_len = sizeof(sockaddr_in);
-    ssize_t bytes_received = recvfrom(server_socket_fd, server_buffer, BUFSIZE, 0, (struct sockaddr*)&sockaddr_client, &sockaddr_client_len);
-    if (bytes_received == -1) {
-        if (errno != EWOULDBLOCK)
-          t_error("recvfrom failed (errno = %d)\n", errno);
-    }
+  // Prepare sockaddr_in for client
+  struct sockaddr_in sockaddr_in;
+  sockaddr_in.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  sockaddr_in.sin_family = AF_INET;
+  sockaddr_in.sin_port = htons(server_port);
 
-    while (bytes_received == -1) {
-        struct pollfd poll_fd = { .fd = server_socket_fd, .events = POLLRDNORM, .revents = 0 };
-        poll(&poll_fd, 1, 100);
-        bytes_received = recvfrom(server_socket_fd, server_buffer, BUFSIZE, 0, (struct sockaddr*)&sockaddr_client, &sockaddr_client_len);
-    }
+  char message[] = "There's gonna be a party when the wolf comes home";
+  int len = strlen(message);
+  char client_buffer[BUFSIZE];
+  char server_buffer[BUFSIZE];
 
-    TEST(bytes_sent == len + 1);
-    TEST(bytes_received == len + 1);
+  // Write to socket
+  ssize_t bytes_sent;
+  while (!t_status) {
+    bytes_sent = sendto(socket_fd, message, len + 1, 0,
+                        (struct sockaddr *)&sockaddr_in, sizeof(sockaddr_in));
+    if (bytes_sent != -1)
+      break;
+    if (errno != EWOULDBLOCK)
+      t_error("sendto failed (errno = %d)\n", errno);
+    struct pollfd poll_fd = {
+        .fd = socket_fd, .events = POLLWRNORM, .revents = 0};
+    TEST(poll(&poll_fd, 1, -1) != -1);
+  }
 
-    // Server echoes message back to client
-    bytes_sent = sendto(server_socket_fd, server_buffer, strlen(server_buffer) + 1, 0, (struct sockaddr*)&sockaddr_client, sockaddr_client_len);
-    bytes_received = recvfrom(socket_fd, client_buffer, BUFSIZE, 0, (struct sockaddr*)&sockaddr_in, &sockaddr_client_len);
-    if (bytes_sent == -1) {
-        struct pollfd poll_fd = { .fd = server_socket_fd, .events = POLLWRNORM, .revents = 0 };
-        poll(&poll_fd, 1, 100);
-    }
-    if (bytes_received == -1) {
-        struct pollfd poll_fd = { .fd = socket_fd, .events = POLLRDNORM, .revents = 0 };
-        poll(&poll_fd, 1, 100);
-        // Retry
-        bytes_received = recv(socket_fd, client_buffer, BUFSIZE, 0);
-    }
-    // If bytes_received still < 1, consider it a timeout
+  // Receive from client
+  struct sockaddr_in sockaddr_client;
+  socklen_t sockaddr_client_len = sizeof(sockaddr_in);
+  ssize_t bytes_received =
+      recvfrom(server_socket_fd, server_buffer, BUFSIZE, 0,
+               (struct sockaddr *)&sockaddr_client, &sockaddr_client_len);
+  if (bytes_received == -1) {
+    if (errno != EWOULDBLOCK)
+      t_error("recvfrom failed (errno = %d)\n", errno);
+  }
 
-    TEST(bytes_sent == len + 1);
-    TEST(bytes_received == len + 1);
+  while (bytes_received == -1) {
+    struct pollfd poll_fd = {
+        .fd = server_socket_fd, .events = POLLRDNORM, .revents = 0};
+    poll(&poll_fd, 1, 100);
+    bytes_received =
+        recvfrom(server_socket_fd, server_buffer, BUFSIZE, 0,
+                 (struct sockaddr *)&sockaddr_client, &sockaddr_client_len);
+  }
 
-    // Message received should be the same as message sent
-    if (bytes_sent == bytes_received)
-        TEST(strcmp(message, client_buffer) == 0);
+  TEST(bytes_sent == len + 1);
+  TEST(bytes_received == len + 1);
 
-    // Shut down client
-    close(socket_fd);
+  // Server echoes message back to client
+  bytes_sent =
+      sendto(server_socket_fd, server_buffer, strlen(server_buffer) + 1, 0,
+             (struct sockaddr *)&sockaddr_client, sockaddr_client_len);
+  bytes_received =
+      recvfrom(socket_fd, client_buffer, BUFSIZE, 0,
+               (struct sockaddr *)&sockaddr_in, &sockaddr_client_len);
+  if (bytes_sent == -1) {
+    struct pollfd poll_fd = {
+        .fd = server_socket_fd, .events = POLLWRNORM, .revents = 0};
+    poll(&poll_fd, 1, 100);
+  }
+  if (bytes_received == -1) {
+    struct pollfd poll_fd = {
+        .fd = socket_fd, .events = POLLRDNORM, .revents = 0};
+    poll(&poll_fd, 1, 100);
+    // Retry
+    bytes_received = recv(socket_fd, client_buffer, BUFSIZE, 0);
+  }
+  // If bytes_received still < 1, consider it a timeout
 
-    // Shut down server
-    close(server_socket_fd);
+  TEST(bytes_sent == len + 1);
+  TEST(bytes_received == len + 1);
+
+  // Message received should be the same as message sent
+  if (bytes_sent == bytes_received)
+    TEST(strcmp(message, client_buffer) == 0);
+
+  // Shut down client
+  TEST(close(socket_fd) == 0);
+
+  // Shut down server
+  TEST(close(server_socket_fd) == 0);
 }
 
-int main(void)
-{
-    test_udp_client();
+int main(void) {
+  test_udp_client();
 
-    return t_status;
+  return t_status;
 }

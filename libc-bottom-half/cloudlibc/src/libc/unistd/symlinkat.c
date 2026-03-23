@@ -41,7 +41,7 @@ int __wasilibc_nocwd_symlinkat(const char *path1, int fd, const char *path2) {
                                                     &error_code);
   // Check for errors
   if (!ok) {
-    translate_error(error_code);
+    translate_error(&error_code);
     return -1;
   }
 #else

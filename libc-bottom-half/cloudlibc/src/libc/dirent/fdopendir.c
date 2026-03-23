@@ -66,7 +66,7 @@ DIR *fdopendir(int fd) {
                                                         &error_code);
   if (!ok) {
     free(dirp);
-    translate_error(error_code);
+    translate_error(&error_code);
     return NULL;
   }
 

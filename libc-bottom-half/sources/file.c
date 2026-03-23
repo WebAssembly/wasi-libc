@@ -26,11 +26,10 @@ typedef struct {
   streams_own_pollable_t read_pollable;
   streams_own_pollable_t write_pollable;
 #else
-  filesystem_tuple2_stream_u8_future_result_void_error_code_t read;
-  filesystem_stream_u8_writer_t write;
-  filesystem_future_result_void_error_code_t write_future;
-  filesystem_result_void_error_code_t write_pending_result;
-  bool write_done;
+  wasip3_io_state_t read;
+  filesystem_future_result_void_error_code_t read_result;
+  wasip3_io_state_t write;
+  filesystem_future_result_void_error_code_t write_result;
 #endif
 } file_t;
 
@@ -54,23 +53,16 @@ static void file_close_streams(void *data) {
     file->write_stream.__handle = 0;
   }
 #else
-  if (file->read.f0 != 0) {
-    filesystem_stream_u8_drop_readable(file->read.f0);
-    file->read.f0 = 0;
+  wasip3_read_state_close(&file->read);
+  wasip3_write_state_close(&file->write);
+  if (file->read_result != 0) {
+    filesystem_future_result_void_error_code_drop_readable(file->read_result);
+    file->read_result = 0;
   }
-  if (file->read.f1 != 0) {
-    filesystem_future_result_void_error_code_drop_readable(file->read.f1);
-    file->read.f1 = 0;
+  if (file->write_result != 0) {
+    filesystem_future_result_void_error_code_drop_readable(file->write_result);
+    file->write_result = 0;
   }
-  if (file->write != 0) {
-    filesystem_stream_u8_drop_writable(file->write);
-    file->write = 0;
-  }
-  if (file->write_future != 0) {
-    filesystem_future_result_void_error_code_drop_readable(file->write_future);
-    file->write_future = 0;
-  }
-  file->write_done = false;
 #endif
 }
 
@@ -85,15 +77,15 @@ static void file_free(void *data) {
 static int file_read_eof(void *data) {
   file_t *file = (file_t *)data;
 
-  if (file->read.f1 != 0) {
+  if (file->read_result != 0) {
     filesystem_result_void_error_code_t result;
-    __wasilibc_future_block_on(
-        filesystem_future_result_void_error_code_read(file->read.f1, &result),
-        file->read.f1);
-    filesystem_future_result_void_error_code_drop_readable(file->read.f1);
-    file->read.f1 = 0;
+    __wasilibc_future_block_on(filesystem_future_result_void_error_code_read(
+                                   file->read_result, &result),
+                               file->read_result);
+    filesystem_future_result_void_error_code_drop_readable(file->read_result);
+    file->read_result = 0;
     if (result.is_err) {
-      translate_error(result.val.err);
+      translate_error(&result.val.err);
       return -1;
     }
   }
@@ -110,19 +102,22 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
         filesystem_borrow_descriptor(file->file_handle), file->offset,
         &file->read_stream, &error_code);
     if (!ok) {
-      translate_error(error_code);
+      translate_error(&error_code);
       return -1;
     }
   }
   read->input = streams_borrow_input_stream(file->read_stream);
   read->pollable = &file->read_pollable;
 #else
-  if (file->read.f0 == 0) {
+  if (!wasip3_io_state_present(&file->read)) {
+    assert(!file->read_result);
+    filesystem_tuple2_stream_u8_future_result_void_error_code_t result;
     filesystem_method_descriptor_read_via_stream(
-        filesystem_borrow_descriptor(file->file_handle), file->offset,
-        &file->read);
+        filesystem_borrow_descriptor(file->file_handle), file->offset, &result);
+    wasip3_io_state_init(&file->read, result.f0);
+    file->read_result = result.f1;
   }
-  read->stream = file->read.f0;
+  read->state = &file->read;
   read->eof = file_read_eof;
   read->eof_data = data;
 #endif
@@ -136,16 +131,20 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
 static int file_write_eof(void *data) {
   file_t *file = (file_t *)data;
 
-  if (file->write_future != 0) {
-    __wasilibc_future_block_on(
-      filesystem_future_result_void_error_code_read(file->write_future, &file->write_pending_result), 
-      file->write_future);
-    file->write_future = 0;
+  if (file->write_result) {
+    filesystem_result_void_error_code_t result;
+    __wasilibc_future_block_on(filesystem_future_result_void_error_code_read(
+                                   file->write_result, &result),
+                               file->write_result);
+    filesystem_future_result_void_error_code_drop_readable(file->write_result);
+    file->write_result = 0;
+
+    if (result.is_err) {
+      translate_error(&result.val.err);
+      return -1;
+    }
   }
-  if (file->write_pending_result.is_err) {
-    translate_error(file->write_pending_result.val.err);
-    return -1;
-  }
+
   return 0;
 }
 #endif
@@ -167,31 +166,30 @@ static int file_get_write_stream(void *data, wasi_write_t *write) {
           &file->write_stream, &error_code);
     }
     if (!ok) {
-      translate_error(error_code);
+      translate_error(&error_code);
       return -1;
     }
   }
   write->output = streams_borrow_output_stream(file->write_stream);
   write->pollable = &file->write_pollable;
 #else
-  if (file->write == 0) {
-    assert(file->write_future == 0);
-    filesystem_stream_u8_t write_read = filesystem_stream_u8_new(&file->write);
-    filesystem_future_result_void_error_code_t future;
+  if (!wasip3_io_state_present(&file->write)) {
+    assert(file->write_result == 0);
+    filesystem_stream_u8_writer_t writer;
+    filesystem_stream_u8_t write_read = filesystem_stream_u8_new(&writer);
     if (file->oflag & O_APPEND) {
-      future = filesystem_method_descriptor_append_via_stream(
+      file->write_result = filesystem_method_descriptor_append_via_stream(
           filesystem_borrow_descriptor(file->file_handle), write_read);
     } else {
-      future = filesystem_method_descriptor_write_via_stream(
+      file->write_result = filesystem_method_descriptor_write_via_stream(
           filesystem_borrow_descriptor(file->file_handle), write_read,
           file->offset);
     }
-    file->write_future = future;
+    wasip3_io_state_init(&file->write, writer);
   }
-  write->output = file->write;
+  write->state = &file->write;
   write->eof = file_write_eof;
   write->eof_data = data;
-  write->done = &file->write_done;
 #endif
   write->offset = &file->offset;
   write->timeout = 0;
@@ -212,7 +210,7 @@ static int file_fstat(void *data, struct stat *buf) {
   filesystem_error_code_t error;
   if (!filesystem_method_descriptor_metadata_hash(
           filesystem_borrow_descriptor(file->file_handle), &metadata, &error)) {
-    translate_error(error);
+    translate_error(&error);
     return -1;
   }
 
@@ -221,7 +219,7 @@ static int file_fstat(void *data, struct stat *buf) {
   bool stat_result = filesystem_method_descriptor_stat(
       filesystem_borrow_descriptor(file->file_handle), &internal_stat, &error);
   if (!stat_result) {
-    translate_error(error);
+    translate_error(&error);
     return -1;
   }
 
@@ -236,7 +234,7 @@ static int file_seek_end(file_t *file) {
   bool ok = filesystem_method_descriptor_stat(
       filesystem_borrow_descriptor(file->file_handle), &stat, &error);
   if (!ok) {
-    translate_error(error);
+    translate_error(&error);
     return -1;
   }
   file->offset = (off_t)stat.size;
@@ -300,7 +298,7 @@ static int file_fcntl_getfl(void *data) {
       filesystem_borrow_descriptor(file->file_handle);
   if (!filesystem_method_descriptor_get_flags(file_handle, &flags,
                                               &error_code)) {
-    translate_error(error_code);
+    translate_error(&error_code);
     return -1;
   }
 

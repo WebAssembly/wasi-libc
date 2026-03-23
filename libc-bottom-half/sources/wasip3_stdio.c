@@ -12,24 +12,23 @@
 
 #define KNOWN_NOT_A_TERMINAL -1
 
+typedef stdout_future_result_void_error_code_t (*stdout_stream_func_t)(stdin_stream_u8_t data);
+
 typedef struct {
-  // input stream and future for result<_, error-code-t>
-  stdin_tuple2_stream_u8_future_result_void_error_code_t input;
+  wasip3_io_state_t input;
+  stdin_future_result_void_error_code_t input_result;
   // tristate: zero=unknown, valid handle=yes, -1=no
   terminal_input_own_terminal_input_t terminal_in;
 } stdin3_t;
 
 typedef struct {
-  // contains stream, result storage and result future
-  stdout_future_result_void_error_code_t future;
-  stdin_stream_u8_writer_t output;
-  bool output_done;
-  stdout_result_void_error_code_t pending_result;
+  // contains stream, result storage and result subtask
+  stdout_future_result_void_error_code_t result;
+  wasip3_io_state_t output;
   // tristate: zero=unknown, valid handle=yes, -1=no
   terminal_output_own_terminal_output_t terminal_out;
   // stream creation function (delayed)
-  stdout_future_result_void_error_code_t (*stream_func)(
-      stdin_stream_u8_t data);
+  stdout_stream_func_t stream_func;
   // function to determine whether this is a terminal (delayed)
   bool (*terminal_func)(terminal_stdout_own_terminal_output_t *ret);
 } stdout3_t;
@@ -55,10 +54,9 @@ static void stdin3_free(void *data) {
   stdin3_t *stdio = (stdin3_t *)data;
   if (stdio->terminal_in.__handle > 0)
     terminal_input_terminal_input_drop_own(stdio->terminal_in);
-  if (stdio->input.f1)
-    stdin_future_result_void_error_code_drop_readable(stdio->input.f1);
-  if (stdio->input.f0)
-    stdin_stream_u8_drop_readable(stdio->input.f0);
+  wasip3_read_state_close(&stdio->input);
+  if (stdio->input_result)
+    stdin_stream_u8_drop_readable(stdio->input_result);
   free(stdio);
 }
 
@@ -66,40 +64,43 @@ static void stdout3_free(void *data) {
   stdout3_t *stdio = (stdout3_t *)data;
   if (stdio->terminal_out.__handle > 0)
     terminal_output_terminal_output_drop_own(stdio->terminal_out);
-  if (stdio->output)
-    stdin_stream_u8_drop_writable(stdio->output);
-  if (stdio->future) {
-    stdout_future_result_void_error_code_drop_readable(stdio->future);
-    stdio->future = 0;
-  }
+  wasip3_write_state_close(&stdio->output);
+  if (stdio->result)
+    stdout_future_result_void_error_code_drop_readable(stdio->result);
   free(stdio);
 }
 
 static int stdout3_write_eof(void *data) {
   stdout3_t *stdio = (stdout3_t *)data;
-  if (stdio->future != 0) {
-    stdout_future_result_void_error_code_drop_readable(stdio->future);
-    stdio->future = 0;
-  }
-  if (stdio->pending_result.is_err) {
-    translate_error(stdio->pending_result.val.err);
-    return -1;
+  if (stdio->result != 0) {
+    stdout_result_void_error_code_t result;
+    __wasilibc_future_block_on(
+        stdout_future_result_void_error_code_read(stdio->result, &result),
+        stdio->result);
+    stdout_future_result_void_error_code_drop_readable(stdio->result);
+    stdio->result = 0;
+
+    if (result.is_err) {
+      translate_error(result.val.err);
+      return -1;
+    }
   }
   return 0;
 }
 
 static int stdout3_write(void *data, wasi_write_t *out) {
   stdout3_t *stdio = (stdout3_t *)data;
-  if (!stdio->output) {
-    assert(!stdio->future);
-    stdin_stream_u8_t read_side = stdin_stream_u8_new(&stdio->output);
-    stdio->future = (*stdio->stream_func)(read_side);
+  if (!wasip3_io_state_present(&stdio->output)) {
+    assert(!stdio->result);
+    stdin_stream_u8_writer_t writer;
+    stdin_stream_u8_t read_side = stdin_stream_u8_new(&writer);
+    stdio->result = stdio->stream_func(read_side);
+    wasip3_io_state_init(&stdio->output, writer);
   }
   out->offset = NULL;
   out->blocking = true;
   out->timeout = 0;
-  out->output = stdio->output;
-  out->done = &stdio->output_done;
+  out->state = &stdio->output;
   out->eof = stdout3_write_eof;
   out->eof_data = data;
   return 0;
@@ -108,13 +109,13 @@ static int stdout3_write(void *data, wasi_write_t *out) {
 static int stdin3_read_eof(void *data) {
   stdin3_t *stdio = (stdin3_t *)data;
 
-  if (stdio->input.f1 != 0) {
+  if (stdio->input_result != 0) {
     stdin_result_void_error_code_t result;
     __wasilibc_future_block_on(
-        stdin_future_result_void_error_code_read(stdio->input.f1, &result),
-        stdio->input.f1);
-    stdin_future_result_void_error_code_drop_readable(stdio->input.f1);
-    stdio->input.f1 = 0;
+        stdin_future_result_void_error_code_read(stdio->input_result, &result),
+        stdio->input_result);
+    stdin_future_result_void_error_code_drop_readable(stdio->input_result);
+    stdio->input_result = 0;
     if (result.is_err) {
       translate_error(result.val.err);
       return -1;
@@ -125,11 +126,14 @@ static int stdin3_read_eof(void *data) {
 
 static int stdin3_read(void *data, wasi_read_t *read) {
   stdin3_t *stdio = (stdin3_t *)data;
-  if (!stdio->input.f0) {
-    assert(!stdio->input.f1);
-    stdin_read_via_stream(&stdio->input);
+  if (!wasip3_io_state_present(&stdio->input)) {
+    assert(!stdio->input_result);
+    stdin_tuple2_stream_u8_future_result_void_error_code_t result;
+    stdin_read_via_stream(&result);
+    wasip3_io_state_init(&stdio->input, result.f0);
+    stdio->input_result = result.f1;
   }
-  read->stream = stdio->input.f0;
+  read->state = &stdio->input;
   read->offset = NULL;
   read->blocking = true;
   read->timeout = 0;
@@ -201,8 +205,7 @@ static int stdio_add_input() {
 }
 
 static int stdio3_add_output(
-    stdout_future_result_void_error_code_t (*stream_func)(
-        stdin_stream_u8_t data),
+    stdout_stream_func_t stream_func,
     bool (*terminal_func)(terminal_stdout_own_terminal_output_t *ret)) {
   stdout3_t *stdio = calloc(1, sizeof(stdout3_t));
   if (!stdio) {
@@ -225,9 +228,7 @@ int __wasilibc_init_stdio() {
                         terminal_stdout_get_terminal_stdout) < 0)
     return -1;
   // assuming that stdout and stderr functions are compatible
-  if (stdio3_add_output(
-          (stdout_future_result_void_error_code_t(*)(
-              stdin_stream_u8_t))stderr_write_via_stream,
+  if (stdio3_add_output(stderr_write_via_stream,
           terminal_stderr_get_terminal_stderr) < 0)
     return -1;
   return 0;

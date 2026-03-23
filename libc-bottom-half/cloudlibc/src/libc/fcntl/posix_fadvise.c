@@ -67,7 +67,7 @@ int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
   }
   bool ok = filesystem_method_descriptor_advise(file_handle, offset, len, fs_advice, &error_code);
   if (!ok) {
-    translate_error(error_code);
+    translate_error(&error_code);
     return errno;
   }
   return 0;

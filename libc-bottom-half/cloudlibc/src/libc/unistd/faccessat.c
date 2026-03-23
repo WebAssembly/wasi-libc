@@ -76,7 +76,7 @@ int __wasilibc_nocwd_faccessat(int fd, const char *path, int amode, int flag) {
                                                  &stat_result,
                                                  &error_code);
   if (!ok) {
-    translate_error(error_code);
+    translate_error(&error_code);
     return -1;
   }
 
@@ -89,7 +89,7 @@ int __wasilibc_nocwd_faccessat(int fd, const char *path, int amode, int flag) {
                                                 &directory_flags,
                                                 &error_code);
     if (!ok) {
-      translate_error(error_code);
+      translate_error(&error_code);
       return -1;
     }
 

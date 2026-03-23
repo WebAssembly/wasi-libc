@@ -115,9 +115,20 @@ int main() {
 
   // Test that we can `recv` what we `send`
   {
-    // Send some data from the server to the client.
     uint8_t data[5] = {1, 2, 3, 4, 5};
-    TEST(send(server_client, data, sizeof(data), 0) == sizeof(data));
+    while (!t_status) {
+      // Send some data from the server to the client.
+      ssize_t sent = send(server_client, data, sizeof(data), 0);
+      if (sent != -1) {
+        TEST2(sent == sizeof(data));
+        break;
+      }
+      if (errno != EWOULDBLOCK)
+        t_error("send failed (errno = %d)\n", errno);
+      struct pollfd fd = {
+          .fd = server_client, .events = POLLWRNORM, .revents = 0};
+      TEST(poll(&fd, 1, -1) != -1);
+    }
 
     fds[0].events = POLLRDNORM;
     errno = 0;

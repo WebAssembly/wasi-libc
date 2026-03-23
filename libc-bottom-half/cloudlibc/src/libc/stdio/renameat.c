@@ -44,7 +44,7 @@ int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char 
                                                    &new_path,
                                                    &error_code);
   if (!ok) {
-    translate_error(error_code);
+    translate_error(&error_code);
     return -1;
   }
 #else

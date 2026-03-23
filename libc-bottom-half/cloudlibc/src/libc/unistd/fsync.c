@@ -27,7 +27,7 @@ int fsync(int fildes) {
   // Sync the file
   filesystem_error_code_t error_code;
   if (!filesystem_method_descriptor_sync(file_handle, &error_code)) {
-    translate_error(error_code);
+    translate_error(&error_code);
     return -1;
   }
 #else

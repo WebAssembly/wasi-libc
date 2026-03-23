@@ -36,6 +36,17 @@ foreach(header ${globbed_headers})
   add_sysroot_header(${header} ${dst})
 endforeach()
 
+file(
+  GLOB_RECURSE globbed_private_headers
+  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+  CONFIGURE_DEPENDS
+  headers/private/*.h
+)
+
+foreach(header ${globbed_private_headers})
+  clang_format_file(${header})
+endforeach()
+
 # =============================================================================
 # building bottom-half sources
 #
@@ -149,12 +160,12 @@ else()
     sources/sockopt.c
     sources/tcp.c
     sources/udp.c
+    sources/netdb.c
   )
 endif()
 
 if(WASI STREQUAL "p2")
   list(APPEND bottom_half_sources
-    sources/netdb.c
     sources/wasip2.c
     sources/wasip2_stdio.c
   )

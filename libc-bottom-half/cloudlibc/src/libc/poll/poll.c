@@ -15,12 +15,35 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
   size_t maxevents = 2 * nfds + 1;
   __wasi_subscription_t subscriptions[maxevents];
   size_t nsubscriptions = 0;
+
+  // POLLPRI (exceptional/out-of-band data) is not supported in WASI.
+  // If all requested events across all fds are POLLPRI, return ENOSYS.
+  // Otherwise, remove POLLPRI so it never fires (same as no OOB data).
+  {
+    bool has_pri_only = false;
+    bool has_non_pri = false;
+    for (size_t i = 0; i < nfds; ++i) {
+      if (fds[i].fd < 0 || fds[i].events == 0)
+        continue;
+      if (fds[i].events & ~POLLPRI)
+        has_non_pri = true;
+      else
+        has_pri_only = true;
+    }
+    if (has_pri_only && !has_non_pri) {
+      errno = ENOSYS;
+      return -1;
+    }
+  }
+
   for (size_t i = 0; i < nfds; ++i) {
     struct pollfd *pollfd = &fds[i];
     if (pollfd->fd < 0)
       continue;
+    // Strip POLLPRI as it is never reported in WASI.
+    short events = pollfd->events & ~POLLPRI;
     bool created_events = false;
-    if ((pollfd->events & POLLRDNORM) != 0) {
+    if ((events & POLLRDNORM) != 0) {
       __wasi_subscription_t *subscription = &subscriptions[nsubscriptions++];
       *subscription = (__wasi_subscription_t){
           .userdata = (uintptr_t)pollfd,
@@ -29,7 +52,7 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
       };
       created_events = true;
     }
-    if ((pollfd->events & POLLWRNORM) != 0) {
+    if ((events & POLLWRNORM) != 0) {
       __wasi_subscription_t *subscription = &subscriptions[nsubscriptions++];
       *subscription = (__wasi_subscription_t){
           .userdata = (uintptr_t)pollfd,
@@ -42,8 +65,9 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
     // As entries are decomposed into separate read/write subscriptions,
     // we cannot detect POLLERR, POLLHUP and POLLNVAL if POLLRDNORM and
     // POLLWRNORM are not specified. Disallow this for now.
-    // Ignore fd entries that have no events requested.
-    if (!created_events && pollfd->events != 0) {
+    // Ignore fd entries that have no events requested (including
+    // entries that only had POLLPRI which was stripped above).
+    if (!created_events && events != 0) {
       errno = ENOSYS;
       return -1;
     }
@@ -176,6 +200,26 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
     fds[i].revents = 0;
   }
 
+  // POLLPRI (exceptional/out-of-band data) is not supported in WASI.
+  // If all requested events across all fds are exclusively POLLPRI,
+  // return ENOSYS. Otherwise, strip POLLPRI and proceed.
+  {
+    bool has_pri_only = false;
+    bool has_non_pri = false;
+    for (size_t i = 0; i < nfds; ++i) {
+      if (fds[i].fd < 0 || fds[i].events == 0)
+        continue;
+      if (fds[i].events & ~POLLPRI)
+        has_non_pri = true;
+      else
+        has_pri_only = true;
+    }
+    if (has_pri_only && !has_non_pri) {
+      errno = ENOSYS;
+      return -1;
+    }
+  }
+
   size_t max_pollables = (2 * nfds) + 1;
   state_t states[max_pollables];
   poll_borrow_pollable_t pollables[max_pollables];
@@ -207,14 +251,17 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
       continue;
     }
 
+    // Strip POLLPRI, it is never reported in WASI (no OOB data).
+    short events = pollfd->events & ~POLLPRI;
+
     // Without a custom registration handle read/write readiness
     // below, but everything else is unsupported.
-    if (pollfd->events & ~(POLLRDNORM | POLLWRNORM)) {
+    if (events & ~(POLLRDNORM | POLLWRNORM)) {
       errno = EOPNOTSUPP;
       return -1;
     }
 
-    if (pollfd->events & POLLRDNORM) {
+    if (events & POLLRDNORM) {
       if (entry->vtable->get_read_stream) {
         wasi_read_t read;
         if (entry->vtable->get_read_stream(entry->data, &read) < 0)
@@ -227,7 +274,7 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
       }
     }
 
-    if (pollfd->events & POLLWRNORM) {
+    if (events & POLLWRNORM) {
       if (entry->vtable->get_write_stream) {
         wasi_write_t write;
         if (entry->vtable->get_write_stream(entry->data, &write) < 0)

@@ -19,23 +19,8 @@
 
 int BUFSIZE = 256;
 
-static int wait_for_server(struct sockaddr_in *addr) {
-  for (int attempt = 0; attempt < 200; attempt++) {
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
-    TEST(fd != -1);
-    if (connect(fd, (struct sockaddr *)addr, sizeof(*addr)) != -1)
-      return fd;
-    close(fd);
-    usleep(5000); // sleep for 5ms
-  }
-  t_error("server didn't come online within 1 second (errno = %d)\n", errno);
-  return -1;
-}
-
 // See sockets-server.c -- must be running already as a separate executable
-void test_tcp_client() {
-  // Prepare server socket
-  int server_port = 4001;
+void test_tcp_client(int server_port) {
 
   // Prepare sockaddr_in for client
   struct sockaddr_in sockaddr_in;
@@ -47,7 +32,10 @@ void test_tcp_client() {
   char message[] = "There's gonna be a party when the wolf comes home";
   int len = strlen(message);
 
-  int socket_fd = wait_for_server(&sockaddr_in);
+  int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  TEST(socket_fd != -1);
+  TEST(connect(socket_fd, (struct sockaddr *)&sockaddr_in,
+               sizeof(sockaddr_in)) == 0);
 
   // Set the timeout to 2 us so that it should time out while sending
   struct timeval tv = {.tv_sec = 0, .tv_usec = 2};
@@ -61,8 +49,17 @@ void test_tcp_client() {
   close(socket_fd);
 }
 
-int main(void) {
-  test_tcp_client();
+int main(int argc, char *argv[]) {
+  if (argc != 2) {
+    fprintf(stderr, "Usage: %s <server_port>\n", argv[0]);
+    return 1;
+  }
+  int port;
+  if (sscanf(argv[1], "%d", &port) != 1) {
+    fprintf(stderr, "Invalid port number: %s\n", argv[1]);
+    return 1;
+  }
+  test_tcp_client(port);
 
   return t_status;
 }

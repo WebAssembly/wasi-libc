@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
 package wasi:filesystem@0.3.0-rc-2026-02-09;
+========
+package wasi:filesystem@0.3.0-rc-2026-03-15;
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
 
 /// WASI filesystem is a filesystem API primarily intended to let users run WASI
 /// programs that access their files on their existing filesystems, without
@@ -35,6 +39,7 @@ package wasi:filesystem@0.3.0-rc-2026-02-09;
 /// store or a database instead.
 ///
 /// [WASI filesystem path resolution]: https://github.com/WebAssembly/wasi-filesystem/blob/main/path-resolution.md
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
 @since(version = 0.3.0-rc-2026-02-09)
 interface types {
   @since(version = 0.3.0-rc-2026-02-09)
@@ -42,16 +47,30 @@ interface types {
 
   /// File size or length of a region within a file.
   @since(version = 0.3.0-rc-2026-02-09)
+========
+@since(version = 0.3.0-rc-2026-03-15)
+interface types {
+  @since(version = 0.3.0-rc-2026-03-15)
+  use wasi:clocks/system-clock@0.3.0-rc-2026-03-15.{instant};
+
+  /// File size or length of a region within a file.
+  @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
   type filesize = u64;
 
   /// The type of a filesystem object referenced by a descriptor.
   ///
   /// Note: This was called `filetype` in earlier versions of WASI.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
   @since(version = 0.3.0-rc-2026-02-09)
   enum descriptor-type {
     /// The type of the descriptor or file is unknown or is different from
     /// any of the other types specified.
     unknown,
+========
+  @since(version = 0.3.0-rc-2026-03-15)
+  variant descriptor-type {
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     /// The descriptor refers to a block device inode.
     block-device,
     /// The descriptor refers to a character device inode.
@@ -66,12 +85,19 @@ interface types {
     regular-file,
     /// The descriptor refers to a socket.
     socket,
+    /// The type of the descriptor or file is different from any of the
+    /// other types specified.
+    other(option<string>),
   }
 
   /// Descriptor flags.
   ///
   /// Note: This was called `fdflags` in earlier versions of WASI.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
   @since(version = 0.3.0-rc-2026-02-09)
+========
+  @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
   flags descriptor-flags {
     /// Read mode: Data can be read.
     read,
@@ -113,7 +139,11 @@ interface types {
   }
 
   /// Flags determining the method of how paths are resolved.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
   @since(version = 0.3.0-rc-2026-02-09)
+========
+  @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
   flags path-flags {
     /// As long as the resolved path corresponds to a symbolic link, it is
     /// expanded.
@@ -121,7 +151,11 @@ interface types {
   }
 
   /// Open flags used by `open-at`.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
   @since(version = 0.3.0-rc-2026-02-09)
+========
+  @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
   flags open-flags {
     /// Create file if it does not exist, similar to `O_CREAT` in POSIX.
     create,
@@ -134,13 +168,21 @@ interface types {
   }
 
   /// Number of hard links to an inode.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
   @since(version = 0.3.0-rc-2026-02-09)
+========
+  @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
   type link-count = u64;
 
   /// File attributes.
   ///
   /// Note: This was called `filestat` in earlier versions of WASI.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
   @since(version = 0.3.0-rc-2026-02-09)
+========
+  @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
   record descriptor-stat {
     /// File type.
     %type: descriptor-type,
@@ -167,7 +209,11 @@ interface types {
   }
 
   /// When setting a timestamp, this gives the value to set it to.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
   @since(version = 0.3.0-rc-2026-02-09)
+========
+  @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
   variant new-timestamp {
     /// Leave the timestamp set to its previous value.
     no-change,
@@ -179,7 +225,11 @@ interface types {
   }
 
   /// A directory entry.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
   @since(version = 0.3.0-rc-2026-02-09)
+========
+  @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
   record directory-entry {
     /// The type of the file referred to by this directory entry.
     %type: descriptor-type,
@@ -191,8 +241,13 @@ interface types {
   /// Not all of these error codes are returned by the functions provided by this
   /// API; some are used in higher-level library layers, and others are provided
   /// merely for alignment with POSIX.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
   @since(version = 0.3.0-rc-2026-02-09)
   enum error-code {
+========
+  @since(version = 0.3.0-rc-2026-03-15)
+  variant error-code {
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     /// Permission denied, similar to `EACCES` in POSIX.
     access,
     /// Connection already in progress, similar to `EALREADY` in POSIX.
@@ -265,10 +320,18 @@ interface types {
     text-file-busy,
     /// Cross-device link, similar to `EXDEV` in POSIX.
     cross-device,
+    /// A catch-all for errors not captured by the existing variants.
+    /// Implementations can use this to extend the error type without
+    /// breaking existing code.
+    other(option<string>),
   }
 
   /// File or memory access pattern advisory information.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
   @since(version = 0.3.0-rc-2026-02-09)
+========
+  @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
   enum advice {
     /// The application has no advice to give on its behavior with respect
     /// to the specified data.
@@ -292,7 +355,11 @@ interface types {
 
   /// A 128-bit hash value, split into parts because wasm doesn't have a
   /// 128-bit integer type.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
   @since(version = 0.3.0-rc-2026-02-09)
+========
+  @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
   record metadata-hash-value {
     /// 64 bits of a 128-bit hash value.
     lower: u64,
@@ -303,7 +370,11 @@ interface types {
   /// A descriptor is a reference to a filesystem object, which may be a file,
   /// directory, named pipe, special file, or other object on which filesystem
   /// calls may be made.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
   @since(version = 0.3.0-rc-2026-02-09)
+========
+  @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
   resource descriptor {
     /// Return a stream for reading from a file.
     ///
@@ -321,7 +392,11 @@ interface types {
     /// resolves to `err` with an `error-code`.
     ///
     /// Note: This is similar to `pread` in POSIX.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     read-via-stream: func(offset: filesize) -> tuple<stream<u8>, future<result<_, error-code>>>;
     /// Return a stream for writing to a file, if available.
     ///
@@ -335,7 +410,11 @@ interface types {
     /// written or an error is encountered.
     ///
     /// Note: This is similar to `pwrite` in POSIX.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     write-via-stream: func(data: stream<u8>, offset: filesize) -> future<result<_, error-code>>;
     /// Return a stream for appending to a file, if available.
     ///
@@ -345,12 +424,20 @@ interface types {
     /// written or an error is encountered.
     ///
     /// Note: This is similar to `write` with `O_APPEND` in POSIX.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     append-via-stream: func(data: stream<u8>) -> future<result<_, error-code>>;
     /// Provide file advisory information on a descriptor.
     ///
     /// This is similar to `posix_fadvise` in POSIX.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     advise: async func(offset: filesize, length: filesize, advice: advice) -> result<_, error-code>;
     /// Synchronize the data of a file to disk.
     ///
@@ -358,7 +445,11 @@ interface types {
     /// opened for writing.
     ///
     /// Note: This is similar to `fdatasync` in POSIX.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     sync-data: async func() -> result<_, error-code>;
     /// Get flags associated with a descriptor.
     ///
@@ -366,7 +457,11 @@ interface types {
     ///
     /// Note: This returns the value that was the `fs_flags` value returned
     /// from `fdstat_get` in earlier versions of WASI.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     get-flags: async func() -> result<descriptor-flags, error-code>;
     /// Get the dynamic type of a descriptor.
     ///
@@ -378,20 +473,32 @@ interface types {
     ///
     /// Note: This returns the value that was the `fs_filetype` value returned
     /// from `fdstat_get` in earlier versions of WASI.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     get-type: async func() -> result<descriptor-type, error-code>;
     /// Adjust the size of an open file. If this increases the file's size, the
     /// extra bytes are filled with zeros.
     ///
     /// Note: This was called `fd_filestat_set_size` in earlier versions of WASI.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     set-size: async func(size: filesize) -> result<_, error-code>;
     /// Adjust the timestamps of an open file or directory.
     ///
     /// Note: This is similar to `futimens` in POSIX.
     ///
     /// Note: This was called `fd_filestat_set_times` in earlier versions of WASI.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     set-times: async func(data-access-timestamp: new-timestamp, data-modification-timestamp: new-timestamp) -> result<_, error-code>;
     /// Read directory entries from a directory.
     ///
@@ -405,7 +512,11 @@ interface types {
     ///
     /// This function returns a future, which will resolve to an error code if
     /// reading full contents of the directory fails.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     read-directory: func() -> tuple<stream<directory-entry>, future<result<_, error-code>>>;
     /// Synchronize the data and metadata of a file to disk.
     ///
@@ -413,12 +524,20 @@ interface types {
     /// opened for writing.
     ///
     /// Note: This is similar to `fsync` in POSIX.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     sync: async func() -> result<_, error-code>;
     /// Create a directory.
     ///
     /// Note: This is similar to `mkdirat` in POSIX.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     create-directory-at: async func(path: string) -> result<_, error-code>;
     /// Return the attributes of an open file or directory.
     ///
@@ -429,7 +548,11 @@ interface types {
     /// modified, use `metadata-hash`.
     ///
     /// Note: This was called `fd_filestat_get` in earlier versions of WASI.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     stat: async func() -> result<descriptor-stat, error-code>;
     /// Return the attributes of a file or directory.
     ///
@@ -438,7 +561,11 @@ interface types {
     /// discussion of alternatives.
     ///
     /// Note: This was called `path_filestat_get` in earlier versions of WASI.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     stat-at: async func(path-flags: path-flags, path: string) -> result<descriptor-stat, error-code>;
     /// Adjust the timestamps of a file or directory.
     ///
@@ -446,7 +573,11 @@ interface types {
     ///
     /// Note: This was called `path_filestat_set_times` in earlier versions of
     /// WASI.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     set-times-at: async func(path-flags: path-flags, path: string, data-access-timestamp: new-timestamp, data-modification-timestamp: new-timestamp) -> result<_, error-code>;
     /// Create a hard link.
     ///
@@ -455,7 +586,11 @@ interface types {
     /// `error-code::not-permitted` if the old path is not a file.
     ///
     /// Note: This is similar to `linkat` in POSIX.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     link-at: async func(old-path-flags: path-flags, old-path: string, new-descriptor: borrow<descriptor>, new-path: string) -> result<_, error-code>;
     /// Open a file or directory.
     ///
@@ -469,7 +604,11 @@ interface types {
     /// `error-code::read-only`.
     ///
     /// Note: This is similar to `openat` in POSIX.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     open-at: async func(path-flags: path-flags, path: string, open-flags: open-flags, %flags: descriptor-flags) -> result<descriptor, error-code>;
     /// Read the contents of a symbolic link.
     ///
@@ -477,19 +616,31 @@ interface types {
     /// filesystem, this function fails with `error-code::not-permitted`.
     ///
     /// Note: This is similar to `readlinkat` in POSIX.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     readlink-at: async func(path: string) -> result<string, error-code>;
     /// Remove a directory.
     ///
     /// Return `error-code::not-empty` if the directory is not empty.
     ///
     /// Note: This is similar to `unlinkat(fd, path, AT_REMOVEDIR)` in POSIX.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     remove-directory-at: async func(path: string) -> result<_, error-code>;
     /// Rename a filesystem object.
     ///
     /// Note: This is similar to `renameat` in POSIX.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     rename-at: async func(old-path: string, new-descriptor: borrow<descriptor>, new-path: string) -> result<_, error-code>;
     /// Create a symbolic link (also known as a "symlink").
     ///
@@ -497,6 +648,7 @@ interface types {
     /// `error-code::not-permitted`.
     ///
     /// Note: This is similar to `symlinkat` in POSIX.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
     symlink-at: async func(old-path: string, new-path: string) -> result<_, error-code>;
     /// Unlink a filesystem object that is not a directory.
@@ -504,6 +656,20 @@ interface types {
     /// Return `error-code::is-directory` if the path refers to a directory.
     /// Note: This is similar to `unlinkat(fd, path, 0)` in POSIX.
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+    symlink-at: async func(old-path: string, new-path: string) -> result<_, error-code>;
+    /// Unlink a filesystem object that is not a directory.
+    ///
+    /// This is similar to `unlinkat(fd, path, 0)` in POSIX.
+    ///
+    /// Error returns are as specified by POSIX.
+    ///
+    /// If the filesystem object is a directory, `error-code::access` or
+    /// `error-code::is-directory` may be returned instead of the
+    /// POSIX-specified `error-code::not-permitted`.
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     unlink-file-at: async func(path: string) -> result<_, error-code>;
     /// Test whether two descriptors refer to the same filesystem object.
     ///
@@ -511,7 +677,11 @@ interface types {
     /// same device (`st_dev`) and inode (`st_ino` or `d_ino`) numbers.
     /// wasi-filesystem does not expose device and inode numbers, so this function
     /// may be used instead.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     is-same-object: async func(other: borrow<descriptor>) -> bool;
     /// Return a hash of the metadata associated with a filesystem object referred
     /// to by a descriptor.
@@ -532,17 +702,26 @@ interface types {
     ///    computed hash.
     ///
     /// However, none of these is required.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     metadata-hash: async func() -> result<metadata-hash-value, error-code>;
     /// Return a hash of the metadata associated with a filesystem object referred
     /// to by a directory descriptor and a relative path.
     ///
     /// This performs the same hash computation as `metadata-hash`.
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
     @since(version = 0.3.0-rc-2026-02-09)
+========
+    @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
     metadata-hash-at: async func(path-flags: path-flags, path: string) -> result<metadata-hash-value, error-code>;
   }
 }
 
+<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-02-09/package.wit
 @since(version = 0.3.0-rc-2026-02-09)
 interface preopens {
   @since(version = 0.3.0-rc-2026-02-09)
@@ -562,5 +741,26 @@ world imports {
   @since(version = 0.3.0-rc-2026-02-09)
   import types;
   @since(version = 0.3.0-rc-2026-02-09)
+========
+@since(version = 0.3.0-rc-2026-03-15)
+interface preopens {
+  @since(version = 0.3.0-rc-2026-03-15)
+  use types.{descriptor};
+
+  /// Return the set of preopened directories, and their paths.
+  @since(version = 0.3.0-rc-2026-03-15)
+  get-directories: func() -> list<tuple<descriptor, string>>;
+}
+
+@since(version = 0.3.0-rc-2026-03-15)
+world imports {
+  @since(version = 0.3.0-rc-2026-03-15)
+  import wasi:clocks/types@0.3.0-rc-2026-03-15;
+  @since(version = 0.3.0-rc-2026-03-15)
+  import wasi:clocks/system-clock@0.3.0-rc-2026-03-15;
+  @since(version = 0.3.0-rc-2026-03-15)
+  import types;
+  @since(version = 0.3.0-rc-2026-03-15)
+>>>>>>>> main:wasi/p3/wit/deps/wasi-filesystem-0.3.0-rc-2026-03-15/package.wit
   import preopens;
 }

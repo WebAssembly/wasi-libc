@@ -31,7 +31,7 @@ function(ba_download target repo version)
   elseif (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
     if (target STREQUAL wkg)
       set(os pc-windows-gnu)
-    else()  
+    else()
       set(os windows)
     endif()
   else()
@@ -39,11 +39,13 @@ function(ba_download target repo version)
     message(WARNING "Unsupported system ${CMAKE_HOST_SYSTEM_NAME} for ${target}")
   endif()
 
-  if (target STREQUAL wasmtime)
-    set(fmt tar.xz)
-  elseif ((os STREQUAL windows) AND
-      ((target STREQUAL wasm-component-ld) OR (target STREQUAL wasm-tools)))
+  if ((os STREQUAL windows) AND
+      ((target STREQUAL wasm-component-ld) OR
+      (target STREQUAL wasm-tools) OR
+      (target STREQUAL wasmtime)))
     set(fmt zip)
+  elseif (target STREQUAL wasmtime)
+    set(fmt tar.xz)
   else()
     set(fmt tar.gz)
   endif()
@@ -53,7 +55,6 @@ function(ba_download target repo version)
   else()
     set(tag ${version})
   endif()
-
 
   message(STATUS "Using ${target} ${version} for ${arch}-${os} from ${repo}")
 
@@ -74,7 +75,7 @@ function(ba_download target repo version)
       BUILD_COMMAND ""
       INSTALL_COMMAND ""
     )
-    
+
     # Make the binary executable on Unix-like systems
     if (NOT CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
       ExternalProject_Add_Step(

@@ -277,9 +277,6 @@ set(top_half_sources
   musl/src/thread/common/pthread_spin_destroy.c
   musl/src/thread/common/pthread_spin_init.c
   musl/src/thread/common/pthread_testcancel.c
-  musl/src/thread/common/mtx_timedlock.c
-  musl/src/thread/common/mtx_init.c
-  musl/src/thread/common/mtx_destroy.c
   musl/src/thread/common/thrd_sleep.c
   musl/src/time/__month_to_secs.c
   musl/src/time/__secs_to_tm.c
@@ -452,6 +449,9 @@ if (THREADS)
     musl/src/thread/wasi-threads/sem_wait.c
     musl/src/thread/wasi-threads/wasi_thread_start.s
     musl/src/thread/wasi-threads/__wasilibc_busywait.c
+    musl/src/thread/common/mtx_timedlock.c
+    musl/src/thread/common/mtx_init.c
+    musl/src/thread/common/mtx_destroy.c
   )
 elseif(WASI STREQUAL "p3")
   # cooperative threads implementation for WASI Preview 3
@@ -511,7 +511,10 @@ elseif(WASI STREQUAL "p3")
     musl/src/thread/coop-threads/sem_post.c
     musl/src/thread/coop-threads/sem_timedwait.c
     musl/src/thread/coop-threads/sem_trywait.c
-    musl/src/thread/coop-threads/sem_wait.c)
+    musl/src/thread/coop-threads/sem_wait.c
+    musl/src/thread/common/mtx_timedlock.c
+    musl/src/thread/common/mtx_init.c
+    musl/src/thread/common/mtx_destroy.c)
 else()
   # pthreads stubs for single-threaded environment
   list(APPEND top_half_sources

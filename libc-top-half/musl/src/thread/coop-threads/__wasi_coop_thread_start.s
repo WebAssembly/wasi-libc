@@ -4,12 +4,8 @@
 
 	.globaltype	__init_stack_pointer, i32
 	.functype	__wasi_coop_thread_start_C (i32, i32) -> ()
-	.functype   __wasm_component_model_builtin_context_set_0 (i32) -> ()
-    .import_module __wasm_component_model_builtin_context_set_0, "$root"
-    .import_name __wasm_component_model_builtin_context_set_0, "[context-set-0]"
-    .functype   __wasm_component_model_builtin_context_set_1 (i32) -> ()
-    .import_module __wasm_component_model_builtin_context_set_1, "$root"
-    .import_name __wasm_component_model_builtin_context_set_1, "[context-set-1]"
+	.functype   __wasm_set_tls_base (i32) -> ()
+    .functype   __wasm_set_stack_pointer (i32) -> ()
 	.import_module __wasm_component_model_builtin_thread_index, "$root"
 	.import_name __wasm_component_model_builtin_thread_index, "[thread-index]"
     .functype   __wasm_component_model_builtin_thread_index () -> (i32)
@@ -24,11 +20,11 @@ __wasi_coop_thread_start:
 	# Set up the minimum C environment.
 	local.get   0  # start_arg
 	i32.load    0  # stack
-	call __wasm_component_model_builtin_context_set_0
+	call __wasm_set_stack_pointer
 
 	local.get   0  # start_arg
 	i32.load    4  # tls_base
-	call __wasm_component_model_builtin_context_set_1
+	call __wasm_set_tls_base
 	# Make the C function do the rest of work.
     call __wasm_component_model_builtin_thread_index
 	local.get   0  # start_arg

@@ -277,6 +277,9 @@ set(top_half_sources
   musl/src/thread/common/pthread_spin_destroy.c
   musl/src/thread/common/pthread_spin_init.c
   musl/src/thread/common/pthread_testcancel.c
+  musl/src/thread/common/mtx_timedlock.c
+  musl/src/thread/common/mtx_init.c
+  musl/src/thread/common/mtx_destroy.c
   musl/src/thread/common/thrd_sleep.c
   musl/src/time/__month_to_secs.c
   musl/src/time/__secs_to_tm.c
@@ -486,7 +489,7 @@ elseif(WASI STREQUAL "p3")
     musl/src/thread/coop-threads/pthread_mutex_trylock.c
     musl/src/thread/coop-threads/pthread_mutex_unlock.c
     musl/src/thread/coop-threads/pthread_once.c
-    musl/src/thread/wasi-threads/pthread_rwlock_rdlock.c
+    musl/src/thread/coop-threads/pthread_rwlock_rdlock.c
     musl/src/thread/coop-threads/pthread_rwlock_timedrdlock.c
     musl/src/thread/coop-threads/pthread_rwlock_timedwrlock.c
     musl/src/thread/coop-threads/pthread_rwlock_tryrdlock.c

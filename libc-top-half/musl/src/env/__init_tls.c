@@ -44,11 +44,8 @@ static inline unsigned char *get_stack_pointer() {
   unsigned char *sp;
 #ifdef __wasm_component_model_thread_context__
   __asm__(
-      ".functype   __wasm_component_model_builtin_context_get_0 () -> (i32)\n"
-      ".import_module __wasm_component_model_builtin_context_get_0, \"$root\"\n"
-      ".import_name __wasm_component_model_builtin_context_get_0, "
-      "\"[context-get-0]\"\n"
-      "call __wasm_component_model_builtin_context_get_0\n"
+      ".functype   __wasm_get_stack_pointer () -> (i32)\n"
+      "call __wasm_get_stack_pointer\n"
       "local.set %0\n"
       : "=r"(sp));
 #else

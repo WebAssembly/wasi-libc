@@ -69,8 +69,7 @@ elseif(TARGET_TRIPLE MATCHES "-wasip2$")
   set(SHARED ON)
 elseif(TARGET_TRIPLE MATCHES "-wasip3$")
   set(WASI p3)
-    # TODO: wasip3_thread_start.s also uses non-position-independent code.
-  set(SHARED OFF)
+  set(SHARED ON)
 else()
   message(FATAL_ERROR "Unknown WASI target triple: ${TARGET_TRIPLE}")
 endif()
@@ -150,7 +149,7 @@ else()
 endif()
 
 set(wasip2-version 0.2.0)
-set(wasip3-version 0.3.0-rc-2026-02-09)
+set(wasip3-version 0.3.0-rc-2026-03-15)
 
 include(bindings)
 include(builtins)

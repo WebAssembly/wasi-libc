@@ -68,6 +68,33 @@ target_compile_options(libc_test_support PRIVATE
   -Wno-sign-compare
 )
 
+function(add_wasilibc_shared_flags target)
+  add_dependencies(${target} sysroot builtins)
+  # Using an `INTERFACE` looks to get what we want here which is to rebuild this
+  # if the library changes but not actually add any arguments to the link-line.
+  target_link_libraries(${target} INTERFACE c)
+endfunction()
+
+if (NOT TARGET_TRIPLE MATCHES "-threads")
+  add_library(libc_test_support_shared SHARED
+    "${LIBC_TEST}/src/common/path.c"
+    "${LIBC_TEST}/src/common/print.c"
+    "${LIBC_TEST}/src/common/rand.c"
+    "${LIBC_TEST}/src/common/utf8.c"
+  )
+  target_include_directories(libc_test_support_shared PUBLIC "${LIBC_TEST}/src/common")
+  add_wasilibc_shared_flags(libc_test_support_shared)
+  # Disable some warnings in this third-party code
+  target_compile_options(libc_test_support_shared PRIVATE
+    -fvisibility=default
+    -fPIC
+    -Wno-unused-variable
+    -Wno-unused-parameter
+    -Wno-unused-function
+    -Wno-sign-compare
+  )
+endif()
+
 # Adds a new test executable to build
 #
 # * `executable_name` must be a unique name and valid cmake target name.
@@ -83,7 +110,7 @@ function(add_test_executable executable_name src)
   set(multiValueArgs LDFLAGS CFLAGS)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
-  # Build the test exeutable itself and apply all custom options as applicable.
+  # Build the test executable itself and apply all custom options as applicable.
   add_executable(${executable_name} ${src})
   clang_format_target(${executable_name})
   add_wasilibc_flags(${executable_name})
@@ -350,6 +377,40 @@ if (TARGET_TRIPLE MATCHES "-threads")
   # some extra warnings.
   add_wasilibc_test(pthread_mutex_busywait.c)
   target_compile_options(pthread_mutex_busywait.wasm PRIVATE -Wno-unused-variable)
+endif()
+
+# ========= shared library tests ================================
+
+function(add_wasilibc_shared_test test_file)
+  cmake_path(REPLACE_EXTENSION test_file so OUTPUT_VARIABLE test_library)
+  cmake_path(REPLACE_EXTENSION test_file wasm OUTPUT_VARIABLE test_name)
+  set(test_file "${CMAKE_CURRENT_SOURCE_DIR}/src/${test_file}")
+
+  add_library(${test_library} SHARED ${test_file})
+  target_compile_options(${test_library} PRIVATE -fPIC)
+  target_link_libraries(${test_library} PRIVATE libc_test_support_shared)
+  # Here we embed the component type custom section into `${test_library}` using
+  # `wasm-tools component embed`, then generate the `${test_name}` file by
+  # linking `${test_library}`, `liblibc_test_support_shared.so`, and `libc.so`
+  # together using `wasm-tools component link`.
+  #
+  # TODO: There must be a better way to express this in CMAKE.
+  add_custom_command(
+    TARGET ${test_library}
+    POST_BUILD
+    COMMAND ${wasm_tools} component embed --world wasi:cli/command "${CMAKE_CURRENT_SOURCE_DIR}/../wasi/p2/wit" $<TARGET_FILE:${test_library}> -o $<TARGET_FILE:${test_library}>
+    COMMAND ${wasm_tools} component link $<TARGET_FILE:${test_library}> "${SYSROOT_LIB}/libc.so" $<TARGET_FILE:libc_test_support_shared> -o ${test_name}
+    DEPENDS engine
+  )
+
+  add_test(
+    NAME "${test_name}"
+    COMMAND ${ENGINE} ${test_name}
+  )
+endfunction()
+
+if (WASI STREQUAL "p2")
+  add_wasilibc_shared_test(malloc-shared.c)
 endif()
 
 # ========= sockets-related tests ===============================

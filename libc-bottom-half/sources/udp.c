@@ -1165,7 +1165,6 @@ static int udp_poll_register(void *data, poll_state_t *state, short events) {
   case UDP_SOCKET_STATE_BOUND_STREAMING:
   case UDP_SOCKET_STATE_CONNECTED: {
     udp_socket_streams_t *streams = udp_streams(socket);
-    ;
     assert(streams);
 #ifdef __wasip2__
     if ((events & POLLRDNORM) != 0) {

@@ -215,7 +215,8 @@ static void udp_close_streams(udp_socket_streams_t *streams) {
   // on the result of cancellation.
   if (streams->recv_subtask) {
     assert(!streams->recv_ready);
-    wasip3_subtask_status_t status = wasip3_subtask_cancel(streams->recv_subtask);
+    wasip3_subtask_status_t status =
+        wasip3_subtask_cancel(streams->recv_subtask);
     wasip3_subtask_drop(streams->recv_subtask);
     streams->recv_subtask = 0;
     if (WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_RETURNED)
@@ -225,7 +226,8 @@ static void udp_close_streams(udp_socket_streams_t *streams) {
   // If a packet is buffered within this socket, then deallocate it and flag it
   // as no longer valid.
   if (streams->recv_ready) {
-    sockets_result_tuple2_list_u8_ip_socket_address_error_code_free(&streams->recv_result);
+    sockets_result_tuple2_list_u8_ip_socket_address_error_code_free(
+        &streams->recv_result);
     streams->recv_ready = false;
   }
 
@@ -516,27 +518,25 @@ static int udp_getpeername(void *data, struct sockaddr *addr,
 // This will kick off a call to `udp-socket#receive` to store the result in
 // `streams`. Returns `true` if a subtask was started here, and returns `false`
 // if the subtask was already in progress or a packet is already ready.
-static bool wasip3_recv_start(udp_socket_t *socket, udp_socket_streams_t *streams) {
+static bool wasip3_recv_start(udp_socket_t *socket,
+                              udp_socket_streams_t *streams) {
   if (streams->recv_subtask || streams->recv_ready)
     return false;
-  // If there's no active subtask, and something's not already ready, then kick
-  // off a receive now.
-  if (!streams->recv_subtask && !streams->recv_ready) {
-    wasip3_subtask_status_t status = sockets_method_udp_socket_receive(
-        sockets_borrow_udp_socket(socket->socket), &streams->recv_result);
-    if (WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_RETURNED) {
-      streams->recv_ready = true;
-    } else {
-      streams->recv_subtask = WASIP3_SUBTASK_HANDLE(status);
-    }
+  wasip3_subtask_status_t status = sockets_method_udp_socket_receive(
+      sockets_borrow_udp_socket(socket->socket), &streams->recv_result);
+  if (WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_RETURNED) {
+    streams->recv_ready = true;
+  } else {
+    streams->recv_subtask = WASIP3_SUBTASK_HANDLE(status);
   }
   return true;
 }
 
-// Ends the process of receiving a packet on `sokcet`.
+// Ends the process of receiving a packet on `socket`.
 //
 // Processes `event` from whence it came and updates internal state.
-static void wasip3_recv_end(udp_socket_streams_t *streams, wasip3_event_t *event) {
+static void wasip3_recv_end(udp_socket_streams_t *streams,
+                            wasip3_event_t *event) {
   assert(event->waitable == streams->recv_subtask);
   assert(event->code == WASIP3_SUBTASK_RETURNED);
   wasip3_subtask_drop(streams->recv_subtask);
@@ -544,7 +544,8 @@ static void wasip3_recv_end(udp_socket_streams_t *streams, wasip3_event_t *event
   streams->recv_ready = true;
 }
 
-static void wasip3_recv_ready(void *data, poll_state_t *state, wasip3_event_t *event) {
+static void wasip3_recv_ready(void *data, poll_state_t *state,
+                              wasip3_event_t *event) {
   udp_socket_t *socket = (udp_socket_t *)data;
   udp_socket_streams_t *streams = udp_streams(socket);
   assert(streams);
@@ -578,7 +579,7 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
     if (udp_create_streams(socket, NULL) < 0)
       return -1;
 
-  udp_socket_streams_t *streams = udp_streams(socket);;
+  udp_socket_streams_t *streams = udp_streams(socket);
   if (!streams) {
     // Unlike `send`, `recv` should _not_ perform an implicit bind.
     errno = EINVAL;
@@ -621,9 +622,9 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
     poll_method_pollable_block(udp_incoming_pollable(streams));
   }
 #else
-  // Ensure there's a subtask started or a packet ready. If this is a nonblocking
-  // operation and a subtask was started then polling below isn't very useful,
-  // so go ahead and return `EWOULDBLOCK`.
+  // Ensure there's a subtask started or a packet ready. If this is a
+  // nonblocking operation and a subtask was started then polling below isn't
+  // very useful, so go ahead and return `EWOULDBLOCK`.
   bool started = wasip3_recv_start(socket, streams);
   if (started && !should_block) {
     errno = EWOULDBLOCK;
@@ -677,14 +678,15 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
 
 #ifdef __wasip3__
 
-static int wasip3_send_resolve(udp_socket_streams_t *streams, bool should_block) {
+static int wasip3_send_resolve(udp_socket_streams_t *streams,
+                               bool should_block) {
   // If a previous packet is in flight then wait for that.
   //
   // * If this is a blocking context, then block here on the previous subtask.
   // * If this is a nonblocking context, poll the result and see what happens,
   //   bailing out if the subtask isn't ready yet.
   //
-  // Upon completion of the subtask it's cleared out and then the reuslt is
+  // Upon completion of the subtask it's cleared out and then the result is
   // flagged as ready for processing below. Note that there may not be a
   // subtask but the result may be ready for processing (e.g. a previous call
   // to `poll`), so the result processing is split out.
@@ -712,8 +714,7 @@ static int wasip3_send_resolve(udp_socket_streams_t *streams, bool should_block)
 
   // Check to see what happened with the previous send if the result is ready.
   // This is technically deferring an error on a call to `send` to the next call
-  // to `send` for nonblocking I/O, but there's only so much that can be done
-  // about that...
+  // to `send` for nonblocking I/O, but that's normal for UDP anyway.
   if (streams->send_result_ready) {
     free(streams->send_args.data.ptr);
     streams->send_args.data.ptr = NULL;
@@ -726,7 +727,8 @@ static int wasip3_send_resolve(udp_socket_streams_t *streams, bool should_block)
   return 0;
 }
 
-static void wasip3_send_ready(void *data, poll_state_t *state, wasip3_event_t *event) {
+static void wasip3_send_ready(void *data, poll_state_t *state,
+                              wasip3_event_t *event) {
   udp_socket_t *socket = (udp_socket_t *)data;
   udp_socket_streams_t *streams = udp_streams(socket);
   assert(streams);
@@ -790,7 +792,8 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
     if (udp_create_streams(socket, NULL) < 0)
       return -1;
 
-  udp_socket_streams_t *streams = udp_streams(socket);;
+  udp_socket_streams_t *streams = udp_streams(socket);
+  ;
   if (!streams) {
     errno = EINVAL;
     return -1;
@@ -873,8 +876,8 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
   streams->send_args.remote_address.is_some = has_remote_address;
   if (has_remote_address)
     streams->send_args.remote_address.val = remote_address;
-  wasip3_subtask_status_t status =
-      sockets_method_udp_socket_send(&streams->send_args, &streams->send_result);
+  wasip3_subtask_status_t status = sockets_method_udp_socket_send(
+      &streams->send_args, &streams->send_result);
 
   // The subtask didn't immediately return, so cancel it. Note that while
   // cancelling the subtask might return, so that's handled by falling through.
@@ -903,7 +906,8 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
     }
     memcpy(streams->send_args.data.ptr, buffer, length);
     streams->send_args.data.len = length;
-    status = sockets_method_udp_socket_send(&streams->send_args, &streams->send_result);
+    status = sockets_method_udp_socket_send(&streams->send_args,
+                                            &streams->send_result);
   }
 
   if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED) {
@@ -1157,7 +1161,8 @@ static int udp_poll_register(void *data, poll_state_t *state, short events) {
 
   case UDP_SOCKET_STATE_BOUND_STREAMING:
   case UDP_SOCKET_STATE_CONNECTED: {
-    udp_socket_streams_t *streams = udp_streams(socket);;
+    udp_socket_streams_t *streams = udp_streams(socket);
+    ;
     assert(streams);
 #ifdef __wasip2__
     if ((events & POLLRDNORM) != 0) {
@@ -1187,7 +1192,8 @@ static int udp_poll_register(void *data, poll_state_t *state, short events) {
         __wasilibc_poll_ready(state, POLLRDNORM);
       } else {
         assert(streams->recv_subtask != 0);
-        if (__wasilibc_poll_add(state, streams->recv_subtask, wasip3_recv_ready, data) < 0)
+        if (__wasilibc_poll_add(state, streams->recv_subtask, wasip3_recv_ready,
+                                data) < 0)
           return -1;
       }
     }
@@ -1197,7 +1203,8 @@ static int udp_poll_register(void *data, poll_state_t *state, short events) {
     // Otherwise we're waiting on the write subtask.
     if ((events & POLLWRNORM) != 0) {
       if (streams->send_subtask) {
-        if (__wasilibc_poll_add(state, streams->send_subtask, wasip3_send_ready, data) < 0)
+        if (__wasilibc_poll_add(state, streams->send_subtask, wasip3_send_ready,
+                                data) < 0)
           return -1;
       } else {
         __wasilibc_poll_ready(state, POLLWRNORM);

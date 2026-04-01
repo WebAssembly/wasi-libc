@@ -57,7 +57,8 @@ __wasilibc_poll_add_output_stream(poll_state_t *state,
 
 #ifdef __wasip3__
 
-typedef void (*poll_ready_t)(void *data, poll_state_t *state, wasip3_event_t *event);
+typedef void (*poll_ready_t)(void *data, poll_state_t *state,
+                             wasip3_event_t *event);
 
 /// Adds the `waitable` to the poll `state`.
 ///

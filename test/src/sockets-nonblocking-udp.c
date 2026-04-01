@@ -2,8 +2,6 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <sys/time.h>
-#include <time.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <poll.h>
@@ -11,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 
 #define TEST(c)                                                                \
@@ -61,7 +61,6 @@ void test_udp_client() {
     long nanoseconds_elapsed = (end_time.tv_sec - start_time.tv_sec) * 1E9 -
                                start_time.tv_nsec + end_time.tv_nsec;
     TEST(nanoseconds_elapsed >= 10 * 1E6);
-
   }
 
   // Prepare client socket

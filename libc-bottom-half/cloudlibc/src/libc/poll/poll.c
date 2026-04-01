@@ -428,8 +428,8 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
   while (event.event != WASIP3_EVENT_NONE) {
     // If this event is for the timeout subtask then that's handled directly here
     // as it's not related to any fds. Upon receiving the terminal status of
-    // the subtask it's no longer candiate for cancellation so it's immediately
-    // dropped and zero'd out to avoid process in the `out` label below.
+    // the subtask it's no longer candidate for cancellation so it's immediately
+    // dropped and zero'd out to avoid processing in the `out` label below.
     if (event.waitable == timeout_subtask) {
       assert(event.event == WASIP3_EVENT_SUBTASK);
       assert(event.code == WASIP3_SUBTASK_RETURNED);

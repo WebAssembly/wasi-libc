@@ -18,7 +18,7 @@
       t_error("%s failed (errno = %d)\n", #c, errno);                          \
   } while (0)
 
-#define _DEBUG 1
+#define _DEBUG 0
 
 #define DEBUG_PRINT(...)                                                       \
   if (_DEBUG) {                                                                \

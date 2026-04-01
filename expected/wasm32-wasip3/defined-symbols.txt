@@ -329,6 +329,9 @@ __wasilibc_nocwd_symlinkat
 __wasilibc_nocwd_utimensat
 __wasilibc_open_nomode
 __wasilibc_parse_port
+__wasilibc_poll_add
+__wasilibc_poll_ready
+__wasilibc_poll_waitable
 __wasilibc_populate_preopens
 __wasilibc_pthread_self
 __wasilibc_random

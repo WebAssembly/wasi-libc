@@ -52,22 +52,6 @@ function(add_wasilibc_flags target)
   endif()
 endfunction()
 
-add_library(libc_test_support STATIC
-  "${LIBC_TEST}/src/common/path.c"
-  "${LIBC_TEST}/src/common/print.c"
-  "${LIBC_TEST}/src/common/rand.c"
-  "${LIBC_TEST}/src/common/utf8.c"
-)
-target_include_directories(libc_test_support PUBLIC "${LIBC_TEST}/src/common")
-add_wasilibc_flags(libc_test_support)
-# Disable some warnings in this third-party code
-target_compile_options(libc_test_support PRIVATE
-  -Wno-unused-variable
-  -Wno-unused-parameter
-  -Wno-unused-function
-  -Wno-sign-compare
-)
-
 function(add_wasilibc_shared_flags target)
   add_dependencies(${target} sysroot builtins)
   # Using an `INTERFACE` looks to get what we want here which is to rebuild this
@@ -75,24 +59,39 @@ function(add_wasilibc_shared_flags target)
   target_link_libraries(${target} INTERFACE c)
 endfunction()
 
-if (NOT TARGET_TRIPLE MATCHES "-threads")
-  add_library(libc_test_support_shared SHARED
-    "${LIBC_TEST}/src/common/path.c"
-    "${LIBC_TEST}/src/common/print.c"
-    "${LIBC_TEST}/src/common/rand.c"
-    "${LIBC_TEST}/src/common/utf8.c"
-  )
-  target_include_directories(libc_test_support_shared PUBLIC "${LIBC_TEST}/src/common")
-  add_wasilibc_shared_flags(libc_test_support_shared)
+function(add_library_pair name)
+  add_library(${name} STATIC ${ARGN})
+
+  if (NOT TARGET_TRIPLE MATCHES "-threads")
+    add_library(${name}_shared SHARED ${ARGN})
+    set_pic(${name}_shared)
+  endif()
+endfunction()
+
+add_library_pair(libc_test_support
+  "${LIBC_TEST}/src/common/path.c"
+  "${LIBC_TEST}/src/common/print.c"
+  "${LIBC_TEST}/src/common/rand.c"
+  "${LIBC_TEST}/src/common/utf8.c"
+)
+
+function(configure_libc_test_support suffix)
   # Disable some warnings in this third-party code
-  target_compile_options(libc_test_support_shared PRIVATE
-    -fvisibility=default
-    -fPIC
+  target_include_directories(libc_test_support${suffix} PUBLIC "${LIBC_TEST}/src/common")
+  cmake_language(CALL add_wasilibc${suffix}_flags libc_test_support${suffix})
+  target_compile_options(libc_test_support${suffix} PRIVATE
     -Wno-unused-variable
     -Wno-unused-parameter
     -Wno-unused-function
     -Wno-sign-compare
   )
+endfunction()
+
+configure_libc_test_support("")
+
+if (NOT TARGET_TRIPLE MATCHES "-threads")
+    configure_libc_test_support("_shared")
+    target_compile_options(libc_test_support_shared PRIVATE -fvisibility=default)
 endif()
 
 # Adds a new test executable to build
@@ -387,7 +386,7 @@ function(add_wasilibc_shared_test test_file)
   set(test_file "${CMAKE_CURRENT_SOURCE_DIR}/src/${test_file}")
 
   add_library(${test_library} SHARED ${test_file})
-  target_compile_options(${test_library} PRIVATE -fPIC)
+  set_pic(${test_library})
   target_link_libraries(${test_library} PRIVATE libc_test_support_shared)
   # Here we embed the component type custom section into `${test_library}` using
   # `wasm-tools component embed`, then generate the `${test_name}` file by
@@ -400,7 +399,7 @@ function(add_wasilibc_shared_test test_file)
     POST_BUILD
     COMMAND ${wasm_tools} component embed --world wasi:cli/command "${CMAKE_CURRENT_SOURCE_DIR}/../wasi/p2/wit" $<TARGET_FILE:${test_library}> -o $<TARGET_FILE:${test_library}>
     COMMAND ${wasm_tools} component link $<TARGET_FILE:${test_library}> "${SYSROOT_LIB}/libc.so" $<TARGET_FILE:libc_test_support_shared> -o ${test_name}
-    DEPENDS engine
+    DEPENDS wasm_tools engine
   )
 
   add_test(

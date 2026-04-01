@@ -537,7 +537,7 @@ static bool wasip3_recv_start(udp_socket_t *socket,
 // Processes `event` from whence it came and updates internal state.
 static void wasip3_recv_end(udp_socket_streams_t *streams,
                             wasip3_event_t *event) {
-  (void) event;
+  (void)event;
   assert(event->waitable == streams->recv_subtask);
   assert(event->code == WASIP3_SUBTASK_RETURNED);
   wasip3_subtask_drop(streams->recv_subtask);

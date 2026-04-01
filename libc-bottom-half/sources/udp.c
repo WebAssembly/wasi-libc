@@ -730,6 +730,8 @@ static int wasip3_send_resolve(udp_socket_streams_t *streams,
 
 static void wasip3_send_ready(void *data, poll_state_t *state,
                               wasip3_event_t *event) {
+  (void)event;
+
   udp_socket_t *socket = (udp_socket_t *)data;
   udp_socket_streams_t *streams = udp_streams(socket);
   assert(streams);

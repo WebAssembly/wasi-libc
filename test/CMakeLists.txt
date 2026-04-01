@@ -392,8 +392,6 @@ function(add_wasilibc_shared_test test_file)
   # `wasm-tools component embed`, then generate the `${test_name}` file by
   # linking `${test_library}`, `liblibc_test_support_shared.so`, and `libc.so`
   # together using `wasm-tools component link`.
-  #
-  # TODO: There must be a better way to express this in CMAKE.
   add_custom_command(
     TARGET ${test_library}
     POST_BUILD

@@ -316,6 +316,7 @@ add_wasilibc_test(fadvise.c FS)
 # native windows machine.
 if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   set_tests_properties(fadvise.wasm PROPERTIES WILL_FAIL TRUE)
+  set_tests_properties(shared_fadvise.wasm PROPERTIES WILL_FAIL TRUE)
 endif()
 add_wasilibc_test(fallocate.c FS)
 add_wasilibc_test(fcntl.c FS)

@@ -1,7 +1,6 @@
 #define _WASI_EMULATED_PROCESS_CLOCKS
 #include <common/time.h>
 #include <time.h>
-#include <assert.h>
 
 _Static_assert(CLOCKS_PER_SEC == NSEC_PER_SEC,
                "This implementation assumes that `clock` is in nanoseconds");

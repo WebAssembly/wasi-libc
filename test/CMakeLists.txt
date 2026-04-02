@@ -285,7 +285,7 @@ add_libc_test(functional/wcsstr.c)
 add_libc_test(functional/wcstol.c)
 
 if (TARGET_TRIPLE MATCHES "-threads")
-  add_libc_test(functional/pthread_mutex.c)
+  add_libc_test(functional/pthread_mutex.c CFLAGS -Wno-unused-variable)
   add_libc_test(functional/pthread_tsd.c)
   add_libc_test(functional/pthread_cond.c)
 endif()

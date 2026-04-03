@@ -130,6 +130,8 @@ void test_udp_client() {
         echo_tail++;
         DEBUG_PRINT("Server received: %.*s (queued: %zu)\n", received, buf,
                     echo_tail - echo_head);
+      } else {
+        DEBUG_PRINT("Server failed to receive: %d\n", errno);
       }
     }
 
@@ -146,6 +148,8 @@ void test_udp_client() {
         TEST(sent == entry->msg_len);
         DEBUG_PRINT("Server echoed: %.*s\n", entry->msg_len, entry->message);
         echo_head++;
+      } else {
+        DEBUG_PRINT("Server failed to send: %d\n", errno);
       }
     }
 
@@ -169,6 +173,8 @@ void test_udp_client() {
           clients[i].state = CLIENT_RECEIVING;
           pfds[idx].events = POLLIN;
           DEBUG_PRINT("Client %zu sent: %s\n", i, clients[i].outgoing);
+        } else {
+          DEBUG_PRINT("Client failed to send: %d\n", errno);
         }
         break;
       }
@@ -186,6 +192,8 @@ void test_udp_client() {
           clients_done++;
           DEBUG_PRINT("Client %zu done: got '%s' (%d/%d)\n", i,
                       clients[i].incoming, clients_done, MAX_CONNECTIONS);
+        } else {
+          DEBUG_PRINT("Client failed to recv: %d\n", errno);
         }
         break;
       }

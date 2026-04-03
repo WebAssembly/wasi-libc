@@ -153,4 +153,12 @@ ssize_t __wasilibc_stream_block_on_timeout(wasip3_waitable_status_t status,
   return WASIP3_WAITABLE_COUNT(status);
 }
 
+void __wasilibc_poll_waitable(uint32_t waitable, wasip3_event_t *event) {
+  wasip3_waitable_set_t set = wasip3_waitable_set_new();
+  wasip3_waitable_join(waitable, set);
+  wasip3_waitable_set_poll(set, event);
+  wasip3_waitable_join(waitable, 0);
+  wasip3_waitable_set_drop(set);
+}
+
 #endif

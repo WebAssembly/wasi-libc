@@ -83,6 +83,12 @@ static inline size_t __wasilibc_stream_block_on(wasip3_waitable_status_t status,
   return ret;
 }
 
+/// Polls the `waitable` provide, filling in `event`, if any.
+///
+/// This will call `waitable-set.poll` with `waitable` and the `event` is
+/// whatever that returns.
+void __wasilibc_poll_waitable(uint32_t waitable, wasip3_event_t *event);
+
 #endif // __wasip3__
 
 #endif // WASI_WASIP3_BLOCK_H

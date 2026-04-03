@@ -12,7 +12,8 @@
 
 #define KNOWN_NOT_A_TERMINAL -1
 
-typedef stdout_future_result_void_error_code_t (*stdout_stream_func_t)(stdin_stream_u8_t data);
+typedef stdout_future_result_void_error_code_t (*stdout_stream_func_t)(
+    stdin_stream_u8_t data);
 
 typedef struct {
   wasip3_io_state_t input;
@@ -229,7 +230,7 @@ int __wasilibc_init_stdio() {
     return -1;
   // assuming that stdout and stderr functions are compatible
   if (stdio3_add_output(stderr_write_via_stream,
-          terminal_stderr_get_terminal_stderr) < 0)
+                        terminal_stderr_get_terminal_stderr) < 0)
     return -1;
   return 0;
 }

@@ -411,14 +411,14 @@ if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(poll-connect.c NETWORK FAILP3)
   add_wasilibc_test(poll-nonblocking-socket.c NETWORK FAILP3)
   add_wasilibc_test(setsockopt.c NETWORK)
-  add_wasilibc_test(sockets-nonblocking-udp.c NETWORK FAILP3)
+  add_wasilibc_test(sockets-nonblocking-udp.c NETWORK)
   add_wasilibc_test(sockets-nonblocking-multiple.c NETWORK FAILP3)
-  add_wasilibc_test(sockets-nonblocking-udp-multiple.c NETWORK FAILP3)
+  add_wasilibc_test(sockets-nonblocking-udp-multiple.c NETWORK)
   add_wasilibc_test(sockets-fcntl.c NETWORK)
   add_wasilibc_test(sockets-udp-connected.c NETWORK)
   add_wasilibc_test(getaddrinfo.c NETWORK)
   add_wasilibc_test(sockets-nonblocking.c NETWORK FAILP3)
-  add_wasilibc_test(sockets-nonblocking-udp-no-connection.c NETWORK FAILP3)
+  add_wasilibc_test(sockets-nonblocking-udp-no-connection.c NETWORK)
 
   # Define executables for server/client tests, and they're paired together in
   # various combinations below for various tests.

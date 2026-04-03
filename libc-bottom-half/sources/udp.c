@@ -796,7 +796,6 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
       return -1;
 
   udp_socket_streams_t *streams = udp_streams(socket);
-  ;
   if (!streams) {
     errno = EINVAL;
     return -1;

@@ -623,13 +623,22 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
     poll_method_pollable_block(udp_incoming_pollable(streams));
   }
 #else
-  // Ensure there's a subtask started or a packet ready. If this is a
-  // nonblocking operation and a subtask was started then polling below isn't
-  // very useful, so go ahead and return `EWOULDBLOCK`.
+  // Start a `recv` operation if there's not already one pending. If there's
+  // already one pending then this'll be left as-is.
+  //
+  // If work was started in `wasip3_recv_start`, and it's not ready, and we're
+  // nonblocking, then there's no point in falling through below to poll the
+  // result again since the operation just started. Test here for this situation
+  // and optionally return-early. Note, though, that if the work started here
+  // and completed immediately then this falls through to process the result.
   bool started = wasip3_recv_start(socket, streams);
   if (started && !should_block) {
-    errno = EWOULDBLOCK;
-    return -1;
+    if (streams->recv_ready) {
+      assert(!streams->recv_subtask);
+    } else {
+      errno = EWOULDBLOCK;
+      return -1;
+    }
   }
 
   // If there's an active subtask, then block on its resolution if that's

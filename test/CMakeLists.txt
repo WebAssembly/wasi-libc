@@ -38,35 +38,22 @@ endif()
 add_compile_options(--sysroot ${SYSROOT})
 add_link_options(--sysroot ${SYSROOT})
 
-# ========= libc-test defined tests =============================
+# ========= Helper functions for tests ==========================
+#
+# These are a set of helper functions and helper variables and such which
+# are used to build test executables appropriately with various flags and
+# to then run the test with appropriate arguments.
 
-function(add_wasilibc_flags target)
-  add_dependencies(${target} sysroot builtins)
-  # Using an `INTERFACE` looks to get what we want here which is to rebuild this
-  # if the library changes but not actually add any arguments to the link-line.
-  target_link_libraries(${target} INTERFACE c-static)
-
-  if (TARGET_TRIPLE MATCHES "-threads")
-    target_link_options(${target} PRIVATE -pthread
-      -Wl,--import-memory,--export-memory,--shared-memory,--max-memory=1073741824)
-  endif()
-endfunction()
-
-add_library(libc_test_support STATIC
+set(libc_test_support_files
   "${LIBC_TEST}/src/common/path.c"
   "${LIBC_TEST}/src/common/print.c"
   "${LIBC_TEST}/src/common/rand.c"
   "${LIBC_TEST}/src/common/utf8.c"
 )
-target_include_directories(libc_test_support PUBLIC "${LIBC_TEST}/src/common")
-add_wasilibc_flags(libc_test_support)
-# Disable some warnings in this third-party code
-target_compile_options(libc_test_support PRIVATE
-  -Wno-unused-variable
-  -Wno-unused-parameter
-  -Wno-unused-function
-  -Wno-sign-compare
-)
+set_source_files_properties("${LIBC_TEST}/src/common/rand.c"
+  PROPERTIES COMPILE_OPTIONS -Wno-unused-function)
+set_source_files_properties("${LIBC_TEST}/src/common/print.c"
+  PROPERTIES COMPILE_OPTIONS -Wno-sign-compare)
 
 # Adds a new test executable to build
 #
@@ -77,24 +64,57 @@ target_compile_options(libc_test_support PRIVATE
 #
 # * `CFLAGS -a -b -c` - additional flags to pass to the compiler
 # * `LDFLAGS -a -b -c` - additional flags to pass to the linker
+# * `SHARED` - link to the shared version of libc_test_support
+# * `SHARED_LIBS` - extra libs to pass to `wasm-tools component link`
 function(add_test_executable executable_name src)
-  set(options)
+  set(options SHARED)
   set(oneValueArgs)
-  set(multiValueArgs LDFLAGS CFLAGS)
+  set(multiValueArgs LDFLAGS CFLAGS SHARED_LIBS)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
   # Build the test exeutable itself and apply all custom options as applicable.
-  add_executable(${executable_name} ${src})
-  clang_format_target(${executable_name})
-  add_wasilibc_flags(${executable_name})
-  target_link_libraries(${executable_name} PRIVATE libc_test_support)
+  add_executable(${executable_name} ${src} ${libc_test_support_files})
+  target_include_directories(${executable_name} PRIVATE "${LIBC_TEST}/src/common")
+  add_dependencies(${executable_name} sysroot builtins)
+
+  if (TARGET_TRIPLE MATCHES "-threads")
+    target_link_options(${executable_name} PRIVATE -pthread
+      -Wl,--import-memory,--export-memory,--shared-memory,--max-memory=1073741824)
+  endif()
+
+  if(arg_SHARED)
+    set_pic(${executable_name})
+    # Skip wit-component when linking to manually run `wasm-tools component
+    # link` below. Additionally use `-shared` to wasm-ld, but notably not clang,
+    # to get clang to work with this as an executable but get `wasm-ld` to
+    # emit shared library imports.
+    #
+    # Note that `-fvisibility=default` is used to make the generated
+    # `__main_void` symbol from clang visible to wasi-libc itself.
+    target_link_options(${executable_name} PRIVATE -Wl,--skip-wit-component,-shared)
+    target_compile_options(${executable_name} PRIVATE -fvisibility=default)
+    add_custom_command(
+      TARGET ${executable_name}
+      POST_BUILD
+      COMMAND
+        ${wasm_tools} component link
+          $<TARGET_FILE:${executable_name}>
+          "${SYSROOT_LIB}/libc.so"
+          ${arg_SHARED_LIBS}
+          -o ${executable_name}
+      DEPENDS wasm-tools
+    )
+    target_link_libraries(${executable_name} PRIVATE c)
+  else()
+    clang_format_target(${executable_name})
+    target_link_libraries(${executable_name} INTERFACE c-static)
+  endif()
   foreach(flag IN LISTS arg_CFLAGS)
     target_compile_options(${executable_name} PRIVATE ${flag})
   endforeach()
   foreach(flag IN LISTS arg_LDFLAGS)
     target_link_options(${executable_name} PRIVATE ${flag})
   endforeach()
-  target_include_directories(${executable_name} PRIVATE "${LIBC_TEST}")
 endfunction()
 
 # Adds a new test to run.
@@ -114,7 +134,7 @@ endfunction()
 function(register_test test_name executable_name)
   set(options FS NETWORK FAILP3 SETJMP)
   set(oneValueArgs CLIENT PASS_REGULAR_EXPRESSION)
-  set(multiValueArgs ARGV ENV LDFLAGS CFLAGS)
+  set(multiValueArgs ARGV ENV)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
   set(wasmtime_args)
@@ -179,6 +199,29 @@ function(register_test test_name executable_name)
   add_dependencies(${test_name} engine)
 endfunction()
 
+# Helper function to add two versions of a test: a statically linked version
+# and a dynamically linked version.
+#
+# This will automatically disable the dynamically linked version on
+# wasip1-based targets or if dynamic libraries aren't built.
+#
+# This function recognizes a `NOSHARED` option to also disable dynamic linking
+# on a per-test basis. All other arguments are forwarded to `add_test_executable`
+# and `register_test`.
+function(add_test_pair test_name test_file)
+  set(options NOSHARED)
+  set(oneValueArgs)
+  set(multiValueArgs)
+  cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
+
+  add_test_executable(${test_name} ${test_file} ${ARGN})
+  register_test(${test_name} ${test_name} ${ARGN})
+  if(NOT arg_NOSHARED AND BUILD_SHARED AND NOT WASI MATCHES "p1")
+    add_test_executable("shared_${test_name}" ${test_file} SHARED ${ARGN})
+    register_test("shared_${test_name}" "shared_${test_name}" ${ARGN})
+  endif()
+endfunction()
+
 # Adds a new test from the `libc-test` repository where `test_file` is a
 # relative path from the `src` directory.
 #
@@ -189,26 +232,20 @@ function(add_libc_test test_file)
   set(test_name "libc_test_${test_name}")
   set(test_file "${LIBC_TEST}/src/${test_file}")
 
-  add_test_executable(${test_name} "${test_file}" ${ARGN})
-  register_test(${test_name} ${test_name} ${ARGN})
-  # Disable some warnings in this third-party code
-  target_compile_options(${test_name} PRIVATE
-    -Wno-sign-compare
-    -Wno-missing-braces
-    -Wno-unused-variable
-    -Wno-unused-parameter
-  )
+  add_test_pair(${test_name} ${test_file} ${ARGN})
 endfunction()
 
-add_libc_test(functional/argv.c)
+# ========= libc-test defined tests =============================
+
+add_libc_test(functional/argv.c CFLAGS -Wno-sign-compare)
 add_libc_test(functional/basename.c)
-add_libc_test(functional/clocale_mbfuncs.c)
+add_libc_test(functional/clocale_mbfuncs.c CFLAGS -Wno-unused-variable -Wno-sign-compare)
 add_libc_test(functional/clock_gettime.c)
 add_libc_test(functional/crypt.c)
 add_libc_test(functional/dirname.c)
 add_libc_test(functional/env.c)
-add_libc_test(functional/fnmatch.c)
-add_libc_test(functional/iconv_open.c)
+add_libc_test(functional/fnmatch.c CFLAGS -Wno-sign-compare)
+add_libc_test(functional/iconv_open.c CFLAGS -Wno-sign-compare)
 add_libc_test(functional/mbc.c)
 add_libc_test(functional/memstream.c)
 add_libc_test(functional/qsort.c)
@@ -222,31 +259,33 @@ if (LTO STREQUAL "full")
   set_tests_properties(libc_test_functional_search_insque.wasm PROPERTIES WILL_FAIL TRUE)
 endif()
 add_libc_test(functional/search_lsearch.c)
-add_libc_test(functional/search_tsearch.c)
-add_libc_test(functional/snprintf.c)
+add_libc_test(functional/search_tsearch.c CFLAGS -Wno-unused-parameter)
+add_libc_test(functional/snprintf.c CFLAGS -Wno-sign-compare)
 add_libc_test(functional/sscanf.c CFLAGS -Wno-literal-range)
 add_libc_test(functional/strftime.c)
 add_libc_test(functional/string.c)
 add_libc_test(functional/string_memcpy.c)
 add_libc_test(functional/string_memmem.c)
-add_libc_test(functional/string_memset.c)
+add_libc_test(functional/string_memset.c CFLAGS -Wno-unused-variable)
 add_libc_test(functional/string_strchr.c)
 add_libc_test(functional/string_strcspn.c)
 add_libc_test(functional/string_strstr.c)
-add_libc_test(functional/strtod.c)
+add_libc_test(functional/strtod.c CFLAGS -Wno-sign-compare)
 add_libc_test(functional/strtod_long.c)
 add_libc_test(functional/strtod_simple.c)
-add_libc_test(functional/strtof.c)
+add_libc_test(functional/strtof.c CFLAGS -Wno-sign-compare)
 add_libc_test(functional/strtol.c)
-add_libc_test(functional/strtold.c LDFLAGS -lc-printscan-long-double)
-add_libc_test(functional/swprintf.c)
+# TODO: the `c-printscan-long-double` file is not in its current form
+# compatible with shared libraries. That should be fixed at some point.
+add_libc_test(functional/strtold.c NOSHARED CFLAGS -Wno-sign-compare LDFLAGS -lc-printscan-long-double)
+add_libc_test(functional/swprintf.c CFLAGS -Wno-sign-compare)
 add_libc_test(functional/tgmath.c)
-add_libc_test(functional/udiv.c)
+add_libc_test(functional/udiv.c CFLAGS -Wno-missing-braces -Wno-sign-compare)
 add_libc_test(functional/wcsstr.c)
 add_libc_test(functional/wcstol.c)
 
 if (TARGET_TRIPLE MATCHES "-threads")
-  add_libc_test(functional/pthread_mutex.c)
+  add_libc_test(functional/pthread_mutex.c CFLAGS -Wno-unused-variable)
   add_libc_test(functional/pthread_tsd.c)
   add_libc_test(functional/pthread_cond.c)
 endif()
@@ -257,8 +296,7 @@ function(add_wasilibc_test test_file)
   cmake_path(REPLACE_EXTENSION test_file wasm OUTPUT_VARIABLE test_name)
   set(test_file "${CMAKE_CURRENT_SOURCE_DIR}/src/${test_file}")
 
-  add_test_executable(${test_name} "${test_file}" ${ARGN})
-  register_test(${test_name} ${test_name} ${ARGN})
+  add_test_pair(${test_name} ${test_file} ${ARGN})
 endfunction()
 
 # TODO: this test fails with `-Sthreads` in Wasmtime since that uses a different
@@ -278,6 +316,7 @@ add_wasilibc_test(fadvise.c FS)
 # native windows machine.
 if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   set_tests_properties(fadvise.wasm PROPERTIES WILL_FAIL TRUE)
+  set_tests_properties(shared_fadvise.wasm PROPERTIES WILL_FAIL TRUE)
 endif()
 add_wasilibc_test(fallocate.c FS)
 add_wasilibc_test(fcntl.c FS)
@@ -319,7 +358,8 @@ add_wasilibc_test(strptime.c)
 add_wasilibc_test(strrchr.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680)
 add_wasilibc_test(time_and_times.c
   CFLAGS -D_WASI_EMULATED_PROCESS_CLOCKS
-  LDFLAGS -lwasi-emulated-process-clocks)
+  LDFLAGS -lwasi-emulated-process-clocks
+  SHARED_LIBS "${SYSROOT_LIB}/libwasi-emulated-process-clocks.so")
 add_wasilibc_test(time.c)
 add_wasilibc_test(utime.c FS)
 add_wasilibc_test(rewinddir.c FS)
@@ -337,7 +377,10 @@ if (NOT (WASI STREQUAL "p1"))
 endif()
 
 if (CMAKE_C_COMPILER_VERSION VERSION_GREATER 20.0)
-  add_wasilibc_test(setjmp.c SETJMP)
+  # TODO: can't build a shared library with setjmp just yet because `wasm-ld`
+  # doesn't work well with tags exported from shared libraries. Probably related
+  # to llvm-project/llvm#188367 and/or llvm/llvm-project#188120
+  add_wasilibc_test(setjmp.c SETJMP NOSHARED)
   set_tests_properties(setjmp.wasm PROPERTIES LABELS v8fail)
 endif()
 
@@ -353,6 +396,13 @@ if (TARGET_TRIPLE MATCHES "-threads")
   # some extra warnings.
   add_wasilibc_test(pthread_mutex_busywait.c)
   target_compile_options(pthread_mutex_busywait.wasm PRIVATE -Wno-unused-variable)
+
+  # These tests #include source files from the `libc-test/src/functional`
+  # directory so they need an extra `-I` path.
+  target_include_directories(busywait.wasm PRIVATE ${LIBC_TEST})
+  target_include_directories(pthread_cond_busywait.wasm PRIVATE ${LIBC_TEST})
+  target_include_directories(pthread_tsd_busywait.wasm PRIVATE ${LIBC_TEST})
+  target_include_directories(pthread_mutex_busywait.wasm PRIVATE ${LIBC_TEST})
 endif()
 
 # ========= sockets-related tests ===============================

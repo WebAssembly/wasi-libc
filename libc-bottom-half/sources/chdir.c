@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <lock.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -11,6 +12,7 @@
 #ifdef _REENTRANT
 void __wasilibc_cwd_lock(void);
 void __wasilibc_cwd_unlock(void);
+static volatile int lock[1];
 #else
 #define __wasilibc_cwd_lock() (void)0
 #define __wasilibc_cwd_unlock() (void)0
@@ -75,8 +77,8 @@ int chdir(const char *path) {
 }
 
 static const char *make_absolute(const char *path) {
-  static __thread char *make_absolute_buf = NULL;
-  static __thread size_t make_absolute_len = 0;
+  static char *make_absolute_buf = NULL;
+  static size_t make_absolute_len = 0;
 
   // If this path is absolute, then we return it as-is.
   if (path[0] == '/') {
@@ -133,9 +135,12 @@ static const char *make_absolute(const char *path) {
 int __wasilibc_find_relpath_alloc(const char *path, const char **abs_prefix,
                                   char **relative_buf, size_t *relative_buf_len,
                                   int can_realloc) {
+  LOCK(lock);
+
   // First, make our path absolute taking the cwd into account.
   const char *abspath = make_absolute(path);
   if (abspath == NULL) {
+    UNLOCK(lock);
     errno = ENOMEM;
     return -1;
   }
@@ -145,17 +150,21 @@ int __wasilibc_find_relpath_alloc(const char *path, const char **abs_prefix,
   // into `relative_buf`.
   const char *rel;
   int fd = __wasilibc_find_abspath(abspath, abs_prefix, &rel);
-  if (fd == -1)
+  if (fd == -1) {
+    UNLOCK(lock);
     return -1;
+  }
 
   size_t rel_len = strlen(rel);
   if (*relative_buf_len < rel_len + 1) {
     if (!can_realloc) {
+      UNLOCK(lock);
       errno = ERANGE;
       return -1;
     }
     char *tmp = realloc(*relative_buf, rel_len + 1);
     if (tmp == NULL) {
+      UNLOCK(lock);
       errno = ENOMEM;
       return -1;
     }
@@ -163,5 +172,6 @@ int __wasilibc_find_relpath_alloc(const char *path, const char **abs_prefix,
     *relative_buf_len = rel_len + 1;
   }
   strcpy(*relative_buf, rel);
+  UNLOCK(lock);
   return fd;
 }

@@ -392,7 +392,7 @@ ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
     // If this stream isn't forced to buffer then do an opportunistic write
     // with the user-provided buffer. If this doesn't work (it was blocked
     // instead of completing), but it should work (because a previous
-    // zero-length operation succeeded which can sometimes mean it's erady),
+    // zero-length operation succeeded which can sometimes mean it's ready),
     // then it means we must buffer from now on. No matter what though if the
     // write is in-progress then it's cancelled here as the user's input buffer
     // won't persist beyond this function call. Throughout writing/cancellation

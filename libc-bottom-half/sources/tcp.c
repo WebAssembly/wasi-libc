@@ -915,6 +915,7 @@ static void tcp_connect_ready(void *data, poll_state_t *state,
   assert(socket->state.tag == TCP_SOCKET_STATE_CONNECTING);
   tcp_socket_state_connecting_t *conn = &socket->state.connecting;
 
+  (void)event;
   assert(event->event == WASIP3_EVENT_SUBTASK);
   assert(event->waitable == conn->subtask);
   assert(event->code == WASIP3_SUBTASK_RETURNED);

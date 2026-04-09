@@ -95,6 +95,11 @@ int __wasilibc_add_tcp_socket(sockets_own_tcp_socket_t socket,
   return tcp_add(socket, family, blocking, NULL);
 }
 
+#ifdef __wasip3__
+static void wasip3_tcp_accept_finish(tcp_socket_state_listening_t *state,
+                                     wasip3_waitable_status_t status);
+#endif
+
 static void tcp_free(void *data) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
 
@@ -111,6 +116,11 @@ static void tcp_free(void *data) {
 
   case TCP_SOCKET_STATE_LISTENING: {
     tcp_socket_state_listening_t *state = &tcp->state.listening;
+    if (state->flags & TCP_LISTENING_ACCEPTING)
+      wasip3_tcp_accept_finish(
+          state, sockets_stream_own_tcp_socket_cancel_read(state->stream));
+    if (state->flags & TCP_LISTENING_ACCEPT_READY)
+      sockets_tcp_socket_drop_own(state->accept_result);
     if (state->stream != 0)
       sockets_stream_own_tcp_socket_drop_readable(state->stream);
     break;
@@ -290,6 +300,58 @@ static void tcp_setup_connected_state_wasip3(tcp_socket_t *socket) {
 }
 #endif
 
+#ifndef __wasip2__
+static void wasip3_tcp_accept_finish(tcp_socket_state_listening_t *state,
+                                     wasip3_waitable_status_t status) {
+  assert(state->flags & TCP_LISTENING_ACCEPTING);
+  assert(!(state->flags & TCP_LISTENING_DONE));
+  assert(!(state->flags & TCP_LISTENING_ACCEPT_READY));
+  state->flags &= ~TCP_LISTENING_ACCEPTING;
+
+  switch (WASIP3_WAITABLE_STATE(status)) {
+  case WASIP3_WAITABLE_DROPPED:
+    state->flags |= TCP_LISTENING_DONE;
+    break;
+  case WASIP3_WAITABLE_COMPLETED:
+  case WASIP3_WAITABLE_CANCELLED:
+    break;
+  default:
+    abort();
+  }
+  if (WASIP3_WAITABLE_COUNT(status) > 0)
+    state->flags |= TCP_LISTENING_ACCEPT_READY;
+}
+
+static void wasip3_tcp_accept_finish_event(tcp_socket_state_listening_t *state,
+                                           wasip3_event_t *event) {
+  assert(event->event == WASIP3_EVENT_STREAM_READ);
+  assert(event->waitable == state->stream);
+  wasip3_tcp_accept_finish(state, event->code);
+}
+
+/// Kicks off any necessary work to accept a TCP socket.
+///
+/// Returns `true` if this actually performed a stream read, and `false`
+/// otherwise. Note that if `false` is returned there may still be an active
+/// read or a pending value.
+static bool wasip3_tcp_accept_start(tcp_socket_state_listening_t *state) {
+  // Kick off an accept while we're (a) not done, (b) there's not already an
+  // active accept, and (c) a previous accept hasn't finished.
+  while (!(state->flags & TCP_LISTENING_DONE) &&
+         !(state->flags & TCP_LISTENING_ACCEPTING) &&
+         !(state->flags & TCP_LISTENING_ACCEPT_READY)) {
+    wasip3_waitable_status_t status = sockets_stream_own_tcp_socket_read(
+        state->stream, &state->accept_result, 1);
+    if (status == WASIP3_WAITABLE_STATUS_BLOCKED) {
+      state->flags |= TCP_LISTENING_ACCEPTING;
+      return true;
+    }
+    wasip3_tcp_accept_finish(state, status);
+  }
+  return false;
+}
+#endif // !__wasip2__
+
 static int tcp_accept4(void *data, struct sockaddr *addr, socklen_t *addrlen,
                        int flags) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
@@ -335,27 +397,53 @@ static int tcp_accept4(void *data, struct sockaddr *addr, socklen_t *addrlen,
   client_socket->state.connected.output = output;
 #else
   tcp_socket_state_listening_t *state = &socket->state.listening;
-  assert(socket->blocking);
-  sockets_own_tcp_socket_t result;
-  while (1) {
+
+  // Turn this loop until a socket is fully accepted and ready to get
+  // processed.
+  while (!(state->flags & TCP_LISTENING_ACCEPT_READY)) {
+    bool started_work = wasip3_tcp_accept_start(state);
+
+    // If the accept immediately completed we're good to go.
+    if (state->flags & TCP_LISTENING_ACCEPT_READY)
+      break;
+
     // It's not clear what the correct error code to return here is, if any,
     // since in theory sockets being accepted are infinite until the socket is
     // closed. Handle this with at least some error for now.
-    if (state->done) {
+    if (state->flags & TCP_LISTENING_DONE) {
       errno = ENOTSUP;
       return -1;
     }
 
-    // Wait on a socket to be accepted, and then break out of the loop. Turn
-    // again on 0-length reads.
-    size_t amt = __wasilibc_stream_block_on(
-        sockets_stream_own_tcp_socket_read(state->stream, &result, 1),
-        state->stream, &state->done);
-    if (amt > 0)
-      break;
+    assert(state->flags & TCP_LISTENING_ACCEPTING);
+
+    // Either block waiting for this to complete in blocking mode or poll to
+    // see what happened in non-blocking mode. As a minor optimization if
+    // an accept was kicked off above and it didn't finish then don't re-poll
+    // here and just bail out immediately.
+    wasip3_event_t event;
+    if (socket->blocking) {
+      __wasilibc_waitable_block_on(state->stream, &event, 0);
+    } else {
+      if (!started_work)
+        __wasilibc_poll_waitable(state->stream, &event);
+      if (started_work || event.event == WASIP3_EVENT_NONE) {
+        errno = EWOULDBLOCK;
+        return -1;
+      }
+    }
+
+    // Update our own internal state with the result of the accept, and then
+    // turn the loop again.
+    wasip3_tcp_accept_finish_event(state, &event);
   }
-  int client_fd = tcp_add(result, socket->family, (flags & SOCK_NONBLOCK) == 0,
-                          &client_socket);
+
+  assert(!(state->flags & TCP_LISTENING_ACCEPTING));
+
+  int client_fd = tcp_add(state->accept_result, socket->family,
+                          (flags & SOCK_NONBLOCK) == 0, &client_socket);
+  state->accept_result.__handle = 0;
+  state->flags &= ~TCP_LISTENING_ACCEPT_READY;
   if (client_fd < 0)
     return -1;
   tcp_setup_connected_state_wasip3(client_socket);
@@ -422,6 +510,24 @@ static int tcp_bind(void *data, const struct sockaddr *addr,
     return -1;
   return tcp_do_bind(socket, &local_address);
 }
+
+#ifndef __wasip2__
+static void tcp_connect_finish(tcp_socket_t *socket) {
+  assert(socket->state.tag == TCP_SOCKET_STATE_CONNECTING);
+  tcp_socket_state_connecting_t *conn = &socket->state.connecting;
+
+  // The connect subtask has completed at this point, so check to see what the
+  // result was.
+  assert(conn->subtask == 0);
+  if (conn->result.is_err) {
+    sockets_error_code_t error = conn->result.val.err;
+    socket->state.tag = TCP_SOCKET_STATE_CONNECT_FAILED;
+    socket->state.connect_failed.error_code = error;
+  } else {
+    tcp_setup_connected_state_wasip3(socket);
+  }
+}
+#endif // !__wasip2__
 
 static int tcp_connect(void *data, const struct sockaddr *addr,
                        socklen_t addrlen) {
@@ -493,6 +599,7 @@ static int tcp_connect(void *data, const struct sockaddr *addr,
   socket->state.connected.input = input;
   socket->state.connected.output = output;
 #else
+  socket->state.tag = TCP_SOCKET_STATE_CONNECTING;
   // Setup the arguments to the `connect` function as well as initializing the
   // `subtask` field of the `connecting` state to zero as we're not sure we'll
   // get a subtask just yet.
@@ -521,18 +628,12 @@ static int tcp_connect(void *data, const struct sockaddr *addr,
 
   // The connect subtask has completed at this point, so check to see what the
   // result was.
-  assert(socket->state.connecting.subtask == 0);
-  if (socket->state.connecting.result.is_err) {
-    sockets_error_code_t error = socket->state.connecting.result.val.err;
-    __wasilibc_socket_error_to_errno(&error);
-    socket->state.tag = TCP_SOCKET_STATE_CONNECT_FAILED;
-    socket->state.connect_failed.error_code = error;
+  tcp_connect_finish(socket);
+
+  if (socket->state.tag == TCP_SOCKET_STATE_CONNECT_FAILED) {
+    __wasilibc_socket_error_to_errno(&socket->state.connect_failed.error_code);
     return -1;
   }
-
-  // Our socket is now connected, so establish the send/receive streams that
-  // will be used for data transmission.
-  tcp_setup_connected_state_wasip3(socket);
 #endif
 
   return 0;
@@ -685,8 +786,8 @@ static int tcp_listen(void *data, int backlog) {
     return __wasilibc_socket_error_to_errno(&error);
 
   socket->state.tag = TCP_SOCKET_STATE_LISTENING;
+  memset(&socket->state.listening, 0, sizeof(socket->state.listening));
   socket->state.listening.stream = stream;
-  socket->state.listening.done = false;
 #endif
 
   return 0;
@@ -807,36 +908,95 @@ static int tcp_shutdown(void *data, int posix_how) {
   return 0;
 }
 
-#ifdef __wasip2__
+#ifndef __wasip2__
+static void tcp_connect_ready(void *data, poll_state_t *state,
+                              wasip3_event_t *event) {
+  tcp_socket_t *socket = (tcp_socket_t *)data;
+  assert(socket->state.tag == TCP_SOCKET_STATE_CONNECTING);
+  tcp_socket_state_connecting_t *conn = &socket->state.connecting;
+
+  (void)event;
+  assert(event->event == WASIP3_EVENT_SUBTASK);
+  assert(event->waitable == conn->subtask);
+  assert(event->code == WASIP3_SUBTASK_RETURNED);
+  wasip3_subtask_drop(conn->subtask);
+  conn->subtask = 0;
+
+  tcp_connect_finish(socket);
+  short events = POLLWRNORM;
+  if (socket->state.tag == TCP_SOCKET_STATE_CONNECT_FAILED)
+    events |= POLLRDNORM;
+  __wasilibc_poll_ready(state, events);
+}
+
+static void tcp_accept_ready(void *data, poll_state_t *state,
+                             wasip3_event_t *event) {
+  tcp_socket_t *socket = (tcp_socket_t *)data;
+  assert(socket->state.tag == TCP_SOCKET_STATE_LISTENING);
+  tcp_socket_state_listening_t *listen = &socket->state.listening;
+  wasip3_tcp_accept_finish_event(listen, event);
+  __wasilibc_poll_ready(state, POLLRDNORM);
+}
+#endif // !__wasip2__
+
 static int tcp_poll_register(void *data, poll_state_t *state, short events) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
   switch (socket->state.tag) {
   case TCP_SOCKET_STATE_CONNECTING: {
-    if ((events & (POLLRDNORM | POLLWRNORM)) != 0)
+    if ((events & (POLLRDNORM | POLLWRNORM)) != 0) {
+#ifdef __wasip2__
       return __wasilibc_poll_add(state, events, tcp_pollable(socket));
+#else
+      tcp_socket_state_connecting_t *conn = &socket->state.connecting;
+      return __wasilibc_poll_add(state, conn->subtask, tcp_connect_ready, data);
+#endif
+    }
     break;
   }
 
   case TCP_SOCKET_STATE_LISTENING: {
     // Listening sockets can only be ready to read, not write.
-    if ((events & POLLRDNORM) != 0)
+    if ((events & POLLRDNORM) != 0) {
+#ifdef __wasip2__
       return __wasilibc_poll_add(state, events, tcp_pollable(socket));
+#else
+      tcp_socket_state_listening_t *listen = &socket->state.listening;
+      // Kick off an accept if it's not already going, then see what happened.
+      wasip3_tcp_accept_start(listen);
+      if (listen->flags & (TCP_LISTENING_ACCEPT_READY | TCP_LISTENING_DONE)) {
+        __wasilibc_poll_ready(state, POLLRDNORM);
+        return 0;
+      }
+      assert(listen->flags & TCP_LISTENING_ACCEPTING);
+      return __wasilibc_poll_add(state, listen->stream, tcp_accept_ready, data);
+#endif
+    }
     break;
   }
 
   case TCP_SOCKET_STATE_CONNECTED: {
+    tcp_socket_state_connected_t *conn = &socket->state.connected;
     if ((events & POLLRDNORM) != 0) {
+#ifdef __wasip2__
       if (__wasilibc_poll_add_input_stream(
-              state, streams_borrow_input_stream(socket->state.connected.input),
-              &socket->state.connected.input_pollable) < 0)
+              state, streams_borrow_input_stream(conn->input),
+              &conn->input_pollable) < 0)
         return -1;
+#else
+      if (__wasilibc_read_poll(&conn->receive, state) < 0)
+        return -1;
+#endif
     }
     if ((events & POLLWRNORM) != 0) {
+#ifdef __wasip2__
       if (__wasilibc_poll_add_output_stream(
-              state,
-              streams_borrow_output_stream(socket->state.connected.output),
-              &socket->state.connected.output_pollable) < 0)
+              state, streams_borrow_output_stream(conn->output),
+              &conn->output_pollable) < 0)
         return -1;
+#else
+      if (__wasilibc_write_poll(&conn->send, state) < 0)
+        return -1;
+#endif
     }
     break;
   }
@@ -853,6 +1013,7 @@ static int tcp_poll_register(void *data, poll_state_t *state, short events) {
   return 0;
 }
 
+#ifdef __wasip2__
 static int tcp_poll_finish(void *data, poll_state_t *state, short events) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
 
@@ -889,7 +1050,7 @@ static int tcp_poll_finish(void *data, poll_state_t *state, short events) {
   }
   return 0;
 }
-#endif // __wasip2__
+#endif
 
 static int tcp_fcntl_getfl(void *data) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
@@ -1308,11 +1469,10 @@ static descriptor_vtable_t tcp_vtable = {
     .shutdown = tcp_shutdown,
     .getsockopt = tcp_getsockopt,
     .setsockopt = tcp_setsockopt,
-
-#ifdef __wasip2__
     .poll_register = tcp_poll_register,
+#ifdef __wasip2__
     .poll_finish = tcp_poll_finish,
-#endif // __wasip2__
+#endif
 
     .fcntl_getfl = tcp_fcntl_getfl,
     .fcntl_setfl = tcp_fcntl_setfl,

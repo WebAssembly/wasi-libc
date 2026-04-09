@@ -989,7 +989,7 @@ static int tcp_poll_register(void *data, poll_state_t *state, short events) {
     if ((events & POLLWRNORM) != 0) {
 #ifdef __wasip2__
       if (__wasilibc_poll_add_output_stream(
-              state, streams_borrow_output_stream(conn->utput),
+              state, streams_borrow_output_stream(conn->output),
               &conn->output_pollable) < 0)
         return -1;
 #else

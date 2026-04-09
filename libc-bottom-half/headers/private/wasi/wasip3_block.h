@@ -9,6 +9,14 @@
 
 typedef wasip3_waitable_status_t (*wasip3_cancel_t)(uint32_t);
 
+/// Wait at most `timeout` duration for `waitable` to become ready.
+///
+/// If `timeout` is 0 this will wait indefinitely. Returns `true` if `waitable`
+/// has become ready. Returns `false` if `timeout` elapsed. Upon returning
+/// `true` the `event` field is filled in.
+bool __wasilibc_waitable_block_on(uint32_t waitable, wasip3_event_t *event,
+                                  monotonic_clock_duration_t timeout);
+
 // Waits for a subtask to return
 void __wasilibc_subtask_block_on_and_drop(wasip3_subtask_t subtask);
 

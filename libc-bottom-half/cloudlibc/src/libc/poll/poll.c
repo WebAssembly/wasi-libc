@@ -372,20 +372,30 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
       goto out;
     }
 
-
     if (events & POLLRDNORM) {
-      // TODO(wasip3): use `get_read_stream` and use that I/O to do something.
-      // Requires a lot more integration with nonblocking I/O to get that
-      // working.
-      errno = EOPNOTSUPP;
-      goto out;
+      if (entry->vtable->get_read_stream) {
+        wasi_read_t read;
+        if (entry->vtable->get_read_stream(entry->data, &read) < 0)
+          goto out;
+        if (__wasilibc_read_poll(read.state, &state) < 0)
+          goto out;
+      } else {
+        errno = EOPNOTSUPP;
+        goto out;
+      }
     }
 
     if (events & POLLWRNORM) {
-      // TODO(wasip3): use `get_write_stream` to implement this (see
-      // `POLLRDNORM` above).
-      errno = EOPNOTSUPP;
-      goto out;
+      if (entry->vtable->get_write_stream) {
+        wasi_write_t write;
+        if (entry->vtable->get_write_stream(entry->data, &write) < 0)
+          goto out;
+        if (__wasilibc_write_poll(write.state, &state) < 0)
+          goto out;
+      } else {
+        errno = EOPNOTSUPP;
+        goto out;
+      }
     }
   }
 
@@ -451,10 +461,14 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
         if (p->waitable != event.waitable)
           continue;
         state.pollfd = p->pollfd;
-        // Clear the `waitable` since this event has fired and it doesn't need
-        // to be join'd to 0 below. Then invoke the custom callback originally
-        // added for this which will handle any necessary completion logic and
-        // updating `state.pollfd` with various events.
+        // Remove this waitable from the `waitable-set` as the `ready`
+        // operation might end up deleting the handle. Set the list here to 0
+        // so it's not removed down below.
+        //
+        // Then invoke the custom callback originally added for this
+        // which will handle any necessary completion logic and updating
+        // `state.pollfd` with various events.
+        wasip3_waitable_join(p->waitable, 0);
         p->waitable = 0;
         p->ready(p->ready_data, &state, &event);
       }

@@ -107,7 +107,7 @@ function(add_test_executable executable_name src)
     target_link_libraries(${executable_name} PRIVATE c)
   else()
     clang_format_target(${executable_name})
-    target_link_libraries(${executable_name} INTERFACE c-static)
+    target_link_libraries(${executable_name} PRIVATE c-static)
   endif()
   foreach(flag IN LISTS arg_CFLAGS)
     target_compile_options(${executable_name} PRIVATE ${flag})
@@ -129,10 +129,9 @@ endfunction()
 # * `ENV a=b b=c` - set env vars for when executing this test
 # * `NETWORK` - this test uses the network and sockets.
 # * `PASS_REGULAR_EXPRESSION` - a regex that must match the test output to pass
-# * `FAILP3` - this test fails on wasip3 targets
 # * `SETJMP` - this test requires setjmp/longjmp
 function(register_test test_name executable_name)
-  set(options FS NETWORK FAILP3 SETJMP)
+  set(options FS NETWORK SETJMP)
   set(oneValueArgs CLIENT PASS_REGULAR_EXPRESSION)
   set(multiValueArgs ARGV ENV)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
@@ -192,9 +191,6 @@ function(register_test test_name executable_name)
   endif()
   set_tests_properties(${test_name} PROPERTIES TIMEOUT 10)
 
-  if (arg_FAILP3 AND (WASI STREQUAL "p3"))
-    set_tests_properties(${test_name} PROPERTIES WILL_FAIL TRUE)
-  endif()
 
   add_dependencies(${test_name} engine)
 endfunction()
@@ -341,8 +337,8 @@ add_wasilibc_test(memchr.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680
 add_wasilibc_test(memcmp.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680)
 add_wasilibc_test(opendir.c FS ARGV /)
 add_wasilibc_test(open_relative_path.c FS ARGV /)
-add_wasilibc_test(poll.c FS FAILP3)
-add_wasilibc_test(pselect.c FS FAILP3)
+add_wasilibc_test(poll.c FS)
+add_wasilibc_test(pselect.c FS)
 add_wasilibc_test(preadvwritev.c FS)
 add_wasilibc_test(preadwrite.c FS)
 add_wasilibc_test(readlink.c FS)
@@ -408,16 +404,16 @@ endif()
 # ========= sockets-related tests ===============================
 
 if (NOT (WASI STREQUAL "p1"))
-  add_wasilibc_test(poll-connect.c NETWORK FAILP3)
-  add_wasilibc_test(poll-nonblocking-socket.c NETWORK FAILP3)
+  add_wasilibc_test(poll-connect.c NETWORK)
+  add_wasilibc_test(poll-nonblocking-socket.c NETWORK)
   add_wasilibc_test(setsockopt.c NETWORK)
   add_wasilibc_test(sockets-nonblocking-udp.c NETWORK)
-  add_wasilibc_test(sockets-nonblocking-multiple.c NETWORK FAILP3)
+  add_wasilibc_test(sockets-nonblocking-multiple.c NETWORK)
   add_wasilibc_test(sockets-nonblocking-udp-multiple.c NETWORK)
   add_wasilibc_test(sockets-fcntl.c NETWORK)
   add_wasilibc_test(sockets-udp-connected.c NETWORK)
   add_wasilibc_test(getaddrinfo.c NETWORK)
-  add_wasilibc_test(sockets-nonblocking.c NETWORK FAILP3)
+  add_wasilibc_test(sockets-nonblocking.c NETWORK)
   add_wasilibc_test(sockets-nonblocking-udp-no-connection.c NETWORK)
 
   # Define executables for server/client tests, and they're paired together in
@@ -446,7 +442,7 @@ if (NOT (WASI STREQUAL "p1"))
   add_sockets_test_executable(sockets-multiple-server.c)
 
   function(sockets_test test_name client server)
-    set(options FAILP3)
+    set(options)
     set(oneValueArgs NCLIENTS)
     set(multiValueArgs)
     cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
@@ -461,17 +457,13 @@ if (NOT (WASI STREQUAL "p1"))
           -DNCLIENTS=${arg_NCLIENTS}
           -P ${CMAKE_CURRENT_SOURCE_DIR}/socket-test.cmake
     )
-
-    if (arg_FAILP3 AND (WASI STREQUAL "p3"))
-      set_tests_properties(${test_name} PROPERTIES WILL_FAIL TRUE)
-    endif()
   endfunction()
 
   sockets_test(sockets sockets-client.wasm sockets-server.wasm)
   sockets_test(sockets-udp-blocking sockets-client-udp-blocking.wasm
     sockets-server-udp-blocking.wasm)
   sockets_test(sockets-multiple sockets-multiple-client.wasm sockets-multiple-server.wasm
-    NCLIENTS 10 FAILP3)
+    NCLIENTS 10)
 
   # Various forms of client hangups
   sockets_test(sockets-client-hangup-after-connect

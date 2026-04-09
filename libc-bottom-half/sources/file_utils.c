@@ -82,6 +82,196 @@ int wasi_string_from_c(const char *s, wasi_string_t *out) {
   return 0;
 }
 
+#ifndef __wasip2__
+/// Update `state` with the result of `code` that happened.
+static size_t wasip3_io_update_code(wasip3_io_state_t *state,
+                                    wasip3_waitable_status_t code) {
+  assert(code != WASIP3_WAITABLE_STATUS_BLOCKED);
+  switch (WASIP3_WAITABLE_STATE(code)) {
+  case WASIP3_WAITABLE_COMPLETED:
+  case WASIP3_WAITABLE_CANCELLED:
+    break;
+  case WASIP3_WAITABLE_DROPPED:
+    state->flags |= WASIP3_IO_DONE;
+    break;
+  default:
+    assert(0 && "unexpected waitable state");
+    abort();
+  }
+
+  assert(state->flags & WASIP3_IO_INPROGRESS);
+  state->flags &= ~WASIP3_IO_INPROGRESS;
+
+  if (state->flags & WASIP3_IO_ZERO_INPROGRESS) {
+    state->flags &= ~WASIP3_IO_ZERO_INPROGRESS;
+
+    assert(!(state->flags & WASIP3_IO_SHOULD_BE_READY));
+    state->flags |= WASIP3_IO_SHOULD_BE_READY;
+  }
+
+  return WASIP3_WAITABLE_COUNT(code);
+}
+
+/// Update `write` with the result of `event` that happened.
+static size_t wasip3_io_update_event(wasip3_io_state_t *state,
+                                     wasip3_event_t *event) {
+  assert(event->event == WASIP3_EVENT_STREAM_WRITE ||
+         event->event == WASIP3_EVENT_STREAM_READ);
+  assert(event->waitable == state->stream);
+  return wasip3_io_update_code(state, event->code);
+}
+
+/// Attempts to resolve any pending write that may be in-progress on `write`.
+///
+/// This may notably end up issuing more writes to finish a buffered write that
+/// was previously flagged as completed.
+static int wasip3_write_resolve_pending(wasi_write_t *write) {
+  wasip3_event_t event;
+  wasip3_io_state_t *state = write->state;
+
+  // If there's nothing in-progress, then there's nothing to do, so bail out.
+  if (!(state->flags & WASIP3_IO_INPROGRESS))
+    return 0;
+  assert(state->buf);
+
+  // This loop ensures that the entirety of `write->buf` is written out. Libc
+  // already reported that the write succeeded so if a short write happens then
+  // it's got to get started back up again.
+  while (1) {
+    // For blocking I/O this awaits the previous result. For non-blocking I/O a
+    // `poll` operation is done.
+    if (write->blocking) {
+      if (!__wasilibc_waitable_block_on(state->stream, &event,
+                                        write->timeout)) {
+        errno = ETIMEDOUT;
+        return -1;
+      }
+    } else {
+      __wasilibc_poll_waitable(state->stream, &event);
+      if (event.event == WASIP3_EVENT_NONE) {
+        errno = EWOULDBLOCK;
+        return -1;
+      }
+    }
+
+    // Update the I/O internal state given the result of the write.
+    state->buf_start += wasip3_io_update_event(state, &event);
+
+    // While there's remaining writes to perform, kick those off here. If a
+    // write is blocked then nonblocking mode returns as such and blocking
+    // mode breaks out to turn this outer `while (1)` loop again to block
+    // on the result. If the write finishes immediately then state is updated
+    // again and then further continues.
+    while (!(state->flags & WASIP3_IO_DONE) &&
+           state->buf_start != state->buf_end) {
+      wasip3_waitable_status_t status = filesystem_stream_u8_write(
+          state->stream, state->buf + state->buf_start,
+          state->buf_end - state->buf_start);
+      state->flags |= WASIP3_IO_INPROGRESS;
+      if (status == WASIP3_WAITABLE_STATUS_BLOCKED) {
+        if (write->blocking) {
+          break;
+        } else {
+          errno = EWOULDBLOCK;
+          return -1;
+        }
+      }
+      state->buf_start += wasip3_io_update_code(state, status);
+    }
+
+    // We either broke out of the `while` loop normally, or we hit the `break`
+    // in the loop which wants to continue to the top of this outer loop. Test
+    // which it is here and act accordingly.
+    if ((state->flags & WASIP3_IO_DONE) || state->buf_start == state->buf_end) {
+      free(state->buf);
+      state->buf = NULL;
+      state->buf_start = 0;
+      state->buf_end = 0;
+      return 0;
+    }
+  }
+
+  abort();
+}
+
+/// Helper of `read`/`write` starting below.
+static bool wasip3_start_zero_length(wasip3_io_state_t *state,
+                                     wasip3_waitable_status_t status) {
+  assert(!(state->flags & WASIP3_IO_INPROGRESS));
+  assert(!(state->flags & WASIP3_IO_ZERO_INPROGRESS));
+  assert(!(state->flags & WASIP3_IO_SHOULD_BE_READY));
+  assert(!(state->flags & WASIP3_IO_DONE));
+  state->flags |= WASIP3_IO_INPROGRESS;
+  state->flags |= WASIP3_IO_ZERO_INPROGRESS;
+  if (status == WASIP3_WAITABLE_STATUS_BLOCKED)
+    return true;
+  wasip3_io_update_code(state, status);
+  return false;
+}
+
+/// Starts a zero-length write on the stream pointed to by `write`.
+///
+/// This requires that there's no active I/O on the stream at this time and
+/// that it's not a closed stream.
+static bool wasip3_write_start_zero_length(wasip3_io_state_t *state) {
+  return wasip3_start_zero_length(
+      state, filesystem_stream_u8_write(state->stream, NULL, 0));
+}
+
+/// Starts a zero-length read on the stream pointed to by `read`.
+///
+/// This requires that there's no active I/O on the stream at this time and
+/// that it's not a closed stream.
+static bool wasip3_read_start_zero_length(wasip3_io_state_t *state) {
+  return wasip3_start_zero_length(
+      state, filesystem_stream_u8_read(state->stream, NULL, 0));
+}
+
+/// Starts a zero-length read on the stream pointed to by `read`.
+///
+/// This requires that there's no active I/O on the stream at this time and
+/// that it's not a closed stream.
+static int wasip3_read_start_nonzero(wasip3_io_state_t *state, size_t length) {
+  assert(state->flags & WASIP3_IO_MUST_BUFFER);
+  assert(!(state->flags & WASIP3_IO_SHOULD_BE_READY));
+  assert(!(state->flags & WASIP3_IO_INPROGRESS));
+  assert(!(state->flags & WASIP3_IO_ZERO_INPROGRESS));
+  assert(!(state->flags & WASIP3_IO_DONE));
+  assert(state->buf == NULL);
+  state->buf = malloc(length);
+  if (!state->buf) {
+    errno = ENOMEM;
+    return -1;
+  }
+  state->buf_start = 0;
+  state->buf_end = 0;
+  wasip3_waitable_status_t status =
+      filesystem_stream_u8_read(state->stream, state->buf, length);
+  state->flags |= WASIP3_IO_INPROGRESS;
+  if (status == WASIP3_WAITABLE_STATUS_BLOCKED) {
+    errno = EWOULDBLOCK;
+    return -1;
+  }
+
+  return 0;
+}
+
+static size_t wasip3_read_complete_internally(wasip3_io_state_t *state,
+                                              void *buffer, size_t length) {
+  size_t buf_len = state->buf_end - state->buf_start;
+  size_t amount = buf_len < length ? buf_len : length;
+  memcpy(buffer, state->buf + state->buf_start, amount);
+  state->buf_start += amount;
+  if (state->buf_start == state->buf_end) {
+    free(state->buf);
+    state->buf = NULL;
+    state->buf_start = 0;
+    state->buf_end = 0;
+  }
+  return amount;
+}
+#endif
+
 ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
                          size_t length) {
 #if defined(__wasip2__)
@@ -159,22 +349,132 @@ ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
     }
   }
 #elif defined(__wasip3__)
-  assert(write->blocking); // TODO(wasip3)
+  wasip3_io_state_t *state = write->state;
 
-  // Perform writes until either a non-zero-length write completes or the stream
-  // is closed.
-  while (!write->state->done) {
+  // First resolve any pending I/O, should it exist.
+  if (wasip3_write_resolve_pending(write) < 0)
+    return -1;
+  assert((state->flags & WASIP3_IO_INPROGRESS) == 0);
+  assert((state->flags & WASIP3_IO_ZERO_INPROGRESS) == 0);
+
+  // If this stream is complete, then delegate to EOF.
+  if (state->flags & WASIP3_IO_DONE)
+    return write->eof(write->eof_data);
+
+  // For simplicity, handle blocking writes directly here. This involves
+  // blocking with an optional timeout and handling the result.
+  if (write->blocking) {
+    state->flags &= ~WASIP3_IO_SHOULD_BE_READY;
+    bool done = false;
     ssize_t amount = __wasilibc_stream_block_on_timeout(
-        filesystem_stream_u8_write(write->state->stream, buffer, length),
-        write->state->stream, &write->state->done, write->timeout,
+        filesystem_stream_u8_write(state->stream, buffer, length),
+        state->stream, &done, write->timeout,
         filesystem_stream_u8_cancel_write);
-    if (amount > 0 || length == 0) {
-      if (write->offset)
-        *write->offset += amount;
-      return amount;
-    }
+    if (done)
+      state->flags |= WASIP3_IO_DONE;
+    if (amount < 0)
+      return -1;
+    if (write->offset)
+      *write->offset += amount;
+    if (amount == 0 && done)
+      return write->eof(write->eof_data);
+    return amount;
   }
-  return write->eof(write->eof_data);
+
+  // ... and everything below is about implementing nonblocking writes ...
+
+  assert(!write->blocking);
+
+  while (1) {
+    bool should_be_ready = state->flags & WASIP3_IO_SHOULD_BE_READY;
+    state->flags &= ~WASIP3_IO_SHOULD_BE_READY;
+
+    // If this stream isn't forced to buffer then do an opportunistic write
+    // with the user-provided buffer. If this doesn't work, but it should work,
+    // then it means we must buffer from now on. No matter what though if the
+    // write is in-progress then it's cancelled here as the user's input buffer
+    // won't persist beyond this function call. Throughout writing/cancellation
+    // if anything actually succeeded then that's immediately returned here.
+    if (!(state->flags & WASIP3_IO_MUST_BUFFER)) {
+      wasip3_waitable_status_t status =
+          filesystem_stream_u8_write(state->stream, buffer, length);
+      state->flags |= WASIP3_IO_INPROGRESS;
+      if (status == WASIP3_WAITABLE_STATUS_BLOCKED) {
+        if (should_be_ready)
+          state->flags |= WASIP3_IO_MUST_BUFFER;
+        status = filesystem_stream_u8_cancel_write(state->stream);
+      }
+      size_t amount = wasip3_io_update_code(state, status);
+      if (amount > 0) {
+        if (write->offset)
+          *write->offset += amount;
+        return amount;
+      }
+      if (state->flags & WASIP3_IO_DONE)
+        return write->eof(write->eof_data);
+    }
+
+    // If, at this point, we're still not forced to buffer then it means that a
+    // write was attempted above, cancelled, and nothing was transferred. In
+    // that case perform a zero-length write as a readiness test for this
+    // stream.
+    if (!(state->flags & WASIP3_IO_MUST_BUFFER)) {
+      if (wasip3_write_start_zero_length(state)) {
+        errno = EWOULDBLOCK;
+        return -1;
+      }
+      if (state->flags & WASIP3_IO_DONE)
+        return write->eof(write->eof_data);
+
+      // The zero-length write succeeded, so turn the loop again to retry the
+      // write of the user-supplied buffer. Note that the I/O "should be ready"
+      // flag will be set here which will poison the loop and avoid coming here
+      // again if zero-length reads/writes don't actually work.
+      assert(state->flags & WASIP3_IO_SHOULD_BE_READY);
+      continue;
+    }
+
+    break;
+  }
+
+  // At this point we're in nonblocking mode, we're required to buffer data,
+  // and most other flags should all be turned off. Here the input `bufffer` is
+  // copied into the internal `state` and the I/O operation is issued.
+  assert(state->flags & WASIP3_IO_MUST_BUFFER);
+  assert(!(state->flags & WASIP3_IO_SHOULD_BE_READY));
+  assert(!(state->flags & WASIP3_IO_INPROGRESS));
+  assert(!(state->flags & WASIP3_IO_ZERO_INPROGRESS));
+  assert(!(state->flags & WASIP3_IO_DONE));
+  assert(state->buf == NULL);
+  state->buf = malloc(length);
+  if (!state->buf) {
+    errno = ENOMEM;
+    return -1;
+  }
+  memcpy(state->buf, buffer, length);
+  state->buf_start = 0;
+  state->buf_end = length;
+  wasip3_waitable_status_t status =
+      filesystem_stream_u8_write(state->stream, state->buf, length);
+  state->flags |= WASIP3_IO_INPROGRESS;
+
+  // If the I/O is blocked, then that's ok. The data is all owned by `state`
+  // meaning that we've effectively just faked a write of `length` bytes. Here
+  // it's reported as having written everything.
+  if (status == WASIP3_WAITABLE_STATUS_BLOCKED) {
+    if (write->offset)
+      *write->offset += length;
+    return length;
+  }
+
+  // If that write actually succeeded, however, then deal with it here. That
+  // means we have to deallocate the internal buffer and then handle the result
+  // of the write.
+  free(state->buf);
+  state->buf = NULL;
+  state->buf_start = 0;
+  state->buf_end = 0;
+  return wasip3_io_update_code(state, status);
 #else
 #error "Unknown WASI version"
 #endif
@@ -245,23 +545,195 @@ ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
     }
   }
 #elif defined(__wasip3__)
-  assert(read->blocking); // TODO(wasip3)
+  wasip3_io_state_t *state = read->state;
+  wasip3_event_t event;
 
-  // Attempt reads until a nonzero-length read is encountered or the stream is
-  // closed.
-  while (!read->state->done) {
+  // If there's active I/O in progress for this stream then this must wait for
+  // it to complete.
+  if (state->flags & WASIP3_IO_INPROGRESS) {
+    if (read->blocking) {
+      if (!__wasilibc_waitable_block_on(state->stream, &event, read->timeout)) {
+        errno = ETIMEDOUT;
+        return -1;
+      }
+    } else {
+      __wasilibc_poll_waitable(state->stream, &event);
+      if (event.event == WASIP3_EVENT_NONE) {
+        errno = EWOULDBLOCK;
+        return -1;
+      }
+    }
+    // Upon completion that's the size of the read buffer which we're now
+    // reading into.
+    state->buf_end = wasip3_io_update_event(state, &event);
+  }
+
+  assert(!(state->flags & WASIP3_IO_INPROGRESS));
+
+  // If this stream has internally buffered data that's ready to read then copy
+  // that out here.
+  if (state->buf)
+    return wasip3_read_complete_internally(state, buffer, length);
+
+  // If this stream has finished, then delegate to EOF.
+  if (state->flags & WASIP3_IO_DONE)
+    return read->eof(read->eof_data);
+
+  // For simplicity handle the blocking read case here.
+  if (read->blocking) {
+    bool done = false;
     size_t amount = __wasilibc_stream_block_on_timeout(
         filesystem_stream_u8_read(read->state->stream, buffer, length),
-        read->state->stream, &read->state->done, read->timeout,
+        read->state->stream, &done, read->timeout,
         filesystem_stream_u8_cancel_read);
-    if (amount > 0 || length == 0) {
-      if (read->offset)
-        *read->offset += amount;
-      return amount;
-    }
+    if (done)
+      state->flags |= WASIP3_IO_DONE;
+    if (amount < 0)
+      return -1;
+    if (read->offset)
+      *read->offset += amount;
+    if (amount == 0 && done)
+      return read->eof(read->eof_data);
+    return amount;
   }
-  return read->eof(read->eof_data);
+
+  // ... and everything below is about implementing nonblocking reads ...
+
+  // NB: this loop structure is intentionally quite similar to `write`'s
+  // structure above. See there for more comments.
+  while (1) {
+    bool should_be_ready = state->flags & WASIP3_IO_SHOULD_BE_READY;
+    state->flags &= ~WASIP3_IO_SHOULD_BE_READY;
+
+    if (!(state->flags & WASIP3_IO_MUST_BUFFER)) {
+      wasip3_waitable_status_t status =
+          filesystem_stream_u8_read(state->stream, buffer, length);
+      state->flags |= WASIP3_IO_INPROGRESS;
+      if (status == WASIP3_WAITABLE_STATUS_BLOCKED) {
+        if (should_be_ready)
+          state->flags |= WASIP3_IO_MUST_BUFFER;
+        status = filesystem_stream_u8_cancel_read(state->stream);
+      }
+      size_t amount = wasip3_io_update_code(state, status);
+      if (amount > 0) {
+        if (read->offset)
+          *read->offset += amount;
+        return amount;
+      }
+      if (state->flags & WASIP3_IO_DONE)
+        return read->eof(read->eof_data);
+    }
+
+    if (!(state->flags & WASIP3_IO_MUST_BUFFER)) {
+      if (wasip3_read_start_zero_length(state)) {
+        errno = EWOULDBLOCK;
+        return -1;
+      }
+      if (state->flags & WASIP3_IO_DONE)
+        return read->eof(read->eof_data);
+
+      assert(state->flags & WASIP3_IO_SHOULD_BE_READY);
+      continue;
+    }
+
+    break;
+  }
+
+  // Like with writes above this is the point where we're forced to do internal
+  // buffering of reads. Issue the read here referencing internal data and
+  // return that we're blocked.
+  if (wasip3_read_start_nonzero(state, length) < 0)
+    return -1;
+  return wasip3_read_complete_internally(state, buffer, length);
 #else
 #error "Unknown WASI version"
 #endif
 }
+
+#ifndef __wasip2__
+static void wasip3_poll_read_ready(void *data, poll_state_t *state,
+                                   wasip3_event_t *event) {
+  wasip3_io_state_t *iostate = (wasip3_io_state_t *)data;
+  iostate->buf_end = wasip3_io_update_event(iostate, event);
+  __wasilibc_poll_ready(state, POLLRDNORM);
+}
+
+static void wasip3_poll_write_ready(void *data, poll_state_t *state,
+                                    wasip3_event_t *event) {
+  wasip3_io_state_t *iostate = (wasip3_io_state_t *)data;
+  iostate->buf_start += wasip3_io_update_event(iostate, event);
+  __wasilibc_poll_ready(state, POLLWRNORM);
+}
+
+static int wasip3_stream_poll(wasip3_io_state_t *iostate, poll_state_t *state,
+                              short events, poll_ready_t ready) {
+  // If the I/O stream is finished it'll never block so it's always ready.
+  if (iostate->flags & WASIP3_IO_DONE) {
+    __wasilibc_poll_ready(state, events);
+    return 0;
+  }
+
+  // If there's I/O in progress, then that's what we're interested in so add it
+  // to the set.
+  if (iostate->flags & WASIP3_IO_INPROGRESS)
+    return __wasilibc_poll_add(state, iostate->stream, ready, iostate);
+
+  // For readable streams if there's buffered data then this is immediately
+  // ready since that data can be read without blocking.
+  if (events == POLLRDNORM && iostate->buf) {
+    __wasilibc_poll_ready(state, events);
+    return 0;
+  }
+
+  if (iostate->flags & WASIP3_IO_MUST_BUFFER) {
+    // For writable streams, if buffering is required and zero-length writes
+    // don't work then this is immediately ready since those writes never block
+    // (they're buffered internally).
+    if (events == POLLWRNORM) {
+      __wasilibc_poll_ready(state, events);
+      return 0;
+    }
+
+    // For readable streams if buffering is required then a read is kicked off
+    // here. An arbitrary read size is chosen for now. If that read isn't ready
+    // then the waitable is added, and otherwise it's flagged as immediately
+    // ready.
+    if (events == POLLRDNORM) {
+      if (wasip3_read_start_nonzero(iostate, 16 * 1024) < 0) {
+        if (errno == EWOULDBLOCK)
+          return __wasilibc_poll_add(state, iostate->stream, ready, iostate);
+        return -1;
+      }
+      __wasilibc_poll_ready(state, events);
+      return 0;
+    }
+  }
+
+  // If I/O should be ready then that means a zero-length op has already
+  // completed, so this should be good to go.
+  if (iostate->flags & WASIP3_IO_SHOULD_BE_READY) {
+    __wasilibc_poll_ready(state, events);
+    return 0;
+  }
+
+  // Kick off a zero-length write here. If that actually gets kicked off then
+  // we're waiting on it so add it to the set. Otherwise it completed so we're
+  // immediately ready.
+  bool started_work = events == POLLWRNORM
+                          ? wasip3_write_start_zero_length(iostate)
+                          : wasip3_read_start_zero_length(iostate);
+  if (started_work)
+    return __wasilibc_poll_add(state, iostate->stream, ready, iostate);
+  __wasilibc_poll_ready(state, events);
+  return 0;
+}
+
+int __wasilibc_read_poll(wasip3_io_state_t *iostate, poll_state_t *state) {
+  return wasip3_stream_poll(iostate, state, POLLRDNORM, wasip3_poll_read_ready);
+}
+
+int __wasilibc_write_poll(wasip3_io_state_t *iostate, poll_state_t *state) {
+  return wasip3_stream_poll(iostate, state, POLLWRNORM,
+                            wasip3_poll_write_ready);
+}
+#endif // !__wasip2__

@@ -424,6 +424,14 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
     wasip3_waitable_set_wait(state.set, &event);
   } else {
     wasip3_waitable_set_poll(state.set, &event);
+
+    // If nothing happened after this `poll`, then yield to the runtime to allow
+    // harvesting any events and avoid starvation if we're being called in a
+    // loop with a timeout of 0.
+    if (event.event == WASIP3_EVENT_NONE) {
+      wasip3_thread_yield();
+      wasip3_waitable_set_poll(state.set, &event);
+    }
   }
   while (event.event != WASIP3_EVENT_NONE) {
     // If this event is for the timeout subtask then that's handled directly here

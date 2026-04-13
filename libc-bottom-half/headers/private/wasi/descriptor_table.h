@@ -6,10 +6,26 @@
 #ifndef __wasip1__
 #include <assert.h>
 #include <netinet/in.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <wasi/poll.h>
 
 #ifdef __wasip3__
+
+/// The stream is complete and no further operations are allowed on it.
+#define WASIP3_IO_DONE (1 << 0)
+/// An I/O operation, be it a read or write, is in flight.
+#define WASIP3_IO_INPROGRESS (1 << 1)
+/// The in-flight I/O operation is a zero-length operation. This means that if
+/// it's finished we expect that the next operation finishes immediately.
+#define WASIP3_IO_ZERO_INPROGRESS (1 << 2)
+/// A zero-sized in-flight I/O operation just finished so the next I/O op
+/// should finish immediately. If it doesn't it'll turn on the next flag.
+#define WASIP3_IO_SHOULD_BE_READY (1 << 3)
+/// This stream isn't compatible with zero-length reads/writes signaling
+/// readiness, so libc must buffer data internally for reads/writes.
+#define WASIP3_IO_MUST_BUFFER (1 << 4)
 
 /// Helper structure to package up state related to a wasip3 `stream<u8>`.
 ///
@@ -17,15 +33,22 @@
 /// stream. This simultaneously represents both readers and writers.
 typedef struct wasip3_io_state_t {
   uint32_t stream;
-  bool done;
+  /// Bitset of `WASIP3_IO_*` flags.
+  uint32_t flags;
+  /// Malloc'd buffer used for reads/writes. NULL if not present.
+  uint8_t *buf;
+  /// Start of `buf` that has data in-flight or ready.
+  size_t buf_start;
+  /// End of `buf` that has data in-flight or ready.
+  size_t buf_end;
 } wasip3_io_state_t;
 
 /// Initializes `state` with the `stream` provided.
 static inline void wasip3_io_state_init(wasip3_io_state_t *state,
                                         uint32_t stream) {
   assert(stream != 0);
+  memset(state, 0, sizeof(*state));
   state->stream = stream;
-  state->done = false;
 }
 
 /// Tests whether `state` has been initialized with a stream yet.
@@ -37,22 +60,26 @@ static inline bool wasip3_io_state_present(wasip3_io_state_t *state) {
 ///
 /// Internally the stream must be a reader-half of a `stream<u8>`.
 static inline void wasip3_read_state_close(wasip3_io_state_t *state) {
-  if (state->stream != 0) {
+  if (state->flags & WASIP3_IO_INPROGRESS)
+    filesystem_stream_u8_cancel_read(state->stream);
+  if (state->buf)
+    free(state->buf);
+  if (state->stream != 0)
     filesystem_stream_u8_drop_readable(state->stream);
-    state->stream = 0;
-  }
-  state->done = false;
+  memset(state, 0, sizeof(*state));
 }
 
 /// Closes out the streams/etc internal to `state`.
 ///
 /// Internally the stream must be a writer-half of a `stream<u8>`.
 static inline void wasip3_write_state_close(wasip3_io_state_t *state) {
-  if (state->stream != 0) {
+  if (state->flags & WASIP3_IO_INPROGRESS)
+    filesystem_stream_u8_cancel_write(state->stream);
+  if (state->buf)
+    free(state->buf);
+  if (state->stream != 0)
     filesystem_stream_u8_drop_writable(state->stream);
-    state->stream = 0;
-  }
-  state->done = false;
+  memset(state, 0, sizeof(*state));
 }
 #endif
 
@@ -195,6 +222,7 @@ typedef struct descriptor_vtable_t {
   /// and `get_write_stream`, if present, to handle `POLL{RD,WR}NORM` events.
   int (*poll_register)(void *, poll_state_t *state, short events);
 
+#ifdef __wasip2__
   /// Invoked when `poll` has already run and detected that this object was
   /// ready. The `events` provided are the same as those provided to
   /// `__wasilibc_poll_add` originally. This function should call
@@ -204,6 +232,7 @@ typedef struct descriptor_vtable_t {
   /// If this function is not provided then `events` will automatically
   /// be placed into the `revents` field of `pollfd`.
   int (*poll_finish)(void *, poll_state_t *state, short events);
+#endif // __wasip2__
 } descriptor_vtable_t;
 
 /// A "fat pointer" which is placed inside of the descriptor table.

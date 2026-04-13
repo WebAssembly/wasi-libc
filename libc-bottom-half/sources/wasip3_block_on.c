@@ -6,13 +6,8 @@
 #include <stdlib.h>
 #include <wasi/wasip3_block.h>
 
-/// Waits for `waitable` and fills in `event.`
-///
-/// A `timeout` can optionally be specified as well. If the `timeout` is 0 then
-/// this function will block indefinitely for the `waitable`.
-static bool __wasilibc_waitable_block_on(uint32_t waitable,
-                                         wasip3_event_t *event,
-                                         monotonic_clock_duration_t timeout) {
+bool __wasilibc_waitable_block_on(uint32_t waitable, wasip3_event_t *event,
+                                  monotonic_clock_duration_t timeout) {
   // If a timeout is requested then create a subtask using the monotonic-clock
   // interface which'll get added to the waitable-set below. If the timeout has
   // immediately elapsed then go ahead and poll the waitable set to see if the

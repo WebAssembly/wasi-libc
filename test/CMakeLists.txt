@@ -509,7 +509,7 @@ if (PYTHON_TESTS)
   find_program(PYTHON python3 python REQUIRED)
   find_program(MAKE make REQUIRED)
 
-  set(flags "--target=${TARGET_TRIPLE} --sysroot=${SYSROOT}")
+  set(flags "--target=${TARGET_TRIPLE} --sysroot=${SYSROOT} -resource-dir ${tmp_resource_dir}")
 
   ExternalProject_Add(
     python

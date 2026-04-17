@@ -509,7 +509,8 @@ if (PYTHON_TESTS)
   find_program(PYTHON python3 python REQUIRED)
   find_program(MAKE make REQUIRED)
 
-  set(flags "--target=${TARGET_TRIPLE} --sysroot=${SYSROOT} -resource-dir ${tmp_resource_dir}")
+  set(cflags "--target=${TARGET_TRIPLE} --sysroot=${SYSROOT}")
+  set(ldflags "${cflags} -resource-dir ${tmp_resource_dir}")
 
   ExternalProject_Add(
     python
@@ -554,7 +555,7 @@ if (PYTHON_TESTS)
 
     BUILD_COMMAND
       ${CMAKE_COMMAND}
-        -E env CFLAGS=${flags} LDFLAGS=${flags} --
+        -E env CFLAGS=${cflags} LDFLAGS=${ldflags} --
         ${PYTHON} <SOURCE_DIR>/Tools/wasm/wasi configure-host
         # Note that this gives double the stack that Python does by default to
         # allow for minor changes in what seems to be a combination of either
@@ -574,18 +575,18 @@ if (PYTHON_TESTS)
           -- --config-cache
     COMMAND
       ${CMAKE_COMMAND}
-        -E env CFLAGS=${flags} LDFLAGS=${flags} --
+        -E env CFLAGS=${cflags} LDFLAGS=${ldflags} --
         ${PYTHON} <SOURCE_DIR>/Tools/wasm/wasi make-host
     COMMAND
       ${CMAKE_COMMAND}
-        -E env CFLAGS=${flags} LDFLAGS=${flags} --
+        -E env CFLAGS=${cflags} LDFLAGS=${ldflags} --
         ${MAKE} --directory cross-build/wasm32-wasip1 pythoninfo
 
     INSTALL_COMMAND ""
 
     TEST_COMMAND
       ${CMAKE_COMMAND}
-        -E env CFLAGS=${flags} LDFLAGS=${flags} --
+        -E env CFLAGS=${cflags} LDFLAGS=${ldflags} --
         ${MAKE} --directory cross-build/wasm32-wasip1 test
   )
   ExternalProject_Add_StepDependencies(python configure sysroot engine)

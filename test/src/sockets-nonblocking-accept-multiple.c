@@ -21,7 +21,6 @@
 #define N 10
 
 int main() {
-  char buf[10];
   int listener_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
 
   // Setup a listener bound to port 0 to have the OS assign us one.

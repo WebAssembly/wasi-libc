@@ -351,6 +351,11 @@ ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
 #elif defined(__wasip3__)
   wasip3_io_state_t *state = write->state;
 
+  // If this stream is closed, for example with a TCP shutdown, then it's
+  // closed and we're at EOF.
+  if (state->stream == 0)
+    return write->eof(write->eof_data);
+
   // First resolve any pending I/O, should it exist.
   if (wasip3_write_resolve_pending(write) < 0)
     return -1;
@@ -549,6 +554,11 @@ ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
 #elif defined(__wasip3__)
   wasip3_io_state_t *state = read->state;
   wasip3_event_t event;
+
+  // If this stream is closed, for example with a TCP shutdown, then it's
+  // closed and we're at EOF.
+  if (state->stream == 0)
+    return read->eof(read->eof_data);
 
   // If there's active I/O in progress for this stream then this must wait for
   // it to complete.

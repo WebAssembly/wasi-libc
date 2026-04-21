@@ -220,7 +220,8 @@ static int tcp_write_eof(void *data) {
     if (result.is_err)
       return __wasilibc_socket_error_to_errno(&result.val.err);
   }
-  return 0;
+  errno = EPIPE;
+  return -1;
 }
 #endif
 

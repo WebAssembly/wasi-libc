@@ -417,6 +417,7 @@ if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(sockets-nonblocking-udp-no-connection.c NETWORK)
   add_wasilibc_test(sockets-eof-delayed.c NETWORK)
   add_wasilibc_test(sockets-nonblocking-accept-multiple.c NETWORK)
+  add_wasilibc_test(sockets-nonblocking-shutdown.c NETWORK)
 
   # Define executables for server/client tests, and they're paired together in
   # various combinations below for various tests.

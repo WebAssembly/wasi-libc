@@ -45,8 +45,8 @@ int main() {
     int client_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
     TEST(client_fd != -1);
     int rc;
-    TEST((rc =connect(client_fd, (struct sockaddr *)&server_address,
-                 server_address_len)) != -1 ||
+    TEST((rc = connect(client_fd, (struct sockaddr *)&server_address,
+                       server_address_len)) != -1 ||
          errno == EINPROGRESS);
     clients[i].fd = client_fd;
     if (rc == -1) {

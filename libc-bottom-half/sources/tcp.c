@@ -216,6 +216,7 @@ static int tcp_write_eof(void *data) {
     __wasilibc_future_block_on(
         sockets_future_result_void_error_code_read(state->send_result, &result),
         state->send_result);
+    sockets_future_result_void_error_code_drop_readable(state->send_result);
     state->send_result = 0;
     if (result.is_err)
       return __wasilibc_socket_error_to_errno(&result.val.err);

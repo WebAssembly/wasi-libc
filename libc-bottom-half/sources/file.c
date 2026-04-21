@@ -273,8 +273,10 @@ static off_t file_seek(void *data, off_t offset, int whence) {
     errno = EINVAL;
     return -1;
   }
-  file->offset = result;
-  file_close_streams(data);
+  if (result != file->offset) {
+    file_close_streams(data);
+    file->offset = result;
+  }
   return file->offset;
 }
 

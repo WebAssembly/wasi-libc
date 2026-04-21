@@ -112,7 +112,7 @@ static size_t wasip3_io_update_code(wasip3_io_state_t *state,
   return WASIP3_WAITABLE_COUNT(code);
 }
 
-/// Update `write` with the result of `event` that happened.
+/// Update `state` with the result of `event` that happened.
 static size_t wasip3_io_update_event(wasip3_io_state_t *state,
                                      wasip3_event_t *event) {
   assert(event->event == WASIP3_EVENT_STREAM_WRITE ||
@@ -209,7 +209,7 @@ static bool wasip3_start_zero_length(wasip3_io_state_t *state,
   return false;
 }
 
-/// Starts a zero-length write on the stream pointed to by `write`.
+/// Starts a zero-length write on the stream pointed to by `state`.
 ///
 /// This requires that there's no active I/O on the stream at this time and
 /// that it's not a closed stream.
@@ -218,7 +218,7 @@ static bool wasip3_write_start_zero_length(wasip3_io_state_t *state) {
       state, filesystem_stream_u8_write(state->stream, NULL, 0));
 }
 
-/// Starts a zero-length read on the stream pointed to by `read`.
+/// Starts a zero-length read on the stream pointed to by `state`.
 ///
 /// This requires that there's no active I/O on the stream at this time and
 /// that it's not a closed stream.
@@ -227,7 +227,7 @@ static bool wasip3_read_start_zero_length(wasip3_io_state_t *state) {
       state, filesystem_stream_u8_read(state->stream, NULL, 0));
 }
 
-/// Starts a zero-length read on the stream pointed to by `read`.
+/// Starts a nonzero-length read on the stream pointed to by `state`.
 ///
 /// This requires that there's no active I/O on the stream at this time and
 /// that it's not a closed stream.
@@ -440,7 +440,7 @@ ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
   }
 
   // At this point we're in nonblocking mode, we're required to buffer data,
-  // and most other flags should all be turned off. Here the input `bufffer` is
+  // and most other flags should all be turned off. Here the input `buffer` is
   // copied into the internal `state` and the I/O operation is issued.
   assert(state->flags & WASIP3_IO_MUST_BUFFER);
   assert(!(state->flags & WASIP3_IO_SHOULD_BE_READY));

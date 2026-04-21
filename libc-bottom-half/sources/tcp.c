@@ -343,8 +343,8 @@ static bool wasip3_tcp_accept_start(tcp_socket_state_listening_t *state) {
          !(state->flags & TCP_LISTENING_ACCEPT_READY)) {
     wasip3_waitable_status_t status = sockets_stream_own_tcp_socket_read(
         state->stream, &state->accept_result, 1);
+    state->flags |= TCP_LISTENING_ACCEPTING;
     if (status == WASIP3_WAITABLE_STATUS_BLOCKED) {
-      state->flags |= TCP_LISTENING_ACCEPTING;
       return true;
     }
     wasip3_tcp_accept_finish(state, status);

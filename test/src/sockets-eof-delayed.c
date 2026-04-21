@@ -19,6 +19,7 @@
   } while (0)
 
 int main() {
+  char buf[10];
   int listener_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
 
   // Setup a listener bound to port 0 to have the OS assign us one.
@@ -47,10 +48,10 @@ int main() {
   TEST(poll(&client, 1, -1) == 1);
 
   // Various ways of seeing that this isn't at EOF yet.
-  TEST(read(client_fd, NULL, 0) == -1 && errno == EWOULDBLOCK);
+  TEST(read(client_fd, buf, sizeof(buf)) == -1 && errno == EWOULDBLOCK);
   client.events = POLLRDNORM;
   TEST(poll(&client, 1, 0) == 0);
-  TEST(read(client_fd, NULL, 0) == -1 && errno == EWOULDBLOCK);
+  TEST(read(client_fd, buf, sizeof(buf)) == -1 && errno == EWOULDBLOCK);
 
   // Accept the socket on the listener, then immediately close it.
   int server_fd;
@@ -61,7 +62,6 @@ int main() {
   TEST(close(server_fd) != -1);
 
   // Test to make sure that the client is now at EOF.
-  char buf[10];
   TEST(poll(&client, 1, -1) == 1);
   TEST(read(client_fd, buf, sizeof(buf)) == 0);
   TEST(read(client_fd, buf, sizeof(buf)) == 0);

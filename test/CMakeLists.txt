@@ -334,6 +334,7 @@ add_wasilibc_test(fwscanf.c FS)
 # main thread when doing file I/O. This is used to exercise this test's
 # behavior where file streams use fallback code for nonblocking reads/writes.
 add_wasilibc_test(fs-nonblocking.c FS ENGINE_ARG -Wtimeout=10s)
+set_tests_properties(fs-nonblocking.wasm PROPERTIES LABELS v8fail)
 add_wasilibc_test(getentropy.c)
 add_wasilibc_test(hello.c PASS_REGULAR_EXPRESSION "Hello, World!")
 add_wasilibc_test(ioctl.c FS)

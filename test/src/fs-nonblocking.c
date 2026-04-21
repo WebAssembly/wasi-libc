@@ -24,12 +24,12 @@ int main() {
   int rc, size = 0;
 
   struct pollfd pollfd;
+  int max = 32 * 1024;
   pollfd.fd = fd;
 
   pollfd.events = POLLWRNORM;
-  for (int i = 0; i < 100; i++) {
-    fprintf(stderr, "iteration %d size: %d\n", i, size);
-    while ((rc = write(fd, "hello", 5)) > 0)
+  for (int i = 0; size < max && i < 100; i++) {
+    while (size < max && (rc = write(fd, "hello", 5)) > 0)
       size += rc;
     TEST(poll(&pollfd, 1, -1) != -1);
   }

@@ -679,6 +679,13 @@ static void wasip3_poll_write_ready(void *data, poll_state_t *state,
 
 static int wasip3_stream_poll(wasip3_io_state_t *iostate, poll_state_t *state,
                               short events, poll_ready_t ready) {
+  // If the stream is closed then it's immediately ready for reading/writing as
+  // that'll resolve with an error/0/etc.
+  if (iostate->stream == 0) {
+    __wasilibc_poll_ready(state, events);
+    return 0;
+  }
+
   // If the I/O stream is finished it'll never block so it's always ready.
   if (iostate->flags & WASIP3_IO_DONE) {
     __wasilibc_poll_ready(state, events);

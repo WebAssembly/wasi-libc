@@ -52,5 +52,12 @@ int main() {
   TEST(recv(client_fd, buf, sizeof(buf), 0) == 0);
   TEST(send(client_fd, buf, sizeof(buf), 0) == -1 && errno == EPIPE);
 
+  struct pollfd pfd = {.fd = client_fd, .events = POLLWRNORM};
+  TEST(poll(&pfd, 1, -1) == 1);
+  TEST(pfd.revents & POLLWRNORM);
+  pfd.events = POLLRDNORM;
+  TEST(poll(&pfd, 1, -1) == 1);
+  TEST(pfd.revents & POLLRDNORM);
+
   return t_status;
 }

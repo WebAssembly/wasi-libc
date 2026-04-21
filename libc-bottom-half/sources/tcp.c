@@ -169,7 +169,6 @@ static int tcp_read_eof(void *data) {
   tcp_socket_state_connected_t *state = &tcp->state.connected;
 
   if (state->receive_result) {
-    assert(tcp->blocking);
     sockets_result_void_error_code_t result;
     __wasilibc_future_block_on(sockets_future_result_void_error_code_read(
                                    state->receive_result, &result),

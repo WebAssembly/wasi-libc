@@ -174,6 +174,7 @@ static int tcp_read_eof(void *data) {
     __wasilibc_future_block_on(sockets_future_result_void_error_code_read(
                                    state->receive_result, &result),
                                state->receive_result);
+    sockets_future_result_void_error_code_drop_readable(state->receive_result);
     state->receive_result = 0;
     if (result.is_err)
       return __wasilibc_socket_error_to_errno(&result.val.err);

@@ -238,6 +238,7 @@ static int wasip3_read_start_nonzero(wasip3_io_state_t *state, size_t length) {
   assert(!(state->flags & WASIP3_IO_ZERO_INPROGRESS));
   assert(!(state->flags & WASIP3_IO_DONE));
   assert(state->buf == NULL);
+  assert(length);
   state->buf = malloc(length);
   if (!state->buf) {
     errno = ENOMEM;
@@ -252,7 +253,7 @@ static int wasip3_read_start_nonzero(wasip3_io_state_t *state, size_t length) {
     errno = EWOULDBLOCK;
     return -1;
   }
-
+  state->buf_end = wasip3_io_update_code(state, status);
   return 0;
 }
 

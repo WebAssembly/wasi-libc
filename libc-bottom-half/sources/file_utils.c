@@ -506,7 +506,8 @@ ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
   if (result > 0 && write->offset)
     *write->offset += result;
 #ifndef __wasip2__
-  if (result == 0 && ((write->state->flags & WASIP3_IO_DONE) || (write->state->stream == 0)))
+  if (result == 0 &&
+      ((write->state->flags & WASIP3_IO_DONE) || (write->state->stream == 0)))
     return write->eof(write->eof_data);
 #endif
   return result;
@@ -692,7 +693,8 @@ ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
   if (result > 0 && read->offset)
     *read->offset += result;
 #ifndef __wasip2__
-  if (result == 0 && ((read->state->flags & WASIP3_IO_DONE) || (read->state->stream == 0)))
+  if (result == 0 &&
+      ((read->state->flags & WASIP3_IO_DONE) || (read->state->stream == 0)))
     return read->eof(read->eof_data);
 #endif
   return result;

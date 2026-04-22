@@ -156,8 +156,56 @@ void test_tcp_client() {
   TEST(close(server_socket_fd) == 0);
 }
 
+static void test_poll_events() {
+  int listener_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+
+  struct sockaddr_in server_address;
+  socklen_t server_address_len = sizeof(server_address);
+  server_address.sin_family = AF_INET;
+  server_address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  server_address.sin_port = 0;
+  TEST(bind(listener_fd, (struct sockaddr *)&server_address,
+            sizeof(server_address)) != -1);
+  TEST(getsockname(listener_fd, (struct sockaddr *)&server_address,
+                   &server_address_len) != -1);
+  TEST(listen(listener_fd, 1) != -1);
+
+  int client_fd;
+  TEST((client_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) != -1);
+  TEST(connect(client_fd, (struct sockaddr *)&server_address,
+               server_address_len) != -1 ||
+       errno == EINPROGRESS);
+
+  struct pollfd pfds[3];
+  pfds[0].fd = listener_fd;
+  pfds[0].events = POLLRDNORM;
+  pfds[0].revents = 0;
+  pfds[1].fd = client_fd;
+  pfds[1].events = POLLRDNORM;
+  pfds[1].revents = 0;
+
+  while (!(pfds[0].revents & POLLRDNORM)) {
+    TEST(poll(pfds, 2, -1) != -1);
+    TEST(pfds[1].revents == 0);
+  }
+  TEST(pfds[0].revents == POLLRDNORM);
+
+  int server_fd;
+  TEST((server_fd = accept4(listener_fd, NULL, NULL, SOCK_NONBLOCK)) != -1);
+  TEST(write(server_fd, "x", 1) == 1);
+  TEST(close(server_fd) == 0);
+
+  TEST(poll(pfds, 2, -1) == 1);
+  TEST(pfds[0].revents == 0);
+  TEST(pfds[1].revents == POLLRDNORM);
+
+  TEST(close(client_fd) == 0);
+  TEST(close(listener_fd) == 0);
+}
+
 int main(void) {
   test_tcp_client();
+  test_poll_events();
 
   return t_status;
 }

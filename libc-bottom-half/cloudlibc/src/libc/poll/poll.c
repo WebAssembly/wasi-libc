@@ -317,6 +317,7 @@ int __wasilibc_poll_add(poll_state_t *state, uint32_t waitable,
 }
 
 void __wasilibc_poll_ready(poll_state_t *state, short events) {
+  events = events & state->pollfd->events;
   if (events != 0) {
     if (state->pollfd->revents == 0) {
       ++state->event_count;

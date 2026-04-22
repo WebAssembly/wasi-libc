@@ -138,6 +138,11 @@ void test_tcp_client() {
     TEST(poll(&poll_fd, 1, -1) != -1);
   }
 
+  TEST(read(client_socket_fd, NULL, 0) == 0);
+  TEST(write(client_socket_fd, NULL, 0) == 0);
+  TEST(read(socket_fd, NULL, 0) == 0);
+  TEST(write(socket_fd, NULL, 0) == 0);
+
   // Message received should be the same as message sent
   TEST(strcmp(message, client_buffer) == 0);
 

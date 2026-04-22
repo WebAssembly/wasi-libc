@@ -363,6 +363,11 @@ ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
   assert((state->flags & WASIP3_IO_INPROGRESS) == 0);
   assert((state->flags & WASIP3_IO_ZERO_INPROGRESS) == 0);
 
+  // Follow posix semantics for zero-length writes which appear to return 0
+  // without actually doing any I/O.
+  if (length == 0)
+    return 0;
+
   // If this stream is complete, then delegate to EOF.
   if (state->flags & WASIP3_IO_DONE)
     return write->eof(write->eof_data);
@@ -587,6 +592,11 @@ ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
   // that out here.
   if (state->buf)
     return wasip3_read_complete_internally(state, buffer, length);
+
+  // Implement posix-like semantics where a `read` of 0 bytes doesn't do
+  // anything and just returns 0.
+  if (length == 0)
+    return 0;
 
   // If this stream has finished, then delegate to EOF.
   if (state->flags & WASIP3_IO_DONE)

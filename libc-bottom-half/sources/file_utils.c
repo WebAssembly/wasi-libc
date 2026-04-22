@@ -371,7 +371,7 @@ static ssize_t __wasilibc_write_without_offset_update(wasi_write_t *write,
   // If this stream is closed, for example with a TCP shutdown, then it's
   // closed and we're at EOF.
   if (state->stream == 0)
-    return write->eof(write->eof_data);
+    return 0;
 
   // First resolve any pending I/O, should it exist.
   if (wasip3_write_resolve_pending(write) < 0)
@@ -386,7 +386,7 @@ static ssize_t __wasilibc_write_without_offset_update(wasi_write_t *write,
 
   // If this stream is complete, then delegate to EOF.
   if (state->flags & WASIP3_IO_DONE)
-    return write->eof(write->eof_data);
+    return 0;
 
   // For simplicity, handle blocking writes directly here. This involves
   // blocking with an optional timeout and handling the result.
@@ -401,8 +401,6 @@ static ssize_t __wasilibc_write_without_offset_update(wasi_write_t *write,
       state->flags |= WASIP3_IO_DONE;
     if (amount < 0)
       return -1;
-    if (amount == 0 && done)
-      return write->eof(write->eof_data);
     return amount;
   }
 
@@ -435,7 +433,7 @@ static ssize_t __wasilibc_write_without_offset_update(wasi_write_t *write,
       if (amount > 0)
         return amount;
       if (state->flags & WASIP3_IO_DONE)
-        return write->eof(write->eof_data);
+        return 0;
     }
 
     // If, at this point, we're still not forced to buffer then it means that a
@@ -448,7 +446,7 @@ static ssize_t __wasilibc_write_without_offset_update(wasi_write_t *write,
         return -1;
       }
       if (state->flags & WASIP3_IO_DONE)
-        return write->eof(write->eof_data);
+        return 0;
 
       // The zero-length write succeeded, so turn the loop again to retry the
       // write of the user-supplied buffer. Note that the I/O "should be ready"
@@ -507,6 +505,11 @@ ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
       __wasilibc_write_without_offset_update(write, buffer, length);
   if (result > 0 && write->offset)
     *write->offset += result;
+#ifndef __wasip2__
+  if (result == 0 &&
+      ((write->state->flags & WASIP3_IO_DONE) || (write->state->stream == 0)))
+    return write->eof(write->eof_data);
+#endif
   return result;
 }
 
@@ -583,7 +586,7 @@ static ssize_t __wasilibc_read_without_offset_update(wasi_read_t *read,
   // If this stream is closed, for example with a TCP shutdown, then it's
   // closed and we're at EOF.
   if (state->stream == 0)
-    return read->eof(read->eof_data);
+    return 0;
 
   // If there's active I/O in progress for this stream then this must wait for
   // it to complete.
@@ -619,7 +622,7 @@ static ssize_t __wasilibc_read_without_offset_update(wasi_read_t *read,
 
   // If this stream has finished, then delegate to EOF.
   if (state->flags & WASIP3_IO_DONE)
-    return read->eof(read->eof_data);
+    return 0;
 
   // For simplicity handle the blocking read case here.
   if (read->blocking) {
@@ -632,8 +635,6 @@ static ssize_t __wasilibc_read_without_offset_update(wasi_read_t *read,
       state->flags |= WASIP3_IO_DONE;
     if (amount < 0)
       return -1;
-    if (amount == 0 && done)
-      return read->eof(read->eof_data);
     return amount;
   }
 
@@ -658,7 +659,7 @@ static ssize_t __wasilibc_read_without_offset_update(wasi_read_t *read,
       if (amount > 0)
         return amount;
       if (state->flags & WASIP3_IO_DONE)
-        return read->eof(read->eof_data);
+        return 0;
     }
 
     if (!(state->flags & WASIP3_IO_MUST_BUFFER)) {
@@ -667,7 +668,7 @@ static ssize_t __wasilibc_read_without_offset_update(wasi_read_t *read,
         return -1;
       }
       if (state->flags & WASIP3_IO_DONE)
-        return read->eof(read->eof_data);
+        return 0;
 
       assert(state->flags & WASIP3_IO_SHOULD_BE_READY);
       continue;
@@ -691,6 +692,11 @@ ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
   ssize_t result = __wasilibc_read_without_offset_update(read, buffer, length);
   if (result > 0 && read->offset)
     *read->offset += result;
+#ifndef __wasip2__
+  if (result == 0 &&
+      ((read->state->flags & WASIP3_IO_DONE) || (read->state->stream == 0)))
+    return read->eof(read->eof_data);
+#endif
   return result;
 }
 

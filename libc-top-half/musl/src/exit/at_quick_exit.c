@@ -7,8 +7,10 @@
 
 static void (*funcs[COUNT])(void);
 static int count;
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 static volatile int lock[1];
 volatile int *const __at_quick_exit_lockptr = lock;
+#endif
 
 void __funcs_on_quick_exit()
 {

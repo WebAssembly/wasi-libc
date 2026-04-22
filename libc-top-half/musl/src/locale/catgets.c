@@ -7,14 +7,17 @@
 
 #define V(p) be32toh(*(uint32_t *)(p))
 
+#ifdef __wasilibc_unmodified_upstream // wasi-libc doesn't support catgets yet
 static int cmp(const void *a, const void *b)
 {
 	uint32_t x = V(a), y = V(b);
 	return x<y ? -1 : x>y ? 1 : 0;
 }
+#endif
 
 char *catgets (nl_catd catd, int set_id, int msg_id, const char *s)
 {
+#ifdef __wasilibc_unmodified_upstream // wasi-libc doesn't support catgets yet
 	const char *map = (const char *)catd;
 	uint32_t nsets = V(map+4);
 	const char *sets = map+20;
@@ -35,4 +38,7 @@ char *catgets (nl_catd catd, int set_id, int msg_id, const char *s)
 		return (char *)s;
 	}
 	return (char *)(strings + V(msg+8));
+#else
+	return (char *)s;
+#endif
 }

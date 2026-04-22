@@ -43,3 +43,5 @@ int scandir(const char *path, struct dirent ***res,
 	*res = names;
 	return cnt;
 }
+
+weak_alias(scandir, scandir64);

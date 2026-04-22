@@ -77,10 +77,22 @@ extern "C" {
 #define PTHREAD_NULL ((pthread_t)0)
 
 
+#ifdef __wasilibc_unmodified_upstream
 int pthread_create(pthread_t *__restrict, const pthread_attr_t *__restrict, void *(*)(void *), void *__restrict);
 int pthread_detach(pthread_t);
 _Noreturn void pthread_exit(void *);
 int pthread_join(pthread_t, void **);
+#else
+#if defined(_REENTRANT) || !defined(_WASI_STRICT_PTHREAD)
+int pthread_create(pthread_t *__restrict, const pthread_attr_t *__restrict, void *(*)(void *), void *__restrict);
+int pthread_detach(pthread_t);
+int pthread_join(pthread_t, void **);
+#else
+#define pthread_create(...) ({ _Static_assert(0, "This function is not available on a single-threaded target; switch to a multi-threaded target with -pthread or enable a stub implementation by undefining _WASI_STRICT_PTHREAD"); 0;})
+#define pthread_detach(...) ({ _Static_assert(0, "This function is not available on a single-threaded target; switch to a multi-threaded target with -pthread or enable a stub implementation by undefining _WASI_STRICT_PTHREAD"); 0;})
+#define pthread_join(...) ({ _Static_assert(0, "This function is not available on a single-threaded target; switch to a multi-threaded target with -pthread or enable a stub implementation by undefining _WASI_STRICT_PTHREAD"); 0;})
+#endif
+#endif
 
 #ifdef __GNUC__
 __attribute__((const))
@@ -95,10 +107,14 @@ int pthread_equal(pthread_t, pthread_t);
 int pthread_setcancelstate(int, int *);
 int pthread_setcanceltype(int, int *);
 void pthread_testcancel(void);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no cancellation support. */
 int pthread_cancel(pthread_t);
+#endif
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no CPU scheduling support. */
 int pthread_getschedparam(pthread_t, int *__restrict, struct sched_param *__restrict);
 int pthread_setschedparam(pthread_t, int, const struct sched_param *);
+#endif
 int pthread_setschedprio(pthread_t, int);
 
 int pthread_once(pthread_once_t *, void (*)(void));
@@ -161,8 +177,10 @@ int pthread_attr_getscope(const pthread_attr_t *__restrict, int *__restrict);
 int pthread_attr_setscope(pthread_attr_t *, int);
 int pthread_attr_getschedpolicy(const pthread_attr_t *__restrict, int *__restrict);
 int pthread_attr_setschedpolicy(pthread_attr_t *, int);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no CPU scheduling support. */
 int pthread_attr_getschedparam(const pthread_attr_t *__restrict, struct sched_param *__restrict);
 int pthread_attr_setschedparam(pthread_attr_t *__restrict, const struct sched_param *__restrict);
+#endif
 int pthread_attr_getinheritsched(const pthread_attr_t *__restrict, int *__restrict);
 int pthread_attr_setinheritsched(pthread_attr_t *, int);
 
@@ -224,8 +242,13 @@ int pthread_setname_np(pthread_t, const char *);
 int pthread_getname_np(pthread_t, char *, size_t);
 int pthread_getattr_default_np(pthread_attr_t *);
 int pthread_setattr_default_np(const pthread_attr_t *);
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT) || !defined(_WASI_STRICT_PTHREAD)
 int pthread_tryjoin_np(pthread_t, void **);
 int pthread_timedjoin_np(pthread_t, void **, const struct timespec *);
+#else
+#define pthread_tryjoin_np(...) ({ _Static_assert(0, "This function is not available on a single-threaded target; switch to a multi-threaded target with -pthread or enable a stub implementation by undefining _WASI_STRICT_PTHREAD"); 0;})
+#define pthread_timedjoin_np(...) ({ _Static_assert(0, "This function is not available on a single-threaded target; switch to a multi-threaded target with -pthread or enable a stub implementation by undefining _WASI_STRICT_PTHREAD"); 0;})
+#endif
 #endif
 
 #if _REDIR_TIME64

@@ -6,6 +6,10 @@
 #include <limits.h>
 #include <string.h>
 #include <stdint.h>
+#ifdef __wasilibc_unmodified_upstream // Changes to optimize printf/scanf when long double isn't needed
+#else
+#include "printscan.h"
+#endif
 
 #include "stdio_impl.h"
 #include "shgetc.h"
@@ -68,7 +72,11 @@ int vfscanf(FILE *restrict f, const char *restrict fmt, va_list ap)
 	int invert;
 	int matches=0;
 	unsigned long long x;
+#if defined(__wasilibc_printscan_no_long_double)
+	long_double y;
+#else
 	long double y;
+#endif
 	off_t pos = 0;
 	unsigned char scanset[257];
 	size_t i, k;
@@ -312,7 +320,11 @@ int vfscanf(FILE *restrict f, const char *restrict fmt, va_list ap)
 				*(double *)dest = y;
 				break;
 			case SIZE_L:
+#if defined(__wasilibc_printscan_no_long_double)
+				long_double_not_supported();
+#else
 				*(long double *)dest = y;
+#endif
 				break;
 			}
 			break;

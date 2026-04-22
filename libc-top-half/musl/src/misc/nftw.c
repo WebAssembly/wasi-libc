@@ -6,7 +6,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <limits.h>
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #include <pthread.h>
+#endif
 
 struct history
 {
@@ -135,8 +137,14 @@ int nftw(const char *path, int (*fn)(const char *, const struct stat *, int, str
 	}
 	memcpy(pathbuf, path, l+1);
 	
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
+#endif
 	r = do_nftw(pathbuf, fn, fd_limit, flags, NULL);
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	pthread_setcancelstate(cs, 0);
+#endif
 	return r;
 }
+
+weak_alias(nftw, nftw64);

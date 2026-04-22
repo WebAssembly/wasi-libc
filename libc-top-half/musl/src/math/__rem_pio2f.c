@@ -35,7 +35,9 @@
  */
 static const double
 toint   = 1.5/EPS,
+#ifdef __wasilibc_unmodified_upstream // Wasm doesn't have alternate rounding modes
 pio4    = 0x1.921fb6p-1,
+#endif
 invpio2 = 6.36619772367581382433e-01, /* 0x3FE45F30, 0x6DC9C883 */
 pio2_1  = 1.57079631090164184570e+00, /* 0x3FF921FB, 0x50000000 */
 pio2_1t = 1.58932547735281966916e-08; /* 0x3E5110b4, 0x611A6263 */
@@ -55,6 +57,7 @@ int __rem_pio2f(float x, double *y)
 		fn = (double_t)x*invpio2 + toint - toint;
 		n  = (int32_t)fn;
 		*y = x - fn*pio2_1 - fn*pio2_1t;
+#ifdef __wasilibc_unmodified_upstream // Wasm doesn't have alternate rounding modes
 		/* Matters with directed rounding. */
 		if (predict_false(*y < -pio4)) {
 			n--;
@@ -65,6 +68,7 @@ int __rem_pio2f(float x, double *y)
 			fn++;
 			*y = x - fn*pio2_1 - fn*pio2_1t;
 		}
+#endif
 		return n;
 	}
 	if(ix>=0x7f800000) {  /* x is inf or NaN */

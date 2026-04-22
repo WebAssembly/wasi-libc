@@ -48,6 +48,7 @@ extern "C" {
 #define FP_FAST_FMAL 1
 #endif
 
+#ifdef __wasilibc_unmodified_upstream /* Use the compiler's definition of the fpclassify-like operations */
 int __fpclassify(double);
 int __fpclassifyf(float);
 int __fpclassifyl(long double);
@@ -131,6 +132,22 @@ __ISREL_DEF(greaterequall, >=, long double)
 #define islessgreater(x, y)     __tg_pred_2(x, y, __islessgreater)
 #define isgreater(x, y)         __tg_pred_2(x, y, __isgreater)
 #define isgreaterequal(x, y)    __tg_pred_2(x, y, __isgreaterequal)
+#else
+#define fpclassify(x)        (__builtin_fpclassify(FP_NAN, FP_INFINITE, \
+                                                   FP_NORMAL, FP_SUBNORMAL, \
+                                                   FP_ZERO, x))
+#define isinf(x)             (__builtin_isinf(x))
+#define isnan(x)             (__builtin_isnan(x))
+#define isnormal(x)          (__builtin_isnormal(x))
+#define isfinite(x)          (__builtin_isfinite(x))
+#define signbit(x)           (__builtin_signbit(x))
+#define isunordered(x, y)    (__builtin_isunordered(x, y))
+#define isless(x, y)         (__builtin_isless(x, y))
+#define islessequal(x, y)    (__builtin_islessequal(x, y))
+#define islessgreater(x, y)  (__builtin_islessgreater(x, y))
+#define isgreater(x, y)      (__builtin_isgreater(x, y))
+#define isgreaterequal(x, y) (__builtin_isgreaterequal(x, y))
+#endif
 
 double      acos(double);
 float       acosf(float);

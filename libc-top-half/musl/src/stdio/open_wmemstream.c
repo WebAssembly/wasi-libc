@@ -31,7 +31,15 @@ fail:
 		errno = EINVAL;
 		return -1;
 	}
+#ifdef __wasilibc_unmodified_upstream // WASI's SEEK_* constants have different values.
 	base = (size_t [3]){0, c->pos, c->len}[whence];
+#else
+	base = (size_t [3]) {
+            [SEEK_SET] = 0,
+            [SEEK_CUR] = c->pos,
+            [SEEK_END] = c->len
+        }[whence];
+#endif
 	if (off < -base || off > SSIZE_MAX/4-base) goto fail;
 	memset(&c->mbs, 0, sizeof c->mbs);
 	return c->pos = base+off;
@@ -98,7 +106,9 @@ FILE *open_wmemstream(wchar_t **bufp, size_t *sizep)
 	f->f.seek = wms_seek;
 	f->f.close = wms_close;
 
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	if (!libc.threaded) f->f.lock = -1;
+#endif
 
 	fwide(&f->f, 1);
 

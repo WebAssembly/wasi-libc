@@ -256,7 +256,11 @@ long double fmal(long double x, long double y, long double z)
 		 * the correct sign.
 		 */
 		fesetround(oround);
+#ifdef __wasilibc_unmodified_upstream // WASI doesn't need old GCC workarounds
 		volatile long double vzs = zs; /* XXX gcc CSE bug workaround */
+#else
+		long double vzs = zs;
+#endif
 		return xy.hi + vzs + scalbnl(xy.lo, spread);
 	}
 

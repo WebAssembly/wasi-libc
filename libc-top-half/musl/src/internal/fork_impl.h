@@ -1,5 +1,6 @@
 #include <features.h>
 
+#ifdef __wasilibc_unmodified_upstream
 extern hidden volatile int *const __at_quick_exit_lockptr;
 extern hidden volatile int *const __atexit_lockptr;
 extern hidden volatile int *const __gettext_lockptr;
@@ -19,3 +20,4 @@ hidden void __ldso_atfork(int);
 hidden void __pthread_key_atfork(int);
 
 hidden void __post_Fork(int);
+#endif

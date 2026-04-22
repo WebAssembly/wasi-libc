@@ -3,7 +3,11 @@
  * with these messages, and then to define a lookup table translating
  * error codes to offsets of corresponding fields in the structure. */
 
+#ifdef __wasilibc_unmodified_upstream // Print "Success" for ESUCCESS.
 E(0,            "No error information")
+#else
+E(0,            "Success")
+#endif
 
 E(EILSEQ,       "Illegal byte sequence")
 E(EDOM,         "Domain error")
@@ -32,14 +36,18 @@ E(ENOTEMPTY,    "Directory not empty")
 E(ECONNRESET,   "Connection reset by peer")
 E(ETIMEDOUT,    "Operation timed out")
 E(ECONNREFUSED, "Connection refused")
+#ifdef __wasilibc_unmodified_upstream // errno value not in WASI
 E(EHOSTDOWN,    "Host is down")
+#endif
 E(EHOSTUNREACH, "Host is unreachable")
 E(EADDRINUSE,   "Address in use")
 
 E(EPIPE,        "Broken pipe")
 E(EIO,          "I/O error")
 E(ENXIO,        "No such device or address")
+#ifdef __wasilibc_unmodified_upstream // errno value not in WASI
 E(ENOTBLK,      "Block device required")
+#endif
 E(ENODEV,       "No such device")
 E(ENOTDIR,      "Not a directory")
 E(EISDIR,       "Is a directory")
@@ -67,23 +75,31 @@ E(ECANCELED,    "Operation canceled")
 E(ENOSYS,       "Function not implemented")
 E(ENOMSG,       "No message of desired type")
 E(EIDRM,        "Identifier removed")
+#ifdef __wasilibc_unmodified_upstream // errno value not in WASI
 E(ENOSTR,       "Device not a stream")
 E(ENODATA,      "No data available")
 E(ETIME,        "Device timeout")
 E(ENOSR,        "Out of streams resources")
+#endif
 E(ENOLINK,      "Link has been severed")
 E(EPROTO,       "Protocol error")
 E(EBADMSG,      "Bad message")
+#ifdef __wasilibc_unmodified_upstream // errno value not in WASI
 E(EBADFD,       "File descriptor in bad state")
+#endif
 E(ENOTSOCK,     "Not a socket")
 E(EDESTADDRREQ, "Destination address required")
 E(EMSGSIZE,     "Message too large")
 E(EPROTOTYPE,   "Protocol wrong type for socket")
 E(ENOPROTOOPT,  "Protocol not available")
 E(EPROTONOSUPPORT,"Protocol not supported")
+#ifdef __wasilibc_unmodified_upstream // errno value not in WASI
 E(ESOCKTNOSUPPORT,"Socket type not supported")
+#endif
 E(ENOTSUP,      "Not supported")
+#ifdef __wasilibc_unmodified_upstream // errno value not in WASI
 E(EPFNOSUPPORT, "Protocol family not supported")
+#endif
 E(EAFNOSUPPORT, "Address family not supported by protocol")
 E(EADDRNOTAVAIL,"Address not available")
 E(ENETDOWN,     "Network is down")
@@ -93,16 +109,29 @@ E(ECONNABORTED, "Connection aborted")
 E(ENOBUFS,      "No buffer space available")
 E(EISCONN,      "Socket is connected")
 E(ENOTCONN,     "Socket not connected")
+#ifdef __wasilibc_unmodified_upstream // errno value not in WASI
 E(ESHUTDOWN,    "Cannot send after socket shutdown")
+#endif
 E(EALREADY,     "Operation already in progress")
 E(EINPROGRESS,  "Operation in progress")
 E(ESTALE,       "Stale file handle")
+#ifdef __wasilibc_unmodified_upstream // errno value not in WASI
 E(EREMOTEIO,    "Remote I/O error")
+#endif
 E(EDQUOT,       "Quota exceeded")
+#ifdef __wasilibc_unmodified_upstream // errno value not in WASI
 E(ENOMEDIUM,    "No medium found")
 E(EMEDIUMTYPE,  "Wrong medium type")
+#endif
 E(EMULTIHOP,    "Multihop attempted")
+#ifdef __wasilibc_unmodified_upstream // errno value not in WASI
 E(ENOKEY,       "Required key not available")
 E(EKEYEXPIRED,  "Key has expired")
 E(EKEYREVOKED,  "Key has been revoked")
 E(EKEYREJECTED, "Key was rejected by service")
+#endif
+#ifdef __wasilibc_unmodified_upstream // errno value in WASI and not musl
+#else
+// WASI adds this errno code.
+E(ENOTCAPABLE,  "Capabilities insufficient")
+#endif

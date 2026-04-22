@@ -1,3 +1,7 @@
+#ifndef _WASI_EMULATED_MMAN
+#error "WASI lacks a true mmap; to enable minimal mmap emulation, \
+compile with -D_WASI_EMULATED_MMAN and link with -lwasi-emulated-mman"
+#else
 #ifndef	_SYS_MMAN_H
 #define	_SYS_MMAN_H
 #ifdef __cplusplus
@@ -141,12 +145,13 @@ int mincore (void *, size_t, unsigned char *);
 int shm_open (const char *, int, mode_t);
 int shm_unlink (const char *);
 
-#if defined(_LARGEFILE64_SOURCE)
+#if defined(_LARGEFILE64_SOURCE) || defined(_GNU_SOURCE)
 #define mmap64 mmap
 #define off64_t off_t
 #endif
 
 #ifdef __cplusplus
 }
+#endif
 #endif
 #endif

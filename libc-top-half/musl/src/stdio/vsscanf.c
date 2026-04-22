@@ -19,7 +19,11 @@ int vsscanf(const char *restrict s, const char *restrict fmt, va_list ap)
 {
 	FILE f = {
 		.buf = (void *)s, .cookie = (void *)s,
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 		.read = string_read, .lock = -1
+#else
+		.read = string_read
+#endif
 	};
 	return vfscanf(&f, fmt, ap);
 }

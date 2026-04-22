@@ -14,8 +14,10 @@ extern "C" {
 #define __NEED_wint_t
 #define __NEED_mbstate_t
 
+#ifdef __wasilibc_unmodified_upstream /* WASI doesn't need to define FILE as a complete type */
 #if __STDC_VERSION__ < 201112L
 #define __NEED_struct__IO_FILE
+#endif
 #endif
 
 #if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) \
@@ -38,12 +40,17 @@ extern "C" {
 #define WCHAR_MIN (-1-0x7fffffff+L'\0')
 #endif
 
+#ifdef __wasilibc_unmodified_upstream /* Use the compiler's definition of NULL */
 #if __cplusplus >= 201103L
 #define NULL nullptr
 #elif defined(__cplusplus)
 #define NULL 0L
 #else
 #define NULL ((void*)0)
+#endif
+#else
+#define __need_NULL
+#include <stddef.h>
 #endif
 
 #undef WEOF

@@ -39,7 +39,9 @@
 
 #include <bits/limits.h>
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no pipes */
 #define PIPE_BUF 4096
+#endif
 #define FILESIZEBITS 64
 #ifndef NAME_MAX
 #define NAME_MAX 255
@@ -66,22 +68,32 @@
 #define PTHREAD_KEYS_MAX 128
 #define PTHREAD_STACK_MIN 2048
 #define PTHREAD_DESTRUCTOR_ITERATIONS 4
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #define SEM_VALUE_MAX 0x7fffffff
 #define SEM_NSEMS_MAX 256
+#endif
 #define DELAYTIMER_MAX 0x7fffffff
+#ifdef __wasilibc_unmodified_upstream /* WASI has no mq */
 #define MQ_PRIO_MAX 32768
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no usernames */
 #define LOGIN_NAME_MAX 256
+#endif
 
 /* Arbitrary numbers... */
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no shell commands */
 #define BC_BASE_MAX 99
 #define BC_DIM_MAX 2048
 #define BC_SCALE_MAX 99
 #define BC_STRING_MAX 1000
+#endif
 #define CHARCLASS_NAME_MAX 14
 #define COLL_WEIGHTS_MAX 2
+#ifdef __wasilibc_unmodified_upstream /* WASI has no shell commands */
 #define EXPR_NEST_MAX 32
 #define LINE_MAX 4096
+#endif
 #define RE_DUP_MAX 255
 
 #define NL_ARGMAX 9

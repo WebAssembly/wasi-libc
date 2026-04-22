@@ -1,6 +1,10 @@
 #ifndef	_FCNTL_H
 #define	_FCNTL_H
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
+#else
+#include <__header_fcntl.h>
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,6 +40,7 @@ int openat(int, const char *, int, ...);
 int posix_fadvise(int, off_t, off_t, int);
 int posix_fallocate(int, off_t, off_t);
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define O_SEARCH   O_PATH
 #define O_EXEC     O_PATH
 #define O_TTY_INIT 0
@@ -158,8 +163,10 @@ int posix_fallocate(int, off_t, off_t);
 
 int lockf(int, int, off_t);
 #endif
+#endif
 
 #if defined(_GNU_SOURCE)
+#ifdef __wasilibc_unmodified_upstream /* WASI has no name_to_handle_at */
 #define F_OWNER_TID 0
 #define F_OWNER_PID 1
 #define F_OWNER_PGRP 2
@@ -169,45 +176,70 @@ struct file_handle {
 	int handle_type;
 	unsigned char f_handle[];
 };
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no F_GETOWN_EX */
 struct f_owner_ex {
 	int type;
 	pid_t pid;
 };
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no fallocate */
 #define FALLOC_FL_KEEP_SIZE 1
 #define FALLOC_FL_PUNCH_HOLE 2
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no name_to_handle_at */
 #define MAX_HANDLE_SZ 128
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no syc_file_range */
 #define SYNC_FILE_RANGE_WAIT_BEFORE 1
 #define SYNC_FILE_RANGE_WRITE 2
 #define SYNC_FILE_RANGE_WAIT_AFTER 4
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no splice */
 #define SPLICE_F_MOVE 1
 #define SPLICE_F_NONBLOCK 2
 #define SPLICE_F_MORE 4
 #define SPLICE_F_GIFT 8
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no fallocate */
 int fallocate(int, int, off_t, off_t);
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no name_to_handle_at */
 int name_to_handle_at(int, const char *, struct file_handle *, int *, int);
 int open_by_handle_at(int, struct file_handle *, int);
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no readahead */
 ssize_t readahead(int, off_t, size_t);
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no splice, syc_file_range, or tee */
 int sync_file_range(int, off_t, off_t, unsigned);
 ssize_t vmsplice(int, const struct iovec *, size_t, unsigned);
 ssize_t splice(int, off_t *, int, off_t *, size_t, unsigned);
 ssize_t tee(int, int, size_t, unsigned);
+#endif
 #define loff_t off_t
 #endif
 
-#if defined(_LARGEFILE64_SOURCE)
+#if defined(_LARGEFILE64_SOURCE) || defined(_GNU_SOURCE)
+#ifdef __wasilibc_unmodified_upstream /* WASI has no POSIX file locking */
 #define F_GETLK64 F_GETLK
 #define F_SETLK64 F_SETLK
 #define F_SETLKW64 F_SETLKW
 #define flock64 flock
+#endif
 #define open64 open
 #define openat64 openat
 #define creat64 creat
+#ifdef __wasilibc_unmodified_upstream /* WASI has no POSIX file locking */
 #define lockf64 lockf
+#endif
 #define posix_fadvise64 posix_fadvise
 #define posix_fallocate64 posix_fallocate
 #define off64_t off_t
+#ifdef __wasilibc_unmodified_upstream /* WASI has no fallocate */
 #if defined(_GNU_SOURCE)
 #define fallocate64 fallocate
+#endif
 #endif
 #endif
 

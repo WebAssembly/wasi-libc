@@ -11,18 +11,27 @@ extern "C" {
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define SEEK_SET 0
 #define SEEK_CUR 1
 #define SEEK_END 2
 #define SEEK_DATA 3
 #define SEEK_HOLE 4
+#else
+#include <__header_unistd.h>
+#endif
 
+#ifdef __wasilibc_unmodified_upstream /* Use the compiler's definition of NULL */
 #if __cplusplus >= 201103L
 #define NULL nullptr
 #elif defined(__cplusplus)
 #define NULL 0L
 #else
 #define NULL ((void*)0)
+#endif
+#else
+#define __need_NULL
+#include <stddef.h>
 #endif
 
 #define __NEED_size_t
@@ -36,14 +45,46 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no pipe */
 int pipe(int [2]);
 int pipe2(int [2], int);
+#endif
 int close(int);
 int posix_close(int, int);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no dup */
 int dup(int);
 int dup2(int, int);
 int dup3(int, int, int);
+#endif
 off_t lseek(int, off_t, int);
+#ifdef __wasilibc_unmodified_upstream /* Optimize the readonly case of lseek */
+#else
+off_t __wasilibc_tell(int);
+
+#ifndef __cplusplus
+/*
+ * Optimize lseek in the case where it's just returning the current offset.
+ * This avoids importing `__wasi_fd_seek` altogether in many common cases.
+ *
+ * But don't do this for C++ because a simple macro wouldn't handle namespaces
+ * correctly:
+ *  - User code could qualify the `lseek` call with `::`.
+ *  - There may be another `lseek` in scope from a `using` declaration.
+ */
+#define lseek(fd, offset, whence)      \
+  ({                                   \
+     off_t __f = (fd);                 \
+     off_t __o = (offset);             \
+     off_t __w = (whence);             \
+     __builtin_constant_p((offset)) && \
+     __builtin_constant_p((whence)) && \
+     __o == 0 &&                       \
+     __w == SEEK_CUR                   \
+     ? __wasilibc_tell(__f)            \
+     : lseek(__f, __o, __w);           \
+  })
+#endif
+#endif
 int fsync(int);
 int fdatasync(int);
 
@@ -52,10 +93,12 @@ ssize_t write(int, const void *, size_t);
 ssize_t pread(int, void *, size_t, off_t);
 ssize_t pwrite(int, const void *, size_t, off_t);
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no chown */
 int chown(const char *, uid_t, gid_t);
 int fchown(int, uid_t, gid_t);
 int lchown(const char *, uid_t, gid_t);
 int fchownat(int, const char *, uid_t, gid_t, int);
+#endif
 
 int link(const char *, const char *);
 int linkat(int, const char *, int, const char *, int);
@@ -69,22 +112,31 @@ int rmdir(const char *);
 int truncate(const char *, off_t);
 int ftruncate(int, off_t);
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define F_OK 0
 #define R_OK 4
 #define W_OK 2
 #define X_OK 1
+#endif
 
 int access(const char *, int);
 int faccessat(int, const char *, int, int);
 
-int chdir(const char *);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no fchdir */
 int fchdir(int);
+#endif
+int chdir(const char *);
 char *getcwd(char *, size_t);
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no signals */
 unsigned alarm(unsigned);
+#endif
 unsigned sleep(unsigned);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no pause */
 int pause(void);
+#endif
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no fork/exec */
 pid_t fork(void);
 pid_t _Fork(void);
 int execve(const char *, char *const [], char *const []);
@@ -94,21 +146,38 @@ int execl(const char *, const char *, ...);
 int execvp(const char *, char *const []);
 int execlp(const char *, const char *, ...);
 int fexecve(int, char *const [], char *const []);
+#endif
 _Noreturn void _exit(int);
 
+#if defined(__wasilibc_unmodified_upstream) || defined(_WASI_EMULATED_GETPID)
 pid_t getpid(void);
+#else
+__attribute__((__deprecated__(
+"WASI lacks process identifiers; to enable emulation of the `getpid` function using "
+"a placeholder value, which doesn't reflect the host PID of the program, "
+"compile with -D_WASI_EMULATED_GETPID and link with -lwasi-emulated-getpid"
+)))
+pid_t getpid(void);
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no getpid etc. */
 pid_t getppid(void);
 pid_t getpgrp(void);
 pid_t getpgid(pid_t);
 int setpgid(pid_t, pid_t);
 pid_t setsid(void);
 pid_t getsid(pid_t);
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no ttyname */
 char *ttyname(int);
 int ttyname_r(int, char *, size_t);
+#endif
 int isatty(int);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no process groups */
 pid_t tcgetpgrp(int);
 int tcsetpgrp(int, pid_t);
+#endif
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no getuid etc. */
 uid_t getuid(void);
 uid_t geteuid(void);
 gid_t getgid(void);
@@ -118,6 +187,7 @@ int setuid(uid_t);
 int seteuid(uid_t);
 int setgid(gid_t);
 int setegid(gid_t);
+#endif
 
 char *getlogin(void);
 int getlogin_r(char *, size_t);
@@ -138,13 +208,19 @@ size_t confstr(int, char *, size_t);
 #define F_LOCK  1
 #define F_TLOCK 2
 #define F_TEST  3
+#ifdef __wasilibc_unmodified_upstream /* WASI has no setreuid */
 int setreuid(uid_t, uid_t);
 int setregid(gid_t, gid_t);
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no POSIX file locking */
 int lockf(int, int, off_t);
+#endif
 long gethostid(void);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no nice, sync, or setpgrp */
 int nice(int);
 void sync(void);
 pid_t setpgrp(void);
+#endif
 char *crypt(const char *, const char *);
 void encrypt(char *, int);
 void swab(const void *__restrict, void *__restrict, ssize_t);
@@ -160,12 +236,17 @@ unsigned ualarm(unsigned, unsigned);
 #define L_SET 0
 #define L_INCR 1
 #define L_XTND 2
+#ifdef __wasilibc_unmodified_upstream /* WASI has no brk */
 int brk(void *);
+#endif
 void *sbrk(intptr_t);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no processes */
 pid_t vfork(void);
 int vhangup(void);
 int chroot(const char *);
+#endif
 int getpagesize(void);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no processes */
 int getdtablesize(void);
 int sethostname(const char *, size_t);
 int getdomainname(char *, size_t);
@@ -180,31 +261,44 @@ int acct(const char *);
 long syscall(long, ...);
 int execvpe(const char *, char *const [], char *const []);
 int issetugid(void);
+#endif
 int getentropy(void *, size_t);
 extern int optreset;
 #endif
 
 #ifdef _GNU_SOURCE
 extern char **environ;
+#ifdef __wasilibc_unmodified_upstream /* WASI has no get/setresuid */
 int setresuid(uid_t, uid_t, uid_t);
 int setresgid(gid_t, gid_t, gid_t);
 int getresuid(uid_t *, uid_t *, uid_t *);
 int getresgid(gid_t *, gid_t *, gid_t *);
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no cwd */
 char *get_current_dir_name(void);
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no syncfs */
 int syncfs(int);
+#endif
+#ifdef __wasilibc_unmodified_upstream /* WASI has no eaccess */
 int euidaccess(const char *, int);
 int eaccess(const char *, int);
 ssize_t copy_file_range(int, off_t *, int, off_t *, size_t, unsigned);
 pid_t gettid(void);
 #endif
+#endif
 
-#if defined(_LARGEFILE64_SOURCE)
+#if defined(_LARGEFILE64_SOURCE) || defined(_GNU_SOURCE)
 #define lseek64 lseek
 #define pread64 pread
 #define pwrite64 pwrite
+#ifdef __wasilibc_unmodified_upstream /* WASI has no truncate */
 #define truncate64 truncate
+#endif
 #define ftruncate64 ftruncate
+#ifdef __wasilibc_unmodified_upstream /* WASI has no POSIX file locking */
 #define lockf64 lockf
+#endif
 #define off64_t off_t
 #endif
 
@@ -220,29 +314,43 @@ pid_t gettid(void);
 #define _POSIX_ADVISORY_INFO    _POSIX_VERSION
 #define _POSIX_CHOWN_RESTRICTED 1
 #define _POSIX_IPV6             _POSIX_VERSION
+#ifdef __wasilibc_unmodified_upstream /* WASI has no processes, mmap, or mq */
 #define _POSIX_JOB_CONTROL      1
 #define _POSIX_MAPPED_FILES     _POSIX_VERSION
 #define _POSIX_MEMLOCK          _POSIX_VERSION
 #define _POSIX_MEMLOCK_RANGE    _POSIX_VERSION
 #define _POSIX_MEMORY_PROTECTION _POSIX_VERSION
 #define _POSIX_MESSAGE_PASSING  _POSIX_VERSION
+#endif
 #define _POSIX_FSYNC            _POSIX_VERSION
 #define _POSIX_NO_TRUNC         1
+#ifdef __wasilibc_unmodified_upstream /* WASI has no raw sockets */
 #define _POSIX_RAW_SOCKETS      _POSIX_VERSION
+#endif
 #define _POSIX_REALTIME_SIGNALS _POSIX_VERSION
 #define _POSIX_REGEXP           1
+#ifdef __wasilibc_unmodified_upstream /* WASI has no processes */
 #define _POSIX_SAVED_IDS        1
 #define _POSIX_SHELL            1
 #define _POSIX_SPAWN            _POSIX_VERSION
+#endif
 #define _POSIX_VDISABLE         0
 
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT) || !defined(_WASI_STRICT_PTHREAD)
 #define _POSIX_THREADS          _POSIX_VERSION
 #define _POSIX_THREAD_PROCESS_SHARED _POSIX_VERSION
 #define _POSIX_THREAD_SAFE_FUNCTIONS _POSIX_VERSION
+#endif
+#if defined(__wasilibc_unmodified_upstream) /* wasi-libc doesn't provide pthread_attr_{get,set}stackaddr */
 #define _POSIX_THREAD_ATTR_STACKADDR _POSIX_VERSION
+#endif
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT) || !defined(_WASI_STRICT_PTHREAD)
 #define _POSIX_THREAD_ATTR_STACKSIZE _POSIX_VERSION
+#endif
+#if defined(__wasilibc_unmodified_upstream) /* WASI has no scheduling control, and wasi-libc doesn't provide pthread_getcpuclockid */
 #define _POSIX_THREAD_PRIORITY_SCHEDULING _POSIX_VERSION
 #define _POSIX_THREAD_CPUTIME   _POSIX_VERSION
+#endif
 #define _POSIX_TIMERS           _POSIX_VERSION
 #define _POSIX_TIMEOUTS         _POSIX_VERSION
 #define _POSIX_MONOTONIC_CLOCK  _POSIX_VERSION
@@ -251,9 +359,11 @@ pid_t gettid(void);
 #define _POSIX_BARRIERS         _POSIX_VERSION
 #define _POSIX_SPIN_LOCKS       _POSIX_VERSION
 #define _POSIX_READER_WRITER_LOCKS _POSIX_VERSION
+#ifdef __wasilibc_unmodified_upstream /* WASI has no POSIX async I/O, semaphores, or shared memory */
 #define _POSIX_ASYNCHRONOUS_IO  _POSIX_VERSION
 #define _POSIX_SEMAPHORES       _POSIX_VERSION
 #define _POSIX_SHARED_MEMORY_OBJECTS _POSIX_VERSION
+#endif
 
 #define _POSIX2_C_BIND          _POSIX_VERSION
 

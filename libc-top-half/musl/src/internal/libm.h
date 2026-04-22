@@ -60,7 +60,11 @@ union ldshape {
 #endif
 
 /* Support non-nearest rounding mode.  */
+#ifdef __wasilibc_unmodified_upstream // Wasm doesn't have alternate rounding modes
 #define WANT_ROUNDING 1
+#else
+#define WANT_ROUNDING 0
+#endif
 /* Support signaling NaNs.  */
 #define WANT_SNAN 0
 
@@ -177,6 +181,7 @@ static inline void fp_force_evall(long double x)
 }
 #endif
 
+#ifdef __wasilibc_unmodified_upstream // WASI has no floating-point status flags
 #define FORCE_EVAL(x) do {                        \
 	if (sizeof(x) == sizeof(float)) {         \
 		fp_force_evalf(x);                \
@@ -186,6 +191,11 @@ static inline void fp_force_evall(long double x)
 		fp_force_evall(x);                \
 	}                                         \
 } while(0)
+#else
+/* WebAssembly doesn't have floating-point status flags, so there's no reason
+ * to force evaluations. */
+#define FORCE_EVAL(x) ((void)(x))
+#endif
 
 #define asuint(f) ((union{float _f; uint32_t _i;}){f})._i
 #define asfloat(i) ((union{uint32_t _i; float _f;}){i})._f
@@ -236,13 +246,21 @@ hidden int    __rem_pio2(double,double*);
 hidden double __sin(double,double,int);
 hidden double __cos(double,double);
 hidden double __tan(double,double,int);
+#ifdef __wasilibc_unmodified_upstream // Wasm doesn't have alternate rounding modes
 hidden double __expo2(double,double);
+#else
+hidden double __expo2(double);
+#endif
 
 hidden int    __rem_pio2f(float,double*);
 hidden float  __sindf(double);
 hidden float  __cosdf(double);
 hidden float  __tandf(double,int);
+#ifdef __wasilibc_unmodified_upstream // Wasm doesn't have alternate rounding modes
 hidden float  __expo2f(float,float);
+#else
+hidden float  __expo2f(float);
+#endif
 
 hidden int __rem_pio2l(long double, long double *);
 hidden long double __sinl(long double, long double, int);

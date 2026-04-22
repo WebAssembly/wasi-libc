@@ -31,15 +31,17 @@ void globfree(glob_t *);
 #define GLOB_NOESCAPE 0x40
 #define	GLOB_PERIOD   0x80
 
+#ifdef __wasilibc_unmodified_upstream // WASI has no usernames
 #define GLOB_TILDE       0x1000
 #define GLOB_TILDE_CHECK 0x4000
+#endif
 
 #define GLOB_NOSPACE 1
 #define GLOB_ABORTED 2
 #define GLOB_NOMATCH 3
 #define GLOB_NOSYS   4
 
-#if defined(_LARGEFILE64_SOURCE)
+#if defined(_LARGEFILE64_SOURCE) || defined(_GNU_SOURCE)
 #define glob64 glob
 #define globfree64 globfree
 #define glob64_t glob_t

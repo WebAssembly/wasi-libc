@@ -340,6 +340,8 @@ riscv64*) ARCH=riscv64 ;;
 riscv32*) ARCH=riscv32 ;;
 sh[1-9bel-]*|sh|superh*) ARCH=sh ;;
 s390x*) ARCH=s390x ;;
+wasm32) ARCH=wasm32 ;;
+wasm64) ARCH=wasm64 ;;
 unknown) fail "$0: unable to detect target arch; try $0 --target=..." ;;
 *) fail "$0: unknown or unsupported target \"$target\"" ;;
 esac

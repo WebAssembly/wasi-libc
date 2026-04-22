@@ -20,8 +20,11 @@ static struct fl
 } builtin, *head;
 
 static int slot;
+
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 static volatile int lock[1];
 volatile int *const __atexit_lockptr = lock;
+#endif
 
 void __funcs_on_exit()
 {

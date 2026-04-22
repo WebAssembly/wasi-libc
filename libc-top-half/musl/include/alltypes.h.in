@@ -9,8 +9,20 @@ TYPEDEF _Addr ssize_t;
 TYPEDEF _Addr intptr_t;
 TYPEDEF _Addr regoff_t;
 TYPEDEF _Reg register_t;
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 TYPEDEF _Int64 time_t;
 TYPEDEF _Int64 suseconds_t;
+#else
+#if defined(__NEED_time_t) && !defined(__DEFINED_time_t)
+#include <__typedef_time_t.h>
+#define __DEFINED_time_t
+#endif
+
+#if defined(__NEED_suseconds_t) && !defined(__DEFINED_suseconds_t)
+#include <__typedef_suseconds_t.h>
+#define __DEFINED_suseconds_t
+#endif
+#endif
 
 TYPEDEF signed char     int8_t;
 TYPEDEF signed short    int16_t;
@@ -40,8 +52,13 @@ TYPEDEF unsigned long wctype_t;
 TYPEDEF void * timer_t;
 TYPEDEF int clockid_t;
 TYPEDEF long clock_t;
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 STRUCT timeval { time_t tv_sec; suseconds_t tv_usec; };
 STRUCT timespec { time_t tv_sec; int :8*(sizeof(time_t)-sizeof(long))*(__BYTE_ORDER==4321); long tv_nsec; int :8*(sizeof(time_t)-sizeof(long))*(__BYTE_ORDER!=4321); };
+#else
+#include <__struct_timeval.h>
+#include <__struct_timespec.h>
+#endif
 
 TYPEDEF int pid_t;
 TYPEDEF unsigned id_t;
@@ -63,7 +80,9 @@ TYPEDEF struct { unsigned __attr; } pthread_condattr_t;
 TYPEDEF struct { unsigned __attr; } pthread_barrierattr_t;
 TYPEDEF struct { unsigned __attr[2]; } pthread_rwlockattr_t;
 
+#ifdef __wasilibc_unmodified_upstream /* WASI doesn't need to define FILE as a complete type */
 STRUCT _IO_FILE { char __x; };
+#endif
 TYPEDEF struct _IO_FILE FILE;
 
 TYPEDEF __builtin_va_list va_list;
@@ -75,7 +94,11 @@ TYPEDEF struct __locale_struct * locale_t;
 
 TYPEDEF struct __sigset_t { unsigned long __bits[128/sizeof(long)]; } sigset_t;
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 STRUCT iovec { void *iov_base; size_t iov_len; };
+#else
+#include <__struct_iovec.h>
+#endif
 
 STRUCT winsize { unsigned short ws_row, ws_col, ws_xpixel, ws_ypixel; };
 

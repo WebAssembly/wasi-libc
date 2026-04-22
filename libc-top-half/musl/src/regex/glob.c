@@ -9,7 +9,9 @@
 #include <errno.h>
 #include <stddef.h>
 #include <unistd.h>
+#ifdef __wasilibc_unmodified_upstream // WASI has no usernames
 #include <pwd.h>
+#endif
 
 struct match
 {
@@ -191,6 +193,7 @@ static int sort(const void *a, const void *b)
 	return strcmp(*(const char **)a, *(const char **)b);
 }
 
+#ifdef __wasilibc_unmodified_upstream // WASI has no usernames
 static int expand_tilde(char **pat, char *buf, size_t *pos)
 {
 	char *p = *pat + 1;
@@ -223,6 +226,7 @@ static int expand_tilde(char **pat, char *buf, size_t *pos)
 	*pos = i;
 	return 0;
 }
+#endif
 
 int glob(const char *restrict pat, int flags, int (*errfunc)(const char *path, int err), glob_t *restrict g)
 {
@@ -246,8 +250,10 @@ int glob(const char *restrict pat, int flags, int (*errfunc)(const char *path, i
 		buf[0] = 0;
 		size_t pos = 0;
 		char *s = p;
+#ifdef __wasilibc_unmodified_upstream // WASI has no usernames
 		if ((flags & (GLOB_TILDE | GLOB_TILDE_CHECK)) && *p == '~')
 			error = expand_tilde(&s, buf, &pos);
+#endif
 		if (!error)
 			error = do_glob(buf, pos, 0, s, flags, errfunc, &tail);
 		free(p);
@@ -306,3 +312,6 @@ void globfree(glob_t *g)
 	g->gl_pathc = 0;
 	g->gl_pathv = NULL;
 }
+
+weak_alias(glob, glob64);
+weak_alias(globfree, globfree64);

@@ -101,6 +101,7 @@ double creal(double complex);
 float crealf(float complex);
 long double creall(long double complex);
 
+#ifdef __wasilibc_unmodified_upstream /* Use the compiler's real/imag operators rather than union type punning */
 #ifndef __cplusplus
 #define __CIMAG(x, t) \
 	(+(union { _Complex t __z; t __xy[2]; }){(_Complex t)(x)}.__xy[1])
@@ -112,6 +113,15 @@ long double creall(long double complex);
 #define cimag(x) __CIMAG(x, double)
 #define cimagf(x) __CIMAG(x, float)
 #define cimagl(x) __CIMAG(x, long double)
+#endif
+#else
+#define creal(x) (__builtin_creal(x))
+#define crealf(x) (__builtin_crealf(x))
+#define creall(x) (__builtin_creall(x))
+
+#define cimag(x) (__builtin_cimag(x))
+#define cimagf(x) (__builtin_cimagf(x))
+#define cimagl(x) (__builtin_cimagl(x))
 #endif
 
 #if __STDC_VERSION__ >= 201112L

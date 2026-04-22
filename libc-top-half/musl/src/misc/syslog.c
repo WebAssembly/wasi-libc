@@ -6,7 +6,9 @@
 #include <time.h>
 #include <signal.h>
 #include <string.h>
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #include <pthread.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #include "lock.h"
@@ -40,13 +42,17 @@ static const struct {
 
 void closelog(void)
 {
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	int cs;
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
+#endif
 	LOCK(lock);
 	close(log_fd);
 	log_fd = -1;
 	UNLOCK(lock);
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	pthread_setcancelstate(cs, 0);
+#endif
 }
 
 static void __openlog()
@@ -57,8 +63,10 @@ static void __openlog()
 
 void openlog(const char *ident, int opt, int facility)
 {
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	int cs;
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
+#endif
 	LOCK(lock);
 
 	if (ident) {
@@ -74,7 +82,9 @@ void openlog(const char *ident, int opt, int facility)
 	if ((opt & LOG_NDELAY) && log_fd<0) __openlog();
 
 	UNLOCK(lock);
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	pthread_setcancelstate(cs, 0);
+#endif
 }
 
 static int is_lost_conn(int e)
@@ -127,13 +137,19 @@ static void _vsyslog(int priority, const char *message, va_list ap)
 
 static void __vsyslog(int priority, const char *message, va_list ap)
 {
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	int cs;
+#endif
 	if (!(log_mask & LOG_MASK(priority&7)) || (priority&~0x3ff)) return;
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
+#endif
 	LOCK(lock);
 	_vsyslog(priority, message, ap);
 	UNLOCK(lock);
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	pthread_setcancelstate(cs, 0);
+#endif
 }
 
 void syslog(int priority, const char *message, ...)

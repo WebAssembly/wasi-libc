@@ -3,6 +3,13 @@
 #include <signal.h>
 #include <errno.h>
 
+#ifndef __wasilibc_unmodified_upstream
+/* undef the macro to use the standard stderr instead of __stderr_FILE
+ * (the libc internal symbol) as this lives in a separate library,
+ * libwasi-emulated-signal.so. */
+#undef stderr
+#endif
+
 void psignal(int sig, const char *msg)
 {
 	FILE *f = stderr;

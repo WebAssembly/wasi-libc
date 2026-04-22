@@ -1,5 +1,7 @@
 #include <time.h>
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #include <pthread.h>
+#endif
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +17,9 @@ struct tm *getdate(const char *s)
 	char fmt[100], *p;
 	int cs;
 
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	pthread_setcancelstate(PTHREAD_CANCEL_DEFERRED, &cs);
+#endif
 
 	if (!datemsk) {
 		getdate_err = 1;
@@ -41,6 +45,8 @@ struct tm *getdate(const char *s)
 	else getdate_err = 7;
 out:
 	if (f) fclose(f);
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	pthread_setcancelstate(cs, 0);
+#endif
 	return ret;
 }

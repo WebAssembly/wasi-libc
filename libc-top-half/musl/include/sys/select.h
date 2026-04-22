@@ -17,8 +17,11 @@ extern "C" {
 
 #define FD_SETSIZE 1024
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 typedef unsigned long fd_mask;
+#endif
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 typedef struct {
 	unsigned long fds_bits[FD_SETSIZE / 8 / sizeof(long)];
 } fd_set;
@@ -27,12 +30,17 @@ typedef struct {
 #define FD_SET(d, s)   ((s)->fds_bits[(d)/(8*sizeof(long))] |= (1UL<<((d)%(8*sizeof(long)))))
 #define FD_CLR(d, s)   ((s)->fds_bits[(d)/(8*sizeof(long))] &= ~(1UL<<((d)%(8*sizeof(long)))))
 #define FD_ISSET(d, s) !!((s)->fds_bits[(d)/(8*sizeof(long))] & (1UL<<((d)%(8*sizeof(long)))))
+#else
+#include <__fd_set.h>
+#endif
 
 int select (int, fd_set *__restrict, fd_set *__restrict, fd_set *__restrict, struct timeval *__restrict);
 int pselect (int, fd_set *__restrict, fd_set *__restrict, fd_set *__restrict, const struct timespec *__restrict, const sigset_t *__restrict);
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 #define NFDBITS (8*(int)sizeof(long))
+#endif
 #endif
 
 #if _REDIR_TIME64

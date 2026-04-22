@@ -1,6 +1,8 @@
 #include <locale.h>
 #include <string.h>
+#ifdef __wasilibc_unmodified_upstream // WASI has no mmap
 #include <sys/mman.h>
+#endif
 #include <stdlib.h>
 #include "locale_impl.h"
 #include "libc.h"
@@ -28,8 +30,10 @@ static const char envvars[][12] = {
 	"LC_MESSAGES",
 };
 
+#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 volatile int __locale_lock[1];
 volatile int *const __locale_lockptr = __locale_lock;
+#endif
 
 const struct __locale_map *__get_locale(int cat, const char *val)
 {
@@ -63,6 +67,7 @@ const struct __locale_map *__get_locale(int cat, const char *val)
 	for (p=loc_head; p; p=p->next)
 		if (!strcmp(val, p->name)) return p;
 
+#ifdef __wasilibc_unmodified_upstream // WASI has no mmap, though this code could be made to use something else
 	if (!libc.secure) path = getenv("MUSL_LOCPATH");
 	/* FIXME: add a default path? */
 
@@ -91,6 +96,7 @@ const struct __locale_map *__get_locale(int cat, const char *val)
 			break;
 		}
 	}
+#endif
 
 	/* If no locale definition was found, make a locale map
 	 * object anyway to store the name, which is kept for the

@@ -58,7 +58,9 @@ pio2_3t = -2.75299651904407171810e-37L; /* -0xbb5bf6c7ddd660ce.0p-185 */
 #define NX 5
 #define NY 3
 static const long double
+#ifdef __wasilibc_unmodified_upstream // Wasm doesn't have alternate rounding modes
 pio4    =  0x1.921fb54442d18469898cc51701b8p-1L,
+#endif
 invpio2 =  6.3661977236758134307553505349005747e-01L,	/*  0x145f306dc9c882a53f84eafa3ea6a.0p-113 */
 pio2_1  =  1.5707963267948966192292994253909555e+00L,	/*  0x1921fb54442d18469800000000000.0p-112 */
 pio2_1t =  2.0222662487959507323996846200947577e-21L,	/*  0x13198a2e03707344a4093822299f3.0p-181 */
@@ -83,6 +85,7 @@ int __rem_pio2l(long double x, long double *y)
 		n = QUOBITS(fn);
 		r = x-fn*pio2_1;
 		w = fn*pio2_1t;  /* 1st round good to 102/180 bits (ld80/ld128) */
+#ifdef __wasilibc_unmodified_upstream // Wasm doesn't have alternate rounding modes
 		/* Matters with directed rounding. */
 		if (predict_false(r - w < -pio4)) {
 			n--;
@@ -95,6 +98,7 @@ int __rem_pio2l(long double x, long double *y)
 			r = x - fn*pio2_1;
 			w = fn*pio2_1t;
 		}
+#endif
 		y[0] = r-w;
 		u.f = y[0];
 		ey = u.i.se & 0x7fff;

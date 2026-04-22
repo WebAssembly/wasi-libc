@@ -8,18 +8,27 @@ extern "C" {
 #include <features.h>
 #include <inttypes.h>
 #include <sys/socket.h>
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
+#else
+#include <__header_netinet_in.h>
+#endif
 
 typedef uint16_t in_port_t;
 typedef uint32_t in_addr_t;
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 struct in_addr { in_addr_t s_addr; };
+#endif
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 struct sockaddr_in {
 	sa_family_t sin_family;
 	in_port_t sin_port;
 	struct in_addr sin_addr;
 	uint8_t sin_zero[8];
 };
+#endif
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 struct in6_addr {
 	union {
 		uint8_t __s6_addr[16];
@@ -30,7 +39,9 @@ struct in6_addr {
 #define s6_addr __in6_union.__s6_addr
 #define s6_addr16 __in6_union.__s6_addr16
 #define s6_addr32 __in6_union.__s6_addr32
+#endif
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 struct sockaddr_in6 {
 	sa_family_t     sin6_family;
 	in_port_t       sin6_port;
@@ -38,6 +49,7 @@ struct sockaddr_in6 {
 	struct in6_addr sin6_addr;
 	uint32_t        sin6_scope_id;
 };
+#endif
 
 struct ipv6_mreq {
 	struct in6_addr ipv6mr_multiaddr;
@@ -56,8 +68,10 @@ struct ipv6_mreq {
 #define INADDR_ALLSNOOPERS_GROUP ((in_addr_t) 0xe000006a)
 #define INADDR_MAX_LOCAL_GROUP  ((in_addr_t) 0xe00000ff)
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define IN6ADDR_ANY_INIT      { { { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 } } }
 #define IN6ADDR_LOOPBACK_INIT { { { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 } } }
+#endif
 
 extern const struct in6_addr in6addr_any, in6addr_loopback;
 
@@ -71,6 +85,7 @@ uint16_t ntohs(uint16_t);
 
 #define IPPORT_RESERVED 1024
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define IPPROTO_IP       0
 #define IPPROTO_HOPOPTS  0
 #define IPPROTO_ICMP     1
@@ -106,6 +121,7 @@ uint16_t ntohs(uint16_t);
 #define IPPROTO_RAW      255
 #define IPPROTO_MPTCP    262
 #define IPPROTO_MAX      263
+#endif
 
 #define IN6_IS_ADDR_UNSPECIFIED(a) \
         (((uint32_t *) (a))[0] == 0 && ((uint32_t *) (a))[1] == 0 && \

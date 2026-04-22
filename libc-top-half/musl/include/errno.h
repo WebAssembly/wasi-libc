@@ -7,6 +7,7 @@ extern "C" {
 
 #include <features.h>
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #include <bits/errno.h>
 
 #ifdef __GNUC__
@@ -14,6 +15,10 @@ __attribute__((const))
 #endif
 int *__errno_location(void);
 #define errno (*__errno_location())
+#else
+#include <__errno.h>
+#include <__errno_values.h>
+#endif
 
 #ifdef _GNU_SOURCE
 extern char *program_invocation_short_name, *program_invocation_name;

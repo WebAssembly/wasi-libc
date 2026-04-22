@@ -29,6 +29,7 @@ extern "C" {
 
 #include <bits/stat.h>
 
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI libc headers */
 #define st_atime st_atim.tv_sec
 #define st_mtime st_mtim.tv_sec
 #define st_ctime st_ctim.tv_sec
@@ -76,6 +77,9 @@ extern "C" {
 
 #define UTIME_NOW  0x3fffffff
 #define UTIME_OMIT 0x3ffffffe
+#else
+#include <__header_sys_stat.h>
+#endif
 
 int stat(const char *__restrict, struct stat *__restrict);
 int fstat(int, struct stat *);
@@ -84,27 +88,38 @@ int fstatat(int, const char *__restrict, struct stat *__restrict, int);
 int chmod(const char *, mode_t);
 int fchmod(int, mode_t);
 int fchmodat(int, const char *, mode_t, int);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no umask */
 mode_t umask(mode_t);
+#endif
 int mkdir(const char *, mode_t);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no fifo */
 int mkfifo(const char *, mode_t);
+#endif
 int mkdirat(int, const char *, mode_t);
+#ifdef __wasilibc_unmodified_upstream /* WASI has no fifo */
 int mkfifoat(int, const char *, mode_t);
+#endif
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no mknod */
 #if defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 int mknod(const char *, mode_t, dev_t);
 int mknodat(int, const char *, mode_t, dev_t);
+#endif
 #endif
 
 int futimens(int, const struct timespec [2]);
 int utimensat(int, const char *, const struct timespec [2], int);
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
+#ifdef __wasilibc_unmodified_upstream /* WASI has no chmod */
 int lchmod(const char *, mode_t);
+#endif
 #define S_IREAD S_IRUSR
 #define S_IWRITE S_IWUSR
 #define S_IEXEC S_IXUSR
 #endif
 
+#ifdef __wasilibc_unmodified_upstream /* WASI has no statx */
 #if defined(_GNU_SOURCE)
 #define STATX_TYPE 1U
 #define STATX_MODE 2U
@@ -152,8 +167,9 @@ struct statx {
 
 int statx(int, const char *__restrict, int, unsigned, struct statx *__restrict);
 #endif
+#endif
 
-#if defined(_LARGEFILE64_SOURCE)
+#if defined(_LARGEFILE64_SOURCE) || defined(_GNU_SOURCE)
 #define stat64 stat
 #define fstat64 fstat
 #define lstat64 lstat

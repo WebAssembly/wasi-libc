@@ -291,8 +291,11 @@ static size_t wasip3_read_complete_internally(wasip3_io_state_t *state,
 }
 #endif
 
-ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
-                         size_t length) {
+/// Internal implementation of `__wasilibc_write` except that this doesn't
+/// update `write->offset`. That's done in the wrapper around this.
+static ssize_t __wasilibc_write_without_offset_update(wasi_write_t *write,
+                                                      const void *buffer,
+                                                      size_t length) {
 #if defined(__wasip2__)
   assert(write->output.__handle != 0);
   while (true) {
@@ -319,11 +322,6 @@ ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
         if (!ok)
           return wasip2_handle_write_error(error);
       }
-
-      // Update the offset if this stream is tracking that.
-      if (write->offset)
-        *write->offset += count;
-
       return count;
     }
 
@@ -403,8 +401,6 @@ ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
       state->flags |= WASIP3_IO_DONE;
     if (amount < 0)
       return -1;
-    if (write->offset)
-      *write->offset += amount;
     if (amount == 0 && done)
       return write->eof(write->eof_data);
     return amount;
@@ -436,11 +432,8 @@ ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
         status = filesystem_stream_u8_cancel_write(state->stream);
       }
       size_t amount = wasip3_io_update_code(state, status);
-      if (amount > 0) {
-        if (write->offset)
-          *write->offset += amount;
+      if (amount > 0)
         return amount;
-      }
       if (state->flags & WASIP3_IO_DONE)
         return write->eof(write->eof_data);
     }
@@ -492,11 +485,8 @@ ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
   // If the I/O is blocked, then that's ok. The data is all owned by `state`
   // meaning that we've effectively just faked a write of `length` bytes. Here
   // it's reported as having written everything.
-  if (status == WASIP3_WAITABLE_STATUS_BLOCKED) {
-    if (write->offset)
-      *write->offset += length;
+  if (status == WASIP3_WAITABLE_STATUS_BLOCKED)
     return length;
-  }
 
   // If that write actually succeeded, however, then deal with it here. That
   // means we have to deallocate the internal buffer and then handle the result
@@ -511,7 +501,20 @@ ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
 #endif
 }
 
-ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
+ssize_t __wasilibc_write(wasi_write_t *write, const void *buffer,
+                         size_t length) {
+  ssize_t result =
+      __wasilibc_write_without_offset_update(write, buffer, length);
+  if (result > 0 && write->offset)
+    *write->offset += result;
+  return result;
+}
+
+/// Internal helper for `__wasilibc_read` that dosen't update `read->offset`,
+/// like the write helper above.
+static ssize_t __wasilibc_read_without_offset_update(wasi_read_t *read,
+                                                     void *buffer,
+                                                     size_t length) {
 #if defined(__wasip2__)
   while (true) {
     wasip2_list_u8_t result;
@@ -532,8 +535,6 @@ ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
       size_t len = result.len;
       memcpy(buffer, result.ptr, len);
       wasip2_list_u8_free(&result);
-      if (read->offset)
-        *read->offset += len;
       return len;
     }
 
@@ -631,8 +632,6 @@ ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
       state->flags |= WASIP3_IO_DONE;
     if (amount < 0)
       return -1;
-    if (read->offset)
-      *read->offset += amount;
     if (amount == 0 && done)
       return read->eof(read->eof_data);
     return amount;
@@ -656,11 +655,8 @@ ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
         status = filesystem_stream_u8_cancel_read(state->stream);
       }
       size_t amount = wasip3_io_update_code(state, status);
-      if (amount > 0) {
-        if (read->offset)
-          *read->offset += amount;
+      if (amount > 0)
         return amount;
-      }
       if (state->flags & WASIP3_IO_DONE)
         return read->eof(read->eof_data);
     }
@@ -689,6 +685,13 @@ ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
 #else
 #error "Unknown WASI version"
 #endif
+}
+
+ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
+  ssize_t result = __wasilibc_read_without_offset_update(read, buffer, length);
+  if (result > 0 && read->offset)
+    *read->offset += result;
+  return result;
 }
 
 #ifndef __wasip2__

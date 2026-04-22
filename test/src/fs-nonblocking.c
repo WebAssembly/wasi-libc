@@ -29,8 +29,10 @@ int main() {
 
   pollfd.events = POLLWRNORM;
   for (int i = 0; size < max && i < 100; i++) {
-    while (size < max && (rc = write(fd, "hello", 5)) > 0)
+    while (size < max && (rc = write(fd, "hello", 5)) > 0) {
       size += rc;
+      TEST(lseek(fd, 0, SEEK_CUR) == size);
+    }
     TEST(poll(&pollfd, 1, -1) != -1);
   }
 
@@ -46,8 +48,10 @@ int main() {
   pollfd.events = POLLRDNORM;
   int remaining = size;
   while (remaining) {
-    while ((rc = read(fd, buf, sizeof(buf))) > 0)
+    while ((rc = read(fd, buf, sizeof(buf))) > 0) {
       remaining -= rc;
+      TEST(lseek(fd, 0, SEEK_CUR) == (size - remaining));
+    }
     TEST(poll(&pollfd, 1, -1) != -1);
   }
 

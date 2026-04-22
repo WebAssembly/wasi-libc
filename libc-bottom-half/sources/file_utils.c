@@ -121,6 +121,45 @@ static size_t wasip3_io_update_event(wasip3_io_state_t *state,
   return wasip3_io_update_code(state, event->code);
 }
 
+/// When `event` has happened due to a completion of a pending write, this
+/// function will advance `state` forward.
+///
+/// This attempts to perform any follow-up writes as necessary if the pending
+/// write ended up coming in short. Additionally this will clear out the
+/// internal buffered data once it reaches
+/// completion.
+///
+/// Returns `true` if this stream is ready for more writes, or `false` if
+/// there's still a pending write in-flight.
+static bool wasip3_advance_pending_write(wasip3_io_state_t *state,
+                                         wasip3_event_t *event) {
+  // Update the I/O internal state given the result of the write.
+  state->buf_start += wasip3_io_update_event(state, event);
+
+  // While there's remaining writes to perform, kick those off here. Once a
+  // write blocks we bail out of this loop as there's I/O in-progress.
+  while (!(state->flags & WASIP3_IO_DONE) &&
+         state->buf_start != state->buf_end) {
+    wasip3_waitable_status_t status =
+        filesystem_stream_u8_write(state->stream, state->buf + state->buf_start,
+                                   state->buf_end - state->buf_start);
+    state->flags |= WASIP3_IO_INPROGRESS;
+    if (status == WASIP3_WAITABLE_STATUS_BLOCKED)
+      return false;
+    state->buf_start += wasip3_io_update_code(state, status);
+  }
+
+  // Everything should be done now at this point, meaning that the stream is
+  // closed or we've written the entire buffer. Clean up internal state and
+  // return to indicate there's no more pending I/O.
+  assert((state->flags & WASIP3_IO_DONE) || state->buf_start == state->buf_end);
+  free(state->buf);
+  state->buf = NULL;
+  state->buf_start = 0;
+  state->buf_end = 0;
+  return true;
+}
+
 /// Attempts to resolve any pending write that may be in-progress on `write`.
 ///
 /// This may notably end up issuing more writes to finish a buffered write that
@@ -154,40 +193,19 @@ static int wasip3_write_resolve_pending(wasi_write_t *write) {
       }
     }
 
-    // Update the I/O internal state given the result of the write.
-    state->buf_start += wasip3_io_update_event(state, &event);
-
-    // While there's remaining writes to perform, kick those off here. If a
-    // write is blocked then nonblocking mode returns as such and blocking
-    // mode breaks out to turn this outer `while (1)` loop again to block
-    // on the result. If the write finishes immediately then state is updated
-    // again and then further continues.
-    while (!(state->flags & WASIP3_IO_DONE) &&
-           state->buf_start != state->buf_end) {
-      wasip3_waitable_status_t status = filesystem_stream_u8_write(
-          state->stream, state->buf + state->buf_start,
-          state->buf_end - state->buf_start);
-      state->flags |= WASIP3_IO_INPROGRESS;
-      if (status == WASIP3_WAITABLE_STATUS_BLOCKED) {
-        if (write->blocking) {
-          break;
-        } else {
-          errno = EWOULDBLOCK;
-          return -1;
-        }
-      }
-      state->buf_start += wasip3_io_update_code(state, status);
-    }
-
-    // We either broke out of the `while` loop normally, or we hit the `break`
-    // in the loop which wants to continue to the top of this outer loop. Test
-    // which it is here and act accordingly.
-    if ((state->flags & WASIP3_IO_DONE) || state->buf_start == state->buf_end) {
-      free(state->buf);
-      state->buf = NULL;
-      state->buf_start = 0;
-      state->buf_end = 0;
+    // Update the internal status of this stream with the `event` we have now
+    // learned. If the stream is complete at this point then go ahead and
+    // return.
+    if (wasip3_advance_pending_write(state, &event))
       return 0;
+
+    // If the write isn't blocking then a pending I/O op is kicked off from
+    // above and there's no point in turning the loop and re-polling. Bail out
+    // here with EWOULDBLOCK.
+    if (!write->blocking) {
+      assert(state->flags & WASIP3_IO_INPROGRESS);
+      errno = EWOULDBLOCK;
+      return -1;
     }
   }
 
@@ -684,8 +702,15 @@ static void wasip3_poll_read_ready(void *data, poll_state_t *state,
 static void wasip3_poll_write_ready(void *data, poll_state_t *state,
                                     wasip3_event_t *event) {
   wasip3_io_state_t *iostate = (wasip3_io_state_t *)data;
-  iostate->buf_start += wasip3_io_update_event(iostate, event);
-  __wasilibc_poll_ready(state, POLLWRNORM);
+
+  // Update our state with this event, and if the pending write is fully
+  // complete then this is now ready for writing again. Otherwise there's still
+  // a pending write so our job is complete trying to advance things a bit.
+  if (wasip3_advance_pending_write(iostate, event)) {
+    __wasilibc_poll_ready(state, POLLWRNORM);
+  } else {
+    assert(iostate->flags & WASIP3_IO_INPROGRESS);
+  }
 }
 
 static int wasip3_stream_poll(wasip3_io_state_t *iostate, poll_state_t *state,

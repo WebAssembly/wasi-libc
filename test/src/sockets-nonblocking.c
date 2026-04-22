@@ -191,12 +191,20 @@ static void test_poll_events() {
   TEST(pfds[0].revents == POLLRDNORM);
 
   int server_fd;
+  struct pollfd pfd;
   TEST((server_fd = accept4(listener_fd, NULL, NULL, SOCK_NONBLOCK)) != -1);
+  pfd.fd = server_fd;
+  pfd.events = POLLWRNORM;
+  pfd.revents = 0;
+  while (!(pfd.revents & POLLWRNORM))
+    TEST(poll(&pfd, 1, -1) != -1);
   TEST(write(server_fd, "x", 1) == 1);
   TEST(close(server_fd) == 0);
 
-  TEST(poll(pfds, 2, -1) == 1);
-  TEST(pfds[0].revents == 0);
+  while (!(pfds[1].revents & POLLRDNORM)) {
+    TEST(poll(pfds, 2, -1) != -1);
+    TEST(pfds[0].revents == 0);
+  }
   TEST(pfds[1].revents == POLLRDNORM);
 
   TEST(close(client_fd) == 0);

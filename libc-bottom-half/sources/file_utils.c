@@ -136,11 +136,8 @@ static bool wasip3_advance_pending_write(wasip3_io_state_t *state,
   // Update the I/O internal state given the result of the write.
   state->buf_start += wasip3_io_update_event(state, event);
 
-  // While there's remaining writes to perform, kick those off here. If a
-  // write is blocked then nonblocking mode returns as such and blocking
-  // mode breaks out to turn this outer `while (1)` loop again to block
-  // on the result. If the write finishes immediately then state is updated
-  // again and then further continues.
+  // While there's remaining writes to perform, kick those off here. Once a
+  // write blocks we bail out of this loop as there's I/O in-progress.
   while (!(state->flags & WASIP3_IO_DONE) &&
          state->buf_start != state->buf_end) {
     wasip3_waitable_status_t status =
@@ -152,9 +149,9 @@ static bool wasip3_advance_pending_write(wasip3_io_state_t *state,
     state->buf_start += wasip3_io_update_code(state, status);
   }
 
-  // We either broke out of the `while` loop normally, or we hit the `break`
-  // in the loop which wants to continue to the top of this outer loop. Test
-  // which it is here and act accordingly.
+  // Everything should be done now at this point, meaning that the stream is
+  // closed or we've written the entire buffer. Clean up internal state and
+  // return to indicate there's no more pending I/O.
   assert((state->flags & WASIP3_IO_DONE) || state->buf_start == state->buf_end);
   free(state->buf);
   state->buf = NULL;

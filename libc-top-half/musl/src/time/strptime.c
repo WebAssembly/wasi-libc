@@ -206,6 +206,7 @@ char *strptime(const char *restrict s, const char *restrict f, struct tm *restri
 			if (neg) tm->__tm_gmtoff = -tm->__tm_gmtoff;
 			s += 5;
 			break;
+#ifdef __wasilibc_unmodified_upstream /* WASI has no timezone tables */
 		case 'Z':
 			if (!strncmp(s, tzname[0], len = strlen(tzname[0]))) {
 				tm->tm_isdst = 0;
@@ -218,6 +219,7 @@ char *strptime(const char *restrict s, const char *restrict f, struct tm *restri
 				while ((*s|32)-'a' <= 'z'-'a') s++;
 			}
 			break;
+#endif
 		case '%':
 			if (*s++ != '%') return 0;
 			break;

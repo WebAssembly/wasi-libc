@@ -23,3 +23,18 @@ Some major known missing areas include:
  - non-builtin locales
  - TIOCGWINSZ (because cloudabi lacks it; affects isatty, line buffering for stdout)
  - O\_CLOEXEC, O\_NOCTTY (because cloudabi lacks them)
+
+## Updating Musl
+
+The `libc-top-half/musl` directory is a `git subtree` for the upstream musl
+repository. Updating it can be done with:
+
+```
+git subtree pull \
+    --prefix libc-top-half/musl \
+    https://git.musl-libc.org/git/musl v1.2.6 \
+    --squash
+```
+
+Resolve all conflicts and such that come about from the merge. Track deleted and
+updated files and update `libc-top-half/CMakeLists.txt` as appropriate.

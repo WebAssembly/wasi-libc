@@ -1,3 +1,4 @@
+#ifdef __wasilibc_unmodified_upstream /* Use alternate WASI stat definition */
 struct stat {
 	dev_t st_dev;
 	ino_t st_ino;
@@ -16,3 +17,6 @@ struct stat {
 	struct timespec st_ctim;
 	unsigned __unused[2];
 };
+#else
+#include <__struct_stat.h>
+#endif

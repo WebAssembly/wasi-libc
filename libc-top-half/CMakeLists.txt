@@ -282,6 +282,7 @@ set(top_half_sources
   musl/src/time/__secs_to_tm.c
   musl/src/time/__tm_to_secs.c
   musl/src/time/__tz.c
+  musl/src/time/__utc.c
   musl/src/time/__year_to_secs.c
   musl/src/time/asctime.c
   musl/src/time/asctime_r.c

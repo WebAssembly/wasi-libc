@@ -710,7 +710,7 @@
 #define IN6_IS_ADDR_MULTICAST(a) (((uint8_t *) (a))[0] == 0xff)
 #define IN6_IS_ADDR_SITELOCAL(a) ((((uint8_t *) (a))[0]) == 0xfe && (((uint8_t *) (a))[1] & 0xc0) == 0xc0)
 #define IN6_IS_ADDR_UNSPECIFIED(a) (((uint32_t *) (a))[0] == 0 && ((uint32_t *) (a))[1] == 0 && ((uint32_t *) (a))[2] == 0 && ((uint32_t *) (a))[3] == 0)
-#define IN6_IS_ADDR_V4COMPAT(a) (((uint32_t *) (a))[0] == 0 && ((uint32_t *) (a))[1] == 0 && ((uint32_t *) (a))[2] == 0 && ((uint8_t *) (a))[15] > 1)
+#define IN6_IS_ADDR_V4COMPAT(a) (((uint32_t *) (a))[0] == 0 && ((uint32_t *) (a))[1] == 0 && ((uint32_t *) (a))[2] == 0 && !IN6_IS_ADDR_UNSPECIFIED(a) && !IN6_IS_ADDR_LOOPBACK(a))
 #define IN6_IS_ADDR_V4MAPPED(a) (((uint32_t *) (a))[0] == 0 && ((uint32_t *) (a))[1] == 0 && ((uint8_t *) (a))[8] == 0 && ((uint8_t *) (a))[9] == 0 && ((uint8_t *) (a))[10] == 0xff && ((uint8_t *) (a))[11] == 0xff)
 #define INADDRSZ NS_INADDRSZ
 #define INADDR_ALLHOSTS_GROUP ((in_addr_t) 0xe0000001)
@@ -748,8 +748,8 @@
 #define INTMAX_MIN INT64_MIN
 #define INTPTR_MAX INT32_MAX
 #define INTPTR_MIN INT32_MIN
-#define INT_FAST16_MAX INT16_MAX
-#define INT_FAST16_MIN INT16_MIN
+#define INT_FAST16_MAX INT32_MAX
+#define INT_FAST16_MIN INT32_MIN
 #define INT_FAST32_MAX INT32_MAX
 #define INT_FAST32_MIN INT32_MIN
 #define INT_FAST64_MAX INT64_MAX
@@ -1652,6 +1652,9 @@
 #define REG_NOTBOL 1
 #define REG_NOTEOL 2
 #define REG_OK 0
+#define RENAME_EXCHANGE (1 << 1)
+#define RENAME_NOREPLACE (1 << 0)
+#define RENAME_WHITEOUT (1 << 2)
 #define RE_DUP_MAX 255
 #define RMSGD 0x0001
 #define RMSGN 0x0002
@@ -2198,7 +2201,7 @@
 #define UINTMAX_C(c) c ## ULL
 #define UINTMAX_MAX UINT64_MAX
 #define UINTPTR_MAX UINT32_MAX
-#define UINT_FAST16_MAX UINT16_MAX
+#define UINT_FAST16_MAX UINT32_MAX
 #define UINT_FAST32_MAX UINT32_MAX
 #define UINT_FAST64_MAX UINT64_MAX
 #define UINT_FAST8_MAX UINT8_MAX
@@ -2420,8 +2423,8 @@
 #define _POSIX_TRACE_USER_EVENT_MAX 32
 #define _POSIX_TTY_NAME_MAX 9
 #define _POSIX_TZNAME_MAX 6
-#define _POSIX_V6_ILP32_OFFBIG (1)
-#define _POSIX_V7_ILP32_OFFBIG (1)
+#define _POSIX_V6_ILP32_OFFBIG 1
+#define _POSIX_V7_ILP32_OFFBIG 1
 #define _POSIX_VDISABLE 0
 #define _POSIX_VERSION 200809L
 #define _PTHREAD_H 
@@ -3100,7 +3103,7 @@
 #define __WINT_MAX__ 2147483647
 #define __WINT_TYPE__ int
 #define __WINT_WIDTH__ 32
-#define __WORDSIZE 64
+#define __WORDSIZE 32
 #define __alignas_is_defined 1
 #define __alignof_is_defined 1
 #define __bitop(x,i,o) ((x)[(i)/8] o (1<<(i)%8))

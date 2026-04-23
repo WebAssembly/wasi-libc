@@ -10,4 +10,4 @@
 #define REL_TPOFF       R_390_TLS_TPOFF
 
 #define CRTJMP(pc,sp) __asm__ __volatile__( \
-	"lgr %%r15,%1; br %0" : : "r"(pc), "r"(sp) : "memory" )
+	"lgr %%r15,%1; br %0" : : "a"(pc), "r"(sp) : "memory" )

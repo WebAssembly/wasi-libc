@@ -22,3 +22,17 @@ typedef union {
 	float f;
 } elf_fpreg_t;
 typedef elf_fpreg_t elf_fpregset_t[ELF_NFPREG];
+
+typedef union
+{
+	__attribute__((__aligned__(16)))
+	double d[2];
+	float f[4];
+} elf_lsxregset_t[32];
+
+typedef union
+{
+	__attribute__((__aligned__(32)))
+	double d[4];
+	float f[8];
+} elf_lasxregset_t[32];

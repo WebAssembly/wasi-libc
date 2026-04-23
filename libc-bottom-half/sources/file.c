@@ -123,7 +123,7 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
 #endif
   read->offset = &file->offset;
   read->timeout = 0;
-  read->blocking = (file->oflag & O_NONBLOCK) == 0;
+  read->blocking = true;
   return 0;
 }
 
@@ -193,7 +193,7 @@ static int file_get_write_stream(void *data, wasi_write_t *write) {
 #endif
   write->offset = &file->offset;
   write->timeout = 0;
-  write->blocking = (file->oflag & O_NONBLOCK) == 0;
+  write->blocking = true;
   return 0;
 }
 

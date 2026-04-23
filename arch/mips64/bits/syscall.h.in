@@ -345,6 +345,7 @@
 #define __NR_process_madvise	5440
 #define __NR_epoll_pwait2	5441
 #define __NR_mount_setattr	5442
+#define __NR_quotactl_fd	5443
 #define __NR_landlock_create_ruleset	5444
 #define __NR_landlock_add_rule	5445
 #define __NR_landlock_restrict_self	5446
@@ -353,4 +354,22 @@
 #define __NR_set_mempolicy_home_node	5450
 #define __NR_cachestat		5451
 #define __NR_fchmodat2		5452
+#define __NR_map_shadow_stack	5453
+#define __NR_futex_wake		5454
+#define __NR_futex_wait		5455
+#define __NR_futex_requeue	5456
+#define __NR_statmount		5457
+#define __NR_listmount		5458
+#define __NR_lsm_get_self_attr	5459
+#define __NR_lsm_set_self_attr	5460
+#define __NR_lsm_list_modules	5461
+#define __NR_mseal		5462
+#define __NR_setxattrat		5463
+#define __NR_getxattrat		5464
+#define __NR_listxattrat	5465
+#define __NR_removexattrat	5466
+#define __NR_open_tree_attr	5467
+#define __NR_file_getattr	5468
+#define __NR_file_setattr	5469
+#define __NR_listns		5470
 

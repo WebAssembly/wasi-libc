@@ -6,6 +6,8 @@
 .hidden __clone
 .type   __clone,@function
 __clone:
+	l.xori	r11, r0, -4
+	l.and	r4, r4, r11
 	l.addi	r4, r4, -8
 	l.sw	0(r4), r3
 	l.sw	4(r4), r6
@@ -23,7 +25,8 @@ __clone:
 	l.jr	r9
 	 l.nop
 
-1:	l.lwz	r11, 0(r1)
+1:	l.ori	r2, r0, 0
+	l.lwz	r11, 0(r1)
 	l.jalr	r11
 	 l.lwz	r3, 4(r1)
 

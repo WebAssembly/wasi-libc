@@ -23,18 +23,24 @@ longjmp:
 	ld ra,    104(a0)
 
 #ifndef __riscv_float_abi_soft
-	fld fs0,  112(a0)
-	fld fs1,  120(a0)
-	fld fs2,  128(a0)
-	fld fs3,  136(a0)
-	fld fs4,  144(a0)
-	fld fs5,  152(a0)
-	fld fs6,  160(a0)
-	fld fs7,  168(a0)
-	fld fs8,  176(a0)
-	fld fs9,  184(a0)
-	fld fs10, 192(a0)
-	fld fs11, 200(a0)
+#ifdef __riscv_float_abi_double
+#define FLX fld
+#else
+#define FLX flw
+#endif
+
+	FLX fs0,  112(a0)
+	FLX fs1,  120(a0)
+	FLX fs2,  128(a0)
+	FLX fs3,  136(a0)
+	FLX fs4,  144(a0)
+	FLX fs5,  152(a0)
+	FLX fs6,  160(a0)
+	FLX fs7,  168(a0)
+	FLX fs8,  176(a0)
+	FLX fs9,  184(a0)
+	FLX fs10, 192(a0)
+	FLX fs11, 200(a0)
 #endif
 
 	seqz a0, a1

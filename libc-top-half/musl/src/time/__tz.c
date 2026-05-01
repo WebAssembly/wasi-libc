@@ -28,7 +28,6 @@ weak_alias(__tzname, tzname);
 static char std_name[TZNAME_MAX+1];
 static char dst_name[TZNAME_MAX+1];
 #endif
-const char __utc[] = "UTC";
 
 #ifdef __wasilibc_unmodified_upstream // timezone data
 static int dst_off;
@@ -169,7 +168,7 @@ static void do_tzset()
 		             || !strcmp(dummy_name, "UTC")
 		             || !strcmp(dummy_name, "GMT")))
 			posix_form = 1;
-	}	
+	}
 
 	/* Non-suid can use an absolute tzfile pathname or a relative
 	 * pathame beginning with "."; in secure mode, only the

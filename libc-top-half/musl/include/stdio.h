@@ -184,6 +184,13 @@ char *ctermid(char *);
 #define L_ctermid 20
 #endif
 
+#if defined(_GNU_SOURCE)
+#define RENAME_NOREPLACE (1 << 0)
+#define RENAME_EXCHANGE  (1 << 1)
+#define RENAME_WHITEOUT  (1 << 2)
+
+int renameat2(int, const char *, int, const char *, unsigned);
+#endif
 
 #ifdef __wasilibc_unmodified_upstream /* WASI has no temp directories */
 #if defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) \

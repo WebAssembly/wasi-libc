@@ -18,6 +18,10 @@
 #endif
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
+#define SC_USED_FP	(1U << 0)
+#define SC_ADDRERR_RD	(1U << 30)
+#define SC_ADDRERR_WR	(1U << 31)
+
 typedef unsigned long greg_t, gregset_t[32];
 
 struct sigcontext {
@@ -25,6 +29,45 @@ struct sigcontext {
 	unsigned long sc_regs[32];
 	unsigned sc_flags;
 	unsigned long sc_extcontext[] __attribute__((__aligned__(16)));
+};
+
+#define CONTEXT_INFO_ALIGN 16
+struct sctx_info {
+	unsigned magic;
+	unsigned size;
+	unsigned long padding;
+};
+
+#define FPU_CTX_MAGIC 0x46505501
+#define FPU_CTX_ALIGN 8
+struct fpu_context {
+	unsigned long regs[32];
+	unsigned long fcc;
+	unsigned fcsr;
+};
+
+#define LSX_CTX_MAGIC 0x53580001
+#define LSX_CTX_ALIGN 16
+struct lsx_context {
+	unsigned long regs[2*32];
+	unsigned long fcc;
+	unsigned fcsr;
+};
+
+#define LASX_CTX_MAGIC 0x41535801
+#define LASX_CTX_ALIGN 32
+struct lasx_context {
+	unsigned long regs[4*32];
+	unsigned long fcc;
+	unsigned fcsr;
+};
+
+#define LBT_CTX_MAGIC 0x42540001
+#define LBT_CTX_ALIGN 8
+struct lbt_context {
+	unsigned long regs[4];
+	unsigned eflags;
+	unsigned ftop;
 };
 #endif
 

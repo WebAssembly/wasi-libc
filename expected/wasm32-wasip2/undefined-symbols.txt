@@ -16,6 +16,7 @@ __heap_base
 __heap_end
 __letf2
 __lttf2
+__main_argc_argv
 __netf2
 __stack_pointer
 __subtf3

@@ -49,6 +49,7 @@
 #include <malloc.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #ifdef __EMSCRIPTEN_TRACING__
 #include <emscripten/trace.h>
@@ -768,6 +769,7 @@ static void *allocate_memory(size_t alignment, size_t size)
 #ifdef EMMALLOC_VERBOSE
     MAIN_THREAD_ASYNC_EM_ASM(console.log('Allocation failed: alignment not power of 2!'));
 #endif
+    errno = EINVAL;
     return 0;
   }
 
@@ -776,6 +778,7 @@ static void *allocate_memory(size_t alignment, size_t size)
 #ifdef EMMALLOC_VERBOSE
     MAIN_THREAD_ASYNC_EM_ASM(console.log('Allocation failed: attempted allocation size is too large: ' + ($0 >>> 0) + 'bytes! (negative integer wraparound?)'), size);
 #endif
+    errno = ENOMEM;
     return 0;
   }
 
@@ -888,6 +891,7 @@ static void *allocate_memory(size_t alignment, size_t size)
   MAIN_THREAD_ASYNC_EM_ASM(console.log('Could not find a free memory block!'));
 #endif
 
+  errno = ENOMEM;
   return 0;
 }
 
@@ -909,8 +913,10 @@ void * EMMALLOC_EXPORT memalign(size_t alignment, size_t size)
 
 void * EMMALLOC_EXPORT aligned_alloc(size_t alignment, size_t size)
 {
-  if ((alignment % sizeof(void *) != 0) || (size % alignment) != 0)
+  if ((alignment % sizeof(void *) != 0) || (size % alignment) != 0) {
+    errno = EINVAL;
     return 0;
+  }
   return emmalloc_memalign(alignment, size);
 }
 
@@ -1122,6 +1128,7 @@ void *emmalloc_aligned_realloc(void *ptr, size_t alignment, size_t size)
 #ifdef EMMALLOC_VERBOSE
     MAIN_THREAD_ASYNC_EM_ASM(console.log('Allocation failed: attempted allocation size is too large: ' + ($0 >>> 0) + 'bytes! (negative integer wraparound?)'), size);
 #endif
+    errno = ENOMEM;
     return 0;
   }
 
@@ -1183,6 +1190,7 @@ void *emmalloc_realloc_try(void *ptr, size_t size)
 #ifdef EMMALLOC_VERBOSE
     MAIN_THREAD_ASYNC_EM_ASM(console.log('Allocation failed: attempted allocation size is too large: ' + ($0 >>> 0) + 'bytes! (negative integer wraparound?)'), size);
 #endif
+    errno = ENOMEM;
     return 0;
   }
 
@@ -1218,6 +1226,7 @@ void *emmalloc_aligned_realloc_uninitialized(void *ptr, size_t alignment, size_t
 #ifdef EMMALLOC_VERBOSE
     MAIN_THREAD_ASYNC_EM_ASM(console.log('Allocation failed: attempted allocation size is too large: ' + ($0 >>> 0) + 'bytes! (negative integer wraparound?)'), size);
 #endif
+    errno = ENOMEM;
     return 0;
   }
 

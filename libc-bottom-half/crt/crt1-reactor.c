@@ -4,7 +4,7 @@
 extern void __wasi_init_tp(void);
 extern void __wasm_call_ctors(void);
 
-#ifdef __wasm_component_model_thread_context__
+#ifdef __wasm_libcall_thread_context__
 // Force __wasm_init_task and __wasm_init_async_task to be linked in for wasip3
 extern void __wasm_init_task(void);
 extern void __wasm_init_async_task(void);

@@ -3,8 +3,8 @@
 	.export_name	__wasm_init_task, __wasm_init_task
     .export_name    __wasm_init_async_task, __wasm_init_async_task
 
-	.globaltype	__init_stack_pointer, i32
-    .globaltype __init_tls_base, i32
+	.globaltype	__init_stack_pointer, i32, immutable
+    .globaltype __init_tls_base, i32, immutable
     .globaltype __tls_size, i32, immutable
     .globaltype __tls_align, i32, immutable
 

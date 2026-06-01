@@ -63,6 +63,9 @@ function(add_wasilibc_flags target)
     target_link_options(${target} PRIVATE -pthread
       -Wl,--import-memory,--export-memory,--shared-memory,--max-memory=1073741824)
   endif()
+  if (WASI STREQUAL "p3")
+    target_link_options(${target} PRIVATE -pthread)
+  endif()
 endfunction()
 
 add_library(libc_test_support STATIC
@@ -148,6 +151,7 @@ function(register_test test_name executable_name)
   if (WASI STREQUAL "p3")
     list(APPEND wasmtime_args --wasm component-model-async)
     list(APPEND wasmtime_args --wasm component-model-threading)
+    list(APPEND wasmtime_args --wasm shared-memory)
     list(APPEND wasmtime_args --wasi p3)
   endif()
   if (arg_SETJMP)

@@ -217,6 +217,7 @@ int __pthread_create(pthread_t *restrict res,
     process_map_base_deferred_free();
     __tl_unlock();
     map = malloc(size);
+    printf("pthread_create: map=%p size=%zu\n", map, size);
     if (!map)
       goto fail;
     tsd = map + size - __pthread_tsd_size;

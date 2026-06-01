@@ -42,7 +42,7 @@ struct stack_bounds {
 
 static inline unsigned char *get_stack_pointer() {
   unsigned char *sp;
-#ifdef __wasm_component_model_thread_context__
+#ifdef __wasm_libcall_thread_context__
   __asm__(
       ".functype   __wasm_get_stack_pointer () -> (i32)\n"
       "call __wasm_get_stack_pointer\n"
@@ -197,7 +197,10 @@ void *__copy_tls(unsigned char *mem)
 	mem += tls_align;
 	mem -= (uintptr_t)mem & (tls_align-1);
 	__wasm_init_tls(mem);
-	#ifndef __wasm_component_model_thread_context__
+	#ifdef __wasm_libcall_thread_context__
+	void __wasm_set_tls_base(volatile void *ptr);
+	__wasm_set_tls_base(tls_base);
+	#else
   	__asm__("local.get %0\n"
 			"global.set __tls_base\n"
 			:: "r"(tls_base));

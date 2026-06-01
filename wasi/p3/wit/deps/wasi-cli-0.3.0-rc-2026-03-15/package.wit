@@ -1,12 +1,6 @@
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-package wasi:cli@0.3.0-rc-2026-02-09;
-
-@since(version = 0.3.0-rc-2026-02-09)
-========
 package wasi:cli@0.3.0-rc-2026-03-15;
 
 @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
 interface environment {
   /// Get the POSIX-style environment variables.
   ///
@@ -16,33 +10,15 @@ interface environment {
   /// Morally, these are a value import, but until value imports are available
   /// in the component model, this import function should return the same
   /// values each time it is called.
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-  @since(version = 0.3.0-rc-2026-02-09)
-  get-environment: func() -> list<tuple<string, string>>;
-
-  /// Get the POSIX-style arguments to the program.
-  @since(version = 0.3.0-rc-2026-02-09)
-========
   @since(version = 0.3.0-rc-2026-03-15)
   get-environment: func() -> list<tuple<string, string>>;
 
   /// Get the POSIX-style arguments to the program.
   @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
   get-arguments: func() -> list<string>;
 
   /// Return a path that programs should use as their initial current working
   /// directory, interpreting `.` as shorthand for this.
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-  @since(version = 0.3.0-rc-2026-02-09)
-  get-initial-cwd: func() -> option<string>;
-}
-
-@since(version = 0.3.0-rc-2026-02-09)
-interface exit {
-  /// Exit the current instance and any linked instances.
-  @since(version = 0.3.0-rc-2026-02-09)
-========
   @since(version = 0.3.0-rc-2026-03-15)
   get-initial-cwd: func() -> option<string>;
 }
@@ -51,7 +27,6 @@ interface exit {
 interface exit {
   /// Exit the current instance and any linked instances.
   @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
   exit: func(status: result);
 
   /// Exit the current instance and any linked instances, reporting the
@@ -66,18 +41,6 @@ interface exit {
   exit-with-code: func(status-code: u8);
 }
 
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-@since(version = 0.3.0-rc-2026-02-09)
-interface run {
-  /// Run the program.
-  @since(version = 0.3.0-rc-2026-02-09)
-  run: async func() -> result;
-}
-
-@since(version = 0.3.0-rc-2026-02-09)
-interface types {
-  @since(version = 0.3.0-rc-2026-02-09)
-========
 @since(version = 0.3.0-rc-2026-03-15)
 interface run {
   /// Run the program.
@@ -88,7 +51,6 @@ interface run {
 @since(version = 0.3.0-rc-2026-03-15)
 interface types {
   @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
   enum error-code {
     /// Input/output error
     io,
@@ -99,11 +61,7 @@ interface types {
   }
 }
 
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-@since(version = 0.3.0-rc-2026-02-09)
-========
 @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
 interface stdin {
   use types.{error-code};
 
@@ -120,19 +78,11 @@ interface stdin {
   ///
   /// Multiple streams may be active at the same time. The behavior of concurrent
   /// reads is implementation-specific.
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-  @since(version = 0.3.0-rc-2026-02-09)
-  read-via-stream: func() -> tuple<stream<u8>, future<result<_, error-code>>>;
-}
-
-@since(version = 0.3.0-rc-2026-02-09)
-========
   @since(version = 0.3.0-rc-2026-03-15)
   read-via-stream: func() -> tuple<stream<u8>, future<result<_, error-code>>>;
 }
 
 @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
 interface stdout {
   use types.{error-code};
 
@@ -144,19 +94,11 @@ interface stdout {
   ///
   /// Otherwise if there is an error the readable end of the stream will be
   /// dropped and this function will return an error-code.
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-  @since(version = 0.3.0-rc-2026-02-09)
-  write-via-stream: func(data: stream<u8>) -> future<result<_, error-code>>;
-}
-
-@since(version = 0.3.0-rc-2026-02-09)
-========
   @since(version = 0.3.0-rc-2026-03-15)
   write-via-stream: func(data: stream<u8>) -> future<result<_, error-code>>;
 }
 
 @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
 interface stderr {
   use types.{error-code};
 
@@ -168,11 +110,7 @@ interface stderr {
   ///
   /// Otherwise if there is an error the readable end of the stream will be
   /// dropped and this function will return an error-code.
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-  @since(version = 0.3.0-rc-2026-02-09)
-========
   @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
   write-via-stream: func(data: stream<u8>) -> future<result<_, error-code>>;
 }
 
@@ -181,17 +119,10 @@ interface stderr {
 /// In the future, this may include functions for disabling echoing,
 /// disabling input buffering so that keyboard events are sent through
 /// immediately, querying supported features, and so on.
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-@since(version = 0.3.0-rc-2026-02-09)
-interface terminal-input {
-  /// The input side of a terminal.
-  @since(version = 0.3.0-rc-2026-02-09)
-========
 @since(version = 0.3.0-rc-2026-03-15)
 interface terminal-input {
   /// The input side of a terminal.
   @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
   resource terminal-input;
 }
 
@@ -200,162 +131,48 @@ interface terminal-input {
 /// In the future, this may include functions for querying the terminal
 /// size, being notified of terminal size changes, querying supported
 /// features, and so on.
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-@since(version = 0.3.0-rc-2026-02-09)
-interface terminal-output {
-  /// The output side of a terminal.
-  @since(version = 0.3.0-rc-2026-02-09)
-========
 @since(version = 0.3.0-rc-2026-03-15)
 interface terminal-output {
   /// The output side of a terminal.
   @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
   resource terminal-output;
 }
 
 /// An interface providing an optional `terminal-input` for stdin as a
 /// link-time authority.
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-@since(version = 0.3.0-rc-2026-02-09)
-interface terminal-stdin {
-  @since(version = 0.3.0-rc-2026-02-09)
-========
 @since(version = 0.3.0-rc-2026-03-15)
 interface terminal-stdin {
   @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
   use terminal-input.{terminal-input};
 
   /// If stdin is connected to a terminal, return a `terminal-input` handle
   /// allowing further interaction with it.
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-  @since(version = 0.3.0-rc-2026-02-09)
-========
   @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
   get-terminal-stdin: func() -> option<terminal-input>;
 }
 
 /// An interface providing an optional `terminal-output` for stdout as a
 /// link-time authority.
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-@since(version = 0.3.0-rc-2026-02-09)
-interface terminal-stdout {
-  @since(version = 0.3.0-rc-2026-02-09)
-========
 @since(version = 0.3.0-rc-2026-03-15)
 interface terminal-stdout {
   @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
   use terminal-output.{terminal-output};
 
   /// If stdout is connected to a terminal, return a `terminal-output` handle
   /// allowing further interaction with it.
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-  @since(version = 0.3.0-rc-2026-02-09)
-========
   @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
   get-terminal-stdout: func() -> option<terminal-output>;
 }
 
 /// An interface providing an optional `terminal-output` for stderr as a
 /// link-time authority.
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-@since(version = 0.3.0-rc-2026-02-09)
-interface terminal-stderr {
-  @since(version = 0.3.0-rc-2026-02-09)
-========
 @since(version = 0.3.0-rc-2026-03-15)
 interface terminal-stderr {
   @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
   use terminal-output.{terminal-output};
 
   /// If stderr is connected to a terminal, return a `terminal-output` handle
   /// allowing further interaction with it.
-<<<<<<<< HEAD:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-02-09/package.wit
-  @since(version = 0.3.0-rc-2026-02-09)
-  get-terminal-stderr: func() -> option<terminal-output>;
-}
-
-@since(version = 0.3.0-rc-2026-02-09)
-world imports {
-  @since(version = 0.3.0-rc-2026-02-09)
-  import environment;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import exit;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import types;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import stdin;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import stdout;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import stderr;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import terminal-input;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import terminal-output;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import terminal-stdin;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import terminal-stdout;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import terminal-stderr;
-  import wasi:clocks/types@0.3.0-rc-2026-02-09;
-  import wasi:clocks/monotonic-clock@0.3.0-rc-2026-02-09;
-  import wasi:clocks/system-clock@0.3.0-rc-2026-02-09;
-  @unstable(feature = clocks-timezone)
-  import wasi:clocks/timezone@0.3.0-rc-2026-02-09;
-  import wasi:filesystem/types@0.3.0-rc-2026-02-09;
-  import wasi:filesystem/preopens@0.3.0-rc-2026-02-09;
-  import wasi:sockets/types@0.3.0-rc-2026-02-09;
-  import wasi:sockets/ip-name-lookup@0.3.0-rc-2026-02-09;
-  import wasi:random/random@0.3.0-rc-2026-02-09;
-  import wasi:random/insecure@0.3.0-rc-2026-02-09;
-  import wasi:random/insecure-seed@0.3.0-rc-2026-02-09;
-}
-@since(version = 0.3.0-rc-2026-02-09)
-world command {
-  @since(version = 0.3.0-rc-2026-02-09)
-  import environment;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import exit;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import types;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import stdin;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import stdout;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import stderr;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import terminal-input;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import terminal-output;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import terminal-stdin;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import terminal-stdout;
-  @since(version = 0.3.0-rc-2026-02-09)
-  import terminal-stderr;
-  import wasi:clocks/types@0.3.0-rc-2026-02-09;
-  import wasi:clocks/monotonic-clock@0.3.0-rc-2026-02-09;
-  import wasi:clocks/system-clock@0.3.0-rc-2026-02-09;
-  @unstable(feature = clocks-timezone)
-  import wasi:clocks/timezone@0.3.0-rc-2026-02-09;
-  import wasi:filesystem/types@0.3.0-rc-2026-02-09;
-  import wasi:filesystem/preopens@0.3.0-rc-2026-02-09;
-  import wasi:sockets/types@0.3.0-rc-2026-02-09;
-  import wasi:sockets/ip-name-lookup@0.3.0-rc-2026-02-09;
-  import wasi:random/random@0.3.0-rc-2026-02-09;
-  import wasi:random/insecure@0.3.0-rc-2026-02-09;
-  import wasi:random/insecure-seed@0.3.0-rc-2026-02-09;
-
-  @since(version = 0.3.0-rc-2026-02-09)
-========
   @since(version = 0.3.0-rc-2026-03-15)
   get-terminal-stderr: func() -> option<terminal-output>;
 }
@@ -435,6 +252,5 @@ world command {
   import wasi:random/insecure-seed@0.3.0-rc-2026-03-15;
 
   @since(version = 0.3.0-rc-2026-03-15)
->>>>>>>> main:wasi/p3/wit/deps/wasi-cli-0.3.0-rc-2026-03-15/package.wit
   export run;
 }

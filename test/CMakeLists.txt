@@ -102,8 +102,8 @@ function(add_test_executable executable_name src)
           "${SYSROOT_LIB}/libc.so"
           ${arg_SHARED_LIBS}
           -o ${executable_name}
-      DEPENDS wasm-tools
     )
+    add_dependencies(${executable_name} wasm-tools)
     target_link_libraries(${executable_name} PRIVATE c)
   else()
     clang_format_target(${executable_name})

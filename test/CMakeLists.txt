@@ -21,10 +21,14 @@ message(STATUS "libc-test source directory: ${LIBC_TEST}")
 include(ba-download)
 
 if(NOT ENGINE OR ENGINE STREQUAL "")
+  set(wasmtime_version dev)
+  if (TARGET_TRIPLE MATCHES "-threads")
+    set(wasmtime_version "v44.0.0")
+  endif()
   ba_download(
     wasmtime
     "https://github.com/bytecodealliance/wasmtime"
-    "dev"
+    ${wasmtime_version}
   )
   ExternalProject_Get_Property(wasmtime SOURCE_DIR)
   set(ENGINE "${SOURCE_DIR}/wasmtime")

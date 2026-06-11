@@ -7,51 +7,51 @@ name = "wasi:cli"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.3.0-rc-2026-03-15"
-version = "0.3.0-rc-2026-03-15"
-digest = "sha256:104654cfcb218c34c21ea06ab95f0d6811508643e9692bb3db751cde5640365f"
+requirement = "=0.3.0"
+version = "0.3.0"
+digest = "sha256:3a2d58743b67a057f7210b9a73d3b21b34ec7895ffe34d1cb092927307156e40"
 
 [[packages]]
 name = "wasi:clocks"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.3.0-rc-2026-03-15"
-version = "0.3.0-rc-2026-03-15"
-digest = "sha256:10f8b2f42c5f8a731292977064788cbb8ca9164c83ae7f4a295565e7b926a313"
+requirement = "=0.3.0"
+version = "0.3.0"
+digest = "sha256:59e1f4079e64ada450e19ffc9d08854c904e356ed8cc1fda36ff4fe150264db2"
 
 [[packages]]
 name = "wasi:filesystem"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.3.0-rc-2026-03-15"
-version = "0.3.0-rc-2026-03-15"
-digest = "sha256:d8e683409e17bbe06ce6560b67dc19414e6b21f62e88f22ca436f8967dfde188"
+requirement = "=0.3.0"
+version = "0.3.0"
+digest = "sha256:42921410cddcdce2e009fd65c9a763bfb3fb61e2c0a64ff71647cc4405470378"
 
 [[packages]]
 name = "wasi:http"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.3.0-rc-2026-03-15"
-version = "0.3.0-rc-2026-03-15"
-digest = "sha256:ed996ba07af24b216deb3d59bf56362f443d8bcfd1b07d1bfd80c49cb37df399"
+requirement = "=0.3.0"
+version = "0.3.0"
+digest = "sha256:92cd8f3730c00226dc15626a2e7b21834dd187fc221f09818720d228585bbbf7"
 
 [[packages]]
 name = "wasi:random"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.3.0-rc-2026-03-15"
-version = "0.3.0-rc-2026-03-15"
-digest = "sha256:821a5c015d3833f748fb00f2279d4fccc360d38f204f37f7ae2af904fc1f7f13"
+requirement = "=0.3.0"
+version = "0.3.0"
+digest = "sha256:daa3c8897a68fbfc58b95c2e1de1b7af5be8c647bbb2cfeaa54c1e5b1ba9b772"
 
 [[packages]]
 name = "wasi:sockets"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.3.0-rc-2026-03-15"
-version = "0.3.0-rc-2026-03-15"
-digest = "sha256:9944ecbee9950744290bb1ccb134aa2fc9821307fd6016cb01e6d617bc382cfe"
+requirement = "=0.3.0"
+version = "0.3.0"
+digest = "sha256:47d4cb10ad41dbd7f543693211876bf413793d4d8dc0aad08ead34bf44348fa1"

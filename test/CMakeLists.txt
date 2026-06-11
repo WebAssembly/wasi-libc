@@ -158,10 +158,6 @@ function(register_test test_name executable_name)
   if (TARGET_TRIPLE MATCHES "-threads")
     list(APPEND wasmtime_args --wasi threads --wasm shared-memory)
   endif()
-  if (WASI STREQUAL "p3")
-    list(APPEND wasmtime_args --wasm component-model-async)
-    list(APPEND wasmtime_args --wasi p3)
-  endif()
   if (arg_SETJMP)
     list(APPEND wasmtime_args --wasm exceptions)
     target_compile_options(${executable_name} PRIVATE
@@ -582,8 +578,7 @@ if (PYTHON_TESTS)
         # and if Python is updated we'll have to update this too.
         --host-runner "\
           ${ENGINE} run \
-            --wasm max-wasm-stack=33554432,component-model-async \
-            --wasi p3 \
+            --wasm max-wasm-stack=33554432 \
             --dir <SOURCE_DIR>::/ \
             --env PYTHONPATH=/cross-build/wasm32-wasip1/build/lib.wasi-wasm32-3.14 \
           "

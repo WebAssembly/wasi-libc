@@ -8,15 +8,9 @@
 #include <unistd.h>
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc.h>
+#include "lock.h"
 
-#ifdef _REENTRANT
-void __wasilibc_cwd_lock(void);
-void __wasilibc_cwd_unlock(void);
-static volatile int lock[1];
-#else
-#define __wasilibc_cwd_lock() (void)0
-#define __wasilibc_cwd_unlock() (void)0
-#endif
+DECLARE_WEAK_LOCK(__wasilibc_cwd_lock, extern);
 extern char *__wasilibc_cwd;
 static int __wasilibc_cwd_mallocd = 0;
 
@@ -66,10 +60,10 @@ int chdir(const char *path) {
 
   // And set our new malloc'd buffer into the global cwd, freeing the
   // previous one if necessary.
-  __wasilibc_cwd_lock();
+  WEAK_LOCK(__wasilibc_cwd_lock);
   char *prev_cwd = __wasilibc_cwd;
   __wasilibc_cwd = new_cwd;
-  __wasilibc_cwd_unlock();
+  WEAK_UNLOCK(__wasilibc_cwd_lock);
   if (__wasilibc_cwd_mallocd)
     free(prev_cwd);
   __wasilibc_cwd_mallocd = 1;
@@ -100,7 +94,7 @@ static const char *make_absolute(const char *path) {
   // Otherwise we'll take the current directory, add a `/`, and then add the
   // input `path`. Note that this doesn't do any normalization (like removing
   // `/./`).
-  __wasilibc_cwd_lock();
+  WEAK_LOCK(__wasilibc_cwd_lock);
   size_t cwd_len = strlen(__wasilibc_cwd);
   size_t path_len = path ? strlen(path) : 0;
   int need_slash = __wasilibc_cwd[cwd_len - 1] == '/' ? 0 : 1;
@@ -108,14 +102,14 @@ static const char *make_absolute(const char *path) {
   if (alloc_len > make_absolute_len) {
     char *tmp = realloc(make_absolute_buf, alloc_len);
     if (tmp == NULL) {
-      __wasilibc_cwd_unlock();
+      WEAK_UNLOCK(__wasilibc_cwd_lock);
       return NULL;
     }
     make_absolute_buf = tmp;
     make_absolute_len = alloc_len;
   }
   strcpy(make_absolute_buf, __wasilibc_cwd);
-  __wasilibc_cwd_unlock();
+  WEAK_UNLOCK(__wasilibc_cwd_lock);
 
 #ifdef _REENTRANT
   if (path[0] == 0 || !strcmp(path, ".") || !strcmp(path, "./")) {
@@ -135,12 +129,12 @@ static const char *make_absolute(const char *path) {
 int __wasilibc_find_relpath_alloc(const char *path, const char **abs_prefix,
                                   char **relative_buf, size_t *relative_buf_len,
                                   int can_realloc) {
-  LOCK(lock);
+  WEAK_LOCK(__wasilibc_cwd_lock);
 
   // First, make our path absolute taking the cwd into account.
   const char *abspath = make_absolute(path);
   if (abspath == NULL) {
-    UNLOCK(lock);
+    WEAK_UNLOCK(__wasilibc_cwd_lock);
     errno = ENOMEM;
     return -1;
   }
@@ -151,20 +145,20 @@ int __wasilibc_find_relpath_alloc(const char *path, const char **abs_prefix,
   const char *rel;
   int fd = __wasilibc_find_abspath(abspath, abs_prefix, &rel);
   if (fd == -1) {
-    UNLOCK(lock);
+    WEAK_UNLOCK(__wasilibc_cwd_lock);
     return -1;
   }
 
   size_t rel_len = strlen(rel);
   if (*relative_buf_len < rel_len + 1) {
     if (!can_realloc) {
-      UNLOCK(lock);
+      WEAK_UNLOCK(__wasilibc_cwd_lock);
       errno = ERANGE;
       return -1;
     }
     char *tmp = realloc(*relative_buf, rel_len + 1);
     if (tmp == NULL) {
-      UNLOCK(lock);
+      WEAK_UNLOCK(__wasilibc_cwd_lock);
       errno = ENOMEM;
       return -1;
     }
@@ -172,6 +166,6 @@ int __wasilibc_find_relpath_alloc(const char *path, const char **abs_prefix,
     *relative_buf_len = rel_len + 1;
   }
   strcpy(*relative_buf, rel);
-  UNLOCK(lock);
+  WEAK_UNLOCK(__wasilibc_cwd_lock);
   return fd;
 }

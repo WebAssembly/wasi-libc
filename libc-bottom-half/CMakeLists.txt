@@ -173,6 +173,7 @@ endif()
 
 if (WASI STREQUAL "p3")
   list(APPEND bottom_half_sources
+    sources/__wasm_init_task.s
     sources/wasip3.c
     sources/wasip3_block_on.c
     sources/wasip3_stdio.c

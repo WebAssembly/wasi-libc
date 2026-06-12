@@ -493,6 +493,7 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
 
 out:
   if (timeout_subtask != 0) {
+    wasip3_waitable_join(timeout_subtask, 0);
     wasip3_subtask_cancel(timeout_subtask);
     wasip3_subtask_drop(timeout_subtask);
   }

@@ -18,8 +18,7 @@ __attribute__((export_name("_start"))) void _start(void)
 // that this shouldn't be too problematic (in theory).
 __attribute__((export_name("wasi:cli/run@0.2.0#run"))) int _start(void)
 #elif defined(__wasip3__)
-__attribute__((export_name("wasi:cli/run@0.3.0-rc-2026-03-15#run"))) int
-_start(void)
+__attribute__((export_name("wasi:cli/run@0.3.0#run"))) int _start(void)
 #else
 #error "Unsupported WASI version"
 #endif

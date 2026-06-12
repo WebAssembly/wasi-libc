@@ -109,7 +109,7 @@ int __init_tp(void *p)
 	td->stack = bounds.base;
 	td->stack_size = bounds.size;
 	td->guard_size = 0;
-	#if defined(__wasi_libcall_thread_context__)
+	#if defined(__wasm_libcall_thread_context__)
 	  td->detach_state = DT_JOINABLE;
 	  #ifdef __wasip3__
 	  td->tid = wasip3_thread_index();

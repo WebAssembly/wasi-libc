@@ -10,7 +10,7 @@
 
 #include "lock.h"
 
-#ifdef __wasi_libcall_thread_context__
+#ifdef __wasm_libcall_thread_context__
 #define FFINALLOCK(f) __lockfile((f))
 #define FLOCK(f) int __need_unlock = __lockfile((f))
 #define FUNLOCK(f) do { if (__need_unlock) __unlockfile((f)); } while (0)

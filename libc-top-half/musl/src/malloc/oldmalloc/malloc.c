@@ -27,7 +27,7 @@ static struct {
 
 /* Synchronization tools */
 
-#ifdef __wasi_libcall_thread_context__
+#ifdef __wasm_libcall_thread_context__
 /* The implementation has no yield points, so locks can be no-ops. */
 static inline void lock(volatile int *lk)
 {

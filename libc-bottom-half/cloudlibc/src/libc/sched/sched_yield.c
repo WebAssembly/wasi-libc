@@ -7,7 +7,7 @@
 #include <sched.h>
 
 int sched_yield(void) {
-#ifdef __wasi_libcall_thread_context__
+#ifdef __wasm_libcall_thread_context__
   #ifdef __wasip3__
     wasip3_thread_yield();
     return 0;

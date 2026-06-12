@@ -11,7 +11,7 @@
 //                            and thus can be no-ops in cooperative threading mode.
 
 
-#ifdef __wasi_libcall_thread_context__
+#ifdef __wasm_libcall_thread_context__
 struct __waitlist_node;
 struct __coop_lock {
 	int owner;  // tid of owning thread, or 0 if unlocked

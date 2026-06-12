@@ -14,7 +14,7 @@ extern "C" {
 
 #define SEM_FAILED ((sem_t *)0)
 
-#ifdef __wasi_libcall_thread_context__
+#ifdef __wasm_libcall_thread_context__
 struct __waitlist_node;
 typedef struct {
 	int __count;

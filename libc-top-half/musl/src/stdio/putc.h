@@ -7,7 +7,7 @@ __attribute__((__noinline__))
 #endif
 static int locking_putc(int c, FILE *f)
 {
-#ifdef __wasi_libcall_thread_context__
+#ifdef __wasm_libcall_thread_context__
 	__lockfile(f);
 	c = putc_unlocked(c, f);
 	__unlockfile(f);
@@ -24,7 +24,7 @@ static int locking_putc(int c, FILE *f)
 
 static inline int do_putc(int c, FILE *f)
 {
-#ifdef __wasi_libcall_thread_context__
+#ifdef __wasm_libcall_thread_context__
 	#ifdef __wasip3__
 	int tid = wasip3_thread_index();
 	#else

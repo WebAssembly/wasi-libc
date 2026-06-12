@@ -6,7 +6,7 @@ void __do_orphaned_stdio_locks()
 {
     FILE *f;
     for (f=__pthread_self()->stdio_locks; f; f=f->next_locked) {
-		#ifdef __wasi_libcall_thread_context__
+		#ifdef __wasm_libcall_thread_context__
         f->lock.owner = 0;
         __waitlist_wake_all(&f->lock.waiters);
 		#else
@@ -33,7 +33,7 @@ void __register_locked_file(FILE *f, pthread_t self)
 	self->stdio_locks = f;
 }
 
-#ifdef __wasi_libcall_thread_context__
+#ifdef __wasm_libcall_thread_context__
 int ftrylockfile(FILE *f)
 {
 	#ifdef __wasip3__

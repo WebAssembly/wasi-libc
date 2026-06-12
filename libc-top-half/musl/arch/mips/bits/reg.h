@@ -1,6 +1,3 @@
-#undef __WORDSIZE
-#define __WORDSIZE 32
-
 #define EF_R0 6
 #define EF_R1 7
 #define EF_R2 8

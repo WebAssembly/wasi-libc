@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <lock.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -128,9 +129,12 @@ static const char *make_absolute(const char *path) {
 int __wasilibc_find_relpath_alloc(const char *path, const char **abs_prefix,
                                   char **relative_buf, size_t *relative_buf_len,
                                   int can_realloc) {
+  WEAK_LOCK(lock);
+
   // First, make our path absolute taking the cwd into account.
   const char *abspath = make_absolute(path);
   if (abspath == NULL) {
+    WEAK_UNLOCK(lock);
     errno = ENOMEM;
     return -1;
   }
@@ -140,17 +144,21 @@ int __wasilibc_find_relpath_alloc(const char *path, const char **abs_prefix,
   // into `relative_buf`.
   const char *rel;
   int fd = __wasilibc_find_abspath(abspath, abs_prefix, &rel);
-  if (fd == -1)
+  if (fd == -1) {
+    WEAK_UNLOCK(lock);
     return -1;
+  }
 
   size_t rel_len = strlen(rel);
   if (*relative_buf_len < rel_len + 1) {
     if (!can_realloc) {
+      WEAK_UNLOCK(lock);
       errno = ERANGE;
       return -1;
     }
     char *tmp = realloc(*relative_buf, rel_len + 1);
     if (tmp == NULL) {
+      WEAK_UNLOCK(lock);
       errno = ENOMEM;
       return -1;
     }
@@ -158,5 +166,6 @@ int __wasilibc_find_relpath_alloc(const char *path, const char **abs_prefix,
     *relative_buf_len = rel_len + 1;
   }
   strcpy(*relative_buf, rel);
+  WEAK_UNLOCK(lock);
   return fd;
 }

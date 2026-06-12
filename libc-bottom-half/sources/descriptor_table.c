@@ -125,6 +125,22 @@ static int remove(descriptor_table_t *table, int fd,
   return 0;
 }
 
+static void clear(descriptor_table_t *table) {
+  for (size_t i = 0; i < table->len; ++i) {
+    descriptor_table_item_t *table_entry = &table->entries[i];
+    if (table_entry->occupied) {
+      descriptor_table_entry_t entry = table_entry->entry;
+      entry.vtable->free(entry.data);
+    }
+  }
+  if (table->entries)
+    free(table->entries);
+  table->entries = NULL;
+  table->next = 0;
+  table->len = 0;
+  table->cap = 0;
+}
+
 static bool stdio_initialized = false;
 
 static int init_stdio() {
@@ -175,4 +191,9 @@ int descriptor_table_remove(int fd) {
     return -1;
   entry.vtable->free(entry.data);
   return 0;
+}
+
+void descriptor_table_clear() {
+  clear(&global_table);
+  stdio_initialized = false;
 }

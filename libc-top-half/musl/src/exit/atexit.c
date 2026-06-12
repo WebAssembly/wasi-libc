@@ -19,6 +19,7 @@ static struct fl
 	void *a[COUNT];
 } builtin, *head;
 
+static int finished_atexit;
 static int slot;
 
 DECLARE_WEAK_LOCK(lock, static);
@@ -34,6 +35,10 @@ void __funcs_on_exit()
 		func(arg);
 		WEAK_LOCK(lock);
 	}
+	/* Unlock to prevent deadlock if a global dtor
+	 * attempts to call atexit. */
+	finished_atexit = 1;
+	WEAK_UNLOCK(lock);
 }
 
 void __cxa_finalize(void *dso)
@@ -43,6 +48,13 @@ void __cxa_finalize(void *dso)
 int __cxa_atexit(void (*func)(void *), void *arg, void *dso)
 {
 	WEAK_LOCK(lock);
+
+	/* Prevent dtors from registering further atexit
+	 * handlers that would never be run. */
+	if (finished_atexit) {
+		WEAK_UNLOCK(lock);
+		return -1;
+	}
 
 	/* Defer initialization of head so it can be in BSS */
 	if (!head) head = &builtin;

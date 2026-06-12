@@ -25,7 +25,7 @@ int main(void) {
   TEST(write(fd, "hello", 6) == 6);
   TEST(pwrite(fd, "42", 2, 2) == 2);
   TEST(pread(fd, &foo, 3, 2) == 3);
-  TEST(strcmp(foo, "42o") == 0);
+  TEST(strncmp(foo, "42o", 3) == 0);
 
   // Negative offset is an error
   TEST(pwrite(fd, "q", 1, -1) == -1);

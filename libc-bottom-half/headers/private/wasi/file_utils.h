@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <wasi/descriptor_table.h>
+#include <wasi/poll.h>
 #include <wasi/wasip2.h>
 
 #ifdef __wasip2__
@@ -118,6 +119,18 @@ dir_entry_type_to_d_type(filesystem_descriptor_type_t *ty) {
     return DT_UNKNOWN;
   }
 }
+
+#ifndef __wasip2__
+/// Starts the process of `poll` for `iostate` assuming it's backed by a
+/// readable stream.
+///
+/// This will handle all the internal logic for zero-length reads/writes/etc
+/// and add to `state` as necessary.
+int __wasilibc_read_poll(wasip3_io_state_t *iostate, poll_state_t *state);
+
+/// Write dual of `__wasilibc_read_poll`.
+int __wasilibc_write_poll(wasip3_io_state_t *iostate, poll_state_t *state);
+#endif // !__wasip2__
 
 #endif // __wasip2__ || __wasip3__
 

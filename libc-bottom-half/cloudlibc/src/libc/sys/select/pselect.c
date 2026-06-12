@@ -3,9 +3,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <common/time.h>
-
 #include <sys/select.h>
-
 #include <wasi/api.h>
 #include <errno.h>
 #include <poll.h>

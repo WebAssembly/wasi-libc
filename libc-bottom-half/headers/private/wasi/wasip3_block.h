@@ -9,6 +9,14 @@
 
 typedef wasip3_waitable_status_t (*wasip3_cancel_t)(uint32_t);
 
+/// Wait at most `timeout` duration for `waitable` to become ready.
+///
+/// If `timeout` is 0 this will wait indefinitely. Returns `true` if `waitable`
+/// has become ready. Returns `false` if `timeout` elapsed. Upon returning
+/// `true` the `event` field is filled in.
+bool __wasilibc_waitable_block_on(uint32_t waitable, wasip3_event_t *event,
+                                  monotonic_clock_duration_t timeout);
+
 // Waits for a subtask to return
 void __wasilibc_subtask_block_on_and_drop(wasip3_subtask_t subtask);
 
@@ -82,6 +90,12 @@ static inline size_t __wasilibc_stream_block_on(wasip3_waitable_status_t status,
   assert(ret >= 0);
   return ret;
 }
+
+/// Polls the `waitable` provide, filling in `event`, if any.
+///
+/// This will call `waitable-set.poll` with `waitable` and the `event` is
+/// whatever that returns.
+void __wasilibc_poll_waitable(uint32_t waitable, wasip3_event_t *event);
 
 #endif // __wasip3__
 

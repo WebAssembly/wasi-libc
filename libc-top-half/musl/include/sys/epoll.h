@@ -7,6 +7,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <fcntl.h>
 
 #define __NEED_sigset_t
@@ -54,6 +55,17 @@ __attribute__ ((__packed__))
 #endif
 ;
 
+struct epoll_params {
+	uint32_t busy_poll_usecs;
+	uint16_t busy_poll_budget;
+	uint8_t prefer_busy_poll;
+
+	uint8_t __pad;
+};
+
+#define EPOLL_IOC_TYPE 0x8A
+#define EPIOCSPARAMS _IOW(EPOLL_IOC_TYPE, 0x01, struct epoll_params)
+#define EPIOCGPARAMS _IOR(EPOLL_IOC_TYPE, 0x02, struct epoll_params)
 
 int epoll_create(int);
 int epoll_create1(int);

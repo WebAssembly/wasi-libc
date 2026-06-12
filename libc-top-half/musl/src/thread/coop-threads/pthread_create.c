@@ -3,6 +3,7 @@
 #include "lock.h"
 #include "pthread_impl.h"
 #include "stdio_impl.h"
+#include <stdatomic.h>
 #include <stddef.h>
 #include <string.h>
 
@@ -158,9 +159,7 @@ int __pthread_create(pthread_t *restrict res,
   struct pthread *self, *new;
   unsigned char *map = 0, *stack = 0, *tsd = 0, *stack_limit;
   
-  // Marking this as volatile seems to prevent certain compiler optimizations
-  // that lead to incorrect code generation. TODO(wasip3) investigate further
-  volatile pthread_attr_t attr = {0};
+  pthread_attr_t attr = {0};
   
   size_t tls_size = __builtin_wasm_tls_size();
   size_t tls_align = __builtin_wasm_tls_align();
@@ -229,6 +228,11 @@ int __pthread_create(pthread_t *restrict res,
   }
 
   new_tls_base = __copy_tls(tsd - tls_size);
+  // __copy_tls temporarily changes and restores the TLS base. The optimizer 
+  // can see through the change+restore and cache TLS-relative values 
+  // (self, attr fields) computed before the call.
+  __atomic_signal_fence(memory_order_seq_cst);
+  
   /* Compute pthread struct offset from old TLS base, apply to new TLS base */
   tls_offset = (uintptr_t)self - (uintptr_t)tls_base;
   new = (void *)((uintptr_t)new_tls_base + tls_offset);

@@ -17,6 +17,7 @@
 #define REL_TPOFF       R_LARCH_TLS_TPREL64
 #define REL_RELATIVE    R_LARCH_RELATIVE
 #define REL_SYMBOLIC    R_LARCH_64
+#define REL_TLSDESC     R_LARCH_TLS_DESC64
 
 #define CRTJMP(pc,sp) __asm__ __volatile__( \
 	"move $sp, %1 ; jr %0" : : "r"(pc), "r"(sp) : "memory" )

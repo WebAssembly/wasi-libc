@@ -48,7 +48,10 @@ void test_tcp_client(int server_port) {
   TEST(bytes_received == len);
 
   // Message received should be the same as message sent
-  TEST(strcmp(message, client_buffer) == 0);
+  TEST(memcmp(message, client_buffer, len) == 0);
+
+  TEST(read(socket_fd, NULL, 0) == 0);
+  TEST(write(socket_fd, NULL, 0) == 0);
 
   // Shut down client
   close(socket_fd);

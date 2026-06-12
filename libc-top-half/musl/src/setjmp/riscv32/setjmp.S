@@ -23,18 +23,24 @@ setjmp:
 	sw ra,    52(a0)
 
 #ifndef __riscv_float_abi_soft
-	fsd fs0,  56(a0)
-	fsd fs1,  64(a0)
-	fsd fs2,  72(a0)
-	fsd fs3,  80(a0)
-	fsd fs4,  88(a0)
-	fsd fs5,  96(a0)
-	fsd fs6,  104(a0)
-	fsd fs7,  112(a0)
-	fsd fs8,  120(a0)
-	fsd fs9,  128(a0)
-	fsd fs10, 136(a0)
-	fsd fs11, 144(a0)
+#ifdef __riscv_float_abi_double
+#define FSX fsd
+#else
+#define FSX fsw
+#endif
+
+	FSX fs0,  56(a0)
+	FSX fs1,  64(a0)
+	FSX fs2,  72(a0)
+	FSX fs3,  80(a0)
+	FSX fs4,  88(a0)
+	FSX fs5,  96(a0)
+	FSX fs6,  104(a0)
+	FSX fs7,  112(a0)
+	FSX fs8,  120(a0)
+	FSX fs9,  128(a0)
+	FSX fs10, 136(a0)
+	FSX fs11, 144(a0)
 #endif
 
 	li a0, 0

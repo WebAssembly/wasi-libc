@@ -2,7 +2,6 @@
 #include <common/time.h>
 #include <sys/times.h>
 #include <time.h>
-#include <wasi/api.h>
 
 _Static_assert(CLOCKS_PER_SEC == NSEC_PER_SEC,
                "This implementation assumes that `clock` is in nanoseconds");
@@ -12,25 +11,13 @@ _Static_assert(CLOCKS_PER_SEC == NSEC_PER_SEC,
 clock_t __clock(void);
 
 clock_t times(struct tms *buffer) {
-#if defined(__wasip1__)
-  __wasi_timestamp_t user = __clock();
-  *buffer = (struct tms){
-      .tms_utime = user,
-      // WASI doesn't provide a way to spawn a new process, so always 0.
-      .tms_cutime = 0};
-
-  __wasi_timestamp_t realtime = 0;
-  (void)__wasi_clock_time_get(__WASI_CLOCKID_MONOTONIC, 0, &realtime);
-#elif defined(__wasip2__) || defined(__wasip3__)
   clock_t user = __clock();
   *buffer = (struct tms){
       .tms_utime = user,
       // WASI doesn't provide a way to spawn a new process, so always 0.
       .tms_cutime = 0};
 
-  monotonic_clock_instant_t realtime = monotonic_clock_now();
-#else
-#error "Unsupported WASI version"
-#endif
-  return realtime;
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  return now.tv_sec * 1E9 + now.tv_nsec;
 }

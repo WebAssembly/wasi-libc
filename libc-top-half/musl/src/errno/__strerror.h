@@ -116,6 +116,8 @@ E(EALREADY,     "Operation already in progress")
 E(EINPROGRESS,  "Operation in progress")
 E(ESTALE,       "Stale file handle")
 #ifdef __wasilibc_unmodified_upstream // errno value not in WASI
+E(EUCLEAN,      "Data consistency error")
+E(ENAVAIL,      "Resource not available")
 E(EREMOTEIO,    "Remote I/O error")
 #endif
 E(EDQUOT,       "Quota exceeded")

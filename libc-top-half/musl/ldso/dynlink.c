@@ -21,14 +21,16 @@
 #include <sys/membarrier.h>
 #include "pthread_impl.h"
 #include "fork_impl.h"
+#include "libc.h"
 #include "dynlink.h"
 
 static size_t ldso_page_size;
-#ifndef PAGE_SIZE
+/* libc.h may have defined a macro for dynamic PAGE_SIZE already, but
+ * PAGESIZE is only defined if it's constant for the arch. */
+#ifndef PAGESIZE
+#undef PAGE_SIZE
 #define PAGE_SIZE ldso_page_size
 #endif
-
-#include "libc.h"
 
 #define malloc __libc_malloc
 #define calloc __libc_calloc
@@ -584,6 +586,7 @@ static void reclaim_gaps(struct dso *dso)
 	for (; phcnt--; ph=(void *)((char *)ph+dso->phentsize)) {
 		if (ph->p_type!=PT_LOAD) continue;
 		if ((ph->p_flags&(PF_R|PF_W))!=(PF_R|PF_W)) continue;
+		if (ph->p_memsz == 0) continue;
 		reclaim(dso, ph->p_vaddr & -PAGE_SIZE, ph->p_vaddr);
 		reclaim(dso, ph->p_vaddr+ph->p_memsz,
 			ph->p_vaddr+ph->p_memsz+PAGE_SIZE-1 & -PAGE_SIZE);
@@ -1293,7 +1296,7 @@ static void extend_bfs_deps(struct dso *p)
 		struct dso *dep = p->deps[i];
 		for (j=cnt=0; j<dep->ndeps_direct; j++)
 			if (!dep->deps[j]->mark) cnt++;
-		tmp = no_realloc ? 
+		tmp = no_realloc ?
 			malloc(sizeof(*tmp) * (ndeps_all+cnt+1)) :
 			realloc(p->deps, sizeof(*tmp) * (ndeps_all+cnt+1));
 		if (!tmp) {
@@ -1554,7 +1557,7 @@ static void do_init_fini(struct dso **queue)
 		if (p->ctor_visitor || p->constructed)
 			continue;
 		p->ctor_visitor = self;
-		
+
 		decode_vec(p->dynv, dyn, DYN_CNT);
 		if (dyn[0] & ((1<<DT_FINI) | (1<<DT_FINI_ARRAY))) {
 			p->fini_next = fini_head;
@@ -1665,7 +1668,7 @@ static void install_new_tls(void)
  * following stage 2 and stage 3 functions via primitive symbolic lookup
  * since it does not have access to their addresses to begin with. */
 
-/* Stage 2 of the dynamic linker is called after relative relocations 
+/* Stage 2 of the dynamic linker is called after relative relocations
  * have been processed. It can make function calls to static functions
  * and access string literals and static data, but cannot use extern
  * symbols. Its job is to perform symbolic relocations on the dynamic

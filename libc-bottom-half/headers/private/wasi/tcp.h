@@ -35,13 +35,25 @@ typedef struct {
   wasip3_subtask_t subtask;
 #endif
 } tcp_socket_state_connecting_t;
+
+/// The `stream` in `tcp_socket_state_listening_t` is finished and should not
+/// be read again.
+#define TCP_LISTENING_DONE (1 << 0)
+/// There is an active read on `stream` which has yet to complete.
+#define TCP_LISTENING_ACCEPTING (1 << 1)
+/// The `accept_result` field is valid and ready to be processed.
+#define TCP_LISTENING_ACCEPT_READY (1 << 2)
+
 typedef struct {
 #ifdef __wasip2__
   int dummy;
 #else
   // The `stream<tcp-socket>` that this is reading to receive accepted sockets.
   sockets_stream_own_tcp_socket_t stream;
-  bool done;
+  /// In-flight result of the read of `stream`.
+  sockets_own_tcp_socket_t accept_result;
+  /// Bitset of `TCP_LISTENING_*`.
+  uint32_t flags;
 #endif
 } tcp_socket_state_listening_t;
 

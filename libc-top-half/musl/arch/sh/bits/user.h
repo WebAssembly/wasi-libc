@@ -1,6 +1,3 @@
-#undef __WORDSIZE
-#define __WORDSIZE 32
-
 #define REG_REG0	 0
 #define REG_REG15	15
 #define REG_PC		16

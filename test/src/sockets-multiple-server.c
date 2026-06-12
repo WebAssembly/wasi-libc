@@ -75,7 +75,7 @@ void run_tcp_server() {
   // Poll on the array of client file descriptors and respond to
   // any that are ready
   unsigned done = 0;
-  while (done < EXPECTED_CONNECTIONS) {
+  while (!t_status && done < EXPECTED_CONNECTIONS) {
     TEST(poll(client_fds, EXPECTED_CONNECTIONS, -1) > 0);
     for (size_t i = 0; i < EXPECTED_CONNECTIONS; i++) {
       if (client_fds[i].revents & POLLIN) {

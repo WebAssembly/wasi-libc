@@ -1,5 +1,6 @@
 #include "pthread_impl.h"
 #include <wasi/api.h>
+#include <stdatomic.h>
 
 #ifndef __wasip3__
 #error "Unknown WASI version"
@@ -12,8 +13,14 @@ void __waitlist_wait_on(struct __waitlist_node **list)
         .next = *list,
     };
     *list = &node;
-    
+
     wasip3_thread_suspend();
+
+    // Another thread may have modified *list (and node.next) while we were
+    // suspended. Prevent the compiler from caching any memory values across
+    // the suspend point. This is a compiler-only fence: no instructions are
+    // emitted, so no atomics feature is required.
+    __atomic_signal_fence(memory_order_seq_cst);
 }
 
 void __waitlist_wake_one(struct __waitlist_node **list)

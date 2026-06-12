@@ -1,5 +1,3 @@
-#undef __WORDSIZE
-#define __WORDSIZE 32
 #define PT_D1 0
 #define PT_D2 1
 #define PT_D3 2

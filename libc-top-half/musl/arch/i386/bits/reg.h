@@ -1,5 +1,3 @@
-#undef __WORDSIZE
-#define __WORDSIZE 32
 #define EBX 0
 #define ECX 1
 #define EDX 2

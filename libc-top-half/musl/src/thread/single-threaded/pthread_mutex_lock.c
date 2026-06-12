@@ -8,7 +8,7 @@ int __pthread_mutex_lock(pthread_mutex_t *m)
 		1 - recursive
 		2 - errorcheck
 	*/
-	if (m->_m_type&3 != PTHREAD_MUTEX_RECURSIVE) {
+	if ((m->_m_type & 3) != PTHREAD_MUTEX_RECURSIVE) {
 		if (m->_m_count) return EDEADLK;
 		m->_m_count = 1;
 	} else {

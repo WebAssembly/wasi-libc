@@ -34,10 +34,14 @@ message(STATUS "Open POSIX Test Suite source directory: ${POSIX_TESTSUITE}")
 include(ba-download)
 
 if(NOT ENGINE OR ENGINE STREQUAL "")
+  set(wasmtime_version dev)
+  if (TARGET_TRIPLE MATCHES "-threads")
+    set(wasmtime_version "v44.0.0")
+  endif()
   ba_download(
     wasmtime
     "https://github.com/bytecodealliance/wasmtime"
-    "dev"
+    ${wasmtime_version}
   )
   ExternalProject_Get_Property(wasmtime SOURCE_DIR)
   set(ENGINE "${SOURCE_DIR}/wasmtime")
@@ -119,8 +123,8 @@ function(add_test_executable executable_name src)
           "${SYSROOT_LIB}/libc.so"
           ${arg_SHARED_LIBS}
           -o ${executable_name}
-      DEPENDS wasm-tools
     )
+    add_dependencies(${executable_name} wasm-tools)
     target_link_libraries(${executable_name} PRIVATE c)
   else()
     clang_format_target(${executable_name})
@@ -982,8 +986,7 @@ if (PYTHON_TESTS)
         # and if Python is updated we'll have to update this too.
         --host-runner "\
           ${ENGINE} run \
-            --wasm max-wasm-stack=33554432,component-model-async \
-            --wasi p3 \
+            --wasm max-wasm-stack=33554432 \
             --dir <SOURCE_DIR>::/ \
             --env PYTHONPATH=/cross-build/wasm32-wasip1/build/lib.wasi-wasm32-3.14 \
           "

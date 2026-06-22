@@ -228,10 +228,6 @@ int __pthread_create(pthread_t *restrict res,
   }
 
   new_tls_base = __copy_tls(tsd - tls_size);
-  // __copy_tls temporarily changes and restores the TLS base. The optimizer 
-  // can see through the change+restore and cache TLS-relative values 
-  // (self, attr fields) computed before the call.
-  __atomic_signal_fence(memory_order_seq_cst);
   
   /* Compute pthread struct offset from old TLS base, apply to new TLS base */
   tls_offset = (uintptr_t)self - (uintptr_t)tls_base;

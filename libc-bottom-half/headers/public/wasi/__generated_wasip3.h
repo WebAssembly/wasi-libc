@@ -942,7 +942,7 @@ typedef struct {
   uint64_t f1;
 } wasip3_tuple2_u64_u64_t;
 
-// Imported Functions from `wasi:cli/environment@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:cli/environment@0.3.0`
 // Get the POSIX-style environment variables.
 // 
 // Each environment variable is provided as a pair of string variable names
@@ -958,11 +958,20 @@ extern void environment_get_arguments(wasip3_list_string_t *ret);
 // directory, interpreting `.` as shorthand for this.
 extern bool environment_get_initial_cwd(wasip3_string_t *ret);
 
-// Imported Functions from `wasi:cli/exit@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:cli/exit@0.3.0`
 // Exit the current instance and any linked instances.
 _Noreturn extern void exit_exit(exit_result_void_void_t *status);
+// Exit the current instance and any linked instances, reporting the
+// specified status code to the host.
+// 
+// The meaning of the code depends on the context, with 0 usually meaning
+// "success", and other values indicating various types of failure.
+// 
+// This function does not return; the effect is analogous to a trap, but
+// without the connotation that something bad has happened.
+_Noreturn extern void exit_exit_with_code(uint8_t status_code);
 
-// Imported Functions from `wasi:cli/stdin@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:cli/stdin@0.3.0`
 // Return a stream for reading from stdin.
 // 
 // This function returns a stream which provides data read from stdin,
@@ -978,7 +987,7 @@ _Noreturn extern void exit_exit(exit_result_void_void_t *status);
 // reads is implementation-specific.
 extern void stdin_read_via_stream(stdin_tuple2_stream_u8_future_result_void_error_code_t *ret);
 
-// Imported Functions from `wasi:cli/stdout@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:cli/stdout@0.3.0`
 // Write the given stream to stdout.
 // 
 // If the stream's writable end is dropped this function will either return
@@ -989,7 +998,7 @@ extern void stdin_read_via_stream(stdin_tuple2_stream_u8_future_result_void_erro
 // dropped and this function will return an error-code.
 extern stdout_future_result_void_error_code_t stdout_write_via_stream(stdin_stream_u8_t data);
 
-// Imported Functions from `wasi:cli/stderr@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:cli/stderr@0.3.0`
 // Write the given stream to stderr.
 // 
 // If the stream's writable end is dropped this function will either return
@@ -1000,22 +1009,22 @@ extern stdout_future_result_void_error_code_t stdout_write_via_stream(stdin_stre
 // dropped and this function will return an error-code.
 extern stderr_future_result_void_error_code_t stderr_write_via_stream(stdin_stream_u8_t data);
 
-// Imported Functions from `wasi:cli/terminal-stdin@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:cli/terminal-stdin@0.3.0`
 // If stdin is connected to a terminal, return a `terminal-input` handle
 // allowing further interaction with it.
 extern bool terminal_stdin_get_terminal_stdin(terminal_stdin_own_terminal_input_t *ret);
 
-// Imported Functions from `wasi:cli/terminal-stdout@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:cli/terminal-stdout@0.3.0`
 // If stdout is connected to a terminal, return a `terminal-output` handle
 // allowing further interaction with it.
 extern bool terminal_stdout_get_terminal_stdout(terminal_stdout_own_terminal_output_t *ret);
 
-// Imported Functions from `wasi:cli/terminal-stderr@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:cli/terminal-stderr@0.3.0`
 // If stderr is connected to a terminal, return a `terminal-output` handle
 // allowing further interaction with it.
 extern bool terminal_stderr_get_terminal_stderr(terminal_stderr_own_terminal_output_t *ret);
 
-// Imported Functions from `wasi:clocks/monotonic-clock@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:clocks/monotonic-clock@0.3.0`
 // Read the current value of the clock.
 // 
 // The clock is monotonic, therefore calling this function repeatedly will
@@ -1034,7 +1043,7 @@ extern void monotonic_clock_wait_until(monotonic_clock_mark_t when);
 // Wait for the specified duration to elapse.
 extern wasip3_subtask_status_t monotonic_clock_wait_for(monotonic_clock_duration_t how_long);
 
-// Imported Functions from `wasi:clocks/system-clock@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:clocks/system-clock@0.3.0`
 // Read the current value of the clock.
 // 
 // This clock is not monotonic, therefore calling this function repeatedly
@@ -1046,7 +1055,7 @@ extern void system_clock_now(system_clock_instant_t *ret);
 // that the implementation permits distinguishing.
 extern system_clock_duration_t system_clock_get_resolution(void);
 
-// Imported Functions from `wasi:filesystem/types@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:filesystem/types@0.3.0`
 // Return a stream for reading from a file.
 // 
 // Multiple read, write, and append streams may be active on the same open
@@ -1263,11 +1272,11 @@ extern bool filesystem_method_descriptor_metadata_hash(filesystem_borrow_descrip
 // This performs the same hash computation as `metadata-hash`.
 extern bool filesystem_method_descriptor_metadata_hash_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip3_string_t *path, filesystem_metadata_hash_value_t *ret, filesystem_error_code_t *err);
 
-// Imported Functions from `wasi:filesystem/preopens@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:filesystem/preopens@0.3.0`
 // Return the set of preopened directories, and their paths.
 extern void filesystem_preopens_get_directories(filesystem_preopens_list_tuple2_own_descriptor_string_t *ret);
 
-// Imported Functions from `wasi:sockets/types@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:sockets/types@0.3.0`
 // Create a new TCP socket.
 // 
 // Similar to `socket(AF_INET or AF_INET6, SOCK_STREAM, IPPROTO_TCP)`
@@ -1832,7 +1841,7 @@ extern bool sockets_method_udp_socket_set_receive_buffer_size(sockets_borrow_udp
 extern bool sockets_method_udp_socket_get_send_buffer_size(sockets_borrow_udp_socket_t self, uint64_t *ret, sockets_error_code_t *err);
 extern bool sockets_method_udp_socket_set_send_buffer_size(sockets_borrow_udp_socket_t self, uint64_t value, sockets_error_code_t *err);
 
-// Imported Functions from `wasi:sockets/ip-name-lookup@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:sockets/ip-name-lookup@0.3.0`
 // Resolve an internet host name to a list of IP addresses.
 // 
 // Unicode domain names are automatically converted to ASCII using IDNA
@@ -1854,7 +1863,7 @@ extern bool sockets_method_udp_socket_set_send_buffer_size(sockets_borrow_udp_so
 // - <https://man.freebsd.org/cgi/man.cgi?query=getaddrinfo&sektion=3>
 extern bool ip_name_lookup_resolve_addresses(wasip3_string_t *name, ip_name_lookup_list_ip_address_t *ret, ip_name_lookup_error_code_t *err);
 
-// Imported Functions from `wasi:random/random@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:random/random@0.3.0`
 // Return up to `max-len` cryptographically-secure random or pseudo-random
 // bytes.
 // 
@@ -1882,7 +1891,7 @@ extern void random_get_random_bytes(uint64_t max_len, wasip3_list_u8_t *ret);
 // represented as a `u64`.
 extern uint64_t random_get_random_u64(void);
 
-// Imported Functions from `wasi:random/insecure@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:random/insecure@0.3.0`
 // Return up to `max-len` insecure pseudo-random bytes.
 // 
 // This function is not cryptographically secure. Do not use it for
@@ -1905,7 +1914,7 @@ extern void random_insecure_get_insecure_random_bytes(uint64_t max_len, wasip3_l
 // `get-insecure-random-bytes`, represented as a `u64`.
 extern uint64_t random_insecure_get_insecure_random_u64(void);
 
-// Imported Functions from `wasi:random/insecure-seed@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:random/insecure-seed@0.3.0`
 // Return a 128-bit value that may contain a pseudo-random value.
 // 
 // The returned value is not required to be computed from a CSPRNG, and may

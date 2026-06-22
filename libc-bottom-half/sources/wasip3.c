@@ -3,302 +3,305 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Imported Functions from `wasi:cli/environment@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:cli/environment@0.3.0`
 
-__attribute__((__import_module__("wasi:cli/environment@0.3.0-rc-2026-03-15"), __import_name__("get-environment")))
+__attribute__((__import_module__("wasi:cli/environment@0.3.0"), __import_name__("get-environment")))
 extern void __wasm_import_environment_get_environment(uint8_t *);
 
-__attribute__((__import_module__("wasi:cli/environment@0.3.0-rc-2026-03-15"), __import_name__("get-arguments")))
+__attribute__((__import_module__("wasi:cli/environment@0.3.0"), __import_name__("get-arguments")))
 extern void __wasm_import_environment_get_arguments(uint8_t *);
 
-__attribute__((__import_module__("wasi:cli/environment@0.3.0-rc-2026-03-15"), __import_name__("get-initial-cwd")))
+__attribute__((__import_module__("wasi:cli/environment@0.3.0"), __import_name__("get-initial-cwd")))
 extern void __wasm_import_environment_get_initial_cwd(uint8_t *);
 
-// Imported Functions from `wasi:cli/exit@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:cli/exit@0.3.0`
 
-__attribute__((__import_module__("wasi:cli/exit@0.3.0-rc-2026-03-15"), __import_name__("exit")))
+__attribute__((__import_module__("wasi:cli/exit@0.3.0"), __import_name__("exit")))
 _Noreturn extern void __wasm_import_exit_exit(int32_t);
 
-// Imported Functions from `wasi:cli/stdin@0.3.0-rc-2026-03-15`
+__attribute__((__import_module__("wasi:cli/exit@0.3.0"), __import_name__("exit-with-code")))
+_Noreturn extern void __wasm_import_exit_exit_with_code(int32_t);
 
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("read-via-stream")))
+// Imported Functions from `wasi:cli/stdin@0.3.0`
+
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0"), __import_name__("read-via-stream")))
 extern void __wasm_import_stdin_read_via_stream(uint8_t *);
 
-// Imported Functions from `wasi:cli/stdout@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:cli/stdout@0.3.0`
 
-__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0"), __import_name__("write-via-stream")))
 extern int32_t __wasm_import_stdout_write_via_stream(int32_t);
 
-// Imported Functions from `wasi:cli/stderr@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:cli/stderr@0.3.0`
 
-__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0"), __import_name__("write-via-stream")))
 extern int32_t __wasm_import_stderr_write_via_stream(int32_t);
 
-// Imported Functions from `wasi:cli/terminal-stdin@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:cli/terminal-stdin@0.3.0`
 
-__attribute__((__import_module__("wasi:cli/terminal-stdin@0.3.0-rc-2026-03-15"), __import_name__("get-terminal-stdin")))
+__attribute__((__import_module__("wasi:cli/terminal-stdin@0.3.0"), __import_name__("get-terminal-stdin")))
 extern void __wasm_import_terminal_stdin_get_terminal_stdin(uint8_t *);
 
-// Imported Functions from `wasi:cli/terminal-stdout@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:cli/terminal-stdout@0.3.0`
 
-__attribute__((__import_module__("wasi:cli/terminal-stdout@0.3.0-rc-2026-03-15"), __import_name__("get-terminal-stdout")))
+__attribute__((__import_module__("wasi:cli/terminal-stdout@0.3.0"), __import_name__("get-terminal-stdout")))
 extern void __wasm_import_terminal_stdout_get_terminal_stdout(uint8_t *);
 
-// Imported Functions from `wasi:cli/terminal-stderr@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:cli/terminal-stderr@0.3.0`
 
-__attribute__((__import_module__("wasi:cli/terminal-stderr@0.3.0-rc-2026-03-15"), __import_name__("get-terminal-stderr")))
+__attribute__((__import_module__("wasi:cli/terminal-stderr@0.3.0"), __import_name__("get-terminal-stderr")))
 extern void __wasm_import_terminal_stderr_get_terminal_stderr(uint8_t *);
 
-// Imported Functions from `wasi:clocks/monotonic-clock@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:clocks/monotonic-clock@0.3.0`
 
-__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-03-15"), __import_name__("now")))
+__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0"), __import_name__("now")))
 extern int64_t __wasm_import_monotonic_clock_now(void);
 
-__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-03-15"), __import_name__("get-resolution")))
+__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0"), __import_name__("get-resolution")))
 extern int64_t __wasm_import_monotonic_clock_get_resolution(void);
 
-__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-03-15"), __import_name__("wait-until")))
+__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0"), __import_name__("wait-until")))
 extern void __wasm_import_monotonic_clock_wait_until(int64_t);
 
-__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0-rc-2026-03-15"), __import_name__("[async-lower]wait-for")))
+__attribute__((__import_module__("wasi:clocks/monotonic-clock@0.3.0"), __import_name__("[async-lower]wait-for")))
 extern int32_t __wasm_import_monotonic_clock_wait_for(int64_t);
 
-// Imported Functions from `wasi:clocks/system-clock@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:clocks/system-clock@0.3.0`
 
-__attribute__((__import_module__("wasi:clocks/system-clock@0.3.0-rc-2026-03-15"), __import_name__("now")))
+__attribute__((__import_module__("wasi:clocks/system-clock@0.3.0"), __import_name__("now")))
 extern void __wasm_import_system_clock_now(uint8_t *);
 
-__attribute__((__import_module__("wasi:clocks/system-clock@0.3.0-rc-2026-03-15"), __import_name__("get-resolution")))
+__attribute__((__import_module__("wasi:clocks/system-clock@0.3.0"), __import_name__("get-resolution")))
 extern int64_t __wasm_import_system_clock_get_resolution(void);
 
-// Imported Functions from `wasi:filesystem/types@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:filesystem/types@0.3.0`
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.read-via-stream")))
 extern void __wasm_import_filesystem_method_descriptor_read_via_stream(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.write-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.write-via-stream")))
 extern int32_t __wasm_import_filesystem_method_descriptor_write_via_stream(int32_t, int32_t, int64_t);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.append-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.append-via-stream")))
 extern int32_t __wasm_import_filesystem_method_descriptor_append_via_stream(int32_t, int32_t);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.advise")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.advise")))
 extern void __wasm_import_filesystem_method_descriptor_advise(int32_t, int64_t, int64_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.sync-data")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.sync-data")))
 extern void __wasm_import_filesystem_method_descriptor_sync_data(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.get-flags")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.get-flags")))
 extern void __wasm_import_filesystem_method_descriptor_get_flags(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][method]descriptor.get-type")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[async-lower][method]descriptor.get-type")))
 extern int32_t __wasm_import_filesystem_method_descriptor_get_type(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.set-size")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.set-size")))
 extern void __wasm_import_filesystem_method_descriptor_set_size(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.set-times")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.set-times")))
 extern void __wasm_import_filesystem_method_descriptor_set_times(int32_t, int32_t, int64_t, int32_t, int32_t, int64_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.read-directory")))
 extern void __wasm_import_filesystem_method_descriptor_read_directory(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.sync")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.sync")))
 extern void __wasm_import_filesystem_method_descriptor_sync(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.create-directory-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.create-directory-at")))
 extern void __wasm_import_filesystem_method_descriptor_create_directory_at(int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.stat")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.stat")))
 extern void __wasm_import_filesystem_method_descriptor_stat(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.stat-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.stat-at")))
 extern void __wasm_import_filesystem_method_descriptor_stat_at(int32_t, int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.set-times-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.set-times-at")))
 extern void __wasm_import_filesystem_method_descriptor_set_times_at(int32_t, int32_t, uint8_t *, size_t, int32_t, int64_t, int32_t, int32_t, int64_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.link-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.link-at")))
 extern void __wasm_import_filesystem_method_descriptor_link_at(int32_t, int32_t, uint8_t *, size_t, int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.open-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.open-at")))
 extern void __wasm_import_filesystem_method_descriptor_open_at(int32_t, int32_t, uint8_t *, size_t, int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.readlink-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.readlink-at")))
 extern void __wasm_import_filesystem_method_descriptor_readlink_at(int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.remove-directory-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.remove-directory-at")))
 extern void __wasm_import_filesystem_method_descriptor_remove_directory_at(int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.rename-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.rename-at")))
 extern void __wasm_import_filesystem_method_descriptor_rename_at(int32_t, uint8_t *, size_t, int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.symlink-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.symlink-at")))
 extern void __wasm_import_filesystem_method_descriptor_symlink_at(int32_t, uint8_t *, size_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.unlink-file-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.unlink-file-at")))
 extern void __wasm_import_filesystem_method_descriptor_unlink_file_at(int32_t, uint8_t *, size_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][method]descriptor.is-same-object")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[async-lower][method]descriptor.is-same-object")))
 extern int32_t __wasm_import_filesystem_method_descriptor_is_same_object(int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.metadata-hash")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.metadata-hash")))
 extern void __wasm_import_filesystem_method_descriptor_metadata_hash(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[method]descriptor.metadata-hash-at")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[method]descriptor.metadata-hash-at")))
 extern void __wasm_import_filesystem_method_descriptor_metadata_hash_at(int32_t, int32_t, uint8_t *, size_t, uint8_t *);
 
-// Imported Functions from `wasi:filesystem/preopens@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:filesystem/preopens@0.3.0`
 
-__attribute__((__import_module__("wasi:filesystem/preopens@0.3.0-rc-2026-03-15"), __import_name__("get-directories")))
+__attribute__((__import_module__("wasi:filesystem/preopens@0.3.0"), __import_name__("get-directories")))
 extern void __wasm_import_filesystem_preopens_get_directories(uint8_t *);
 
-// Imported Functions from `wasi:sockets/types@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:sockets/types@0.3.0`
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[static]tcp-socket.create")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[static]tcp-socket.create")))
 extern void __wasm_import_sockets_static_tcp_socket_create(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.bind")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.bind")))
 extern void __wasm_import_sockets_method_tcp_socket_bind(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][method]tcp-socket.connect")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[async-lower][method]tcp-socket.connect")))
 extern int32_t __wasm_import_sockets_method_tcp_socket_connect(uint8_t *, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.listen")))
 extern void __wasm_import_sockets_method_tcp_socket_listen(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.send")))
 extern int32_t __wasm_import_sockets_method_tcp_socket_send(int32_t, int32_t);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.receive")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.receive")))
 extern void __wasm_import_sockets_method_tcp_socket_receive(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-local-address")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.get-local-address")))
 extern void __wasm_import_sockets_method_tcp_socket_get_local_address(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-remote-address")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.get-remote-address")))
 extern void __wasm_import_sockets_method_tcp_socket_get_remote_address(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-is-listening")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.get-is-listening")))
 extern int32_t __wasm_import_sockets_method_tcp_socket_get_is_listening(int32_t);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-address-family")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.get-address-family")))
 extern int32_t __wasm_import_sockets_method_tcp_socket_get_address_family(int32_t);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-listen-backlog-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.set-listen-backlog-size")))
 extern void __wasm_import_sockets_method_tcp_socket_set_listen_backlog_size(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-keep-alive-enabled")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.get-keep-alive-enabled")))
 extern void __wasm_import_sockets_method_tcp_socket_get_keep_alive_enabled(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-keep-alive-enabled")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.set-keep-alive-enabled")))
 extern void __wasm_import_sockets_method_tcp_socket_set_keep_alive_enabled(int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-keep-alive-idle-time")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.get-keep-alive-idle-time")))
 extern void __wasm_import_sockets_method_tcp_socket_get_keep_alive_idle_time(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-keep-alive-idle-time")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.set-keep-alive-idle-time")))
 extern void __wasm_import_sockets_method_tcp_socket_set_keep_alive_idle_time(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-keep-alive-interval")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.get-keep-alive-interval")))
 extern void __wasm_import_sockets_method_tcp_socket_get_keep_alive_interval(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-keep-alive-interval")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.set-keep-alive-interval")))
 extern void __wasm_import_sockets_method_tcp_socket_set_keep_alive_interval(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-keep-alive-count")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.get-keep-alive-count")))
 extern void __wasm_import_sockets_method_tcp_socket_get_keep_alive_count(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-keep-alive-count")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.set-keep-alive-count")))
 extern void __wasm_import_sockets_method_tcp_socket_set_keep_alive_count(int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-hop-limit")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.get-hop-limit")))
 extern void __wasm_import_sockets_method_tcp_socket_get_hop_limit(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-hop-limit")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.set-hop-limit")))
 extern void __wasm_import_sockets_method_tcp_socket_set_hop_limit(int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-receive-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.get-receive-buffer-size")))
 extern void __wasm_import_sockets_method_tcp_socket_get_receive_buffer_size(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-receive-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.set-receive-buffer-size")))
 extern void __wasm_import_sockets_method_tcp_socket_set_receive_buffer_size(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.get-send-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.get-send-buffer-size")))
 extern void __wasm_import_sockets_method_tcp_socket_get_send_buffer_size(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]tcp-socket.set-send-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]tcp-socket.set-send-buffer-size")))
 extern void __wasm_import_sockets_method_tcp_socket_set_send_buffer_size(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[static]udp-socket.create")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[static]udp-socket.create")))
 extern void __wasm_import_sockets_static_udp_socket_create(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.bind")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]udp-socket.bind")))
 extern void __wasm_import_sockets_method_udp_socket_bind(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.connect")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]udp-socket.connect")))
 extern void __wasm_import_sockets_method_udp_socket_connect(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.disconnect")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]udp-socket.disconnect")))
 extern void __wasm_import_sockets_method_udp_socket_disconnect(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][method]udp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[async-lower][method]udp-socket.send")))
 extern int32_t __wasm_import_sockets_method_udp_socket_send(uint8_t *, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][method]udp-socket.receive")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[async-lower][method]udp-socket.receive")))
 extern int32_t __wasm_import_sockets_method_udp_socket_receive(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.get-local-address")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]udp-socket.get-local-address")))
 extern void __wasm_import_sockets_method_udp_socket_get_local_address(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.get-remote-address")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]udp-socket.get-remote-address")))
 extern void __wasm_import_sockets_method_udp_socket_get_remote_address(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.get-address-family")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]udp-socket.get-address-family")))
 extern int32_t __wasm_import_sockets_method_udp_socket_get_address_family(int32_t);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.get-unicast-hop-limit")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]udp-socket.get-unicast-hop-limit")))
 extern void __wasm_import_sockets_method_udp_socket_get_unicast_hop_limit(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.set-unicast-hop-limit")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]udp-socket.set-unicast-hop-limit")))
 extern void __wasm_import_sockets_method_udp_socket_set_unicast_hop_limit(int32_t, int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.get-receive-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]udp-socket.get-receive-buffer-size")))
 extern void __wasm_import_sockets_method_udp_socket_get_receive_buffer_size(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.set-receive-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]udp-socket.set-receive-buffer-size")))
 extern void __wasm_import_sockets_method_udp_socket_set_receive_buffer_size(int32_t, int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.get-send-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]udp-socket.get-send-buffer-size")))
 extern void __wasm_import_sockets_method_udp_socket_get_send_buffer_size(int32_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[method]udp-socket.set-send-buffer-size")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[method]udp-socket.set-send-buffer-size")))
 extern void __wasm_import_sockets_method_udp_socket_set_send_buffer_size(int32_t, int64_t, uint8_t *);
 
-// Imported Functions from `wasi:sockets/ip-name-lookup@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:sockets/ip-name-lookup@0.3.0`
 
-__attribute__((__import_module__("wasi:sockets/ip-name-lookup@0.3.0-rc-2026-03-15"), __import_name__("resolve-addresses")))
+__attribute__((__import_module__("wasi:sockets/ip-name-lookup@0.3.0"), __import_name__("resolve-addresses")))
 extern void __wasm_import_ip_name_lookup_resolve_addresses(uint8_t *, size_t, uint8_t *);
 
-// Imported Functions from `wasi:random/random@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:random/random@0.3.0`
 
-__attribute__((__import_module__("wasi:random/random@0.3.0-rc-2026-03-15"), __import_name__("get-random-bytes")))
+__attribute__((__import_module__("wasi:random/random@0.3.0"), __import_name__("get-random-bytes")))
 extern void __wasm_import_random_get_random_bytes(int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:random/random@0.3.0-rc-2026-03-15"), __import_name__("get-random-u64")))
+__attribute__((__import_module__("wasi:random/random@0.3.0"), __import_name__("get-random-u64")))
 extern int64_t __wasm_import_random_get_random_u64(void);
 
-// Imported Functions from `wasi:random/insecure@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:random/insecure@0.3.0`
 
-__attribute__((__import_module__("wasi:random/insecure@0.3.0-rc-2026-03-15"), __import_name__("get-insecure-random-bytes")))
+__attribute__((__import_module__("wasi:random/insecure@0.3.0"), __import_name__("get-insecure-random-bytes")))
 extern void __wasm_import_random_insecure_get_insecure_random_bytes(int64_t, uint8_t *);
 
-__attribute__((__import_module__("wasi:random/insecure@0.3.0-rc-2026-03-15"), __import_name__("get-insecure-random-u64")))
+__attribute__((__import_module__("wasi:random/insecure@0.3.0"), __import_name__("get-insecure-random-u64")))
 extern int64_t __wasm_import_random_insecure_get_insecure_random_u64(void);
 
-// Imported Functions from `wasi:random/insecure-seed@0.3.0-rc-2026-03-15`
+// Imported Functions from `wasi:random/insecure-seed@0.3.0`
 
-__attribute__((__import_module__("wasi:random/insecure-seed@0.3.0-rc-2026-03-15"), __import_name__("get-insecure-seed")))
+__attribute__((__import_module__("wasi:random/insecure-seed@0.3.0"), __import_name__("get-insecure-seed")))
 extern void __wasm_import_random_insecure_seed_get_insecure_seed(uint8_t *);
 
 // Canonical ABI intrinsics
@@ -358,19 +361,19 @@ void stdin_result_void_error_code_free(stdin_result_void_error_code_t *ptr) {
   }
 }
 
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[stream-new-0]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0"), __import_name__("[stream-new-0]read-via-stream")))
 extern uint64_t stdin_stream_u8__new(void);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-read-0]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0"), __import_name__("[async-lower][stream-read-0]read-via-stream")))
 extern uint32_t stdin_stream_u8__read(uint32_t, uint8_t*, size_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-write-0]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0"), __import_name__("[async-lower][stream-write-0]read-via-stream")))
 extern uint32_t stdin_stream_u8__write(uint32_t, const uint8_t*, size_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-read-0]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0"), __import_name__("[stream-cancel-read-0]read-via-stream")))
 extern uint32_t stdin_stream_u8__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-write-0]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0"), __import_name__("[stream-cancel-write-0]read-via-stream")))
 extern uint32_t stdin_stream_u8__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-readable-0]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0"), __import_name__("[stream-drop-readable-0]read-via-stream")))
 extern void stdin_stream_u8__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-writable-0]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0"), __import_name__("[stream-drop-writable-0]read-via-stream")))
 extern void stdin_stream_u8__drop_writable(uint32_t);
 
 stdin_stream_u8_t stdin_stream_u8_new(stdin_stream_u8_writer_t *writer) {
@@ -404,19 +407,19 @@ void stdin_stream_u8_drop_writable(stdin_stream_u8_writer_t writer) {
 }
 
 
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[future-new-1]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0"), __import_name__("[future-new-1]read-via-stream")))
 extern uint64_t stdin_future_result_void_error_code__new(void);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-read-1]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0"), __import_name__("[async-lower][future-read-1]read-via-stream")))
 extern uint32_t stdin_future_result_void_error_code__read(uint32_t, uint8_t*);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-write-1]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0"), __import_name__("[async-lower][future-write-1]read-via-stream")))
 extern uint32_t stdin_future_result_void_error_code__write(uint32_t, const uint8_t*);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-read-1]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0"), __import_name__("[future-cancel-read-1]read-via-stream")))
 extern uint32_t stdin_future_result_void_error_code__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-write-1]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0"), __import_name__("[future-cancel-write-1]read-via-stream")))
 extern uint32_t stdin_future_result_void_error_code__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-readable-1]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0"), __import_name__("[future-drop-readable-1]read-via-stream")))
 extern void stdin_future_result_void_error_code__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:cli/stdin@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-writable-1]read-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdin@0.3.0"), __import_name__("[future-drop-writable-1]read-via-stream")))
 extern void stdin_future_result_void_error_code__drop_writable(uint32_t);
 
 stdin_future_result_void_error_code_t stdin_future_result_void_error_code_new(stdin_future_result_void_error_code_writer_t *writer) {
@@ -456,19 +459,19 @@ void stdout_result_void_error_code_free(stdout_result_void_error_code_t *ptr) {
   }
 }
 
-__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("[future-new-1]write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0"), __import_name__("[future-new-1]write-via-stream")))
 extern uint64_t stdout_future_result_void_error_code__new(void);
-__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-read-1]write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0"), __import_name__("[async-lower][future-read-1]write-via-stream")))
 extern uint32_t stdout_future_result_void_error_code__read(uint32_t, uint8_t*);
-__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-write-1]write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0"), __import_name__("[async-lower][future-write-1]write-via-stream")))
 extern uint32_t stdout_future_result_void_error_code__write(uint32_t, const uint8_t*);
-__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-read-1]write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0"), __import_name__("[future-cancel-read-1]write-via-stream")))
 extern uint32_t stdout_future_result_void_error_code__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-write-1]write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0"), __import_name__("[future-cancel-write-1]write-via-stream")))
 extern uint32_t stdout_future_result_void_error_code__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-readable-1]write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0"), __import_name__("[future-drop-readable-1]write-via-stream")))
 extern void stdout_future_result_void_error_code__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:cli/stdout@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-writable-1]write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stdout@0.3.0"), __import_name__("[future-drop-writable-1]write-via-stream")))
 extern void stdout_future_result_void_error_code__drop_writable(uint32_t);
 
 stdout_future_result_void_error_code_t stdout_future_result_void_error_code_new(stdout_future_result_void_error_code_writer_t *writer) {
@@ -508,19 +511,19 @@ void stderr_result_void_error_code_free(stderr_result_void_error_code_t *ptr) {
   }
 }
 
-__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("[future-new-1]write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0"), __import_name__("[future-new-1]write-via-stream")))
 extern uint64_t stderr_future_result_void_error_code__new(void);
-__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-read-1]write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0"), __import_name__("[async-lower][future-read-1]write-via-stream")))
 extern uint32_t stderr_future_result_void_error_code__read(uint32_t, uint8_t*);
-__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-write-1]write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0"), __import_name__("[async-lower][future-write-1]write-via-stream")))
 extern uint32_t stderr_future_result_void_error_code__write(uint32_t, const uint8_t*);
-__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-read-1]write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0"), __import_name__("[future-cancel-read-1]write-via-stream")))
 extern uint32_t stderr_future_result_void_error_code__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-write-1]write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0"), __import_name__("[future-cancel-write-1]write-via-stream")))
 extern uint32_t stderr_future_result_void_error_code__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-readable-1]write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0"), __import_name__("[future-drop-readable-1]write-via-stream")))
 extern void stderr_future_result_void_error_code__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:cli/stderr@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-writable-1]write-via-stream")))
+__attribute__((__import_module__("wasi:cli/stderr@0.3.0"), __import_name__("[future-drop-writable-1]write-via-stream")))
 extern void stderr_future_result_void_error_code__drop_writable(uint32_t);
 
 stderr_future_result_void_error_code_t stderr_future_result_void_error_code_new(stderr_future_result_void_error_code_writer_t *writer) {
@@ -554,7 +557,7 @@ void stderr_future_result_void_error_code_drop_writable(stderr_future_result_voi
 }
 
 
-__attribute__((__import_module__("wasi:cli/terminal-input@0.3.0-rc-2026-03-15"), __import_name__("[resource-drop]terminal-input")))
+__attribute__((__import_module__("wasi:cli/terminal-input@0.3.0"), __import_name__("[resource-drop]terminal-input")))
 extern void __wasm_import_terminal_input_terminal_input_drop(int32_t handle);
 
 void terminal_input_terminal_input_drop_own(terminal_input_own_terminal_input_t handle) {
@@ -565,7 +568,7 @@ terminal_input_borrow_terminal_input_t terminal_input_borrow_terminal_input(term
   return (terminal_input_borrow_terminal_input_t) { arg.__handle };
 }
 
-__attribute__((__import_module__("wasi:cli/terminal-output@0.3.0-rc-2026-03-15"), __import_name__("[resource-drop]terminal-output")))
+__attribute__((__import_module__("wasi:cli/terminal-output@0.3.0"), __import_name__("[resource-drop]terminal-output")))
 extern void __wasm_import_terminal_output_terminal_output_drop(int32_t handle);
 
 void terminal_output_terminal_output_drop_own(terminal_output_own_terminal_output_t handle) {
@@ -632,7 +635,7 @@ void filesystem_error_code_free(filesystem_error_code_t *ptr) {
   }
 }
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[resource-drop]descriptor")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[resource-drop]descriptor")))
 extern void __wasm_import_filesystem_descriptor_drop(int32_t handle);
 
 void filesystem_descriptor_drop_own(filesystem_own_descriptor_t handle) {
@@ -695,19 +698,19 @@ void filesystem_result_metadata_hash_value_error_code_free(filesystem_result_met
   }
 }
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-new-0][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[stream-new-0][method]descriptor.read-via-stream")))
 extern uint64_t filesystem_stream_u8__new(void);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-read-0][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[async-lower][stream-read-0][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_stream_u8__read(uint32_t, uint8_t*, size_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-write-0][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[async-lower][stream-write-0][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_stream_u8__write(uint32_t, const uint8_t*, size_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-read-0][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[stream-cancel-read-0][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_stream_u8__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-write-0][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[stream-cancel-write-0][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_stream_u8__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-readable-0][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[stream-drop-readable-0][method]descriptor.read-via-stream")))
 extern void filesystem_stream_u8__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-writable-0][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[stream-drop-writable-0][method]descriptor.read-via-stream")))
 extern void filesystem_stream_u8__drop_writable(uint32_t);
 
 filesystem_stream_u8_t filesystem_stream_u8_new(filesystem_stream_u8_writer_t *writer) {
@@ -741,19 +744,19 @@ void filesystem_stream_u8_drop_writable(filesystem_stream_u8_writer_t writer) {
 }
 
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[future-new-1][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[future-new-1][method]descriptor.read-via-stream")))
 extern uint64_t filesystem_future_result_void_error_code__new(void);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-read-1][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[async-lower][future-read-1][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_future_result_void_error_code__read(uint32_t, uint8_t*);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-write-1][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[async-lower][future-write-1][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_future_result_void_error_code__write(uint32_t, const uint8_t*);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-read-1][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[future-cancel-read-1][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_future_result_void_error_code__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-write-1][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[future-cancel-write-1][method]descriptor.read-via-stream")))
 extern uint32_t filesystem_future_result_void_error_code__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-readable-1][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[future-drop-readable-1][method]descriptor.read-via-stream")))
 extern void filesystem_future_result_void_error_code__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-writable-1][method]descriptor.read-via-stream")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[future-drop-writable-1][method]descriptor.read-via-stream")))
 extern void filesystem_future_result_void_error_code__drop_writable(uint32_t);
 
 filesystem_future_result_void_error_code_t filesystem_future_result_void_error_code_new(filesystem_future_result_void_error_code_writer_t *writer) {
@@ -787,19 +790,19 @@ void filesystem_future_result_void_error_code_drop_writable(filesystem_future_re
 }
 
 
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-new-0][method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[stream-new-0][method]descriptor.read-directory")))
 extern uint64_t filesystem_stream_directory_entry__new(void);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-read-0][method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[async-lower][stream-read-0][method]descriptor.read-directory")))
 extern uint32_t filesystem_stream_directory_entry__read(uint32_t, uint8_t*, size_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-write-0][method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[async-lower][stream-write-0][method]descriptor.read-directory")))
 extern uint32_t filesystem_stream_directory_entry__write(uint32_t, const uint8_t*, size_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-read-0][method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[stream-cancel-read-0][method]descriptor.read-directory")))
 extern uint32_t filesystem_stream_directory_entry__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-write-0][method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[stream-cancel-write-0][method]descriptor.read-directory")))
 extern uint32_t filesystem_stream_directory_entry__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-readable-0][method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[stream-drop-readable-0][method]descriptor.read-directory")))
 extern void filesystem_stream_directory_entry__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:filesystem/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-writable-0][method]descriptor.read-directory")))
+__attribute__((__import_module__("wasi:filesystem/types@0.3.0"), __import_name__("[stream-drop-writable-0][method]descriptor.read-directory")))
 extern void filesystem_stream_directory_entry__drop_writable(uint32_t);
 
 filesystem_stream_directory_entry_t filesystem_stream_directory_entry_new(filesystem_stream_directory_entry_writer_t *writer) {
@@ -878,7 +881,7 @@ void sockets_ip_socket_address_free(sockets_ip_socket_address_t *ptr) {
   }
 }
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[resource-drop]tcp-socket")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[resource-drop]tcp-socket")))
 extern void __wasm_import_sockets_tcp_socket_drop(int32_t handle);
 
 void sockets_tcp_socket_drop_own(sockets_own_tcp_socket_t handle) {
@@ -889,7 +892,7 @@ sockets_borrow_tcp_socket_t sockets_borrow_tcp_socket(sockets_own_tcp_socket_t a
   return (sockets_borrow_tcp_socket_t) { arg.__handle };
 }
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[resource-drop]udp-socket")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[resource-drop]udp-socket")))
 extern void __wasm_import_sockets_udp_socket_drop(int32_t handle);
 
 void sockets_udp_socket_drop_own(sockets_own_udp_socket_t handle) {
@@ -1000,19 +1003,19 @@ void sockets_result_tuple2_list_u8_ip_socket_address_error_code_free(sockets_res
   }
 }
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-new-0][method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[stream-new-0][method]tcp-socket.listen")))
 extern uint64_t sockets_stream_own_tcp_socket__new(void);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-read-0][method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[async-lower][stream-read-0][method]tcp-socket.listen")))
 extern uint32_t sockets_stream_own_tcp_socket__read(uint32_t, uint8_t*, size_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-write-0][method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[async-lower][stream-write-0][method]tcp-socket.listen")))
 extern uint32_t sockets_stream_own_tcp_socket__write(uint32_t, const uint8_t*, size_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-read-0][method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[stream-cancel-read-0][method]tcp-socket.listen")))
 extern uint32_t sockets_stream_own_tcp_socket__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-write-0][method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[stream-cancel-write-0][method]tcp-socket.listen")))
 extern uint32_t sockets_stream_own_tcp_socket__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-readable-0][method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[stream-drop-readable-0][method]tcp-socket.listen")))
 extern void sockets_stream_own_tcp_socket__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-writable-0][method]tcp-socket.listen")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[stream-drop-writable-0][method]tcp-socket.listen")))
 extern void sockets_stream_own_tcp_socket__drop_writable(uint32_t);
 
 sockets_stream_own_tcp_socket_t sockets_stream_own_tcp_socket_new(sockets_stream_own_tcp_socket_writer_t *writer) {
@@ -1046,19 +1049,19 @@ void sockets_stream_own_tcp_socket_drop_writable(sockets_stream_own_tcp_socket_w
 }
 
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-new-0][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[stream-new-0][method]tcp-socket.send")))
 extern uint64_t sockets_stream_u8__new(void);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-read-0][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[async-lower][stream-read-0][method]tcp-socket.send")))
 extern uint32_t sockets_stream_u8__read(uint32_t, uint8_t*, size_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][stream-write-0][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[async-lower][stream-write-0][method]tcp-socket.send")))
 extern uint32_t sockets_stream_u8__write(uint32_t, const uint8_t*, size_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-read-0][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[stream-cancel-read-0][method]tcp-socket.send")))
 extern uint32_t sockets_stream_u8__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-cancel-write-0][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[stream-cancel-write-0][method]tcp-socket.send")))
 extern uint32_t sockets_stream_u8__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-readable-0][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[stream-drop-readable-0][method]tcp-socket.send")))
 extern void sockets_stream_u8__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[stream-drop-writable-0][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[stream-drop-writable-0][method]tcp-socket.send")))
 extern void sockets_stream_u8__drop_writable(uint32_t);
 
 sockets_stream_u8_t sockets_stream_u8_new(sockets_stream_u8_writer_t *writer) {
@@ -1092,19 +1095,19 @@ void sockets_stream_u8_drop_writable(sockets_stream_u8_writer_t writer) {
 }
 
 
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[future-new-1][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[future-new-1][method]tcp-socket.send")))
 extern uint64_t sockets_future_result_void_error_code__new(void);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-read-1][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[async-lower][future-read-1][method]tcp-socket.send")))
 extern uint32_t sockets_future_result_void_error_code__read(uint32_t, uint8_t*);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[async-lower][future-write-1][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[async-lower][future-write-1][method]tcp-socket.send")))
 extern uint32_t sockets_future_result_void_error_code__write(uint32_t, const uint8_t*);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-read-1][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[future-cancel-read-1][method]tcp-socket.send")))
 extern uint32_t sockets_future_result_void_error_code__cancel_read(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[future-cancel-write-1][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[future-cancel-write-1][method]tcp-socket.send")))
 extern uint32_t sockets_future_result_void_error_code__cancel_write(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-readable-1][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[future-drop-readable-1][method]tcp-socket.send")))
 extern void sockets_future_result_void_error_code__drop_readable(uint32_t);
-__attribute__((__import_module__("wasi:sockets/types@0.3.0-rc-2026-03-15"), __import_name__("[future-drop-writable-1][method]tcp-socket.send")))
+__attribute__((__import_module__("wasi:sockets/types@0.3.0"), __import_name__("[future-drop-writable-1][method]tcp-socket.send")))
 extern void sockets_future_result_void_error_code__drop_writable(uint32_t);
 
 sockets_future_result_void_error_code_t sockets_future_result_void_error_code_new(sockets_future_result_void_error_code_writer_t *writer) {
@@ -1435,6 +1438,10 @@ void exit_exit(exit_result_void_void_t *status) {
     result = 0;
   }
   __wasm_import_exit_exit(result);
+}
+
+void exit_exit_with_code(uint8_t status_code) {
+  __wasm_import_exit_exit_with_code((int32_t) (status_code));
 }
 
 void stdin_read_via_stream(stdin_tuple2_stream_u8_future_result_void_error_code_t *ret) {

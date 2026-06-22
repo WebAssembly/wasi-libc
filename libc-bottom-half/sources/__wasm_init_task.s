@@ -13,41 +13,14 @@
 
     .functype    malloc (i32) -> (i32)
     .functype   __copy_tls (i32) -> (i32)
+    .functype   __allocate_tls () -> (i32)
 
 	.globl	__wasm_init_task
 	.type	__wasm_init_task,@function
     .globl	__wasm_init_async_task
     .type	__wasm_init_async_task,@function
 
-	.functype	__wasi_init_tp() -> ()
-
-# Helper function to allocate and align TLS
-# Returns an aligned TLS pointer ready for __copy_tls
-__allocate_aligned_tls:
-    .functype   __allocate_aligned_tls () -> (i32)
-
-    # Allocate size + align - 1 to ensure we have room for alignment
-    global.get   __tls_size
-    global.get   __tls_align
-    i32.add
-    i32.const 1
-    i32.sub
-    call malloc
-
-    # Align the pointer: (ptr + align - 1) & ~(align - 1)
-    global.get   __tls_align
-    i32.const 1
-    i32.sub
-    i32.add
-
-    global.get   __tls_align
-    i32.const 1
-    i32.sub
-    i32.const -1
-    i32.xor
-    i32.and
-
-    end_function    
+	.functype	__wasi_init_tp() -> () 
 
 __wasm_init_task:
 	.functype	__wasm_init_task () -> ()
@@ -59,7 +32,7 @@ __wasm_init_task:
     call __wasm_set_tls_base
 
     # Allocate a new TLS area
-    call __allocate_aligned_tls
+    call __allocate_tls
     call __copy_tls
     call __wasm_set_tls_base
 
@@ -87,7 +60,7 @@ __wasm_init_async_task:
     call __wasm_set_stack_pointer
 
     # Allocate a new TLS area
-    call __allocate_aligned_tls
+    call __allocate_tls
     call __copy_tls
     call __wasm_set_tls_base
 

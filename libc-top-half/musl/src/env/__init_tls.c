@@ -292,3 +292,11 @@ static void static_init_tls(size_t *aux)
 
 weak_alias(static_init_tls, __init_tls);
 #endif
+
+#ifdef _REENTRANT
+void* __allocate_tls() {
+	void* mem;
+	posix_memalign(&mem, __builtin_wasm_tls_align(), __builtin_wasm_tls_size());
+	return mem;
+}
+#endif

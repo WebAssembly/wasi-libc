@@ -12,21 +12,21 @@ DECLARE_STRONG_LOCK(lock, static);
 void __funcs_on_quick_exit()
 {
 	void (*func)(void);
-	WEAK_LOCK(lock);
+	STRONG_LOCK(lock);
 	while (count > 0) {
 		func = funcs[--count];
-		WEAK_UNLOCK(lock);
+		STRONG_UNLOCK(lock);
 		func();
-		WEAK_LOCK(lock);
+		STRONG_LOCK(lock);
 	}
 }
 
 int at_quick_exit(void (*func)(void))
 {
 	int r = 0;
-	WEAK_LOCK(lock);
+	STRONG_LOCK(lock);
 	if (count == 32) r = -1;
 	else funcs[count++] = func;
-	WEAK_UNLOCK(lock);
+	STRONG_UNLOCK(lock);
 	return r;
 }

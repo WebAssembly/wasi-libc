@@ -126,7 +126,12 @@ struct start_args {
 void __wasi_coop_thread_start(void *context);
 hidden void *__dummy_reference = __wasi_coop_thread_start;
 
-hidden void __wasi_coop_thread_start_C(int tid, void *context) {
+hidden void __wasi_coop_thread_start_C(void *context) {
+  #ifdef __wasip3__
+  int tid = wasip3_thread_index();
+  #else
+  #error "Unknown WASI version"
+  #endif
   struct start_args *args = context;
   __pthread_self()->tid = tid;
   __pthread_exit(args->start_func(args->start_arg));

@@ -51,6 +51,7 @@ option(BUILD_SHARED "Whether or not to build shared libraries" ON)
 option(CHECK_SYMBOLS "Whether or not to check the exported symbols of libc.a" OFF)
 set(WASI_SDK_VERSION "" CACHE STRING "Version information for wasi-sdk to embed in headers")
 option(ENABLE_WERROR "Whether to compile with `-Werror`" OFF)
+option(ENABLE_COOP_THREADS "Whether to compile with cooperative threads support" OFF)
 
 if(TARGET_TRIPLE MATCHES "-threads$")
   set(WASI p1)
@@ -145,6 +146,10 @@ elseif(WASI STREQUAL "p3")
   set(__wasip3__ ON)
 else()
   message(FATAL_ERROR "Unknown WASI version: ${WASI}")
+endif()
+
+if(ENABLE_COOP_THREADS)
+  set(__wasi_cooperative_threads__ ON)
 endif()
 
 set(wasip2-version 0.2.0)

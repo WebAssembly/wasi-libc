@@ -11,6 +11,10 @@
 #cmakedefine __wasip2__
 #cmakedefine __wasip3__
 
+#ifdef __wasm_libcall_thread_context__
+#cmakedefine __wasi_cooperative_threads__
+#endif
+
 #cmakedefine __wasi_sdk_major__ @__wasi_sdk_major__@
 #cmakedefine __wasi_sdk_version__ "@__wasi_sdk_version__@"
 

@@ -25,7 +25,6 @@
 /// threads.
 DECLARE_STRONG_LOCK(lock, static);
 
-
 #if defined(__wasip1__)
 typedef struct {
   __wasi_fd_t fd;

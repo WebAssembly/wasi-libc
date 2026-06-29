@@ -1,3 +1,4 @@
+#include "lock.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -8,7 +9,6 @@
 #include <unistd.h>
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc.h>
-#include "lock.h"
 
 DECLARE_WEAK_LOCK(__wasilibc_cwd_lock, extern);
 extern char *__wasilibc_cwd;

@@ -7,7 +7,6 @@
 char *__wasilibc_cwd = "/";
 DECLARE_WEAK_LOCK(__wasilibc_cwd_lock);
 
-
 char *getcwd(char *buf, size_t size) {
   // Critical section contains no yield points, so we can use weak locks.
   WEAK_LOCK(__wasilibc_cwd_lock);

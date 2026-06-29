@@ -9,7 +9,8 @@ extern void __wasm_call_ctors(void);
 extern void __wasm_init_task(void);
 extern void __wasm_init_async_task(void);
 __attribute__((used)) static void *__wasm_init_task_ref = __wasm_init_task;
-__attribute__((used)) static void *__wasm_init_async_task_ref = __wasm_init_async_task;
+__attribute__((used)) static void *__wasm_init_async_task_ref =
+    __wasm_init_async_task;
 #endif
 
 __attribute__((export_name("_initialize"))) void _initialize(void) {

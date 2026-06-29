@@ -99,7 +99,7 @@ function(add_test_executable executable_name src)
       -Wl,--import-memory,--export-memory,--shared-memory,--max-memory=1073741824)
   endif()
 
-  if (WASI STREQUAL "p3")
+  if (ENABLE_COOP_THREADS)
     target_link_options(${executable_name} PRIVATE -pthread)
   endif()
 
@@ -175,7 +175,7 @@ function(register_test test_name executable_name)
   if (TARGET_TRIPLE MATCHES "-threads")
     list(APPEND wasmtime_args --wasi threads --wasm shared-memory)
   endif()
-  if (WASI STREQUAL "p3")
+  if (ENABLE_COOP_THREADS)
     list(APPEND wasmtime_args --wasm component-model-async)
     list(APPEND wasmtime_args --wasm component-model-threading)
     list(APPEND wasmtime_args --wasi p3)
@@ -550,49 +550,49 @@ function(add_posix_test test_file)
   target_include_directories(${test_name} PRIVATE ${POSIX_TESTSUITE}/include)
 endfunction()
 
-if (WASI STREQUAL "p3")
+if (ENABLE_COOP_THREADS)
   # unsupported(fork): conformance/interfaces/pthread_atfork/*
-  
+
   add_posix_test(conformance/interfaces/pthread_attr_destroy/1-1.c)
   add_posix_test(conformance/interfaces/pthread_attr_destroy/2-1.c)
   add_posix_test(conformance/interfaces/pthread_attr_destroy/3-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_attr_getdetachstate/1-1.c)
   add_posix_test(conformance/interfaces/pthread_attr_getdetachstate/1-2.c)
-  
+
   # unsupported(scheduling): conformance/interfaces/pthread_attr_getinheritsched/*
   # unsupported(scheduling): conformance/interfaces/pthread_attr_getschedparam/*
   # unsupported(scheduling): conformance/interfaces/pthread_attr_getschedpolicy/*
   # unsupported(scheduling): conformance/interfaces/pthread_attr_getscope/*
-  
+
   add_posix_test(conformance/interfaces/pthread_attr_getstack/1-1.c)
   add_posix_test(conformance/interfaces/pthread_attr_getstacksize/1-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_attr_init/1-1.c)
   add_posix_test(conformance/interfaces/pthread_attr_init/2-1.c)
   add_posix_test(conformance/interfaces/pthread_attr_init/3-1.c)
   add_posix_test(conformance/interfaces/pthread_attr_init/4-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_attr_setdetachstate/1-1.c)
   add_posix_test(conformance/interfaces/pthread_attr_setdetachstate/1-2.c)
   add_posix_test(conformance/interfaces/pthread_attr_setdetachstate/2-1.c)
   add_posix_test(conformance/interfaces/pthread_attr_setdetachstate/4-1.c)
-  
+
   # unsupported(scheduling): conformance/interfaces/pthread_attr_setinheritsched/*
   # unsupported(scheduling): conformance/interfaces/pthread_attr_setschedparam/*
   # unsupported(scheduling): conformance/interfaces/pthread_attr_setschedpolicy/*
   # unsupported(scheduling): conformance/interfaces/pthread_attr_setscope/*
-  
+
   add_posix_test(conformance/interfaces/pthread_attr_setstack/1-1.c)
   # bad test(untouched stack): conformance/interfaces/pthread_attr_setstack/2-1.c
   add_posix_test(conformance/interfaces/pthread_attr_setstack/4-1.c)
   # bad test(untouched stack): conformance/interfaces/pthread_attr_setstack/6-1.c
   add_posix_test(conformance/interfaces/pthread_attr_setstack/7-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_attr_setstacksize/1-1.c)
   # bad test(untouched stack): conformance/interfaces/pthread_attr_setstacksize/2-1.c
   # bad test(stack/page size): conformance/interfaces/pthread_attr_setstacksize/4-1.c
-  
+
   add_posix_test(conformance/interfaces/pthread_barrier_destroy/1-1.c)
   # unsupported(cancellation): conformance/interfaces/pthread_barrier_destroy/2-1.c
   add_posix_test(conformance/interfaces/pthread_barrier_init/1-1.c)
@@ -608,17 +608,17 @@ if (WASI STREQUAL "p3")
   # unsupported(process-shared): conformance/interfaces/pthread_barrierattr_getpshared/*
   # unsupported(process-shared): conformance/interfaces/pthread_barrierattr_init/*
   # unsupported(process-shared): conformance/interfaces/pthread_barrierattr_setpshared/*
-  
+
   # unsupported(cancellation): conformance/interfaces/pthread_cancel/*
-  
+
   # temporarily unsupported(clocks,pthread_exit): conformance/interfaces/pthread_cleanup_pop/1-1.c
   # temporarily unsupported(clocks,pthread_exit): conformance/interfaces/pthread_cleanup_pop/1-2.c
   # temporarily unsupported(pthread_exit): conformance/interfaces/pthread_cleanup_pop/1-3.c
-  
+
   # temporarily unsupported(pthread_exit): conformance/interfaces/pthread_cleanup_push/1-1.c
   # unsupported(cancellation): conformance/interfaces/pthread_cleanup_push/1-2.c
   # unsupported(cancellation): conformance/interfaces/pthread_cleanup_push/1-3.c
-  
+
   add_posix_test(conformance/interfaces/pthread_cond_broadcast/1-1.c)
   # temporarily unsupported(timed waits): conformance/interfaces/pthread_cond_broadcast/1-2.c
   add_posix_test(conformance/interfaces/pthread_cond_broadcast/2-1.c)
@@ -626,12 +626,12 @@ if (WASI STREQUAL "p3")
   # unsupported(mmap): conformance/interfaces/pthread_cond_broadcast/2-3.c
   add_posix_test(conformance/interfaces/pthread_cond_broadcast/4-1.c)
   # unsupported(signals): conformance/interfaces/pthread_cond_broadcast/4-2.c
-  
+
   add_posix_test(conformance/interfaces/pthread_cond_destroy/1-1.c)
   # temporarily unsupported(timed waits): conformance/interfaces/pthread_cond_destroy/2-1.c
   add_posix_test(conformance/interfaces/pthread_cond_destroy/3-1.c)
   add_posix_test(conformance/interfaces/pthread_cond_destroy/speculative/4-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_cond_init/1-1.c)
   # unsupported(set time): conformance/interfaces/pthread_cond_init/1-2.c
   # unsupported(processes): conformance/interfaces/pthread_cond_init/1-3.c
@@ -647,7 +647,7 @@ if (WASI STREQUAL "p3")
   # temporarily unsupported(timed waits): conformance/interfaces/pthread_cond_signal/2-2.c
   add_posix_test(conformance/interfaces/pthread_cond_signal/4-1.c)
   # unsupported(signals): conformance/interfaces/pthread_cond_signal/4-2.c
-  
+
   # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/1-1.c
   # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/2-1.c
   # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/2-2.c
@@ -660,34 +660,34 @@ if (WASI STREQUAL "p3")
   # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/4-1.c
   # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/4-2.c
   # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/4-3.c
-  
+
   add_posix_test(conformance/interfaces/pthread_cond_wait/1-1.c)
   add_posix_test(conformance/interfaces/pthread_cond_wait/2-1.c)
   add_posix_test(conformance/interfaces/pthread_cond_wait/2-2.c)
   # unsupported(cancellation): conformance/interfaces/pthread_cond_wait/2-3.c
   # test needs modified(alarm waking): conformance/interfaces/pthread_cond_wait/3-1.c
   # test needs modified(alarm waking): conformance/interfaces/pthread_cond_wait/4-1.c
-  
+
   add_posix_test(conformance/interfaces/pthread_condattr_destroy/1-1.c)
   add_posix_test(conformance/interfaces/pthread_condattr_destroy/2-1.c)
   add_posix_test(conformance/interfaces/pthread_condattr_destroy/3-1.c)
   add_posix_test(conformance/interfaces/pthread_condattr_destroy/4-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_condattr_getclock/1-1.c)
   add_posix_test(conformance/interfaces/pthread_condattr_getclock/1-2.c)
-  
+
   # unsupported(process-shared): conformance/interfaces/pthread_condattr_getpshared/*
 
   add_posix_test(conformance/interfaces/pthread_condattr_init/1-1.c)
   add_posix_test(conformance/interfaces/pthread_condattr_init/3-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_condattr_setclock/1-1.c)
   add_posix_test(conformance/interfaces/pthread_condattr_setclock/1-2.c)
   # unsupported(getcpuclockid): conformance/interfaces/pthread_condattr_setclock/1-3.c
   add_posix_test(conformance/interfaces/pthread_condattr_setclock/2-1.c)
-  
+
   # unsupported(process-shared): conformance/interfaces/pthread_condattr_setpshared/*
-  
+
   add_posix_test(conformance/interfaces/pthread_create/1-1.c)
   # unsupported(cancellation): conformance/interfaces/pthread_create/1-2.c
   # unsupported(signals): conformance/interfaces/pthread_create/1-3.c
@@ -707,7 +707,7 @@ if (WASI STREQUAL "p3")
   add_posix_test(conformance/interfaces/pthread_create/5-2.c)
   # unsupported(signals): conformance/interfaces/pthread_create/8-1.c
   # unsupported(signals): conformance/interfaces/pthread_create/8-2.c
-  
+
   add_posix_test(conformance/interfaces/pthread_detach/1-1.c)
   add_posix_test(conformance/interfaces/pthread_detach/1-2.c)
   add_posix_test(conformance/interfaces/pthread_detach/2-1.c)
@@ -716,20 +716,20 @@ if (WASI STREQUAL "p3")
   add_posix_test(conformance/interfaces/pthread_detach/4-1.c)
   # bad test(invalid assumption): conformance/interfaces/pthread_detach/4-2.c
   # unsupported(signals): conformance/interfaces/pthread_detach/4-3.c
-  
+
   add_posix_test(conformance/interfaces/pthread_equal/1-1.c)
   add_posix_test(conformance/interfaces/pthread_equal/1-2.c)
   # unsupported(signals): conformance/interfaces/pthread_equal/2-1.c
-  
+
   # temporarily unsupported(pthread_exit) conformance/interfaces/pthread_exit/*
   # unsupported(fork): conformance/interfaces/pthread_exit/6-1.c
-  
+
   # unsupported(getcpuclockid): conformance/interfaces/pthread_getcpuclockid/*
   # unsupported(scheduling): conformance/interfaces/pthread_getschedparam/*
-  
+
   add_posix_test(conformance/interfaces/pthread_getspecific/1-1.c)
   add_posix_test(conformance/interfaces/pthread_getspecific/3-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_join/1-1.c)
   add_posix_test(conformance/interfaces/pthread_join/1-2.c)
   add_posix_test(conformance/interfaces/pthread_join/2-1.c)
@@ -739,19 +739,19 @@ if (WASI STREQUAL "p3")
   # bad test(undefined behaviour): conformance/interfaces/pthread_join/6-2.c
   # unsupported(signals): conformance/interfaces/pthread_join/6-3.c
   add_posix_test(conformance/interfaces/pthread_join/speculative/6-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_key_create/1-1.c)
   add_posix_test(conformance/interfaces/pthread_key_create/1-2.c)
   add_posix_test(conformance/interfaces/pthread_key_create/2-1.c)
   add_posix_test(conformance/interfaces/pthread_key_create/3-1.c)
   add_posix_test(conformance/interfaces/pthread_key_create/speculative/5-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_key_delete/1-1.c)
   add_posix_test(conformance/interfaces/pthread_key_delete/1-2.c)
   add_posix_test(conformance/interfaces/pthread_key_delete/2-1.c)
-  
+
   # unsupported(signals): conformance/interfaces/pthread_kill/*
-  
+
   add_posix_test(conformance/interfaces/pthread_mutex_destroy/1-1.c)
   add_posix_test(conformance/interfaces/pthread_mutex_destroy/2-1.c)
   add_posix_test(conformance/interfaces/pthread_mutex_destroy/2-2.c)
@@ -759,9 +759,9 @@ if (WASI STREQUAL "p3")
   add_posix_test(conformance/interfaces/pthread_mutex_destroy/5-1.c)
   add_posix_test(conformance/interfaces/pthread_mutex_destroy/5-2.c)
   add_posix_test(conformance/interfaces/pthread_mutex_destroy/speculative/4-2.c)
-  
+
   # unsupported(scheduling): conformance/interfaces/pthread_mutex_getprioceiling/*
-  
+
   add_posix_test(conformance/interfaces/pthread_mutex_init/1-1.c)
   # unsupported(cancellation): conformance/interfaces/pthread_mutex_init/1-2.c
   add_posix_test(conformance/interfaces/pthread_mutex_init/2-1.c)
@@ -771,20 +771,20 @@ if (WASI STREQUAL "p3")
   # unsupported(fork): add_posix_test(conformance/interfaces/pthread_mutex_init/5-1.c
   # unsupported(signals): conformance/interfaces/pthread_mutex_init/5-3.c
   # unsupported(privileges): conformance/interfaces/pthread_mutex_init/speculative/5-2.c
-  
+
   add_posix_test(conformance/interfaces/pthread_mutex_lock/1-1.c)
   add_posix_test(conformance/interfaces/pthread_mutex_lock/2-1.c)
   # unsupported(signals): add_posix_test(conformance/interfaces/pthread_mutex_lock/3-1.c
   add_posix_test(conformance/interfaces/pthread_mutex_lock/4-1.c)
   # unsupported(signals): add_posix_test(conformance/interfaces/pthread_mutex_lock/5-1.c
-  
+
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_mutex_timedlock/1-1.c
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_mutex_timedlock/2-1.c
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_mutex_timedlock/4-1.c
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_mutex_timedlock/5-1.c
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_mutex_timedlock/5-2.c
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_mutex_timedlock/5-3.c
-  
+
   add_posix_test(conformance/interfaces/pthread_mutex_trylock/1-1.c)
   add_posix_test(conformance/interfaces/pthread_mutex_trylock/1-2.c)
   add_posix_test(conformance/interfaces/pthread_mutex_trylock/2-1.c)
@@ -792,43 +792,43 @@ if (WASI STREQUAL "p3")
   add_posix_test(conformance/interfaces/pthread_mutex_trylock/4-1.c)
   add_posix_test(conformance/interfaces/pthread_mutex_trylock/4-2.c)
   # unsupported(signals): conformance/interfaces/pthread_mutex_trylock/4-3.c
-  
+
   add_posix_test(conformance/interfaces/pthread_mutex_unlock/1-1.c)
   add_posix_test(conformance/interfaces/pthread_mutex_unlock/2-1.c)
   add_posix_test(conformance/interfaces/pthread_mutex_unlock/3-1.c)
   add_posix_test(conformance/interfaces/pthread_mutex_unlock/5-1.c)
   add_posix_test(conformance/interfaces/pthread_mutex_unlock/5-2.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_mutexattr_destroy/1-1.c)
   add_posix_test(conformance/interfaces/pthread_mutexattr_destroy/2-1.c)
   add_posix_test(conformance/interfaces/pthread_mutexattr_destroy/3-1.c)
   add_posix_test(conformance/interfaces/pthread_mutexattr_destroy/4-1.c)
-  
+
   # unsupported(scheduling): conformance/interfaces/pthread_mutexattr_getprioceiling/*
-  
+
   add_posix_test(conformance/interfaces/pthread_mutexattr_getprotocol/1-1.c)
   # unsupported(scheduling): conformance/interfaces/pthread_mutexattr_getprotocol/1-2.c
-  
+
   # unsupported(process-shared): conformance/interfaces/pthread_mutexattr_getpshared/*
-  
+
   add_posix_test(conformance/interfaces/pthread_mutexattr_gettype/1-1.c)
   add_posix_test(conformance/interfaces/pthread_mutexattr_gettype/1-2.c)
   add_posix_test(conformance/interfaces/pthread_mutexattr_gettype/1-3.c)
   add_posix_test(conformance/interfaces/pthread_mutexattr_gettype/1-4.c)
   add_posix_test(conformance/interfaces/pthread_mutexattr_gettype/1-5.c)
   # bad test(assumes layout): conformance/interfaces/pthread_mutexattr_gettype/speculative/3-1.c
-  
+
   add_posix_test(conformance/interfaces/pthread_mutexattr_init/1-1.c)
   add_posix_test(conformance/interfaces/pthread_mutexattr_init/3-1.c)
-  
+
   # unsupported(scheduling): conformance/interfaces/pthread_mutexattr_setprioceiling/*
-  
+
   # unsupported(scheduling): conformance/interfaces/pthread_mutexattr_setprotocol/1-1.c
   add_posix_test(conformance/interfaces/pthread_mutexattr_setprotocol/3-1.c)
   add_posix_test(conformance/interfaces/pthread_mutexattr_setprotocol/3-2.c)
-  
+
   # unsupported(process-shared): conformance/interfaces/pthread_mutexattr_setpshared/*
-  
+
   add_posix_test(conformance/interfaces/pthread_mutexattr_settype/1-1.c)
   # bad test(undefined behaviour): conformance/interfaces/pthread_mutexattr_settype/2-1.c
   add_posix_test(conformance/interfaces/pthread_mutexattr_settype/3-1.c)
@@ -836,7 +836,7 @@ if (WASI STREQUAL "p3")
   add_posix_test(conformance/interfaces/pthread_mutexattr_settype/3-3.c)
   add_posix_test(conformance/interfaces/pthread_mutexattr_settype/3-4.c)
   add_posix_test(conformance/interfaces/pthread_mutexattr_settype/7-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_once/1-1.c)
   add_posix_test(conformance/interfaces/pthread_once/1-2.c)
   add_posix_test(conformance/interfaces/pthread_once/1-3.c)
@@ -844,81 +844,81 @@ if (WASI STREQUAL "p3")
   # unsupported(cancellation): conformance/interfaces/pthread_once/3-1.c
   add_posix_test(conformance/interfaces/pthread_once/4-1.c)
   # unsupported(signals): conformance/interfaces/pthread_once/6-1.c
-  
+
   add_posix_test(conformance/interfaces/pthread_rwlock_destroy/1-1.c)
   add_posix_test(conformance/interfaces/pthread_rwlock_destroy/3-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_rwlock_init/1-1.c)
   add_posix_test(conformance/interfaces/pthread_rwlock_init/2-1.c)
   add_posix_test(conformance/interfaces/pthread_rwlock_init/3-1.c)
   add_posix_test(conformance/interfaces/pthread_rwlock_init/6-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_rwlock_rdlock/1-1.c)
   # unsupported(scheduling): conformance/interfaces/pthread_rwlock_rdlock/2-1.c
   # unsupported(scheduling): conformance/interfaces/pthread_rwlock_rdlock/2-2.c
   # unsupported(scheduling): conformance/interfaces/pthread_rwlock_rdlock/2-3.c
   # unsupported(signals): conformance/interfaces/pthread_rwlock_rdlock/4-1.c
   add_posix_test(conformance/interfaces/pthread_rwlock_rdlock/5-1.c)
-  
+
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedrdlock/1-1.c
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedrdlock/2-1.c
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedrdlock/3-1.c
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedrdlock/5-1.c
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedrdlock/6-1.c
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedrdlock/6-2.c
-  
+
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedwrlock/1-1.c
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedwrlock/2-1.c
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedwrlock/3-1.c
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedwrlock/5-1.c
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedwrlock/6-1.c
   # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedwrlock/6-2.c
-  
+
   add_posix_test(conformance/interfaces/pthread_rwlock_tryrdlock/1-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_rwlock_trywrlock/1-1.c)
   add_posix_test(conformance/interfaces/pthread_rwlock_trywrlock/speculative/3-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_rwlock_unlock/1-1.c)
   add_posix_test(conformance/interfaces/pthread_rwlock_unlock/2-1.c)
   # unsupported(scheduling): conformance/interfaces/pthread_rwlock_unlock/3-1.c
   # bad test(undefined behaviour): conformance/interfaces/pthread_rwlock_unlock/4-1.c
   # bad test(undefined behaviour): conformance/interfaces/pthread_rwlock_unlock/4-2.c
-  
+
   add_posix_test(conformance/interfaces/pthread_rwlock_wrlock/1-1.c)
   # unsupported(signals): conformance/interfaces/pthread_rwlock_wrlock/2-1.c
   add_posix_test(conformance/interfaces/pthread_rwlock_wrlock/3-1.c)
-  
+
   add_posix_test(conformance/interfaces/pthread_rwlockattr_destroy/1-1.c)
   add_posix_test(conformance/interfaces/pthread_rwlockattr_destroy/2-1.c)
-  
+
   # unsupported(process-shared): conformance/interfaces/pthread_rwlockattr_getpshared/*
-  
+
   add_posix_test(conformance/interfaces/pthread_rwlockattr_init/1-1.c)
   add_posix_test(conformance/interfaces/pthread_rwlockattr_init/2-1.c)
-  
+
   # unsupported(process-shared): conformance/interfaces/pthread_rwlockattr_setpshared/*
-  
+
   add_posix_test(conformance/interfaces/pthread_self/1-1.c)
-  
+
   # unsupported(cancellation): conformance/interfaces/pthread_setcancelstate/*
-  
+
   # unsupported(cancellation): conformance/interfaces/pthread_setcanceltype/*
-  
+
   # unsupported(scheduling): conformance/interfaces/pthread_setschedparam/*
   # unsupported(scheduling): conformance/interfaces/pthread_setschedprio/*
-  
+
   add_posix_test(conformance/interfaces/pthread_setspecific/1-1.c)
   add_posix_test(conformance/interfaces/pthread_setspecific/1-2.c)
-  
+
   # unsupported(signals): conformance/interfaces/pthread_sigmask/*
-  
+
   # unsupported(spinlocks): conformance/interfaces/pthread_spin_destroy/*
   # unsupported(spinlocks): conformance/interfaces/pthread_spin_init/*
   # unsupported(spinlocks): conformance/interfaces/pthread_spin_lock/*
   # unsupported(spinlocks): conformance/interfaces/pthread_spin_trylock/*
   # unsupported(spinlocks): conformance/interfaces/pthread_spin_unlock/*
-  
+
   # unsupported(cancellation): conformance/interfaces/pthread_testcancel/*
 endif()
 

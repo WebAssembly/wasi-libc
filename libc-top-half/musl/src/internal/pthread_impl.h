@@ -42,7 +42,7 @@ struct pthread {
 #endif
 
 	/* Part 2 -- implementation details, non-ABI. */
-	int tid; 
+	int tid;
 	int errno_val;
 	volatile int detach_state;
 	volatile int cancel;
@@ -68,7 +68,7 @@ struct pthread {
 	DECLARE_WEAK_LOCK(killlock);
 	char *dlerror_buf;
 	void *stdio_locks;
-	#ifdef __wasm_libcall_thread_context__
+	#ifdef __wasi_cooperative_threads__
 	struct __waitlist_node *joiner_waiters;
 	#endif
 
@@ -96,7 +96,7 @@ enum {
 #define _a_sched __u.__i[3*__SU+1]
 #define _a_policy __u.__i[3*__SU+2]
 #define _a_prio __u.__i[3*__SU+3]
-#ifndef __wasm_libcall_thread_context__
+#ifndef __wasi_cooperative_threads__
 #define _m_type __u.__i[0]
 #define _m_lock __u.__vi[1]
 #define _m_waiters __u.__vi[2]
@@ -179,7 +179,7 @@ hidden int __libc_sigaction(int, const struct sigaction *, struct sigaction *);
 #endif
 hidden void __unmapself(void *, size_t);
 
-#ifdef __wasm_libcall_thread_context__
+#ifdef __wasi_cooperative_threads__
 struct __waitlist_node {
     uint32_t tid;
     struct __waitlist_node *next;

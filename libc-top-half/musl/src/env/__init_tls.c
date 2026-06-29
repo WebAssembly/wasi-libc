@@ -42,7 +42,7 @@ struct stack_bounds {
 
 static inline unsigned char *get_stack_pointer() {
   unsigned char *sp;
-#ifdef __wasm_libcall_thread_context__
+#ifdef __wasi_cooperative_threads__
   __asm__(
       ".functype   __wasm_get_stack_pointer () -> (i32)\n"
       "call __wasm_get_stack_pointer\n"
@@ -109,7 +109,7 @@ int __init_tp(void *p)
 	td->stack = bounds.base;
 	td->stack_size = bounds.size;
 	td->guard_size = 0;
-	#if defined(__wasm_libcall_thread_context__)
+	#if defined(__wasi_cooperative_threads__)
 	  td->detach_state = DT_JOINABLE;
 	  #ifdef __wasip3__
 	  td->tid = wasip3_thread_index();
@@ -197,7 +197,7 @@ void *__copy_tls(unsigned char *mem)
 	mem += tls_align;
 	mem -= (uintptr_t)mem & (tls_align-1);
 	__wasm_init_tls(mem);
-	#ifdef __wasm_libcall_thread_context__
+	#ifdef __wasi_cooperative_threads__
 	void __wasm_set_tls_base(volatile void *ptr);
 	__wasm_set_tls_base(tls_base);
 	#else

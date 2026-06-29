@@ -454,7 +454,7 @@ if (THREADS)
     musl/src/thread/common/mtx_init.c
     musl/src/thread/common/mtx_destroy.c
   )
-elseif(WASI STREQUAL "p3")
+elseif(ENABLE_COOP_THREADS)
   # cooperative threads implementation for WASI Preview 3
   list(APPEND top_half_sources
     musl/src/stdio/__lockfile.c

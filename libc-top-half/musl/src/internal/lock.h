@@ -5,13 +5,13 @@
 // - __lock_t: the type of a lock variable
 // - __lock_ptr_t: the type of a pointer to a lock variable
 // - __LOCK_INIT: initializer for a lock variable
-// - STRONG_LOCK/STRONG_UNLOCK: functions to acquire/release a lock for a critical section that contains 
+// - STRONG_LOCK/STRONG_UNLOCK: functions to acquire/release a lock for a critical section that contains
 //                              potential context switch points, and thus must be executed even in cooperative threading mode.
-// - WEAK_LOCK/WEAK_UNLOCK: functions to acquire/release a lock for a critical section that does not contain any context switch points, 
+// - WEAK_LOCK/WEAK_UNLOCK: functions to acquire/release a lock for a critical section that does not contain any context switch points,
 //                            and thus can be no-ops in cooperative threading mode.
 
 
-#ifdef __wasm_libcall_thread_context__
+#ifdef __wasi_cooperative_threads__
 struct __waitlist_node;
 struct __coop_lock {
 	int owner;  // tid of owning thread, or 0 if unlocked

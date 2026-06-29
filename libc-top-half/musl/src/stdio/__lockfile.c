@@ -1,7 +1,7 @@
 #include "stdio_impl.h"
 #include "pthread_impl.h"
 
-#ifdef __wasm_libcall_thread_context__
+#ifdef __wasi_cooperative_threads__
 #include "lock.h"
 int __lockfile(FILE *f)
 {

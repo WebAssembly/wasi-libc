@@ -7,7 +7,7 @@ __attribute__((__noinline__))
 #endif
 static int locking_getc(FILE *f)
 {
-#ifdef __wasm_libcall_thread_context__
+#ifdef __wasi_cooperative_threads__
     __lockfile(f);
     int c = getc_unlocked(f);
     __unlockfile(f);
@@ -24,7 +24,7 @@ static int locking_getc(FILE *f)
 
 static inline int do_getc(FILE *f)
 {
-#ifdef __wasm_libcall_thread_context__
+#ifdef __wasi_cooperative_threads__
 	if (f->lock.owner == wasip3_thread_index())
 		return getc_unlocked(f);
 	return locking_getc(f);

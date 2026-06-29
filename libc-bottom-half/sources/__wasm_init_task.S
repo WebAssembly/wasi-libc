@@ -3,11 +3,11 @@
 .text
 
   .globaltype  __init_stack_pointer, i32, immutable
-  .globaltype __init_tls_base, i32, immutable
   .functype   __wasm_set_stack_pointer (i32) -> ()
-  .functype   __wasm_set_tls_base (i32) -> ()
 
 #ifdef __wasi_cooperative_threads__
+  .globaltype __init_tls_base, i32, immutable
+  .functype   __wasm_set_tls_base (i32) -> ()
   .globaltype __tls_size, i32, immutable
   .globaltype __tls_align, i32, immutable
   .functype    malloc (i32) -> (i32)
@@ -30,10 +30,11 @@ __wasm_init_task:
   global.get   __init_stack_pointer
   call __wasm_set_stack_pointer
 
+#ifdef __wasi_cooperative_threads__
+
   global.get   __init_tls_base
   call __wasm_set_tls_base
 
-#ifdef __wasi_cooperative_threads__
   # Allocate a new TLS area
   call __allocate_tls
   call __copy_tls

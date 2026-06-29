@@ -19,14 +19,18 @@ message(STATUS "libc-test source directory: ${LIBC_TEST}")
 
 # ======== Clone Open POSIX Test Suite ==========================
 
-FetchContent_Declare(
+set(OPEN_POSIX_TEST_SUITE_COMMIT dc7c7d54fc4f6219bb4c7af348be2290335bf17e)
+ExternalProject_Add(
   posix-testsuite
-  GIT_REPOSITORY https://github.com/bytecodealliance/open-posix-test-suite
-  GIT_TAG dc7c7d54fc4f6219bb4c7af348be2290335bf17e
-  GIT_SHALLOW true
+  EXCLUDE_FROM_ALL ON
+  URL "https://github.com/bytecodealliance/open-posix-test-suite/archive/${OPEN_POSIX_TEST_SUITE_COMMIT}.tar.gz"
+  DOWNLOAD_EXTRACT_TIMESTAMP ON
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
 )
-FetchContent_MakeAvailable(posix-testsuite)
-set(POSIX_TESTSUITE "${posix-testsuite_SOURCE_DIR}")
+ExternalProject_Get_Property(posix-testsuite SOURCE_DIR)
+set(POSIX_TESTSUITE "${SOURCE_DIR}")
 message(STATUS "Open POSIX Test Suite source directory: ${POSIX_TESTSUITE}")
 
 
@@ -544,8 +548,10 @@ function(add_posix_test test_file)
   string(REPLACE "/" "_" test_name ${test_name})
   set(test_name "open_posix_test_${test_name}")
   set(test_file "${POSIX_TESTSUITE}/${test_file}")
+  set_source_files_properties(${test_file} PROPERTIES GENERATED TRUE)
 
   add_test_executable(${test_name} "${test_file}" ${ARGN} LDFLAGS -Wl,--export-table)
+  add_dependencies(${test_name} posix-testsuite)
   register_test(${test_name} ${test_name} ${ARGN})
   target_include_directories(${test_name} PRIVATE ${POSIX_TESTSUITE}/include)
 endfunction()

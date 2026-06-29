@@ -29,6 +29,12 @@ endif()
 set(TARGET_TRIPLE "wasm32-wasip1" CACHE STRING "WASI target to test")
 set(CMAKE_C_COMPILER_TARGET ${TARGET_TRIPLE})
 
+# We're building libc, and the compiler being used may not have a wasm sysroot
+# for libc, so skip this check. Otherwise the `project` call below attempts a
+# link to see if the compiler is working and if that fails it doesn't mean it
+# doesn't work. Let the build keep going to see what happens.
+set(CMAKE_C_COMPILER_WORKS 1)
+
 project(wasi-libc LANGUAGES C ASM)
 
 if(NOT CMAKE_C_COMPILER_ID MATCHES Clang)

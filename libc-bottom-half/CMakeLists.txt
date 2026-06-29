@@ -179,12 +179,11 @@ if (WASI STREQUAL "p3")
   )
 endif()
 
-if (ENABLE_COOP_THREADS)
-  list(APPEND bottom_half_sources sources/__wasm_init_task.s)
-endif()
-
 if (HAVE_WASM_LIBCALL_THREAD_CONTEXT)
-  list(APPEND bottom_half_sources sources/__libcall_thread_context.S)
+  list(APPEND bottom_half_sources
+    sources/__libcall_thread_context.S
+    sources/__wasm_init_task.S
+  )
 endif()
 
 # Don't export symbols of generated code in shared libraries, so specifically

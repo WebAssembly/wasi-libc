@@ -183,6 +183,10 @@ if (ENABLE_COOP_THREADS)
   list(APPEND bottom_half_sources sources/__wasm_init_task.s)
 endif()
 
+if (HAVE_WASM_LIBCALL_THREAD_CONTEXT)
+  list(APPEND bottom_half_sources sources/__libcall_thread_context.s)
+endif()
+
 # Don't export symbols of generated code in shared libraries, so specifically
 # pass `-fvisibility=hidden`.
 set_source_files_properties(sources/wasip2.c PROPERTIES

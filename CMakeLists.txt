@@ -26,6 +26,9 @@ if (CMAKE_HOST_WIN32)
   set(CMAKE_INCLUDE_SYSTEM_FLAG_C "-isystem ")
 endif()
 
+set(TARGET_TRIPLE "wasm32-wasip1" CACHE STRING "WASI target to test")
+set(CMAKE_C_COMPILER_TARGET ${TARGET_TRIPLE})
+
 project(wasi-libc LANGUAGES C ASM)
 
 if(NOT CMAKE_C_COMPILER_ID MATCHES Clang)
@@ -36,7 +39,6 @@ message(STATUS "Found executable for `nm`: ${CMAKE_NM}")
 message(STATUS "Found executable for `ar`: ${CMAKE_AR}")
 message(STATUS "Found executable for `ranlib`: ${CMAKE_RANLIB}")
 
-set(TARGET_TRIPLE "wasm32-wasip1" CACHE STRING "WASI target to test")
 # Note: thin LTO here is just for experimentation. It has known issues:
 # - https://github.com/llvm/llvm-project/issues/91700
 # - https://github.com/llvm/llvm-project/issues/91711
@@ -148,16 +150,6 @@ else()
   message(FATAL_ERROR "Unknown WASI version: ${WASI}")
 endif()
 
-if(ENABLE_COOP_THREADS)
-  if(NOT WASI STREQUAL "p3")
-    message(FATAL_ERROR "Cooperative threads are only supported on WASIp3")
-  endif()
-  if (CMAKE_C_COMPILER_VERSION VERSION_LESS 23.0)
-    message(FATAL_ERROR "Cooperative threads require clang 23 or later")
-  endif()
-  set(__wasi_cooperative_threads__ ON)
-endif()
-
 set(wasip2-version 0.2.0)
 set(wasip3-version 0.3.0)
 
@@ -221,6 +213,28 @@ add_compile_options(
 
 if (ENABLE_WERROR)
   add_compile_options(-Werror)
+endif()
+
+# =============================================================================
+# Detection of a libcall thread context for wasip3
+
+include(CheckSourceCompiles)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+check_source_compiles(C [[
+  #ifndef __wasm_libcall_thread_context__
+  #error "missing define"
+  #endif
+]] HAVE_WASM_LIBCALL_THREAD_CONTEXT)
+
+if(ENABLE_COOP_THREADS)
+  if(NOT WASI STREQUAL "p3")
+    message(FATAL_ERROR "Cooperative threads are only supported on WASIp3")
+  endif()
+  if (NOT HAVE_WASM_LIBCALL_THREAD_CONTEXT)
+    message(FATAL_ERROR "Cooperative threads require clang 23 or later")
+  endif()
+  set(__wasi_cooperative_threads__ ON)
+else()
 endif()
 
 # =============================================================================

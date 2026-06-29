@@ -461,7 +461,6 @@ elseif(ENABLE_COOP_THREADS)
     musl/src/stdio/flockfile.c
     musl/src/stdio/ftrylockfile.c
     musl/src/stdio/funlockfile.c
-    musl/src/thread/coop-threads/__libcall_thread_context.s
     musl/src/thread/coop-threads/__lock.c
     musl/src/thread/coop-threads/__wait.c
     musl/src/thread/coop-threads/__wasi_coop_thread_start.s

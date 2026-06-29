@@ -184,7 +184,7 @@ if (ENABLE_COOP_THREADS)
 endif()
 
 if (HAVE_WASM_LIBCALL_THREAD_CONTEXT)
-  list(APPEND bottom_half_sources sources/__libcall_thread_context.s)
+  list(APPEND bottom_half_sources sources/__libcall_thread_context.S)
 endif()
 
 # Don't export symbols of generated code in shared libraries, so specifically

@@ -66,7 +66,7 @@ if(TEST_WITH_V8)
 
 elseif(NOT ENGINE OR ENGINE STREQUAL "")
   # ====== Download Wasmtime as a test runner ==================
-  set(wasmtime_version dev)
+  set(wasmtime_version v46.0.1)
   if (TARGET_TRIPLE MATCHES "-threads")
     set(wasmtime_version "v44.0.0")
   endif()

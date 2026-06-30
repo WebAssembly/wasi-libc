@@ -4,24 +4,27 @@
 static int __pthread_timedjoin_np(pthread_t t, void **res, const struct timespec *at)
 {
 	int state = t->detach_state;
-	
+
 	/* Cannot join a detached thread */
 	if (state >= DT_DETACHED) {
 		return EINVAL;
 	}
-	
+
 	/* If already exited, just return the result */
 	if (state == DT_EXITED) {
 		if (res) *res = t->result;
-		if (t->map_base) free(t->map_base);
+		if (t->map_base) {
+                  free(t->map_base);
+                  t->map_base = NULL;
+                }
 		return 0;
 	}
-	
+
 	/* Timeouts not supported for cooperative threading */
 	if (at) {
 		return ETIMEDOUT;
 	}
-	
+
     if (t->joiner_waiters) {
         // Only one thread can wait to join at a time
         return EINVAL;
@@ -30,7 +33,10 @@ static int __pthread_timedjoin_np(pthread_t t, void **res, const struct timespec
 	__waitlist_wait_on(&t->joiner_waiters);
 
 	if (res) *res = t->result;
-	if (t->map_base) free(t->map_base);
+	if (t->map_base) {
+          free(t->map_base);
+          t->map_base = NULL;
+        }
 	return 0;
 }
 

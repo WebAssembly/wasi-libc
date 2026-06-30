@@ -90,15 +90,13 @@ jobs:
             os: ubuntu-24.04
             clang_version: 20
             test: true
-            test_with_v8: true
-            args: -DTARGET_TRIPLE=wasm32-wasip1
+            args: -DTARGET_TRIPLE=wasm32-wasip1 -DTEST_WITH_V8=ON
 
           - name: Test wasm32-wasip1-threads in V8
             os: ubuntu-24.04
             clang_version: 20
             test: true
-            test_with_v8: true
-            args: -DTARGET_TRIPLE=wasm32-wasip1-threads
+            args: -DTARGET_TRIPLE=wasm32-wasip1-threads -DTEST_WITH_V8=ON
 
           - name: Test wasm32-wasi-simd
             os: ubuntu-24.04
@@ -177,14 +175,6 @@ jobs:
         clang_version: ${{ matrix.clang_version }}
         llvm_asset_suffix: ${{ matrix.llvm_asset_suffix }}
 
-    - name: Install V8 dependencies
-      if: matrix.test_with_v8
-      run: |
-        npm -C test/scripts/browser-test install
-        npx -C test/scripts/browser-test playwright install chromium-headless-shell
-        echo ENGINE="$PWD/test/scripts/browser-test/harness.mjs" >> $GITHUB_ENV
-        echo CTEST_ARGS="--label-exclude v8fail" >> $GITHUB_ENV
-
     - name: Configure libc
       run: |
         cmake -G Ninja -S . -B build \
@@ -194,14 +184,14 @@ jobs:
 
     - name: Configure testing
       if: matrix.test
-      run: cmake -S . -B build -DENABLE_WERROR=ON -DBUILD_TESTS=ON -DENGINE=${{ env.ENGINE }}
+      run: cmake -S . -B build -DENABLE_WERROR=ON -DBUILD_TESTS=ON
 
     - name: Build
       run: ninja -C build -v
 
     - name: Test
       if: matrix.test
-      run: ctest --test-dir build/test --output-on-failure -j4 $CTEST_ARGS
+      run: ctest --test-dir build/test --output-on-failure -j4
 
     - uses: actions/upload-artifact@v6
       if: matrix.upload

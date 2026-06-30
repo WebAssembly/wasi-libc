@@ -3,20 +3,16 @@
 #include <semaphore.h>
 
 int sem_post(sem_t *sem) {
-  int val = sem->__count;
-
-  if (val == SEM_VALUE_MAX) {
+  if (sem->__count == SEM_VALUE_MAX) {
     errno = EOVERFLOW;
     return -1;
   }
 
-  /* Increment count */
-  sem->__count = val + 1;
-
-  /* If count was negative (waiters present), wake one */
-  if (val < 0) {
-    __waitlist_wake_one(&sem->__waiters);
-  }
+  /* Make a permit available and wake a waiter if there is one. The woken
+   * waiter re-checks the count and consumes the permit; `__waitlist_wake_one`
+   * is a no-op when nobody is waiting. */
+  sem->__count++;
+  __waitlist_wake_one(&sem->__waiters);
 
   return 0;
 }

@@ -34,10 +34,38 @@ set(POSIX_TESTSUITE "${SOURCE_DIR}")
 message(STATUS "Open POSIX Test Suite source directory: ${POSIX_TESTSUITE}")
 
 
-# ========= Download wasmtime as a test runner ==================
+# ========= Download a test runner =============================
 include(ba-download)
 
-if(NOT ENGINE OR ENGINE STREQUAL "")
+option(TEST_WITH_V8 "Run tests in headless Chromium (V8) via Playwright instead of Wasmtime" OFF)
+
+if(TEST_WITH_V8)
+  find_program(NPM_EXECUTABLE npm REQUIRED)
+  find_program(NPX_EXECUTABLE npx REQUIRED)
+
+  set(browser_test_src "${CMAKE_CURRENT_SOURCE_DIR}/scripts/browser-test")
+  set(browser_test_dir "${CMAKE_CURRENT_BINARY_DIR}/browser-test")
+  set(browser_test_stamp "${browser_test_dir}/deps.stamp")
+
+  set(browser_test_inputs
+    "${browser_test_src}/package.json"
+    "${browser_test_src}/package-lock.json"
+  )
+
+  add_custom_command(
+    OUTPUT ${browser_test_stamp}
+    COMMAND ${NPM_EXECUTABLE} -C ${browser_test_src} install
+    COMMAND ${NPX_EXECUTABLE} -C ${browser_test_src} playwright install chromium-headless-shell
+    COMMAND ${CMAKE_COMMAND} -E touch ${browser_test_stamp}
+    DEPENDS ${browser_test_inputs}
+  )
+
+  set(ENGINE "${browser_test_src}/harness.mjs")
+  add_custom_target(engine ALL DEPENDS ${browser_test_stamp})
+  message(STATUS "Test engine: V8 (headless browser) via ${ENGINE}")
+
+elseif(NOT ENGINE OR ENGINE STREQUAL "")
+  # ====== Download Wasmtime as a test runner ==================
   set(wasmtime_version dev)
   if (TARGET_TRIPLE MATCHES "-threads")
     set(wasmtime_version "v44.0.0")
@@ -54,6 +82,13 @@ if(NOT ENGINE OR ENGINE STREQUAL "")
 else()
   add_custom_target(engine)
 endif()
+
+# Helper to completely disable tests which currently fail in v8.
+function(expect_fail_under_v8 test_name)
+  if(TEST_WITH_V8)
+    set_tests_properties(${test_name} PROPERTIES WILL_FAIL ON)
+  endif()
+endfunction()
 
 # All tests are compiled against the wasi-libc sysroot
 add_compile_options(--sysroot ${SYSROOT})
@@ -360,7 +395,7 @@ add_wasilibc_test(fwscanf.c FS)
 # main thread when doing file I/O. This is used to exercise this test's
 # behavior where file streams use fallback code for nonblocking reads/writes.
 add_wasilibc_test(fs-nonblocking.c FS ENGINE_ARG -Wtimeout=10s)
-set_tests_properties(fs-nonblocking.wasm PROPERTIES LABELS v8fail)
+expect_fail_under_v8(fs-nonblocking.wasm)
 add_wasilibc_test(getentropy.c)
 add_wasilibc_test(hello.c PASS_REGULAR_EXPRESSION "Hello, World!")
 add_wasilibc_test(ioctl.c FS)
@@ -411,7 +446,7 @@ if (CMAKE_C_COMPILER_VERSION VERSION_GREATER 20.0)
   # doesn't work well with tags exported from shared libraries. Probably related
   # to llvm-project/llvm#188367 and/or llvm/llvm-project#188120
   add_wasilibc_test(setjmp.c SETJMP NOSHARED)
-  set_tests_properties(setjmp.wasm PROPERTIES LABELS v8fail)
+  expect_fail_under_v8(setjmp.wasm)
 endif()
 
 # This test works for single-threaded targets too
@@ -525,19 +560,18 @@ if (NOT (WASI STREQUAL "p1"))
     sockets-client-handle-hangups.wasm hello.wasm)
 endif()
 
-# Flag some tests as failing in V8
-set_tests_properties(hello.wasm PROPERTIES LABELS v8fail)
-set_tests_properties(clock_nanosleep.wasm PROPERTIES LABELS v8fail)
+# Disable some tests that can't run in V8
+expect_fail_under_v8(hello.wasm)
 # Skip test that uses environment variables
-set_tests_properties(external_env.wasm PROPERTIES LABELS v8fail)
+expect_fail_under_v8(external_env.wasm)
 # Skip test that uses command-line arguments
-set_tests_properties(argv_two_args.wasm PROPERTIES LABELS v8fail)
+expect_fail_under_v8(argv_two_args.wasm)
 if (TARGET_TRIPLE MATCHES "-threads")
   # atomic.wait32 can't be executed on the main thread
-  set_tests_properties(libc_test_functional_pthread_mutex.wasm PROPERTIES LABELS v8fail)
-  set_tests_properties(libc_test_functional_pthread_tsd.wasm PROPERTIES LABELS v8fail)
+  expect_fail_under_v8(libc_test_functional_pthread_mutex.wasm)
+  expect_fail_under_v8(libc_test_functional_pthread_tsd.wasm)
   # "poll_oneoff" can't be implemented in the browser
-  set_tests_properties(libc_test_functional_pthread_cond.wasm PROPERTIES LABELS v8fail)
+  expect_fail_under_v8(libc_test_functional_pthread_cond.wasm)
 endif()
 
 

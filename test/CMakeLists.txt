@@ -143,7 +143,8 @@ function(add_test_executable executable_name src)
   endif()
 
   if (ENABLE_COOP_THREADS)
-    target_link_options(${executable_name} PRIVATE -pthread)
+    # FIXME(#808): --export-table here shouldn't be necessary
+    target_link_options(${executable_name} PRIVATE -pthread -Wl,--export-table)
   endif()
 
   if(arg_SHARED)
@@ -473,6 +474,12 @@ if (TARGET_TRIPLE MATCHES "-threads")
   target_include_directories(pthread_mutex_busywait.wasm PRIVATE ${LIBC_TEST})
 endif()
 
+# ========= cooperative/not threads related tests ================
+
+if (ENABLE_COOP_THREADS)
+  add_wasilibc_test(coop_smoke.c)
+endif()
+
 # ========= sockets-related tests ===============================
 
 if (NOT (WASI STREQUAL "p1"))
@@ -587,7 +594,7 @@ function(add_posix_test test_file)
   set(test_file "${POSIX_TESTSUITE}/${test_file}")
   set_source_files_properties(${test_file} PROPERTIES GENERATED TRUE)
 
-  add_test_executable(${test_name} "${test_file}" ${ARGN} LDFLAGS -Wl,--export-table)
+  add_test_executable(${test_name} "${test_file}" ${ARGN})
   add_dependencies(${test_name} posix-testsuite)
   register_test(${test_name} ${test_name} ${ARGN})
   target_include_directories(${test_name} PRIVATE ${POSIX_TESTSUITE}/include)

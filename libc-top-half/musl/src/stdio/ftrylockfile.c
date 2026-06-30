@@ -54,7 +54,7 @@ int ftrylockfile(FILE *f)
 		return -1;
 
 	f->lock.owner = self_tid;
-	f->lockcount = 1;
+	__register_locked_file(f, __pthread_self());
 	return 0;
 }
 #else

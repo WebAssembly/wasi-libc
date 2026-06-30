@@ -480,6 +480,7 @@ if (ENABLE_COOP_THREADS)
   add_wasilibc_test(coop_smoke.c)
   add_wasilibc_test(coop_sem_multiwaiter.c)
   add_wasilibc_test(coop_cond_signal_wakeup.c)
+  add_wasilibc_test(coop_stdio_orphan_lock.c)
 endif()
 
 # ========= sockets-related tests ===============================

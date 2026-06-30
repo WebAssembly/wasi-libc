@@ -401,7 +401,7 @@ if (NOT (WASI STREQUAL "p1"))
   )
 endif()
 
-if (THREADS)
+if (TARGET_TRIPLE MATCHES "wasip1-threads")
   # pthreads functions needed for actual thread support
   list(APPEND top_half_sources
     musl/src/stdio/__lockfile.c

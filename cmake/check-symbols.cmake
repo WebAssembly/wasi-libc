@@ -22,10 +22,12 @@ add_custom_command(
     ${CMAKE_CURRENT_LIST_DIR}/scripts/run-check-symbols.cmake
 )
 
-if(THREADS)
-  set(expected "${CMAKE_SOURCE_DIR}/expected/wasm32-wasip1-threads")
-elseif(WASI STREQUAL "p1")
-  set(expected "${CMAKE_SOURCE_DIR}/expected/wasm32-wasip1")
+if(WASI STREQUAL "p1")
+  if(TARGET_TRIPLE MATCHES "threads")
+    set(expected "${CMAKE_SOURCE_DIR}/expected/wasm32-wasip1-threads")
+  else()
+    set(expected "${CMAKE_SOURCE_DIR}/expected/wasm32-wasip1")
+  endif()
 elseif(WASI STREQUAL "p2")
   set(expected "${CMAKE_SOURCE_DIR}/expected/wasm32-wasip2")
 elseif(WASI STREQUAL "p3")

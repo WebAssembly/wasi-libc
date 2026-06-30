@@ -95,13 +95,10 @@ else()
 endif()
 
 if(TARGET_TRIPLE MATCHES "-threads$")
-  set(THREADS ON)
   add_compile_options(-mthread-model posix -pthread -ftls-model=local-exec -matomics)
 elseif(ENABLE_COOP_THREADS)
-  set(THREADS OFF)
   add_compile_options(-mthread-model posix -pthread -ftls-model=local-exec)
 else()
-  set(THREADS OFF)
   add_compile_options(-mthread-model single)
 endif()
 

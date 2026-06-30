@@ -32,5 +32,5 @@ void __unlock(struct __coop_lock *lock) {
 
   lock->owner = 0;
   /* Awake one waiter; the others will be resumed on future unlocks. */
-  __waitlist_wake_one(&lock->waiters);
+  __waitlist_wake_one(&lock->waiters, 1);
 }

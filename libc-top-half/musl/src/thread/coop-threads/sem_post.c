@@ -12,7 +12,7 @@ int sem_post(sem_t *sem) {
    * waiter re-checks the count and consumes the permit; `__waitlist_wake_one`
    * is a no-op when nobody is waiting. */
   sem->__count++;
-  __waitlist_wake_one(&sem->__waiters);
+  __waitlist_wake_one(&sem->__waiters, 1);
 
   return 0;
 }

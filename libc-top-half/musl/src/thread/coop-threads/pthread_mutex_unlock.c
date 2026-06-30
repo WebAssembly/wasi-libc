@@ -1,6 +1,6 @@
 #include "pthread_impl.h"
 
-int __pthread_mutex_unlock(pthread_mutex_t *m) {
+int __wasilibc_pthread_mutex_unlock(pthread_mutex_t *m, int yield) {
   int tid = wasip3_thread_index();
   int type = m->_m_type & 15;
 
@@ -22,8 +22,12 @@ int __pthread_mutex_unlock(pthread_mutex_t *m) {
   /* Unlock */
   m->_m_lock = 0;
   m->_m_count = 0;
-  __waitlist_wake_one(&m->_m_waiters);
+  __waitlist_wake_one(&m->_m_waiters, yield);
   return 0;
+}
+
+int __pthread_mutex_unlock(pthread_mutex_t *m) {
+  return __wasilibc_pthread_mutex_unlock(m, 1);
 }
 
 weak_alias(__pthread_mutex_unlock, pthread_mutex_unlock);

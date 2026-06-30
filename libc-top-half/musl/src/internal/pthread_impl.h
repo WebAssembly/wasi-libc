@@ -185,8 +185,9 @@ struct __waitlist_node {
     struct __waitlist_node *next;
 };
 hidden void __waitlist_wait_on(struct __waitlist_node **list);
-hidden void __waitlist_wake_one(struct __waitlist_node **list);
+hidden void __waitlist_wake_one(struct __waitlist_node **list, int yield);
 hidden void __waitlist_wake_all(struct __waitlist_node **list);
+hidden int __wasilibc_pthread_mutex_unlock(pthread_mutex_t *m, int yield);
 #else
 
 #ifndef __wasilibc_unmodified_upstream

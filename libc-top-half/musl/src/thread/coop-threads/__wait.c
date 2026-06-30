@@ -22,13 +22,17 @@ void __waitlist_wait_on(struct __waitlist_node **list) {
   __atomic_signal_fence(memory_order_seq_cst);
 }
 
-void __waitlist_wake_one(struct __waitlist_node **list) {
+void __waitlist_wake_one(struct __waitlist_node **list, int yield) {
   if (*list == NULL) {
     return;
   }
   struct __waitlist_node *node = *list;
   *list = node->next;
-  wasip3_thread_yield_to_suspended(node->tid);
+  if (yield) {
+    wasip3_thread_yield_to_suspended(node->tid);
+  } else {
+    wasip3_thread_unsuspend(node->tid);
+  }
 }
 
 void __waitlist_wake_all(struct __waitlist_node **list) {

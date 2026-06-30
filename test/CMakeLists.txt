@@ -483,6 +483,8 @@ if (ENABLE_COOP_THREADS)
   add_wasilibc_test(coop_stdio_orphan_lock.c)
 endif()
 
+add_wasilibc_test(cwd_relative_threads.c FS)
+
 # ========= sockets-related tests ===============================
 
 if (NOT (WASI STREQUAL "p1"))

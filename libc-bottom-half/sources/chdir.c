@@ -70,6 +70,11 @@ int chdir(const char *path) {
   return 0;
 }
 
+// Computes an absolute path for `path` based on the current working directory.
+//
+// The caller must already hold `__wasilibc_cwd_lock`: this function reads the
+// global cwd and writes the static `make_absolute_buf` (a pointer into which is
+// returned), so both must stay stable until the caller is done with the result.
 static const char *make_absolute(const char *path) {
   static char *make_absolute_buf = NULL;
   static size_t make_absolute_len = 0;
@@ -94,7 +99,6 @@ static const char *make_absolute(const char *path) {
   // Otherwise we'll take the current directory, add a `/`, and then add the
   // input `path`. Note that this doesn't do any normalization (like removing
   // `/./`).
-  WEAK_LOCK(__wasilibc_cwd_lock);
   size_t cwd_len = strlen(__wasilibc_cwd);
   size_t path_len = path ? strlen(path) : 0;
   int need_slash = __wasilibc_cwd[cwd_len - 1] == '/' ? 0 : 1;
@@ -102,14 +106,12 @@ static const char *make_absolute(const char *path) {
   if (alloc_len > make_absolute_len) {
     char *tmp = realloc(make_absolute_buf, alloc_len);
     if (tmp == NULL) {
-      WEAK_UNLOCK(__wasilibc_cwd_lock);
       return NULL;
     }
     make_absolute_buf = tmp;
     make_absolute_len = alloc_len;
   }
   strcpy(make_absolute_buf, __wasilibc_cwd);
-  WEAK_UNLOCK(__wasilibc_cwd_lock);
 
 #ifdef _REENTRANT
   if (path[0] == 0 || !strcmp(path, ".") || !strcmp(path, "./")) {

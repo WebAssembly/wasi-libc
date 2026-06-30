@@ -2,6 +2,7 @@
 #define LOCK_H
 
 #include <features.h>
+#include <wasi/version.h>
 
 // Defines internal locking primitives. The main elements defined here are:
 // - __lock_t: the type of a lock variable

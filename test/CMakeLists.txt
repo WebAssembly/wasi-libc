@@ -1,20 +1,23 @@
-include(FetchContent)
 include(ExternalProject)
 include(CTest)
 enable_testing()
 
 option(PYTHON_TESTS "Build Python with this wasi-libc and run its tests" OFF)
 
-# ========= Clone libc-test =====================================
+# ========= Download libc-test ==================================
 
-FetchContent_Declare(
+set(LIBC_TEST_COMMIT 18e28496adee3d84fefdda6efcb9c5b8996a2398)
+ExternalProject_Add(
   libc-test
-  GIT_REPOSITORY https://github.com/bytecodealliance/libc-test
-  GIT_TAG 18e28496adee3d84fefdda6efcb9c5b8996a2398
-  GIT_SHALLOW true
+  EXCLUDE_FROM_ALL ON
+  URL "https://github.com/bytecodealliance/libc-test/archive/${LIBC_TEST_COMMIT}.tar.gz"
+  DOWNLOAD_EXTRACT_TIMESTAMP ON
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
 )
-FetchContent_MakeAvailable(libc-test)
-set(LIBC_TEST "${libc-test_SOURCE_DIR}")
+ExternalProject_Get_Property(libc-test SOURCE_DIR)
+set(LIBC_TEST "${SOURCE_DIR}")
 message(STATUS "libc-test source directory: ${LIBC_TEST}")
 
 # ======== Clone Open POSIX Test Suite ==========================
@@ -106,6 +109,7 @@ set(libc_test_support_files
   "${LIBC_TEST}/src/common/rand.c"
   "${LIBC_TEST}/src/common/utf8.c"
 )
+set_source_files_properties(${libc_test_support_files} PROPERTIES GENERATED TRUE)
 set_source_files_properties("${LIBC_TEST}/src/common/rand.c"
   PROPERTIES COMPILE_OPTIONS -Wno-unused-function)
 set_source_files_properties("${LIBC_TEST}/src/common/print.c"
@@ -131,7 +135,7 @@ function(add_test_executable executable_name src)
   # Build the test exeutable itself and apply all custom options as applicable.
   add_executable(${executable_name} ${src} ${libc_test_support_files})
   target_include_directories(${executable_name} PRIVATE "${LIBC_TEST}/src/common")
-  add_dependencies(${executable_name} sysroot builtins)
+  add_dependencies(${executable_name} sysroot builtins libc-test)
 
   if (TARGET_TRIPLE MATCHES "-threads")
     target_link_options(${executable_name} PRIVATE -pthread
@@ -291,6 +295,7 @@ function(add_libc_test test_file)
   string(REPLACE "/" "_" test_name ${test_name})
   set(test_name "libc_test_${test_name}")
   set(test_file "${LIBC_TEST}/src/${test_file}")
+  set_source_files_properties(${test_file} PROPERTIES GENERATED TRUE)
 
   add_test_pair(${test_name} ${test_file} ${ARGN})
 endfunction()

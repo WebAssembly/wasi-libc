@@ -25,7 +25,7 @@ static void process_map_base_deferred_free() {
 
 // There is currently no thread.exit intrinsic, so pthread_exit
 // cannot terminate a thread early. As such, we do not expose it to users.
-// TODO(wasip3) revisit this if we add a thread.exit intrinsic 
+// TODO(wasip3) revisit this if we add a thread.exit intrinsic
 static void __pthread_exit(void *result)
 {
   pthread_t self = __pthread_self();
@@ -90,7 +90,7 @@ static void __pthread_exit(void *result)
   }
 
   self->detach_state = DT_EXITED;
-  
+
   // There may be a thread waiting for this thread to exit, in which case
   // we wake it up.
   __waitlist_wake_all(&self->joiner_waiters);
@@ -163,9 +163,9 @@ int __pthread_create(pthread_t *restrict res,
   size_t size, guard;
   struct pthread *self, *new;
   unsigned char *map = 0, *stack = 0, *tsd = 0, *stack_limit;
-  
+
   pthread_attr_t attr = {0};
-  
+
   size_t tls_size = __builtin_wasm_tls_size();
   size_t tls_align = __builtin_wasm_tls_align();
   void *tls_base = __builtin_wasm_tls_base();
@@ -176,7 +176,7 @@ int __pthread_create(pthread_t *restrict res,
   tls_size += tls_align;
 
   self = __pthread_self();
-  
+
   if (!libc.threaded) {
     self->tsd = (void **)__pthread_tsd_main;
     libc.threaded = 1;
@@ -221,7 +221,6 @@ int __pthread_create(pthread_t *restrict res,
     process_map_base_deferred_free();
     __tl_unlock();
     map = malloc(size);
-    printf("pthread_create: map=%p size=%zu\n", map, size);
     if (!map)
       goto fail;
     tsd = map + size - __pthread_tsd_size;
@@ -233,7 +232,7 @@ int __pthread_create(pthread_t *restrict res,
   }
 
   new_tls_base = __copy_tls(tsd - tls_size);
-  
+
   /* Compute pthread struct offset from old TLS base, apply to new TLS base */
   tls_offset = (uintptr_t)self - (uintptr_t)tls_base;
   new = (void *)((uintptr_t)new_tls_base + tls_offset);

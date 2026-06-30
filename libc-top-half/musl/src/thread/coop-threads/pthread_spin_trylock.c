@@ -1,8 +1,8 @@
 #include "pthread_impl.h"
 
-int pthread_spin_trylock(pthread_spinlock_t *s)
-{
-	if (*s) return EBUSY;
-	*s = EBUSY;
-	return 0;
+int pthread_spin_trylock(pthread_spinlock_t *s) {
+  if (*s)
+    return EBUSY;
+  *s = EBUSY;
+  return 0;
 }

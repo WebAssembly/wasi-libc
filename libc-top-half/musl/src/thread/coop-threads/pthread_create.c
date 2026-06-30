@@ -26,8 +26,7 @@ static void process_map_base_deferred_free() {
 // There is currently no thread.exit intrinsic, so pthread_exit
 // cannot terminate a thread early. As such, we do not expose it to users.
 // TODO(wasip3) revisit this if we add a thread.exit intrinsic
-static void __pthread_exit(void *result)
-{
+static void __pthread_exit(void *result) {
   pthread_t self = __pthread_self();
 
   self->canceldisable = 1;
@@ -127,11 +126,11 @@ void __wasi_coop_thread_start(void *context);
 hidden void *__dummy_reference = __wasi_coop_thread_start;
 
 hidden void __wasi_coop_thread_start_C(void *context) {
-  #ifdef __wasip3__
+#ifdef __wasip3__
   int tid = wasip3_thread_index();
-  #else
-  #error "Unknown WASI version"
-  #endif
+#else
+#error "Unknown WASI version"
+#endif
   struct start_args *args = context;
   __pthread_self()->tid = tid;
   __pthread_exit(args->start_func(args->start_arg));
@@ -207,8 +206,7 @@ int __pthread_create(pthread_t *restrict res,
     guard = 0;
   } else {
     guard = ROUND(attr._a_guardsize);
-    size = guard + ROUND(attr._a_stacksize
-                         + tls_size + __pthread_tsd_size);
+    size = guard + ROUND(attr._a_stacksize + tls_size + __pthread_tsd_size);
   }
 
   if (!tsd) {

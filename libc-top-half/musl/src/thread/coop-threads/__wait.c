@@ -36,19 +36,23 @@ void __waitlist_wake_one(struct __waitlist_node **list, int yield) {
 }
 
 void __waitlist_wake_all(struct __waitlist_node **list) {
-  struct __waitlist_node **prev = list;
+  // Detach the entire waitlist up front and iterate over it locally. Waking a
+  // thread may yield to it and may modify `list` which we don't want to tamper
+  // with.
   struct __waitlist_node *curr = *list;
+  *list = NULL;
 
   while (curr) {
-    uint32_t tid = curr->tid;
-    *prev = curr->next;
+    // Read `next` before waking, since `curr`'s storage may go away once it
+    // runs.
+    struct __waitlist_node *next = curr->next;
     // As a scheduling optimization, we always yield directly to the last
     // suspended thread instead of just scheduling it to run at some point.
-    if (curr->next == NULL) {
-      wasip3_thread_yield_to_suspended(tid);
+    if (next == NULL) {
+      wasip3_thread_yield_to_suspended(curr->tid);
     } else {
-      wasip3_thread_unsuspend(tid);
+      wasip3_thread_unsuspend(curr->tid);
     }
-    curr = *prev;
+    curr = next;
   }
 }

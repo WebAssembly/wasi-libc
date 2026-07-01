@@ -296,7 +296,8 @@ weak_alias(static_init_tls, __init_tls);
 #ifdef _REENTRANT
 void* __allocate_tls() {
 	void* mem;
-	posix_memalign(&mem, __builtin_wasm_tls_align(), __builtin_wasm_tls_size());
+	if (posix_memalign(&mem, __builtin_wasm_tls_align(), __builtin_wasm_tls_size()) != 0)
+          __builtin_trap();
 	return mem;
 }
 #endif

@@ -11,6 +11,13 @@
 #cmakedefine __wasip2__
 #cmakedefine __wasip3__
 
+// The `__wasi_cooperative_threads__` define is used to test whether cooperative
+// threads are enabled for this build of wasi-libc. This is detected at
+// build-time and only works on supported versions of clang.
+#ifdef __wasm_libcall_thread_context__
+#cmakedefine __wasi_cooperative_threads__
+#endif
+
 #cmakedefine __wasi_sdk_major__ @__wasi_sdk_major__@
 #cmakedefine __wasi_sdk_version__ "@__wasi_sdk_version__@"
 

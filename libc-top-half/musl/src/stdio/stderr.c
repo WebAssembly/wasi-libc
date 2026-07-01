@@ -13,7 +13,7 @@ hidden FILE __stderr_FILE = {
 	.seek = __stdio_seek,
 	.close = __stdio_close,
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-	.lock = -1,
+	.lock = __STDIO_LOCK_INIT,
 #endif
 };
 FILE *const stderr = &__stderr_FILE;

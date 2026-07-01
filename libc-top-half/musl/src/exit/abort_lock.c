@@ -1,3 +1,4 @@
 #include "pthread_impl.h"
+#include "lock.h"
 
-volatile int __abort_lock[1];
+DECLARE_STRONG_LOCK(__abort_lock);

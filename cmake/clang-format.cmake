@@ -21,7 +21,8 @@ set(formatted_sources)
 
 function(clang_format_file file)
   if (file MATCHES "__generated" OR
-      file MATCHES "wasip.\.c$")  # Skip auto-generated files
+      file MATCHES "wasip.\.c$" OR # Skip auto-generated files
+      file MATCHES "\.(s|S)$")     # Skip assembly files
     return()
   endif()
   cmake_path(ABSOLUTE_PATH file BASE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE src)
@@ -30,7 +31,7 @@ function(clang_format_file file)
   # excludes upstream projects like cloudlibc/musl, malloc implementations, etc.
   if (NOT EXISTS ${src}
     OR ${src} MATCHES "cloudlibc"
-    OR ${src} MATCHES "libc-top-half"
+    OR (${src} MATCHES "libc-top-half" AND NOT ${src} MATCHES "libc-top-half/musl/src/thread/coop-threads")
     OR ${src} MATCHES "fts/musl-fts"
     OR ${src} MATCHES "dlmalloc"
     OR ${src} MATCHES "emmalloc"

@@ -8,10 +8,20 @@
 
 #define UNGET 8
 
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
+#include "lock.h"
+
+#ifdef __wasi_cooperative_threads__
+#define FFINALLOCK(f) __lockfile((f))
+#define FLOCK(f) int __need_unlock = __lockfile((f))
+#define FUNLOCK(f) do { if (__need_unlock) __unlockfile((f)); } while (0)
+#define __STDIO_LOCK_INIT {0, 0}
+#define __STDIO_LOCK_RESET(lock) do { (lock).owner = 0; (lock).waiters = NULL; } while (0)
+#elif defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #define FFINALLOCK(f) ((f)->lock>=0 ? __lockfile((f)) : 0)
 #define FLOCK(f) int __need_unlock = ((f)->lock>=0 ? __lockfile((f)) : 0)
 #define FUNLOCK(f) do { if (__need_unlock) __unlockfile((f)); } while (0)
+#define __STDIO_LOCK_INIT -1
+#define __STDIO_LOCK_RESET(lock) do { (lock) = -1; } while (0)
 #else
 // No locking needed.
 #define FFINALLOCK(f) ((void)(f))
@@ -51,7 +61,7 @@ struct _IO_FILE {
 #endif
 	int mode;
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-	volatile int lock;
+	DECLARE_STRONG_LOCK(lock);
 #endif
 	int lbf;
 	void *cookie;
@@ -73,8 +83,8 @@ extern hidden FILE *volatile __stdout_used;
 extern hidden FILE *volatile __stderr_used;
 
 #if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-hidden int __lockfile(FILE *);
-hidden void __unlockfile(FILE *);
+int __lockfile(FILE *);
+void __unlockfile(FILE *);
 #endif
 
 hidden size_t __stdio_read(FILE *, unsigned char *, size_t);

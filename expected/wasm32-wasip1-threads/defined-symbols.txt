@@ -13,10 +13,9 @@ __SIG_ERR
 __SIG_IGN
 __acquire_ptc
 __aio_close
+__allocate_tls
 __asctime_r
 __assert_fail
-__at_quick_exit_lockptr
-__atexit_lockptr
 __c_dot_utf8
 __c_dot_utf8_locale
 __c_locale
@@ -81,6 +80,7 @@ __ftello
 __ftello_unlocked
 __funcs_on_exit
 __funcs_on_quick_exit
+__futexwait
 __futimesat
 __fwritable
 __fwritex
@@ -92,6 +92,7 @@ __getopt_msg
 __gmtime_r
 __hwcap
 __inet_aton
+__inhibit_ptc
 __init_ssp
 __init_tp
 __intscan
@@ -148,7 +149,6 @@ __libc_free
 __libc_malloc
 __loc_is_allocated
 __locale_lock
-__locale_lockptr
 __localtime_r
 __lock
 __lockfile
@@ -219,7 +219,6 @@ __pthread_tsd_size
 __putenv
 __qsort_r
 __rand48_step
-__random_lockptr
 __reallocarray
 __register_locked_file
 __release_ptc
@@ -248,7 +247,6 @@ __stdin_used
 __stdio_close
 __stdio_exit
 __stdio_exit_needed
-__stdio_ofl_lockptr
 __stdio_read
 __stdio_seek
 __stdio_write
@@ -308,6 +306,7 @@ __unlockfile
 __uselocale
 __utc
 __wait
+__wake
 __wasi_args_get
 __wasi_args_sizes_get
 __wasi_clock_res_get
@@ -359,7 +358,6 @@ __wasi_thread_start_C
 __wasilibc_access
 __wasilibc_cwd
 __wasilibc_cwd_lock
-__wasilibc_cwd_unlock
 __wasilibc_deinitialize_environ
 __wasilibc_dttoif
 __wasilibc_enable_futex_busywait_on_current_thread
@@ -946,6 +944,9 @@ modff
 modfl
 mprotect
 mrand48
+mtx_destroy
+mtx_init
+mtx_timedlock
 munmap
 nan
 nanf

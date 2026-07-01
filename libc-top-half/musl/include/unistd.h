@@ -359,7 +359,9 @@ pid_t gettid(void);
 #define _POSIX_BARRIERS         _POSIX_VERSION
 #define _POSIX_SPIN_LOCKS       _POSIX_VERSION
 #define _POSIX_READER_WRITER_LOCKS _POSIX_VERSION
-#ifdef __wasilibc_unmodified_upstream /* WASI has no POSIX async I/O, semaphores, or shared memory */
+#ifdef __wasi_cooperative_threads__
+#define _POSIX_SEMAPHORES       _POSIX_VERSION
+#elif defined(__wasilibc_unmodified_upstream) /* WASI has no POSIX async I/O, semaphores, or shared memory */
 #define _POSIX_ASYNCHRONOUS_IO  _POSIX_VERSION
 #define _POSIX_SEMAPHORES       _POSIX_VERSION
 #define _POSIX_SHARED_MEMORY_OBJECTS _POSIX_VERSION

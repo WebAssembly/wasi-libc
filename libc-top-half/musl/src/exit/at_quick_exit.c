@@ -7,29 +7,26 @@
 
 static void (*funcs[COUNT])(void);
 static int count;
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-static volatile int lock[1];
-volatile int *const __at_quick_exit_lockptr = lock;
-#endif
+DECLARE_STRONG_LOCK(lock, static);
 
 void __funcs_on_quick_exit()
 {
 	void (*func)(void);
-	LOCK(lock);
+	STRONG_LOCK(lock);
 	while (count > 0) {
 		func = funcs[--count];
-		UNLOCK(lock);
+		STRONG_UNLOCK(lock);
 		func();
-		LOCK(lock);
+		STRONG_LOCK(lock);
 	}
 }
 
 int at_quick_exit(void (*func)(void))
 {
 	int r = 0;
-	LOCK(lock);
+	STRONG_LOCK(lock);
 	if (count == 32) r = -1;
 	else funcs[count++] = func;
-	UNLOCK(lock);
+	STRONG_UNLOCK(lock);
 	return r;
 }

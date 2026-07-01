@@ -83,7 +83,7 @@ ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
     &closed);
   filesystem_stream_u8_drop_writable(writer);
 
-  // Wait for the subtask to resolve now that the writer half is closed and if
+  // Wait for the future to resolve now that the writer half is closed and if
   // we failed to write bytes (0 bytes written) and the result is an error we
   // can return -1.
   filesystem_result_void_error_code_t result;

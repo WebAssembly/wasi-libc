@@ -36,13 +36,13 @@ read port  # read the first line of stdin from the previous process
 echo $port # forward this line to the next process, or out to cmake itself
 exec 2>&1  # close our stdout and replace it with stderr
 cat <&0 &  # forward the rest of stdin to stderr so it shows up in cmake
-exec ${ENGINE} -Wcomponent-model-async -Sp3,inherit-network ${CLIENT} \"$port\"
+exec ${ENGINE} -Wcomponent-model-async -Wcomponent-model-threading -Sp3,inherit-network ${CLIENT} \"$port\"
   ")
   list(APPEND CLIENTS COMMAND bash -c ${client_script})
 endforeach()
 
 execute_process(
-  COMMAND ${ENGINE} -Wcomponent-model-async -Sp3,inherit-network ${SERVER}
+  COMMAND ${ENGINE} -Wcomponent-model-async -Wcomponent-model-threading -Sp3,inherit-network ${SERVER}
   ${CLIENTS}
   TIMEOUT 5
   COMMAND_ERROR_IS_FATAL ANY

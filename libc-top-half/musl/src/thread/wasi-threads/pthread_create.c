@@ -118,7 +118,7 @@ static void __pthread_exit(void *result)
 	 * any use past this point would have undefined behavior, but for
 	 * joinable threads it's a valid usage that must be handled.
 	 * Signals must be blocked since pthread_kill must be AS-safe. */
-	LOCK(self->killlock);
+	WEAK_LOCK(self->killlock);
 
 	/* The thread list lock must be AS-safe, and thus depends on
 	 * application signals being blocked above. */
@@ -129,7 +129,7 @@ static void __pthread_exit(void *result)
 	 * signal state to prepare for exit to call atexit handlers. */
 	if (self->next == self) {
 		__tl_unlock();
-		UNLOCK(self->killlock);
+		WEAK_UNLOCK(self->killlock);
 		self->detach_state = state;
 #ifdef __wasilibc_unmodified_upstream
 		__restore_sigs(&set);
@@ -147,7 +147,7 @@ static void __pthread_exit(void *result)
 	 * remaining locks (except thread list) are held if we end up
 	 * resetting need_locks below. */
 	self->tid = 0;
-	UNLOCK(self->killlock);
+	WEAK_UNLOCK(self->killlock);
 
 #ifdef __wasilibc_unmodified_upstream
 	/* Process robust list in userspace to handle non-pshared mutexes

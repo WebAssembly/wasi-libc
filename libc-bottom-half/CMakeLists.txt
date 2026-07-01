@@ -179,6 +179,13 @@ if (WASI STREQUAL "p3")
   )
 endif()
 
+if (HAVE_WASM_LIBCALL_THREAD_CONTEXT)
+  list(APPEND bottom_half_sources
+    sources/__libcall_thread_context.S
+    sources/__wasm_init_task.S
+  )
+endif()
+
 # Don't export symbols of generated code in shared libraries, so specifically
 # pass `-fvisibility=hidden`.
 set_source_files_properties(sources/wasip2.c PROPERTIES

@@ -14,10 +14,8 @@ static int __pthread_timedjoin_np(pthread_t t, void **res,
   if (state == DT_EXITED) {
     if (res)
       *res = t->result;
-    if (t->map_base) {
+    if (t->map_base)
       free(t->map_base);
-      t->map_base = NULL;
-    }
     return 0;
   }
 
@@ -35,10 +33,8 @@ static int __pthread_timedjoin_np(pthread_t t, void **res,
 
   if (res)
     *res = t->result;
-  if (t->map_base) {
+  if (t->map_base)
     free(t->map_base);
-    t->map_base = NULL;
-  }
   return 0;
 }
 

@@ -11,6 +11,7 @@ static int __pthread_detach(pthread_t t) {
 
   if (state == DT_EXITING || state == DT_EXITED) {
     __pthread_join(t, 0);
+    return 0;
   }
 
   t->detach_state = DT_DETACHED;

@@ -765,7 +765,7 @@ if (ENABLE_COOP_THREADS)
   # unsupported(signals): conformance/interfaces/pthread_create/8-2.c
 
   add_posix_test(conformance/interfaces/pthread_detach/1-1.c)
-  add_posix_test(conformance/interfaces/pthread_detach/1-2.c)
+  # unsupported(ub): add_posix_test(conformance/interfaces/pthread_detach/1-2.c)
   add_posix_test(conformance/interfaces/pthread_detach/2-1.c)
   add_posix_test(conformance/interfaces/pthread_detach/2-2.c)
   add_posix_test(conformance/interfaces/pthread_detach/3-1.c)

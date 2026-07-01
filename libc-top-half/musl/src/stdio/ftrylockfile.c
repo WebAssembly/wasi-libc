@@ -8,7 +8,7 @@ void __do_orphaned_stdio_locks()
     for (f=__pthread_self()->stdio_locks; f; f=f->next_locked) {
 		#ifdef __wasi_cooperative_threads__
         f->lock.owner = 0;
-        __waitlist_wake_all(&f->lock.waiters);
+        __waitlist_wake_all(&f->lock.waiters, 1);
 		#else
         a_store(&f->lock, 0x40000000);
 		#endif

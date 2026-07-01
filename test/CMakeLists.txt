@@ -482,6 +482,7 @@ if (ENABLE_COOP_THREADS)
   add_wasilibc_test(coop_cond_signal_wakeup.c)
   add_wasilibc_test(coop_stdio_orphan_lock.c)
   add_wasilibc_test(coop_barrier_reuse.c)
+  add_wasilibc_test(coop_join_uaf.c)
 endif()
 
 add_wasilibc_test(cwd_relative_threads.c FS)

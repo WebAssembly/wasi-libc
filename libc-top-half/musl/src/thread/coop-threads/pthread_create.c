@@ -91,8 +91,12 @@ static void __pthread_exit(void *result) {
   self->detach_state = DT_EXITED;
 
   // There may be a thread waiting for this thread to exit, in which case
-  // we wake it up.
-  __waitlist_wake_all(&self->joiner_waiters);
+  // we wake it up. Note that this specifically doesn't yield to the thread,
+  // however, because that would leave this thread able to get reaped and the
+  // stack would get deallocated. That means this thread, upon resuming, would
+  // UAF its own stack. By not yielding here we're guaranteed that the stack is
+  // valid until this function returns.
+  __waitlist_wake_all(&self->joiner_waiters, 0);
 }
 
 void __do_cleanup_push(struct __ptcb *cb) {

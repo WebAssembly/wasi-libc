@@ -28,7 +28,7 @@ int __pthread_once(pthread_once_t *control, void (*init)(void)) {
     init();
 
     *control = PTHREAD_ONCE_STATE_COMPLETED;
-    __waitlist_wake_all(&all_waiters);
+    __waitlist_wake_all(&all_waiters, 1);
     return 0;
   }
 

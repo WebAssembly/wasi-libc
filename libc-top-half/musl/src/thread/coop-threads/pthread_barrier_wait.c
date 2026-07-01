@@ -12,7 +12,7 @@ int pthread_barrier_wait(pthread_barrier_t *b) {
   // If all threads have arrived, wake them all
   if (b->_b_count == b->_b_limit) {
     b->_b_count = 0;
-    __waitlist_wake_all(&b->_b_waiters);
+    __waitlist_wake_all(&b->_b_waiters, 1);
     return PTHREAD_BARRIER_SERIAL_THREAD;
   }
 

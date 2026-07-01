@@ -5,10 +5,12 @@ enum {
   PTHREAD_ONCE_STATE_COMPLETED = 2
 };
 
-static struct {
-  pthread_once_t *control;
-  struct __waitlist_node *waiters;
-} once_state;
+// For now this implementation has one global list of all waiters for all
+// currently active `pthread_once` calls. Ideally this would be a
+// per-`pthread_once_t` list  or `pthread_once` would bottom out in something
+// that looked like a futex, but for now this is at least a correct
+// implementation albeit not the most efficient one.
+static struct __waitlist_node *all_waiters;
 
 int __pthread_once(pthread_once_t *control, void (*init)(void)) {
   /* Fast path: already completed */
@@ -19,7 +21,6 @@ int __pthread_once(pthread_once_t *control, void (*init)(void)) {
   /* Try to become the initializer */
   if (*control == PTHREAD_ONCE_STATE_NOT_RUN) {
     *control = PTHREAD_ONCE_STATE_RUNNING;
-    once_state.control = control;
 
     /* init may do something that blocks, in which case other threads
      * may try to run pthread_once on the same control. They will
@@ -27,13 +28,13 @@ int __pthread_once(pthread_once_t *control, void (*init)(void)) {
     init();
 
     *control = PTHREAD_ONCE_STATE_COMPLETED;
-    __waitlist_wake_all(&once_state.waiters);
+    __waitlist_wake_all(&all_waiters);
     return 0;
   }
 
   /* Another thread is initializing, wait for completion */
   while (*control == PTHREAD_ONCE_STATE_RUNNING) {
-    __waitlist_wait_on(&once_state.waiters);
+    __waitlist_wait_on(&all_waiters);
   }
 
   return 0;

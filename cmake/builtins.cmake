@@ -48,13 +48,18 @@ else()
   ExternalProject_Add(
     wasi-sdk-builtins
     EXCLUDE_FROM_ALL ON
-    URL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-25/libclang_rt.builtins-wasm32-wasi-25.0.tar.gz
+    URL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-34-rc.1/libclang_rt-34.0-rc.1.tar.gz
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
   )
   ExternalProject_Get_Property(wasi-sdk-builtins SOURCE_DIR)
-  set(builtins_lib_src ${SOURCE_DIR}/libclang_rt.builtins-wasm32.a)
+  if(ENABLE_COOP_THREADS)
+    set(builtins_target "wasm32-unknown-wasip3")
+  else()
+    set(builtins_target "wasm32-unknown-wasip2")
+  endif()
+  set(builtins_lib_src ${SOURCE_DIR}/${builtins_target}/libclang_rt.builtins.a)
   set(builtins_lib_dep wasi-sdk-builtins)
 endif()
 

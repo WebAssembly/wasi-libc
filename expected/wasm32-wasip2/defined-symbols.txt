@@ -1042,6 +1042,7 @@ pow10f
 pow10l
 powf
 powl
+ppoll
 pread
 preadv
 printf

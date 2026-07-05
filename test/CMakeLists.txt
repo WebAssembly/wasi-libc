@@ -411,6 +411,7 @@ add_wasilibc_test(memcmp.c LDFLAGS -Wl,--stack-first -Wl,--initial-memory=327680
 add_wasilibc_test(opendir.c FS ARGV /)
 add_wasilibc_test(open_relative_path.c FS ARGV /)
 add_wasilibc_test(poll.c FS)
+add_wasilibc_test(ppoll.c FS)
 add_wasilibc_test(pselect.c FS)
 add_wasilibc_test(preadvwritev.c FS)
 add_wasilibc_test(preadwrite.c FS)

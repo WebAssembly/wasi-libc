@@ -136,6 +136,18 @@ jobs:
             test: true
             args: -DCMAKE_BUILD_TYPE=Debug -DTARGET_TRIPLE=wasm32-wasip3
 
+          - name: Test wasm32-wasip3 coop-threads
+            os: ubuntu-24.04
+            clang_version: 23
+            test: true
+            args: -DTARGET_TRIPLE=wasm32-wasip3 -DENABLE_COOP_THREADS=ON
+
+          - name: Test wasm32-wasip3 coop-threads (debug)
+            os: ubuntu-24.04
+            clang_version: 23
+            test: true
+            args: -DCMAKE_BUILD_TYPE=Debug -DTARGET_TRIPLE=wasm32-wasip3 -DENABLE_COOP_THREADS=ON
+
           - name: Test emmalloc
             os: ubuntu-24.04
             clang_version: 20

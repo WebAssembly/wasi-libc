@@ -65,7 +65,11 @@ runs:
         if [ $v -ge 21 ]; then
           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
           rel=$(lsb_release -cs)
-          sudo apt-add-repository "deb http://apt.llvm.org/$rel/ llvm-toolchain-$rel-$v main"
+          if [ $v -lt 23 ]; then
+            sudo apt-add-repository "deb http://apt.llvm.org/$rel/ llvm-toolchain-$rel-$v main"
+          else
+            sudo apt-add-repository "deb http://apt.llvm.org/$rel/ llvm-toolchain-$rel main"
+          fi
         fi
         sudo apt-get update
         sudo apt-get install -y clang-$v clang-tools-$v lld-$v

@@ -129,7 +129,7 @@ set_source_files_properties("${LIBC_TEST}/src/common/print.c"
 function(add_test_executable executable_name src)
   set(options SHARED)
   set(oneValueArgs)
-  set(multiValueArgs LDFLAGS CFLAGS SHARED_LIBS)
+  set(multiValueArgs LDFLAGS CFLAGS SHARED_LIBS INCLUDE DEPENDENCIES)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
   # Build the test exeutable itself and apply all custom options as applicable.
@@ -177,8 +177,14 @@ function(add_test_executable executable_name src)
   foreach(flag IN LISTS arg_CFLAGS)
     target_compile_options(${executable_name} PRIVATE ${flag})
   endforeach()
+  foreach(dir IN LISTS arg_INCLUDE)
+    target_include_directories(${executable_name} PRIVATE ${dir})
+  endforeach()
   foreach(flag IN LISTS arg_LDFLAGS)
     target_link_options(${executable_name} PRIVATE ${flag})
+  endforeach()
+  foreach(dep IN LISTS arg_DEPENDENCIES)
+    add_dependencies(${executable_name} ${dep})
   endforeach()
 endfunction()
 
@@ -601,10 +607,10 @@ function(add_posix_test test_file)
   set(test_file "${POSIX_TESTSUITE}/${test_file}")
   set_source_files_properties(${test_file} PROPERTIES GENERATED TRUE)
 
-  add_test_executable(${test_name} "${test_file}" ${ARGN})
-  add_dependencies(${test_name} posix-testsuite)
-  register_test(${test_name} ${test_name} ${ARGN})
-  target_include_directories(${test_name} PRIVATE ${POSIX_TESTSUITE}/include)
+  add_test_pair(${test_name} ${test_file}
+    CFLAGS -Wno-unused-parameter
+    INCLUDE ${POSIX_TESTSUITE}/include
+    DEPENDENCIES posix-testsuite)
 endfunction()
 
 if (ENABLE_COOP_THREADS)

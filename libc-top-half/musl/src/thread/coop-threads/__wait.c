@@ -29,9 +29,9 @@ void __waitlist_wake_one(struct __waitlist_node **list, int yield) {
   struct __waitlist_node *node = *list;
   *list = node->next;
   if (yield) {
-    wasip3_thread_yield_to_suspended(node->tid);
+    wasip3_thread_yield_then_resume(node->tid);
   } else {
-    wasip3_thread_unsuspend(node->tid);
+    wasip3_thread_resume_later(node->tid);
   }
 }
 
@@ -50,9 +50,9 @@ void __waitlist_wake_all(struct __waitlist_node **list, int yield) {
     // directly to the last suspended thread instead of just scheduling it to
     // run at some point.
     if (next == NULL && yield) {
-      wasip3_thread_yield_to_suspended(curr->tid);
+      wasip3_thread_yield_then_resume(curr->tid);
     } else {
-      wasip3_thread_unsuspend(curr->tid);
+      wasip3_thread_resume_later(curr->tid);
     }
     curr = next;
   }

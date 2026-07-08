@@ -10,7 +10,7 @@
 static __thread int static_tls = 3;
 
 static void *worker(void *arg) {
-  (void) arg;
+  (void)arg;
 
   TEST(static_tls == 3);
   static_tls = 5;

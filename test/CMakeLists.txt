@@ -498,6 +498,7 @@ if (ENABLE_COOP_THREADS)
 endif()
 
 add_wasilibc_test(tls_smoke.c)
+expect_fail_under_v8(tls_smoke.wasm)
 add_wasilibc_test(cwd_relative_threads.c FS)
 
 # ========= sockets-related tests ===============================

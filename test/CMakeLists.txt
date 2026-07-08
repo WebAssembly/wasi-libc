@@ -497,6 +497,7 @@ if (ENABLE_COOP_THREADS)
   add_wasilibc_test(coop_join_uaf.c)
 endif()
 
+add_wasilibc_test(tls_smoke.c)
 add_wasilibc_test(cwd_relative_threads.c FS)
 
 # ========= sockets-related tests ===============================

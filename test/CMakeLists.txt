@@ -285,7 +285,13 @@ function(add_test_pair test_name test_file)
 
   add_test_executable(${test_name} ${test_file} ${ARGN})
   register_test(${test_name} ${test_name} ${ARGN})
-  if(NOT arg_NOSHARED AND BUILD_SHARED AND NOT WASI MATCHES "p1" AND NOT WASI MATCHES "p3")
+
+  # If shared libraries are enabled, and this test supports shared libraries,
+  # then build a version of the test that's linked against `libc.so` and run the
+  # test that way. This is skipped on WASIp1 since the format used here requires
+  # components, and WASIp3 coop threads testing is the subject of #813
+  if(NOT arg_NOSHARED AND BUILD_SHARED AND NOT (WASI MATCHES "p1")
+      AND NOT (WASI MATCHES "p3" AND ENABLE_COOP_THREADS))
     add_test_executable("shared_${test_name}" ${test_file} SHARED ${ARGN})
     register_test("shared_${test_name}" "shared_${test_name}" ${ARGN})
   endif()

@@ -299,7 +299,7 @@ int __pthread_create(pthread_t *restrict res,
 
   // Eagerly run the newly-created thread
   // TODO(wasip3): make this configurable, perhaps through scheduler options?
-  wasip3_thread_yield_to_suspended(new->tid);
+  wasip3_thread_yield_then_resume(new->tid);
 
   *res = new;
   return 0;

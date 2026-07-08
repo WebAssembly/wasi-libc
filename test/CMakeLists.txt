@@ -497,6 +497,10 @@ if (ENABLE_COOP_THREADS)
   add_wasilibc_test(coop_join_uaf.c)
 endif()
 
+add_wasilibc_test(tls_smoke.c)
+if (TARGET_TRIPLE MATCHES "-threads")
+  expect_fail_under_v8(tls_smoke.wasm)
+endif()
 add_wasilibc_test(cwd_relative_threads.c FS)
 
 # ========= sockets-related tests ===============================

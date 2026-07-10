@@ -1,4 +1,5 @@
 #include "pthread_impl.h"
+#include <assert.h>
 
 int __pthread_mutex_lock(pthread_mutex_t *m) {
   int tid = wasip3_thread_index();
@@ -19,7 +20,9 @@ int __pthread_mutex_lock(pthread_mutex_t *m) {
 
   /* Wait until unlocked */
   while (m->_m_lock != 0) {
-    __waitlist_wait_on(&m->_m_waiters);
+    int rc = __waitlist_wait_on(&m->_m_waiters, NULL, NULL);
+    (void)rc;
+    assert(rc == 0);
   }
 
   m->_m_lock = tid;

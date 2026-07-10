@@ -1,4 +1,5 @@
 #include "pthread_impl.h"
+#include <assert.h>
 
 int pthread_barrier_wait(pthread_barrier_t *b) {
   // Trivial case: only one thread needs to reach barrier
@@ -17,6 +18,8 @@ int pthread_barrier_wait(pthread_barrier_t *b) {
   }
 
   // Otherwise, wait for remaining threads to enter
-  __waitlist_wait_on(&b->_b_waiters);
+  int rc = __waitlist_wait_on(&b->_b_waiters, NULL, NULL);
+  (void)rc;
+  assert(rc == 0);
   return 0;
 }

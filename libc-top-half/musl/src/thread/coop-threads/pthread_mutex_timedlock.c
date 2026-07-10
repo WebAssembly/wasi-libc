@@ -1,4 +1,5 @@
 #include "pthread_impl.h"
+#include <time.h>
 
 int __pthread_mutex_timedlock(pthread_mutex_t *restrict m,
                               const struct timespec *restrict at) {
@@ -25,14 +26,11 @@ int __pthread_mutex_timedlock(pthread_mutex_t *restrict m,
     __builtin_trap();
   }
 
-  /* Would need to block, but timeouts not supported */
-  if (at) {
-    return ETIMEDOUT;
-  }
-
-  /* Wait indefinitely */
+  /* Wait for the lock to be available */
   while (m->_m_lock != 0) {
-    __waitlist_wait_on(&m->_m_waiters);
+    int rc = __waitlist_wait_on(&m->_m_waiters, CLOCK_REALTIME, at);
+    if (rc != 0)
+      return rc;
   }
 
   m->_m_lock = tid;

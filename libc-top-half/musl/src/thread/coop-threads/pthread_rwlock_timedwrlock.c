@@ -1,4 +1,5 @@
 #include "pthread_impl.h"
+#include <time.h>
 
 int __pthread_rwlock_timedwrlock(pthread_rwlock_t *restrict rw,
                                  const struct timespec *restrict at) {
@@ -15,18 +16,16 @@ int __pthread_rwlock_timedwrlock(pthread_rwlock_t *restrict rw,
     return 0;
   }
 
-  /* Would need to wait, but timeouts not supported */
-  if (at) {
-    errno = ENOSYS;
-    return -1;
-  }
-
   /* Wait until no readers and no writers */
   while (rw->_rw_lock != 0) {
-    __waitlist_wait_on(&rw->_rw_waiters);
+    int rc = __waitlist_wait_on(&rw->_rw_waiters, CLOCK_REALTIME, at);
+    if (rc != 0)
+      return rc;
   }
 
   /* Acquired, mark as write-locked with owner */
   rw->_rw_lock = -tid;
   return 0;
 }
+
+weak_alias(__pthread_rwlock_timedwrlock, pthread_rwlock_timedwrlock);

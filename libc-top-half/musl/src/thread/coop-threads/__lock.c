@@ -1,5 +1,6 @@
 #include "lock.h"
 #include "pthread_impl.h"
+#include <assert.h>
 #include <wasi/api.h>
 
 #ifndef __wasip3__
@@ -15,7 +16,9 @@ void __lock(struct __coop_lock *lock) {
 
   /* Loop until we acquire the lock. */
   while (lock->owner != 0) {
-    __waitlist_wait_on(&lock->waiters);
+    int rc = __waitlist_wait_on(&lock->waiters, NULL, NULL);
+    (void)rc;
+    assert(rc == 0);
     /* After waking, the lock might still be held by another
      * thread that was scheduled before us, so loop back. */
   }

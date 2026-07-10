@@ -23,6 +23,7 @@ __init_tls_base
 __letf2
 __lttf2
 __netf2
+__stack_high
 __subtask_cancel
 __subtask_drop
 __subtf3
@@ -159,6 +160,12 @@ filesystem_stream_u8__drop_writable
 filesystem_stream_u8__new
 filesystem_stream_u8__read
 filesystem_stream_u8__write
+future_cancel_read_unit
+future_drop_readable_unit
+future_drop_writable_unit
+future_new_unit
+future_read_unit
+future_write_unit
 sockets_future_result_void_error_code__cancel_read
 sockets_future_result_void_error_code__cancel_write
 sockets_future_result_void_error_code__drop_readable

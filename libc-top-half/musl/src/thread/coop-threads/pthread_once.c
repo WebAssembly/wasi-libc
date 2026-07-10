@@ -1,4 +1,5 @@
 #include "pthread_impl.h"
+#include <assert.h>
 enum {
   PTHREAD_ONCE_STATE_NOT_RUN = 0,
   PTHREAD_ONCE_STATE_RUNNING = 1,
@@ -34,7 +35,9 @@ int __pthread_once(pthread_once_t *control, void (*init)(void)) {
 
   /* Another thread is initializing, wait for completion */
   while (*control == PTHREAD_ONCE_STATE_RUNNING) {
-    __waitlist_wait_on(&all_waiters);
+    int rc = __waitlist_wait_on(&all_waiters, NULL, NULL);
+    (void)rc;
+    assert(rc == 0);
   }
 
   return 0;

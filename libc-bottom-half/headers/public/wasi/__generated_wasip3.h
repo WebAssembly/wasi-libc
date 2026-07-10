@@ -1066,7 +1066,7 @@ extern monotonic_clock_mark_t monotonic_clock_now(void);
 // corresponding to a clock tick.
 extern monotonic_clock_duration_t monotonic_clock_get_resolution(void);
 // Wait until the specified mark has occurred.
-extern void monotonic_clock_wait_until(monotonic_clock_mark_t when);
+extern wasip3_subtask_status_t monotonic_clock_wait_until(monotonic_clock_mark_t when);
 // Wait for the specified duration to elapse.
 extern wasip3_subtask_status_t monotonic_clock_wait_for(monotonic_clock_duration_t how_long);
 

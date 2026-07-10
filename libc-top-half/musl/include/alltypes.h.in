@@ -111,8 +111,8 @@ TYPEDEF struct { union { int __i[sizeof(long)==8?14:9]; volatile int __vi[sizeof
 struct __waitlist_node;
 TYPEDEF struct { int _m_type; int _m_lock; int _m_count; struct __waitlist_node *_m_waiters; } pthread_mutex_t;
 TYPEDEF struct { int _m_type; int _m_lock; int _m_count; struct __waitlist_node *_m_waiters; } mtx_t;
-TYPEDEF struct { struct __waitlist_node *_c_waiters; } pthread_cond_t;
-TYPEDEF struct { struct __waitlist_node *_c_waiters; } cnd_t;
+TYPEDEF struct { struct __waitlist_node *_c_waiters; int _c_clock; } pthread_cond_t;
+TYPEDEF struct { struct __waitlist_node *_c_waiters; int _c_clock; } cnd_t;
 TYPEDEF struct { long long _rw_lock; struct __waitlist_node *_rw_waiters; } pthread_rwlock_t;
 TYPEDEF struct { int _b_limit; int _b_count; struct __waitlist_node *_b_waiters; } pthread_barrier_t;
 #else

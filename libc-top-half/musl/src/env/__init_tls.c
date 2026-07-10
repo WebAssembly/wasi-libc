@@ -8,6 +8,7 @@
 #endif
 #include <string.h>
 #include <stddef.h>
+#include <assert.h>
 #include "pthread_impl.h"
 #include "libc.h"
 #include "atomic.h"
@@ -86,9 +87,6 @@ static inline struct stack_bounds get_stack_bounds()
 	return bounds;
 }
 
-void __wasi_init_tp() {
-	__init_tp((void *)__get_tp());
-}
 #endif
 
 int __init_tp(void *p)
@@ -156,7 +154,7 @@ static struct tls_module main_tls;
 extern void __wasm_init_tls(void*);
 #endif
 
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
+#if defined(_REENTRANT) && !defined(__wasi_cooperative_threads__)
 void *__copy_tls(unsigned char *mem)
 {
 #ifdef __wasilibc_unmodified_upstream
@@ -197,14 +195,9 @@ void *__copy_tls(unsigned char *mem)
 	mem += tls_align;
 	mem -= (uintptr_t)mem & (tls_align-1);
 	__wasm_init_tls(mem);
-	#ifdef __wasi_cooperative_threads__
-	void __wasm_set_tls_base(volatile void *ptr);
-	__wasm_set_tls_base(tls_base);
-	#else
   	__asm__("local.get %0\n"
 			"global.set __tls_base\n"
 			:: "r"(tls_base));
-	#endif
 	return mem;
 #endif
 }
@@ -293,11 +286,43 @@ static void static_init_tls(size_t *aux)
 weak_alias(static_init_tls, __init_tls);
 #endif
 
-#ifdef _REENTRANT
-void* __allocate_tls() {
-	void* mem;
-	if (posix_memalign(&mem, __builtin_wasm_tls_align(), __builtin_wasm_tls_size()) != 0)
-          __builtin_trap();
-	return mem;
+#ifdef __wasi_cooperative_threads__
+// Entrypoint for all new async tasks, invoked from `__wasm_init_async_task`.
+//
+// This is responsible for allocating a new stack for this async task in
+// addition to initializing TLS. TLS right now is stored at the top of the
+// stack.
+hidden void* __wasilibc_init_async_task(void) {
+  // Attempt to use the same stack size as the LLD-initialized stack (as
+  // reported by `get_stack_bounds`). If that failed (e.g. in PIC) mode then
+  // choose a best-effort constant.
+  //
+  // TODO(wasip3): should make this constant configurable.
+  size_t stack_size = get_stack_bounds().size;
+  if (stack_size == 0)
+    stack_size = 131072;
+
+  // Allocate the stack, trapping if allocation fails.
+  //
+  // FIXME(#810) this is never deallocated.
+  void* task_stack = malloc(stack_size);
+  if (task_stack == NULL)
+    __builtin_trap();
+
+  // TLS is stored at the top of the stack, and its initial address is
+  // aligned-down based on its requirement. Note that `__wasm_init_tls` serves
+  // double-duty of initializing using `memory.init` to initialize TLS while
+  // additionally setting the TLS base for this task.
+  uintptr_t stack_top = (uintptr_t)task_stack + stack_size;
+  uintptr_t tls_base_unaligned = stack_top - __builtin_wasm_tls_size();
+  uintptr_t tls_base = tls_base_unaligned & -__builtin_wasm_tls_align();
+  assert(tls_base >= (uintptr_t) task_stack);
+  __wasm_init_tls((void*)tls_base);
+
+  // The stack itself is always 16-byte aligned, so align down as necessary.
+  // Return this so the assembly shim can set this as the current stack pointer.
+  uintptr_t stack_init_aligned = tls_base & -16;
+  assert(stack_init_aligned >= (uintptr_t) task_stack);
+  return (void*) stack_init_aligned;
 }
 #endif

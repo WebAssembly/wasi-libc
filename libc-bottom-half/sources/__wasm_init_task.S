@@ -4,16 +4,13 @@
 
   .globaltype  __init_stack_pointer, i32, immutable
   .functype   __wasm_set_stack_pointer (i32) -> ()
+  .globl __wasm_set_stack_pointer
 
 #ifdef __wasi_cooperative_threads__
   .globaltype __init_tls_base, i32, immutable
   .functype   __wasm_set_tls_base (i32) -> ()
-  .globaltype __tls_size, i32, immutable
-  .globaltype __tls_align, i32, immutable
-  .functype    malloc (i32) -> (i32)
-  .functype   __copy_tls (i32) -> (i32)
-  .functype   __allocate_tls () -> (i32)
-  .functype  __wasi_init_tp() -> ()
+  .functype   __wasilibc_init_async_task () -> (i32)
+  .functype   __wasi_init_tp () -> ()
 #endif
 
   .globl  __wasm_init_task
@@ -27,20 +24,26 @@
 __wasm_init_task:
   .functype  __wasm_init_task () -> ()
 
+  // Synchronous tasks will return before anything else can enter this
+  // component, so use the initial stack for this task.
   global.get   __init_stack_pointer
   call __wasm_set_stack_pointer
 
 #ifdef __wasi_cooperative_threads__
-
+  // For synchronous tasks in coop threads they inherit the same TLS as the
+  // original "main thread" that started the module.
+  //
+  // FIXME(#819) - the `__init_tls_base` global isn't correct right now, so
+  // use the `__stack_high` symbol as a kludge workaround for test while things
+  // are broken. Note that `__stack_high` isn't defined in PIC mode though, but
+  // coop threads are currently otherwise broken with PIC (#813) so there's
+  // other work to do there.
+#ifdef __PIC__
   global.get   __init_tls_base
+#else
+  i32.const __stack_high
+#endif
   call __wasm_set_tls_base
-
-  # Allocate a new TLS area
-  call __allocate_tls
-  call __copy_tls
-  call __wasm_set_tls_base
-
-  call __wasi_init_tp
 #endif
 
   end_function
@@ -48,31 +51,24 @@ __wasm_init_task:
 __wasm_init_async_task:
   .functype  __wasm_init_async_task () -> ()
 
-#ifdef __wasi_cooperative_threads__
-  # malloc and __init_tls may use the stack pointer and TLS base, so set those first
-  # to the statically-allocated values used for synchronous tasks.
+  // Setup a temporary stack for this task to invoke `malloc` on. Note that if
+  // threading is disabled then this is the actual stack of this task since no
+  // other tasks can enter while this is blocked and/or actively running.
   global.get   __init_stack_pointer
   call __wasm_set_stack_pointer
 
+#ifdef __wasi_cooperative_threads__
+  // Setup the initial TLS from the "main thread" in case `malloc` uses TLS.
+  // This won't be the TLS used by this task, however, in the long run.
   global.get   __init_tls_base
   call __wasm_set_tls_base
 
-  # Allocate a new stack
-  # Constant copied from __default_stacksize, TODO(wasip3) find a way
-  # to reference this constant without linking failing for shared libraries,
-  # i.e. a position-independent data reference.
-  i32.const 131072
-  call malloc
+  // Defer to the C code in wasi-libc to finish initialization. This'll
+  // allocate a new stack, setup this thread's TLS block, etc. The return
+  // value of the function is what to use a the stack pointer for the rest of
+  // this async task.
+  call __wasilibc_init_async_task
   call __wasm_set_stack_pointer
-
-  # Allocate a new TLS area
-  call __allocate_tls
-  call __copy_tls
-  call __wasm_set_tls_base
-
-  call __wasi_init_tp
-#else
-  call __wasm_init_task
 #endif
 
   end_function

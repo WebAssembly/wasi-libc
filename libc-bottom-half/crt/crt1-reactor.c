@@ -1,7 +1,6 @@
 #if defined(_REENTRANT)
 #include <stdatomic.h>
 #endif
-extern void __wasi_init_tp(void);
 extern void __wasm_call_ctors(void);
 
 #ifdef __wasm_libcall_thread_context__
@@ -27,7 +26,6 @@ __attribute__((export_name("_initialize"))) void _initialize(void) {
   }
   initialized = 1;
 #endif
-  __wasi_init_tp();
 
   // The linker synthesizes this to call constructors.
   __wasm_call_ctors();

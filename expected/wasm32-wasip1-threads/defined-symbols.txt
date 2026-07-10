@@ -13,7 +13,6 @@ __SIG_ERR
 __SIG_IGN
 __acquire_ptc
 __aio_close
-__allocate_tls
 __asctime_r
 __assert_fail
 __c_dot_utf8
@@ -334,7 +333,6 @@ __wasi_fd_seek
 __wasi_fd_sync
 __wasi_fd_tell
 __wasi_fd_write
-__wasi_init_tp
 __wasi_path_create_directory
 __wasi_path_filestat_get
 __wasi_path_filestat_set_times

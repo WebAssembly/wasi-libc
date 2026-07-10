@@ -129,12 +129,20 @@ enum {
 #define DTP_OFFSET 0
 #endif
 
+hidden int __init_tp(void *);
+
 #ifdef TLS_ABOVE_TP
 #define TP_ADJ(p) ((char *)(p) + sizeof(struct pthread) + TP_OFFSET)
 #define __pthread_self() ((pthread_t)(__get_tp() - sizeof(struct __pthread) - TP_OFFSET))
+#error "wasi-libc doesn't support this setting"
 #else
 #define TP_ADJ(p) (p)
-#define __pthread_self() ((pthread_t)__get_tp())
+static inline pthread_t __pthread_self() {
+  pthread_t ret = (pthread_t) __get_tp();
+  if (ret->tid == 0)
+    __init_tp(ret);
+  return ret;
+}
 #endif
 
 #ifndef tls_mod_off_t
@@ -154,8 +162,9 @@ enum {
 	 0x80000000 })
 
 void *__tls_get_addr(tls_mod_off_t *);
-hidden int __init_tp(void *);
+#if defined(_REENTRANT) && !defined(__wasi_cooperative_threads__)
 hidden void *__copy_tls(unsigned char *);
+#endif
 hidden void __reset_tls();
 
 hidden void __membarrier_init(void);

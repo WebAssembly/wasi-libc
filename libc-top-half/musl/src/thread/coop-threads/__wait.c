@@ -90,6 +90,7 @@ static int wait_timeout(struct __waitlist_node **list, clockid_t clk,
       return EINVAL;
     status = monotonic_clock_wait_until(deadline);
   } else {
+    assert(clk == CLOCK_REALTIME);
     // FIXME(WebAssembly/WASI#857): `CLOCK_REALTIME` is not supported by the
     // WASI interfaces. It's the default for `pthread_*` primitives, however, so
     // it kind of needs to be supported. Calculate the diff in seconds between

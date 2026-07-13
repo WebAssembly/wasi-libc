@@ -83,7 +83,7 @@ static int tcp_add(sockets_own_tcp_socket_t socket,
 
   descriptor_table_entry_t entry;
   entry.vtable = &tcp_vtable;
-  entry.data = tcp;
+  entry.data = &tcp->refcnt;
   if (out)
     *out = tcp;
   return descriptor_table_insert(entry);

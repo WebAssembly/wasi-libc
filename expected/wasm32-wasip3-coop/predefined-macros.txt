@@ -2989,6 +2989,7 @@
 #define __SIZE_TYPE__ long unsigned int
 #define __SIZE_WIDTH__ 32
 #define __STDARG_H 
+#define __STDC_DEFER_TS25755__ 1
 #define __STDC_HOSTED__ 1
 #define __STDC_IEC_559__ 1
 #define __STDC_ISO_10646__ 201206L

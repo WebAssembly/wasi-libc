@@ -8,6 +8,7 @@
 #include <string.h>
 
 #ifndef __wasip1__
+#include <stddefer.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #endif
@@ -22,12 +23,16 @@ int __wasilibc_nocwd_renameat(int oldfd, const char *old, int newfd, const char 
 #elif defined(__wasip2__) || defined(__wasip3__)
   // Translate the file descriptors to internal handles
   filesystem_borrow_descriptor_t old_file_handle;
-  if (fd_to_file_handle(oldfd, &old_file_handle) < 0)
+  descriptor_table_entry_t old_entry;
+  if (fd_to_file_handle(oldfd, &old_entry, &old_file_handle) < 0)
     return -1;
+  defer descriptor_table_entry_dec(old_entry);
 
   filesystem_borrow_descriptor_t new_file_handle;
-  if (fd_to_file_handle(newfd, &new_file_handle) < 0)
+  descriptor_table_entry_t new_entry;
+  if (fd_to_file_handle(newfd, &new_entry, &new_file_handle) < 0)
     return -1;
+  defer descriptor_table_entry_dec(new_entry);
 
   // Convert the strings into WASI strings
   wasi_string_t old_path, new_path;

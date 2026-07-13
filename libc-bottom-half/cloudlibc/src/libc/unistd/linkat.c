@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #ifndef __wasip1__
+#include <stddefer.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #endif
@@ -29,10 +30,14 @@ int __wasilibc_nocwd_linkat(int fd1, const char *path1, int fd2, const char *pat
 #elif defined(__wasip2__) || defined(__wasip3__)
   // Translate the file descriptors to internal handles
   filesystem_borrow_descriptor_t file_handle1, file_handle2;
-  if (fd_to_file_handle(fd1, &file_handle1) < 0)
+  descriptor_table_entry_t entry1;
+  if (fd_to_file_handle(fd1, &entry1, &file_handle1) < 0)
     return -1;
-  if (fd_to_file_handle(fd2, &file_handle2) < 0)
+  defer descriptor_table_entry_dec(entry1);
+  descriptor_table_entry_t entry2;
+  if (fd_to_file_handle(fd2, &entry2, &file_handle2) < 0)
     return -1;
+  defer descriptor_table_entry_dec(entry2);
 
   // Convert the strings into WASI strings
   wasi_string_t path1_wasi, path2_wasi;

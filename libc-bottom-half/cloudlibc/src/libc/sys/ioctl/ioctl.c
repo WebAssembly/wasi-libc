@@ -9,6 +9,10 @@
 #include <wasi/api.h>
 #include <wasi/descriptor_table.h>
 
+#ifndef __wasip1__
+#include <stddefer.h>
+#endif
+
 int ioctl(int fildes, int request, ...) {
   switch (request) {
     case FIONREAD: {
@@ -90,17 +94,20 @@ int ioctl(int fildes, int request, ...) {
       }
       return 0;
 #elif defined(__wasip2__) || defined(__wasip3__) 
-      descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
+      descriptor_table_entry_t entry;
+      if (descriptor_table_get(fildes, &entry) < 0)
+        return -1;
+      defer descriptor_table_entry_dec(entry);
       va_list ap;
       va_start(ap, request);
       bool blocking = *va_arg(ap, const int *) == 0;
       va_end(ap);
 
-      if (!entry->vtable->set_blocking) {
+      if (!entry.vtable->set_blocking) {
         errno = EINVAL;
         return -1;
       }
-      return entry->vtable->set_blocking(entry->data, blocking);
+      return entry.vtable->set_blocking(entry.data, blocking);
 #else
 # error "Unknown WASI version"
 #endif

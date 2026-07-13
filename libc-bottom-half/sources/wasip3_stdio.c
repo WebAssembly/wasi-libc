@@ -16,6 +16,7 @@ typedef stdout_future_result_void_error_code_t (*stdout_stream_func_t)(
     stdin_stream_u8_t data);
 
 typedef struct {
+  descriptor_refcnt_t refcnt;
   wasip3_io_state_t input;
   stdin_future_result_void_error_code_t input_result;
   // tristate: zero=unknown, valid handle=yes, -1=no
@@ -23,6 +24,7 @@ typedef struct {
 } stdin3_t;
 
 typedef struct {
+  descriptor_refcnt_t refcnt;
   // contains stream, result storage and result subtask
   stdout_future_result_void_error_code_t result;
   wasip3_io_state_t output;
@@ -201,7 +203,7 @@ static int stdio_add_input() {
   }
   descriptor_table_entry_t entry;
   entry.vtable = &stdin3_vtable;
-  entry.data = stdio;
+  entry.data = &stdio->refcnt;
   return descriptor_table_insert(entry);
 }
 
@@ -218,7 +220,7 @@ static int stdio3_add_output(
 
   descriptor_table_entry_t entry;
   entry.vtable = &stdout3_vtable;
-  entry.data = stdio;
+  entry.data = &stdio->refcnt;
   return descriptor_table_insert(entry);
 }
 

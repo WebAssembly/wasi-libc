@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #ifndef __wasip1__
+#include <stddefer.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #endif
@@ -27,8 +28,10 @@ int ftruncate(int fildes, off_t length) {
 #elif defined(__wasip2__) || defined(__wasip3__)
   // Translate the file descriptor to an internal file handle
   filesystem_borrow_descriptor_t file_handle;
-  if (fd_to_file_handle(fildes, &file_handle) < 0)
+  descriptor_table_entry_t entry;
+  if (fd_to_file_handle(fildes, &entry, &file_handle) < 0)
     return -1;
+  defer descriptor_table_entry_dec(entry);
 
   filesystem_error_code_t error_code;
   if (!filesystem_method_descriptor_set_size(file_handle, length, &error_code)) {

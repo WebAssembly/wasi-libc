@@ -457,12 +457,26 @@ if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(clear_fds.c FS)
 endif()
 
-if (CMAKE_C_COMPILER_VERSION VERSION_GREATER 20.0)
-  # TODO: can't build a shared library with setjmp just yet because `wasm-ld`
-  # doesn't work well with tags exported from shared libraries. Probably related
-  # to llvm-project/llvm#188367 and/or llvm/llvm-project#188120
-  add_wasilibc_test(setjmp.c SETJMP NOSHARED)
-  expect_fail_under_v8(setjmp.wasm)
+if (
+  # Setjmp currently requires llvm 20+ for the support necessary in wasi-libc.
+  CMAKE_C_COMPILER_VERSION VERSION_GREATER 20.0
+  # LTO + LLVM 22 is buggy
+  AND (
+    (NOT LTO) OR
+    (CMAKE_C_COMPILER_VERSION VERSION_LESS 22.0) OR
+    (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 23.0)
+  )
+  # Currently not setup to run this test
+  AND NOT TEST_WITH_V8
+)
+  # LLVM 22-and-prior can't build a shared library with setjmp just yet because
+  # `wasm-ld` didn't work well with tags exported from shared libraries.
+  # Supported with LLVM 23-and-later
+  set(noshared NOSHARED)
+  if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 23.0)
+    set(noshared)
+  endif()
+  add_wasilibc_test(setjmp.c SETJMP ${noshared})
 endif()
 
 # This test works for single-threaded targets too

@@ -307,6 +307,7 @@ __wasilibc_add_tcp_socket
 __wasilibc_add_udp_socket
 __wasilibc_cwd
 __wasilibc_deinitialize_environ
+__wasilibc_descriptor_deallocate
 __wasilibc_dttoif
 __wasilibc_ensure_environ
 __wasilibc_environ
@@ -552,7 +553,7 @@ ctanl
 ctime
 ctime_r
 descriptor_table_clear
-descriptor_table_get_ref
+descriptor_table_get
 descriptor_table_insert
 descriptor_table_remove
 descriptor_table_renumber

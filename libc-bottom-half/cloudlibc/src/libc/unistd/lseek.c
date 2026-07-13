@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #ifndef __wasip1__
+#include <stddefer.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
@@ -31,14 +32,15 @@ off_t __lseek(int fildes, off_t offset, int whence) {
   return new_offset;
 #elif defined(__wasip2__) || defined(__wasip3__)
   // Look up a stream for fildes
-  descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
-  if (!entry)
+  descriptor_table_entry_t entry;
+  if (descriptor_table_get(fildes, &entry) < 0)
     return -1;
-  if (!entry->vtable->seek) {
+  defer descriptor_table_entry_dec(entry);
+  if (!entry.vtable->seek) {
     errno = EINVAL;
     return -1;
   }
-  return entry->vtable->seek(entry->data, offset, whence);
+  return entry.vtable->seek(entry.data, offset, whence);
 #else
 # error "Unknown WASI version"
 #endif

@@ -118,6 +118,7 @@ typedef struct {
 } udp_socket_state_t;
 
 typedef struct {
+  descriptor_refcnt_t refcnt;
   sockets_own_udp_socket_t socket;
 #ifdef __wasip2__
   // Lazily initialized as-needed pollable.
@@ -146,7 +147,7 @@ int __wasilibc_add_udp_socket(sockets_own_udp_socket_t socket,
 
   descriptor_table_entry_t entry;
   entry.vtable = &udp_vtable;
-  entry.data = udp;
+  entry.data = &udp->refcnt;
   return descriptor_table_insert(entry);
 }
 

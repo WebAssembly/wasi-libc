@@ -8,6 +8,7 @@
 #include <wasi/api.h>
 
 #ifndef __wasip1__
+#include <stddefer.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #endif
@@ -32,8 +33,10 @@ int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
   return __wasi_fd_advise(fd, offset, len, advice);
 #elif defined(__wasip2__) || defined(__wasip3__)
   filesystem_borrow_descriptor_t file_handle;
-  if (fd_to_file_handle(fd, &file_handle) < 0)
+  descriptor_table_entry_t entry;
+  if (fd_to_file_handle(fd, &entry, &file_handle) < 0)
     return EBADF;
+  defer descriptor_table_entry_dec(entry);
   if (file_handle.__handle == 0) {
     errno = EBADF;
     return EBADF;

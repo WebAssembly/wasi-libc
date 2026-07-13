@@ -231,10 +231,16 @@ typedef struct descriptor_vtable_t {
 #endif // __wasip2__
 } descriptor_vtable_t;
 
+/// Reference count structure that must be at the beginning of all data passed
+/// to `descriptor_table_insert`.
+typedef struct {
+  unsigned cnt;
+} descriptor_refcnt_t;
+
 /// A "fat pointer" which is placed inside of the descriptor table.
 typedef struct {
   /// Arbitrary descriptor-specific data passed to `vtable` function pointer.
-  void *data;
+  descriptor_refcnt_t *data;
   /// Definition of various operations for this descriptor.
   descriptor_vtable_t *vtable;
 } descriptor_table_entry_t;
@@ -242,14 +248,18 @@ typedef struct {
 /// Inserts the `entry` provided into the descriptor table, returning the
 /// integer file descriptor used to refer to it.
 ///
+/// Note that `entry` is expected to have a reference count of 0 (freshly
+/// initialized), and it'll get initialized within this function.
+///
 /// On failure returns -1, sets `errno`, and runs `entry`'s destructor.
 int descriptor_table_insert(descriptor_table_entry_t entry);
 
 /// Looks up a descriptor by its file descriptor.
 ///
-/// On success returns a non-null value of the entry in the table. On failure
-/// returns `NULL` and sets errno.
-descriptor_table_entry_t *descriptor_table_get_ref(int fd);
+/// On success returns 0 and `entry` is filled in with a strong reference to
+/// the new entry. Callers must call `descriptor_table_entry_dec` when they're
+/// done with the entry. On failure -1 is returned an `errno` is set.
+int descriptor_table_get(int fd, descriptor_table_entry_t *entry);
 
 /// Removes the specified file descriptor from the table.
 ///
@@ -266,6 +276,35 @@ int descriptor_table_renumber(int fd, int newfd);
 
 /// Removes all file descriptors from the table, running their destructors.
 void descriptor_table_clear();
+
+/// Increment the reference count of the `entry` provided.
+static inline void descriptor_table_entry_inc(descriptor_table_entry_t entry) {
+  assert(entry.data->cnt > 0);
+  entry.data->cnt++;
+}
+
+/// Slow-path deallocation routine of `descriptor_table_entry_dec`.
+///
+/// Assumes refcount is already 0.
+void __wasilibc_descriptor_deallocate(descriptor_table_entry_t entry);
+
+/// Decrement the reference count of the `entry` provided, running deallocation
+/// if the cnt reaches 0.
+static inline void descriptor_table_entry_dec(descriptor_table_entry_t entry) {
+  assert(entry.data->cnt > 0);
+  entry.data->cnt--;
+  if (entry.data->cnt == 0)
+    __wasilibc_descriptor_deallocate(entry);
+}
+
+// Helper function used at program-exit time to assert that there are no
+// descriptor leaks when libc is itself built in debug mode. Note that this is
+// a noop when compiled with `-DNDEBUG`.
+#ifdef NDEBUG
+static inline void __wasilibc_assert_no_descriptor_leaks(void) {}
+#else
+void __wasilibc_assert_no_descriptor_leaks(void);
+#endif
 
 #endif // __wasip1__
 

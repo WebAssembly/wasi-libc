@@ -240,6 +240,15 @@ if(ENABLE_COOP_THREADS)
 else()
 endif()
 
+# In wasip2/wasip3 code we're using `defer { ... }`, so make sure that exists.
+include(CheckCCompilerFlag)
+check_c_compiler_flag(-fdefer-ts HAVE_FDEFER_TS)
+if(HAVE_FDEFER_TS)
+  add_compile_options(-fdefer-ts)
+elseif(NOT WASI STREQUAL "p1")
+  message(FATAL_ERROR "wasip2/wasip3 require clang 22 or later for `-fdefer-ts`")
+endif()
+
 # =============================================================================
 # Helper functions for adding libraries.
 

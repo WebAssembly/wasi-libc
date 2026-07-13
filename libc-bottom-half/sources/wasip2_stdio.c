@@ -9,6 +9,7 @@
 #ifdef __wasip2__
 
 typedef struct {
+  descriptor_refcnt_t refcnt;
   int fd;
   // Lazily initialized streams. Depending on `fd` these may never be
   // initialized, for example stdin can never have an output stream.
@@ -138,7 +139,7 @@ static int stdio_add(int fd) {
 
   descriptor_table_entry_t entry;
   entry.vtable = &stdio_vtable;
-  entry.data = stdio;
+  entry.data = &stdio->refcnt;
   return descriptor_table_insert(entry);
 }
 

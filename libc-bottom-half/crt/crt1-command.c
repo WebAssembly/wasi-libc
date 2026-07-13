@@ -3,6 +3,7 @@
 #endif
 
 #include <wasi/api.h>
+#include <wasi/descriptor_table.h>
 
 extern void __wasm_call_ctors(void);
 extern int __main_void(void);
@@ -69,6 +70,7 @@ __attribute__((export_name("wasi:cli/run@0.3.0#run"))) int _start(void)
     __wasi_proc_exit(r);
   }
 #elif defined(__wasip2__) || defined(__wasip3__)
+  __wasilibc_assert_no_descriptor_leaks();
   return r != 0;
 #else
 #error "Unsupported WASI version"

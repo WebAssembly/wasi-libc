@@ -7,6 +7,7 @@
 
 #ifndef __wasip1__
 #include <common/errors.h>
+#include <stddefer.h>
 #include <wasi/file_utils.h>
 #endif
 
@@ -30,15 +31,16 @@ int __isatty(int fd) {
   return 1;
 #elif defined(__wasip2__) || defined(__wasip3__)
   // Translate the file descriptor into an internal handle
-  descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
-  if (!entry)
+  descriptor_table_entry_t entry;
+  if (descriptor_table_get(fd, &entry) < 0)
     return 0;
-  if (!entry->vtable->isatty) {
+  defer descriptor_table_entry_dec(entry);
+  if (!entry.vtable->isatty) {
     errno = ENOTTY;
     return 0;
   }
 
-  return entry->vtable->isatty(entry->data);
+  return entry.vtable->isatty(entry.data);
 #else
 #error "Unsupported WASI version"
 #endif

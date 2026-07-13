@@ -9,6 +9,10 @@
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
 
+#ifndef __wasip1__
+#include <stddefer.h>
+#endif
+
 #if defined(__wasip1__)
 static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
   // Construct events for poll().
@@ -134,6 +138,7 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
 
 typedef struct {
   struct pollfd *pollfd;
+  descriptor_table_entry_t entry;
   short events;
 } state_t;
 
@@ -144,7 +149,8 @@ struct poll_state_t {
   size_t cap;
 
   int event_count;
-  struct pollfd *pollfd;
+  struct pollfd *cur_pollfd;
+  descriptor_table_entry_t *cur_entry;
 };
 
 int __wasilibc_poll_add(poll_state_t *state, short events,
@@ -153,19 +159,24 @@ int __wasilibc_poll_add(poll_state_t *state, short events,
     errno = ENOMEM;
     return -1;
   }
-  state->states[state->len].pollfd = state->pollfd;
+  assert(state->cur_pollfd);
+  assert(state->cur_entry);
+  state->states[state->len].pollfd = state->cur_pollfd;
   state->states[state->len].events = events;
+  descriptor_table_entry_inc(*state->cur_entry);
+  state->states[state->len].entry = *state->cur_entry;
   state->pollables[state->len] = pollable;
   state->len += 1;
   return 0;
 }
 
 void __wasilibc_poll_ready(poll_state_t *state, short events) {
+  assert(state->cur_pollfd);
   if (events != 0) {
-    if (state->pollfd->revents == 0) {
+    if (state->cur_pollfd->revents == 0) {
       ++state->event_count;
     }
-    state->pollfd->revents |= events;
+    state->cur_pollfd->revents |= events;
   }
 }
 
@@ -181,23 +192,33 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
   state.len = 0;
   state.cap = max_pollables;
   state.event_count = 0;
-  state.pollfd = fds;
+  state.cur_pollfd = NULL;
+  state.cur_entry = NULL;
+
+  defer {
+    for (size_t i = 0; i < state.len; i++)
+      descriptor_table_entry_dec(state.states[i].entry);
+  }
 
   for (size_t i = 0; i < nfds; ++i) {
     struct pollfd *pollfd = fds + i;
     if (pollfd->fd < 0)
       continue;
-    state.pollfd = pollfd;
-    descriptor_table_entry_t *entry = descriptor_table_get_ref(pollfd->fd);
-    if (!entry) {
-      errno = EBADF;
+    descriptor_table_entry_t entry;
+    if (descriptor_table_get(pollfd->fd, &entry) < 0)
       return -1;
+    state.cur_pollfd = pollfd;
+    state.cur_entry = &entry;
+    defer {
+      state.cur_pollfd = NULL;
+      state.cur_entry = NULL;
+      descriptor_table_entry_dec(entry);
     }
 
     // If this descriptor has a custom registration function then
     // use that exclusively.
-    if (entry->vtable->poll_register) {
-      if (entry->vtable->poll_register(entry->data, &state, pollfd->events) < 0)
+    if (entry.vtable->poll_register) {
+      if (entry.vtable->poll_register(entry.data, &state, pollfd->events) < 0)
         return -1;
       continue;
     }
@@ -213,9 +234,9 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
     }
 
     if (events & POLLRDNORM) {
-      if (entry->vtable->get_read_stream) {
+      if (entry.vtable->get_read_stream) {
         wasi_read_t read;
-        if (entry->vtable->get_read_stream(entry->data, &read) < 0)
+        if (entry.vtable->get_read_stream(entry.data, &read) < 0)
           return -1;
         if (__wasilibc_poll_add_input_stream(&state, read.input, read.pollable) < 0)
           return -1;
@@ -226,9 +247,9 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
     }
 
     if (events & POLLWRNORM) {
-      if (entry->vtable->get_write_stream) {
+      if (entry.vtable->get_write_stream) {
         wasi_write_t write;
-        if (entry->vtable->get_write_stream(entry->data, &write) < 0)
+        if (entry.vtable->get_write_stream(entry.data, &write) < 0)
           return -1;
         if (__wasilibc_poll_add_output_stream(&state, write.output, write.pollable) < 0)
           return -1;
@@ -243,37 +264,36 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
     return state.event_count;
   }
 
-  poll_own_pollable_t timeout_pollable;
+  poll_own_pollable_t timeout_pollable = {0};
   size_t pollable_count = state.len;
   if (timeout >= 0) {
     timeout_pollable = monotonic_clock_subscribe_duration(
         ((monotonic_clock_duration_t)timeout) * 1000000);
     pollables[pollable_count++] = poll_borrow_pollable(timeout_pollable);
   }
+  defer {
+    if (timeout_pollable.__handle != 0)
+      poll_pollable_drop_own(timeout_pollable);
+  }
 
   wasip2_list_u32_t ready;
   poll_list_borrow_pollable_t list = {.ptr = pollables, .len = pollable_count};
   poll_poll(&list, &ready);
+  defer wasip2_list_u32_free(&ready);
 
   for (size_t i = 0; i < ready.len; ++i) {
     size_t index = ready.ptr[i];
     if (index >= state.len)
       continue;
     state_t *ready_state = &states[index];
-    state.pollfd = ready_state->pollfd;
-    descriptor_table_entry_t *entry =
-        descriptor_table_get_ref(ready_state->pollfd->fd);
+    descriptor_table_entry_t *entry = &ready_state->entry;
+    state.cur_pollfd = ready_state->pollfd;
+    state.cur_entry = entry;
     if (entry->vtable->poll_finish) {
       entry->vtable->poll_finish(entry->data, &state, ready_state->events);
     } else {
       __wasilibc_poll_ready(&state, ready_state->events);
     }
-  }
-
-  wasip2_list_u32_free(&ready);
-
-  if (timeout >= 0) {
-    poll_pollable_drop_own(timeout_pollable);
   }
 
   return state.event_count;
@@ -282,6 +302,7 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
 #elif defined(__wasip3__)
 
 typedef struct {
+  descriptor_table_entry_t entry;
   struct pollfd *pollfd;
   uint32_t waitable;
   // Callback/data pointer to invoke when `waitable` receives an event, and that
@@ -298,7 +319,8 @@ struct poll_state_t {
   wasip3_waitable_set_t set;
 
   int event_count;
-  struct pollfd *pollfd;
+  struct pollfd *cur_pollfd;
+  descriptor_table_entry_t *cur_entry;
 };
 
 int __wasilibc_poll_add(poll_state_t *state, uint32_t waitable,
@@ -307,22 +329,27 @@ int __wasilibc_poll_add(poll_state_t *state, uint32_t waitable,
     errno = ENOMEM;
     return -1;
   }
-  state->states[state->len].pollfd = state->pollfd;
+  assert(state->cur_pollfd);
+  assert(state->cur_entry);
+  state->states[state->len].pollfd = state->cur_pollfd;
   state->states[state->len].waitable = waitable;
   state->states[state->len].ready = ready;
   state->states[state->len].ready_data = ready_data;
+  descriptor_table_entry_inc(*state->cur_entry);
+  state->states[state->len].entry = *state->cur_entry;
   wasip3_waitable_join(waitable, state->set);
   state->len += 1;
   return 0;
 }
 
 void __wasilibc_poll_ready(poll_state_t *state, short events) {
-  events = events & state->pollfd->events;
+  assert(state->cur_pollfd);
+  events = events & state->cur_pollfd->events;
   if (events != 0) {
-    if (state->pollfd->revents == 0) {
+    if (state->cur_pollfd->revents == 0) {
       ++state->event_count;
     }
-    state->pollfd->revents |= events;
+    state->cur_pollfd->revents |= events;
   }
 }
 
@@ -339,27 +366,53 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
   state.len = 0;
   state.cap = max_pollables;
   state.event_count = 0;
-  state.pollfd = fds;
+  state.cur_pollfd = NULL;
+  state.cur_entry = NULL;
 
-  int ret = -1;
+  // Schedule cleanup of `state`, notably every waitable that's still in it, all
+  // the entries, and then the waitable-set itself.
+  defer {
+    for (size_t i = 0; i < state.len; i++) {
+      uint32_t waitable = state.states[i].waitable;
+      if (waitable)
+        wasip3_waitable_join(waitable, 0);
+      descriptor_table_entry_dec(state.states[i].entry);
+    }
+    wasip3_waitable_set_drop(state.set);
+  }
+
+  // Tracks the timeout, if any, and the subtask being used to wait on that.
+  // Additioanlly schedule cleanup of this subtask.
   wasip3_subtask_t timeout_subtask = 0;
+  defer {
+    if (timeout_subtask != 0) {
+      wasip3_waitable_join(timeout_subtask, 0);
+      wasip3_subtask_cancel(timeout_subtask);
+      wasip3_subtask_drop(timeout_subtask);
+    }
+  }
 
   for (size_t i = 0; i < nfds; ++i) {
     struct pollfd *pollfd = fds + i;
     if (pollfd->fd < 0)
       continue;
-    state.pollfd = pollfd;
-    descriptor_table_entry_t *entry = descriptor_table_get_ref(pollfd->fd);
-    if (!entry) {
-      errno = EBADF;
-      goto out;
+    descriptor_table_entry_t entry;
+    if (descriptor_table_get(pollfd->fd, &entry) < 0)
+      return -1;
+    defer descriptor_table_entry_dec(entry);
+
+    state.cur_pollfd = pollfd;
+    state.cur_entry = &entry;
+    defer {
+      state.cur_pollfd = NULL;
+      state.cur_entry = NULL;
     }
 
     // If this descriptor has a custom registration function then
     // use that exclusively.
-    if (entry->vtable->poll_register) {
-      if (entry->vtable->poll_register(entry->data, &state, pollfd->events) < 0)
-        goto out;
+    if (entry.vtable->poll_register) {
+      if (entry.vtable->poll_register(entry.data, &state, pollfd->events) < 0)
+        return -1;
       continue;
     }
 
@@ -370,32 +423,32 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
     // below, but everything else is unsupported.
     if (events & ~(POLLRDNORM | POLLWRNORM)) {
       errno = EOPNOTSUPP;
-      goto out;
+      return -1;
     }
 
     if (events & POLLRDNORM) {
-      if (entry->vtable->get_read_stream) {
+      if (entry.vtable->get_read_stream) {
         wasi_read_t read;
-        if (entry->vtable->get_read_stream(entry->data, &read) < 0)
-          goto out;
+        if (entry.vtable->get_read_stream(entry.data, &read) < 0)
+          return -1;
         if (__wasilibc_read_poll(read.state, &state) < 0)
-          goto out;
+          return -1;
       } else {
         errno = EOPNOTSUPP;
-        goto out;
+        return -1;
       }
     }
 
     if (events & POLLWRNORM) {
-      if (entry->vtable->get_write_stream) {
+      if (entry.vtable->get_write_stream) {
         wasi_write_t write;
-        if (entry->vtable->get_write_stream(entry->data, &write) < 0)
-          goto out;
+        if (entry.vtable->get_write_stream(entry.data, &write) < 0)
+          return -1;
         if (__wasilibc_write_poll(write.state, &state) < 0)
-          goto out;
+          return -1;
       } else {
         errno = EOPNOTSUPP;
-        goto out;
+        return -1;
       }
     }
   }
@@ -413,7 +466,8 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
   // Note that in `out`, the exit of this function, the subtask is cleaned up
   // if it's still in-progress.
   if (timeout > 0) {
-    wasip3_subtask_status_t status = monotonic_clock_wait_for(timeout * 1000000);
+    uint64_t timeout_ns = (uint64_t)timeout * 1000000;
+    wasip3_subtask_status_t status = monotonic_clock_wait_for(timeout_ns);
     if (WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_RETURNED) {
       timeout = 0;
     } else {
@@ -469,7 +523,7 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
         state_t *p = &state.states[i];
         if (p->waitable != event.waitable)
           continue;
-        state.pollfd = p->pollfd;
+        state.cur_pollfd = p->pollfd;
         // Remove this waitable from the `waitable-set` as the `ready`
         // operation might end up deleting the handle. Set the list here to 0
         // so it's not removed down below.
@@ -480,6 +534,7 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
         wasip3_waitable_join(p->waitable, 0);
         p->waitable = 0;
         p->ready(p->ready_data, &state, &event);
+        state.cur_pollfd = NULL;
       }
     }
 
@@ -489,22 +544,7 @@ static int poll_impl(struct pollfd *fds, size_t nfds, int timeout) {
     wasip3_waitable_set_poll(state.set, &event);
   }
 
-  ret = state.event_count;
-
-out:
-  if (timeout_subtask != 0) {
-    wasip3_waitable_join(timeout_subtask, 0);
-    wasip3_subtask_cancel(timeout_subtask);
-    wasip3_subtask_drop(timeout_subtask);
-  }
-  for (size_t i = 0; i < state.len; i++) {
-    uint32_t waitable = state.states[i].waitable;
-    if (waitable)
-      wasip3_waitable_join(waitable, 0);
-  }
-  wasip3_waitable_set_drop(state.set);
-
-  return ret;
+  return state.event_count;
 }
 
 #else

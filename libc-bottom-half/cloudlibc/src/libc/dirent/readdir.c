@@ -15,6 +15,7 @@
 #include <string.h>
 
 #ifndef __wasip1__
+#include <stddefer.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #endif
@@ -147,9 +148,19 @@ struct dirent *readdir(DIR *dirp) {
 }
 
 #elif defined(__wasip2__) || defined(__wasip3__)
-
-static int ensure_has_directory_stream(DIR *dirp, filesystem_borrow_descriptor_t *handle) {
-  if (fd_to_file_handle(dirp->fd, handle) < 0)
+// Ensures that `dirp` has the necessary streams prepared to start reading
+// directory entries.
+//
+// On success returns `entry`, the owned entry for this operation that must be
+// deallocated with `descriptor_table_entry_dec` when done, and `handle`, the
+// WASI file that's being used. Additionally `dirp`'s streams are filled and
+// ready for use.
+//
+// On failure returns -1 and `entry` need not be deallocated.
+static int ensure_has_directory_stream(DIR *dirp,
+                                       descriptor_table_entry_t *entry,
+                                       filesystem_borrow_descriptor_t *handle) {
+  if (fd_to_file_handle(dirp->fd, entry, handle) < 0)
     return -1;
 
 #ifdef __wasip2__
@@ -162,6 +173,7 @@ static int ensure_has_directory_stream(DIR *dirp, filesystem_borrow_descriptor_t
                                                         &error_code);
   if (!ok) {
     translate_error(&error_code);
+    descriptor_table_entry_dec(*entry);
     return -1;
   }
 #elif defined(__wasip3__)
@@ -176,9 +188,11 @@ static struct dirent *readdir_next(DIR *dirp) {
   filesystem_metadata_hash_value_t metadata;
   filesystem_error_code_t error_code;
   filesystem_borrow_descriptor_t dir_handle;
+  descriptor_table_entry_t entry;
 
-  if (ensure_has_directory_stream(dirp, &dir_handle) < 0)
+  if (ensure_has_directory_stream(dirp, &entry, &dir_handle) < 0)
     return NULL;
+  defer descriptor_table_entry_dec(entry);
 
   // Yield '.' first if the offset is 0. Note that `d_ino` is from the metadata
   // hash of the directory itself.

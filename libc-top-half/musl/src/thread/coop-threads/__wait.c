@@ -157,7 +157,7 @@ static int wait_timeout(struct __waitlist_node **list, clockid_t clk,
   wasip3_waitable_set_wait(ws, &event);
   __atomic_signal_fence(memory_order_seq_cst);
 
-  // Delegate based on what event happen. Note that each arm cancels the event
+  // Delegate based on what event happened. Note that each arm cancels the event
   // that didn't happen.
   if (event.event == WASIP3_EVENT_SUBTASK) {
     // If a subtask event happened, that means that the deadline was

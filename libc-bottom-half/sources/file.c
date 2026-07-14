@@ -1,16 +1,18 @@
+#include "libc/sys/stat/stat_impl.h"
+#include "lock.h"
 #include <assert.h>
 #include <common/errors.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stddefer.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file.h>
 #include <wasi/wasip2.h>
 #include <wasi/wasip3_block.h>
 
-#include "libc/sys/stat/stat_impl.h"
-
 typedef struct {
   descriptor_refcnt_t refcnt;
+  DECLARE_STRONG_LOCK(lock);
   filesystem_own_descriptor_t file_handle;
   // Current position in stream, relative to the beginning of the
   // *file_handle*, measured in bytes
@@ -36,6 +38,7 @@ typedef struct {
 
 static void file_close_streams(void *data) {
   file_t *file = (file_t *)data;
+
 #ifdef __wasip2__
   if (file->read_pollable.__handle != 0) {
     poll_pollable_drop_own(file->read_pollable);
@@ -69,6 +72,7 @@ static void file_close_streams(void *data) {
 
 static void file_free(void *data) {
   file_t *file = (file_t *)data;
+  STRONG_ASSERT_EMPTY(file->lock);
   file_close_streams(data);
   filesystem_descriptor_drop_own(file->file_handle);
   free(file);
@@ -77,6 +81,7 @@ static void file_free(void *data) {
 #ifndef __wasip2__
 static int file_read_eof(void *data) {
   file_t *file = (file_t *)data;
+  STRONG_ASSERT_HELD(file->lock);
 
   if (file->read_result != 0) {
     filesystem_result_void_error_code_t result;
@@ -96,6 +101,10 @@ static int file_read_eof(void *data) {
 
 static int file_get_read_stream(void *data, wasi_read_t *read) {
   file_t *file = (file_t *)data;
+  STRONG_LOCK(file->lock);
+  // .. intentionally don't unlock `file->lock` as this function lets the
+  // caller do that.
+
 #ifdef __wasip2__
   if (file->read_stream.__handle == 0) {
     filesystem_error_code_t error_code;
@@ -115,7 +124,7 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
     filesystem_tuple2_stream_u8_future_result_void_error_code_t result;
     filesystem_method_descriptor_read_via_stream(
         filesystem_borrow_descriptor(file->file_handle), file->offset, &result);
-    wasip3_io_state_init(&file->read, result.f0);
+    wasip3_io_state_init(&file->read, result.f0, file->lock);
     file->read_result = result.f1;
   }
   read->state = &file->read;
@@ -131,6 +140,7 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
 #ifndef __wasip2__
 static int file_write_eof(void *data) {
   file_t *file = (file_t *)data;
+  STRONG_ASSERT_HELD(file->lock);
 
   if (file->write_result) {
     filesystem_result_void_error_code_t result;
@@ -152,6 +162,10 @@ static int file_write_eof(void *data) {
 
 static int file_get_write_stream(void *data, wasi_write_t *write) {
   file_t *file = (file_t *)data;
+  STRONG_LOCK(file->lock);
+  // .. intentionally don't unlock `file->lock` as this function lets the
+  // caller do that.
+
 #ifdef __wasip2__
   if (file->write_stream.__handle == 0) {
     filesystem_error_code_t error_code;
@@ -186,7 +200,7 @@ static int file_get_write_stream(void *data, wasi_write_t *write) {
           filesystem_borrow_descriptor(file->file_handle), write_read,
           file->offset);
     }
-    wasip3_io_state_init(&file->write, writer);
+    wasip3_io_state_init(&file->write, writer, file->lock);
   }
   write->state = &file->write;
   write->eof = file_write_eof;
@@ -230,6 +244,7 @@ static int file_fstat(void *data, struct stat *buf) {
 }
 
 static int file_seek_end(file_t *file) {
+  STRONG_ASSERT_HELD(file->lock);
   filesystem_descriptor_stat_t stat;
   filesystem_error_code_t error;
   bool ok = filesystem_method_descriptor_stat(
@@ -244,6 +259,22 @@ static int file_seek_end(file_t *file) {
 
 static off_t file_seek(void *data, off_t offset, int whence) {
   file_t *file = (file_t *)data;
+
+  STRONG_LOCK(file->lock);
+  defer STRONG_UNLOCK(file->lock);
+
+#ifndef __wasip2__
+  // If another thread is blocked in an I/O operation on this file then
+  // disallow this concurrent operation: `file_close_streams` below can't
+  // cancel a blocking operation in another thread, and supporting the seek
+  // would additionally require synchronizing updates to `offset` which
+  // currently isn't done.
+  if (wasip3_io_state_blocked(&file->read) ||
+      wasip3_io_state_blocked(&file->write)) {
+    errno = EOPNOTSUPP;
+    return -1;
+  }
+#endif
 
   // If this file is in append mode, reset our knowledge of the current cursor
   // to the current end of the file.
@@ -283,6 +314,9 @@ static off_t file_seek(void *data, off_t offset, int whence) {
 
 static int file_set_blocking(void *data, bool blocking) {
   file_t *file = (file_t *)data;
+  STRONG_LOCK(file->lock);
+  defer STRONG_UNLOCK(file->lock);
+
   if (blocking)
     file->oflag &= ~O_NONBLOCK;
   else
@@ -292,6 +326,8 @@ static int file_set_blocking(void *data, bool blocking) {
 
 static int file_fcntl_getfl(void *data) {
   file_t *file = (file_t *)data;
+  STRONG_LOCK(file->lock);
+  defer STRONG_UNLOCK(file->lock);
 
   // Get the flags of the descriptor
   filesystem_descriptor_flags_t flags;
@@ -321,6 +357,9 @@ static int file_fcntl_getfl(void *data) {
 
 static int file_fcntl_setfl(void *data, int flags) {
   file_t *file = (file_t *)data;
+  STRONG_LOCK(file->lock);
+  defer STRONG_UNLOCK(file->lock);
+
   flags &= O_NONBLOCK | O_APPEND;
   file->oflag = (file->oflag & ~(O_NONBLOCK | O_APPEND)) | flags;
   return 0;

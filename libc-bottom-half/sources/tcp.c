@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <netinet/tcp.h>
+#include <stddefer.h>
 #include <stdlib.h>
 #include <string.h>
 #include <wasi/descriptor_table.h>
@@ -102,6 +103,7 @@ static void wasip3_tcp_accept_finish(tcp_socket_state_listening_t *state,
 
 static void tcp_free(void *data) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
+  STRONG_ASSERT_EMPTY(tcp->lock);
 
   switch (tcp->state.tag) {
 #ifdef __wasip3__
@@ -116,6 +118,7 @@ static void tcp_free(void *data) {
 
   case TCP_SOCKET_STATE_LISTENING: {
     tcp_socket_state_listening_t *state = &tcp->state.listening;
+    STRONG_ASSERT_EMPTY(state->blocking_lock);
     if (state->flags & TCP_LISTENING_ACCEPTING)
       wasip3_tcp_accept_finish(
           state, sockets_stream_own_tcp_socket_cancel_read(state->stream));
@@ -165,6 +168,8 @@ static void tcp_free(void *data) {
 #ifndef __wasip2__
 static int tcp_read_eof(void *data) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
+  STRONG_ASSERT_HELD(tcp->lock);
+
   assert(tcp->state.tag == TCP_SOCKET_STATE_CONNECTED);
   tcp_socket_state_connected_t *state = &tcp->state.connected;
 
@@ -184,8 +189,12 @@ static int tcp_read_eof(void *data) {
 
 static int tcp_get_read_stream(void *data, wasi_read_t *read) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
+  STRONG_LOCK(tcp->lock);
+  // .. intentionally don't unlock `tcp->lock` as this function lets the
+  // caller do that.
 
   if (tcp->state.tag != TCP_SOCKET_STATE_CONNECTED) {
+    STRONG_UNLOCK(tcp->lock);
     errno = ENOTCONN;
     return -1;
   }
@@ -207,6 +216,8 @@ static int tcp_get_read_stream(void *data, wasi_read_t *read) {
 #ifndef __wasip2__
 static int tcp_write_eof(void *data) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
+  STRONG_ASSERT_HELD(tcp->lock);
+
   assert(tcp->state.tag == TCP_SOCKET_STATE_CONNECTED);
   tcp_socket_state_connected_t *state = &tcp->state.connected;
 
@@ -227,8 +238,12 @@ static int tcp_write_eof(void *data) {
 
 static int tcp_get_write_stream(void *data, wasi_write_t *write) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
+  STRONG_LOCK(tcp->lock);
+  // .. intentionally don't unlock `tcp->lock` as this function lets the
+  // caller do that.
 
   if (tcp->state.tag != TCP_SOCKET_STATE_CONNECTED) {
+    STRONG_UNLOCK(tcp->lock);
     errno = ENOTCONN;
     return -1;
   }
@@ -249,6 +264,9 @@ static int tcp_get_write_stream(void *data, wasi_write_t *write) {
 
 static int tcp_set_blocking(void *data, bool blocking) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
+  STRONG_LOCK(tcp->lock);
+  defer STRONG_UNLOCK(tcp->lock);
+
   tcp->blocking = blocking;
   return 0;
 }
@@ -284,6 +302,8 @@ static int tcp_handle_error(tcp_socket_t *socket, sockets_error_code_t *error) {
 
 // Setup the `TCP_SOCKET_STATE_CONNECTED` fields for a wasip3-connected socket.
 static void tcp_setup_connected_state_wasip3(tcp_socket_t *socket) {
+  STRONG_ASSERT_HELD(socket->lock);
+
   sockets_borrow_tcp_socket_t socket_borrow =
       sockets_borrow_tcp_socket(socket->socket);
 
@@ -292,12 +312,12 @@ static void tcp_setup_connected_state_wasip3(tcp_socket_t *socket) {
 
   sockets_tuple2_stream_u8_future_result_void_error_code_t receive_result;
   sockets_method_tcp_socket_receive(socket_borrow, &receive_result);
-  wasip3_io_state_init(&state->receive, receive_result.f0);
+  wasip3_io_state_init(&state->receive, receive_result.f0, socket->lock);
   state->receive_result = receive_result.f1;
 
   sockets_stream_u8_writer_t send;
   sockets_stream_u8_t reader = sockets_stream_u8_new(&send);
-  wasip3_io_state_init(&state->send, send);
+  wasip3_io_state_init(&state->send, send, socket->lock);
   state->send_result = sockets_method_tcp_socket_send(socket_borrow, reader);
 }
 #endif
@@ -352,11 +372,66 @@ static bool wasip3_tcp_accept_start(tcp_socket_state_listening_t *state) {
   }
   return false;
 }
+
+/// This function is similar to `wasip3_enter_io` in `file_utils.c`
+static int wasip3_accept_enter(tcp_socket_t *socket, bool blocking) {
+  STRONG_ASSERT_HELD(socket->lock);
+  assert(socket->state.tag == TCP_SOCKET_STATE_LISTENING);
+  tcp_socket_state_listening_t *state = &socket->state.listening;
+
+  while (state->flags & TCP_LISTENING_BLOCKING) {
+    if (!blocking) {
+      errno = EOPNOTSUPP;
+      return -1;
+    }
+#ifdef _REENTRANT
+    STRONG_UNLOCK(socket->lock);
+
+    STRONG_LOCK(state->blocking_lock);
+    STRONG_UNLOCK(state->blocking_lock);
+
+    STRONG_LOCK(socket->lock);
+#else
+    // should not be possible to hit if threads are disabled
+    __builtin_trap();
+#endif
+  }
+
+  return 0;
+}
+
+/// This function is similar to `wasip3_enter_blocking_operation` in
+/// `file_utils.c`
+static void wasip3_accept_enter_blocking(tcp_socket_t *socket) {
+  STRONG_ASSERT_HELD(socket->lock);
+  assert(socket->state.tag == TCP_SOCKET_STATE_LISTENING);
+  tcp_socket_state_listening_t *state = &socket->state.listening;
+
+  assert(!(state->flags & TCP_LISTENING_BLOCKING));
+  state->flags |= TCP_LISTENING_BLOCKING;
+  STRONG_LOCK(state->blocking_lock);
+}
+
+/// This function is similar to `wasip3_exit_blocking_operation` in
+/// `file_utils.c`
+static void wasip3_accept_exit_blocking(tcp_socket_t *socket) {
+  assert(socket->state.tag == TCP_SOCKET_STATE_LISTENING);
+  tcp_socket_state_listening_t *state = &socket->state.listening;
+
+  STRONG_ASSERT_HELD(state->blocking_lock);
+  STRONG_ASSERT_HELD(socket->lock);
+  STRONG_UNLOCK(state->blocking_lock);
+  assert(state->flags & TCP_LISTENING_BLOCKING);
+  state->flags &= ~TCP_LISTENING_BLOCKING;
+}
 #endif // !__wasip2__
 
 static int tcp_accept4(void *data, struct sockaddr *addr, socklen_t *addrlen,
                        int flags) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   output_sockaddr_t output_addr;
   if (__wasilibc_sockaddr_validate(socket->family, addr, addrlen,
                                    &output_addr) < 0) {
@@ -400,6 +475,9 @@ static int tcp_accept4(void *data, struct sockaddr *addr, socklen_t *addrlen,
 #else
   tcp_socket_state_listening_t *state = &socket->state.listening;
 
+  if (wasip3_accept_enter(socket, socket->blocking) < 0)
+    return -1;
+
   // Turn this loop until a socket is fully accepted and ready to get
   // processed.
   while (!(state->flags & TCP_LISTENING_ACCEPT_READY)) {
@@ -425,7 +503,11 @@ static int tcp_accept4(void *data, struct sockaddr *addr, socklen_t *addrlen,
     // here and just bail out immediately.
     wasip3_event_t event;
     if (socket->blocking) {
+      wasip3_accept_enter_blocking(socket);
+      STRONG_UNLOCK(socket->lock);
       __wasilibc_waitable_block_on(state->stream, &event, 0);
+      STRONG_LOCK(socket->lock);
+      wasip3_accept_exit_blocking(socket);
     } else {
       if (!started_work)
         __wasilibc_poll_waitable(state->stream, &event);
@@ -448,6 +530,8 @@ static int tcp_accept4(void *data, struct sockaddr *addr, socklen_t *addrlen,
   state->flags &= ~TCP_LISTENING_ACCEPT_READY;
   if (client_fd < 0)
     return -1;
+  STRONG_LOCK(client_socket->lock);
+  defer STRONG_UNLOCK(client_socket->lock);
   tcp_setup_connected_state_wasip3(client_socket);
 #endif
 
@@ -469,6 +553,7 @@ static int tcp_accept4(void *data, struct sockaddr *addr, socklen_t *addrlen,
 
 static int tcp_do_bind(tcp_socket_t *socket,
                        sockets_ip_socket_address_t *address) {
+  STRONG_ASSERT_HELD(socket->lock);
   if (socket->state.tag != TCP_SOCKET_STATE_UNBOUND) {
     errno = EINVAL;
     return -1;
@@ -506,6 +591,9 @@ static int tcp_do_bind(tcp_socket_t *socket,
 static int tcp_bind(void *data, const struct sockaddr *addr,
                     socklen_t addrlen) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   sockets_ip_socket_address_t local_address;
   if (__wasilibc_sockaddr_to_wasi(socket->family, addr, addrlen,
                                   &local_address) < 0)
@@ -515,6 +603,8 @@ static int tcp_bind(void *data, const struct sockaddr *addr,
 
 #ifndef __wasip2__
 static void tcp_connect_finish(tcp_socket_t *socket) {
+  STRONG_ASSERT_HELD(socket->lock);
+
   assert(socket->state.tag == TCP_SOCKET_STATE_CONNECTING);
   tcp_socket_state_connecting_t *conn = &socket->state.connecting;
 
@@ -534,6 +624,9 @@ static void tcp_connect_finish(tcp_socket_t *socket) {
 static int tcp_connect(void *data, const struct sockaddr *addr,
                        socklen_t addrlen) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   sockets_ip_socket_address_t remote_address;
   if (__wasilibc_sockaddr_to_wasi(socket->family, addr, addrlen,
                                   &remote_address) < 0)
@@ -608,6 +701,7 @@ static int tcp_connect(void *data, const struct sockaddr *addr,
   socket->state.connecting.args.self = socket_borrow;
   socket->state.connecting.args.remote_address = remote_address;
   socket->state.connecting.subtask = 0;
+  socket->state.connecting.polling = false;
 
   wasip3_subtask_status_t status = sockets_method_tcp_socket_connect(
       &socket->state.connecting.args, &socket->state.connecting.result);
@@ -617,10 +711,23 @@ static int tcp_connect(void *data, const struct sockaddr *addr,
   // stable addresses. Here if the socket is in blocking mode we block on the
   // result of the task, and otherwise this returns that the connect is in
   // progress and otherwise bails out.
+  //
+  // Note that if the socket is in blocking mode we need to block on the
+  // subtask here if one is created. When doing so we need to do something
+  // about our socket's lock which is otherwise currently held. The naive
+  // "just drop it and re-acquire it", however, should work here. The only
+  // function in this module to mutate the socket's state away from connecting
+  // is via `poll`, and there's specifically a clause there which tests if
+  // `subtask` is 0 and rejects polls on that socket. Otherwise the socket will
+  // be entirely unusable/internal for the duration of this blocking operation,
+  // so it should be safe to without any extra accounting just drop the lock.
   if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED) {
     wasip3_subtask_t subtask = WASIP3_SUBTASK_HANDLE(status);
     if (socket->blocking) {
+      STRONG_UNLOCK(socket->lock);
       __wasilibc_subtask_block_on_and_drop(subtask);
+      STRONG_LOCK(socket->lock);
+      assert(socket->state.tag == TCP_SOCKET_STATE_CONNECTING);
     } else {
       socket->state.connecting.subtask = subtask;
       errno = EINPROGRESS;
@@ -644,6 +751,9 @@ static int tcp_connect(void *data, const struct sockaddr *addr,
 static int tcp_getsockname(void *data, struct sockaddr *addr,
                            socklen_t *addrlen) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   output_sockaddr_t output_addr;
   if (__wasilibc_sockaddr_validate(socket->family, addr, addrlen,
                                    &output_addr) < 0)
@@ -686,6 +796,9 @@ static int tcp_getsockname(void *data, struct sockaddr *addr,
 static int tcp_getpeername(void *data, struct sockaddr *addr,
                            socklen_t *addrlen) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   output_sockaddr_t output_addr;
   if (__wasilibc_sockaddr_validate(socket->family, addr, addrlen,
                                    &output_addr) < 0)
@@ -727,6 +840,9 @@ static int tcp_getpeername(void *data, struct sockaddr *addr,
 
 static int tcp_listen(void *data, int backlog) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   sockets_error_code_t error;
   sockets_borrow_tcp_socket_t socket_borrow =
       sockets_borrow_tcp_socket(socket->socket);
@@ -826,6 +942,7 @@ static ssize_t tcp_recvfrom(void *data, void *buffer, size_t length, int flags,
   wasi_read_t read;
   if (tcp_get_read_stream(data, &read) < 0)
     return -1;
+  defer STRONG_UNLOCK(*read.state->lock);
 
   if ((flags & MSG_DONTWAIT) != 0)
     read.blocking = false;
@@ -850,6 +967,7 @@ static ssize_t tcp_sendto(void *data, const void *buffer, size_t length,
   wasi_write_t write;
   if (tcp_get_write_stream(data, &write) < 0)
     return -1;
+  defer STRONG_UNLOCK(*write.state->lock);
 
   if ((flags & MSG_DONTWAIT) != 0)
     write.blocking = false;
@@ -865,6 +983,8 @@ static ssize_t tcp_sendto(void *data, const void *buffer, size_t length,
 
 static int tcp_shutdown(void *data, int posix_how) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
 
   if (socket->state.tag != TCP_SOCKET_STATE_CONNECTED) {
     errno = ENOTCONN;
@@ -906,12 +1026,38 @@ static int tcp_shutdown(void *data, int posix_how) {
   }
 #else
   tcp_socket_state_connected_t *state = &socket->state.connected;
-  if (posix_how == SHUT_RD || posix_how == SHUT_RDWR) {
-    wasip3_read_state_close(&state->receive);
+  bool close_receive = posix_how == SHUT_RD || posix_how == SHUT_RDWR;
+  bool close_send = posix_how == SHUT_WR || posix_how == SHUT_RDWR;
+
+  // If there's a thread blocked in I/O in read/write, then we can't cancel
+  // that operation to close the stream. Return that this operation isn't
+  // supported at this time.
+  if ((close_receive && wasip3_io_state_blocked(&state->receive)) ||
+      (close_send && wasip3_io_state_blocked(&state->send))) {
+    errno = EOPNOTSUPP;
+    return -1;
   }
 
-  if (posix_how == SHUT_WR || posix_how == SHUT_RDWR) {
+  // Close out halves that are needed.
+  //
+  // Note the I/O states here may continue to get used by future syscalls, so
+  // the internal lock pointer is reset to ensure that it's still pointing
+  // to our still-valid lock.
+  //
+  // TODO: This will cancel any in-flight operation which probably isn't
+  // POSIX-compliant, this might have to block waiting? Unsure.
+  if (close_receive) {
+    wasip3_read_state_close(&state->receive);
+#ifdef _REENTRANT
+    state->receive.lock = &socket->lock;
+#endif
+  }
+
+  if (close_send) {
     wasip3_write_state_close(&state->send);
+#ifdef _REENTRANT
+    state->send.lock = &socket->lock;
+#endif
   }
 #endif
 
@@ -922,10 +1068,18 @@ static int tcp_shutdown(void *data, int posix_how) {
 static void tcp_connect_ready(void *data, poll_state_t *state,
                               wasip3_event_t *event) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   assert(socket->state.tag == TCP_SOCKET_STATE_CONNECTING);
   tcp_socket_state_connecting_t *conn = &socket->state.connecting;
 
-  (void)event;
+  assert(conn->polling);
+  conn->polling = false;
+
+  if (!event)
+    return;
+
   assert(event->event == WASIP3_EVENT_SUBTASK);
   assert(event->waitable == conn->subtask);
   assert(event->code == WASIP3_SUBTASK_RETURNED);
@@ -942,23 +1096,55 @@ static void tcp_connect_ready(void *data, poll_state_t *state,
 static void tcp_accept_ready(void *data, poll_state_t *state,
                              wasip3_event_t *event) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   assert(socket->state.tag == TCP_SOCKET_STATE_LISTENING);
   tcp_socket_state_listening_t *listen = &socket->state.listening;
-  wasip3_tcp_accept_finish_event(listen, event);
-  __wasilibc_poll_ready(state, POLLRDNORM);
+  wasip3_accept_exit_blocking(socket);
+
+  if (event) {
+    wasip3_tcp_accept_finish_event(listen, event);
+    __wasilibc_poll_ready(state, POLLRDNORM);
+  }
 }
 #endif // !__wasip2__
 
 static int tcp_poll_register(void *data, poll_state_t *state, short events) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   switch (socket->state.tag) {
   case TCP_SOCKET_STATE_CONNECTING: {
     if ((events & (POLLRDNORM | POLLWRNORM)) != 0) {
 #ifdef __wasip2__
       return __wasilibc_poll_add(state, events, tcp_pollable(socket));
 #else
+      // If the `subtask` isn't listed here then that means that a thread is
+      // blocked in `connect` while some parallel thread here is trying to
+      // `poll` that socket. This isn't something supported by wasi-libc right
+      // now.
       tcp_socket_state_connecting_t *conn = &socket->state.connecting;
-      return __wasilibc_poll_add(state, conn->subtask, tcp_connect_ready, data);
+      if (conn->subtask == 0) {
+        errno = EOPNOTSUPP;
+        return -1;
+      }
+      // Subtasks can only be in one waitable-set at a time, so if the connect
+      // subtask is already registered with a `poll` — either another thread's
+      // or this same `poll` call listing this socket twice — this can't be
+      // supported. The flag is cleared in `tcp_connect_ready`, which `poll`
+      // invokes both when the subtask completes and when the poll is torn
+      // down.
+      if (conn->polling) {
+        errno = EOPNOTSUPP;
+        return -1;
+      }
+      int rc =
+          __wasilibc_poll_add(state, conn->subtask, tcp_connect_ready, data);
+      if (rc == 0)
+        conn->polling = true;
+      return rc;
 #endif
     }
     break;
@@ -971,14 +1157,26 @@ static int tcp_poll_register(void *data, poll_state_t *state, short events) {
       return __wasilibc_poll_add(state, events, tcp_pollable(socket));
 #else
       tcp_socket_state_listening_t *listen = &socket->state.listening;
+      // First make sure there's not another thread blocked on `accept`
+      if (wasip3_accept_enter(socket, false) < 0)
+        return -1;
       // Kick off an accept if it's not already going, then see what happened.
+      //
+      // If the accept is added to the poll set then
+      // `wasip3_accept_enter_blocking` marks this socket as blocked for the
+      // duration of the `poll`; `tcp_accept_ready` undoes that both when the
+      // accept completes and when the poll is torn down.
       wasip3_tcp_accept_start(listen);
       if (listen->flags & (TCP_LISTENING_ACCEPT_READY | TCP_LISTENING_DONE)) {
         __wasilibc_poll_ready(state, POLLRDNORM);
         return 0;
       }
       assert(listen->flags & TCP_LISTENING_ACCEPTING);
-      return __wasilibc_poll_add(state, listen->stream, tcp_accept_ready, data);
+      int rc =
+          __wasilibc_poll_add(state, listen->stream, tcp_accept_ready, data);
+      if (rc == 0)
+        wasip3_accept_enter_blocking(socket);
+      return rc;
 #endif
     }
     break;
@@ -1064,6 +1262,9 @@ static int tcp_poll_finish(void *data, poll_state_t *state, short events) {
 
 static int tcp_fcntl_getfl(void *data) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   int flags = 0;
   if (!socket->blocking) {
     flags |= O_NONBLOCK;
@@ -1073,6 +1274,9 @@ static int tcp_fcntl_getfl(void *data) {
 
 static int tcp_fcntl_setfl(void *data, int flags) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   if (flags & O_NONBLOCK) {
     socket->blocking = false;
   } else {
@@ -1084,6 +1288,9 @@ static int tcp_fcntl_setfl(void *data, int flags) {
 static int tcp_getsockopt(void *data, int level, int optname,
                           void *restrict optval, socklen_t *restrict optlen) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   int value = 0;
 
   sockets_error_code_t error;
@@ -1285,6 +1492,9 @@ static int tcp_getsockopt(void *data, int level, int optname,
 static int tcp_setsockopt(void *data, int level, int optname,
                           const void *optval, socklen_t optlen) {
   tcp_socket_t *socket = (tcp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   if (optlen < sizeof(int)) {
     errno = EINVAL;
     return -1;

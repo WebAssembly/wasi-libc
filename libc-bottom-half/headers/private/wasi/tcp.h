@@ -5,6 +5,7 @@
 
 #ifndef __wasip1__
 
+#include "lock.h"
 #include <sys/socket.h>
 #include <wasi/sockets_utils.h>
 
@@ -33,6 +34,10 @@ typedef struct {
   sockets_method_tcp_socket_connect_args_t args;
   sockets_result_void_error_code_t result;
   wasip3_subtask_t subtask;
+  /// Whether `subtask` is currently registered in some `poll`'s waitable-set.
+  /// Subtasks can be in at most one waitable-set at a time, so while this is
+  /// set no other `poll` can register this socket.
+  bool polling;
 #endif
 } tcp_socket_state_connecting_t;
 
@@ -43,11 +48,16 @@ typedef struct {
 #define TCP_LISTENING_ACCEPTING (1 << 1)
 /// The `accept_result` field is valid and ready to be processed.
 #define TCP_LISTENING_ACCEPT_READY (1 << 2)
+/// Whether or not a thread is blocked in `accept` on this socket meaning that
+/// the stream is not suitable for any other operations.
+#define TCP_LISTENING_BLOCKING (1 << 3)
 
 typedef struct {
 #ifdef __wasip2__
   int dummy;
 #else
+  /// Queue for concurrent blocking calls to accept to wait on.
+  DECLARE_STRONG_LOCK(blocking_lock);
   // The `stream<tcp-socket>` that this is reading to receive accepted sockets.
   sockets_stream_own_tcp_socket_t stream;
   /// In-flight result of the read of `stream`.
@@ -104,6 +114,7 @@ typedef struct {
 
 typedef struct {
   descriptor_refcnt_t refcnt;
+  DECLARE_STRONG_LOCK(lock);
   sockets_own_tcp_socket_t socket;
   tcp_socket_state_t state;
 #ifdef __wasip2__

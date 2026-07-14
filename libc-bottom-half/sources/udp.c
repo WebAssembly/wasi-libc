@@ -1,7 +1,9 @@
+#include "lock.h"
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <stddefer.h>
 #include <stdlib.h>
 #include <string.h>
 #include <wasi/descriptor_table.h>
@@ -30,6 +32,25 @@
   udp_method_udp_socket_set_unicast_hop_limit
 #endif
 
+/// Indicator of `recv_result` is valid.
+///
+/// Note that this can be set while `recv_subtask` is 0, for example if
+/// `poll` receives an event which means `recv_subtask` is immediately closed
+/// but the result is still valid.
+#define UDP_STREAMS_RECV_READY (1 << 0)
+
+/// Indicator that a thread is blocked in `recvfrom`
+#define UDP_STREAMS_RECV_BLOCKING (1 << 1)
+
+/// Indicator of `send_result` is ready to read.
+///
+/// Similar to `UDP_STREAMS_RECV_READY` this can be set while `send_subtask` is
+/// 0.
+#define UDP_STREAMS_SEND_READY (1 << 2)
+
+/// Indicator that a thread is blocked in `sendto`
+#define UDP_STREAMS_SEND_BLOCKING (1 << 3)
+
 // Pollables here are lazily initialized as-needed.
 typedef struct {
 #if defined(__wasip2__)
@@ -38,18 +59,14 @@ typedef struct {
   udp_own_outgoing_datagram_stream_t outgoing;
   poll_own_pollable_t outgoing_pollable;
 #elif defined(__wasip3__)
+  /// Bitset of `UDP_STREAMS_*`
+  int flags;
+
   /// Currently active call to `udp-socket#receive`.
   ///
   /// This subtask can be started both during `poll` or during a call to `recv`
   /// itself. If this is 0 then there's no active subtask.
   wasip3_subtask_t recv_subtask;
-
-  /// Whether or not `recv_result` is valid.
-  ///
-  /// Note that this can be `true` while `recv_subtask` is 0, for example if
-  /// `poll` receives an event which means `recv_subtask` is immediately closed
-  /// but the result below is still valid.
-  bool recv_ready;
 
   /// Storage space for the return value of `udp-socket#receive`.
   ///
@@ -68,14 +85,14 @@ typedef struct {
   /// called.
   sockets_method_udp_socket_send_args_t send_args;
 
-  /// Whether or not `send_result` is ready to read.
-  ///
-  /// Similar to `recv_ready` this can be `true` while `send_subtask` is 0.
-  bool send_result_ready;
-
   /// On-heap result of `udp-socket#send`, only readable if `send_result_ready`
   /// is `true`.
   sockets_result_void_error_code_t send_result;
+
+  /// Queue for concurrent blocking calls to `recvfrom` to wait on.
+  DECLARE_STRONG_LOCK(recv_blocking_lock);
+  /// Queue for concurrent blocking calls to `sendto` to wait on.
+  DECLARE_STRONG_LOCK(send_blocking_lock);
 #else
 #error "Unsupported WASI version"
 #endif
@@ -119,6 +136,7 @@ typedef struct {
 
 typedef struct {
   descriptor_refcnt_t refcnt;
+  DECLARE_STRONG_LOCK(lock);
   sockets_own_udp_socket_t socket;
 #ifdef __wasip2__
   // Lazily initialized as-needed pollable.
@@ -153,6 +171,8 @@ int __wasilibc_add_udp_socket(sockets_own_udp_socket_t socket,
 
 static int udp_create_streams(udp_socket_t *socket,
                               sockets_ip_socket_address_t *remote_address) {
+  STRONG_ASSERT_HELD(socket->lock);
+
   // Assert that:
   // - We're already bound. This is required by WASI.
   // - We have no active streams. From WASI:
@@ -197,6 +217,8 @@ static int udp_create_streams(udp_socket_t *socket,
 }
 
 static void udp_close_streams(udp_socket_streams_t *streams) {
+  STRONG_ASSERT_EMPTY(streams->recv_blocking_lock);
+  STRONG_ASSERT_EMPTY(streams->send_blocking_lock);
 #ifdef __wasip2__
   if (streams->incoming_pollable.__handle != 0) {
     poll_pollable_drop_own(streams->incoming_pollable);
@@ -211,25 +233,28 @@ static void udp_close_streams(udp_socket_streams_t *streams) {
   udp_outgoing_datagram_stream_drop_own(streams->outgoing);
   streams->outgoing.__handle = 0;
 #else
+  assert(!(streams->flags & UDP_STREAMS_RECV_BLOCKING));
+  assert(!(streams->flags & UDP_STREAMS_SEND_BLOCKING));
+
   // If there's an active `recv` then cancel it since nothing's ever going to
   // receive the result. This conditionally flags the result as valid depending
   // on the result of cancellation.
   if (streams->recv_subtask) {
-    assert(!streams->recv_ready);
+    assert(!(streams->flags & UDP_STREAMS_RECV_READY));
     wasip3_subtask_status_t status =
         wasip3_subtask_cancel(streams->recv_subtask);
     wasip3_subtask_drop(streams->recv_subtask);
     streams->recv_subtask = 0;
     if (WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_RETURNED)
-      streams->recv_ready = true;
+      streams->flags |= UDP_STREAMS_RECV_READY;
   }
 
   // If a packet is buffered within this socket, then deallocate it and flag it
   // as no longer valid.
-  if (streams->recv_ready) {
+  if (streams->flags & UDP_STREAMS_RECV_READY) {
     sockets_result_tuple2_list_u8_ip_socket_address_error_code_free(
         &streams->recv_result);
-    streams->recv_ready = false;
+    streams->flags &= ~UDP_STREAMS_RECV_READY;
   }
 
   // Unlike for `recv_subtask` if there's an active packet being sent this
@@ -238,10 +263,10 @@ static void udp_close_streams(udp_socket_streams_t *streams) {
   // more discussion in WebAssembly/component-model#617. Currently it's at least
   // intentional that this blocks on the result.
   if (streams->send_subtask) {
-    assert(!streams->send_result_ready);
+    assert(!(streams->flags & UDP_STREAMS_SEND_READY));
     __wasilibc_subtask_block_on_and_drop(streams->send_subtask);
     streams->send_subtask = 0;
-    streams->send_result_ready = true;
+    streams->flags |= UDP_STREAMS_SEND_READY;
   }
 
   // If there's an active buffer in `send_args` then that's allocated on the
@@ -251,7 +276,7 @@ static void udp_close_streams(udp_socket_streams_t *streams) {
     streams->send_args.data.ptr = NULL;
     streams->send_args.data.len = 0;
   }
-  streams->send_result_ready = false;
+  streams->flags &= ~UDP_STREAMS_SEND_READY;
 #endif
 }
 
@@ -270,6 +295,7 @@ static udp_socket_streams_t *udp_streams(udp_socket_t *socket) {
 
 static void udp_free(void *data) {
   udp_socket_t *udp = (udp_socket_t *)data;
+  STRONG_ASSERT_EMPTY(udp->lock);
 
   udp_socket_streams_t *streams = udp_streams(udp);
   if (streams)
@@ -286,6 +312,9 @@ static void udp_free(void *data) {
 
 static int udp_set_blocking(void *data, bool blocking) {
   udp_socket_t *udp = (udp_socket_t *)data;
+  STRONG_LOCK(udp->lock);
+  defer STRONG_UNLOCK(udp->lock);
+
   udp->blocking = blocking;
   return 0;
 }
@@ -338,6 +367,8 @@ static int udp_handle_error(udp_socket_t *socket, sockets_error_code_t *error) {
 
 static int udp_do_bind(udp_socket_t *socket,
                        sockets_ip_socket_address_t *address) {
+  STRONG_ASSERT_HELD(socket->lock);
+
   if (socket->state.tag != UDP_SOCKET_STATE_UNBOUND) {
     errno = EINVAL;
     return -1;
@@ -374,6 +405,9 @@ static int udp_do_bind(udp_socket_t *socket,
 static int udp_bind(void *data, const struct sockaddr *addr,
                     socklen_t addrlen) {
   udp_socket_t *socket = (udp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   sockets_ip_socket_address_t local_address;
   if (__wasilibc_sockaddr_to_wasi(socket->family, addr, addrlen,
                                   &local_address) < 0)
@@ -386,6 +420,9 @@ static int udp_bind(void *data, const struct sockaddr *addr,
 static int udp_connect(void *data, const struct sockaddr *addr,
                        socklen_t addrlen) {
   udp_socket_t *socket = (udp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   if (addr == NULL || addrlen < sizeof(struct sockaddr)) {
     errno = EINVAL;
     return -1;
@@ -409,23 +446,30 @@ static int udp_connect(void *data, const struct sockaddr *addr,
       return -1;
     break;
   }
-  case UDP_SOCKET_STATE_BOUND_NOSTREAMS: {
-    // This is the state we want to be in.
+  // Fall through to below where streams are closed if they're opened.
+  case UDP_SOCKET_STATE_BOUND_NOSTREAMS:
+  case UDP_SOCKET_STATE_BOUND_STREAMING:
+  case UDP_SOCKET_STATE_CONNECTED:
     break;
-  }
-  case UDP_SOCKET_STATE_BOUND_STREAMING: {
-    udp_close_streams(&socket->state.bound_streaming.streams);
-    socket->state.tag = UDP_SOCKET_STATE_BOUND_NOSTREAMS;
-    break;
-  }
-  case UDP_SOCKET_STATE_CONNECTED: {
-    udp_close_streams(&socket->state.connected.streams);
-    socket->state.tag = UDP_SOCKET_STATE_BOUND_NOSTREAMS;
-    break;
-  }
   default:
     /* unreachable */
     abort();
+  }
+
+  // Close open streams, if present. Note though that this implementation
+  // doesn't support a concurrent request to `connect` while another thread is
+  // blocked in `sendto` or `recvfrom`.
+  udp_socket_streams_t *streams = udp_streams(socket);
+  if (streams) {
+#ifdef __wasip3__
+    if (streams->flags &
+        (UDP_STREAMS_RECV_BLOCKING | UDP_STREAMS_SEND_BLOCKING)) {
+      errno = EOPNOTSUPP;
+      return -1;
+    }
+#endif
+    udp_close_streams(streams);
+    socket->state.tag = UDP_SOCKET_STATE_BOUND_NOSTREAMS;
   }
 
   return udp_create_streams(socket,
@@ -435,6 +479,9 @@ static int udp_connect(void *data, const struct sockaddr *addr,
 static int udp_getsockname(void *data, struct sockaddr *addr,
                            socklen_t *addrlen) {
   udp_socket_t *socket = (udp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   output_sockaddr_t output_addr;
   if (__wasilibc_sockaddr_validate(socket->family, addr, addrlen,
                                    &output_addr) < 0)
@@ -475,6 +522,9 @@ static int udp_getsockname(void *data, struct sockaddr *addr,
 static int udp_getpeername(void *data, struct sockaddr *addr,
                            socklen_t *addrlen) {
   udp_socket_t *socket = (udp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   output_sockaddr_t output_addr;
   if (__wasilibc_sockaddr_validate(socket->family, addr, addrlen,
                                    &output_addr) < 0)
@@ -521,12 +571,15 @@ static int udp_getpeername(void *data, struct sockaddr *addr,
 // if the subtask was already in progress or a packet is already ready.
 static bool wasip3_recv_start(udp_socket_t *socket,
                               udp_socket_streams_t *streams) {
-  if (streams->recv_subtask || streams->recv_ready)
+  STRONG_ASSERT_HELD(socket->lock);
+  assert(!(streams->flags & UDP_STREAMS_RECV_BLOCKING));
+
+  if (streams->recv_subtask || (streams->flags & UDP_STREAMS_RECV_READY))
     return false;
   wasip3_subtask_status_t status = sockets_method_udp_socket_receive(
       sockets_borrow_udp_socket(socket->socket), &streams->recv_result);
   if (WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_RETURNED) {
-    streams->recv_ready = true;
+    streams->flags |= UDP_STREAMS_RECV_READY;
   } else {
     streams->recv_subtask = WASIP3_SUBTASK_HANDLE(status);
   }
@@ -539,18 +592,86 @@ static bool wasip3_recv_start(udp_socket_t *socket,
 static void wasip3_recv_end(udp_socket_streams_t *streams,
                             wasip3_event_t *event) {
   (void)event;
+
   assert(event->waitable == streams->recv_subtask);
   assert(event->code == WASIP3_SUBTASK_RETURNED);
   wasip3_subtask_drop(streams->recv_subtask);
   streams->recv_subtask = 0;
-  streams->recv_ready = true;
+  streams->flags |= UDP_STREAMS_RECV_READY;
+}
+
+/// This function is similar to `wasip3_enter_io` in `file_utils.c`
+///
+/// Note that callers need to re-fetch any internal state from within `socket`
+/// after calling this function as this may drop the lock and re-acquire it.
+/// This is only required if `blocking` is `true`.
+static int wasip3_udp_recv_enter(udp_socket_t *socket, bool blocking) {
+  STRONG_ASSERT_HELD(socket->lock);
+
+  while (1) {
+    udp_socket_streams_t *streams = udp_streams(socket);
+    if (!streams) {
+      errno = EOPNOTSUPP;
+      return -1;
+    }
+    if (!(streams->flags & UDP_STREAMS_RECV_BLOCKING))
+      return 0;
+    if (!blocking) {
+      errno = EOPNOTSUPP;
+      return -1;
+    }
+#ifdef _REENTRANT
+    STRONG_UNLOCK(socket->lock);
+
+    STRONG_LOCK(streams->recv_blocking_lock);
+    STRONG_UNLOCK(streams->recv_blocking_lock);
+
+    STRONG_LOCK(socket->lock);
+#else
+    // should not be possible to hit if threads are disabled
+    __builtin_trap();
+#endif
+  }
+}
+
+/// This function is similar to `wasip3_enter_blocking_operation` in
+/// `file_utils.c`
+static void wasip3_udp_recv_enter_blocking(udp_socket_t *socket) {
+  STRONG_ASSERT_HELD(socket->lock);
+  udp_socket_streams_t *streams = udp_streams(socket);
+  assert(streams);
+
+  assert(!(streams->flags & UDP_STREAMS_RECV_BLOCKING));
+  streams->flags |= UDP_STREAMS_RECV_BLOCKING;
+  STRONG_LOCK(streams->recv_blocking_lock);
+}
+
+/// This function is similar to `wasip3_exit_blocking_operation` in
+/// `file_utils.c`
+static void wasip3_udp_recv_exit_blocking(udp_socket_t *socket) {
+  udp_socket_streams_t *streams = udp_streams(socket);
+  assert(streams);
+
+  STRONG_ASSERT_HELD(streams->recv_blocking_lock);
+  STRONG_ASSERT_HELD(socket->lock);
+  STRONG_UNLOCK(streams->recv_blocking_lock);
+  assert(streams->flags & UDP_STREAMS_RECV_BLOCKING);
+  streams->flags &= ~UDP_STREAMS_RECV_BLOCKING;
 }
 
 static void wasip3_recv_ready(void *data, poll_state_t *state,
                               wasip3_event_t *event) {
+
   udp_socket_t *socket = (udp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+  wasip3_udp_recv_exit_blocking(socket);
+
   udp_socket_streams_t *streams = udp_streams(socket);
   assert(streams);
+
+  if (!event)
+    return;
 
   wasip3_recv_end(streams, event);
   __wasilibc_poll_ready(state, POLLRDNORM);
@@ -561,6 +682,9 @@ static void wasip3_recv_ready(void *data, poll_state_t *state,
 static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
                             struct sockaddr *addr, socklen_t *addrlen) {
   udp_socket_t *socket = (udp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   // TODO wasi-sockets: flags:
   // - MSG_PEEK: could be shimmed by performing the receive into a local
   // socket-specific buffer. And on subsequent receives first check that buffer.
@@ -624,6 +748,11 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
     poll_method_pollable_block(udp_incoming_pollable(streams));
   }
 #else
+  if (wasip3_udp_recv_enter(socket, should_block) < 0)
+    return -1;
+  streams = udp_streams(socket);
+  assert(streams);
+
   // Start a `recv` operation if there's not already one pending. If there's
   // already one pending then this'll be left as-is.
   //
@@ -634,7 +763,7 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
   // and completed immediately then this falls through to process the result.
   bool started = wasip3_recv_start(socket, streams);
   if (started && !should_block) {
-    if (streams->recv_ready) {
+    if (streams->flags & UDP_STREAMS_RECV_READY) {
       assert(!streams->recv_subtask);
     } else {
       errno = EWOULDBLOCK;
@@ -647,9 +776,13 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
   // flight.
   if (streams->recv_subtask) {
     if (should_block) {
+      wasip3_udp_recv_enter_blocking(socket);
+      STRONG_UNLOCK(socket->lock);
       __wasilibc_subtask_block_on_and_drop(streams->recv_subtask);
+      STRONG_LOCK(socket->lock);
+      wasip3_udp_recv_exit_blocking(socket);
       streams->recv_subtask = 0;
-      streams->recv_ready = true;
+      streams->flags |= UDP_STREAMS_RECV_READY;
     } else {
       wasip3_event_t event;
       __wasilibc_poll_waitable(streams->recv_subtask, &event);
@@ -666,9 +799,9 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
   // At this point we're finishing up an I/O operation. This involves copying
   // out the result to the caller. Reset the `recv_ready` flag and then
   // process the result that's in the `streams` storage.
-  assert(streams->recv_ready);
+  assert(streams->flags & UDP_STREAMS_RECV_READY);
   assert(streams->recv_subtask == 0);
-  streams->recv_ready = false;
+  streams->flags &= ~UDP_STREAMS_RECV_READY;
 
   // If the operation failed, just translate its error and return.
   if (streams->recv_result.is_err)
@@ -689,8 +822,69 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
 
 #ifdef __wasip3__
 
-static int wasip3_send_resolve(udp_socket_streams_t *streams,
-                               bool should_block) {
+/// This function is similar to `wasip3_enter_io` in `file_utils.c`
+///
+/// Note that like `wasip3_udp_recv_enter` this requires callers to re-acquire
+/// internal pointers within `socket` if `blocking` is true.
+static int wasip3_udp_send_enter(udp_socket_t *socket, bool blocking) {
+  STRONG_ASSERT_HELD(socket->lock);
+
+  while (1) {
+    udp_socket_streams_t *streams = udp_streams(socket);
+    if (!streams) {
+      errno = EOPNOTSUPP;
+      return -1;
+    }
+    if (!(streams->flags & UDP_STREAMS_SEND_BLOCKING))
+      return 0;
+    if (!blocking) {
+      errno = EOPNOTSUPP;
+      return -1;
+    }
+#ifdef _REENTRANT
+    STRONG_UNLOCK(socket->lock);
+
+    STRONG_LOCK(streams->send_blocking_lock);
+    STRONG_UNLOCK(streams->send_blocking_lock);
+
+    STRONG_LOCK(socket->lock);
+#else
+    // should not be possible to hit if threads are disabled
+    __builtin_trap();
+#endif
+  }
+}
+
+/// This function is similar to `wasip3_enter_blocking_operation` in
+/// `file_utils.c`
+static void wasip3_udp_send_enter_blocking(udp_socket_t *socket) {
+  STRONG_ASSERT_HELD(socket->lock);
+  udp_socket_streams_t *streams = udp_streams(socket);
+  assert(streams);
+
+  assert(!(streams->flags & UDP_STREAMS_SEND_BLOCKING));
+  streams->flags |= UDP_STREAMS_SEND_BLOCKING;
+  STRONG_LOCK(streams->send_blocking_lock);
+}
+
+/// This function is similar to `wasip3_exit_blocking_operation` in
+/// `file_utils.c`
+static void wasip3_udp_send_exit_blocking(udp_socket_t *socket) {
+  udp_socket_streams_t *streams = udp_streams(socket);
+  assert(streams);
+
+  STRONG_ASSERT_HELD(streams->send_blocking_lock);
+  STRONG_ASSERT_HELD(socket->lock);
+  STRONG_UNLOCK(streams->send_blocking_lock);
+  assert(streams->flags & UDP_STREAMS_SEND_BLOCKING);
+  streams->flags &= ~UDP_STREAMS_SEND_BLOCKING;
+}
+
+static int wasip3_send_resolve(udp_socket_t *socket, bool should_block) {
+  STRONG_ASSERT_HELD(socket->lock);
+  udp_socket_streams_t *streams = udp_streams(socket);
+  assert(streams);
+
   // If a previous packet is in flight then wait for that.
   //
   // * If this is a blocking context, then block here on the previous subtask.
@@ -703,7 +897,11 @@ static int wasip3_send_resolve(udp_socket_streams_t *streams,
   // to `poll`), so the result processing is split out.
   if (streams->send_subtask) {
     if (should_block) {
+      wasip3_udp_send_enter_blocking(socket);
+      STRONG_UNLOCK(socket->lock);
       __wasilibc_subtask_block_on_and_drop(streams->send_subtask);
+      STRONG_LOCK(socket->lock);
+      wasip3_udp_send_exit_blocking(socket);
       streams->send_subtask = 0;
     } else {
       wasip3_event_t event;
@@ -716,7 +914,7 @@ static int wasip3_send_resolve(udp_socket_streams_t *streams,
         return -1;
       }
     }
-    streams->send_result_ready = true;
+    streams->flags |= UDP_STREAMS_SEND_READY;
     if (streams->send_subtask) {
       wasip3_subtask_drop(streams->send_subtask);
       streams->send_subtask = 0;
@@ -726,11 +924,11 @@ static int wasip3_send_resolve(udp_socket_streams_t *streams,
   // Check to see what happened with the previous send if the result is ready.
   // This is technically deferring an error on a call to `send` to the next call
   // to `send` for nonblocking I/O, but that's normal for UDP anyway.
-  if (streams->send_result_ready) {
+  if (streams->flags & UDP_STREAMS_SEND_READY) {
     free(streams->send_args.data.ptr);
     streams->send_args.data.ptr = NULL;
     streams->send_args.data.len = 0;
-    streams->send_result_ready = false;
+    streams->flags &= ~UDP_STREAMS_SEND_READY;
     if (streams->send_result.is_err)
       return __wasilibc_socket_error_to_errno(&streams->send_result.val.err);
   }
@@ -740,18 +938,23 @@ static int wasip3_send_resolve(udp_socket_streams_t *streams,
 
 static void wasip3_send_ready(void *data, poll_state_t *state,
                               wasip3_event_t *event) {
-  (void)event;
-
   udp_socket_t *socket = (udp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+  wasip3_udp_send_exit_blocking(socket);
+
   udp_socket_streams_t *streams = udp_streams(socket);
   assert(streams);
 
+  if (!event)
+    return;
+
   assert(event->waitable == streams->send_subtask);
   assert(event->code == WASIP3_SUBTASK_RETURNED);
-  assert(!streams->send_result_ready);
+  assert(!(streams->flags & UDP_STREAMS_SEND_READY));
   wasip3_subtask_drop(streams->send_subtask);
   streams->send_subtask = 0;
-  streams->send_result_ready = true;
+  streams->flags |= UDP_STREAMS_SEND_READY;
 
   __wasilibc_poll_ready(state, POLLWRNORM);
 }
@@ -762,6 +965,9 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
                           int flags, const struct sockaddr *addr,
                           socklen_t addrlen) {
   udp_socket_t *socket = (udp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   const int supported_flags = MSG_DONTWAIT;
   if ((flags & supported_flags) != flags) {
     errno = EOPNOTSUPP;
@@ -865,13 +1071,19 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
     poll_method_pollable_block(udp_outgoing_pollable(streams));
   }
 #else
+  // First wait/weed out concurrent blocking calls to `sendto`.
+  if (wasip3_udp_send_enter(socket, should_block) < 0)
+    return -1;
+  streams = udp_streams(socket);
+  assert(streams);
+
   // There might be a previous subtask or result waiting for us from a previous
   // subtask. If that's the case pick up the result here and transfer the result
   // to the application. This means things get a bit weird where errors from
   // a previous `send` get reported on the next `send` (or never if the
   // application never calls `send` again), but it's not clear if libc can
   // do better with the current wasip3 APIs.
-  if (wasip3_send_resolve(streams, should_block) < 0)
+  if (wasip3_send_resolve(socket, should_block) < 0)
     return -1;
 
   // At this point there's no active send, so go ahead and issue another send.
@@ -879,7 +1091,7 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
   // can't borrow the caller's buffer indefinitely so if that fails then we
   // have to cancel the subtask, copy to internal storage, and then try again.
   assert(!streams->send_subtask);
-  assert(!streams->send_result_ready);
+  assert(!(streams->flags & UDP_STREAMS_SEND_READY));
   assert(!streams->send_args.data.ptr);
 
   streams->send_args.self = sockets_borrow_udp_socket(socket->socket);
@@ -926,16 +1138,16 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
     streams->send_subtask = WASIP3_SUBTASK_HANDLE(status);
   } else {
     assert(streams->send_subtask == 0);
-    assert(!streams->send_result_ready);
-    streams->send_result_ready = true;
+    assert(!(streams->flags & UDP_STREAMS_SEND_READY));
+    streams->flags |= UDP_STREAMS_SEND_READY;
   }
 
   // If blocking I/O is enabled, wait for the result. Also go ahead and resolve
   // things if the result is ready from an async perspective. If this is
   // nonblocking, however, and the stream result isn't present, then consider
   // this as good to go in the background and return that the packet is sent.
-  if (should_block || streams->send_result_ready) {
-    if (wasip3_send_resolve(streams, should_block) < 0)
+  if (should_block || (streams->flags & UDP_STREAMS_SEND_READY)) {
+    if (wasip3_send_resolve(socket, should_block) < 0)
       return -1;
   }
 
@@ -946,6 +1158,9 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
 static int udp_getsockopt(void *data, int level, int optname, void *optval,
                           socklen_t *optlen) {
   udp_socket_t *socket = (udp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   int value;
 
   sockets_error_code_t error;
@@ -1064,6 +1279,9 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
 static int udp_setsockopt(void *data, int level, int optname,
                           const void *optval, socklen_t optlen) {
   udp_socket_t *socket = (udp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   if (optlen < sizeof(int)) {
     errno = EINVAL;
     return -1;
@@ -1157,6 +1375,9 @@ static int udp_setsockopt(void *data, int level, int optname,
 
 static int udp_poll_register(void *data, poll_state_t *state, short events) {
   udp_socket_t *socket = (udp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   switch (socket->state.tag) {
   case UDP_SOCKET_STATE_UNBOUND:
     // In the unbound case, all we can do is assume immediate read and write
@@ -1198,14 +1419,17 @@ static int udp_poll_register(void *data, poll_state_t *state, short events) {
     //    we're waiting on the subtask so it's added to the set of things to
     //    poll.
     if ((events & POLLRDNORM) != 0) {
+      if (wasip3_udp_recv_enter(socket, false) < 0)
+        return -1;
       wasip3_recv_start(socket, streams);
-      if (streams->recv_ready) {
+      if (streams->flags & UDP_STREAMS_RECV_READY) {
         __wasilibc_poll_ready(state, POLLRDNORM);
       } else {
         assert(streams->recv_subtask != 0);
         if (__wasilibc_poll_add(state, streams->recv_subtask, wasip3_recv_ready,
                                 data) < 0)
           return -1;
+        wasip3_udp_recv_enter_blocking(socket);
       }
     }
 
@@ -1213,10 +1437,13 @@ static int udp_poll_register(void *data, poll_state_t *state, short events) {
     // active write in progress, then this is immediately ready to write.
     // Otherwise we're waiting on the write subtask.
     if ((events & POLLWRNORM) != 0) {
+      if (wasip3_udp_send_enter(socket, false) < 0)
+        return -1;
       if (streams->send_subtask) {
         if (__wasilibc_poll_add(state, streams->send_subtask, wasip3_send_ready,
                                 data) < 0)
           return -1;
+        wasip3_udp_send_enter_blocking(socket);
       } else {
         __wasilibc_poll_ready(state, POLLWRNORM);
       }
@@ -1233,6 +1460,9 @@ static int udp_poll_register(void *data, poll_state_t *state, short events) {
 
 static int udp_fcntl_getfl(void *data) {
   udp_socket_t *socket = (udp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   int flags = 0;
   if (!socket->blocking) {
     flags |= O_NONBLOCK;
@@ -1242,6 +1472,9 @@ static int udp_fcntl_getfl(void *data) {
 
 static int udp_fcntl_setfl(void *data, int flags) {
   udp_socket_t *socket = (udp_socket_t *)data;
+  STRONG_LOCK(socket->lock);
+  defer STRONG_UNLOCK(socket->lock);
+
   if (flags & O_NONBLOCK) {
     socket->blocking = false;
   } else {

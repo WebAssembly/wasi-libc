@@ -1,4 +1,6 @@
+#include "lock.h"
 #include <errno.h>
+#include <stddefer.h>
 #include <wasi/version.h>
 
 #ifdef __wasip3__
@@ -17,6 +19,7 @@ typedef stdout_future_result_void_error_code_t (*stdout_stream_func_t)(
 
 typedef struct {
   descriptor_refcnt_t refcnt;
+  DECLARE_STRONG_LOCK(lock);
   wasip3_io_state_t input;
   stdin_future_result_void_error_code_t input_result;
   // tristate: zero=unknown, valid handle=yes, -1=no
@@ -25,6 +28,7 @@ typedef struct {
 
 typedef struct {
   descriptor_refcnt_t refcnt;
+  DECLARE_STRONG_LOCK(lock);
   // contains stream, result storage and result subtask
   stdout_future_result_void_error_code_t result;
   wasip3_io_state_t output;
@@ -55,6 +59,7 @@ static void translate_error(wasi_cli_types_error_code_t err) {
 
 static void stdin3_free(void *data) {
   stdin3_t *stdio = (stdin3_t *)data;
+  STRONG_ASSERT_EMPTY(stdio->lock);
   if (stdio->terminal_in.__handle > 0)
     terminal_input_terminal_input_drop_own(stdio->terminal_in);
   wasip3_read_state_close(&stdio->input);
@@ -65,6 +70,7 @@ static void stdin3_free(void *data) {
 
 static void stdout3_free(void *data) {
   stdout3_t *stdio = (stdout3_t *)data;
+  STRONG_ASSERT_EMPTY(stdio->lock);
   if (stdio->terminal_out.__handle > 0)
     terminal_output_terminal_output_drop_own(stdio->terminal_out);
   wasip3_write_state_close(&stdio->output);
@@ -75,6 +81,8 @@ static void stdout3_free(void *data) {
 
 static int stdout3_write_eof(void *data) {
   stdout3_t *stdio = (stdout3_t *)data;
+  STRONG_ASSERT_HELD(stdio->lock);
+
   if (stdio->result != 0) {
     stdout_result_void_error_code_t result;
     __wasilibc_future_block_on(
@@ -93,12 +101,16 @@ static int stdout3_write_eof(void *data) {
 
 static int stdout3_write(void *data, wasi_write_t *out) {
   stdout3_t *stdio = (stdout3_t *)data;
+  STRONG_LOCK(stdio->lock);
+  // .. intentionally don't unlock `stdio->lock` as this function lets the
+  // caller do that.
+
   if (!wasip3_io_state_present(&stdio->output)) {
     assert(!stdio->result);
     stdin_stream_u8_writer_t writer;
     stdin_stream_u8_t read_side = stdin_stream_u8_new(&writer);
     stdio->result = stdio->stream_func(read_side);
-    wasip3_io_state_init(&stdio->output, writer);
+    wasip3_io_state_init(&stdio->output, writer, stdio->lock);
   }
   out->offset = NULL;
   out->blocking = true;
@@ -111,6 +123,7 @@ static int stdout3_write(void *data, wasi_write_t *out) {
 
 static int stdin3_read_eof(void *data) {
   stdin3_t *stdio = (stdin3_t *)data;
+  STRONG_ASSERT_HELD(stdio->lock);
 
   if (stdio->input_result != 0) {
     stdin_result_void_error_code_t result;
@@ -129,11 +142,15 @@ static int stdin3_read_eof(void *data) {
 
 static int stdin3_read(void *data, wasi_read_t *read) {
   stdin3_t *stdio = (stdin3_t *)data;
+  STRONG_LOCK(stdio->lock);
+  // .. intentionally don't unlock `stdio->lock` as this function lets the
+  // caller do that.
+
   if (!wasip3_io_state_present(&stdio->input)) {
     assert(!stdio->input_result);
     stdin_tuple2_stream_u8_future_result_void_error_code_t result;
     stdin_read_via_stream(&result);
-    wasip3_io_state_init(&stdio->input, result.f0);
+    wasip3_io_state_init(&stdio->input, result.f0, stdio->lock);
     stdio->input_result = result.f1;
   }
   read->state = &stdio->input;
@@ -163,6 +180,9 @@ static int stdout3_fcntl_getfl(void *data) {
 
 static int stdin3_isatty(void *data) {
   stdin3_t *stdio = (stdin3_t *)data;
+  STRONG_LOCK(stdio->lock);
+  defer STRONG_UNLOCK(stdio->lock);
+
   if (stdio->terminal_in.__handle == 0) {
     if (!terminal_stdin_get_terminal_stdin(&stdio->terminal_in))
       stdio->terminal_in.__handle = KNOWN_NOT_A_TERMINAL;
@@ -172,6 +192,9 @@ static int stdin3_isatty(void *data) {
 
 static int stdout3_isatty(void *data) {
   stdout3_t *stdio = (stdout3_t *)data;
+  STRONG_LOCK(stdio->lock);
+  defer STRONG_UNLOCK(stdio->lock);
+
   if (stdio->terminal_out.__handle == 0) {
     if (!(*stdio->terminal_func)(&stdio->terminal_out))
       stdio->terminal_out.__handle = KNOWN_NOT_A_TERMINAL;

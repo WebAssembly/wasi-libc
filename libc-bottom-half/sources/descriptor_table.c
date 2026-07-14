@@ -15,9 +15,6 @@
 
 #define MINSIZE 8
 
-// FIXME: Remove after #825 lands
-#define STRONG_ASSERT_HELD(lock) ((void)0)
-
 typedef struct {
   bool occupied;
   descriptor_table_entry_t entry;

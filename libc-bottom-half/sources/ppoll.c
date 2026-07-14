@@ -380,10 +380,12 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds,
   // the entries, and then the waitable-set itself.
   defer {
     for (size_t i = 0; i < state.len; i++) {
-      uint32_t waitable = state.states[i].waitable;
-      if (waitable)
-        wasip3_waitable_join(waitable, 0);
-      descriptor_table_entry_dec(state.states[i].entry);
+      state_t *s = &state.states[i];
+      if (s->waitable)
+        wasip3_waitable_join(s->waitable, 0);
+      if (s->ready)
+        s->ready(s->ready_data, NULL, NULL);
+      descriptor_table_entry_dec(s->entry);
     }
     wasip3_waitable_set_drop(state.set);
   }
@@ -438,6 +440,7 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds,
         wasi_read_t read;
         if (entry.vtable->get_read_stream(entry.data, &read) < 0)
           return -1;
+        defer STRONG_UNLOCK(*read.state->lock);
         if (__wasilibc_read_poll(read.state, &state) < 0)
           return -1;
       } else {
@@ -451,6 +454,7 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds,
         wasi_write_t write;
         if (entry.vtable->get_write_stream(entry.data, &write) < 0)
           return -1;
+        defer STRONG_UNLOCK(*write.state->lock);
         if (__wasilibc_write_poll(write.state, &state) < 0)
           return -1;
       } else {
@@ -543,7 +547,10 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds,
         // `state.pollfd` with various events.
         wasip3_waitable_join(p->waitable, 0);
         p->waitable = 0;
+        assert(p->ready);
         p->ready(p->ready_data, &state, &event);
+        p->ready = NULL;
+        p->ready_data = NULL;
         state.cur_pollfd = NULL;
       }
     }

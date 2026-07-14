@@ -18,18 +18,8 @@ int __wasilibc_nocwd___wasilibc_unlinkat(int fd, const char *path) {
   return 0;
 #elif defined(__wasip2__) || defined(__wasip3__)
   // Translate the file descriptor to an internal handle
-  descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
-  if (!entry)
-    return -1;
-  if (!entry->vtable->get_file) {
-    errno = EOPNOTSUPP;
-    return -1;
-  }
-
-  if (entry->vtable->close_streams)
-    entry->vtable->close_streams(entry->data);
   filesystem_borrow_descriptor_t file;
-  if (entry->vtable->get_file(entry->data, &file) < 0)
+  if (fd_to_file_handle(fd, &file) < 0)
     return -1;
 
   // Create a Wasm string from the path

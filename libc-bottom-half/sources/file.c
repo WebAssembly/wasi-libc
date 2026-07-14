@@ -333,7 +333,6 @@ static descriptor_vtable_t file_vtable = {
     .set_blocking = file_set_blocking,
     .fstat = file_fstat,
     .seek = file_seek,
-    .close_streams = file_close_streams,
     .fcntl_getfl = file_fcntl_getfl,
     .fcntl_setfl = file_fcntl_setfl,
 };

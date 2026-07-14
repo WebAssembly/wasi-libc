@@ -168,10 +168,6 @@ typedef struct descriptor_vtable_t {
   int (*get_file)(void *, filesystem_borrow_descriptor_t *);
   /// Implementation of `lseek`-the-function.
   off_t (*seek)(void *, off_t, int);
-  /// Used during `unlinkat` to ensure that all internal stremas are
-  /// closed before deleting the file to ensure there are no open references to
-  /// it.
-  void (*close_streams)(void *);
   /// Implementation of `fnctl(fd, F_GETFL)`.
   int (*fcntl_getfl)(void *);
   /// Implementation of `fnctl(fd, F_SETFL)`.

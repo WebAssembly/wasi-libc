@@ -60,7 +60,7 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
   poll_pollable_drop_own(pollable);
 #else // defined(__wasip3__)
   if (flags & TIMER_ABSTIME) {
-    monotonic_clock_wait_until(duration);
+    __wasilibc_subtask_await(monotonic_clock_wait_until(duration));
   } else {
     __wasilibc_subtask_await(monotonic_clock_wait_for(duration));
   }

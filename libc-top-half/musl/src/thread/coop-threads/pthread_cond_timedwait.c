@@ -1,19 +1,29 @@
 #include "pthread_impl.h"
+#include <assert.h>
+#include <common/clock.h>
+#include <time.h>
 
 int __pthread_cond_timedwait(pthread_cond_t *restrict c,
                              pthread_mutex_t *restrict m,
                              const struct timespec *restrict ts) {
-  // TODO(wasip3) timed waits
-  if (ts) {
-    return ETIMEDOUT;
-  }
+  // The deadline is measured against the clock configured with
+  // `pthread_condattr_setclock`, CLOCK_REALTIME by default (note that the
+  // static initializer zeroes `_c_clock` and `CLOCKID_REALTIME` is 0).
+  assert(CLOCKID_REALTIME == 0);
+  clockid_t clk =
+      c->_c_clock == CLOCKID_MONOTONIC ? CLOCK_MONOTONIC : CLOCK_REALTIME;
 
   // Specifically do not yield to other threads as part of this unlock which
   // ensures that this thread keeps running into below where it's queued up on
   // the list of waiters which then yields.
-  __wasilibc_pthread_mutex_unlock(m, 0);
-  __waitlist_wait_on(&c->_c_waiters);
-  return pthread_mutex_lock(m);
+  int rc = __wasilibc_pthread_mutex_unlock(m, 0);
+  if (rc != 0)
+    return rc;
+  int result = __waitlist_wait_on(&c->_c_waiters, clk, ts);
+  rc = pthread_mutex_lock(m);
+  (void)rc;
+  assert(rc == 0);
+  return result;
 }
 
 weak_alias(__pthread_cond_timedwait, pthread_cond_timedwait);

@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include "pthread_impl.h"
+#include <time.h>
 
 static int __pthread_timedjoin_np(pthread_t t, void **res,
                                   const struct timespec *at) {
@@ -19,17 +20,14 @@ static int __pthread_timedjoin_np(pthread_t t, void **res,
     return 0;
   }
 
-  /* Timeouts not supported for cooperative threading */
-  if (at) {
-    return ETIMEDOUT;
-  }
-
   if (t->joiner_waiters) {
     // Only one thread can wait to join at a time
     return EINVAL;
   }
 
-  __waitlist_wait_on(&t->joiner_waiters);
+  int rc = __waitlist_wait_on(&t->joiner_waiters, CLOCK_REALTIME, at);
+  if (rc != 0)
+    return rc;
 
   if (res)
     *res = t->result;

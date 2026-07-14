@@ -1,4 +1,5 @@
 #include "pthread_impl.h"
+#include <time.h>
 
 int __pthread_rwlock_timedrdlock(pthread_rwlock_t *restrict rw,
                                  const struct timespec *restrict at) {
@@ -8,15 +9,11 @@ int __pthread_rwlock_timedrdlock(pthread_rwlock_t *restrict rw,
     return 0;
   }
 
-  /* Would need to wait for writer, but timeouts not supported */
-  if (at) {
-    errno = ENOSYS;
-    return -1;
-  }
-
   /* Wait until no writer holds the lock */
   while (rw->_rw_lock < 0) {
-    __waitlist_wait_on(&rw->_rw_waiters);
+    int rc = __waitlist_wait_on(&rw->_rw_waiters, CLOCK_REALTIME, at);
+    if (rc != 0)
+      return rc;
   }
 
   /* Acquired, increment reader count */

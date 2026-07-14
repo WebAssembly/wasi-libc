@@ -495,6 +495,17 @@ if (ENABLE_COOP_THREADS)
   add_wasilibc_test(coop_stdio_orphan_lock.c)
   add_wasilibc_test(coop_barrier_reuse.c)
   add_wasilibc_test(coop_join_uaf.c)
+  add_wasilibc_test(coop_timedwaits.c)
+  add_wasilibc_test(coop_cond_timedwait_return.c)
+  add_wasilibc_test(coop_timedwait_abs_deadline.c)
+  add_wasilibc_test(coop_timedwait_past_deadline.c)
+  add_wasilibc_test(coop_timedwait_wake_race.c)
+  add_wasilibc_test(coop_timedwait_rwlock.c)
+  add_wasilibc_test(coop_timedwait_sem_steal.c)
+  add_wasilibc_test(coop_timedwait_join.c)
+  add_wasilibc_test(coop_timedwait_mixed_waiters.c)
+  add_wasilibc_test(coop_timedwait_einval.c)
+  add_wasilibc_test(coop_cond_clock_monotonic.c)
 endif()
 
 add_wasilibc_test(tls_smoke.c)
@@ -618,7 +629,7 @@ function(add_posix_test test_file)
   set_source_files_properties(${test_file} PROPERTIES GENERATED TRUE)
 
   add_test_pair(${test_name} ${test_file}
-    CFLAGS -Wno-unused-parameter
+    CFLAGS -Wno-unused-parameter -Wno-unused-variable -Wno-sign-compare -Wno-unused-but-set-global
     INCLUDE ${POSIX_TESTSUITE}/include
     DEPENDENCIES posix-testsuite)
 endfunction()
@@ -693,9 +704,9 @@ if (ENABLE_COOP_THREADS)
   # unsupported(cancellation): conformance/interfaces/pthread_cleanup_push/1-3.c
 
   add_posix_test(conformance/interfaces/pthread_cond_broadcast/1-1.c)
-  # temporarily unsupported(timed waits): conformance/interfaces/pthread_cond_broadcast/1-2.c
+  add_posix_test(conformance/interfaces/pthread_cond_broadcast/1-2.c)
   add_posix_test(conformance/interfaces/pthread_cond_broadcast/2-1.c)
-  # temporarily unsupported(timed waits): conformance/interfaces/pthread_cond_broadcast/2-2.c
+  add_posix_test(conformance/interfaces/pthread_cond_broadcast/2-2.c)
   # unsupported(mmap): conformance/interfaces/pthread_cond_broadcast/2-3.c
   add_posix_test(conformance/interfaces/pthread_cond_broadcast/4-1.c)
   # unsupported(signals): conformance/interfaces/pthread_cond_broadcast/4-2.c
@@ -715,24 +726,24 @@ if (ENABLE_COOP_THREADS)
   # unsupported(signals): conformance/interfaces/pthread_cond_init/4-2.c
 
   add_posix_test(conformance/interfaces/pthread_cond_signal/1-1.c)
-  # temporarily unsupported(timed waits): conformance/interfaces/pthread_cond_signal/1-2.c
+  add_posix_test(conformance/interfaces/pthread_cond_signal/1-2.c)
   add_posix_test(conformance/interfaces/pthread_cond_signal/2-1.c)
-  # temporarily unsupported(timed waits): conformance/interfaces/pthread_cond_signal/2-2.c
+  add_posix_test(conformance/interfaces/pthread_cond_signal/2-2.c)
   add_posix_test(conformance/interfaces/pthread_cond_signal/4-1.c)
   # unsupported(signals): conformance/interfaces/pthread_cond_signal/4-2.c
 
-  # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/1-1.c
-  # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/2-1.c
-  # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/2-2.c
-  # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/2-3.c
-  # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/2-4.c
-  # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/2-5.c
-  # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/2-6.c
-  # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/2-7.c
-  # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/3-1.c
-  # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/4-1.c
-  # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/4-2.c
-  # temporarily unsupported(timed wait): conformance/interfaces/pthread_cond_timedwait/4-3.c
+  add_posix_test(conformance/interfaces/pthread_cond_timedwait/1-1.c)
+  add_posix_test(conformance/interfaces/pthread_cond_timedwait/2-1.c)
+  # unsupported(signals/exit) add_posix_test(conformance/interfaces/pthread_cond_timedwait/2-2.c)
+  # unsupported(signals/exit) add_posix_test(conformance/interfaces/pthread_cond_timedwait/2-3.c)
+  # unsupported(processes) add_posix_test(conformance/interfaces/pthread_cond_timedwait/2-4.c)
+  add_posix_test(conformance/interfaces/pthread_cond_timedwait/2-5.c)
+  # unsupported(fails??) add_posix_test(conformance/interfaces/pthread_cond_timedwait/2-6.c)
+  # unsupported(processes) add_posix_test(conformance/interfaces/pthread_cond_timedwait/2-7.c)
+  add_posix_test(conformance/interfaces/pthread_cond_timedwait/3-1.c)
+  add_posix_test(conformance/interfaces/pthread_cond_timedwait/4-1.c)
+  # unsupported(processes) add_posix_test(conformance/interfaces/pthread_cond_timedwait/4-2.c)
+  # unsupported(signals) add_posix_test(conformance/interfaces/pthread_cond_timedwait/4-3.c)
 
   add_posix_test(conformance/interfaces/pthread_cond_wait/1-1.c)
   add_posix_test(conformance/interfaces/pthread_cond_wait/2-1.c)
@@ -851,12 +862,12 @@ if (ENABLE_COOP_THREADS)
   add_posix_test(conformance/interfaces/pthread_mutex_lock/4-1.c)
   # unsupported(signals): add_posix_test(conformance/interfaces/pthread_mutex_lock/5-1.c
 
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_mutex_timedlock/1-1.c
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_mutex_timedlock/2-1.c
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_mutex_timedlock/4-1.c
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_mutex_timedlock/5-1.c
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_mutex_timedlock/5-2.c
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_mutex_timedlock/5-3.c
+  # unsupported(exit) add_posix_test(conformance/interfaces/pthread_mutex_timedlock/1-1.c)
+  # unsupported(exit) add_posix_test(conformance/interfaces/pthread_mutex_timedlock/2-1.c)
+  # unsupported(exit) add_posix_test(conformance/interfaces/pthread_mutex_timedlock/4-1.c)
+  # unsupported(exit) add_posix_test(conformance/interfaces/pthread_mutex_timedlock/5-1.c)
+  # unsupported(exit) add_posix_test(conformance/interfaces/pthread_mutex_timedlock/5-2.c)
+  add_posix_test(conformance/interfaces/pthread_mutex_timedlock/5-3.c)
 
   add_posix_test(conformance/interfaces/pthread_mutex_trylock/1-1.c)
   add_posix_test(conformance/interfaces/pthread_mutex_trylock/1-2.c)
@@ -933,19 +944,18 @@ if (ENABLE_COOP_THREADS)
   # unsupported(signals): conformance/interfaces/pthread_rwlock_rdlock/4-1.c
   add_posix_test(conformance/interfaces/pthread_rwlock_rdlock/5-1.c)
 
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedrdlock/1-1.c
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedrdlock/2-1.c
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedrdlock/3-1.c
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedrdlock/5-1.c
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedrdlock/6-1.c
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedrdlock/6-2.c
+  add_posix_test(conformance/interfaces/pthread_rwlock_timedrdlock/1-1.c)
+  add_posix_test(conformance/interfaces/pthread_rwlock_timedrdlock/2-1.c)
+  add_posix_test(conformance/interfaces/pthread_rwlock_timedrdlock/3-1.c)
+  add_posix_test(conformance/interfaces/pthread_rwlock_timedrdlock/5-1.c)
+  # unsupported(signals) add_posix_test(conformance/interfaces/pthread_rwlock_timedrdlock/6-1.c)
+  # unsupported(signals) add_posix_test(conformance/interfaces/pthread_rwlock_timedrdlock/6-2.c)
 
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedwrlock/1-1.c
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedwrlock/2-1.c
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedwrlock/3-1.c
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedwrlock/5-1.c
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedwrlock/6-1.c
-  # temporarily unsupported(timed lock): conformance/interfaces/pthread_rwlock_timedwrlock/6-2.c
+  add_posix_test(conformance/interfaces/pthread_rwlock_timedwrlock/1-1.c)
+  add_posix_test(conformance/interfaces/pthread_rwlock_timedwrlock/2-1.c)
+  add_posix_test(conformance/interfaces/pthread_rwlock_timedwrlock/5-1.c)
+  # unsupported(signals) add_posix_test(conformance/interfaces/pthread_rwlock_timedwrlock/6-1.c)
+  # unsupported(signals) add_posix_test(conformance/interfaces/pthread_rwlock_timedwrlock/6-2.c)
 
   add_posix_test(conformance/interfaces/pthread_rwlock_tryrdlock/1-1.c)
 

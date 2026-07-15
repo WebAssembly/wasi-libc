@@ -1,17 +1,389 @@
 diff --git a/Include/pyport.h b/Include/pyport.h
-index 3eac119bf8e..6a4df4bf75f 100644
+index 3eac119bf8e..51f4a56dabc 100644
 --- a/Include/pyport.h
 +++ b/Include/pyport.h
-@@ -503,6 +503,7 @@ extern "C" {
+@@ -502,7 +502,11 @@ extern "C" {
+ /* Some WebAssembly platforms do not provide a working pthread implementation.
   * Thread support is stubbed and any attempt to create a new thread fails.
   */
++#ifdef __wasi__
++#  include <wasi/version.h>
++#endif
  #if (!defined(HAVE_PTHREAD_STUBS) && \
-+     !defined(__wasi__) && \
++      (!defined(__wasi__) || defined(__wasi_cooperative_threads__)) && \
        (!defined(__EMSCRIPTEN__) || defined(__EMSCRIPTEN_PTHREADS__)))
  #  define Py_CAN_START_THREADS 1
  #endif
+diff --git a/Lib/socket.py b/Lib/socket.py
+index 727b0e75f03..e26ba6797b5 100644
+--- a/Lib/socket.py
++++ b/Lib/socket.py
+@@ -461,7 +461,7 @@ def _sendfile_use_send(self, file, offset=0, count=None):
+     def _check_sendfile_params(self, file, offset, count):
+         if 'b' not in getattr(file, 'mode', 'b'):
+             raise ValueError("file should be opened in binary mode")
+-        if not self.type & SOCK_STREAM:
++        if self.type != SOCK_STREAM:
+             raise ValueError("only SOCK_STREAM type sockets are supported")
+         if count is not None:
+             if not isinstance(count, int):
+@@ -641,6 +641,12 @@ def _fallback_socketpair(family=AF_INET, type=SOCK_STREAM, proto=0):
+     # able to connect to {host}:{port} instead of us.
+     # We expect only AF_INET and AF_INET6 families.
+     try:
++        if sys.platform == "wasi":
++            # On WASI the non-blocking connect() above only completes while the
++            # guest is blocked on the socket, so wait for the client socket to
++            # become writable before asking either socket for its peer.
++            import select
++            select.select([], [csock], [])
+         if (
+             ssock.getsockname() != csock.getpeername()
+             or csock.getsockname() != ssock.getpeername()
+diff --git a/Lib/test/support/__init__.py b/Lib/test/support/__init__.py
+index 88f61103512..a1ec95fe903 100644
+--- a/Lib/test/support/__init__.py
++++ b/Lib/test/support/__init__.py
+@@ -628,7 +628,7 @@ def requires_subprocess():
+ # Emscripten's socket emulation and WASI sockets have limitations.
+ has_socket_support = not (
+     is_emscripten
+-    or is_wasi
++    or (is_wasi and not sys._wasi_info.cooperative_threads)
+ )
+ 
+ def requires_working_socket(*, module=False):
+diff --git a/Lib/test/support/threading_helper.py b/Lib/test/support/threading_helper.py
+index 3e04c344a0d..fb1288c2536 100644
+--- a/Lib/test/support/threading_helper.py
++++ b/Lib/test/support/threading_helper.py
+@@ -230,7 +230,7 @@ def _can_start_thread() -> bool:
+     if sys.platform == "emscripten":
+         return sys._emscripten_info.pthreads
+     elif sys.platform == "wasi":
+-        return False
++        return sys._wasi_info.cooperative_threads
+     else:
+         # assume all other platforms have working thread support.
+         return True
+diff --git a/Lib/test/test_asyncio/test_base_events.py b/Lib/test/test_asyncio/test_base_events.py
+index 1b727f3b1fe..e08a2ef8167 100644
+--- a/Lib/test/test_asyncio/test_base_events.py
++++ b/Lib/test/test_asyncio/test_base_events.py
+@@ -331,6 +331,8 @@ def cb():
+             loop.call_later(60, cb)
+             loop.call_at(loop.time() + 60, cb)
+ 
++    @unittest.skipIf(support.is_wasi,
++                     "requires preemptive thread scheduling")
+     def test_check_thread(self):
+         def check_in_thread(loop, event, debug, create_loop, fut):
+             # wait until the event loop is running
+@@ -1034,6 +1036,8 @@ def test_asyncgen_finalization_by_gc(self):
+             test_utils.run_briefly(self.loop)
+             self.assertTrue(status['finalized'])
+ 
++    @unittest.skipIf(support.is_wasi,
++                     "requires preemptive thread scheduling")
+     def test_asyncgen_finalization_by_gc_in_other_thread(self):
+         # Python issue 34769: If garbage collector runs in another
+         # thread, async generators will not finalize in debug
+@@ -1467,6 +1471,8 @@ def _test_create_connection_ip_addr(self, m_socket, allow_inet_pton):
+     @unittest.skipIf(sys.platform.startswith('aix'),
+                     "bpo-25545: IPv6 scope id and getaddrinfo() behave differently on AIX")
+     @patch_socket
++    @unittest.skipIf(support.is_wasi,
++                     'scoped IPv6 literals are not supported by getaddrinfo on WASI')
+     def test_create_connection_ipv6_scope(self, m_socket):
+         m_socket.getaddrinfo = socket.getaddrinfo
+         sock = m_socket.socket.return_value
+@@ -1768,6 +1774,8 @@ def test_create_datagram_endpoint_connect_err(self):
+         self.assertRaises(
+             OSError, self.loop.run_until_complete, coro)
+ 
++    @unittest.skipIf(support.is_wasi,
++                     "WASI has no SO_BROADCAST / socket-option support")
+     def test_create_datagram_endpoint_allow_broadcast(self):
+         protocol = MyDatagramProto(create_future=True, loop=self.loop)
+         self.loop.sock_connect = sock_connect = mock.Mock()
+@@ -1909,6 +1917,8 @@ class FakeSock:
+ 
+     @unittest.skipIf(sys.platform == 'vxworks',
+                     "SO_BROADCAST is enabled by default on VxWorks")
++    @unittest.skipIf(support.is_wasi,
++                     "WASI has no SO_BROADCAST / socket-option support")
+     def test_create_datagram_endpoint_sockopts(self):
+         # Socket options should not be applied unless asked for.
+         # SO_REUSEPORT is not available on all platforms.
+diff --git a/Lib/test/test_asyncio/test_events.py b/Lib/test/test_asyncio/test_events.py
+index 919d543b032..6776d4600d2 100644
+--- a/Lib/test/test_asyncio/test_events.py
++++ b/Lib/test/test_asyncio/test_events.py
+@@ -23,7 +23,7 @@
+ import unittest
+ from unittest import mock
+ import weakref
+-if sys.platform not in ('win32', 'vxworks'):
++if sys.platform not in ('win32', 'vxworks', 'wasi'):
+     import tty
+ 
+ import asyncio
+@@ -514,6 +514,11 @@ def run():
+     def test_reader_callback(self):
+         r, w = socket.socketpair()
+         r.setblocking(False)
++        # WASI's I/O behavior seems to not always deliver EOF to this test which
++        # loops in a particular manner. Work around the "socket not closed"
++        # warning which causes the test to fail.
++        self.addCleanup(r.close)
++
+         bytes_read = bytearray()
+ 
+         def reader():
+@@ -560,6 +565,8 @@ def writer(data):
+         self.assertEqual(read, data)
+ 
+     @unittest.skipUnless(hasattr(signal, 'SIGKILL'), 'No SIGKILL')
++    @unittest.skipUnless(hasattr(signal, 'valid_signals'),
++                         'requires signal.valid_signals()')
+     def test_add_signal_handler(self):
+         caught = 0
+ 
+@@ -1462,10 +1469,12 @@ def datagram_received(self, data, addr):
+         self.assertEqual('CLOSED', client.state)
+         server.transport.close()
+ 
++    @unittest.skipIf(support.is_wasi, 'getnameinfo is not supported on WASI')
+     def test_create_datagram_endpoint(self):
+         self._test_create_datagram_endpoint(('127.0.0.1', 0), socket.AF_INET)
+ 
+     @unittest.skipUnless(socket_helper.IPV6_ENABLED, 'IPv6 not supported or enabled')
++    @unittest.skipIf(support.is_wasi, 'getnameinfo is not supported on WASI')
+     def test_create_datagram_endpoint_ipv6(self):
+         self._test_create_datagram_endpoint(('::1', 0), socket.AF_INET6)
+ 
+@@ -1957,6 +1966,8 @@ async def close_loop(loop):
+         with self.assertRaises(RuntimeError):
+             self.loop.run_until_complete(coro)
+ 
++    @unittest.skipUnless(hasattr(signal, 'valid_signals'),
++                         'requires signal.valid_signals()')
+     def test_close(self):
+         self.loop.close()
+ 
+diff --git a/Lib/test/test_asyncio/test_selector_events.py b/Lib/test/test_asyncio/test_selector_events.py
+index 7b6d1bce5e4..2ba86b07230 100644
+--- a/Lib/test/test_asyncio/test_selector_events.py
++++ b/Lib/test/test_asyncio/test_selector_events.py
+@@ -19,6 +19,7 @@
+                                      _SelectorSocketTransport,
+                                      _SelectorTransport)
+ from test.test_asyncio import utils as test_utils
++from test import support
+ 
+ MOCK_ANY = mock.ANY
+ 
+@@ -159,6 +160,8 @@ def test_write_to_self_exception(self):
+         self.loop._csock.send.side_effect = RuntimeError()
+         self.assertRaises(RuntimeError, self.loop._write_to_self)
+ 
++    @unittest.skipIf(support.is_wasi,
++                     "requires preemptive thread scheduling")
+     @mock.patch('socket.getaddrinfo')
+     def test_sock_connect_resolve_using_socket_params(self, m_gai):
+         addr = ('need-resolution.com', 8080)
+diff --git a/Lib/test/test_asyncio/test_sendfile.py b/Lib/test/test_asyncio/test_sendfile.py
+index dcd963b3355..1254c1f6ab1 100644
+--- a/Lib/test/test_asyncio/test_sendfile.py
++++ b/Lib/test/test_asyncio/test_sendfile.py
+@@ -196,9 +196,34 @@ def cleanup():
+ 
+         return sock, proto
+ 
++    def drain_before_close(self, sock):
++        # On WASI the `close` function can block, and discussion of this is
++        # located upstream at WebAssembly/component-model#617. The
++        # single-threaded nature of this test means that a blocking `close` is
++        # bad, so to work around this wait for sockets to be writable to ensure
++        # that `close` doesn't block.
++        if sys.platform != "wasi":
++            return
++
++        async def wait_writable():
++            fut = self.loop.create_future()
++
++            def on_writable():
++                if not fut.done():
++                    fut.set_result(None)
++
++            self.loop.add_writer(sock.fileno(), on_writable)
++            try:
++                await fut
++            finally:
++                self.loop.remove_writer(sock.fileno())
++
++        self.run_loop(wait_writable())
++
+     def test_sock_sendfile_success(self):
+         sock, proto = self.prepare_socksendfile()
+         ret = self.run_loop(self.loop.sock_sendfile(sock, self.file))
++        self.drain_before_close(sock)
+         sock.close()
+         self.run_loop(proto.wait_closed())
+ 
+@@ -210,6 +235,7 @@ def test_sock_sendfile_with_offset_and_count(self):
+         sock, proto = self.prepare_socksendfile()
+         ret = self.run_loop(self.loop.sock_sendfile(sock, self.file,
+                                                     1000, 2000))
++        self.drain_before_close(sock)
+         sock.close()
+         self.run_loop(proto.wait_closed())
+ 
+@@ -222,6 +248,7 @@ def test_sock_sendfile_zero_size(self):
+         with tempfile.TemporaryFile() as f:
+             ret = self.run_loop(self.loop.sock_sendfile(sock, f,
+                                                         0, None))
++        self.drain_before_close(sock)
+         sock.close()
+         self.run_loop(proto.wait_closed())
+ 
+@@ -234,6 +261,7 @@ def test_sock_sendfile_mix_with_regular_send(self):
+         self.run_loop(self.loop.sock_sendall(sock, buf))
+         ret = self.run_loop(self.loop.sock_sendfile(sock, self.file))
+         self.run_loop(self.loop.sock_sendall(sock, buf))
++        self.drain_before_close(sock)
+         sock.close()
+         self.run_loop(proto.wait_closed())
+ 
+diff --git a/Lib/test/test_asyncio/test_tools.py b/Lib/test/test_asyncio/test_tools.py
+index 34e94830204..ce8381488f3 100644
+--- a/Lib/test/test_asyncio/test_tools.py
++++ b/Lib/test/test_asyncio/test_tools.py
+@@ -1,5 +1,9 @@
+ import unittest
+ 
++from test.support import import_helper
++# asyncio.tools requires _remote_debugging, which is not built on every
++# platform, so raise a SkipTest when it is missing.
++import_helper.import_module('_remote_debugging')
+ from asyncio import tools
+ 
+ from collections import namedtuple
+diff --git a/Lib/test/test_asyncio/test_unix_events.py b/Lib/test/test_asyncio/test_unix_events.py
+index 22982dc9d8a..a82a13d37c1 100644
+--- a/Lib/test/test_asyncio/test_unix_events.py
++++ b/Lib/test/test_asyncio/test_unix_events.py
+@@ -55,7 +55,8 @@ def close_pipe_transport(transport):
+     transport._pipe = None
+ 
+ 
+-@unittest.skipUnless(signal, 'Signals are not supported')
++@unittest.skipUnless(signal and hasattr(signal, 'valid_signals'),
++                     'Signals are not supported')
+ class SelectorEventLoopSignalTests(test_utils.TestCase):
+ 
+     def setUp(self):
+diff --git a/Lib/test/test_capi/test_misc.py b/Lib/test/test_capi/test_misc.py
+index ef950f5df04..8d134dfee32 100644
+--- a/Lib/test/test_capi/test_misc.py
++++ b/Lib/test/test_capi/test_misc.py
+@@ -1174,6 +1174,8 @@ def pendingcalls_wait(self, l, numadded, context = None):
+             print("(%i)"%(len(l),))
+ 
+     @threading_helper.requires_working_threading()
++    @unittest.skipIf(support.is_wasi,
++                     "requires preemptive thread scheduling")
+     def test_main_pendingcalls_threaded(self):
+ 
+         #do every callback on a separate thread
+@@ -2592,6 +2594,12 @@ class Test_PyLock(unittest.TestCase):
+                     for name in dir(_testinternalcapi)
+                     if name.startswith('test_lock_'))
+ 
++if support.is_wasi:
++    # The benchmark threads spin on the uncontended lock fast path, which
++    # starves the timer thread without preemptive scheduling.
++    Test_PyLock.test_lock_benchmark = unittest.skip(
++        "requires preemptive thread scheduling")(Test_PyLock.test_lock_benchmark)
++
+ 
+ @unittest.skipIf(_testmultiphase is None, "test requires _testmultiphase module")
+ class Test_ModuleStateAccess(unittest.TestCase):
+diff --git a/Lib/test/test_concurrent_futures/test_interpreter_pool.py b/Lib/test/test_concurrent_futures/test_interpreter_pool.py
+index 7241fcc4b1e..90995d302e9 100644
+--- a/Lib/test/test_concurrent_futures/test_interpreter_pool.py
++++ b/Lib/test/test_concurrent_futures/test_interpreter_pool.py
+@@ -8,6 +8,9 @@
+ import textwrap
+ import time
+ import unittest
++from test.support import import_helper
++# Raise SkipTest on builds without subinterpreter support.
++import_helper.import_module('_interpreters')
+ from concurrent.futures.interpreter import BrokenInterpreterPool
+ from concurrent import interpreters
+ from concurrent.interpreters import _queues as queues
+diff --git a/Lib/test/test_concurrent_futures/util.py b/Lib/test/test_concurrent_futures/util.py
+index b12940414d9..6abb29aef09 100644
+--- a/Lib/test/test_concurrent_futures/util.py
++++ b/Lib/test/test_concurrent_futures/util.py
+@@ -85,7 +85,12 @@ def create_event(self):
+ 
+ @support.skip_if_sanitizer("gh-129824: data races in InterpreterPool tests", thread=True)
+ class InterpreterPoolMixin(ExecutorMixin):
+-    executor_type = futures.InterpreterPoolExecutor
++    executor_type = getattr(futures, "InterpreterPoolExecutor", None)
++
++    def setUp(self):
++        if self.executor_type is None:
++            self.skipTest("requires subinterpreter support")
++        super().setUp()
+ 
+     def create_event(self):
+         self.skipTest("InterpreterPoolExecutor doesn't support events")
+diff --git a/Lib/test/test_fcntl.py b/Lib/test/test_fcntl.py
+index 9f1e2e250fe..97ce2cfb552 100644
+--- a/Lib/test/test_fcntl.py
++++ b/Lib/test/test_fcntl.py
+@@ -8,7 +8,8 @@
+ import sys
+ import unittest
+ from test.support import (
+-    cpython_only, get_pagesize, is_apple, requires_subprocess, verbose, is_emscripten
++    cpython_only, get_pagesize, is_apple, requires_subprocess, verbose, is_emscripten,
++    is_wasi
+ )
+ from test.support.import_helper import import_module
+ from test.support.os_helper import TESTFN, unlink, make_bad_fd
+@@ -82,6 +83,8 @@ def get_lockdata():
+                 print('struct.pack: ', repr(lockdata))
+         return lockdata
+ 
++    @unittest.skipIf(is_wasi, 'WASI defines the locking constants but '
++                              'fcntl(F_SETLKW) returns ENOTSUP')
+     def test_fcntl_fileno(self):
+         # the example from the library docs
+         self.f = open(TESTFN, 'wb')
+@@ -94,6 +97,8 @@ def test_fcntl_fileno(self):
+             print('String from fcntl with F_SETLKW: ', repr(rv))
+         self.f.close()
+ 
++    @unittest.skipIf(is_wasi, 'WASI defines the locking constants but '
++                              'fcntl(F_SETLKW) returns ENOTSUP')
+     def test_fcntl_file_descriptor(self):
+         # again, but pass the file rather than numeric descriptor
+         self.f = open(TESTFN, 'wb')
+@@ -155,6 +160,8 @@ def test_fcntl_64_bit(self):
+         finally:
+             os.close(fd)
+ 
++    @unittest.skipIf(is_wasi, 'WASI defines the locking constants but '
++                              'flock() returns ENOTSUP')
+     def test_flock(self):
+         # Solaris needs readable file for shared lock
+         self.f = open(TESTFN, 'wb+')
 diff --git a/Lib/test/test_file.py b/Lib/test/test_file.py
-index 029c903e01a..2cdf353eebe 100644
+index 029c903e01a..7e1b95a525d 100644
 --- a/Lib/test/test_file.py
 +++ b/Lib/test/test_file.py
 @@ -224,7 +224,7 @@ def testDefaultBufferSize(self):
@@ -19,28 +391,195 @@ index 029c903e01a..2cdf353eebe 100644
              data = f.read1()
              expected_size = max(min(blksize, 8192 * 1024), io.DEFAULT_BUFFER_SIZE)
 -            self.assertEqual(len(data), expected_size)
-+            self.assertTrue(len(data) <= expected_size)
++            self.assertLessEqual(len(data), expected_size)
  
      def testTruncateOnWindows(self):
          # SF bug <https://bugs.python.org/issue801631>
-diff --git a/Lib/test/test_posix.py b/Lib/test/test_posix.py
-index 2a72fa2fbbe..1c8d05a48f4 100644
---- a/Lib/test/test_posix.py
-+++ b/Lib/test/test_posix.py
-@@ -937,7 +937,12 @@ class PosixTester(unittest.TestCase):
-         self.assertRaises(TypeError, os.pipe2, 0, 0)
+diff --git a/Lib/test/test_ftplib.py b/Lib/test/test_ftplib.py
+index c864d401f9e..3454948648c 100644
+--- a/Lib/test/test_ftplib.py
++++ b/Lib/test/test_ftplib.py
+@@ -105,8 +105,8 @@ class DummyFTPHandler(asynchat.async_chat):
  
-         # try calling with flags = 0, like os.pipe()
--        r, w = os.pipe2(0)
-+        try:
-+            r, w = os.pipe2(0)
-+        except OSError as e:
-+            if e.errno == errno.ENOTSUP:
-+                self.skipTest("os.pipe2() is not supported at runtime")
-+            raise
-         os.close(r)
-         os.close(w)
+     def __init__(self, conn, encoding=DEFAULT_ENCODING):
+         asynchat.async_chat.__init__(self, conn)
+-        # tells the socket to handle urgent data inline (ABOR command)
+-        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_OOBINLINE, 1)
++        if hasattr(socket, 'SO_OOBINLINE'):
++            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_OOBINLINE, 1)
+         self.set_terminator(b"\r\n")
+         self.in_buffer = []
+         self.dtp = None
+@@ -590,6 +590,8 @@ def test_quit(self):
+         # Ensure the connection gets closed; sock attribute should be None
+         self.assertEqual(self.client.sock, None)
  
++    @unittest.skipUnless(hasattr(socket, 'SO_OOBINLINE'),
++                         'platform lacks out-of-band data support')
+     def test_abort(self):
+         self.client.abort()
+ 
+diff --git a/Lib/test/test_httpservers.py b/Lib/test/test_httpservers.py
+index 9a321952a8d..5c00477abe1 100644
+--- a/Lib/test/test_httpservers.py
++++ b/Lib/test/test_httpservers.py
+@@ -729,7 +729,7 @@ def test_get(self):
+ 
+         # chmod() doesn't work as expected on Windows, and filesystem
+         # permissions are ignored by root on Unix.
+-        if os.name == 'posix' and os.geteuid() != 0:
++        if os.name == 'posix' and hasattr(os, 'geteuid') and os.geteuid() != 0:
+             os.chmod(self.tempdir, 0)
+             try:
+                 response = self.request(self.base_url + '/')
+diff --git a/Lib/test/test_poll.py b/Lib/test/test_poll.py
+index 5675db8d1ca..a9047edc8d2 100644
+--- a/Lib/test/test_poll.py
++++ b/Lib/test/test_poll.py
+@@ -8,7 +8,8 @@
+ import time
+ import unittest
+ from test.support import (
+-    cpython_only, requires_subprocess, requires_working_socket, requires_resource
++    cpython_only, requires_subprocess, requires_working_socket, requires_resource,
++    is_wasi
+ )
+ from test.support import threading_helper
+ from test.support.os_helper import TESTFN
+@@ -185,6 +186,9 @@ def test_poll_c_limits(self):
+         self.assertRaises(OverflowError, pollster.poll, INT_MAX + 1)
+         self.assertRaises(OverflowError, pollster.poll, UINT_MAX + 1)
+ 
++    @unittest.skipIf(is_wasi,
++                     "WASI allows only one concurrent poll registration per "
++                     "open file description")
+     @threading_helper.reap_threads
+     def test_threaded_poll(self):
+         r, w = os.pipe()
+diff --git a/Lib/test/test_queue.py b/Lib/test/test_queue.py
+index c855fb8fe2b..134b515b1d5 100644
+--- a/Lib/test/test_queue.py
++++ b/Lib/test/test_queue.py
+@@ -6,6 +6,7 @@
+ import time
+ import unittest
+ import weakref
++from test import support
+ from test.support import gc_collect, bigmemtest
+ from test.support import import_helper
+ from test.support import threading_helper
+@@ -414,9 +415,13 @@ def _shutdown_all_methods_in_many_threads(self, immediate):
+             self.assertListEqual(res_shutdown, [True])
+             self.assertTrue(q.empty())
+ 
++    @unittest.skipIf(support.is_wasi,
++                     "requires preemptive thread scheduling")
+     def test_shutdown_all_methods_in_many_threads(self):
+         return self._shutdown_all_methods_in_many_threads(False)
+ 
++    @unittest.skipIf(support.is_wasi,
++                     "requires preemptive thread scheduling")
+     def test_shutdown_immediate_all_methods_in_many_threads(self):
+         return self._shutdown_all_methods_in_many_threads(True)
+ 
+diff --git a/Lib/test/test_signal.py b/Lib/test/test_signal.py
+index 6d62d611925..addb53857d1 100644
+--- a/Lib/test/test_signal.py
++++ b/Lib/test/test_signal.py
+@@ -1350,6 +1350,8 @@ def handler(signum, frame):
+     @unittest.skipUnless(hasattr(signal, "SIGUSR1"),
+                          "test needs SIGUSR1")
+     @threading_helper.requires_working_threading()
++    @unittest.skipIf(support.is_wasi,
++                     "requires preemptive thread scheduling")
+     def test_stress_modifying_handlers(self):
+         # bpo-43406: race condition between trip_signal() and signal.signal
+         signum = signal.SIGUSR1
+diff --git a/Lib/test/test_socket.py b/Lib/test/test_socket.py
+index cd07e94b3b1..95f1b1930ad 100644
+--- a/Lib/test/test_socket.py
++++ b/Lib/test/test_socket.py
+@@ -1022,9 +1022,10 @@ def testCrucialConstants(self):
+             socket.AF_INET6
+         socket.SOCK_STREAM
+         socket.SOCK_DGRAM
+-        socket.SOCK_RAW
+-        socket.SOCK_RDM
+-        socket.SOCK_SEQPACKET
++        if not support.is_wasi:
++            socket.SOCK_RAW
++            socket.SOCK_RDM
++            socket.SOCK_SEQPACKET
+         socket.SOL_SOCKET
+         socket.SO_REUSEADDR
+ 
+@@ -1112,8 +1113,9 @@ def test_host_resolution(self):
+ 
+         # we don't test socket_helper.HOSTv6 because there's a chance it doesn't have
+         # a matching name entry (e.g. 'ip6-localhost')
+-        for host in [socket_helper.HOSTv4]:
+-            self.assertIn(host, socket.gethostbyaddr(host)[2])
++        if not support.is_wasi:
++            for host in [socket_helper.HOSTv4]:
++                self.assertIn(host, socket.gethostbyaddr(host)[2])
+ 
+     def test_host_resolution_bad_address(self):
+         # These are all malformed IP addresses and expected not to resolve to
+@@ -1763,7 +1765,8 @@ def test_idna(self):
+         # these should all be successful
+         domain = 'испытание.pythontest.net'
+         socket.gethostbyname(domain)
+-        socket.gethostbyname_ex(domain)
++        if not support.is_wasi:
++            socket.gethostbyname_ex(domain)
+         socket.getaddrinfo(domain,0,socket.AF_UNSPEC,socket.SOCK_STREAM)
+         # this may not work if the forward lookup chooses the IPv6 address, as that doesn't
+         # have a reverse entry yet
+@@ -5893,7 +5896,7 @@ def _testFamily(self):
+         self.cli = socket.create_connection((HOST, self.port),
+                             timeout=support.LOOPBACK_TIMEOUT)
+         self.addCleanup(self.cli.close)
+-        self.assertEqual(self.cli.family, 2)
++        self.assertEqual(self.cli.family, socket.AF_INET)
+ 
+     testSourceAddress = _justAccept
+     def _testSourceAddress(self):
+@@ -6471,6 +6474,8 @@ def test_dup(self):
+             with newsock:
+                 self.assertEqual(newsock.get_inheritable(), False)
+ 
++    @unittest.skipIf(support.is_wasi,
++                     "WASI has no exec; descriptors are never inheritable")
+     def test_set_inheritable(self):
+         sock = socket.socket()
+         with sock:
+@@ -6481,6 +6486,8 @@ def test_set_inheritable(self):
+             self.assertEqual(sock.get_inheritable(), False)
+ 
+     @unittest.skipIf(fcntl is None, "need fcntl")
++    @unittest.skipIf(support.is_wasi,
++                     "WASI has no exec; descriptors are never inheritable")
+     def test_get_inheritable_cloexec(self):
+         sock = socket.socket()
+         with sock:
+@@ -6495,6 +6502,8 @@ def test_get_inheritable_cloexec(self):
+             self.assertEqual(sock.get_inheritable(), True)
+ 
+     @unittest.skipIf(fcntl is None, "need fcntl")
++    @unittest.skipIf(support.is_wasi,
++                     "WASI has no exec; descriptors are never inheritable")
+     def test_set_inheritable_cloexec(self):
+         sock = socket.socket()
+         with sock:
+@@ -7167,6 +7176,8 @@ def test_tcp_keepalive(self):
+         self.assertTrue(socket.TCP_KEEPALIVE)
+ 
+ @unittest.skipUnless(hasattr(socket, 'TCP_QUICKACK'), 'need socket.TCP_QUICKACK')
++@unittest.skipIf(support.is_wasi,
++                 "WASI defines TCP_QUICKACK but the host does not support it")
+ class TestQuickackFlag(unittest.TestCase):
+     def check_set_quickack(self, sock):
+         # quickack already true by default on some OS distributions
 diff --git a/Lib/test/test_sys.py b/Lib/test/test_sys.py
 index e2117b9588d..1a14c758c55 100644
 --- a/Lib/test/test_sys.py
@@ -54,3 +593,263 @@ index e2117b9588d..1a14c758c55 100644
  
      @unittest.skipUnless(support.is_emscripten, "only available on Emscripten")
      def test_emscripten_info(self):
+diff --git a/Lib/test/test_threading.py b/Lib/test/test_threading.py
+index e468fcd7601..f95df2012a8 100644
+--- a/Lib/test/test_threading.py
++++ b/Lib/test/test_threading.py
+@@ -2388,6 +2388,8 @@ def test_interrupt_main_invalid_signal(self):
+         self.assertRaises(ValueError, _thread.interrupt_main, 1000000)
+ 
+     @threading_helper.reap_threads
++    @unittest.skipIf(support.is_wasi,
++                     "requires preemptive thread scheduling")
+     def test_can_interrupt_tight_loops(self):
+         cont = [True]
+         started = [False]
+diff --git a/Lib/test/test_threadsignals.py b/Lib/test/test_threadsignals.py
+index bf241ada90e..d0478649fe5 100644
+--- a/Lib/test/test_threadsignals.py
++++ b/Lib/test/test_threadsignals.py
+@@ -77,6 +77,7 @@ def alarm_interrupt(self, sig, frame):
+     # Issue #20564: sem_timedwait() cannot be interrupted on OpenBSD
+     @unittest.skipIf(sys.platform.startswith('openbsd'),
+                      'lock cannot be interrupted on OpenBSD')
++    @unittest.skipUnless(hasattr(signal, 'alarm'), 'requires signal.alarm()')
+     def test_lock_acquire_interruption(self):
+         # Mimic receiving a SIGINT (KeyboardInterrupt) with SIGALRM while stuck
+         # in a deadlock.
+@@ -108,6 +109,7 @@ def test_lock_acquire_interruption(self):
+     # Issue #20564: sem_timedwait() cannot be interrupted on OpenBSD
+     @unittest.skipIf(sys.platform.startswith('openbsd'),
+                      'lock cannot be interrupted on OpenBSD')
++    @unittest.skipUnless(hasattr(signal, 'alarm'), 'requires signal.alarm()')
+     def test_rlock_acquire_interruption(self):
+         # Mimic receiving a SIGINT (KeyboardInterrupt) with SIGALRM while stuck
+         # in a deadlock.
+@@ -169,12 +171,15 @@ def other_thread():
+         finally:
+             signal.signal(signal.SIGUSR1, old_handler)
+ 
++    @unittest.skipUnless(hasattr(os, 'kill'), 'requires os.kill()')
+     def test_lock_acquire_retries_on_intr(self):
+         self.acquire_retries_on_intr(thread.allocate_lock())
+ 
++    @unittest.skipUnless(hasattr(os, 'kill'), 'requires os.kill()')
+     def test_rlock_acquire_retries_on_intr(self):
+         self.acquire_retries_on_intr(thread.RLock())
+ 
++    @unittest.skipUnless(hasattr(os, 'kill'), 'requires os.kill()')
+     def test_interrupted_timed_acquire(self):
+         # Test to make sure we recompute lock acquisition timeouts when we
+         # receive a signal.  Check this by repeatedly interrupting a lock
+diff --git a/Lib/test/test_time.py b/Lib/test/test_time.py
+index 5312faa5077..1e8a7231be7 100644
+--- a/Lib/test/test_time.py
++++ b/Lib/test/test_time.py
+@@ -117,6 +117,7 @@ def test_clock_monotonic(self):
+     @unittest.skipUnless(hasattr(time, 'clock_gettime'),
+                          'need time.clock_gettime()')
+     @unittest.skipIf(support.is_emscripten, "Fails to find clock")
++    @unittest.skipIf(support.is_wasi, "WASI has no per-thread CPU clocks")
+     def test_pthread_getcpuclockid(self):
+         clk_id = time.pthread_getcpuclockid(threading.get_ident())
+         self.assertTrue(type(clk_id) is int)
+diff --git a/Python/sysmodule.c b/Python/sysmodule.c
+index 5eeb3e9910b..eff6777cf50 100644
+--- a/Python/sysmodule.c
++++ b/Python/sysmodule.c
+@@ -3775,6 +3775,85 @@ make_emscripten_info(void)
+ 
+ #endif // __EMSCRIPTEN__
+ 
++#ifdef __wasi__
++
++#include <wasi/version.h>
++
++PyDoc_STRVAR(wasi_info__doc__,
++"sys._wasi_info\n\
++\n\
++WebAssembly WASI platform information.");
++
++static PyTypeObject *WasiInfoType;
++
++static PyStructSequence_Field wasi_info_fields[] = {
++    {"wasi_sdk_major", "WASI SDK major version, or None outside of a SDK build"},
++    {"wasi_sdk_version", "WASI SDK full version, or None outside of a SDK build"},
++    {"cooperative_threads", "cooperative thread support"},
++    {"wasi_version", "WASI target version (\"wasip1\", \"wasip2\", ...)"},
++    {0}
++};
++
++static PyStructSequence_Desc wasi_info_desc = {
++    "sys._wasi_info",     /* name */
++    wasi_info__doc__ ,    /* doc */
++    wasi_info_fields,     /* fields */
++    4
++};
++
++#define SetItem(obj) set_wasi_info_item(wasi_info, &pos, (obj))
++
++static PyObject *
++make_wasi_info(void)
++{
++    int pos = 0;
++
++    PyObject *wasi_info = PyStructSequence_New(WasiInfoType);
++    if (wasi_info == NULL) {
++        return NULL;
++    }
++
++    /* The __wasi_sdk_*__ macros are only defined when wasi-libc was built as
++     * part of a wasi-sdk release. */
++#ifdef __wasi_sdk_major__
++    PyStructSequence_SET_ITEM(wasi_info, pos++, PyLong_FromLong(__wasi_sdk_major__));
++#else
++    PyStructSequence_SET_ITEM(wasi_info, pos++, Py_NewRef(Py_None));
++#endif
++
++#ifdef __wasi_sdk_version__
++    PyStructSequence_SET_ITEM(wasi_info, pos++, PyUnicode_FromString(__wasi_sdk_version__));
++#else
++    PyStructSequence_SET_ITEM(wasi_info, pos++, Py_NewRef(Py_None));
++#endif
++
++#ifdef __wasi_cooperative_threads__
++    PyStructSequence_SET_ITEM(wasi_info, pos++, PyBool_FromLong(1));
++#else
++    PyStructSequence_SET_ITEM(wasi_info, pos++, PyBool_FromLong(0));
++#endif
++
++#if defined(__wasip1__)
++    PyStructSequence_SET_ITEM(wasi_info, pos++, PyUnicode_FromString("wasip1"));
++#elif defined(__wasip2__)
++    PyStructSequence_SET_ITEM(wasi_info, pos++, PyUnicode_FromString("wasip2"));
++#elif defined(__wasip3__)
++    PyStructSequence_SET_ITEM(wasi_info, pos++, PyUnicode_FromString("wasip3"));
++#else
++    PyStructSequence_SET_ITEM(wasi_info, pos++, Py_NewRef(Py_None));
++#endif
++
++    if (PyErr_Occurred()) {
++        Py_CLEAR(wasi_info);
++        return NULL;
++    }
++    return wasi_info;
++}
++
++#undef SetItem
++
++#endif // __wasi__
++
+ static struct PyModuleDef sysmodule = {
+     PyModuleDef_HEAD_INIT,
+     "sys",
+@@ -3913,6 +3992,16 @@ _PySys_InitCore(PyThreadState *tstate, PyObject *sysdict)
+     SET_SYS("_emscripten_info", make_emscripten_info());
+ #endif
+ 
++#ifdef __wasi__
++    if (WasiInfoType == NULL) {
++        WasiInfoType = PyStructSequence_NewType(&wasi_info_desc);
++        if (WasiInfoType == NULL) {
++            goto type_init_failed;
++        }
++    }
++    SET_SYS("_wasi_info", make_wasi_info());
++#endif
++
+     /* adding sys.path_hooks and sys.path_importer_cache */
+     SET_SYS("meta_path", PyList_New(0));
+     SET_SYS("path_importer_cache", PyDict_New());
+@@ -4207,6 +4296,11 @@ _PySys_FiniTypes(PyInterpreterState *interp)
+         Py_CLEAR(EmscriptenInfoType);
+     }
+ #endif
++#ifdef __wasi__
++    if (_Py_IsMainInterpreter(interp)) {
++        Py_CLEAR(WasiInfoType);
++    }
++#endif
+ }
+ 
+ 
+diff --git a/Tools/wasm/wasi/config.site-wasm32-wasi b/Tools/wasm/wasi/config.site-wasm32-wasi
+index c5d8b3e205d..746b6b00237 100644
+--- a/Tools/wasm/wasi/config.site-wasm32-wasi
++++ b/Tools/wasm/wasi/config.site-wasm32-wasi
+@@ -15,9 +15,6 @@ ac_cv_header_sys_resource_h=no
+ # undefined symbols / unsupported features
+ ac_cv_func_eventfd=no
+ 
+-# WASI SDK 15.0 has no pipe syscall.
+-ac_cv_func_pipe=no
+-
+ # WASI SDK 15.0 cannot create fifos and special files.
+ ac_cv_func_mkfifo=no
+ ac_cv_func_mkfifoat=no
+diff --git a/configure b/configure
+index d31c24dffa2..9b80ad30c95 100755
+--- a/configure
++++ b/configure
+@@ -18260,14 +18260,6 @@ esac
+ fi
+ rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+ 
+-case $ac_sys_system in #(
+-  WASI) :
+-    ipv6=no
+- ;; #(
+-  *) :
+-     ;;
+-esac
+-
+ { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ipv6" >&5
+ printf "%s\n" "$ipv6" >&6; }
+ 
+@@ -31107,6 +31099,7 @@ case "$ac_sys_system" in
+   iOS) _PYTHREAD_NAME_MAXLEN=63;;
+   FreeBSD*) _PYTHREAD_NAME_MAXLEN=19;; # gh-131268
+   OpenBSD*) _PYTHREAD_NAME_MAXLEN=23;; # gh-131268
++  WASI*) _PYTHREAD_NAME_MAXLEN=15;;
+   *) _PYTHREAD_NAME_MAXLEN=;;
+ esac
+ if test -n "$_PYTHREAD_NAME_MAXLEN"; then
+@@ -31229,7 +31222,6 @@ case $ac_sys_system in #(
+     py_cv_module__testimportmultiple=n/a
+     py_cv_module__testmultiphase=n/a
+     py_cv_module__testsinglephase=n/a
+-    py_cv_module_fcntl=n/a
+     py_cv_module_mmap=n/a
+     py_cv_module_termios=n/a
+     py_cv_module_xxlimited=n/a
+diff --git a/configure.ac b/configure.ac
+index af7a9623d7b..22be0439312 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -4804,10 +4804,6 @@ dnl the check does not work on cross compilation case...
+   ipv6=no
+ ])
+ 
+-AS_CASE([$ac_sys_system],
+-  [WASI], [ipv6=no]
+-)
+-
+ AC_MSG_RESULT([$ipv6])
+ 
+ if test "$ipv6" = "yes"; then
+@@ -7706,6 +7702,7 @@ case "$ac_sys_system" in
+   iOS) _PYTHREAD_NAME_MAXLEN=63;;
+   FreeBSD*) _PYTHREAD_NAME_MAXLEN=19;; # gh-131268
+   OpenBSD*) _PYTHREAD_NAME_MAXLEN=23;; # gh-131268
++  WASI*) _PYTHREAD_NAME_MAXLEN=15;;
+   *) _PYTHREAD_NAME_MAXLEN=;;
+ esac
+ if test -n "$_PYTHREAD_NAME_MAXLEN"; then
+@@ -7813,7 +7810,6 @@ AS_CASE([$ac_sys_system],
+       [_testimportmultiple],
+       [_testmultiphase],
+       [_testsinglephase],
+-      [fcntl],
+       [mmap],
+       [termios],
+       [xxlimited],

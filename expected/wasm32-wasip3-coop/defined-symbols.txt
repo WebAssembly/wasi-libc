@@ -13,7 +13,6 @@ __SIG_ERR
 __SIG_IGN
 __acquire_ptc
 __aio_close
-__allocate_tls
 __asctime_r
 __assert_fail
 __c_dot_utf8
@@ -24,7 +23,6 @@ __clock_gettime
 __clock_nanosleep
 __component_type_object_force_link_wasip3
 __component_type_object_force_link_wasip3_public_use_in_this_compilation_unit
-__copy_tls
 __cos
 __cosdf
 __cosl
@@ -47,7 +45,6 @@ __do_cleanup_pop
 __do_cleanup_push
 __do_des
 __do_orphaned_stdio_locks
-__dummy_reference
 __duplocale
 __env_rm_add
 __errno_location
@@ -303,7 +300,6 @@ __waitlist_wake_all
 __waitlist_wake_one
 __wasi_coop_thread_start
 __wasi_coop_thread_start_C
-__wasi_init_tp
 __wasi_sockets_services_db
 __wasilibc_access
 __wasilibc_add_file
@@ -323,6 +319,7 @@ __wasilibc_get_environ
 __wasilibc_get_service_entry_by_name
 __wasilibc_get_service_entry_by_port
 __wasilibc_iftodt
+__wasilibc_init_async_task
 __wasilibc_init_stdio
 __wasilibc_initialize_environ
 __wasilibc_link

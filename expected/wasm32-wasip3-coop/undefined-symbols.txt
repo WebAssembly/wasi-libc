@@ -23,6 +23,7 @@ __init_tls_base
 __letf2
 __lttf2
 __netf2
+__stack_high
 __subtask_cancel
 __subtask_drop
 __subtf3

@@ -287,7 +287,6 @@ __uflow
 __unlist_locked_file
 __uselocale
 __utc
-__wasi_init_tp
 __wasi_sockets_services_db
 __wasilibc_access
 __wasilibc_add_file

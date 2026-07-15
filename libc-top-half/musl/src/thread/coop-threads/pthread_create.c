@@ -23,6 +23,14 @@ static void process_map_base_deferred_free() {
   map_base_deferred_free = NULL;
 }
 
+// Defined in `__wasi_coop_thread_start.s` and not actually callable from C,
+// this is the component-model entrypoint.
+extern void __wasi_coop_thread_start(void *context);
+
+// Synthesized by wasm-ld this is called at the start of each new thread to
+// initialize its own TLS block.
+extern void __wasm_init_tls(void *ptr);
+
 // There is currently no thread.exit intrinsic, so pthread_exit
 // cannot terminate a thread early. As such, we do not expose it to users.
 // TODO(wasip3) revisit this if we add a thread.exit intrinsic
@@ -110,33 +118,45 @@ void __do_cleanup_pop(struct __ptcb *cb) {
 }
 
 struct start_args {
-  /*
-   * Note: the offset of the "stack" and "tls_base" members
-   * in this structure is hardcoded in wasip3_thread_start.
-   */
+  // Note that this `stack` member must be first as its offset is referenced
+  // from `__wasi_coop_thread_start` within the `__wasi_coop_thread_start.s`
+  // file.
+  //
+  // Otherwise though this is the initial stack pointer of the thread-to-be.
   void *stack;
+
+  // The TLS base pointer for this new thread. Not yet initialized, but
+  // allocated and has appropriate alignment.
   void *tls_base;
+
+  // A pointer to where this thread's `struct pthread` block is located. This is
+  // within `tls_base` and is used during initialization.
+  pthread_t self;
+
+  // The arguments used to execute this thread.
   void *(*start_func)(void *);
   void *start_arg;
 };
 
-/*
- * We want to ensure __wasi_coop_thread_start is linked whenever
- * pthread_create is used. The following reference is to ensure that.
- * Otherwise, the linker doesn't notice the dependency because
- * __wasi_coop_thread_start is used indirectly via a wasm export.
- */
-void __wasi_coop_thread_start(void *context);
-hidden void *__dummy_reference = __wasi_coop_thread_start;
+hidden void __wasi_coop_thread_start_C(struct start_args *args) {
+  // First thing to do on this new thread is initialize TLS. At the start of a
+  // new thread our tls base is 0, so it needs to be set to `args->tls_base`.
+  // TLS initialization happens through the `wasm-ld` provided symbol of
+  // `__wasm_init_tls` which will `memory.init` this pointer and additionally
+  // store the pointer into our tls base slot.
+  //
+  // Note that this thread's own `struct pthread`, however, lives within the TLS
+  // block and is already initialized. We don't want the default initialization
+  // here as well. The contents of our pthread block are thus saved/restored
+  // around the `__wasm_init_tls` call.
+  assert(((uintptr_t)args->tls_base) % __builtin_wasm_tls_align() == 0);
+  struct pthread self_copy = *args->self;
+  __wasm_init_tls(args->tls_base);
+  *__pthread_self() = self_copy;
 
-hidden void __wasi_coop_thread_start_C(void *context) {
-#ifdef __wasip3__
-  int tid = wasip3_thread_index();
-#else
-#error "Unknown WASI version"
-#endif
-  struct start_args *args = context;
-  __pthread_self()->tid = tid;
+  // Our tid should be configured in `pthread_create`, but double check it.
+  assert(__pthread_self()->tid == wasip3_thread_index());
+
   __pthread_exit(args->start_func(args->start_arg));
 }
 
@@ -233,7 +253,8 @@ int __pthread_create(pthread_t *restrict res,
     }
   }
 
-  new_tls_base = __copy_tls(tsd - tls_size);
+  void *unaligned_tls_base = tsd - tls_size;
+  new_tls_base = (void *)(((uintptr_t)unaligned_tls_base) & -tls_align);
 
   /* Compute pthread struct offset from old TLS base, apply to new TLS base */
   tls_offset = (uintptr_t)self - (uintptr_t)tls_base;
@@ -272,6 +293,7 @@ int __pthread_create(pthread_t *restrict res,
   args->start_func = entry;
   args->start_arg = arg;
   args->tls_base = (void *)new_tls_base;
+  args->self = new;
 
   if (!libc.threads_minus_1++)
     libc.need_locks = 1;

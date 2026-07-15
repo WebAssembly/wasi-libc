@@ -1028,6 +1028,8 @@ optopt
 optreset
 pathconf
 perror
+pipe
+pipe2
 poll
 poll_borrow_pollable
 poll_list_borrow_pollable_free

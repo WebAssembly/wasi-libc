@@ -1361,6 +1361,7 @@
 #define PF_INET 1
 #define PF_INET6 2
 #define PF_UNSPEC 0
+#define PIPE_BUF 4096
 #define PM_STR 0x20027
 #define POLLERR 0x1000
 #define POLLHUP 0x2000

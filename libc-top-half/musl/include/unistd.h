@@ -45,10 +45,8 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no pipe */
 int pipe(int [2]);
 int pipe2(int [2], int);
-#endif
 int close(int);
 int posix_close(int, int);
 int dup(int);

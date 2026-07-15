@@ -455,12 +455,13 @@ add_wasilibc_test(dup-file.c FS)
 add_wasilibc_test(dup2-file.c FS)
 add_wasilibc_test(dup3-file.c FS)
 add_wasilibc_test(fcntl-dupfd.c FS)
-
-# This tests the behavior of the WASIp2+ descriptor table and won't succeed on
-# p1:
-if (NOT (WASI STREQUAL "p1"))
-  add_wasilibc_test(clear_fds.c FS)
-endif()
+add_wasilibc_test(clear_fds.c FS)
+add_wasilibc_test(pipe.c)
+add_wasilibc_test(pipe_poll.c)
+add_wasilibc_test(pipe_fstat.c)
+add_wasilibc_test(pipe_setfl_independent.c)
+add_wasilibc_test(pipe_atomic_write.c)
+add_wasilibc_test(pipe_zero_len.c)
 
 if (
   # Setjmp currently requires llvm 20+ for the support necessary in wasi-libc.
@@ -547,6 +548,12 @@ if (ENABLE_COOP_THREADS)
   add_wasilibc_test(coop_io_shutdown_under_poll.c NETWORK)
   add_wasilibc_test(coop_io_accept_queued_behind_poll.c NETWORK)
   add_wasilibc_test(coop_io_write_after_ewouldblock.c NETWORK)
+  add_wasilibc_test(coop_pipe_rw.c)
+  add_wasilibc_test(coop_pipe_poll_read.c)
+  add_wasilibc_test(coop_pipe_poll_write.c)
+  add_wasilibc_test(coop_pipe_close_wakes.c)
+  add_wasilibc_test(coop_pipe_close_wakes_poll.c)
+  add_wasilibc_test(coop_pipe_zero_write_poll.c)
 endif()
 
 add_wasilibc_test(tls_smoke.c)

@@ -39,9 +39,7 @@
 
 #include <bits/limits.h>
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no pipes */
 #define PIPE_BUF 4096
-#endif
 #define FILESIZEBITS 64
 #ifndef NAME_MAX
 #define NAME_MAX 255

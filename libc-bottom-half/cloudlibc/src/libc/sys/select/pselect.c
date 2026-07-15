@@ -31,39 +31,32 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
   struct pollfd poll_fds[readfds->__nfds + writefds->__nfds + errorfds->__nfds];
   size_t poll_nfds = 0;
 
-  for (size_t i = 0; i < readfds->__nfds; ++i) {
-    int fd = readfds->__fds[i];
-    if (fd < nfds) {
+  // Combine the event bits when the same file descriptor appears in more than
+  // one set.
+  struct {
+    const fd_set *set;
+    short events;
+  } sets[3] = {
+      {readfds, POLLRDNORM},
+      {writefds, POLLWRNORM},
+      {errorfds, POLLPRI},
+  };
+  for (size_t s = 0; s < 3; s++) {
+    for (size_t i = 0; i < sets[s].set->__nfds; i++) {
+      int fd = sets[s].set->__fds[i];
+      if (fd >= nfds)
+        continue;
+      size_t j = 0;
+      while (j < poll_nfds && poll_fds[j].fd != fd)
+        ++j;
+      if (j == poll_nfds) {
         poll_fds[poll_nfds++] = (struct pollfd){
             .fd = fd,
-            .events = POLLRDNORM,
-            .revents = 0
+            .events = 0,
+            .revents = 0,
         };
-    }
-  }
-
-  for (size_t i = 0; i < writefds->__nfds; ++i) {
-    int fd = writefds->__fds[i];
-    if (fd < nfds) {
-      poll_fds[poll_nfds++] = (struct pollfd){
-          .fd = fd,
-          .events = POLLWRNORM,
-          .revents = 0
-      };
-    }
-  }
-
-  // Thread exceptional conditions through as POLLPRI. WASI has no out-of-band
-  // data, so POLLPRI will never fire, but poll() will allow the call to proceed
-  // as long as there are other non-POLLPRI events to wait on.
-  for (size_t i = 0; i < errorfds->__nfds; ++i) {
-    int fd = errorfds->__fds[i];
-    if (fd < nfds) {
-      poll_fds[poll_nfds++] = (struct pollfd){
-          .fd = fd,
-          .events = POLLPRI,
-          .revents = 0
-      };
+      }
+      poll_fds[j].events |= sets[s].events;
     }
   }
 

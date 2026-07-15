@@ -296,11 +296,9 @@ hidden void* __wasilibc_init_async_task(void) {
   // Attempt to use the same stack size as the LLD-initialized stack (as
   // reported by `get_stack_bounds`). If that failed (e.g. in PIC) mode then
   // choose a best-effort constant.
-  //
-  // TODO(wasip3): should make this constant configurable.
   size_t stack_size = get_stack_bounds().size;
   if (stack_size == 0)
-    stack_size = 131072;
+    stack_size = __default_stacksize;
 
   // Allocate the stack, trapping if allocation fails.
   //

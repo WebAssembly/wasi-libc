@@ -70,6 +70,7 @@ struct pthread {
 	void *stdio_locks;
 	#ifdef __wasi_cooperative_threads__
 	volatile int joiner_futex;
+	char name[16];
 	#endif
 
 	/* Part 3 -- the positions of these fields relative to

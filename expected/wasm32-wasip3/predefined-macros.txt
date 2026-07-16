@@ -3144,6 +3144,8 @@
 #define __wasi_libc_find_relpath_h 
 #define __wasi_libc_h 
 #define __wasi_libc_nocwd_h 
+#define __wasi_sdk_major__ 34
+#define __wasi_sdk_version__ "34.1-rc.1g358113409c56+m"
 #define __wasi_wasip1_h 
 #define __wasilibc___errno_h 
 #define __wasilibc___errno_values_h 
@@ -3212,6 +3214,7 @@
 #define __wasm32 1
 #define __wasm32__ 1
 #define __wasm__ 1
+#define __wasm_libcall_thread_context__ 1
 #define _tolower(a) ((a)|0x20)
 #define _toupper(a) ((a)&0x5f)
 #define acos(x) __tg_real_complex(acos, (x))

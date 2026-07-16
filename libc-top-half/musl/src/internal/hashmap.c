@@ -321,6 +321,7 @@ const void *__hashmap_set_with_hash(struct hashmap *map, const void *item,
 // memory then NULL is returned and hashmap_oom() returns true.
 const void *__hashmap_set(struct hashmap *map, const void *item) {
     return __hashmap_set_with_hash(map, item, get_hash(map, item));
+}
 
 // __hashmap_get_with_hash works like hashmap_get but you provide your
 // own hash. The 'hash' callback provided to the hashmap_new function
@@ -408,6 +409,7 @@ const void *__hashmap_delete_with_hash(struct hashmap *map, const void *key,
 // item is not found then NULL is returned.
 const void *__hashmap_delete(struct hashmap *map, const void *key) {
     return __hashmap_delete_with_hash(map, key, get_hash(map, key));
+}
 
 // hashmap_count returns the number of items in the hash map.
 size_t __hashmap_count(const struct hashmap *map) {
@@ -419,7 +421,7 @@ size_t __hashmap_count(const struct hashmap *map) {
 // if present, to free any data referenced in the elements of the hashmap.
 void __hashmap_free(struct hashmap *map) {
     if (!map) return;
-    free_elements(map);
+    __hashmap_free_elements(map);
     map->free(map->buckets);
     map->free(map);
 }

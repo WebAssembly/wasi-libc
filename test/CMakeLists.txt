@@ -566,6 +566,7 @@ add_wasilibc_test(cwd_relative_threads.c FS)
 
 if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(poll-connect.c NETWORK)
+  add_wasilibc_test(poll-badfd.c)
   add_wasilibc_test(poll-nonblocking-socket.c NETWORK)
   add_wasilibc_test(setsockopt.c NETWORK)
   add_wasilibc_test(sockets-nonblocking-udp.c NETWORK)

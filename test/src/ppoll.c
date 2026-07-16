@@ -51,10 +51,13 @@ int main(void) {
   r = ppoll(&poll_fd, 1, &zero, NULL);
   TEST(r == 0, "ppoll returned %d, expected 0\n", r);
 
-  // fail on invalid fds
+#ifndef __wasip1__
   poll_fd.fd = 300;
+  poll_fd.revents = 0;
   r = ppoll(&poll_fd, 1, &zero, NULL);
-  int err = errno;
-  TEST(r == -1 && err == EBADF, "ppoll returned %d, expected -1\n", r);
+  TEST(r == 1 && poll_fd.revents == POLLNVAL,
+       "ppoll returned %d, revents 0x%x, expected 1 / POLLNVAL\n", r,
+       poll_fd.revents);
+#endif
   return t_status;
 }

@@ -78,6 +78,23 @@ int main(void) {
          r, errno);
   }
 
+  {
+    int badfd = open(tmp, O_RDONLY);
+    TEST(badfd > 2);
+    close(badfd);
+
+    fd_set rfds;
+    FD_ZERO(&rfds);
+    FD_SET(badfd, &rfds);
+
+    struct timespec tv = {0, 0};
+    errno = 0;
+    int r = pselect(badfd + 1, &rfds, NULL, NULL, &tv, NULL);
+    TEST(r == -1 && errno == EBADF,
+         "pselect with a closed fd should fail with EBADF, got r=%d errno=%d\n",
+         r, errno);
+  }
+
   close(fd);
   TEST(unlink(tmp) != -1);
 

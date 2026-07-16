@@ -203,7 +203,6 @@ set(top_half_sources
   musl/src/fenv/fesetround.c
   musl/src/fenv/feupdateenv.c
   musl/src/internal/defsysinfo.c
-  musl/src/internal/hashmap.c
   musl/src/internal/intscan.c
   musl/src/internal/libc.c
   musl/src/internal/shgetc.c
@@ -458,6 +457,7 @@ if (TARGET_TRIPLE MATCHES "wasip1-threads")
 elseif(ENABLE_COOP_THREADS)
   # cooperative threads implementation for WASI Preview 3
   list(APPEND top_half_sources
+    musl/src/internal/hashmap.c
     musl/src/stdio/__lockfile.c
     musl/src/stdio/flockfile.c
     musl/src/stdio/ftrylockfile.c

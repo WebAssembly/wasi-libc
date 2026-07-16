@@ -731,6 +731,12 @@ static int tcp_listen(void *data, int backlog) {
   sockets_borrow_tcp_socket_t socket_borrow =
       sockets_borrow_tcp_socket(socket->socket);
 
+  // POSIX says negative values behave like 0, and 0 means it can be set to an
+  // implementation-defined minimum. WASI rejects 0, but POSIX doesn't, so set
+  // it to an implementation-defined minimum.
+  if (backlog < 1)
+    backlog = 1;
+
   switch (socket->state.tag) {
   case TCP_SOCKET_STATE_UNBOUND: {
     // Socket is not explicitly bound by the user. We'll do it for them:

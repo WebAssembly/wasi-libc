@@ -292,7 +292,7 @@ static struct hashmap *futex_map;
 static uint64_t futex_entry_hash(const void *item, uint64_t seed0,
                                  uint64_t seed1) {
   const struct __futex_entry *entry = item;
-  return hashmap_xxhash3(&entry->addr, sizeof(entry->addr), seed0, seed1);
+  return __hashmap_xxhash3(&entry->addr, sizeof(entry->addr), seed0, seed1);
 }
 static int futex_entry_compare(const void *a, const void *b, void *udata) {
   const struct __futex_entry *left = a;
@@ -306,7 +306,7 @@ static struct hashmap *get_futex_map(bool create) {
     return futex_map;
 
   const size_t initial_capacity = 64;
-  futex_map = hashmap_new(sizeof(struct __futex_entry), initial_capacity, 0, 0,
+  futex_map = __hashmap_new(sizeof(struct __futex_entry), initial_capacity, 0, 0,
                           futex_entry_hash, futex_entry_compare, NULL, NULL);
   return futex_map;
 }
@@ -324,20 +324,20 @@ static struct __futex_entry *find_futex_entry(volatile int *addr, bool create) {
   if (!map)
     return NULL;
 
-  struct __futex_entry *entry = (struct __futex_entry *)hashmap_get(map, &key);
+  struct __futex_entry *entry = (struct __futex_entry *)__hashmap_get(map, &key);
   if (entry || !create)
     return entry;
 
-  if (!hashmap_set(map, &key) && hashmap_oom(map))
+  if (!__hashmap_set(map, &key) && __hashmap_oom(map))
     return NULL;
 
-  return (struct __futex_entry *)hashmap_get(map, &key);
+  return (struct __futex_entry *)__hashmap_get(map, &key);
 }
 
 // If a futex entry exists for the given address and its waitlist is empty, remove it from the hashmap.
 static void maybe_release_futex_entry(struct __futex_entry *entry) {
   if (entry != NULL && entry->list == NULL) {
-    hashmap_delete(get_futex_map(false), entry);
+    __hashmap_delete(get_futex_map(false), entry);
   }
 }
 

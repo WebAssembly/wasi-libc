@@ -203,6 +203,7 @@ set(top_half_sources
   musl/src/fenv/fesetround.c
   musl/src/fenv/feupdateenv.c
   musl/src/internal/defsysinfo.c
+  musl/src/internal/hashmap.c
   musl/src/internal/intscan.c
   musl/src/internal/libc.c
   musl/src/internal/shgetc.c

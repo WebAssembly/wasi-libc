@@ -96,7 +96,6 @@ enum {
 #define _a_sched __u.__i[3*__SU+1]
 #define _a_policy __u.__i[3*__SU+2]
 #define _a_prio __u.__i[3*__SU+3]
-#ifndef __wasi_cooperative_threads__
 #define _m_type __u.__i[0]
 #define _m_lock __u.__vi[1]
 #define _m_waiters __u.__vi[2]
@@ -119,7 +118,6 @@ enum {
 #define _b_count __u.__vi[3]
 #define _b_waiters2 __u.__vi[4]
 #define _b_inst __u.__p[3]
-#endif
 
 #ifndef TP_OFFSET
 #define TP_OFFSET 0
@@ -211,6 +209,10 @@ hidden int __waitlist_wait_on(struct __waitlist_node **list, clockid_t clk,
                               const struct timespec *at);
 hidden void __waitlist_wake_one(struct __waitlist_node **list, int yield);
 hidden void __waitlist_wake_all(struct __waitlist_node **list, int yield);
+hidden int __timedwait(volatile int *, int, clockid_t, const struct timespec *, int);
+hidden void __wait(volatile int *addr, volatile int *waiters, int val, int);
+hidden void __wake(volatile void *addr, int cnt, int yield);
+hidden void __futexwait(volatile void *addr, int val, int yield);
 hidden int __wasilibc_pthread_mutex_unlock(pthread_mutex_t *m, int yield);
 #else
 

@@ -20,9 +20,8 @@ int __pthread_mutex_lock(pthread_mutex_t *m) {
 
   /* Wait until unlocked */
   while (m->_m_lock != 0) {
-    int rc = __waitlist_wait_on(&m->_m_waiters, NULL, NULL);
-    (void)rc;
-    assert(rc == 0);
+    int v = m->_m_lock;
+    __wait(&m->_m_lock, &m->_m_waiters, v, 1);
   }
 
   m->_m_lock = tid;

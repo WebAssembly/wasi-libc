@@ -18,8 +18,7 @@ int __pthread_rwlock_timedwrlock(pthread_rwlock_t *restrict rw,
 
   /* Wait until no readers and no writers */
   while (rw->_rw_lock != 0) {
-    int v = rw->_rw_lock;
-    int rc = __timedwait(&rw->_rw_lock, v, CLOCK_REALTIME, at, 1);
+    int rc = __timedwait(&rw->_rw_lock, rw->_rw_lock, CLOCK_REALTIME, at, 1);
     if (rc != 0)
       return rc;
   }

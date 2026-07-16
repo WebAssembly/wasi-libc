@@ -342,9 +342,7 @@ static void maybe_release_futex_entry(struct __futex_entry *entry) {
 }
 
 int __timedwait(volatile int *addr, int val, clockid_t clk,
-                const struct timespec *at, int opt) {
-  (void)opt;
-
+                const struct timespec *at) {
   if (*addr != val)
     return 0;
 
@@ -357,11 +355,11 @@ int __timedwait(volatile int *addr, int val, clockid_t clk,
   return rc;
 }
 
-void __wait(volatile int *addr, volatile int *waiters, int val, int yield) {
+void __wait(volatile int *addr, volatile int *waiters, int val) {
   if (waiters)
     ++*waiters;
   while (*addr == val) {
-    int rc = __timedwait(addr, val, CLOCK_REALTIME, NULL, yield);
+    int rc = __timedwait(addr, val, CLOCK_REALTIME, NULL);
     if (rc)
       break;
   }
@@ -390,6 +388,6 @@ void __wake(volatile void *addr, int cnt, int yield) {
   }
 }
 
-void __futexwait(volatile void *addr, int val, int yield) {
-  (void)__timedwait((volatile int *)addr, val, CLOCK_REALTIME, NULL, yield);
+void __futexwait(volatile void *addr, int val) {
+  (void)__timedwait((volatile int *)addr, val, CLOCK_REALTIME, NULL);
 }

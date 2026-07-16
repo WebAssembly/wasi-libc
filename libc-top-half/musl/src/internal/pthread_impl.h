@@ -218,7 +218,7 @@ hidden int __waitlist_wait_on(struct __waitlist_node **list, clockid_t clk,
                               const struct timespec *at);
 hidden void __waitlist_wake_one(struct __waitlist_node **list, int yield);
 hidden void __waitlist_wake_all(struct __waitlist_node **list, int yield);
-hidden int __timedwait(volatile int *, int, clockid_t, const struct timespec *, int);
+hidden int __timedwait(volatile int *, int, clockid_t, const struct timespec *);
 hidden void __wait(volatile int *addr, volatile int *waiters, int val);
 hidden void __wake(volatile void *addr, int cnt, int yield);
 hidden void __futexwait(volatile void *addr, int val);

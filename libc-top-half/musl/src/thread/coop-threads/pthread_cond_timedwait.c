@@ -19,6 +19,8 @@ int __pthread_cond_timedwait(pthread_cond_t *restrict c,
   int rc = __wasilibc_pthread_mutex_unlock(m, 0);
   if (rc != 0)
     return rc;
+  // In coop mode this field is used as the futex-style wait key
+  // for the internal wait-map, not as a precise waiter count.
   c->_c_waiters = 1;
   int result = __timedwait(&c->_c_waiters, 1, clk, ts, 1);
   rc = pthread_mutex_lock(m);

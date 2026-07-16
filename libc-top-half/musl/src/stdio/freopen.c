@@ -47,7 +47,7 @@ FILE *freopen(const char *restrict filename, const char *restrict mode, FILE *re
 		f2 = fopen(filename, mode);
 		if (!f2) goto fail;
 		if (f2->fd == f->fd) f2->fd = -1; /* avoid closing in fclose */
-#ifdef __wasilibc_unmodified_upstream // WASI has no dup
+#ifndef __wasip1__
 		else if (__dup3(f2->fd, f->fd, fl&O_CLOEXEC)<0) goto fail2;
 #else
 		// WASI doesn't have dup3, but does have a way to renumber

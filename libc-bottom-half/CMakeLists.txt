@@ -120,6 +120,7 @@ set(bottom_half_sources
   sources/at_fdcwd.c
   sources/chdir.c
   sources/complex-builtins.c
+  sources/dup.c
   sources/environ.c
   sources/errno.c
   sources/getcwd.c

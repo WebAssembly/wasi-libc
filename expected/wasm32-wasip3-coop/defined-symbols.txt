@@ -45,6 +45,7 @@ __do_cleanup_pop
 __do_cleanup_push
 __do_des
 __do_orphaned_stdio_locks
+__dup3
 __duplocale
 __env_rm_add
 __errno_location
@@ -338,7 +339,6 @@ __wasilibc_descriptor_deallocate
 __wasilibc_dttoif
 __wasilibc_ensure_environ
 __wasilibc_environ
-__wasilibc_fd_renumber
 __wasilibc_find_abspath
 __wasilibc_find_relpath
 __wasilibc_find_relpath_alloc
@@ -580,10 +580,10 @@ ctanl
 ctime
 ctime_r
 descriptor_table_clear
+descriptor_table_dup
 descriptor_table_get
 descriptor_table_insert
 descriptor_table_remove
-descriptor_table_renumber
 difftime
 dirfd
 dirname
@@ -592,6 +592,9 @@ dprintf
 drand48
 drem
 dremf
+dup
+dup2
+dup3
 duplocale
 ecvt
 encrypt

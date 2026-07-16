@@ -254,6 +254,21 @@ typedef struct {
 /// On failure returns -1, sets `errno`, and runs `entry`'s destructor.
 int descriptor_table_insert(descriptor_table_entry_t entry);
 
+/// Operations that `descriptor_table_dup` supports.
+enum dup_op_t {
+  /// `dup` function, no `arg`
+  DUP_OP_DUP,
+  /// `dup2` function, `arg` is specified
+  DUP_OP_DUP2,
+  /// `dup3` function, `arg` is specified
+  DUP_OP_DUP3,
+  /// `F_DUPFD` fcntl, `arg` is specified
+  DUP_OP_DUPFD,
+};
+
+/// Performs a `dup`-style operation.
+int descriptor_table_dup(int fd, enum dup_op_t op, int arg);
+
 /// Looks up a descriptor by its file descriptor.
 ///
 /// On success returns 0 and `entry` is filled in with a strong reference to
@@ -266,13 +281,6 @@ int descriptor_table_get(int fd, descriptor_table_entry_t *entry);
 /// On success returns 0 and runs the entry's destructor. On failure returns -1
 /// and sets `errno`.
 int descriptor_table_remove(int fd);
-
-/// Moves `fd` to `newfd` in the descriptor table.
-///
-/// This will overwrite `newfd` and open up `fd` for a future file descriptor.
-/// Both descriptors are required to be present. Returns 0 on success and -1 +
-/// errno on failure.
-int descriptor_table_renumber(int fd, int newfd);
 
 /// Removes all file descriptors from the table, running their destructors.
 void descriptor_table_clear();

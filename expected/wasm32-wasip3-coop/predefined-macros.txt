@@ -519,6 +519,8 @@
 #define FTW_PHYS 1
 #define FTW_SL 5
 #define FTW_SLN 7
+#define F_DUPFD (5)
+#define F_DUPFD_CLOEXEC (6)
 #define F_GETFD (1)
 #define F_GETFL (3)
 #define F_LOCK 1
@@ -2988,7 +2990,6 @@
 #define __SIZE_TYPE__ long unsigned int
 #define __SIZE_WIDTH__ 32
 #define __STDARG_H 
-#define __STDC_DEFER_TS25755__ 1
 #define __STDC_HOSTED__ 1
 #define __STDC_IEC_559__ 1
 #define __STDC_ISO_10646__ 201206L

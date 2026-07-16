@@ -27,7 +27,7 @@ off_t __wasilibc_tell(int fildes) {
     return -1;
   defer descriptor_table_entry_dec(entry);
   if (!entry.vtable->seek) {
-    errno = EINVAL;
+    errno = ESPIPE;
     return -1;
   }
   return entry.vtable->seek(entry.data, 0, SEEK_CUR);

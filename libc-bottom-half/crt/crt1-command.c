@@ -4,7 +4,6 @@
 
 #include <wasi/api.h>
 
-extern void __wasi_init_tp(void);
 extern void __wasm_call_ctors(void);
 extern int __main_void(void);
 extern void __wasm_call_dtors(void);
@@ -51,8 +50,6 @@ __attribute__((export_name("wasi:cli/run@0.3.0#run"))) int _start(void)
   }
   started = 1;
 #endif
-
-  __wasi_init_tp();
 
   // The linker synthesizes this to call constructors.
   __wasm_call_ctors();

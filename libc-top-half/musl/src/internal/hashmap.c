@@ -187,7 +187,7 @@ struct hashmap *__hashmap_new(size_t elsize, size_t cap, uint64_t seed0,
     void (*elfree)(void *item),
     void *udata)
 {
-    return hashmap_new_with_allocator(NULL, NULL, NULL, elsize, cap, seed0, 
+    return __hashmap_new_with_allocator(NULL, NULL, NULL, elsize, cap, seed0, 
         seed1, hash, compare, elfree, udata);
 }
 
@@ -226,7 +226,7 @@ void __hashmap_clear(struct hashmap *map, bool update_cap) {
 }
 
 static bool resize0(struct hashmap *map, size_t new_cap) {
-    struct hashmap *map2 = hashmap_new_with_allocator(map->malloc, map->realloc, 
+    struct hashmap *map2 = __hashmap_new_with_allocator(map->malloc, map->realloc, 
         map->free, map->elsize, new_cap, map->seed0, map->seed1, map->hash, 
         map->compare, map->elfree, map->udata);
     if (!map2) return false;

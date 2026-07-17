@@ -816,10 +816,12 @@ static ssize_t tcp_recvfrom(void *data, void *buffer, size_t length, int flags,
     return -1;
   }
 
-  if (addr != NULL || addrlen != NULL) {
-    errno = EISCONN;
-    return -1;
-  }
+  // Mostly ignore `addr`, and fill in `addrlen` with 0 if provided since we're
+  // not going to be filling in the address. This is intended to match Linux
+  // behvaior at this time.
+  (void)addr;
+  if (addrlen != NULL)
+    *addrlen = 0;
 
   wasi_read_t read;
   if (tcp_get_read_stream(data, &read) < 0)
@@ -840,10 +842,10 @@ static ssize_t tcp_sendto(void *data, const void *buffer, size_t length,
     return -1;
   }
 
-  if (addr != NULL || addrlen != 0) {
-    errno = EISCONN;
-    return -1;
-  }
+  // POSIX says to addr/addrlen may be ignored and may return EISCONN. Match
+  // Linux and do nothing.
+  (void)addr;
+  (void)addrlen;
 
   wasi_write_t write;
   if (tcp_get_write_stream(data, &write) < 0)

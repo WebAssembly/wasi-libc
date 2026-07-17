@@ -58,4 +58,3 @@ int main(void) {
   TEST(r == -1 && err == EBADF, "ppoll returned %d, expected -1\n", r);
   return t_status;
 }
-

@@ -11,7 +11,8 @@
 #endif
 
 #if defined(__wasip1__)
-static int ppoll_impl(struct pollfd *fds, size_t nfds, const struct timespec *timeout) {
+static int ppoll_impl(struct pollfd *fds, size_t nfds,
+                      const struct timespec *timeout) {
   // Construct events for poll().
   size_t maxevents = 2 * nfds + 1;
   __wasi_subscription_t subscriptions[maxevents];
@@ -60,7 +61,8 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds, const struct timespec *ti
     *subscription = (__wasi_subscription_t){
         .u.tag = __WASI_EVENTTYPE_CLOCK,
         .u.u.clock.id = __WASI_CLOCKID_REALTIME,
-        .u.u.clock.timeout = (__wasi_timestamp_t)timeout->tv_sec * 1000000000 + timeout->tv_nsec,
+        .u.u.clock.timeout =
+            (__wasi_timestamp_t)timeout->tv_sec * 1000000000 + timeout->tv_nsec,
     };
   }
 
@@ -104,15 +106,17 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds, const struct timespec *ti
       } else {
         // Data can be read or written.
         if (event->type == __WASI_EVENTTYPE_FD_READ) {
-            pollfd->revents |= POLLRDNORM;
-            if (event->fd_readwrite.flags & __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP) {
-              pollfd->revents |= POLLHUP;
-            }
+          pollfd->revents |= POLLRDNORM;
+          if (event->fd_readwrite.flags &
+              __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP) {
+            pollfd->revents |= POLLHUP;
+          }
         } else if (event->type == __WASI_EVENTTYPE_FD_WRITE) {
-            pollfd->revents |= POLLWRNORM;
-            if (event->fd_readwrite.flags & __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP) {
-              pollfd->revents |= POLLHUP;
-            }
+          pollfd->revents |= POLLWRNORM;
+          if (event->fd_readwrite.flags &
+              __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP) {
+            pollfd->revents |= POLLHUP;
+          }
         }
       }
     }
@@ -177,7 +181,8 @@ void __wasilibc_poll_ready(poll_state_t *state, short events) {
   }
 }
 
-static int ppoll_impl(struct pollfd *fds, size_t nfds, const struct timespec *timeout) {
+static int ppoll_impl(struct pollfd *fds, size_t nfds,
+                      const struct timespec *timeout) {
 
   size_t max_pollables = (2 * nfds) + 1;
   state_t states[max_pollables];
@@ -235,7 +240,8 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds, const struct timespec *ti
         wasi_read_t read;
         if (entry.vtable->get_read_stream(entry.data, &read) < 0)
           return -1;
-        if (__wasilibc_poll_add_input_stream(&state, read.input, read.pollable) < 0)
+        if (__wasilibc_poll_add_input_stream(&state, read.input,
+                                             read.pollable) < 0)
           return -1;
       } else {
         errno = EOPNOTSUPP;
@@ -248,7 +254,8 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds, const struct timespec *ti
         wasi_write_t write;
         if (entry.vtable->get_write_stream(entry.data, &write) < 0)
           return -1;
-        if (__wasilibc_poll_add_output_stream(&state, write.output, write.pollable) < 0)
+        if (__wasilibc_poll_add_output_stream(&state, write.output,
+                                              write.pollable) < 0)
           return -1;
       } else {
         errno = EOPNOTSUPP;
@@ -264,7 +271,9 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds, const struct timespec *ti
   poll_own_pollable_t timeout_pollable = {0};
   size_t pollable_count = state.len;
   if (timeout) {
-    monotonic_clock_duration_t timeout_ns = ((monotonic_clock_duration_t)timeout->tv_sec * 1000000000) + timeout->tv_nsec;
+    monotonic_clock_duration_t timeout_ns =
+        ((monotonic_clock_duration_t)timeout->tv_sec * 1000000000) +
+        timeout->tv_nsec;
     timeout_pollable = monotonic_clock_subscribe_duration(timeout_ns);
     pollables[pollable_count++] = poll_borrow_pollable(timeout_pollable);
   }
@@ -350,7 +359,8 @@ void __wasilibc_poll_ready(poll_state_t *state, short events) {
   }
 }
 
-static int ppoll_impl(struct pollfd *fds, size_t nfds, const struct timespec *timeout) {
+static int ppoll_impl(struct pollfd *fds, size_t nfds,
+                      const struct timespec *timeout) {
   // TODO(wasip3) this calculation of 2n+1 is a coarse approximation but not
   // necessarily accurate. This worked well for wasip2 but this should be
   // revisited for wasip3. Maybe make this a dynamically allocated array?
@@ -464,7 +474,8 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds, const struct timespec *ti
   // Note that in `out`, the exit of this function, the subtask is cleaned up
   // if it's still in-progress.
   if (timeout) {
-    uint64_t timeout_ns = (uint64_t)timeout->tv_sec * 1000000000 + timeout->tv_nsec;
+    uint64_t timeout_ns =
+        (uint64_t)timeout->tv_sec * 1000000000 + timeout->tv_nsec;
     wasip3_subtask_status_t status = monotonic_clock_wait_for(timeout_ns);
     if (WASIP3_SUBTASK_STATE(status) == WASIP3_SUBTASK_RETURNED) {
       timeout = &zero_timeout;
@@ -497,10 +508,11 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds, const struct timespec *ti
     }
   }
   while (event.event != WASIP3_EVENT_NONE) {
-    // If this event is for the timeout subtask then that's handled directly here
-    // as it's not related to any fds. Upon receiving the terminal status of
-    // the subtask it's no longer candidate for cancellation so it's immediately
-    // dropped and zero'd out to avoid processing in the `out` label below.
+    // If this event is for the timeout subtask then that's handled directly
+    // here as it's not related to any fds. Upon receiving the terminal status
+    // of the subtask it's no longer candidate for cancellation so it's
+    // immediately dropped and zero'd out to avoid processing in the `out` label
+    // below.
     if (event.waitable == timeout_subtask) {
       assert(event.event == WASIP3_EVENT_SUBTASK);
       assert(event.code == WASIP3_SUBTASK_RETURNED);
@@ -546,7 +558,7 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds, const struct timespec *ti
 }
 
 #else
-# error "Unknown WASI version"
+#error "Unknown WASI version"
 #endif
 
 // POLLPRI (exceptional/out-of-band data) is not supported in WASI.
@@ -570,10 +582,11 @@ static int validate_something_not_pollpri(struct pollfd *fds, size_t nfds) {
   return 0;
 }
 
-int ppoll(struct pollfd* fds, nfds_t nfds, const struct timespec *timeout,
-    const sigset_t *sigmask) {
-  (void) sigmask;
-  if (timeout && (timeout->tv_sec < 0 || timeout->tv_nsec >= 1000000000 || timeout->tv_nsec < 0)) {
+int ppoll(struct pollfd *fds, nfds_t nfds, const struct timespec *timeout,
+          const sigset_t *sigmask) {
+  (void)sigmask;
+  if (timeout && (timeout->tv_sec < 0 || timeout->tv_nsec >= 1000000000 ||
+                  timeout->tv_nsec < 0)) {
     errno = EINVAL;
     return -1;
   }

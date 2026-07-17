@@ -27,8 +27,8 @@ static int __pthread_timedjoin_np(pthread_t t, void **res,
 
   t->joiner_futex = 1;
   int rc = __timedwait(&t->joiner_futex, 1, CLOCK_REALTIME, at, 0);
+  t->joiner_futex = 0;
   if (rc != 0) {
-    t->joiner_futex = 0;
     return rc;
   }
 

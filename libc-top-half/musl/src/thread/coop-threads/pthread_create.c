@@ -273,6 +273,7 @@ int __pthread_create(pthread_t *restrict res,
   } else {
     new->detach_state = DT_JOINABLE;
   }
+  new->joiner_futex = 0;
   new->robust_list.head = &new->robust_list.head;
   new->canary = self->canary;
   new->sysinfo = self->sysinfo;

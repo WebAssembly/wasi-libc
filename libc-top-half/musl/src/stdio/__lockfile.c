@@ -12,7 +12,7 @@ int __lockfile(FILE *f)
 	#endif
 
 	// Allow recursive locking
-	if (f->lock.owner == tid)
+	if (f->lock == tid)
 		return 0;
 
 	STRONG_LOCK(f->lock);

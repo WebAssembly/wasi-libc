@@ -69,7 +69,7 @@ struct pthread {
 	char *dlerror_buf;
 	void *stdio_locks;
 	#ifdef __wasi_cooperative_threads__
-	struct __waitlist_node *joiner_waiters;
+	volatile int joiner_futex;
 	#endif
 
 	/* Part 3 -- the positions of these fields relative to

@@ -7,33 +7,31 @@
 #error "Unknown WASI version"
 #endif
 
-void __lock(struct __coop_lock *lock) {
+void __lock(volatile int *lock) {
   int tid = wasip3_thread_index();
-  if (lock->owner == tid) {
+  if (*lock == tid) {
     /* Trap on recursive locking. */
     __builtin_trap();
   }
 
   /* Loop until we acquire the lock. */
-  while (lock->owner != 0) {
-    int rc = __waitlist_wait_on(&lock->waiters, NULL, NULL);
-    (void)rc;
-    assert(rc == 0);
+  while (*lock != 0) {
+    __futexwait(lock, *lock, 0);
     /* After waking, the lock might still be held by another
      * thread that was scheduled before us, so loop back. */
   }
 
-  lock->owner = tid;
+  *lock = tid;
 }
 
-void __unlock(struct __coop_lock *lock) {
+void __unlock(volatile int *lock) {
   int tid = wasip3_thread_index();
-  if (lock->owner != tid) {
+  if (*lock != tid) {
     /* We're trying to unlock a lock we don't own. */
     __builtin_trap();
   }
 
-  lock->owner = 0;
+  *lock = 0;
   /* Awake one waiter; the others will be resumed on future unlocks. */
-  __waitlist_wake_one(&lock->waiters, 1);
+  __wake(lock, 1, 1);
 }

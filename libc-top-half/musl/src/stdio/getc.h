@@ -25,7 +25,7 @@ static int locking_getc(FILE *f)
 static inline int do_getc(FILE *f)
 {
 #ifdef __wasi_cooperative_threads__
-	if (f->lock.owner == wasip3_thread_index())
+	if (f->lock == wasip3_thread_index())
 		return getc_unlocked(f);
 	return locking_getc(f);
 #elif defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)

@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <netdb.h>
+#include <stddefer.h>
 #include <stdlib.h>
 #include <string.h>
 #include <wasi/file_utils.h>
@@ -64,111 +65,90 @@ static int map_error(ip_name_lookup_error_code_t *error) {
   }
 }
 
-static int add_addr(sockets_ip_address_t address, in_port_t port, int socktype,
-                    const struct addrinfo *restrict hint,
-                    struct addrinfo **restrict current,
-                    struct addrinfo **restrict res) {
+static bool add_addr(sockets_ip_address_t address, in_port_t port, int socktype,
+                     const struct addrinfo *restrict hint,
+                     struct addrinfo **restrict current,
+                     struct addrinfo **restrict result) {
   int family;
-  struct sockaddr *addr;
+  struct sockaddr_storage addr;
   socklen_t addrlen;
+
   switch (address.tag) {
   case SOCKETS_IP_ADDRESS_IPV4: {
-    if (hint && hint->ai_family != AF_UNSPEC && hint->ai_family != AF_INET) {
-      return 0;
-    }
-
-    sockets_ipv4_address_t ip = address.val.ipv4;
-
+    if (hint && hint->ai_family != AF_UNSPEC && hint->ai_family != AF_INET)
+      return true;
+    sockets_ipv4_address_t *ip = &address.val.ipv4;
     family = PF_INET;
     addrlen = sizeof(struct sockaddr_in);
-    addr = malloc(addrlen);
-    if (addr == NULL) {
-      freeaddrinfo(*res);
-      return EAI_MEMORY;
-    }
-
-    struct sockaddr_in sockaddr = {
-        .sin_family = AF_INET,
-        .sin_port = port,
-        .sin_addr = {.s_addr =
-                         ip.f0 | (ip.f1 << 8) | (ip.f2 << 16) | (ip.f3 << 24)},
-    };
-    memcpy(addr, &sockaddr, addrlen);
+    struct sockaddr_in *addr4 = (struct sockaddr_in *)&addr;
+    addr4->sin_family = AF_INET;
+    addr4->sin_port = port;
+    addr4->sin_addr.s_addr =
+        ip->f0 | (ip->f1 << 8) | (ip->f2 << 16) | (ip->f3 << 24);
     break;
   }
   case SOCKETS_IP_ADDRESS_IPV6: {
-    if (hint && hint->ai_family != AF_UNSPEC && hint->ai_family != AF_INET6) {
-      return 0;
-    }
+    if (hint && hint->ai_family != AF_UNSPEC && hint->ai_family != AF_INET6)
+      return true;
 
-    sockets_ipv6_address_t ip = address.val.ipv6;
-
+    sockets_ipv6_address_t *ip = &address.val.ipv6;
     family = PF_INET6;
     addrlen = sizeof(struct sockaddr_in6);
-    addr = malloc(addrlen);
-    if (addr == NULL) {
-      freeaddrinfo(*res);
-      return EAI_MEMORY;
-    }
-
-    struct sockaddr_in6 sockaddr = {
-        .sin6_family = AF_INET6,
-        .sin6_port = port,
-        .sin6_addr = {.s6_addr =
-                          {
-                              ip.f0 >> 8,
-                              ip.f0 & 0xFF,
-                              ip.f1 >> 8,
-                              ip.f1 & 0xFF,
-                              ip.f2 >> 8,
-                              ip.f2 & 0xFF,
-                              ip.f3 >> 8,
-                              ip.f3 & 0xFF,
-                              ip.f4 >> 8,
-                              ip.f4 & 0xFF,
-                              ip.f5 >> 8,
-                              ip.f5 & 0xFF,
-                              ip.f6 >> 8,
-                              ip.f6 & 0xFF,
-                              ip.f7 >> 8,
-                              ip.f7 & 0xFF,
-                          }},
-        .sin6_flowinfo = 0,
-        .sin6_scope_id = 0,
-    };
-    memcpy(addr, &sockaddr, addrlen);
+    struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)&addr;
+    addr6->sin6_family = AF_INET6;
+    addr6->sin6_port = port;
+    addr6->sin6_addr.s6_addr[0] = ip->f0 >> 8;
+    addr6->sin6_addr.s6_addr[1] = ip->f0 & 0xFF;
+    addr6->sin6_addr.s6_addr[2] = ip->f1 >> 8;
+    addr6->sin6_addr.s6_addr[3] = ip->f1 & 0xFF;
+    addr6->sin6_addr.s6_addr[4] = ip->f2 >> 8;
+    addr6->sin6_addr.s6_addr[5] = ip->f2 & 0xFF;
+    addr6->sin6_addr.s6_addr[6] = ip->f3 >> 8;
+    addr6->sin6_addr.s6_addr[7] = ip->f3 & 0xFF;
+    addr6->sin6_addr.s6_addr[8] = ip->f4 >> 8;
+    addr6->sin6_addr.s6_addr[9] = ip->f4 & 0xFF;
+    addr6->sin6_addr.s6_addr[10] = ip->f5 >> 8;
+    addr6->sin6_addr.s6_addr[11] = ip->f5 & 0xFF;
+    addr6->sin6_addr.s6_addr[12] = ip->f6 >> 8;
+    addr6->sin6_addr.s6_addr[13] = ip->f6 & 0xFF;
+    addr6->sin6_addr.s6_addr[14] = ip->f7 >> 8;
+    addr6->sin6_addr.s6_addr[15] = ip->f7 & 0xFF;
+    addr6->sin6_flowinfo = 0;
+    addr6->sin6_scope_id = 0;
     break;
   }
   default: /* unreachable */
     abort();
   }
 
-  struct addrinfo *result = malloc(sizeof(struct addrinfo));
-  if (result == NULL) {
-    freeaddrinfo(*res);
-    return EAI_MEMORY;
+  struct addrinfo *node = malloc(sizeof(struct addrinfo));
+  struct sockaddr *addr_ret = malloc(addrlen);
+  if (node == NULL || addr_ret == NULL) {
+    free(node);
+    free(addr_ret);
+    return false;
   }
 
-  *result = (struct addrinfo){
+  memcpy(addr_ret, &addr, addrlen);
+
+  *node = (struct addrinfo){
       .ai_family = family,
       .ai_flags = 0,
       .ai_socktype = socktype,
-      .ai_protocol = 0,
+      .ai_protocol = socktype == SOCK_STREAM ? IPPROTO_TCP : IPPROTO_UDP,
       .ai_addrlen = addrlen,
-      .ai_addr = addr,
+      .ai_addr = addr_ret,
       .ai_canonname = NULL,
       .ai_next = NULL,
   };
 
-  if (*current) {
-    (*current)->ai_next = result;
-    *current = result;
-  } else {
-    *current = result;
-    *res = result;
-  }
+  if (*result == NULL)
+    *result = node;
+  if (*current)
+    (*current)->ai_next = node;
+  *current = node;
 
-  return 0;
+  return true;
 }
 
 static bool set_global_serv_entry(const service_entry_t *entry,
@@ -195,103 +175,197 @@ static bool set_global_serv_entry(const service_entry_t *entry,
   return true;
 }
 
+static sockets_ip_address_t ipv4_address(const uint8_t *b) {
+  return (sockets_ip_address_t){
+      .tag = SOCKETS_IP_ADDRESS_IPV4,
+      .val = {.ipv4 = {.f0 = b[0], .f1 = b[1], .f2 = b[2], .f3 = b[3]}},
+  };
+}
+
+static sockets_ip_address_t ipv6_address(const uint8_t *b) {
+  return (sockets_ip_address_t){
+      .tag = SOCKETS_IP_ADDRESS_IPV6,
+      .val = {.ipv6 =
+                  {
+                      .f0 = (uint16_t)(b[0] << 8 | b[1]),
+                      .f1 = (uint16_t)(b[2] << 8 | b[3]),
+                      .f2 = (uint16_t)(b[4] << 8 | b[5]),
+                      .f3 = (uint16_t)(b[6] << 8 | b[7]),
+                      .f4 = (uint16_t)(b[8] << 8 | b[9]),
+                      .f5 = (uint16_t)(b[10] << 8 | b[11]),
+                      .f6 = (uint16_t)(b[12] << 8 | b[13]),
+                      .f7 = (uint16_t)(b[14] << 8 | b[15]),
+                  }},
+  };
+}
+
 int getaddrinfo(const char *restrict host, const char *restrict serv,
                 const struct addrinfo *restrict hint,
                 struct addrinfo **restrict res) {
-  if (host == NULL) {
-    host = "localhost";
-  }
-
   *res = NULL;
-  struct addrinfo *current = NULL;
-  wasi_string_t name = {.ptr = (uint8_t *)host, .len = strlen(host)};
-  ip_name_lookup_error_code_t error;
-#ifdef __wasip2__
-  ip_name_lookup_own_resolve_address_stream_t stream;
-  if (!ip_name_lookup_resolve_addresses(__wasi_sockets_utils__borrow_network(),
-                                        &name, &stream, &error))
-    return map_error(&error);
-  ip_name_lookup_borrow_resolve_address_stream_t stream_borrow =
-      ip_name_lookup_borrow_resolve_address_stream(stream);
-  poll_own_pollable_t pollable;
-  pollable.__handle = 0;
-#else
-  ip_name_lookup_list_ip_address_t addresses;
-  if (!ip_name_lookup_resolve_addresses(&name, &addresses, &error))
-    return map_error(&error);
-  size_t next = 0;
-#endif
 
-  int ret = 0;
-  // The 'serv' parameter can be either a port number or a service name.
+  int flags = hint ? hint->ai_flags : 0;
+  if (flags & ~(AI_PASSIVE | AI_CANONNAME | AI_NUMERICHOST | AI_V4MAPPED |
+                AI_ALL | AI_ADDRCONFIG | AI_NUMERICSERV))
+    return EAI_BADFLAGS;
+
+  int family = hint ? hint->ai_family : AF_UNSPEC;
+  if (family != AF_UNSPEC && family != AF_INET && family != AF_INET6)
+    return EAI_FAMILY;
+
+  int socktype = hint ? hint->ai_socktype : 0;
+  if (socktype != 0 && socktype != SOCK_STREAM && socktype != SOCK_DGRAM)
+    return EAI_SOCKTYPE;
+
+  if (host == NULL && serv == NULL)
+    return EAI_NONAME;
+
+  // The 'serv' parameter can be either a port number or a service name. By
+  // default an entry is generated for both TCP and UDP; a service table
+  // entry and/or the socktype hint narrow that down.
   int port = 0;
-  uint16_t protocol = SERVICE_PROTOCOL_TCP;
+  uint16_t protocol = SERVICE_PROTOCOL_TCP | SERVICE_PROTOCOL_UDP;
   if (serv != NULL) {
     port = __wasilibc_parse_port(serv);
     if (port < 0) {
+      if (flags & AI_NUMERICSERV)
+        return EAI_NONAME;
       const service_entry_t *service =
           __wasilibc_get_service_entry_by_name(serv);
-      if (service) {
-        port = service->port;
-        protocol = service->protocol;
-      } else {
-        ret = EAI_NONAME;
-      }
+      if (service == NULL)
+        return EAI_NONAME;
+      port = service->port;
+      protocol = service->protocol;
     }
   }
+  if (socktype == SOCK_STREAM)
+    protocol &= SERVICE_PROTOCOL_TCP;
+  else if (socktype == SOCK_DGRAM)
+    protocol &= SERVICE_PROTOCOL_UDP;
+  if (protocol == 0)
+    return EAI_SERVICE;
 
-  while (ret == 0) {
-#ifdef __wasip2__
-    ip_name_lookup_option_ip_address_t maybe_address;
-    if (!ip_name_lookup_method_resolve_address_stream_resolve_next_address(
-            stream_borrow, &maybe_address, &error)) {
-      if (error != NETWORK_ERROR_CODE_WOULD_BLOCK) {
-        freeaddrinfo(*res);
-        ret = map_error(&error);
-        break;
-      }
-
-      if (pollable.__handle == 0) {
-        pollable = ip_name_lookup_method_resolve_address_stream_subscribe(
-            stream_borrow);
-      }
-      poll_method_pollable_block(poll_borrow_pollable(pollable));
-      continue;
+  // Handle addresses which don't require the resolver: a NULL host maps to
+  // the wildcard (AI_PASSIVE) or loopback address locally, and numeric
+  // literals are parsed directly. Only fall through to the resolver for a
+  // non-numeric hostname, and only when AI_NUMERICHOST permits it.
+  sockets_ip_address_t local[2];
+  size_t num_local = 0;
+  struct in_addr a4;
+  struct in6_addr a6;
+  if (host == NULL) {
+    if (family != AF_INET6) {
+      static const uint8_t any4[4] = {0, 0, 0, 0};
+      static const uint8_t loopback4[4] = {127, 0, 0, 1};
+      local[num_local++] = ipv4_address(flags & AI_PASSIVE ? any4 : loopback4);
     }
-    if (!maybe_address.is_some)
-      break;
-    sockets_ip_address_t address = maybe_address.val;
-
-#else
-    if (next == addresses.len)
-      break;
-    sockets_ip_address_t address = addresses.ptr[next++];
-#endif
-    if (protocol & SERVICE_PROTOCOL_TCP) {
-      ret = add_addr(address, htons(port), SOCK_STREAM, hint, &current, res);
-      if (ret)
-        break;
+    if (family != AF_INET) {
+      const struct in6_addr *a =
+          flags & AI_PASSIVE ? &in6addr_any : &in6addr_loopback;
+      local[num_local++] = ipv6_address(a->s6_addr);
     }
-    if (protocol & SERVICE_PROTOCOL_UDP) {
-      ret = add_addr(address, htons(port), SOCK_DGRAM, hint, &current, res);
-      if (ret)
-        break;
-    }
+  } else if (inet_pton(AF_INET, host, &a4) == 1) {
+    if (family == AF_INET6)
+      return EAI_NONAME;
+    local[num_local++] = ipv4_address((const uint8_t *)&a4.s_addr);
+  } else if (inet_pton(AF_INET6, host, &a6) == 1) {
+    if (family == AF_INET)
+      return EAI_NONAME;
+    local[num_local++] = ipv6_address(a6.s6_addr);
+  } else if (flags & AI_NUMERICHOST) {
+    return EAI_NONAME;
   }
 
+  struct addrinfo *result = NULL;
+  defer freeaddrinfo(result);
+  struct addrinfo *current = NULL;
+
+  if (num_local > 0) {
+    for (size_t i = 0; i < num_local; i++) {
+      if (protocol & SERVICE_PROTOCOL_TCP &&
+          !add_addr(local[i], htons(port), SOCK_STREAM, hint, &current,
+                    &result))
+        return EAI_MEMORY;
+      if (protocol & SERVICE_PROTOCOL_UDP &&
+          !add_addr(local[i], htons(port), SOCK_DGRAM, hint, &current, &result))
+        return EAI_MEMORY;
+    }
+  } else {
+    wasi_string_t name = {.ptr = (uint8_t *)host, .len = strlen(host)};
+    ip_name_lookup_error_code_t error;
 #ifdef __wasip2__
-  if (pollable.__handle != 0)
-    poll_pollable_drop_own(pollable);
-  ip_name_lookup_resolve_address_stream_drop_own(stream);
+    ip_name_lookup_own_resolve_address_stream_t stream;
+    if (!ip_name_lookup_resolve_addresses(
+            __wasi_sockets_utils__borrow_network(), &name, &stream, &error))
+      return map_error(&error);
+    ip_name_lookup_borrow_resolve_address_stream_t stream_borrow =
+        ip_name_lookup_borrow_resolve_address_stream(stream);
+    poll_own_pollable_t pollable;
+    pollable.__handle = 0;
 #else
-  ip_name_lookup_list_ip_address_free(&addresses);
+    ip_name_lookup_list_ip_address_t addresses;
+    if (!ip_name_lookup_resolve_addresses(&name, &addresses, &error))
+      return map_error(&error);
+    size_t next = 0;
 #endif
-  return ret;
+
+    while (1) {
+#ifdef __wasip2__
+      ip_name_lookup_option_ip_address_t maybe_address;
+      if (!ip_name_lookup_method_resolve_address_stream_resolve_next_address(
+              stream_borrow, &maybe_address, &error)) {
+        if (error != NETWORK_ERROR_CODE_WOULD_BLOCK)
+          return map_error(&error);
+
+        if (pollable.__handle == 0) {
+          pollable = ip_name_lookup_method_resolve_address_stream_subscribe(
+              stream_borrow);
+        }
+        poll_method_pollable_block(poll_borrow_pollable(pollable));
+        continue;
+      }
+      if (!maybe_address.is_some)
+        break;
+      sockets_ip_address_t address = maybe_address.val;
+
+#else
+      if (next == addresses.len)
+        break;
+      sockets_ip_address_t address = addresses.ptr[next++];
+#endif
+      if (protocol & SERVICE_PROTOCOL_TCP &&
+          !add_addr(address, htons(port), SOCK_STREAM, hint, &current, &result))
+        return EAI_MEMORY;
+      if (protocol & SERVICE_PROTOCOL_UDP &&
+          !add_addr(address, htons(port), SOCK_DGRAM, hint, &current, &result))
+        return EAI_MEMORY;
+    }
+
+#ifdef __wasip2__
+    if (pollable.__handle != 0)
+      poll_pollable_drop_own(pollable);
+    ip_name_lookup_resolve_address_stream_drop_own(stream);
+#else
+    ip_name_lookup_list_ip_address_free(&addresses);
+#endif
+  }
+
+  // If a canonical name is asked for just give what was passed in.
+  if (result != NULL && host != NULL && flags & AI_CANONNAME) {
+    result->ai_canonname = strdup(host);
+    if (result->ai_canonname == NULL)
+      return EAI_MEMORY;
+  }
+
+  *res = result;
+  result = NULL;
+  return 0;
 }
 
 void freeaddrinfo(struct addrinfo *p) {
   while (p) {
     struct addrinfo *next = p->ai_next;
+    free(p->ai_canonname);
     free(p->ai_addr);
     free(p);
     p = next;

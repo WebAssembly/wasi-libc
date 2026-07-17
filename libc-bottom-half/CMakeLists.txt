@@ -128,6 +128,7 @@ set(bottom_half_sources
   sources/math/fmin-fmax.c
   sources/math/math-builtins.c
   sources/posix.c
+  sources/ppoll.c
   sources/preopens.c
   sources/reallocarray.c
   sources/sbrk.c

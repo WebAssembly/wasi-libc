@@ -14,8 +14,8 @@
 #define FFINALLOCK(f) __lockfile((f))
 #define FLOCK(f) int __need_unlock = __lockfile((f))
 #define FUNLOCK(f) do { if (__need_unlock) __unlockfile((f)); } while (0)
-#define __STDIO_LOCK_INIT -1
-#define __STDIO_LOCK_RESET(lock) do { (lock) = -1; } while (0)
+#define __STDIO_LOCK_INIT 0
+#define __STDIO_LOCK_RESET(lock) do { (lock) = 0; } while (0)
 #elif defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #define FFINALLOCK(f) ((f)->lock>=0 ? __lockfile((f)) : 0)
 #define FLOCK(f) int __need_unlock = ((f)->lock>=0 ? __lockfile((f)) : 0)

@@ -260,6 +260,9 @@ int __pthread_create(pthread_t *restrict res,
   tls_offset = (uintptr_t)self - (uintptr_t)tls_base;
   new = (void *)((uintptr_t)new_tls_base + tls_offset);
 
+  // Ensure the pthread structure is at least fully initialized.
+  memset(new, 0, sizeof(*new));
+
   new->map_base = map;
   new->map_size = size;
   new->stack = stack;

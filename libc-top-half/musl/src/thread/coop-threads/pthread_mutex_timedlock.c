@@ -28,7 +28,7 @@ int __pthread_mutex_timedlock(pthread_mutex_t *restrict m,
 
   /* Wait for the lock to be available */
   while (m->_m_lock != 0) {
-    int rc = __waitlist_wait_on(&m->_m_waiters, CLOCK_REALTIME, at);
+    int rc = __timedwait(&m->_m_lock, m->_m_lock, CLOCK_REALTIME, at, 1);
     if (rc != 0)
       return rc;
   }

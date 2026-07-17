@@ -1,4 +1,5 @@
 #include "common/time.h"
+#include "hashmap.h"
 #include "pthread_impl.h"
 #include <assert.h>
 #include <stdatomic.h>
@@ -8,6 +9,23 @@
 #ifndef __wasip3__
 #error "Unknown WASI version"
 #endif
+
+#define WAITLIST_NODE_TID 0
+#define WAITLIST_NODE_FUTURE 1
+struct __waitlist_node {
+    // One of `WAITLIST_NODE_TID` or `WAITLIST_NODE_FUTURE`.
+    uint32_t kind;
+    // The thread id if `kind == WAITLIST_NODE_TID`, or a writable future
+    // handle if `kind == WAITLIST_NODE_FUTURE`.
+    uint32_t tid_or_future;
+    // Set to `true` when this node is removed from the linked list by an
+    // explicit thread notification.
+    bool woken;
+
+    // Linked list pointers for easy insertion/removal on timeout.
+    struct __waitlist_node *next;
+    struct __waitlist_node *prev;
+};
 
 // Manual bindings to a `future` in the component model (no payload) where the
 // name mangling is what's recognized by `wit-component` at this time.
@@ -215,6 +233,17 @@ static int wait_timeout(struct __waitlist_node **list, clockid_t clk,
   return node.woken ? 0 : ETIMEDOUT;
 }
 
+
+/// Blocks the current thread on `list` waiting for a notification.
+///
+/// If `at` is non-NULL then it is an *absolute* deadline measured against the
+/// clock `clk`, matching POSIX `pthread_mutex_timedlock`-style semantics.
+/// If `at` is `NULL` this waits indefinitely and `clk` is unused (and may be
+/// `NULL`).
+///
+/// Returns 0 when the thread was externally woken with `__waitlist_wake_*`
+/// and otherwise returns a nonzero error code. This function does not set
+/// `errno`.
 int __waitlist_wait_on(struct __waitlist_node **list, clockid_t clk,
                        const struct timespec *at) {
   // Delegate to the internal implementation based on the timeout. Note that we
@@ -272,4 +301,119 @@ void __waitlist_wake_all(struct __waitlist_node **list, int yield) {
     wake_node(curr, next == NULL && yield);
     curr = next;
   }
+}
+
+// We supply a futex-style interface on top of our cooperative threading model to 
+// maintain compatibility with the existing pthreads ABI. This is supported by a 
+// hashmap of futex addresses to waitlists of threads that are waiting on those
+// futexes.
+struct __futex_entry {
+  volatile int *addr;
+  struct __waitlist_node *list;
+};
+
+// The futex map should be accessed through `get_futex_map` to ensure it is lazily initialized. It is never freed.
+static struct hashmap *futex_map;
+
+// The hash function and comparison functions are supplied to the hashmap to allow it to store `__futex_entry` 
+// structs keyed by their `addr` field. 
+static uint64_t futex_entry_hash(const void *item, uint64_t seed0,
+                                 uint64_t seed1) {
+  const struct __futex_entry *entry = item;
+  return __hashmap_xxhash3(&entry->addr, sizeof(entry->addr), seed0, seed1);
+}
+static int futex_entry_compare(const void *a, const void *b, void *udata) {
+  const struct __futex_entry *left = a;
+  const struct __futex_entry *right = b;
+  (void)udata;
+  return left->addr != right->addr;
+}
+
+static struct hashmap *get_futex_map(bool create) {
+  if (futex_map || !create)
+    return futex_map;
+
+  const size_t initial_capacity = 64;
+  futex_map = __hashmap_new(sizeof(struct __futex_entry), initial_capacity, 0, 0,
+                          futex_entry_hash, futex_entry_compare, NULL, NULL);
+  return futex_map;
+}
+
+static struct __futex_entry *find_futex_entry(volatile int *addr, bool create) {
+  struct hashmap *map = get_futex_map(create);
+
+  // Create a temporary key to search for the futex entry in the hashmap; 
+  // the `list` field is not used for comparison, so it can be NULL.
+  struct __futex_entry key = {
+      .addr = addr,
+      .list = NULL,
+  };
+
+  if (!map)
+    return NULL;
+
+  struct __futex_entry *entry = (struct __futex_entry *)__hashmap_get(map, &key);
+  if (entry || !create)
+    return entry;
+
+  if (!__hashmap_set(map, &key) && __hashmap_oom(map))
+    return NULL;
+
+  return (struct __futex_entry *)__hashmap_get(map, &key);
+}
+
+// If a futex entry exists for the given address and its waitlist is empty, remove it from the hashmap.
+static void maybe_release_futex_entry(struct __futex_entry *entry) {
+  if (entry != NULL && entry->list == NULL) {
+    __hashmap_delete(get_futex_map(false), entry);
+  }
+}
+
+int __timedwait(volatile int *addr, int val, clockid_t clk,
+                const struct timespec *at, int opt) {
+  (void)opt; // Unused in this implementation
+
+  if (*addr != val)
+    return 0;
+
+  struct __futex_entry *entry = find_futex_entry(addr, true);
+  if (!entry)
+    return ENOMEM;
+
+  int rc = __waitlist_wait_on(&entry->list, clk, at);
+  maybe_release_futex_entry(entry);
+  return rc;
+}
+
+void __wait(volatile int *addr, volatile int *waiters, int val, int opt) {
+  if (waiters)
+    ++*waiters;
+  while (*addr == val) {
+    int rc = __timedwait(addr, val, CLOCK_REALTIME, NULL, opt);
+    if (rc)
+      break;
+  }
+  if (waiters)
+    --*waiters;
+}
+
+void __wake(volatile void *addr, int cnt, int yield) {
+  struct __futex_entry *entry;
+  volatile int *word = (volatile int *)addr;
+
+  entry = find_futex_entry(word, false);
+  if (!entry)
+    return;
+
+  if (cnt < 0) {
+    __waitlist_wake_all(&entry->list, yield);
+  } else {
+    while (cnt-- > 0 && entry->list) {
+      __waitlist_wake_one(&entry->list, yield);
+    }
+  }
+}
+
+void __futexwait(volatile void *addr, int val, int opt) {
+  (void)__timedwait((volatile int *)addr, val, CLOCK_REALTIME, NULL, opt);
 }

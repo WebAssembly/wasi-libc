@@ -8,7 +8,9 @@ int sem_init(sem_t *sem, int pshared, unsigned value) {
     errno = EINVAL;
     return -1;
   }
-  sem->__count = value;
-  sem->__waiters = NULL;
+  sem->__val[0] = value;
+  sem->__val[1] = 1;
+  sem->__val[2] = pshared ? 0 : 128;
+  sem->__val[3] = 0;
   return 0;
 }

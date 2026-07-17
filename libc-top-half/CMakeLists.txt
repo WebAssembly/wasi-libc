@@ -457,6 +457,7 @@ if (TARGET_TRIPLE MATCHES "wasip1-threads")
 elseif(ENABLE_COOP_THREADS)
   # cooperative threads implementation for WASI Preview 3
   list(APPEND top_half_sources
+    musl/src/internal/hashmap.c
     musl/src/stdio/__lockfile.c
     musl/src/stdio/flockfile.c
     musl/src/stdio/ftrylockfile.c

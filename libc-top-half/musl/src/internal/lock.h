@@ -15,19 +15,13 @@
 
 
 #ifdef __wasi_cooperative_threads__
-struct __waitlist_node;
-struct __coop_lock {
-	int owner;  // tid of owning thread, or 0 if unlocked
-	struct __waitlist_node *waiters;
-};
-
-#define DECLARE_STRONG_LOCK(name, ...) __VA_ARGS__ struct __coop_lock name
+#define DECLARE_STRONG_LOCK(name, ...) __VA_ARGS__ volatile int name
 #define DECLARE_WEAK_LOCK(name, ...)
-#define __COOP_LOCK_INIT {0, NULL}
+#define __COOP_LOCK_INIT {0}
 #define __LOCK_INIT __COOP_LOCK_INIT
 
-hidden void __lock(struct __coop_lock *lock);
-hidden void __unlock(struct __coop_lock *lock);
+hidden void __lock(volatile int *lock);
+hidden void __unlock(volatile int *lock);
 #define STRONG_LOCK(x) __lock(&x)
 #define STRONG_UNLOCK(x) __unlock(&x)
 #define WEAK_LOCK(x) ((void)0)

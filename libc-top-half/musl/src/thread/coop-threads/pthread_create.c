@@ -104,7 +104,7 @@ static void __pthread_exit(void *result) {
   // stack would get deallocated. That means this thread, upon resuming, would
   // UAF its own stack. By not yielding here we're guaranteed that the stack is
   // valid until this function returns.
-  __waitlist_wake_all(&self->joiner_waiters, 0);
+  __wake(&self->joiner_futex, 1, 0);
 }
 
 void __do_cleanup_push(struct __ptcb *cb) {
@@ -276,6 +276,7 @@ int __pthread_create(pthread_t *restrict res,
   } else {
     new->detach_state = DT_JOINABLE;
   }
+  new->joiner_futex = 0;
   new->robust_list.head = &new->robust_list.head;
   new->canary = self->canary;
   new->sysinfo = self->sysinfo;

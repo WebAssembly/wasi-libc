@@ -3,16 +3,15 @@
 #include <semaphore.h>
 
 int sem_post(sem_t *sem) {
-  if (sem->__count == SEM_VALUE_MAX) {
+  if (sem->__val[0] == SEM_VALUE_MAX) {
     errno = EOVERFLOW;
     return -1;
   }
 
-  /* Make a permit available and wake a waiter if there is one. The woken
-   * waiter re-checks the count and consumes the permit; `__waitlist_wake_one`
-   * is a no-op when nobody is waiting. */
-  sem->__count++;
-  __waitlist_wake_one(&sem->__waiters, 1);
+  /* Make a permit available and wake one waiter sleeping on the futex token.
+   * The woken waiter re-checks the count and consumes the permit. */
+  sem->__val[0]++;
+  __wake(&sem->__val[1], 1, 1);
 
   return 0;
 }

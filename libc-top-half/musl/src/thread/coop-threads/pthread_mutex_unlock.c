@@ -22,7 +22,7 @@ int __wasilibc_pthread_mutex_unlock(pthread_mutex_t *m, int yield) {
   /* Unlock */
   m->_m_lock = 0;
   m->_m_count = 0;
-  __waitlist_wake_one(&m->_m_waiters, yield);
+  __wake(&m->_m_lock, 1, yield);
   return 0;
 }
 

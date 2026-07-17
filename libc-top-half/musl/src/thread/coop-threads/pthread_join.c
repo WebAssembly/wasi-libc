@@ -20,14 +20,17 @@ static int __pthread_timedjoin_np(pthread_t t, void **res,
     return 0;
   }
 
-  if (t->joiner_waiters) {
+  if (t->joiner_futex) {
     // Only one thread can wait to join at a time
     return EINVAL;
   }
 
-  int rc = __waitlist_wait_on(&t->joiner_waiters, CLOCK_REALTIME, at);
-  if (rc != 0)
+  t->joiner_futex = 1;
+  int rc = __timedwait(&t->joiner_futex, 1, CLOCK_REALTIME, at, 0);
+  t->joiner_futex = 0;
+  if (rc != 0) {
     return rc;
+  }
 
   if (res)
     *res = t->result;

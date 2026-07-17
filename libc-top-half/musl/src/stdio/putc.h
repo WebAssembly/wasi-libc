@@ -30,7 +30,7 @@ static inline int do_putc(int c, FILE *f)
 	#else
 	#error "Unknown WASI version"
 	#endif
-	if (f->lock.owner == tid)
+	if (f->lock == tid)
 		return putc_unlocked(c, f);
 	return locking_putc(c, f);
 #elif defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)

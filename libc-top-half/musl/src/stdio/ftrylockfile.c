@@ -7,8 +7,8 @@ void __do_orphaned_stdio_locks()
     FILE *f;
     for (f=__pthread_self()->stdio_locks; f; f=f->next_locked) {
 		#ifdef __wasi_cooperative_threads__
-        f->lock.owner = 0;
-        __waitlist_wake_all(&f->lock.waiters, 1);
+		f->lock = 0;
+		__wake(&f->lock, -1, 1);
 		#else
         a_store(&f->lock, 0x40000000);
 		#endif
@@ -42,7 +42,7 @@ int ftrylockfile(FILE *f)
 	#error "Unknown WASI version"
 	#endif
 
-	if (f->lock.owner == self_tid) {
+	if (f->lock == self_tid) {
 		if (f->lockcount == LONG_MAX)
 			return -1;
 		f->lockcount++;
@@ -50,10 +50,10 @@ int ftrylockfile(FILE *f)
 	}
 
 	// Try to acquire the lock
-	if (f->lock.owner != 0)
+	if (f->lock != 0)
 		return -1;
 
-	f->lock.owner = self_tid;
+	f->lock = self_tid;
 	__register_locked_file(f, __pthread_self());
 	return 0;
 }

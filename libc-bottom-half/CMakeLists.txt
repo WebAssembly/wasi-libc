@@ -219,6 +219,7 @@ foreach(file crt/crt1-command.c
   target_link_libraries(${stem} PRIVATE musl-top-half-interface)
   set_pic(${stem})
   target_compile_options(${stem} PRIVATE -fvisibility=default -fno-lto)
+  target_include_directories(${stem} PRIVATE headers/private)
 endforeach()
 
 set(crt_sysroot ${SYSROOT}/lib/${TARGET_TRIPLE})

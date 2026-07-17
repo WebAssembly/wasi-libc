@@ -10,6 +10,7 @@
 #include "stat_impl.h"
 
 #ifndef __wasip1__
+#include <stddefer.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #endif
@@ -41,8 +42,10 @@ int __wasilibc_nocwd_utimensat(int fd, const char *path, const struct timespec t
 #elif defined(__wasip2__) || defined(__wasip3__)
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
-  if (fd_to_file_handle(fd, &file_handle) < 0)
+  descriptor_table_entry_t entry;
+  if (fd_to_file_handle(fd, &entry, &file_handle) < 0)
     return -1;
+  defer descriptor_table_entry_dec(entry);
 
   // Convert timestamps and extract NOW/OMIT flags.
   filesystem_new_timestamp_t new_timestamp_atim;

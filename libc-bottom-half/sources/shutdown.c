@@ -1,13 +1,15 @@
 #include <errno.h>
+#include <stddefer.h>
 #include <wasi/descriptor_table.h>
 
 int shutdown(int socket, int how) {
-  descriptor_table_entry_t *entry = descriptor_table_get_ref(socket);
-  if (!entry)
+  descriptor_table_entry_t entry;
+  if (descriptor_table_get(socket, &entry) < 0)
     return -1;
-  if (entry->vtable->shutdown == NULL) {
+  defer descriptor_table_entry_dec(entry);
+  if (entry.vtable->shutdown == NULL) {
     errno = EOPNOTSUPP;
     return -1;
   }
-  return entry->vtable->shutdown(entry->data, how);
+  return entry.vtable->shutdown(entry.data, how);
 }

@@ -56,17 +56,27 @@ typedef wasip3_string_t wasi_string_t;
 // Returns -1 and sets errno to `ENOENT` if `s` is not valid utf-8.
 int wasi_string_from_c(const char *s, wasi_string_t *out);
 
-// Succeed only if fd is bound to a file handle in the descriptor table
-static inline int fd_to_file_handle(int fd,
+// Looks up the `fd` specified and acquires the WASI file handle within it,
+// storing it into `result`.
+//
+// On success 0 is returned and `entry` and `result` are filled in. Callers must
+// use `descriptor_table_entry_dec` on `entry`.
+//
+// On failure -1, errno is set, and nothing else need be done.
+static inline int fd_to_file_handle(int fd, descriptor_table_entry_t *entry,
                                     filesystem_borrow_descriptor_t *result) {
-  descriptor_table_entry_t *entry = descriptor_table_get_ref(fd);
-  if (entry == NULL)
+  if (descriptor_table_get(fd, entry) < 0)
     return -1;
   if (!entry->vtable->get_file) {
+    descriptor_table_entry_dec(*entry);
     errno = EINVAL;
     return -1;
   }
-  return entry->vtable->get_file(entry->data, result);
+  if (entry->vtable->get_file(entry->data, result) < 0) {
+    descriptor_table_entry_dec(*entry);
+    return -1;
+  }
+  return 0;
 }
 
 // Reads from `read` into `buf`/`len`

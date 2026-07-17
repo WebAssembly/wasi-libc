@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #ifndef __wasip1__
+#include <stddefer.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #endif
@@ -59,8 +60,10 @@ int __wasilibc_nocwd_faccessat(int fd, const char *path, int amode, int flag) {
   // Translate the file descriptor to an internal handle
   // Translate the file descriptor to an internal handle
   filesystem_borrow_descriptor_t file_handle;
-  if (fd_to_file_handle(fd, &file_handle) < 0)
+  descriptor_table_entry_t entry;
+  if (fd_to_file_handle(fd, &entry, &file_handle) < 0)
     return -1;
+  defer descriptor_table_entry_dec(entry);
 
   // Convert the string into a WASI string
   wasi_string_t wasi_path;

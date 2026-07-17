@@ -103,6 +103,7 @@ typedef struct {
 } tcp_socket_state_t;
 
 typedef struct {
+  descriptor_refcnt_t refcnt;
   sockets_own_tcp_socket_t socket;
   tcp_socket_state_t state;
 #ifdef __wasip2__

@@ -7,6 +7,7 @@
 #include <wasi/api.h>
 
 #ifndef __wasip1__
+#include <stddefer.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
@@ -25,17 +26,18 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
   }
   return bytes_written;
 #else
-  descriptor_table_entry_t *entry = descriptor_table_get_ref(fildes);
-  if (!entry)
+  descriptor_table_entry_t entry;
+  if (descriptor_table_get(fildes, &entry) < 0)
     return -1;
-  if (entry->vtable->get_write_stream) {
+  defer descriptor_table_entry_dec(entry);
+  if (entry.vtable->get_write_stream) {
     wasi_write_t write;
-    if (entry->vtable->get_write_stream(entry->data, &write) < 0)
+    if (entry.vtable->get_write_stream(entry.data, &write) < 0)
       return -1;
     return __wasilibc_write(&write, buf, nbyte);
   }
-  if (entry->vtable->sendto)
-    return entry->vtable->sendto(entry->data, buf, nbyte, 0, NULL, 0);
+  if (entry.vtable->sendto)
+    return entry.vtable->sendto(entry.data, buf, nbyte, 0, NULL, 0);
   errno = EOPNOTSUPP;
   return -1;
 #endif

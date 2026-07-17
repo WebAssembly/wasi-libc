@@ -10,6 +10,7 @@
 #include "libc/sys/stat/stat_impl.h"
 
 typedef struct {
+  descriptor_refcnt_t refcnt;
   filesystem_own_descriptor_t file_handle;
   // Current position in stream, relative to the beginning of the
   // *file_handle*, measured in bytes
@@ -350,6 +351,6 @@ int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag) {
 
   descriptor_table_entry_t entry;
   entry.vtable = &file_vtable;
-  entry.data = file;
+  entry.data = &file->refcnt;
   return descriptor_table_insert(entry);
 }

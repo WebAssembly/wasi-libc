@@ -39,7 +39,7 @@ jobs:
             upload: windows-clang-20
           - name: Build on WASIp2 Windows x86_64
             os: windows-2025
-            clang_version: 20.1.8
+            clang_version: 22.1.8
             args: -DTARGET_TRIPLE=wasm32-wasip2
 
           # Other versions of LLVM
@@ -74,7 +74,7 @@ jobs:
 
           - name: Test wasm32-wasip2
             os: ubuntu-24.04
-            clang_version: 20
+            clang_version: 22
             test: true
             upload: wasm32-wasip2
             args: -DTARGET_TRIPLE=wasm32-wasip2
@@ -113,7 +113,7 @@ jobs:
 
           - name: Test wasm32-wasip2 (debug)
             os: ubuntu-24.04
-            clang_version: 20
+            clang_version: 22
             test: true
             args: -DCMAKE_BUILD_TYPE=Debug -DTARGET_TRIPLE=wasm32-wasip2
 
@@ -125,14 +125,14 @@ jobs:
 
           - name: Test wasm32-wasip3
             os: ubuntu-24.04
-            clang_version: 20
+            clang_version: 22
             test: true
             upload: wasm32-wasip3
             args: -DTARGET_TRIPLE=wasm32-wasip3
 
           - name: Test wasm32-wasip3 (debug)
             os: ubuntu-24.04
-            clang_version: 20
+            clang_version: 22
             test: true
             args: -DCMAKE_BUILD_TYPE=Debug -DTARGET_TRIPLE=wasm32-wasip3
 
@@ -156,19 +156,19 @@ jobs:
 
           - name: Test LTO
             os: ubuntu-24.04
-            clang_version: 20
+            clang_version: 22
             test: true
             args: -DLTO=full -DTARGET_TRIPLE=wasm32-wasip2 -DCHECK_SYMBOLS=OFF
 
           - name: Test wasip2 on macOS
             os: macos-15
-            clang_version: wasi-sdk-30
+            clang_version: wasi-sdk-33
             test: true
             args: -DTARGET_TRIPLE=wasm32-wasip2 -DCMAKE_C_COMPILER_WORKS=ON
 
           - name: Test wasip2 on Windows
             os: windows-2025
-            clang_version: 20.1.8
+            clang_version: 22.1.8
             test: true
             args: -DTARGET_TRIPLE=wasm32-wasip2
 
@@ -248,11 +248,16 @@ jobs:
     - uses: actions/checkout@v6
       with:
         submodules: true
-    - run: cmake -S . -B build -DBUILD_TESTS=ON -G Ninja -DCMAKE_C_COMPILER=clang
+    - uses: ./.github/actions/setup
+      with:
+        clang_version: 22
+    - run: cmake -S . -B build -DBUILD_TESTS=ON -G Ninja -DCMAKE_C_COMPILER=clang-22
+    - run: ninja -C build format-check
+    - run: cmake -S . -B build -DTARGET_TRIPLE=wasm32-wasip1-threads
     - run: ninja -C build format-check
     - run: cmake -S . -B build -DTARGET_TRIPLE=wasm32-wasip2
     - run: ninja -C build format-check
-    - run: cmake -S . -B build -DTARGET_TRIPLE=wasm32-wasip1-threads
+    - run: cmake -S . -B build -DTARGET_TRIPLE=wasm32-wasip3
     - run: ninja -C build format-check
 
   rustfmt:

@@ -10,6 +10,23 @@
 #error "Unknown WASI version"
 #endif
 
+#define WAITLIST_NODE_TID 0
+#define WAITLIST_NODE_FUTURE 1
+struct __waitlist_node {
+    // One of `WAITLIST_NODE_TID` or `WAITLIST_NODE_FUTURE`.
+    uint32_t kind;
+    // The thread id if `kind == WAITLIST_NODE_TID`, or a writable future
+    // handle if `kind == WAITLIST_NODE_FUTURE`.
+    uint32_t tid_or_future;
+    // Set to `true` when this node is removed from the linked list by an
+    // explicit thread notification.
+    bool woken;
+
+    // Linked list pointers for easy insertion/removal on timeout.
+    struct __waitlist_node *next;
+    struct __waitlist_node *prev;
+};
+
 // Manual bindings to a `future` in the component model (no payload) where the
 // name mangling is what's recognized by `wit-component` at this time.
 __attribute__((import_module("$root"),
@@ -216,6 +233,17 @@ static int wait_timeout(struct __waitlist_node **list, clockid_t clk,
   return node.woken ? 0 : ETIMEDOUT;
 }
 
+
+/// Blocks the current thread on `list` waiting for a notification.
+///
+/// If `at` is non-NULL then it is an *absolute* deadline measured against the
+/// clock `clk`, matching POSIX `pthread_mutex_timedlock`-style semantics.
+/// If `at` is `NULL` this waits indefinitely and `clk` is unused (and may be
+/// `NULL`).
+///
+/// Returns 0 when the thread was externally woken with `__waitlist_wake_*`
+/// and otherwise returns a nonzero error code. This function does not set
+/// `errno`.
 int __waitlist_wait_on(struct __waitlist_node **list, clockid_t clk,
                        const struct timespec *at) {
   // Delegate to the internal implementation based on the timeout. Note that we
@@ -342,7 +370,9 @@ static void maybe_release_futex_entry(struct __futex_entry *entry) {
 }
 
 int __timedwait(volatile int *addr, int val, clockid_t clk,
-                const struct timespec *at) {
+                const struct timespec *at, int opt) {
+  (void)opt; // Unused in this implementation
+
   if (*addr != val)
     return 0;
 
@@ -355,11 +385,11 @@ int __timedwait(volatile int *addr, int val, clockid_t clk,
   return rc;
 }
 
-void __wait(volatile int *addr, volatile int *waiters, int val) {
+void __wait(volatile int *addr, volatile int *waiters, int val, int opt) {
   if (waiters)
     ++*waiters;
   while (*addr == val) {
-    int rc = __timedwait(addr, val, CLOCK_REALTIME, NULL);
+    int rc = __timedwait(addr, val, CLOCK_REALTIME, NULL, opt);
     if (rc)
       break;
   }
@@ -388,6 +418,6 @@ void __wake(volatile void *addr, int cnt, int yield) {
   }
 }
 
-void __futexwait(volatile void *addr, int val) {
-  (void)__timedwait((volatile int *)addr, val, CLOCK_REALTIME, NULL);
+void __futexwait(volatile void *addr, int val, int opt) {
+  (void)__timedwait((volatile int *)addr, val, CLOCK_REALTIME, NULL, opt);
 }

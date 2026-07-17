@@ -187,53 +187,16 @@ hidden int __libc_sigaction(int, const struct sigaction *, struct sigaction *);
 hidden void __unmapself(void *, size_t);
 
 #ifdef __wasi_cooperative_threads__
-#define WAITLIST_NODE_TID 0
-#define WAITLIST_NODE_FUTURE 1
-struct __waitlist_node {
-    // One of `WAITLIST_NODE_TID` or `WAITLIST_NODE_FUTURE`.
-    uint32_t kind;
-    // The thread id if `kind == WAITLIST_NODE_TID`, or a writable future
-    // handle if `kind == WAITLIST_NODE_FUTURE`.
-    uint32_t tid_or_future;
-    // Set to `true` when this node is removed from the linked list by an
-    // explicit thread notification.
-    bool woken;
-
-    // Linked list pointers for easy insertion/removal on timeout.
-    struct __waitlist_node *next;
-    struct __waitlist_node *prev;
-};
-
-/// Blocks the current thread on `list` waiting for a notification.
-///
-/// If `at` is non-NULL then it is an *absolute* deadline measured against the
-/// clock `clk`, matching POSIX `pthread_mutex_timedlock`-style semantics.
-/// If `at` is `NULL` this waits indefinitely and `clk` is unused (and may be
-/// `NULL`).
-///
-/// Returns 0 when the thread was externally woken with `__waitlist_wake_*`
-/// and otherwise returns a nonzero error code. This function does not set
-/// `errno`.
-hidden int __waitlist_wait_on(struct __waitlist_node **list, clockid_t clk,
-                              const struct timespec *at);
-hidden void __waitlist_wake_one(struct __waitlist_node **list, int yield);
-hidden void __waitlist_wake_all(struct __waitlist_node **list, int yield);
-hidden int __timedwait(volatile int *, int, clockid_t, const struct timespec *);
-hidden void __wait(volatile int *addr, volatile int *waiters, int val);
-hidden void __wake(volatile void *addr, int cnt, int yield);
-hidden void __futexwait(volatile void *addr, int val);
 hidden int __wasilibc_pthread_mutex_unlock(pthread_mutex_t *m, int yield);
 #else
-
-#ifndef __wasilibc_unmodified_upstream
 hidden int __wasilibc_futex_wait(volatile void *, int, int, int64_t);
 #endif
+
 hidden int __timedwait(volatile int *, int, clockid_t, const struct timespec *, int);
 hidden int __timedwait_cp(volatile int *, int, clockid_t, const struct timespec *, int);
 hidden void __wait(volatile int *, volatile int *, int, int);
 hidden void __wake(volatile void *addr, int cnt, int priv);
 hidden void __futexwait(volatile void *addr, int val, int priv);
-#endif
 
 hidden void __acquire_ptc(void);
 hidden void __release_ptc(void);

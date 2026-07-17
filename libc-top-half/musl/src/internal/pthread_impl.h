@@ -138,7 +138,13 @@ hidden int __init_tp(void *);
 #define TP_ADJ(p) (p)
 static inline pthread_t __pthread_self() {
   pthread_t ret = (pthread_t) __get_tp();
-  if (ret->tid == 0)
+  // All user-spawned threads will initialize their TLS block at the start of
+  // the thread itself. For the main thread though the initialization is
+  // deferred until pthread functions are actually used to defer acquiring the
+  // current thread's ID. This is detected here by if the main thread's
+  // self-pointer hasn't yet been initialized then it's time to init the data
+  // for the main thread.
+  if (ret->self != ret)
     __init_tp(ret);
   return ret;
 }

@@ -280,6 +280,7 @@ int __pthread_create(pthread_t *restrict res,
   new->robust_list.head = &new->robust_list.head;
   new->canary = self->canary;
   new->sysinfo = self->sysinfo;
+  new->name[0] = 0;
 
   // Setup argument structure for the new thread on its stack.
 

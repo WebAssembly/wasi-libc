@@ -100,7 +100,7 @@ enum {
 /// The `flags` argument is currently unused and should be 0.
 ///
 /// In single-threaded builds, calling this function traps.
-int __wasilibc_futex_wait(volatile void *addr, int val, clockid_t clock,
+int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clock,
 						  const struct timespec *at, unsigned flags);
 
 /// Wake up to `count` threads waiting on the futex at `addr`.

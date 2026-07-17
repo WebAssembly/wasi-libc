@@ -11,7 +11,6 @@
 int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
             fd_set *restrict errorfds, const struct timespec *restrict timeout,
             const sigset_t *sigmask) {
-  (void) sigmask;
   // Negative file descriptor upperbound.
   if (nfds < 0) {
     errno = EINVAL;
@@ -60,33 +59,7 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
     }
   }
 
-  int poll_timeout;
-  if (timeout) {
-    uint64_t timeout_u64;
-#if defined(__wasip1__)
-    if (!timespec_to_timestamp_clamp(timeout, &timeout_u64) ) {
-#elif defined(__wasip2__) || defined(__wasip3__)
-    if (!timespec_to_instant_clamp(timeout, &timeout_u64) ) {
-#else
-# error "Unknown WASI version"
-#endif
-      errno = EINVAL;
-      return -1;
-    }
-
-    // Convert nanoseconds to milliseconds:
-    timeout_u64 /= 1000000;
-
-    if (timeout_u64 > INT_MAX) {
-      timeout_u64 = INT_MAX;
-    }
-
-    poll_timeout = (int) timeout_u64;
-  } else {
-    poll_timeout = -1;
-  };
-
-  if (poll(poll_fds, poll_nfds, poll_timeout) < 0) {
+  if (ppoll(poll_fds, poll_nfds, timeout, sigmask) < 0) {
     return -1;
   }
 

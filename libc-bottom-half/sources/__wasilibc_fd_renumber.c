@@ -8,24 +8,19 @@
 #include <wasi/file_utils.h>
 #endif
 
+#ifdef __wasip1__
 int __wasilibc_fd_renumber(int fd, int newfd) {
   // Scan the preopen fds before making any changes.
   __wasilibc_populate_preopens();
 
-#if defined(__wasip1__)
   __wasi_errno_t error = __wasi_fd_renumber(fd, newfd);
   if (error != 0) {
     errno = error;
     return -1;
   }
-#elif defined(__wasip2__) || defined(__wasip3__)
-  if (descriptor_table_renumber(fd, newfd) < 0)
-    return -1;
-#else
-#error "Unsupported WASI version"
-#endif
   return 0;
 }
+#endif
 
 int close(int fd) {
   // Scan the preopen fds before making any changes.

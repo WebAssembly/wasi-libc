@@ -41,6 +41,7 @@ __des_setkey
 __do_cleanup_pop
 __do_cleanup_push
 __do_des
+__dup3
 __duplocale
 __env_rm_add
 __errno_location
@@ -550,6 +551,9 @@ dprintf
 drand48
 drem
 dremf
+dup
+dup2
+dup3
 duplocale
 ecvt
 encrypt

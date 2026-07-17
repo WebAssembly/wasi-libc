@@ -31,10 +31,12 @@ void __wasilibc_reset_preopens();
 int __wasilibc_register_preopened_fd(int fd, const char *prefix);
 #endif
 
+#ifdef __wasip1__
 /// Renumber `fd` to `newfd`; similar to `dup2` but does a move rather than a
 /// copy.
 int __wasilibc_fd_renumber(int fd, int newfd)
     __attribute__((__warn_unused_result__));
+#endif
 
 /// Like `unlinkat`, but without depending on `__wasi_path_remove_directory`.
 int __wasilibc_unlinkat(int fd, const char *path)

@@ -450,6 +450,10 @@ add_wasilibc_test(nanosleep.c)
 add_wasilibc_test(sleep.c)
 add_wasilibc_test(write.c FS)
 add_wasilibc_test(wasi-defines.c)
+add_wasilibc_test(dup-file.c FS)
+add_wasilibc_test(dup2-file.c FS)
+add_wasilibc_test(dup3-file.c FS)
+add_wasilibc_test(fcntl-dupfd.c FS)
 
 # This tests the behavior of the WASIp2+ descriptor table and won't succeed on
 # p1:
@@ -539,6 +543,7 @@ if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(sockets-nonblocking-multiple.c NETWORK)
   add_wasilibc_test(sockets-nonblocking-udp-multiple.c NETWORK)
   add_wasilibc_test(sockets-fcntl.c NETWORK)
+  add_wasilibc_test(sockets-dup.c NETWORK)
   add_wasilibc_test(sockets-udp-connected.c NETWORK)
   add_wasilibc_test(getaddrinfo.c NETWORK)
   add_wasilibc_test(sockets-nonblocking.c NETWORK)

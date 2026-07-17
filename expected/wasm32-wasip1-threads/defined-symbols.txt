@@ -45,6 +45,7 @@ __do_cleanup_push
 __do_des
 __do_orphaned_stdio_locks
 __dummy_reference
+__dup3
 __duplocale
 __env_rm_add
 __errno_location
@@ -579,6 +580,9 @@ dprintf
 drand48
 drem
 dremf
+dup
+dup2
+dup3
 duplocale
 ecvt
 encrypt

@@ -53,7 +53,7 @@ int fcntl(int fildes, int cmd, ...) {
         oflags |= O_SEARCH;
       }
       return oflags;
-#elif defined(__wasip2__) || defined(__wasip3__) 
+#elif defined(__wasip2__) || defined(__wasip3__)
       if (!entry.vtable->fcntl_getfl) {
         errno = EINVAL;
         return -1;
@@ -89,6 +89,16 @@ int fcntl(int fildes, int cmd, ...) {
 #endif
       return 0;
     }
+#ifndef __wasip1__
+    case F_DUPFD:
+    case F_DUPFD_CLOEXEC: {
+      va_list ap;
+      va_start(ap, cmd);
+      int minfd = va_arg(ap, int);
+      va_end(ap);
+      return descriptor_table_dup(fildes, DUP_OP_DUPFD, minfd);
+    }
+#endif
     default:
       errno = EINVAL;
       return -1;

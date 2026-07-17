@@ -59,7 +59,7 @@ void test_tcp_client() {
 
   // Connect from client
   char message[] = "There's gonna be a party when the wolf comes home";
-  int len = strlen(message);
+  int len = strlen(message) + 1;
   char client_buffer[BUFSIZE];
   TEST(connect(socket_fd, (struct sockaddr *)&sockaddr_in,
                sizeof(sockaddr_in)) != -1 ||

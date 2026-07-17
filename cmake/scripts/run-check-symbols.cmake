@@ -174,6 +174,7 @@ foreach(line IN LISTS predefined_macro_lines)
      OR line MATCHES "^#define __MEMORY_SCOPE_"
      OR line MATCHES "^#define __GCC_(CON|DE)STRUCTIVE_SIZE"
      OR line MATCHES "^#define __STDC_EMBED_"
+     OR line MATCHES "^#define __STDC_DEFER_"
      OR line MATCHES "^#define __(DBL|FLT|LDBL)_NORM_MAX__"
      OR line MATCHES "^#define NDEBUG"
      OR line MATCHES "^#define __OPTIMIZE__"

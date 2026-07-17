@@ -5,6 +5,7 @@
 #include <stdatomic.h>
 #include <time.h>
 #include <wasi/api.h>
+#include <wasi/libc.h>
 
 #ifndef __wasip3__
 #error "Unknown WASI version"
@@ -416,4 +417,19 @@ void __wake(volatile void *addr, int cnt, int yield) {
 
 void __futexwait(volatile void *addr, int val, int opt) {
   (void)__timedwait((volatile int *)addr, val, CLOCK_REALTIME, NULL, opt);
+}
+
+int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
+                          const struct timespec *at, unsigned flags)
+{
+  if (*addr != val) {
+    return -EWOULDBLOCK;
+  }
+  int r = __timedwait(addr, val, clk, at, 0);
+  return r ? -r : 0;
+}
+
+void __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags)
+{
+  __wake(addr, count, flags & __WASILIBC_FUTEX_YIELD);
 }

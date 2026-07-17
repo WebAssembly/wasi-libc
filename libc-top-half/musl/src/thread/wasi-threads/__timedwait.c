@@ -36,7 +36,7 @@ static int __futex4_cp(volatile void *addr, int op, int val, const struct timesp
 	if (to) {
 		max_wait_ns = (int64_t)(to->tv_sec * 1000000000 + to->tv_nsec);
 	}
-	return __wasilibc_futex_wait(addr, op, val, max_wait_ns);
+	return __wasilibc_futex_wait_syscall(addr, op, val, max_wait_ns);
 }
 #endif
 

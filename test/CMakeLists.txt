@@ -528,6 +528,12 @@ if (TARGET_TRIPLE MATCHES "-threads")
 endif()
 add_wasilibc_test(cwd_relative_threads.c FS)
 
+if (TARGET_TRIPLE MATCHES "-threads" OR ENABLE_COOP_THREADS)
+  add_wasilibc_test(futex_wait_api.c)
+  add_wasilibc_test(futex_wake_one.c)
+  add_wasilibc_test(futex_wake_all.c)
+endif()
+
 # ========= sockets-related tests ===============================
 
 if (NOT (WASI STREQUAL "p1"))

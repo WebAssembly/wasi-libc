@@ -520,6 +520,7 @@ elseif(ENABLE_COOP_THREADS)
 else()
   # pthreads stubs for single-threaded environment
   list(APPEND top_half_sources
+    musl/src/thread/single-threaded/__wait.c
     musl/src/thread/single-threaded/pthread_barrier_destroy.c
     musl/src/thread/single-threaded/pthread_barrier_init.c
     musl/src/thread/single-threaded/pthread_barrier_wait.c

@@ -409,11 +409,7 @@ void __wake(volatile void *addr, int cnt, int yield) {
     __waitlist_wake_all(&entry->list, yield);
   } else {
     while (cnt-- > 0 && entry->list) {
-      // Detach one node before waking so entry/list lifetimes remain stable
-      // even when waking yields to another thread.
-      struct __waitlist_node *node = entry->list;
-      list_remove(&entry->list, node);
-      wake_node(node, yield);
+      __waitlist_wake_one(&entry->list, yield);
     }
   }
 }

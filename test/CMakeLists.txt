@@ -535,6 +535,12 @@ if (WASILIBC_MULTITHREADING)
   add_wasilibc_test(futex_wake_all.c)
 endif()
 
+if (TARGET_TRIPLE MATCHES "-threads")
+  # atomic.wait32 can't be executed in this context
+  expect_fail_under_v8(futex_wake_one.wasm)
+  expect_fail_under_v8(futex_wake_all.wasm)
+endif()
+
 # These futex tests should trap on single-threaded targets.
 if (NOT WASILIBC_MULTITHREADING)
   set_tests_properties(futex_wait_in_past.wasm PROPERTIES WILL_FAIL TRUE)

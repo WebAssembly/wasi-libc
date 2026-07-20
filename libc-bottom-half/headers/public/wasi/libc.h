@@ -2,8 +2,8 @@
 #define __wasi_libc_h
 
 #include <__struct_timespec.h>
-#include <__typedef_off_t.h>
 #include <__typedef_clockid_t.h>
+#include <__typedef_off_t.h>
 #include <unistd.h>
 #include <wasi/version.h>
 
@@ -86,8 +86,8 @@ int __wasilibc_random(void *buffer, size_t len)
     __attribute__((__warn_unused_result__));
 
 enum {
-    __WASILIBC_FUTEX_WAKE_ALL = -1,
-    __WASILIBC_FUTEX_YIELD = 1,
+  __WASILIBC_FUTEX_WAKE_ALL = -1,
+  __WASILIBC_FUTEX_YIELD = 1,
 };
 /// Wait on a futex after first confirming `*addr == val`.
 ///
@@ -99,9 +99,10 @@ enum {
 /// If `at` is NULL, this waits indefinitely.
 /// The `flags` argument is currently unused and should be 0.
 ///
-/// In single-threaded builds, calling this function with arguments that would require waiting will trap.
+/// In single-threaded builds, calling this function with arguments that would
+/// require waiting will trap.
 int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clock,
-						  const struct timespec *at, unsigned flags);
+                          const struct timespec *at, unsigned flags);
 
 /// Wake up to `count` threads waiting on the futex at `addr`.
 ///

@@ -537,6 +537,9 @@ if (NOT WASILIBC_MULTITHREADING)
   set_tests_properties(futex_wait_in_past.wasm PROPERTIES WILL_FAIL TRUE)
   set_tests_properties(futex_wake_one.wasm PROPERTIES WILL_FAIL TRUE)
   set_tests_properties(futex_wake_all.wasm PROPERTIES WILL_FAIL TRUE)
+  set_tests_properties(shared_futex_wait_in_past.wasm PROPERTIES WILL_FAIL TRUE)
+  set_tests_properties(shared_futex_wake_one.wasm PROPERTIES WILL_FAIL TRUE)
+  set_tests_properties(shared_futex_wake_all.wasm PROPERTIES WILL_FAIL TRUE)
 endif()
 
 # ========= sockets-related tests ===============================

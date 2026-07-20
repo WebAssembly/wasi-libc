@@ -6,11 +6,10 @@
 #define TEST(c)                                                                \
   do {                                                                         \
     if (!(c))                                                                  \
-      t_error("%s failed\n", #c);                                            \
+      t_error("%s failed\n", #c);                                              \
   } while (0)
 
-int main(void)
-{
+int main(void) {
   volatile int fut = 7;
   int r;
   // A deadline in the past must report timeout when the value matches.

@@ -99,7 +99,7 @@ enum {
 /// If `at` is NULL, this waits indefinitely.
 /// The `flags` argument is currently unused and should be 0.
 ///
-/// In single-threaded builds, calling this function traps.
+/// In single-threaded builds, calling this function with arguments that would require waiting will trap.
 int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clock,
 						  const struct timespec *at, unsigned flags);
 
@@ -109,7 +109,7 @@ int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clock,
 /// `flags` may be `__WASILIBC_FUTEX_YIELD` in cooperative-threading builds
 /// to yield to the woken thread(s) immediately. Otherwise, `flags` should be 0.
 ///
-/// In single-threaded builds, calling this function traps.
+/// In single-threaded builds, this function is a no-op.
 void __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags);
 
 #ifdef __cplusplus

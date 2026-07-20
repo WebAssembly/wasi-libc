@@ -1,6 +1,7 @@
 // We cannot support futexes in single-threaded mode, so we just trap if we need to wait, and make waking a no-op.
 
 #include <wasi/libc.h>
+#include <wasi/api.h>
 #include "common/time.h"
 #include <errno.h>
 #include <time.h>
@@ -16,11 +17,9 @@ static bool timespec_is_past(clockid_t clk, const struct timespec *ts) {
   }
   if (clk == CLOCK_REALTIME) {
     system_clock_instant_t now, desired;
-
+    system_clock_now(&now);
     if (!timespec_to_timestamp_clamp(ts, &desired))
       return false;
-    system_clock_now(&now);
-
     if (desired.seconds < now.seconds ||
         (desired.seconds == now.seconds &&
          desired.nanoseconds <= now.nanoseconds))

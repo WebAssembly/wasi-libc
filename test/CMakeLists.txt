@@ -530,16 +530,15 @@ add_wasilibc_test(cwd_relative_threads.c FS)
 
 add_wasilibc_test(futex_wait_in_past.c)
 add_wasilibc_test(futex_wait_mismatch.c)
-add_wasilibc_test(futex_wake_one.c)
-add_wasilibc_test(futex_wake_all.c)
+if (WASILIBC_MULTITHREADING)
+  add_wasilibc_test(futex_wake_one.c)
+  add_wasilibc_test(futex_wake_all.c)
+endif()
+
 # These futex tests should trap on single-threaded targets.
 if (NOT WASILIBC_MULTITHREADING)
   set_tests_properties(futex_wait_in_past.wasm PROPERTIES WILL_FAIL TRUE)
-  set_tests_properties(futex_wake_one.wasm PROPERTIES WILL_FAIL TRUE)
-  set_tests_properties(futex_wake_all.wasm PROPERTIES WILL_FAIL TRUE)
   set_tests_properties(shared_futex_wait_in_past.wasm PROPERTIES WILL_FAIL TRUE)
-  set_tests_properties(shared_futex_wake_one.wasm PROPERTIES WILL_FAIL TRUE)
-  set_tests_properties(shared_futex_wake_all.wasm PROPERTIES WILL_FAIL TRUE)
 endif()
 
 # ========= sockets-related tests ===============================

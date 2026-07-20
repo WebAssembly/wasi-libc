@@ -240,6 +240,11 @@ if(ENABLE_COOP_THREADS)
 else()
 endif()
 
+set(WASILIBC_MULTITHREADING OFF)
+if (ENABLE_COOP_THREADS OR TARGET_TRIPLE MATCHES "-threads")
+  set(WASILIBC_MULTITHREADING ON)
+endif()
+
 # In wasip2/wasip3 code we're using `defer { ... }`, so make sure that exists.
 include(CheckCCompilerFlag)
 check_c_compiler_flag(-fdefer-ts HAVE_FDEFER_TS)

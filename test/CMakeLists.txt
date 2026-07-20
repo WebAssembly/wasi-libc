@@ -528,10 +528,13 @@ if (TARGET_TRIPLE MATCHES "-threads")
 endif()
 add_wasilibc_test(cwd_relative_threads.c FS)
 
-if (TARGET_TRIPLE MATCHES "-threads" OR ENABLE_COOP_THREADS)
-  add_wasilibc_test(futex_wait_api.c)
-  add_wasilibc_test(futex_wake_one.c)
-  add_wasilibc_test(futex_wake_all.c)
+add_wasilibc_test(futex_wait_api.c)
+add_wasilibc_test(futex_wake_one.c)
+add_wasilibc_test(futex_wake_all.c)
+# These futex tests should trap on single-threaded targets.
+if (NOT WASILIBC_MULTITHREADING)
+  set_tests_properties(futex_wake_one.wasm PROPERTIES WILL_FAIL TRUE)
+  set_tests_properties(futex_wake_all.wasm PROPERTIES WILL_FAIL TRUE)
 endif()
 
 # ========= sockets-related tests ===============================

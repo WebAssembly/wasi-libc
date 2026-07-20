@@ -1,10 +1,44 @@
 // We cannot support futexes in single-threaded mode, so we just trap if we need to wait, and make waking a no-op.
+
 #include <wasi/libc.h>
+#include "common/time.h"
+#include <errno.h>
+#include <time.h>
+
+static bool timespec_is_past(clockid_t clk, const struct timespec *ts) {
+  if (clk == CLOCK_MONOTONIC) {
+    monotonic_clock_instant_t now, desired;
+    now = monotonic_clock_now();
+    if (!timespec_to_instant_clamp(ts, &desired))
+      return false;
+    if (now >= desired)
+      return true;
+  }
+  if (clk == CLOCK_REALTIME) {
+    system_clock_instant_t now, desired;
+
+    if (!timespec_to_timestamp_clamp(ts, &desired))
+      return false;
+    system_clock_now(&now);
+
+    if (desired.seconds < now.seconds ||
+        (desired.seconds == now.seconds &&
+         desired.nanoseconds <= now.nanoseconds))
+      return true;
+  }
+  return false;
+}
+
 int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
                           const struct timespec *at, unsigned flags)
 {
+  (void)flags;
+
   if (*addr != val) {
     return -EWOULDBLOCK;
+  }
+  if (at && timespec_is_past(clk, at)) {
+    return -ETIMEDOUT;
   }
   __builtin_trap();
 }

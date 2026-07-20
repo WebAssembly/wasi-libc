@@ -19,6 +19,7 @@ enum {
 static volatile int futex_word;
 static volatile int ready_count;
 static volatile int go_flag;
+static volatile int waiting_count;
 static int waiter_result[NUM_WAITERS];
 
 static void *waiter(void *arg)
@@ -31,6 +32,7 @@ static void *waiter(void *arg)
     sched_yield();
   }
 
+  __atomic_fetch_add(&waiting_count, 1, __ATOMIC_SEQ_CST);
   waiter_result[id] = __wasilibc_futex_wait((volatile void *)&futex_word, 0,
                                             CLOCK_REALTIME, NULL, 0);
   return NULL;
@@ -43,6 +45,7 @@ int main(void)
   futex_word = 0;
   ready_count = 0;
   go_flag = 0;
+  waiting_count = 0;
 
   for (int i = 0; i < NUM_WAITERS; i++) {
     waiter_result[i] = -9999;
@@ -56,7 +59,9 @@ int main(void)
   // Let all waiters enter the futex wait path before issuing wake-all.
   __atomic_store_n(&go_flag, 1, __ATOMIC_SEQ_CST);
 
-  sched_yield();
+  while (__atomic_load_n(&waiting_count, __ATOMIC_SEQ_CST) != NUM_WAITERS) {
+    sched_yield();
+  }
 
   // Wake all waiters and expect each wait call to succeed.
   __wasilibc_futex_wake((volatile int *)&futex_word, __WASILIBC_FUTEX_WAKE_ALL, 0);

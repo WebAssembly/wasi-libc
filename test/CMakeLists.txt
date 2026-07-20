@@ -538,7 +538,9 @@ endif()
 # These futex tests should trap on single-threaded targets.
 if (NOT WASILIBC_MULTITHREADING)
   set_tests_properties(futex_wait_in_past.wasm PROPERTIES WILL_FAIL TRUE)
-  set_tests_properties(shared_futex_wait_in_past.wasm PROPERTIES WILL_FAIL TRUE)
+  if (TEST shared_futex_wait_in_past.wasm)
+    set_tests_properties(shared_futex_wait_in_past.wasm PROPERTIES WILL_FAIL TRUE)
+  endif()
 endif()
 
 # ========= sockets-related tests ===============================

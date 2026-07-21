@@ -3,6 +3,8 @@
 #include "assert.h"
 #endif
 
+#include <wasi/libc.h>
+
 #ifndef __wasilibc_unmodified_upstream
 
 weak int __wasilibc_futex_wait_maybe_busy(volatile void *addr, int op, int val, int64_t max_wait_ns);
@@ -32,7 +34,8 @@ int __wasilibc_futex_wait_atomic_wait(volatile void *addr, int op, int val, int6
     return 0;
 }
 
-int __wasilibc_futex_wait(volatile void *addr, int op, int val, int64_t max_wait_ns)
+int __wasilibc_futex_wait_syscall(volatile void *addr, int op, int val,
+								  int64_t max_wait_ns)
 {
     if ((((intptr_t)addr) & 3) != 0) {
         return -EINVAL;
@@ -42,6 +45,34 @@ int __wasilibc_futex_wait(volatile void *addr, int op, int val, int64_t max_wait
         return __wasilibc_futex_wait_maybe_busy(addr, op, val, max_wait_ns);
     }
     return __wasilibc_futex_wait_atomic_wait(addr, op, val, max_wait_ns);
+}
+
+int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
+						  const struct timespec *at, unsigned flags)
+{
+	int r;
+
+	if (flags != 0) {
+		return -EINVAL;
+	}
+	if (*addr != val) {
+		return -EWOULDBLOCK;
+	}
+	r = __timedwait(addr, val, clk, at, 0);
+	return r ? -r : 0;
+}
+
+int __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags)
+{
+	if (flags != 0 && flags != __WASILIBC_FUTEX_YIELD) {
+		return -EINVAL;
+	}
+
+	if (count < 0) {
+		count = INT_MAX;
+	}
+	__builtin_wasm_memory_atomic_notify((int *)addr, count);
+	return 0;
 }
 #endif
 
@@ -59,7 +90,7 @@ void __wait(volatile int *addr, volatile int *waiters, int val, int priv)
 		__syscall(SYS_futex, addr, FUTEX_WAIT|priv, val, 0) != -ENOSYS
 		|| __syscall(SYS_futex, addr, FUTEX_WAIT, val, 0);
 #else
-		__wasilibc_futex_wait(addr, FUTEX_WAIT, val, -1);
+		__wasilibc_futex_wait_syscall(addr, FUTEX_WAIT, val, -1);
 #endif
 	}
 	if (waiters) a_dec(waiters);

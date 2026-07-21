@@ -342,6 +342,8 @@ __wasilibc_environ
 __wasilibc_find_abspath
 __wasilibc_find_relpath
 __wasilibc_find_relpath_alloc
+__wasilibc_futex_wait
+__wasilibc_futex_wake
 __wasilibc_future_block_on_timeout
 __wasilibc_get_environ
 __wasilibc_get_service_entry_by_name

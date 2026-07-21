@@ -2,6 +2,7 @@
 #define __wasi_libc_h
 
 #include <__struct_timespec.h>
+#include <__typedef_clockid_t.h>
 #include <__typedef_off_t.h>
 #include <unistd.h>
 #include <wasi/version.h>
@@ -85,6 +86,37 @@ void __wasilibc_enable_futex_busywait_on_current_thread(void);
 /// Fill a buffer with random bytes
 int __wasilibc_random(void *buffer, size_t len)
     __attribute__((__warn_unused_result__));
+
+enum {
+  __WASILIBC_FUTEX_WAKE_ALL = -1,
+  __WASILIBC_FUTEX_YIELD = 1,
+};
+/// Wait on a futex after first confirming `*addr == val`.
+///
+/// Returns 0 when woken, or a negated errno on failure:
+/// - `-EWOULDBLOCK` if `*addr != val` at entry,
+/// - `-ETIMEDOUT` if the deadline expires.
+///
+/// The `clock` argument selects the clock used for the absolute deadline `at`.
+/// If `at` is NULL, this waits indefinitely.
+/// The `flags` argument is currently unused and should be 0.
+///
+/// In single-threaded builds, calling this function with arguments that would
+/// require waiting will trap.
+int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clock,
+                          const struct timespec *at, unsigned flags);
+
+/// Wake up to `count` threads waiting on the futex at `addr`.
+///
+/// Returns 0 on success, or a negated errno on failure:
+/// - `-EINVAL` if `flags` is invalid.
+///
+/// If `count` is `__WASILIBC_FUTEX_WAKE_ALL`, all waiters are woken.
+/// `flags` may be `__WASILIBC_FUTEX_YIELD` in cooperative-threading builds
+/// to yield to the woken thread(s) immediately. Otherwise, `flags` should be 0.
+///
+/// In single-threaded builds, this function is a no-op.
+int __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags);
 
 #ifdef __cplusplus
 }

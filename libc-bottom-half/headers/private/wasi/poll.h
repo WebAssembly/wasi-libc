@@ -57,6 +57,11 @@ __wasilibc_poll_add_output_stream(poll_state_t *state,
 
 #ifdef __wasip3__
 
+/// Callback invoked after `__wasilibc_poll_add` when an event is ready.
+///
+/// This additionally serves as a destructor of sorts where if no event arrives
+/// before the `poll` is torn down then this is invoked with `state` and
+/// `event` as NULL.
 typedef void (*poll_ready_t)(void *data, poll_state_t *state,
                              wasip3_event_t *event);
 

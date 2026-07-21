@@ -13,6 +13,8 @@
 
 #ifdef __wasip3__
 
+#include "lock.h"
+
 /// The stream is complete and no further operations are allowed on it.
 #define WASIP3_IO_DONE (1 << 0)
 /// An I/O operation, be it a read or write, is in flight.
@@ -26,6 +28,9 @@
 /// This stream isn't compatible with zero-length reads/writes signaling
 /// readiness, so libc must buffer data internally for reads/writes.
 #define WASIP3_IO_MUST_BUFFER (1 << 4)
+/// A thread is actively blocked in an I/O operation and no other operation
+/// can be performed.
+#define WASIP3_IO_BLOCKED (1 << 5)
 
 /// Helper structure to package up state related to a wasip3 `stream<u8>`.
 ///
@@ -41,15 +46,42 @@ typedef struct wasip3_io_state_t {
   size_t buf_start;
   /// End of `buf` that has data in-flight or ready.
   size_t buf_end;
+
+#ifdef _REENTRANT
+  /// Pointer to the containing object's lock, which protects all the state
+  /// above. This is acquired and held through all I/O operations, but dropped
+  /// while an operation that may indefinitely block is in flight.
+  volatile int *lock;
+  /// An internal lock used to hold a queue of threads waiting to do blocking
+  /// I/O while some other thread is already doing blocking I/O.
+  DECLARE_STRONG_LOCK(blocking_lock);
+  /// Number of threads that are waiting on `blocking_lock` to take their turn
+  /// doing blocking I/O. This count notably disallows a concurrent
+  /// shutdown/reset/etc of this stream, for example `shutdown` fails while
+  /// something is blocking and so does `seek`.
+  size_t blocking_waiters;
+#endif
 } wasip3_io_state_t;
 
-/// Initializes `state` with the `stream` provided.
-static inline void wasip3_io_state_init(wasip3_io_state_t *state,
-                                        uint32_t stream) {
+static inline void __wasip3_io_state_init(wasip3_io_state_t *state,
+                                          uint32_t stream) {
   assert(stream != 0);
   memset(state, 0, sizeof(*state));
   state->stream = stream;
 }
+
+/// Initializes `state` with the `stream` provided, using `lock` — the
+/// containing object's lock — to protect the state's fields.
+#ifdef _REENTRANT
+#define wasip3_io_state_init(state, stream, lock_ptr)                          \
+  do {                                                                         \
+    __wasip3_io_state_init(state, stream);                                     \
+    (state)->lock = &(lock_ptr);                                               \
+  } while (0)
+#else
+#define wasip3_io_state_init(state, stream, lock)                              \
+  __wasip3_io_state_init(state, stream)
+#endif
 
 /// Tests whether `state` has been initialized with a stream yet.
 static inline bool wasip3_io_state_present(wasip3_io_state_t *state) {
@@ -60,6 +92,7 @@ static inline bool wasip3_io_state_present(wasip3_io_state_t *state) {
 ///
 /// Internally the stream must be a reader-half of a `stream<u8>`.
 static inline void wasip3_read_state_close(wasip3_io_state_t *state) {
+  STRONG_ASSERT_EMPTY(state->blocking_lock);
   if (state->flags & WASIP3_IO_INPROGRESS)
     filesystem_stream_u8_cancel_read(state->stream);
   if (state->buf)
@@ -73,6 +106,7 @@ static inline void wasip3_read_state_close(wasip3_io_state_t *state) {
 ///
 /// Internally the stream must be a writer-half of a `stream<u8>`.
 static inline void wasip3_write_state_close(wasip3_io_state_t *state) {
+  STRONG_ASSERT_EMPTY(state->blocking_lock);
   if (state->flags & WASIP3_IO_INPROGRESS)
     filesystem_stream_u8_cancel_write(state->stream);
   if (state->buf)
@@ -80,6 +114,17 @@ static inline void wasip3_write_state_close(wasip3_io_state_t *state) {
   if (state->stream != 0)
     filesystem_stream_u8_drop_writable(state->stream);
   memset(state, 0, sizeof(*state));
+}
+
+/// Tests whether there is active or pending blocking I/O on this stream which
+/// notably should prevent it from being closed.
+static inline bool wasip3_io_state_blocked(wasip3_io_state_t *state) {
+#ifdef _REENTRANT
+  return (state->flags & WASIP3_IO_BLOCKED) || state->blocking_waiters > 0;
+#else
+  (void)state;
+  return false;
+#endif
 }
 #endif
 
@@ -149,6 +194,11 @@ typedef struct descriptor_vtable_t {
   /// Looks up metadata to perform a read operation for this stream. This is
   /// used to implement the `read` syscall, for example, and is also used with
   /// `poll` when waiting for readability.
+  ///
+  /// When threading is enabled for WASIp3+ this additionally acquires the
+  /// internal lock for the object and the caller must unlock the
+  /// `read->state->lock` object on success. On failure no locks are held when
+  /// this returns.
   int (*get_read_stream)(void *, wasi_read_t *);
   /// Same as `get_read_stream`, but for output streams.
   int (*get_write_stream)(void *, wasi_write_t *);

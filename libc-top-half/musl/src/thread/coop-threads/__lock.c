@@ -35,3 +35,16 @@ void __unlock(volatile int *lock) {
   /* Awake one waiter; the others will be resumed on future unlocks. */
   __wake(lock, 1, 1);
 }
+
+#ifndef NDEBUG
+void __wasilibc_assert_held_lock(volatile int *lock) {
+  assert(lock);
+  assert(*lock != 0);
+  assert(*lock == wasip3_thread_index());
+}
+
+void __wasilibc_assert_empty_lock(volatile int *lock) {
+  assert(lock);
+  assert(*lock == 0);
+}
+#endif

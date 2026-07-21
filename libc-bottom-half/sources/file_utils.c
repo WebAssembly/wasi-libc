@@ -2,6 +2,7 @@
 #include <common/errors.h>
 #include <errno.h>
 #include <stddef.h>
+#include <stddefer.h>
 #include <string.h>
 #include <wasi/file_utils.h>
 #include <wasi/wasip3_block.h>
@@ -86,6 +87,7 @@ int wasi_string_from_c(const char *s, wasi_string_t *out) {
 /// Update `state` with the result of `code` that happened.
 static size_t wasip3_io_update_code(wasip3_io_state_t *state,
                                     wasip3_waitable_status_t code) {
+  STRONG_ASSERT_HELD(*state->lock);
   assert(code != WASIP3_WAITABLE_STATUS_BLOCKED);
   switch (WASIP3_WAITABLE_STATE(code)) {
   case WASIP3_WAITABLE_COMPLETED:
@@ -133,6 +135,7 @@ static size_t wasip3_io_update_event(wasip3_io_state_t *state,
 /// there's still a pending write in-flight.
 static bool wasip3_advance_pending_write(wasip3_io_state_t *state,
                                          wasip3_event_t *event) {
+  STRONG_ASSERT_HELD(*state->lock);
   // Update the I/O internal state given the result of the write.
   state->buf_start += wasip3_io_update_event(state, event);
 
@@ -160,6 +163,85 @@ static bool wasip3_advance_pending_write(wasip3_io_state_t *state,
   return true;
 }
 
+/// Entrypoint for I/O on reads/writes.
+///
+/// This will synchronize with other concurrent operations and notably ensure
+/// that this operation completes with an exclusive lock. If `blocking` is
+/// `true` then this will block waiting for other operations to complete. If
+/// it's set to `false` this may briefly block if a race meant that another
+/// thread is temporarily unscheduled, but this will never block indefinitely.
+static int wasip3_io_sync(wasip3_io_state_t *state, bool blocking) {
+  STRONG_ASSERT_HELD(*state->lock);
+
+  // If there's another thread blocked in an I/O operation at this time, then
+  // this one can't make any progress as the stream is in-use and the component
+  // model only allows at most one in-flight operation at this time. If this is
+  // a nonblocking operation then this immediately exits. Otherwise if this is
+  // a blocking operation it's our responsibility to wait here until the I/O
+  // object is ready. To do that we drop the state's lock and then acquire the
+  // `blocking_lock`. This lock is held for the duration of blocking I/O
+  // operations which means we can't acquire it until it's finished. Once it's
+  // acquired it's immediately dropped and then the whole situation is retried.
+  //
+  // Note that when `state->lock` is dropped we're sure to leave at least a
+  // breadcrumb behind indicating that `state` is still being used. This is
+  // intended to reject any calls to reset `state` such as a TCP `shutdown`
+  // or a file `seek` which resets streams.
+  while (state->flags & WASIP3_IO_BLOCKED) {
+    if (!blocking) {
+      errno = EOPNOTSUPP;
+      return -1;
+    }
+#ifdef _REENTRANT
+    state->blocking_waiters++;
+    STRONG_UNLOCK(*state->lock);
+
+    // just a bounce to wait for any pending blocking I/O to finish.
+    STRONG_LOCK(state->blocking_lock);
+    STRONG_UNLOCK(state->blocking_lock);
+
+    STRONG_LOCK(*state->lock);
+    state->blocking_waiters--;
+#else
+    // should not be possible without threads
+    __builtin_trap();
+#endif
+  }
+
+  return 0;
+}
+
+/// Indicator that a blocking I/O operation on `state` is about to be performed.
+///
+/// This manages the internals of `state` to ensure that it's flagged that a
+/// thread is doing blocking I/O which will prevent other threads from doing
+/// I/O. Internally this will acquire the state's `blocking_lock`, which should
+/// not be held by any other thread, and will then return.
+///
+/// This must be paired with a call to `wasip3_exit_blocking_operation` when the
+/// I/O is complete to unblock other operations.
+///
+/// After calling this function it's safe to drop `state`'s lock.
+static void wasip3_enter_blocking_operation(wasip3_io_state_t *state) {
+  STRONG_ASSERT_HELD(*state->lock);
+  assert(!(state->flags & WASIP3_IO_BLOCKED));
+  state->flags |= WASIP3_IO_BLOCKED;
+  STRONG_LOCK(state->blocking_lock);
+}
+
+/// Exit routine for a blocking I/O operation.
+///
+/// Previously `wasip3_enter_blocking_operation` must have been called with
+/// `state` and this undoes the work configured there. The `state`'s `lock` must
+/// be acquired before entering this function.
+static void wasip3_exit_blocking_operation(wasip3_io_state_t *state) {
+  STRONG_ASSERT_HELD(state->blocking_lock);
+  STRONG_ASSERT_HELD(*state->lock);
+  STRONG_UNLOCK(state->blocking_lock);
+  assert(state->flags & WASIP3_IO_BLOCKED);
+  state->flags &= ~WASIP3_IO_BLOCKED;
+}
+
 /// Attempts to resolve any pending write that may be in-progress on `write`.
 ///
 /// This may notably end up issuing more writes to finish a buffered write that
@@ -167,11 +249,13 @@ static bool wasip3_advance_pending_write(wasip3_io_state_t *state,
 static int wasip3_write_resolve_pending(wasi_write_t *write) {
   wasip3_event_t event;
   wasip3_io_state_t *state = write->state;
+  STRONG_ASSERT_HELD(*state->lock);
+  assert(!(state->flags & WASIP3_IO_BLOCKED));
 
   // If there's nothing in-progress, then there's nothing to do, so bail out.
   if (!(state->flags & WASIP3_IO_INPROGRESS))
     return 0;
-  assert(state->buf);
+  assert(state->buf || (state->flags & WASIP3_IO_ZERO_INPROGRESS));
 
   // This loop ensures that the entirety of `write->buf` is written out. Libc
   // already reported that the write succeeded so if a short write happens then
@@ -180,8 +264,13 @@ static int wasip3_write_resolve_pending(wasi_write_t *write) {
     // For blocking I/O this awaits the previous result. For non-blocking I/O a
     // `poll` operation is done.
     if (write->blocking) {
-      if (!__wasilibc_waitable_block_on(state->stream, &event,
-                                        write->timeout)) {
+      wasip3_enter_blocking_operation(state);
+      STRONG_UNLOCK(*state->lock);
+      bool ok =
+          __wasilibc_waitable_block_on(state->stream, &event, write->timeout);
+      STRONG_LOCK(*state->lock);
+      wasip3_exit_blocking_operation(state);
+      if (!ok) {
         errno = ETIMEDOUT;
         return -1;
       }
@@ -215,6 +304,7 @@ static int wasip3_write_resolve_pending(wasi_write_t *write) {
 /// Helper of `read`/`write` starting below.
 static bool wasip3_start_zero_length(wasip3_io_state_t *state,
                                      wasip3_waitable_status_t status) {
+  STRONG_ASSERT_HELD(*state->lock);
   assert(!(state->flags & WASIP3_IO_INPROGRESS));
   assert(!(state->flags & WASIP3_IO_ZERO_INPROGRESS));
   assert(!(state->flags & WASIP3_IO_SHOULD_BE_READY));
@@ -250,6 +340,7 @@ static bool wasip3_read_start_zero_length(wasip3_io_state_t *state) {
 /// This requires that there's no active I/O on the stream at this time and
 /// that it's not a closed stream.
 static int wasip3_read_start_nonzero(wasip3_io_state_t *state, size_t length) {
+  STRONG_ASSERT_HELD(*state->lock);
   assert(state->flags & WASIP3_IO_MUST_BUFFER);
   assert(!(state->flags & WASIP3_IO_SHOULD_BE_READY));
   assert(!(state->flags & WASIP3_IO_INPROGRESS));
@@ -277,6 +368,7 @@ static int wasip3_read_start_nonzero(wasip3_io_state_t *state, size_t length) {
 
 static size_t wasip3_read_complete_internally(wasip3_io_state_t *state,
                                               void *buffer, size_t length) {
+  STRONG_ASSERT_HELD(*state->lock);
   size_t buf_len = state->buf_end - state->buf_start;
   size_t amount = buf_len < length ? buf_len : length;
   memcpy(buffer, state->buf + state->buf_start, amount);
@@ -368,6 +460,9 @@ static ssize_t __wasilibc_write_without_offset_update(wasi_write_t *write,
 #elif defined(__wasip3__)
   wasip3_io_state_t *state = write->state;
 
+  if (wasip3_io_sync(state, write->blocking) < 0)
+    return -1;
+
   // If this stream is closed, for example with a TCP shutdown, then it's
   // closed and we're at EOF.
   if (state->stream == 0)
@@ -392,11 +487,17 @@ static ssize_t __wasilibc_write_without_offset_update(wasi_write_t *write,
   // blocking with an optional timeout and handling the result.
   if (write->blocking) {
     state->flags &= ~WASIP3_IO_SHOULD_BE_READY;
+
+    wasip3_enter_blocking_operation(state);
+    STRONG_UNLOCK(*state->lock);
     bool done = false;
     ssize_t amount = __wasilibc_stream_block_on_timeout(
         filesystem_stream_u8_write(state->stream, buffer, length),
         state->stream, &done, write->timeout,
         filesystem_stream_u8_cancel_write);
+    STRONG_LOCK(*state->lock);
+    wasip3_exit_blocking_operation(state);
+
     if (done)
       state->flags |= WASIP3_IO_DONE;
     if (amount < 0)
@@ -583,6 +684,9 @@ static ssize_t __wasilibc_read_without_offset_update(wasi_read_t *read,
   wasip3_io_state_t *state = read->state;
   wasip3_event_t event;
 
+  if (wasip3_io_sync(state, read->blocking) < 0)
+    return -1;
+
   // If this stream is closed, for example with a TCP shutdown, then it's
   // closed and we're at EOF.
   if (state->stream == 0)
@@ -592,7 +696,14 @@ static ssize_t __wasilibc_read_without_offset_update(wasi_read_t *read,
   // it to complete.
   if (state->flags & WASIP3_IO_INPROGRESS) {
     if (read->blocking) {
-      if (!__wasilibc_waitable_block_on(state->stream, &event, read->timeout)) {
+      wasip3_enter_blocking_operation(state);
+      STRONG_UNLOCK(*state->lock);
+      bool ok =
+          __wasilibc_waitable_block_on(state->stream, &event, read->timeout);
+      STRONG_LOCK(*state->lock);
+      wasip3_exit_blocking_operation(state);
+
+      if (!ok) {
         errno = ETIMEDOUT;
         return -1;
       }
@@ -626,11 +737,16 @@ static ssize_t __wasilibc_read_without_offset_update(wasi_read_t *read,
 
   // For simplicity handle the blocking read case here.
   if (read->blocking) {
+    state->flags &= ~WASIP3_IO_SHOULD_BE_READY;
     bool done = false;
+    wasip3_enter_blocking_operation(state);
+    STRONG_UNLOCK(*state->lock);
     size_t amount = __wasilibc_stream_block_on_timeout(
         filesystem_stream_u8_read(read->state->stream, buffer, length),
         read->state->stream, &done, read->timeout,
         filesystem_stream_u8_cancel_read);
+    STRONG_LOCK(*state->lock);
+    wasip3_exit_blocking_operation(state);
     if (done)
       state->flags |= WASIP3_IO_DONE;
     if (amount < 0)
@@ -704,59 +820,69 @@ ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
 static void wasip3_poll_read_ready(void *data, poll_state_t *state,
                                    wasip3_event_t *event) {
   wasip3_io_state_t *iostate = (wasip3_io_state_t *)data;
-  iostate->buf_end = wasip3_io_update_event(iostate, event);
-  __wasilibc_poll_ready(state, POLLRDNORM);
+  STRONG_LOCK(*iostate->lock);
+  defer STRONG_UNLOCK(*iostate->lock);
+  wasip3_exit_blocking_operation(iostate);
+
+  if (event) {
+    iostate->buf_end = wasip3_io_update_event(iostate, event);
+    __wasilibc_poll_ready(state, POLLRDNORM);
+  }
 }
 
 static void wasip3_poll_write_ready(void *data, poll_state_t *state,
                                     wasip3_event_t *event) {
   wasip3_io_state_t *iostate = (wasip3_io_state_t *)data;
+  STRONG_LOCK(*iostate->lock);
+  defer STRONG_UNLOCK(*iostate->lock);
+  wasip3_exit_blocking_operation(iostate);
 
-  // Update our state with this event, and if the pending write is fully
-  // complete then this is now ready for writing again. Otherwise there's still
-  // a pending write so our job is complete trying to advance things a bit.
-  if (wasip3_advance_pending_write(iostate, event)) {
-    __wasilibc_poll_ready(state, POLLWRNORM);
-  } else {
-    assert(iostate->flags & WASIP3_IO_INPROGRESS);
+  if (event) {
+    // Update our state with this event, and if the pending write is fully
+    // complete then this is now ready for writing again. Otherwise there's
+    // still a pending write so our job is complete trying to advance things a
+    // bit.
+    if (wasip3_advance_pending_write(iostate, event)) {
+      __wasilibc_poll_ready(state, POLLWRNORM);
+    } else {
+      assert(iostate->flags & WASIP3_IO_INPROGRESS);
+    }
   }
 }
 
-static int wasip3_stream_poll(wasip3_io_state_t *iostate, poll_state_t *state,
-                              short events, poll_ready_t ready) {
+enum wasip3_poll_status {
+  POLL_READY = 0,
+  POLL_INPROGRESS = 1,
+  POLL_ERROR = -1,
+};
+
+static enum wasip3_poll_status
+wasip3_stream_poll_init(wasip3_io_state_t *iostate, short events) {
   // If the stream is closed then it's immediately ready for reading/writing as
   // that'll resolve with an error/0/etc.
-  if (iostate->stream == 0) {
-    __wasilibc_poll_ready(state, events);
-    return 0;
-  }
+  if (iostate->stream == 0)
+    return POLL_READY;
 
   // If the I/O stream is finished it'll never block so it's always ready.
-  if (iostate->flags & WASIP3_IO_DONE) {
-    __wasilibc_poll_ready(state, events);
-    return 0;
-  }
+  if (iostate->flags & WASIP3_IO_DONE)
+    return POLL_READY;
 
   // If there's I/O in progress, then that's what we're interested in so add it
   // to the set.
   if (iostate->flags & WASIP3_IO_INPROGRESS)
-    return __wasilibc_poll_add(state, iostate->stream, ready, iostate);
+    return POLL_INPROGRESS;
 
   // For readable streams if there's buffered data then this is immediately
   // ready since that data can be read without blocking.
-  if (events == POLLRDNORM && iostate->buf) {
-    __wasilibc_poll_ready(state, events);
-    return 0;
-  }
+  if (events == POLLRDNORM && iostate->buf)
+    return POLL_READY;
 
   if (iostate->flags & WASIP3_IO_MUST_BUFFER) {
     // For writable streams, if buffering is required and zero-length writes
     // don't work then this is immediately ready since those writes never block
     // (they're buffered internally).
-    if (events == POLLWRNORM) {
-      __wasilibc_poll_ready(state, events);
-      return 0;
-    }
+    if (events == POLLWRNORM)
+      return POLL_READY;
 
     // For readable streams if buffering is required then a read is kicked off
     // here. An arbitrary read size is chosen for now. If that read isn't ready
@@ -765,20 +891,17 @@ static int wasip3_stream_poll(wasip3_io_state_t *iostate, poll_state_t *state,
     if (events == POLLRDNORM) {
       if (wasip3_read_start_nonzero(iostate, 16 * 1024) < 0) {
         if (errno == EWOULDBLOCK)
-          return __wasilibc_poll_add(state, iostate->stream, ready, iostate);
-        return -1;
+          return POLL_INPROGRESS;
+        return POLL_ERROR;
       }
-      __wasilibc_poll_ready(state, events);
-      return 0;
+      return POLL_READY;
     }
   }
 
   // If I/O should be ready then that means a zero-length op has already
   // completed, so this should be good to go.
-  if (iostate->flags & WASIP3_IO_SHOULD_BE_READY) {
-    __wasilibc_poll_ready(state, events);
-    return 0;
-  }
+  if (iostate->flags & WASIP3_IO_SHOULD_BE_READY)
+    return POLL_READY;
 
   // Kick off a zero-length write here. If that actually gets kicked off then
   // we're waiting on it so add it to the set. Otherwise it completed so we're
@@ -787,9 +910,47 @@ static int wasip3_stream_poll(wasip3_io_state_t *iostate, poll_state_t *state,
                           ? wasip3_write_start_zero_length(iostate)
                           : wasip3_read_start_zero_length(iostate);
   if (started_work)
-    return __wasilibc_poll_add(state, iostate->stream, ready, iostate);
-  __wasilibc_poll_ready(state, events);
-  return 0;
+    return POLL_INPROGRESS;
+  return POLL_READY;
+}
+
+static int wasip3_stream_poll(wasip3_io_state_t *iostate, poll_state_t *state,
+                              short events, poll_ready_t ready) {
+  // First ensure that `iostate` can enter a blocking operation I/O operation
+  // `poll`. This ensures that the stream isn't currently in use by some other
+  // thread's blocking I/O as moving things around in waitable sets wouldn't
+  // work then. Note that if another thread is blocked at this time then this
+  // will return a "not supported" error because that concurrent behavior isn't
+  // supported by wasi-libc.
+  if (wasip3_io_sync(iostate, false) < 0)
+    return -1;
+
+  switch (wasip3_stream_poll_init(iostate, events)) {
+  // If this stream is immediately ready, then flag it as such within
+  // `state.`
+  case POLL_READY:
+    __wasilibc_poll_ready(state, events);
+    return 0;
+
+  // If this stream has an in-progress I/O operation then it's gonna get added
+  // to the waitable-set in `poll`. For that we flag this as entering a
+  // blocking operation. Note that the `wasip3_exit_*` calls, both for this
+  // blocking operation and the above "enter io", are done in the ready
+  // callback.
+  case POLL_INPROGRESS: {
+    int rc = __wasilibc_poll_add(state, iostate->stream, ready, iostate);
+    if (rc == 0)
+      wasip3_enter_blocking_operation(iostate);
+    return rc;
+  }
+
+  // On error we're just propagating the error.
+  case POLL_ERROR:
+    return -1;
+
+  default:
+    abort();
+  }
 }
 
 int __wasilibc_read_poll(wasip3_io_state_t *iostate, poll_state_t *state) {

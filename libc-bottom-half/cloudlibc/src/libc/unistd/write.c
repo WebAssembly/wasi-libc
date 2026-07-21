@@ -12,6 +12,7 @@
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #include <time.h>
+#include "lock.h"
 #endif
 
 ssize_t write(int fildes, const void *buf, size_t nbyte) {
@@ -34,6 +35,7 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
     wasi_write_t write;
     if (entry.vtable->get_write_stream(entry.data, &write) < 0)
       return -1;
+    defer STRONG_UNLOCK(*write.state->lock);
     return __wasilibc_write(&write, buf, nbyte);
   }
   if (entry.vtable->sendto)

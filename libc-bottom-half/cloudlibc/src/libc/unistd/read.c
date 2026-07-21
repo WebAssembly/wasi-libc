@@ -12,6 +12,7 @@
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #include <string.h>
+#include "lock.h"
 #endif
 
 ssize_t read(int fildes, void *buf, size_t nbyte) {
@@ -33,6 +34,7 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
     wasi_read_t read;
     if (entry.vtable->get_read_stream(entry.data, &read) < 0)
       return -1;
+    defer STRONG_UNLOCK(*read.state->lock);
     return __wasilibc_read(&read, buf, nbyte);
   }
   if (entry.vtable->recvfrom)

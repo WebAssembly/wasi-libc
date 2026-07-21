@@ -1261,6 +1261,14 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
       value = result;
       break;
     }
+    case IPV6_V6ONLY:
+      if (socket->family != SOCKETS_IP_ADDRESS_FAMILY_IPV6) {
+        errno = EAFNOSUPPORT;
+        return -1;
+      }
+      // WASI IPv6 sockets are always v6-only.
+      value = 1;
+      break;
     default:
       errno = ENOPROTOOPT;
       return -1;
@@ -1363,6 +1371,18 @@ static int udp_setsockopt(void *data, int level, int optname,
 
       return 0;
     }
+    case IPV6_V6ONLY:
+      if (socket->family != SOCKETS_IP_ADDRESS_FAMILY_IPV6) {
+        errno = EAFNOSUPPORT;
+        return -1;
+      }
+      // WASI IPv6 sockets are always v6-only; accept setting it to the
+      // default (enabled) but reject any attempt to disable it.
+      if (intval == 0) {
+        errno = EOPNOTSUPP;
+        return -1;
+      }
+      return 0;
     default:
       errno = ENOPROTOOPT;
       return -1;

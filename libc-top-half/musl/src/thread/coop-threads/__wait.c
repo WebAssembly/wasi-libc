@@ -423,7 +423,7 @@ int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
                           const struct timespec *at, unsigned flags)
 {
   if (flags != 0) {
-    return EINVAL;
+    return -EINVAL;
   }
   if (*addr != val) {
     return -EWOULDBLOCK;

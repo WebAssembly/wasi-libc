@@ -48,7 +48,7 @@ int __wasilibc_futex_wait_syscall(volatile void *addr, int op, int val,
 }
 
 int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
-						  const struct timespec *at, int flags)
+						  const struct timespec *at, unsigned flags)
 {
 	int r;
 

@@ -99,6 +99,12 @@ int fcntl(int fildes, int cmd, ...) {
       return descriptor_table_dup(fildes, DUP_OP_DUPFD, minfd);
     }
 #endif
+    case F_GETLK:
+    case F_SETLK:
+    case F_SETLKW:
+      // POSIX advisory record locking is not supported by WASI.
+      errno = ENOTSUP;
+      return -1;
     default:
       errno = EINVAL;
       return -1;

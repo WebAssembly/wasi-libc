@@ -28,7 +28,7 @@ static void *waiter(void *arg) {
   // Mark this waiter as ready, then wait for a synchronized start.
   __atomic_fetch_add(&ready_count, 1, __ATOMIC_SEQ_CST);
   while (!__atomic_load_n(&go_flag, __ATOMIC_SEQ_CST)) {
-    sched_yield();
+    usleep(1000);
   }
 
   __atomic_fetch_add(&waiting_count, 1, __ATOMIC_SEQ_CST);
@@ -51,14 +51,14 @@ int main(void) {
   }
 
   while (__atomic_load_n(&ready_count, __ATOMIC_SEQ_CST) != NUM_WAITERS) {
-    sched_yield();
+    usleep(1000);
   }
 
   // Let all waiters enter the futex wait path before issuing wake-all.
   __atomic_store_n(&go_flag, 1, __ATOMIC_SEQ_CST);
 
   while (__atomic_load_n(&waiting_count, __ATOMIC_SEQ_CST) != NUM_WAITERS) {
-    sched_yield();
+    usleep(1000);
   }
 
   // Wake all waiters and expect each wait call to succeed.

@@ -29,7 +29,7 @@ static void *waiter(void *arg) {
   // Mark this waiter as ready, then wait until all waiters are released.
   __atomic_fetch_add(&ready_count, 1, __ATOMIC_SEQ_CST);
   while (!__atomic_load_n(&go_flag, __ATOMIC_SEQ_CST)) {
-    sched_yield();
+    usleep(1000);
   }
 
   __atomic_fetch_add(&waiting_count, 1, __ATOMIC_SEQ_CST);
@@ -56,14 +56,14 @@ int main(void) {
   }
 
   while (__atomic_load_n(&ready_count, __ATOMIC_SEQ_CST) != NUM_WAITERS) {
-    sched_yield();
+    usleep(1000);
   }
 
   // Let all waiters proceed into the futex wait call.
   __atomic_store_n(&go_flag, 1, __ATOMIC_SEQ_CST);
 
   while (__atomic_load_n(&waiting_count, __ATOMIC_SEQ_CST) != NUM_WAITERS) {
-    sched_yield();
+    usleep(1000);
   }
 
   // Wake exactly one waiter first.
@@ -72,7 +72,7 @@ int main(void) {
   // Give the awakened thread a chance to run and record the wake.
   for (int i = 0;
        i < 1000 && __atomic_load_n(&woke_count, __ATOMIC_SEQ_CST) == 0; i++) {
-    sched_yield();
+    usleep(1000);
   }
 
   TEST(__atomic_load_n(&woke_count, __ATOMIC_SEQ_CST) == 1);

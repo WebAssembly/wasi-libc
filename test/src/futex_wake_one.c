@@ -9,7 +9,7 @@
 #define TEST(c)                                                                \
   do {                                                                         \
     if (!(c))                                                                  \
-      t_error("%s failed\n", #c);                                            \
+      t_error("%s failed\n", #c);                                              \
   } while (0)
 
 enum {
@@ -23,8 +23,7 @@ static volatile int waiting_count;
 static volatile int woke_count;
 static int waiter_result[NUM_WAITERS];
 
-static void *waiter(void *arg)
-{
+static void *waiter(void *arg) {
   int id = (int)(intptr_t)arg;
 
   // Mark this waiter as ready, then wait until all waiters are released.
@@ -42,8 +41,7 @@ static void *waiter(void *arg)
   return NULL;
 }
 
-int main(void)
-{
+int main(void) {
   pthread_t threads[NUM_WAITERS];
 
   futex_word = 0;
@@ -72,15 +70,16 @@ int main(void)
   __wasilibc_futex_wake((volatile int *)&futex_word, 1, 0);
 
   // Give the awakened thread a chance to run and record the wake.
-  for (int i = 0; i < 1000 && __atomic_load_n(&woke_count, __ATOMIC_SEQ_CST) == 0;
-       i++) {
+  for (int i = 0;
+       i < 1000 && __atomic_load_n(&woke_count, __ATOMIC_SEQ_CST) == 0; i++) {
     sched_yield();
   }
 
   TEST(__atomic_load_n(&woke_count, __ATOMIC_SEQ_CST) == 1);
 
   // Then wake the rest and ensure everyone completed successfully.
-  __wasilibc_futex_wake((volatile int *)&futex_word, __WASILIBC_FUTEX_WAKE_ALL, 0);
+  __wasilibc_futex_wake((volatile int *)&futex_word, __WASILIBC_FUTEX_WAKE_ALL,
+                        0);
 
   for (int i = 0; i < NUM_WAITERS; i++) {
     TEST(pthread_join(threads[i], NULL) == 0);

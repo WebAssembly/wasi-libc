@@ -9,7 +9,7 @@
 #define TEST(c)                                                                \
   do {                                                                         \
     if (!(c))                                                                  \
-      t_error("%s failed\n", #c);                                            \
+      t_error("%s failed\n", #c);                                              \
   } while (0)
 
 enum {
@@ -22,8 +22,7 @@ static volatile int go_flag;
 static volatile int waiting_count;
 static int waiter_result[NUM_WAITERS];
 
-static void *waiter(void *arg)
-{
+static void *waiter(void *arg) {
   int id = (int)(intptr_t)arg;
 
   // Mark this waiter as ready, then wait for a synchronized start.
@@ -38,8 +37,7 @@ static void *waiter(void *arg)
   return NULL;
 }
 
-int main(void)
-{
+int main(void) {
   pthread_t threads[NUM_WAITERS];
 
   futex_word = 0;
@@ -64,7 +62,8 @@ int main(void)
   }
 
   // Wake all waiters and expect each wait call to succeed.
-  __wasilibc_futex_wake((volatile int *)&futex_word, __WASILIBC_FUTEX_WAKE_ALL, 0);
+  __wasilibc_futex_wake((volatile int *)&futex_word, __WASILIBC_FUTEX_WAKE_ALL,
+                        0);
 
   for (int i = 0; i < NUM_WAITERS; i++) {
     TEST(pthread_join(threads[i], NULL) == 0);

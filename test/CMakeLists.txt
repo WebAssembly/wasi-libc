@@ -531,15 +531,9 @@ add_wasilibc_test(cwd_relative_threads.c FS)
 add_wasilibc_test(futex_wait_in_past.c)
 add_wasilibc_test(futex_wait_mismatch.c)
 add_wasilibc_test(futex_flags.c)
-if (WASILIBC_MULTITHREADING)
+if (WASILIBC_MULTITHREADING AND NOT TEST_WITH_V8)
   add_wasilibc_test(futex_wake_one.c)
   add_wasilibc_test(futex_wake_all.c)
-endif()
-
-if (TARGET_TRIPLE MATCHES "-threads")
-  # atomic.wait32 can't be executed in this context
-  expect_fail_under_v8(futex_wake_one.wasm)
-  expect_fail_under_v8(futex_wake_all.wasm)
 endif()
 
 # These futex tests should trap on single-threaded targets.

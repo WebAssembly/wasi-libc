@@ -331,12 +331,13 @@ int descriptor_table_remove(int fd) {
   if (!stdio_initialized && init_stdio() < 0)
     return -1;
 
-  STRONG_LOCK(global_table.lock);
-  defer STRONG_UNLOCK(global_table.lock);
-
   descriptor_table_entry_t entry;
-  if (table_remove(&global_table, fd, &entry) < 0)
+  STRONG_LOCK(global_table.lock);
+  int rc = table_remove(&global_table, fd, &entry);
+  STRONG_UNLOCK(global_table.lock);
+  if (rc < 0)
     return -1;
+
   descriptor_table_entry_dec(entry);
   return 0;
 }

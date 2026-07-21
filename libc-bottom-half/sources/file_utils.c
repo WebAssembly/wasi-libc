@@ -381,6 +381,51 @@ static size_t wasip3_read_complete_internally(wasip3_io_state_t *state,
   }
   return amount;
 }
+
+void wasip3_write_state_close(wasip3_io_state_t *state) {
+  // If this was never initialized then we don't have a lock to check, but if
+  // it's even been initialized then the lock can be checked to be held.
+#ifdef _REENTRANT
+  if (state->lock) {
+    STRONG_ASSERT_HELD(*state->lock);
+  } else {
+    assert(!(state->flags & WASIP3_IO_INPROGRESS));
+  }
+#endif
+
+  // Component model streams can't be closed with active I/O operations. If
+  // there's an operation in-flight then there are two options:
+  //
+  // 1. Cancel it. This would be a problem though because the data has already
+  //    been acknowledged to be sent via POSIX-style APIs, meaning that it would
+  //    effectively corrupt the stream being sent.
+  // 2. Wait on it. This makes `close` a blocking operation if a previous
+  //    nonblocking `write` was issued.
+  //
+  // Neither of these options are great and this is additionally the subject of
+  // discussion at WebAssembly/component-model#617. For now the best that can be
+  // done is blocking where a future `try-*` intrinsic will remove the need to
+  // block here.
+  if ((state->flags & WASIP3_IO_INPROGRESS) &&
+      !(state->flags & WASIP3_IO_ZERO_INPROGRESS)) {
+    wasi_write_t write = {0};
+    write.state = state;
+    write.blocking = true;
+    int rc = wasip3_write_resolve_pending(&write);
+    (void)rc;
+    assert(rc == 0);
+    assert(!(state->flags & WASIP3_IO_INPROGRESS));
+  }
+
+  STRONG_ASSERT_EMPTY(state->blocking_lock);
+  if (state->flags & WASIP3_IO_INPROGRESS)
+    filesystem_stream_u8_cancel_write(state->stream);
+  if (state->buf)
+    free(state->buf);
+  if (state->stream != 0)
+    filesystem_stream_u8_drop_writable(state->stream);
+  memset(state, 0, sizeof(*state));
+}
 #endif
 
 /// Internal implementation of `__wasilibc_write` except that this doesn't

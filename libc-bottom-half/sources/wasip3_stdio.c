@@ -73,7 +73,9 @@ static void stdout3_free(void *data) {
   STRONG_ASSERT_EMPTY(stdio->lock);
   if (stdio->terminal_out.__handle > 0)
     terminal_output_terminal_output_drop_own(stdio->terminal_out);
+  STRONG_LOCK(stdio->lock);
   wasip3_write_state_close(&stdio->output);
+  STRONG_UNLOCK(stdio->lock);
   if (stdio->result)
     stdout_future_result_void_error_code_drop_readable(stdio->result);
   free(stdio);

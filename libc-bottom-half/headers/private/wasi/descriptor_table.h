@@ -105,16 +105,15 @@ static inline void wasip3_read_state_close(wasip3_io_state_t *state) {
 /// Closes out the streams/etc internal to `state`.
 ///
 /// Internally the stream must be a writer-half of a `stream<u8>`.
-static inline void wasip3_write_state_close(wasip3_io_state_t *state) {
-  STRONG_ASSERT_EMPTY(state->blocking_lock);
-  if (state->flags & WASIP3_IO_INPROGRESS)
-    filesystem_stream_u8_cancel_write(state->stream);
-  if (state->buf)
-    free(state->buf);
-  if (state->stream != 0)
-    filesystem_stream_u8_drop_writable(state->stream);
-  memset(state, 0, sizeof(*state));
-}
+///
+/// Note that unlike `wasip3_read_state_close` this first blocks to flush any
+/// buffered-but-unsent data, so this is a blocking operation even when the
+/// descriptor is in nonblocking mode.
+///
+/// This requires `*state->lock` to be held by the caller, and that lock may be
+/// dropped and reacquired while blocking.
+#define wasip3_write_state_close __wasilibc_write_state_close
+hidden void wasip3_write_state_close(wasip3_io_state_t *state);
 
 /// Tests whether there is active or pending blocking I/O on this stream which
 /// notably should prevent it from being closed.
@@ -302,7 +301,7 @@ typedef struct {
 /// initialized), and it'll get initialized within this function.
 ///
 /// On failure returns -1, sets `errno`, and runs `entry`'s destructor.
-int descriptor_table_insert(descriptor_table_entry_t entry);
+hidden int descriptor_table_insert(descriptor_table_entry_t entry);
 
 /// Operations that `descriptor_table_dup` supports.
 enum dup_op_t {
@@ -317,23 +316,23 @@ enum dup_op_t {
 };
 
 /// Performs a `dup`-style operation.
-int descriptor_table_dup(int fd, enum dup_op_t op, int arg);
+hidden int descriptor_table_dup(int fd, enum dup_op_t op, int arg);
 
 /// Looks up a descriptor by its file descriptor.
 ///
 /// On success returns 0 and `entry` is filled in with a strong reference to
 /// the new entry. Callers must call `descriptor_table_entry_dec` when they're
 /// done with the entry. On failure -1 is returned an `errno` is set.
-int descriptor_table_get(int fd, descriptor_table_entry_t *entry);
+hidden int descriptor_table_get(int fd, descriptor_table_entry_t *entry);
 
 /// Removes the specified file descriptor from the table.
 ///
 /// On success returns 0 and runs the entry's destructor. On failure returns -1
 /// and sets `errno`.
-int descriptor_table_remove(int fd);
+hidden int descriptor_table_remove(int fd);
 
 /// Removes all file descriptors from the table, running their destructors.
-void descriptor_table_clear();
+hidden void descriptor_table_clear();
 
 /// Increment the reference count of the `entry` provided.
 static inline void descriptor_table_entry_inc(descriptor_table_entry_t entry) {
@@ -344,7 +343,7 @@ static inline void descriptor_table_entry_inc(descriptor_table_entry_t entry) {
 /// Slow-path deallocation routine of `descriptor_table_entry_dec`.
 ///
 /// Assumes refcount is already 0.
-void __wasilibc_descriptor_deallocate(descriptor_table_entry_t entry);
+hidden void __wasilibc_descriptor_deallocate(descriptor_table_entry_t entry);
 
 /// Decrement the reference count of the `entry` provided, running deallocation
 /// if the cnt reaches 0.

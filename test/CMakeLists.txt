@@ -557,6 +557,7 @@ if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(sockets-listen-backlog.c NETWORK)
   add_wasilibc_test(sockets-sendto-connected.c NETWORK)
   add_wasilibc_test(sockets-recvfrom-connected.c NETWORK)
+  add_wasilibc_test(sockets-write-broken.c NETWORK)
 
   # Define executables for server/client tests, and they're paired together in
   # various combinations below for various tests.

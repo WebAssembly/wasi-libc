@@ -106,6 +106,10 @@ int __wasilibc_map_socket_error(sockets_error_code_t *wasi_error) {
     return EHOSTUNREACH;
   case SOCKETS_ERROR_CODE_CONNECTION_REFUSED:
     return ECONNREFUSED;
+#ifdef __wasip3__
+  case SOCKETS_ERROR_CODE_CONNECTION_BROKEN:
+    return EPIPE;
+#endif
   case SOCKETS_ERROR_CODE_CONNECTION_RESET:
     return ECONNRESET;
   case SOCKETS_ERROR_CODE_CONNECTION_ABORTED:

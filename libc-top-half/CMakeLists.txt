@@ -249,6 +249,9 @@ set(top_half_sources
   musl/src/thread/common/pthread_barrierattr_destroy.c
   musl/src/thread/common/pthread_barrierattr_init.c
   musl/src/thread/common/pthread_barrierattr_setpshared.c
+  musl/src/thread/common/pthread_barrier_wait.c
+  musl/src/thread/common/pthread_barrier_destroy.c
+  musl/src/thread/common/pthread_barrier_init.c
   musl/src/thread/common/pthread_cancel.c
   musl/src/thread/common/pthread_cleanup_push.c
   musl/src/thread/common/pthread_condattr_destroy.c
@@ -413,9 +416,6 @@ if (TARGET_TRIPLE MATCHES "wasip1-threads")
     musl/src/thread/wasi-threads/__lock.c
     musl/src/thread/wasi-threads/futex.c
     musl/src/thread/wasi-threads/lock_ptc.c
-    musl/src/thread/wasi-threads/pthread_barrier_destroy.c
-    musl/src/thread/wasi-threads/pthread_barrier_init.c
-    musl/src/thread/wasi-threads/pthread_barrier_wait.c
     musl/src/thread/wasi-threads/pthread_cond_broadcast.c
     musl/src/thread/wasi-threads/pthread_cond_destroy.c
     musl/src/thread/wasi-threads/pthread_cond_init.c
@@ -469,9 +469,6 @@ elseif(ENABLE_COOP_THREADS)
     musl/src/thread/coop-threads/lock_ptc.c
     musl/src/thread/coop-threads/mtx_lock.c
     musl/src/thread/coop-threads/mtx_trylock.c
-    musl/src/thread/coop-threads/pthread_barrier_destroy.c
-    musl/src/thread/coop-threads/pthread_barrier_init.c
-    musl/src/thread/coop-threads/pthread_barrier_wait.c
     musl/src/thread/coop-threads/pthread_cond_broadcast.c
     musl/src/thread/coop-threads/pthread_cond_destroy.c
     musl/src/thread/coop-threads/pthread_cond_init.c
@@ -522,9 +519,6 @@ else()
   # pthreads stubs for single-threaded environment
   list(APPEND top_half_sources
     musl/src/thread/single-threaded/futex.c
-    musl/src/thread/single-threaded/pthread_barrier_destroy.c
-    musl/src/thread/single-threaded/pthread_barrier_init.c
-    musl/src/thread/single-threaded/pthread_barrier_wait.c
     musl/src/thread/single-threaded/pthread_cond_broadcast.c
     musl/src/thread/single-threaded/pthread_cond_destroy.c
     musl/src/thread/single-threaded/pthread_cond_init.c

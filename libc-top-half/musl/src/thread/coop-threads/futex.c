@@ -281,37 +281,6 @@ static void wake_node(struct __waitlist_node *node, int yield) {
   }
 }
 
-static void __waitlist_wake_one(struct __waitlist_node **list, int yield) {
-  if (*list == NULL) {
-    return;
-  }
-  struct __waitlist_node *node = *list;
-  list_remove(list, node);
-  wake_node(node, yield);
-}
-
-static int __waitlist_wake_all(struct __waitlist_node **list, int yield) {
-  // Detach the entire waitlist up front and iterate over it locally. Waking a
-  // thread may yield to it and may modify `list` which we don't want to tamper
-  // with.
-  struct __waitlist_node *curr = *list;
-  *list = NULL;
-  int woken = 0;
-
-  while (curr) {
-    // Read `next` before waking, since `curr`'s storage may go away once it
-    // runs.
-    struct __waitlist_node *next = curr->next;
-    // As a scheduling optimization, if yielding is allowed, we always yield
-    // directly to the last suspended thread instead of just scheduling it to
-    // run at some point.
-    wake_node(curr, next == NULL && yield);
-    curr = next;
-    woken++;
-  }
-  return woken;
-}
-
 // We supply a futex-style interface on top of our cooperative threading model to
 // maintain compatibility with the existing pthreads ABI. This is supported by a
 // hashmap of futex addresses to waitlists of threads that are waiting on those
@@ -425,14 +394,25 @@ int __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags)
   if (!entry)
     return 0;
 
-  if (count < 0) {
-    return __waitlist_wake_all(&entry->list, yield);
-  } else {
-    int woken = 0;
-    while (count-- > 0 && entry->list) {
-      __waitlist_wake_one(&entry->list, yield);
-      woken++;
-    }
-    return woken;
+  count = (count < 0) ? INT_MAX : count;
+
+  // "Atomically" dequeue all waiters first, then wake them all up. That way if
+  // a waiter re-enqueues themselves we won't see it.
+  struct __waitlist_node *to_wake = NULL;
+  while (count > 0 && entry->list) {
+    struct __waitlist_node *node = entry->list;
+    list_remove(&entry->list, node);
+    list_insert(&to_wake, node);
+    count--;
   }
+
+  // Wake all dequeued waiters, and if specified yield to the final one.
+  int woken = 0;
+  while (to_wake) {
+    struct __waitlist_node *node = to_wake;
+    list_remove(&to_wake, node);
+    wake_node(node, to_wake == NULL && yield);
+    woken++;
+  }
+  return woken;
 }

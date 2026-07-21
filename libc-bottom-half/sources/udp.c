@@ -60,7 +60,7 @@ typedef struct {
   poll_own_pollable_t outgoing_pollable;
 #elif defined(__wasip3__)
   /// Bitset of `UDP_STREAMS_*`
-  int flags;
+  unsigned flags;
 
   /// Currently active call to `udp-socket#receive`.
   ///
@@ -605,7 +605,7 @@ static void wasip3_recv_end(udp_socket_streams_t *streams,
 /// Note that callers need to re-fetch any internal state from within `socket`
 /// after calling this function as this may drop the lock and re-acquire it.
 /// This is only required if `blocking` is `true`.
-static int wasip3_udp_recv_enter(udp_socket_t *socket, bool blocking) {
+static int wasip3_udp_recv_sync(udp_socket_t *socket, bool blocking) {
   STRONG_ASSERT_HELD(socket->lock);
 
   while (1) {
@@ -748,7 +748,7 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
     poll_method_pollable_block(udp_incoming_pollable(streams));
   }
 #else
-  if (wasip3_udp_recv_enter(socket, should_block) < 0)
+  if (wasip3_udp_recv_sync(socket, should_block) < 0)
     return -1;
   streams = udp_streams(socket);
   assert(streams);
@@ -826,7 +826,7 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
 ///
 /// Note that like `wasip3_udp_recv_enter` this requires callers to re-acquire
 /// internal pointers within `socket` if `blocking` is true.
-static int wasip3_udp_send_enter(udp_socket_t *socket, bool blocking) {
+static int wasip3_udp_send_sync(udp_socket_t *socket, bool blocking) {
   STRONG_ASSERT_HELD(socket->lock);
 
   while (1) {
@@ -1072,7 +1072,7 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
   }
 #else
   // First wait/weed out concurrent blocking calls to `sendto`.
-  if (wasip3_udp_send_enter(socket, should_block) < 0)
+  if (wasip3_udp_send_sync(socket, should_block) < 0)
     return -1;
   streams = udp_streams(socket);
   assert(streams);
@@ -1419,7 +1419,7 @@ static int udp_poll_register(void *data, poll_state_t *state, short events) {
     //    we're waiting on the subtask so it's added to the set of things to
     //    poll.
     if ((events & POLLRDNORM) != 0) {
-      if (wasip3_udp_recv_enter(socket, false) < 0)
+      if (wasip3_udp_recv_sync(socket, false) < 0)
         return -1;
       wasip3_recv_start(socket, streams);
       if (streams->flags & UDP_STREAMS_RECV_READY) {
@@ -1437,7 +1437,7 @@ static int udp_poll_register(void *data, poll_state_t *state, short events) {
     // active write in progress, then this is immediately ready to write.
     // Otherwise we're waiting on the write subtask.
     if ((events & POLLWRNORM) != 0) {
-      if (wasip3_udp_send_enter(socket, false) < 0)
+      if (wasip3_udp_send_sync(socket, false) < 0)
         return -1;
       if (streams->send_subtask) {
         if (__wasilibc_poll_add(state, streams->send_subtask, wasip3_send_ready,

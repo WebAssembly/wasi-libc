@@ -197,7 +197,8 @@ typedef struct descriptor_vtable_t {
   ///
   /// When threading is enabled for WASIp3+ this additionally acquires the
   /// internal lock for the object and the caller must unlock the
-  /// `read->state->lock` object.
+  /// `read->state->lock` object on success. On failure no locks are held when
+  /// this returns.
   int (*get_read_stream)(void *, wasi_read_t *);
   /// Same as `get_read_stream`, but for output streams.
   int (*get_write_stream)(void *, wasi_write_t *);

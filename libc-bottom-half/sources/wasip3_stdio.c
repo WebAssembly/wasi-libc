@@ -99,11 +99,11 @@ static int stdout3_write_eof(void *data) {
   return 0;
 }
 
-static int stdout3_write(void *data, wasi_write_t *out) {
+static int stdout3_get_write_stream(void *data, wasi_write_t *out) {
   stdout3_t *stdio = (stdout3_t *)data;
   STRONG_LOCK(stdio->lock);
   // .. intentionally don't unlock `stdio->lock` as this function lets the
-  // caller do that.
+  // caller do that (see `descriptor_table.h` for details of this callback).
 
   if (!wasip3_io_state_present(&stdio->output)) {
     assert(!stdio->result);
@@ -140,11 +140,11 @@ static int stdin3_read_eof(void *data) {
   return 0;
 }
 
-static int stdin3_read(void *data, wasi_read_t *read) {
+static int stdin3_get_read_stream(void *data, wasi_read_t *read) {
   stdin3_t *stdio = (stdin3_t *)data;
   STRONG_LOCK(stdio->lock);
   // .. intentionally don't unlock `stdio->lock` as this function lets the
-  // caller do that.
+  // caller do that (see `descriptor_table.h` for details of this callback).
 
   if (!wasip3_io_state_present(&stdio->input)) {
     assert(!stdio->input_result);
@@ -204,7 +204,7 @@ static int stdout3_isatty(void *data) {
 
 static descriptor_vtable_t stdin3_vtable = {
     .free = stdin3_free,
-    .get_read_stream = stdin3_read,
+    .get_read_stream = stdin3_get_read_stream,
     .fstat = stdio3_fstat,
     .fcntl_getfl = stdin3_fcntl_getfl,
     .isatty = stdin3_isatty,
@@ -212,7 +212,7 @@ static descriptor_vtable_t stdin3_vtable = {
 
 static descriptor_vtable_t stdout3_vtable = {
     .free = stdout3_free,
-    .get_write_stream = stdout3_write,
+    .get_write_stream = stdout3_get_write_stream,
     .fstat = stdio3_fstat,
     .fcntl_getfl = stdout3_fcntl_getfl,
     .isatty = stdout3_isatty,

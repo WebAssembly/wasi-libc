@@ -170,7 +170,7 @@ static bool wasip3_advance_pending_write(wasip3_io_state_t *state,
 /// `true` then this will block waiting for other operations to complete. If
 /// it's set to `false` this may briefly block if a race meant that another
 /// thread is temporarily unscheduled, but this will never block indefinitely.
-static int wasip3_enter_io(wasip3_io_state_t *state, bool blocking) {
+static int wasip3_io_sync(wasip3_io_state_t *state, bool blocking) {
   STRONG_ASSERT_HELD(*state->lock);
 
   // If there's another thread blocked in an I/O operation at this time, then
@@ -213,14 +213,15 @@ static int wasip3_enter_io(wasip3_io_state_t *state, bool blocking) {
 
 /// Indicator that a blocking I/O operation on `state` is about to be performed.
 ///
-/// This manages the internal locks of `state` provided to ensure that while
-/// this thread is blocked in I/O there are no other competing threads that are
-/// able to do I/O (component model streams allow at most one I/O operation
-/// in-flight at this time).
+/// This manages the internals of `state` to ensure that it's flagged that a
+/// thread is doing blocking I/O which will prevent other threads from doing
+/// I/O. Internally this will acquire the state's `blocking_lock`, which should
+/// not be held by any other thread, and will then return.
 ///
-/// Notably here this will drop the internal `lock`, but only after acquiring
-/// the `blocking_lock`. An internal flag then signals to other operations that
-/// this is happening.
+/// This must be paired with a call to `wasip3_exit_blocking_operation` when the
+/// I/O is complete to unblock other operations.
+///
+/// After calling this function it's safe to drop `state`'s lock.
 static void wasip3_enter_blocking_operation(wasip3_io_state_t *state) {
   STRONG_ASSERT_HELD(*state->lock);
   assert(!(state->flags & WASIP3_IO_BLOCKED));
@@ -231,10 +232,8 @@ static void wasip3_enter_blocking_operation(wasip3_io_state_t *state) {
 /// Exit routine for a blocking I/O operation.
 ///
 /// Previously `wasip3_enter_blocking_operation` must have been called with
-/// `state` and this undoes the work configured there. Note that `lock` is
-/// intentionally acquired before `blocking_lock` is dropped to ensure that if
-/// a thread happens to acquire `blocking_lock` it doesn't just sit spinning
-/// for awhile.
+/// `state` and this undoes the work configured there. The `state`'s `lock` must
+/// be acquired before entering this function.
 static void wasip3_exit_blocking_operation(wasip3_io_state_t *state) {
   STRONG_ASSERT_HELD(state->blocking_lock);
   STRONG_ASSERT_HELD(*state->lock);
@@ -461,7 +460,7 @@ static ssize_t __wasilibc_write_without_offset_update(wasi_write_t *write,
 #elif defined(__wasip3__)
   wasip3_io_state_t *state = write->state;
 
-  if (wasip3_enter_io(state, write->blocking) < 0)
+  if (wasip3_io_sync(state, write->blocking) < 0)
     return -1;
 
   // If this stream is closed, for example with a TCP shutdown, then it's
@@ -685,7 +684,7 @@ static ssize_t __wasilibc_read_without_offset_update(wasi_read_t *read,
   wasip3_io_state_t *state = read->state;
   wasip3_event_t event;
 
-  if (wasip3_enter_io(state, read->blocking) < 0)
+  if (wasip3_io_sync(state, read->blocking) < 0)
     return -1;
 
   // If this stream is closed, for example with a TCP shutdown, then it's
@@ -923,7 +922,7 @@ static int wasip3_stream_poll(wasip3_io_state_t *iostate, poll_state_t *state,
   // work then. Note that if another thread is blocked at this time then this
   // will return a "not supported" error because that concurrent behavior isn't
   // supported by wasi-libc.
-  if (wasip3_enter_io(iostate, false) < 0)
+  if (wasip3_io_sync(iostate, false) < 0)
     return -1;
 
   switch (wasip3_stream_poll_init(iostate, events)) {

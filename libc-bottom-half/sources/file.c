@@ -103,7 +103,7 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
   file_t *file = (file_t *)data;
   STRONG_LOCK(file->lock);
   // .. intentionally don't unlock `file->lock` as this function lets the
-  // caller do that.
+  // caller do that (see `descriptor_table.h` for details of this callback).
 
 #ifdef __wasip2__
   if (file->read_stream.__handle == 0) {
@@ -164,7 +164,7 @@ static int file_get_write_stream(void *data, wasi_write_t *write) {
   file_t *file = (file_t *)data;
   STRONG_LOCK(file->lock);
   // .. intentionally don't unlock `file->lock` as this function lets the
-  // caller do that.
+  // caller do that (see `descriptor_table.h` for details of this callback).
 
 #ifdef __wasip2__
   if (file->write_stream.__handle == 0) {

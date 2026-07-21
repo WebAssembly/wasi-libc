@@ -191,7 +191,7 @@ static int tcp_get_read_stream(void *data, wasi_read_t *read) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
   STRONG_LOCK(tcp->lock);
   // .. intentionally don't unlock `tcp->lock` as this function lets the
-  // caller do that.
+  // caller do that (see `descriptor_table.h` for details of this callback).
 
   if (tcp->state.tag != TCP_SOCKET_STATE_CONNECTED) {
     STRONG_UNLOCK(tcp->lock);
@@ -240,7 +240,7 @@ static int tcp_get_write_stream(void *data, wasi_write_t *write) {
   tcp_socket_t *tcp = (tcp_socket_t *)data;
   STRONG_LOCK(tcp->lock);
   // .. intentionally don't unlock `tcp->lock` as this function lets the
-  // caller do that.
+  // caller do that (see `descriptor_table.h` for details of this callback).
 
   if (tcp->state.tag != TCP_SOCKET_STATE_CONNECTED) {
     STRONG_UNLOCK(tcp->lock);
@@ -374,7 +374,7 @@ static bool wasip3_tcp_accept_start(tcp_socket_state_listening_t *state) {
 }
 
 /// This function is similar to `wasip3_enter_io` in `file_utils.c`
-static int wasip3_accept_enter(tcp_socket_t *socket, bool blocking) {
+static int wasip3_accept_sync(tcp_socket_t *socket, bool blocking) {
   STRONG_ASSERT_HELD(socket->lock);
   assert(socket->state.tag == TCP_SOCKET_STATE_LISTENING);
   tcp_socket_state_listening_t *state = &socket->state.listening;
@@ -475,7 +475,7 @@ static int tcp_accept4(void *data, struct sockaddr *addr, socklen_t *addrlen,
 #else
   tcp_socket_state_listening_t *state = &socket->state.listening;
 
-  if (wasip3_accept_enter(socket, socket->blocking) < 0)
+  if (wasip3_accept_sync(socket, socket->blocking) < 0)
     return -1;
 
   // Turn this loop until a socket is fully accepted and ready to get
@@ -1158,7 +1158,7 @@ static int tcp_poll_register(void *data, poll_state_t *state, short events) {
 #else
       tcp_socket_state_listening_t *listen = &socket->state.listening;
       // First make sure there's not another thread blocked on `accept`
-      if (wasip3_accept_enter(socket, false) < 0)
+      if (wasip3_accept_sync(socket, false) < 0)
         return -1;
       // Kick off an accept if it's not already going, then see what happened.
       //

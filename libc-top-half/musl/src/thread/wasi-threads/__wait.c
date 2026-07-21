@@ -3,6 +3,8 @@
 #include "assert.h"
 #endif
 
+#include <wasi/libc.h>
+
 #ifndef __wasilibc_unmodified_upstream
 
 weak int __wasilibc_futex_wait_maybe_busy(volatile void *addr, int op, int val, int64_t max_wait_ns);

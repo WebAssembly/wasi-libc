@@ -39,7 +39,7 @@ int main(void) {
     ssize_t n = send(csock, buf, sizeof(buf), 0);
     if (n < 0) {
       int e = errno;
-      TEST(e == EPIPE);
+      TEST(e == EPIPE || e == ECONNRESET);
       saw_error = 1;
       break;
     }

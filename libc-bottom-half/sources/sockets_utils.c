@@ -117,13 +117,14 @@ int __wasilibc_map_socket_error(sockets_error_code_t *wasi_error) {
   case SOCKETS_ERROR_CODE_DATAGRAM_TOO_LARGE:
     return EMSGSIZE;
 
+  // Note that this error-code serves double-duty for handling invalid API
+  // calls such as writing before connect completes, and it additionally
+  // is used for host-side errors like `ENOTCONN`.
   case SOCKETS_ERROR_CODE_INVALID_STATE:
 #ifdef __wasip2__
   case NETWORK_ERROR_CODE_NOT_IN_PROGRESS:
 #endif
-    abort(); // If our internal state checks are working right, these errors
-             // should never show up.
-    break;
+    return ENOTCONN;
 
 #ifdef __wasip2__
   case NETWORK_ERROR_CODE_NAME_UNRESOLVABLE:

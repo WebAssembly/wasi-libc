@@ -406,12 +406,13 @@ void wasip3_write_state_close(wasip3_io_state_t *state) {
   // discussion at WebAssembly/component-model#617. For now the best that can be
   // done is blocking where a future `try-*` intrinsic will remove the need to
   // block here.
-  if ((state->flags & WASIP3_IO_INPROGRESS) && !(state->flags & WASIP3_IO_ZERO_INPROGRESS)) {
+  if ((state->flags & WASIP3_IO_INPROGRESS) &&
+      !(state->flags & WASIP3_IO_ZERO_INPROGRESS)) {
     wasi_write_t write = {0};
     write.state = state;
     write.blocking = true;
     int rc = wasip3_write_resolve_pending(&write);
-    (void) rc;
+    (void)rc;
     assert(rc == 0);
     assert(!(state->flags & WASIP3_IO_INPROGRESS));
   }

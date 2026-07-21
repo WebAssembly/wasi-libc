@@ -36,6 +36,10 @@ int __timedwait_cp(volatile int *addr, int val,
 	clockid_t clk, const struct timespec *at, int priv)
 {
 	int r;
+	if (at) {
+		if (at->tv_nsec >= 1000000000UL) return EINVAL;
+		if (at->tv_nsec < 0) return EINVAL;
+	}
 #ifdef __wasilibc_unmodified_upstream
 	struct timespec to, *top=0;
 

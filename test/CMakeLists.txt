@@ -1090,6 +1090,11 @@ if (PYTHON_TESTS)
 
   set(cflags "--target=${TARGET_TRIPLE} --sysroot=${SYSROOT}")
   set(ldflags "${cflags} -resource-dir ${tmp_resource_dir}")
+  if(WASM_COMPONENT_LD_EXECUTABLE)
+    set(ldflags "${ldflags} -fuse-ld=${WASM_COMPONENT_LD_EXECUTABLE}")
+  endif()
+  cmake_path(GET CMAKE_C_COMPILER PARENT_PATH compiler_dir)
+  cmake_path(GET compiler_dir PARENT_PATH wasi_sdk_path)
 
   ExternalProject_Add(
     python
@@ -1128,13 +1133,16 @@ if (PYTHON_TESTS)
     # More information about building Python for WASI can be found at
     # https://devguide.python.org/getting-started/setup-building/#wasi
     CONFIGURE_COMMAND
+      ${CMAKE_COMMAND} -E env --unset=CC --unset=AR --unset=NM --
       ${PYTHON} <SOURCE_DIR>/Tools/wasm/wasi configure-build-python -- --config-cache --with-pydebug
     COMMAND
+      ${CMAKE_COMMAND} -E env --unset=CC --unset=AR --unset=NM --
       ${PYTHON} <SOURCE_DIR>/Tools/wasm/wasi make-build-python
 
     BUILD_COMMAND
       ${CMAKE_COMMAND}
-        -E env CFLAGS=${cflags} LDFLAGS=${ldflags} --
+        -E env CFLAGS=${cflags} LDFLAGS=${ldflags} WASI_SDK_PATH=${wasi_sdk_path}
+          --unset=CC --unset=AR --unset=NM --
         ${PYTHON} <SOURCE_DIR>/Tools/wasm/wasi configure-host
         # Note that this gives double the stack that Python does by default to
         # allow for minor changes in what seems to be a combination of either
@@ -1153,18 +1161,20 @@ if (PYTHON_TESTS)
           -- --config-cache
     COMMAND
       ${CMAKE_COMMAND}
-        -E env CFLAGS=${cflags} LDFLAGS=${ldflags} --
+        -E env CFLAGS=${cflags} LDFLAGS=${ldflags} WASI_SDK_PATH=${wasi_sdk_path}
+          --unset=CC --unset=AR --unset=NM --
         ${PYTHON} <SOURCE_DIR>/Tools/wasm/wasi make-host
     COMMAND
       ${CMAKE_COMMAND}
-        -E env CFLAGS=${cflags} LDFLAGS=${ldflags} --
+        -E env CFLAGS=${cflags} LDFLAGS=${ldflags} WASI_SDK_PATH=${wasi_sdk_path}
+          --unset=CC --unset=AR --unset=NM --
         ${MAKE} --directory cross-build/wasm32-wasip1 pythoninfo
 
     INSTALL_COMMAND ""
 
     TEST_COMMAND
       ${CMAKE_COMMAND}
-        -E env CFLAGS=${cflags} LDFLAGS=${ldflags} --
+        -E env CFLAGS=${cflags} LDFLAGS=${ldflags} WASI_SDK_PATH=${wasi_sdk_path} --
         ${MAKE} --directory cross-build/wasm32-wasip1 test
   )
   ExternalProject_Add_StepDependencies(python configure sysroot engine)

@@ -12,6 +12,33 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Install LLVM tools (wasi-sdk)
+      shell: bash
+      run: |
+        if [ "${{ runner.os }}" == "Linux" ]; then
+          if [ "${{ runner.arch }}" == "x86_64" ]; then
+            plat=x86_64-linux
+          elif [ "${{ runner.arch }}" == "ARM64" ]; then
+            plat=arm64-linux
+          else
+            echo "Unsupported architecture for wasi-sdk: ${{ runner.arch }}"
+            exit 1
+          fi
+        elif [ "${{ runner.os }}" == "macOS" ]; then
+          plat=arm64-macos
+        else
+          echo "Unsupported OS for wasi-sdk: ${{ runner.os }}"
+          exit 1
+        fi
+        tag=$(echo ${{ inputs.clang_version }} | sed 's/\.0//')
+        curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/$tag/${{ inputs.clang_version }}-$plat.tar.gz | tar xzf -
+        CLANG_DIR=`pwd`/${{ inputs.clang_version }}-$plat/bin
+        echo "$CLANG_DIR" >> $GITHUB_PATH
+        echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
+        echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
+        echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
+      if: startsWith(inputs.clang_version, 'wasi-sdk-')
+
     - name: Install LLVM tools (Windows)
       shell: bash
       run: |
@@ -35,21 +62,13 @@ runs:
     - name: Install LLVM tools (MacOS)
       shell: bash
       run: |
-        case ${{ inputs.clang_version }} in
-          wasi-sdk-*)
-            curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/${{ inputs.clang_version }}/${{ inputs.clang_version }}.0-arm64-macos.tar.gz | tar xzf -
-            export CLANG_DIR=`pwd`/${{ inputs.clang_version }}.0-arm64-macos/bin
-            ;;
-          *)
-            curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.clang_version }}/clang+llvm-${{ inputs.clang_version }}-${{ inputs.llvm_asset_suffix }}.tar.xz | tar xJf -
-            export CLANG_DIR=`pwd`/clang+llvm-${{ inputs.clang_version }}-${{ inputs.llvm_asset_suffix }}/bin
-            ;;
-        esac
+        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.clang_version }}/clang+llvm-${{ inputs.clang_version }}-${{ inputs.llvm_asset_suffix }}.tar.xz | tar xJf -
+        CLANG_DIR=`pwd`/clang+llvm-${{ inputs.clang_version }}-${{ inputs.llvm_asset_suffix }}/bin
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
         echo "NM=$CLANG_DIR/llvm-nm" >> $GITHUB_ENV
-      if: runner.os == 'macOS'
+      if: "runner.os == 'macOS' && !startsWith(inputs.clang_version, 'wasi-sdk-')"
 
     # Use apt repositories to install various clang versions on Linux as those
     # generally work the best and are more available than per-release downloads
@@ -76,4 +95,4 @@ runs:
         echo "CC=clang-$v" >> $GITHUB_ENV
         echo "AR=llvm-ar-$v" >> $GITHUB_ENV
         echo "NM=llvm-nm-$v" >> $GITHUB_ENV
-      if: runner.os == 'Linux'
+      if: "runner.os == 'Linux' && !startsWith(inputs.clang_version, 'wasi-sdk-')"

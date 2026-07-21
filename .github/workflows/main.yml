@@ -162,7 +162,7 @@ jobs:
 
           - name: Test wasip2 on macOS
             os: macos-15
-            clang_version: wasi-sdk-33
+            clang_version: wasi-sdk-33.0
             test: true
             args: -DTARGET_TRIPLE=wasm32-wasip2 -DCMAKE_C_COMPILER_WORKS=ON
 
@@ -297,30 +297,30 @@ jobs:
         include:
           - name: wasm32-wasip1
             args: -DTARGET_TRIPLE=wasm32-wasip1
+            clang_version: wasi-sdk-32.0
           - name: emmalloc
             args: -DTARGET_TRIPLE=wasm32-wasip1 -DMALLOC=emmalloc
+            clang_version: wasi-sdk-32.0
           - name: wasm32-wasip2
             args: -DTARGET_TRIPLE=wasm32-wasip2
+            clang_version: wasi-sdk-32.0
           - name: wasm32-wasip3
             args: -DTARGET_TRIPLE=wasm32-wasip3
+            clang_version: wasi-sdk-32.0
     steps:
     - uses: actions/checkout@v6
       with:
         submodules: true
-    - run: |
-        curl https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-32/wasi-sdk-32.0-arm64-linux.tar.gz -L | tar xzvf -
-        echo "WASI_SDK_PATH=`pwd`/wasi-sdk-32.0-arm64-linux" >> $GITHUB_ENV
-      if: runner.os == 'Linux'
-      shell: bash
-      working-directory: ${{ runner.tool_cache }}
+    - uses: ./.github/actions/setup
+      with:
+        clang_version: ${{ matrix.clang_version }}
     - name: Setup wasi-libc
       run: |
         cmake -S . -B build -G Ninja \
           ${{ matrix.args }} \
           -DCMAKE_LINK_DEPENDS_USE_LINKER=OFF \
           -DPYTHON_TESTS=ON \
-          -DBUILD_TESTS=ON \
-          -DCMAKE_C_COMPILER=$WASI_SDK_PATH/bin/clang
+          -DBUILD_TESTS=ON
     - name: Build and test python
       run: ninja -C build -v python
 

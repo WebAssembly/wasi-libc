@@ -358,6 +358,7 @@ __wasilibc_wasi_family_to_libc
 __wasilibc_wasi_to_sockaddr
 __wasilibc_write
 __wasilibc_write_poll
+__wasilibc_write_state_close
 __wasm_call_dtors
 __wcscoll_l
 __wcsftime_l

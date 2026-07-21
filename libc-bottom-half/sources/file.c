@@ -38,6 +38,7 @@ typedef struct {
 
 static void file_close_streams(void *data) {
   file_t *file = (file_t *)data;
+  STRONG_ASSERT_HELD(file->lock);
 
 #ifdef __wasip2__
   if (file->read_pollable.__handle != 0) {
@@ -73,7 +74,9 @@ static void file_close_streams(void *data) {
 static void file_free(void *data) {
   file_t *file = (file_t *)data;
   STRONG_ASSERT_EMPTY(file->lock);
+  STRONG_LOCK(file->lock);
   file_close_streams(data);
+  STRONG_UNLOCK(file->lock);
   filesystem_descriptor_drop_own(file->file_handle);
   free(file);
 }

@@ -145,7 +145,9 @@ static void tcp_free(void *data) {
     if (state->receive_result != 0)
       sockets_future_result_void_error_code_drop_readable(
           state->receive_result);
+    STRONG_LOCK(tcp->lock);
     wasip3_write_state_close(&state->send);
+    STRONG_UNLOCK(tcp->lock);
     if (state->send_result != 0)
       sockets_future_result_void_error_code_drop_readable(state->send_result);
 #endif
@@ -1045,8 +1047,9 @@ static int tcp_shutdown(void *data, int posix_how) {
   // the internal lock pointer is reset to ensure that it's still pointing
   // to our still-valid lock.
   //
-  // TODO: This will cancel any in-flight operation which probably isn't
-  // POSIX-compliant, this might have to block waiting? Unsure.
+  // Note that closing the send half blocks to flush any buffered-but-unsent
+  // data, so `shutdown(SHUT_WR)` can block here. See comments in
+  // `wasip3_write_state_close` for some more discussion.
   if (close_receive) {
     wasip3_read_state_close(&state->receive);
 #ifdef _REENTRANT

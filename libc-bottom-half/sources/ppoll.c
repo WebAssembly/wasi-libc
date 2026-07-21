@@ -206,16 +206,18 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds,
     struct pollfd *pollfd = fds + i;
     if (pollfd->fd < 0)
       continue;
-    descriptor_table_entry_t entry;
-    if (descriptor_table_get(pollfd->fd, &entry) < 0)
-      return -1;
     state.cur_pollfd = pollfd;
-    state.cur_entry = &entry;
-    defer {
-      state.cur_pollfd = NULL;
-      state.cur_entry = NULL;
-      descriptor_table_entry_dec(entry);
+    defer state.cur_pollfd = NULL;
+
+    descriptor_table_entry_t entry;
+    if (descriptor_table_get(pollfd->fd, &entry) < 0) {
+      __wasilibc_poll_ready(&state, POLLNVAL);
+      continue;
     }
+    defer descriptor_table_entry_dec(entry);
+
+    state.cur_entry = &entry;
+    defer state.cur_entry = NULL;
 
     // If this descriptor has a custom registration function then
     // use that exclusively.
@@ -350,7 +352,11 @@ int __wasilibc_poll_add(poll_state_t *state, uint32_t waitable,
 
 void __wasilibc_poll_ready(poll_state_t *state, short events) {
   assert(state->cur_pollfd);
-  events = events & state->cur_pollfd->events;
+  // POLLERR, POLLHUP and POLLNVAL are always reported, regardless of the
+  // events the caller requested; only the maskable readiness events are
+  // filtered by the requested set.
+  short unmaskable = events & (POLLERR | POLLHUP | POLLNVAL);
+  events = (events & state->cur_pollfd->events) | unmaskable;
   if (events != 0) {
     if (state->cur_pollfd->revents == 0) {
       ++state->event_count;
@@ -405,17 +411,18 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds,
     struct pollfd *pollfd = fds + i;
     if (pollfd->fd < 0)
       continue;
+    state.cur_pollfd = pollfd;
+    defer state.cur_pollfd = NULL;
+
     descriptor_table_entry_t entry;
-    if (descriptor_table_get(pollfd->fd, &entry) < 0)
-      return -1;
+    if (descriptor_table_get(pollfd->fd, &entry) < 0) {
+      __wasilibc_poll_ready(&state, POLLNVAL);
+      continue;
+    }
     defer descriptor_table_entry_dec(entry);
 
-    state.cur_pollfd = pollfd;
     state.cur_entry = &entry;
-    defer {
-      state.cur_pollfd = NULL;
-      state.cur_entry = NULL;
-    }
+    defer state.cur_entry = NULL;
 
     // If this descriptor has a custom registration function then
     // use that exclusively.

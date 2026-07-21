@@ -63,6 +63,17 @@ int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
     return -1;
   }
 
+  // POSIX requires select/pselect to fail with EBADF if any of the file
+  // descriptors is not a valid open descriptor. poll() reports these with
+  // POLLNVAL, so surface that as EBADF here rather than silently dropping the
+  // descriptor from the result sets.
+  for (size_t i = 0; i < poll_nfds; ++i) {
+    if ((poll_fds[i].revents & POLLNVAL) != 0) {
+      errno = EBADF;
+      return -1;
+    }
+  }
+
   FD_ZERO(readfds);
   FD_ZERO(writefds);
   FD_ZERO(errorfds);

@@ -89,17 +89,20 @@ int __wasilibc_random(void *buffer, size_t len)
 
 enum {
   __WASILIBC_FUTEX_WAKE_ALL = -1,
-  __WASILIBC_FUTEX_YIELD = 1,
+  __WASILIBC_FUTEX_YIELD = 1 << 0,
+  __WASILIBC_FUTEX_TIMESPEC_ABSOLUTE = 1 << 1,
 };
+
 /// Wait on a futex after first confirming `*addr == val`.
 ///
 /// Returns 0 when woken, or a negated errno on failure:
 /// - `-EWOULDBLOCK` if `*addr != val` at entry,
 /// - `-ETIMEDOUT` if the deadline expires.
 ///
-/// The `clock` argument selects the clock used for the absolute deadline `at`.
+/// The `clock` argument selects the clock used for `at`.
 /// If `at` is NULL, this waits indefinitely.
-/// The `flags` argument is currently unused and should be 0.
+/// The `flags` argument may be `__WASILIBC_FUTEX_TIMESPEC_ABSOLUTE` to
+/// indicate that `at` is an absolute time rather than a relative timeout.
 ///
 /// In single-threaded builds, calling this function with arguments that would
 /// require waiting will trap.
@@ -108,7 +111,8 @@ int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clock,
 
 /// Wake up to `count` threads waiting on the futex at `addr`.
 ///
-/// Returns 0 on success, or a negated errno on failure:
+/// Returns the number of threads woken on success, or a negated errno on
+/// failure:
 /// - `-EINVAL` if `flags` is invalid.
 ///
 /// If `count` is `__WASILIBC_FUTEX_WAKE_ALL`, all waiters are woken.

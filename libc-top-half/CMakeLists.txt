@@ -235,6 +235,8 @@ set(top_half_sources
   musl/src/network/ntohl.c
   musl/src/network/ntohs.c
   musl/src/stat/futimesat.c
+  musl/src/thread/common/__wait.c
+  musl/src/thread/common/__timedwait.c
   musl/src/thread/common/default_attr.c
   musl/src/thread/common/pthread_attr_destroy.c
   musl/src/thread/common/pthread_attr_get.c
@@ -409,8 +411,7 @@ if (TARGET_TRIPLE MATCHES "wasip1-threads")
     musl/src/stdio/ftrylockfile.c
     musl/src/stdio/funlockfile.c
     musl/src/thread/wasi-threads/__lock.c
-    musl/src/thread/wasi-threads/__wait.c
-    musl/src/thread/wasi-threads/__timedwait.c
+    musl/src/thread/wasi-threads/futex.c
     musl/src/thread/wasi-threads/lock_ptc.c
     musl/src/thread/wasi-threads/pthread_barrier_destroy.c
     musl/src/thread/wasi-threads/pthread_barrier_init.c
@@ -463,7 +464,7 @@ elseif(ENABLE_COOP_THREADS)
     musl/src/stdio/ftrylockfile.c
     musl/src/stdio/funlockfile.c
     musl/src/thread/coop-threads/__lock.c
-    musl/src/thread/coop-threads/__wait.c
+    musl/src/thread/coop-threads/futex.c
     musl/src/thread/coop-threads/__wasi_coop_thread_start.s
     musl/src/thread/coop-threads/lock_ptc.c
     musl/src/thread/coop-threads/mtx_lock.c
@@ -520,7 +521,7 @@ elseif(ENABLE_COOP_THREADS)
 else()
   # pthreads stubs for single-threaded environment
   list(APPEND top_half_sources
-    musl/src/thread/single-threaded/__wait.c
+    musl/src/thread/single-threaded/futex.c
     musl/src/thread/single-threaded/pthread_barrier_destroy.c
     musl/src/thread/single-threaded/pthread_barrier_init.c
     musl/src/thread/single-threaded/pthread_barrier_wait.c

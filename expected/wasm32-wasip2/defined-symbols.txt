@@ -78,6 +78,7 @@ __ftello
 __ftello_unlocked
 __funcs_on_exit
 __funcs_on_quick_exit
+__futexwait
 __futimesat
 __fwritable
 __fwritex
@@ -267,6 +268,8 @@ __tan
 __tandf
 __tanl
 __testcancel
+__timedwait
+__timedwait_cp
 __tl_lock
 __tl_unlock
 __tm_to_secs
@@ -288,6 +291,8 @@ __uflow
 __unlist_locked_file
 __uselocale
 __utc
+__wait
+__wake
 __wasi_sockets_services_db
 __wasi_sockets_utils__borrow_network
 __wasilibc_access

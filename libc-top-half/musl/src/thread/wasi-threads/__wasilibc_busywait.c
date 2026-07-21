@@ -37,14 +37,14 @@ void __wasilibc_enable_futex_busywait_on_current_thread(void)
     __wasilibc_use_busy_futex_set(1);
 }
 
-int __wasilibc_futex_wait_atomic_wait(volatile void *addr, int op, int val, int64_t max_wait_ns);
+int __wasilibc_futex_wait_atomic_wait(volatile void *addr, int val, int64_t max_wait_ns);
 
-int __wasilibc_futex_wait_maybe_busy(volatile void *addr, int op, int val, int64_t max_wait_ns)
+int __wasilibc_futex_wait_maybe_busy(volatile void *addr, int val, int64_t max_wait_ns)
 {
     // PLEASE NOTE THAT WE CANNOT CALL LIBC FUNCTIONS THAT USE FUTEXES HERE
 
     if (!__wasilibc_use_busy_futex_get()) {
-        return __wasilibc_futex_wait_atomic_wait(addr, op, val, max_wait_ns);
+        return __wasilibc_futex_wait_atomic_wait(addr, val, max_wait_ns);
     }
 
     struct timespec start;
@@ -72,4 +72,4 @@ int __wasilibc_futex_wait_maybe_busy(volatile void *addr, int op, int val, int64
     }
 
     return 0;
-} 
+}

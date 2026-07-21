@@ -96,18 +96,22 @@ static void wait_indefinitely(struct __waitlist_node **list) {
 /// involve hooking into thread shutdown, however, which is currently left for a
 /// future refactoring.
 static int wait_timeout(struct __waitlist_node **list, clockid_t clk,
-                        const struct timespec *at) {
+                        const struct timespec *at, unsigned flags) {
   wasip3_event_t event;
 
   // Create a subtask based on sleeping until `at`. Note that if this subtask
   // immediately returns we don't bother with `list` and just immediately return
   // `ETIMEDOUT`.
   wasip3_subtask_status_t status;
-  if (clk == CLOCK_MONOTONIC) {
+  if (clk == CLOCK_MONOTONIC || !(flags & __WASILIBC_FUTEX_TIMESPEC_ABSOLUTE)) {
     monotonic_clock_mark_t deadline;
     if (!timespec_to_instant_clamp(at, &deadline))
       return EINVAL;
-    status = monotonic_clock_wait_until(deadline);
+    if (flags & __WASILIBC_FUTEX_TIMESPEC_ABSOLUTE)  {
+      status = monotonic_clock_wait_until(deadline);
+    } else {
+      status = monotonic_clock_wait_for(deadline);
+    }
   } else {
     assert(clk == CLOCK_REALTIME);
     // FIXME(WebAssembly/WASI#857): `CLOCK_REALTIME` is not supported by the
@@ -245,12 +249,13 @@ static int wait_timeout(struct __waitlist_node **list, clockid_t clk,
 /// Returns 0 when the thread was externally woken with `__waitlist_wake_*`
 /// and otherwise returns a nonzero error code. This function does not set
 /// `errno`.
-int __waitlist_wait_on(struct __waitlist_node **list, clockid_t clk,
-                       const struct timespec *at) {
+static int __waitlist_wait_on(struct __waitlist_node **list, clockid_t clk,
+                       const struct timespec *at,
+                       unsigned flags) {
   // Delegate to the internal implementation based on the timeout. Note that we
   // always return "woken" for the indefinite wait scenario.
   if (at)
-    return wait_timeout(list, clk, at);
+    return wait_timeout(list, clk, at, flags);
   wait_indefinitely(list);
   return 0;
 }
@@ -276,7 +281,7 @@ static void wake_node(struct __waitlist_node *node, int yield) {
   }
 }
 
-void __waitlist_wake_one(struct __waitlist_node **list, int yield) {
+static void __waitlist_wake_one(struct __waitlist_node **list, int yield) {
   if (*list == NULL) {
     return;
   }
@@ -285,12 +290,13 @@ void __waitlist_wake_one(struct __waitlist_node **list, int yield) {
   wake_node(node, yield);
 }
 
-void __waitlist_wake_all(struct __waitlist_node **list, int yield) {
+static int __waitlist_wake_all(struct __waitlist_node **list, int yield) {
   // Detach the entire waitlist up front and iterate over it locally. Waking a
   // thread may yield to it and may modify `list` which we don't want to tamper
   // with.
   struct __waitlist_node *curr = *list;
   *list = NULL;
+  int woken = 0;
 
   while (curr) {
     // Read `next` before waking, since `curr`'s storage may go away once it
@@ -301,11 +307,13 @@ void __waitlist_wake_all(struct __waitlist_node **list, int yield) {
     // run at some point.
     wake_node(curr, next == NULL && yield);
     curr = next;
+    woken++;
   }
+  return woken;
 }
 
-// We supply a futex-style interface on top of our cooperative threading model to 
-// maintain compatibility with the existing pthreads ABI. This is supported by a 
+// We supply a futex-style interface on top of our cooperative threading model to
+// maintain compatibility with the existing pthreads ABI. This is supported by a
 // hashmap of futex addresses to waitlists of threads that are waiting on those
 // futexes.
 struct __futex_entry {
@@ -316,8 +324,8 @@ struct __futex_entry {
 // The futex map should be accessed through `get_futex_map` to ensure it is lazily initialized. It is never freed.
 static struct hashmap *futex_map;
 
-// The hash function and comparison functions are supplied to the hashmap to allow it to store `__futex_entry` 
-// structs keyed by their `addr` field. 
+// The hash function and comparison functions are supplied to the hashmap to allow it to store `__futex_entry`
+// structs keyed by their `addr` field.
 static uint64_t futex_entry_hash(const void *item, uint64_t seed0,
                                  uint64_t seed1) {
   const struct __futex_entry *entry = item;
@@ -343,7 +351,7 @@ static struct hashmap *get_futex_map(bool create) {
 static struct __futex_entry *find_futex_entry(volatile int *addr, bool create) {
   struct hashmap *map = get_futex_map(create);
 
-  // Create a temporary key to search for the futex entry in the hashmap; 
+  // Create a temporary key to search for the futex entry in the hashmap;
   // the `list` field is not used for comparison, so it can be NULL.
   struct __futex_entry key = {
       .addr = addr,
@@ -370,9 +378,20 @@ static void maybe_release_futex_entry(struct __futex_entry *entry) {
   }
 }
 
-int __timedwait(volatile int *addr, int val, clockid_t clk,
-                const struct timespec *at, int opt) {
-  (void)opt; // Unused in this implementation
+int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
+                          const struct timespec *at, unsigned flags)
+{
+  if ((flags & ~__WASILIBC_FUTEX_TIMESPEC_ABSOLUTE) != 0)
+    return -EINVAL;
+  if (*addr != val)
+    return -EWOULDBLOCK;
+
+  if (at) {
+    if (at->tv_nsec >= 1000000000UL)
+      return -EINVAL;
+    if (at->tv_nsec < 0)
+      return -EINVAL;
+  }
 
   if (*addr != val)
     return 0;
@@ -381,55 +400,16 @@ int __timedwait(volatile int *addr, int val, clockid_t clk,
   if (!entry)
     return ENOMEM;
 
-  int rc = __waitlist_wait_on(&entry->list, clk, at);
-  maybe_release_futex_entry(entry);
-  return rc;
-}
-
-void __wait(volatile int *addr, volatile int *waiters, int val, int opt) {
-  if (waiters)
-    ++*waiters;
-  while (*addr == val) {
-    int rc = __timedwait(addr, val, CLOCK_REALTIME, NULL, opt);
-    if (rc)
-      break;
-  }
-  if (waiters)
-    --*waiters;
-}
-
-void __wake(volatile void *addr, int cnt, int yield) {
-  struct __futex_entry *entry;
-  volatile int *word = (volatile int *)addr;
-
-  entry = find_futex_entry(word, false);
-  if (!entry)
-    return;
-
-  if (cnt < 0) {
-    __waitlist_wake_all(&entry->list, yield);
+  int rc = 0;
+  if (at) {
+    if (!(flags & __WASILIBC_FUTEX_TIMESPEC_ABSOLUTE) &&at->tv_sec < 0)
+        return -EINVAL;
+    rc = __waitlist_wait_on(&entry->list, clk, at, flags);
   } else {
-    while (cnt-- > 0 && entry->list) {
-      __waitlist_wake_one(&entry->list, yield);
-    }
+    wait_indefinitely(&entry->list);
   }
-}
-
-void __futexwait(volatile void *addr, int val, int opt) {
-  (void)__timedwait((volatile int *)addr, val, CLOCK_REALTIME, NULL, opt);
-}
-
-int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
-                          const struct timespec *at, unsigned flags)
-{
-  if (flags != 0) {
-    return -EINVAL;
-  }
-  if (*addr != val) {
-    return -EWOULDBLOCK;
-  }
-  int r = __timedwait(addr, val, clk, at, 0);
-  return r ? -r : 0;
+  maybe_release_futex_entry(entry);
+  return rc ? -rc : 0;
 }
 
 int __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags)
@@ -437,6 +417,22 @@ int __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags)
   if (flags != 0 && flags != __WASILIBC_FUTEX_YIELD) {
     return -EINVAL;
   }
-  __wake(addr, count, flags & __WASILIBC_FUTEX_YIELD);
-  return 0;
+  int yield = (flags & __WASILIBC_FUTEX_YIELD) != 0;
+  struct __futex_entry *entry;
+  volatile int *word = (volatile int *)addr;
+
+  entry = find_futex_entry(word, false);
+  if (!entry)
+    return 0;
+
+  if (count < 0) {
+    return __waitlist_wake_all(&entry->list, yield);
+  } else {
+    int woken = 0;
+    while (count-- > 0 && entry->list) {
+      __waitlist_wake_one(&entry->list, yield);
+      woken++;
+    }
+    return woken;
+  }
 }

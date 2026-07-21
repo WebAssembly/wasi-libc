@@ -195,8 +195,6 @@ hidden void __unmapself(void *, size_t);
 
 #ifdef __wasi_cooperative_threads__
 hidden int __wasilibc_pthread_mutex_unlock(pthread_mutex_t *m, int yield);
-#else
-hidden int __wasilibc_futex_wait_syscall(volatile void *, int, int, int64_t);
 #endif
 
 hidden int __timedwait(volatile int *, int, clockid_t, const struct timespec *, int);

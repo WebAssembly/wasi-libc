@@ -21,7 +21,8 @@ int main(void) {
     past.tv_sec -= 1;
   }
 
-  r = __wasilibc_futex_wait((volatile void *)&fut, 7, CLOCK_REALTIME, &past, 0);
+  r = __wasilibc_futex_wait((volatile void *)&fut, 7, CLOCK_REALTIME, &past,
+                            __WASILIBC_FUTEX_TIMESPEC_ABSOLUTE);
   TEST(r == -ETIMEDOUT);
 
   return t_status;

@@ -37,7 +37,7 @@ off_t __lseek(int fildes, off_t offset, int whence) {
     return -1;
   defer descriptor_table_entry_dec(entry);
   if (!entry.vtable->seek) {
-    errno = EINVAL;
+    errno = ESPIPE;
     return -1;
   }
   return entry.vtable->seek(entry.data, offset, whence);

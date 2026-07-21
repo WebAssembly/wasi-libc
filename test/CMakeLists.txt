@@ -462,6 +462,7 @@ add_wasilibc_test(pipe_fstat.c)
 add_wasilibc_test(pipe_setfl_independent.c)
 add_wasilibc_test(pipe_atomic_write.c)
 add_wasilibc_test(pipe_zero_len.c)
+add_wasilibc_test(pipe_espipe.c)
 
 if (
   # Setjmp currently requires llvm 20+ for the support necessary in wasi-libc.

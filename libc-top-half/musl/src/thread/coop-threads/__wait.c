@@ -422,6 +422,9 @@ void __futexwait(volatile void *addr, int val, int opt) {
 int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
                           const struct timespec *at, unsigned flags)
 {
+  if (flags != 0) {
+    return EINVAL;
+  }
   if (*addr != val) {
     return -EWOULDBLOCK;
   }
@@ -429,7 +432,11 @@ int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
   return r ? -r : 0;
 }
 
-void __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags)
+int __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags)
 {
+  if (flags != 0 && flags != __WASILIBC_FUTEX_YIELD) {
+    return -EINVAL;
+  }
   __wake(addr, count, flags & __WASILIBC_FUTEX_YIELD);
+  return 0;
 }

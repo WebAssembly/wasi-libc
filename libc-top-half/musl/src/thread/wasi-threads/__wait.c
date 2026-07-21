@@ -48,9 +48,11 @@ int __wasilibc_futex_wait_syscall(volatile void *addr, int op, int val,
 int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
 						  const struct timespec *at, int flags)
 {
-	(void)flags; // unused
 	int r;
 
+	if (flags != 0) {
+		return -EINVAL;
+	}
 	if (*addr != val) {
 		return -EWOULDBLOCK;
 	}
@@ -58,14 +60,17 @@ int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
 	return r ? -r : 0;
 }
 
-void __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags)
+int __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags)
 {
-	(void)flags; // unused
+	if (flags != 0 && flags != __WASILIBC_FUTEX_YIELD) {
+		return -EINVAL;
+	}
 
 	if (count < 0) {
 		count = INT_MAX;
 	}
 	__builtin_wasm_memory_atomic_notify((int *)addr, count);
+	return 0;
 }
 #endif
 

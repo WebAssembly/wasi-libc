@@ -106,12 +106,15 @@ int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clock,
 
 /// Wake up to `count` threads waiting on the futex at `addr`.
 ///
+/// Returns 0 on success, or a negated errno on failure:
+/// - `-EINVAL` if `flags` is invalid.
+///
 /// If `count` is `__WASILIBC_FUTEX_WAKE_ALL`, all waiters are woken.
 /// `flags` may be `__WASILIBC_FUTEX_YIELD` in cooperative-threading builds
 /// to yield to the woken thread(s) immediately. Otherwise, `flags` should be 0.
 ///
 /// In single-threaded builds, this function is a no-op.
-void __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags);
+int __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags);
 
 #ifdef __cplusplus
 }

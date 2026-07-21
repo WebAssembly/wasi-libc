@@ -530,6 +530,7 @@ add_wasilibc_test(cwd_relative_threads.c FS)
 
 add_wasilibc_test(futex_wait_in_past.c)
 add_wasilibc_test(futex_wait_mismatch.c)
+add_wasilibc_test(futex_flags.c)
 if (WASILIBC_MULTITHREADING)
   add_wasilibc_test(futex_wake_one.c)
   add_wasilibc_test(futex_wake_all.c)

@@ -373,7 +373,7 @@ static bool wasip3_tcp_accept_start(tcp_socket_state_listening_t *state) {
   return false;
 }
 
-/// This function is similar to `wasip3_enter_io` in `file_utils.c`
+/// This function is similar to `wasip3_io_sync` in `file_utils.c`
 static int wasip3_accept_sync(tcp_socket_t *socket, bool blocking) {
   STRONG_ASSERT_HELD(socket->lock);
   assert(socket->state.tag == TCP_SOCKET_STATE_LISTENING);
@@ -387,6 +387,7 @@ static int wasip3_accept_sync(tcp_socket_t *socket, bool blocking) {
 #ifdef _REENTRANT
     STRONG_UNLOCK(socket->lock);
 
+    // Bounce on the lock to wait for pending blocking I/O to complete.
     STRONG_LOCK(state->blocking_lock);
     STRONG_UNLOCK(state->blocking_lock);
 
@@ -720,7 +721,7 @@ static int tcp_connect(void *data, const struct sockaddr *addr,
   // is via `poll`, and there's specifically a clause there which tests if
   // `subtask` is 0 and rejects polls on that socket. Otherwise the socket will
   // be entirely unusable/internal for the duration of this blocking operation,
-  // so it should be safe to without any extra accounting just drop the lock.
+  // so it should be safe to without any extra accounting to just drop the lock.
   if (WASIP3_SUBTASK_STATE(status) != WASIP3_SUBTASK_RETURNED) {
     wasip3_subtask_t subtask = WASIP3_SUBTASK_HANDLE(status);
     if (socket->blocking) {

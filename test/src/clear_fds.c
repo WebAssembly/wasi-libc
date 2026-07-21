@@ -15,6 +15,7 @@
   } while (0)
 
 int main(void) {
+#ifndef __wasip1__
   char tmp[] = "testsuite-XXXXXX";
   int fd;
   TEST((fd = open(tmp, O_RDWR | O_CREAT | O_EXCL, 0600)) > 2);
@@ -29,5 +30,6 @@ int main(void) {
   TEST(write(2, "test stderr\n", 12) == 12);
   if (fd > 2)
     TEST(unlink(tmp) != -1);
+#endif
   return t_status;
 }

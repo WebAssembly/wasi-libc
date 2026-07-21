@@ -600,7 +600,7 @@ static void wasip3_recv_end(udp_socket_streams_t *streams,
   streams->flags |= UDP_STREAMS_RECV_READY;
 }
 
-/// This function is similar to `wasip3_enter_io` in `file_utils.c`
+/// This function is similar to `wasip3_io_sync` in `file_utils.c`
 ///
 /// Note that callers need to re-fetch any internal state from within `socket`
 /// after calling this function as this may drop the lock and re-acquire it.
@@ -623,6 +623,7 @@ static int wasip3_udp_recv_sync(udp_socket_t *socket, bool blocking) {
 #ifdef _REENTRANT
     STRONG_UNLOCK(socket->lock);
 
+    // Bounce on the lock to wait for pending blocking I/O to complete.
     STRONG_LOCK(streams->recv_blocking_lock);
     STRONG_UNLOCK(streams->recv_blocking_lock);
 
@@ -822,7 +823,7 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
 
 #ifdef __wasip3__
 
-/// This function is similar to `wasip3_enter_io` in `file_utils.c`
+/// This function is similar to `wasip3_io_sync` in `file_utils.c`
 ///
 /// Note that like `wasip3_udp_recv_enter` this requires callers to re-acquire
 /// internal pointers within `socket` if `blocking` is true.
@@ -844,6 +845,7 @@ static int wasip3_udp_send_sync(udp_socket_t *socket, bool blocking) {
 #ifdef _REENTRANT
     STRONG_UNLOCK(socket->lock);
 
+    // Bounce on the lock to wait for pending blocking I/O to complete.
     STRONG_LOCK(streams->send_blocking_lock);
     STRONG_UNLOCK(streams->send_blocking_lock);
 

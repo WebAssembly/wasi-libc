@@ -23,6 +23,24 @@ index 029c903e01a..2cdf353eebe 100644
  
      def testTruncateOnWindows(self):
          # SF bug <https://bugs.python.org/issue801631>
+diff --git a/Lib/test/test_posix.py b/Lib/test/test_posix.py
+index 2a72fa2fbbe..1c8d05a48f4 100644
+--- a/Lib/test/test_posix.py
++++ b/Lib/test/test_posix.py
+@@ -937,7 +937,12 @@ class PosixTester(unittest.TestCase):
+         self.assertRaises(TypeError, os.pipe2, 0, 0)
+ 
+         # try calling with flags = 0, like os.pipe()
+-        r, w = os.pipe2(0)
++        try:
++            r, w = os.pipe2(0)
++        except OSError as e:
++            if e.errno == errno.ENOTSUP:
++                self.skipTest("os.pipe2() is not supported at runtime")
++            raise
+         os.close(r)
+         os.close(w)
+ 
 diff --git a/Lib/test/test_sys.py b/Lib/test/test_sys.py
 index e2117b9588d..1a14c758c55 100644
 --- a/Lib/test/test_sys.py

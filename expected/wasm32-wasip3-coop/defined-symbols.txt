@@ -298,6 +298,7 @@ __tandf
 __tanl
 __testcancel
 __timedwait
+__timedwait_cp
 __tl_lock
 __tl_unlock
 __tm_to_secs
@@ -322,9 +323,6 @@ __unlockfile
 __uselocale
 __utc
 __wait
-__waitlist_wait_on
-__waitlist_wake_all
-__waitlist_wake_one
 __wake
 __wasi_coop_thread_start
 __wasi_coop_thread_start_C

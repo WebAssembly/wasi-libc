@@ -67,7 +67,7 @@ int main(void) {
   }
 
   // Wake exactly one waiter first.
-  __wasilibc_futex_wake((volatile int *)&futex_word, 1, 0);
+  TEST(__wasilibc_futex_wake((volatile int *)&futex_word, 1, 0) == 1);
 
   // Give the awakened thread a chance to run and record the wake.
   for (int i = 0;
@@ -78,8 +78,8 @@ int main(void) {
   TEST(__atomic_load_n(&woke_count, __ATOMIC_SEQ_CST) == 1);
 
   // Then wake the rest and ensure everyone completed successfully.
-  __wasilibc_futex_wake((volatile int *)&futex_word, __WASILIBC_FUTEX_WAKE_ALL,
-                        0);
+  TEST(__wasilibc_futex_wake((volatile int *)&futex_word,
+                             __WASILIBC_FUTEX_WAKE_ALL, 0) == NUM_WAITERS - 1);
 
   for (int i = 0; i < NUM_WAITERS; i++) {
     TEST(pthread_join(threads[i], NULL) == 0);

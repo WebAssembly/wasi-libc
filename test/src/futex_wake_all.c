@@ -62,8 +62,8 @@ int main(void) {
   }
 
   // Wake all waiters and expect each wait call to succeed.
-  __wasilibc_futex_wake((volatile int *)&futex_word, __WASILIBC_FUTEX_WAKE_ALL,
-                        0);
+  TEST(__wasilibc_futex_wake((volatile int *)&futex_word,
+                             __WASILIBC_FUTEX_WAKE_ALL, 0) == NUM_WAITERS);
 
   for (int i = 0; i < NUM_WAITERS; i++) {
     TEST(pthread_join(threads[i], NULL) == 0);

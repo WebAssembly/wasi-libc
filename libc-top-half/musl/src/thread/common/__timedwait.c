@@ -4,6 +4,7 @@
 #include "futex.h"
 #include "syscall.h"
 #include "pthread_impl.h"
+#include <wasi/libc.h>
 
 #ifdef __wasilibc_unmodified_upstream
 #define IS32BIT(x) !((x)+0x80000000ULL>>32)
@@ -29,21 +30,17 @@ static int __futex4_cp(volatile void *addr, int op, int val, const struct timesp
 
 static volatile int dummy = 0;
 weak_alias(dummy, __eintr_valid_flag);
-#else
-static int __futex4_cp(volatile void *addr, int op, int val, const struct timespec *to)
-{
-	int64_t max_wait_ns = -1;
-	if (to) {
-		max_wait_ns = (int64_t)(to->tv_sec * 1000000000 + to->tv_nsec);
-	}
-	return __wasilibc_futex_wait_syscall(addr, op, val, max_wait_ns);
-}
 #endif
 
 int __timedwait_cp(volatile int *addr, int val,
 	clockid_t clk, const struct timespec *at, int priv)
 {
 	int r;
+	if (at) {
+		if (at->tv_nsec >= 1000000000UL) return EINVAL;
+		if (at->tv_nsec < 0) return EINVAL;
+	}
+#ifdef __wasilibc_unmodified_upstream
 	struct timespec to, *top=0;
 
 	if (priv) priv = FUTEX_PRIVATE;
@@ -61,6 +58,9 @@ int __timedwait_cp(volatile int *addr, int val,
 	}
 
 	r = -__futex4_cp(addr, FUTEX_WAIT|priv, val, top);
+#else
+        r = -__wasilibc_futex_wait(addr, val, clk, at, __WASILIBC_FUTEX_TIMESPEC_ABSOLUTE);
+#endif
 	if (r != EINTR && r != ETIMEDOUT && r != ECANCELED) r = 0;
 #ifdef __wasilibc_unmodified_upstream
 	/* Mitigate bug in old kernels wrongly reporting EINTR for non-

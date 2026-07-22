@@ -98,6 +98,13 @@ enum {
 /// Returns 0 when woken, or a negated errno on failure:
 /// - `-EWOULDBLOCK` if `*addr != val` at entry,
 /// - `-ETIMEDOUT` if the deadline expires.
+/// - `-EINVAL` if `addr` is unaligned.
+/// - `-EINVAL` if `at`'s `tv_nsec` field exceeds 1s.
+/// - `-EINVAL` if `at`'s `tv_nsec` field is negative.
+/// - `-EINVAL` if `at`'s `tv_sec` field is negative and it's a relative
+///   timeout.
+/// - `-EINVAL` if `clock` is invalid.
+/// - `-ENOMEM` if libc-internal data structures fail to get allocated.
 ///
 /// The `clock` argument selects the clock used for `at`.
 /// If `at` is NULL, this waits indefinitely.

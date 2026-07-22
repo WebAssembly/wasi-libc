@@ -352,6 +352,8 @@ int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
 {
   if ((flags & ~__WASILIBC_FUTEX_TIMESPEC_ABSOLUTE) != 0)
     return -EINVAL;
+  if ((((intptr_t)addr) & 3) != 0)
+    return -EINVAL;
   if (*addr != val)
     return -EWOULDBLOCK;
 

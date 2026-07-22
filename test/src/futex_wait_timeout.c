@@ -100,5 +100,9 @@ int main(void) {
                              &invalid,
                              __WASILIBC_FUTEX_TIMESPEC_ABSOLUTE) == -EINVAL);
 
+  volatile void *unaligned_word = (volatile void *)0x12;
+  TEST(__wasilibc_futex_wait(unaligned_word, 0, 0, NULL,
+                             __WASILIBC_FUTEX_TIMESPEC_ABSOLUTE) == -EINVAL);
+
   return t_status;
 }

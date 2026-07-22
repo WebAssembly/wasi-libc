@@ -483,7 +483,6 @@ elseif(ENABLE_COOP_THREADS)
     musl/src/thread/coop-threads/pthread_getname_np.c
     musl/src/thread/coop-threads/pthread_getschedparam.c
     musl/src/thread/coop-threads/pthread_join.c
-    musl/src/thread/coop-threads/pthread_kill.c
     musl/src/thread/coop-threads/pthread_mutex_consistent.c
     musl/src/thread/coop-threads/pthread_mutex_lock.c
     musl/src/thread/coop-threads/pthread_mutex_setprioceiling.c
@@ -502,7 +501,6 @@ elseif(ENABLE_COOP_THREADS)
     musl/src/thread/coop-threads/pthread_setname_np.c
     musl/src/thread/coop-threads/pthread_setschedparam.c
     musl/src/thread/coop-threads/pthread_setschedprio.c
-    musl/src/thread/coop-threads/pthread_sigmask.c
     musl/src/thread/coop-threads/pthread_spin_lock.c
     musl/src/thread/coop-threads/pthread_spin_trylock.c
     musl/src/thread/coop-threads/pthread_spin_unlock.c

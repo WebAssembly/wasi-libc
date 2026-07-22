@@ -6,6 +6,7 @@
 #include <time.h>
 #include <wasi/api.h>
 #include <wasi/libc.h>
+#include "common/clock.h"
 
 #ifndef __wasip3__
 #error "Unknown WASI version"
@@ -103,7 +104,7 @@ static int wait_timeout(struct __waitlist_node **list, clockid_t clk,
   // immediately returns we don't bother with `list` and just immediately return
   // `ETIMEDOUT`.
   wasip3_subtask_status_t status;
-  if (clk == CLOCK_MONOTONIC || !(flags & __WASILIBC_FUTEX_TIMESPEC_ABSOLUTE)) {
+  if (clk->id == CLOCKID_MONOTONIC || !(flags & __WASILIBC_FUTEX_TIMESPEC_ABSOLUTE)) {
     monotonic_clock_mark_t deadline;
     if (!timespec_to_instant_clamp(at, &deadline))
       return EINVAL;
@@ -113,7 +114,7 @@ static int wait_timeout(struct __waitlist_node **list, clockid_t clk,
       status = monotonic_clock_wait_for(deadline);
     }
   } else {
-    assert(clk == CLOCK_REALTIME);
+    assert(clk->id == CLOCKID_REALTIME);
     // FIXME(WebAssembly/WASI#857): `CLOCK_REALTIME` is not supported by the
     // WASI interfaces. It's the default for `pthread_*` primitives, however, so
     // it kind of needs to be supported. Calculate the diff in seconds between
@@ -238,28 +239,6 @@ static int wait_timeout(struct __waitlist_node **list, clockid_t clk,
   return node.woken ? 0 : ETIMEDOUT;
 }
 
-
-/// Blocks the current thread on `list` waiting for a notification.
-///
-/// If `at` is non-NULL then it is an *absolute* deadline measured against the
-/// clock `clk`, matching POSIX `pthread_mutex_timedlock`-style semantics.
-/// If `at` is `NULL` this waits indefinitely and `clk` is unused (and may be
-/// `NULL`).
-///
-/// Returns 0 when the thread was externally woken with `__waitlist_wake_*`
-/// and otherwise returns a nonzero error code. This function does not set
-/// `errno`.
-static int __waitlist_wait_on(struct __waitlist_node **list, clockid_t clk,
-                       const struct timespec *at,
-                       unsigned flags) {
-  // Delegate to the internal implementation based on the timeout. Note that we
-  // always return "woken" for the indefinite wait scenario.
-  if (at)
-    return wait_timeout(list, clk, at, flags);
-  wait_indefinitely(list);
-  return 0;
-}
-
 static void wake_node(struct __waitlist_node *node, int yield) {
   node->woken = true;
   if (node->kind == WAITLIST_NODE_TID) {
@@ -285,9 +264,14 @@ static void wake_node(struct __waitlist_node *node, int yield) {
 // maintain compatibility with the existing pthreads ABI. This is supported by a
 // hashmap of futex addresses to waitlists of threads that are waiting on those
 // futexes.
+//
+// Note that the waitlist of each entry is an indirect separately heap-allocated
+// pointer. This ensures that the list itself is stable across hash map
+// reallocations which enables `wait_timeout` and `wait_indefinitely` to rely on
+// the list being valid before and after the operation.
 struct __futex_entry {
   volatile int *addr;
-  struct __waitlist_node *list;
+  struct __waitlist_node **list;
 };
 
 // The futex map should be accessed through `get_futex_map` to ensure it is lazily initialized. It is never freed.
@@ -317,7 +301,7 @@ static struct hashmap *get_futex_map(bool create) {
   return futex_map;
 }
 
-static struct __futex_entry *find_futex_entry(volatile int *addr, bool create) {
+static struct __waitlist_node **find_futex_entry(volatile int *addr, bool create) {
   struct hashmap *map = get_futex_map(create);
 
   // Create a temporary key to search for the futex entry in the hashmap;
@@ -332,19 +316,31 @@ static struct __futex_entry *find_futex_entry(volatile int *addr, bool create) {
 
   struct __futex_entry *entry = (struct __futex_entry *)__hashmap_get(map, &key);
   if (entry || !create)
-    return entry;
+    return entry->list;
 
-  if (!__hashmap_set(map, &key) && __hashmap_oom(map))
+  key.list = malloc(sizeof(struct __waitlist_node *));
+  if (!key.list)
     return NULL;
+  *key.list = NULL;
 
-  return (struct __futex_entry *)__hashmap_get(map, &key);
+  if (!__hashmap_set(map, &key) && __hashmap_oom(map)) {
+    free(key.list);
+    return NULL;
+  }
+
+  return key.list;
 }
 
 // If a futex entry exists for the given address and its waitlist is empty, remove it from the hashmap.
-static void maybe_release_futex_entry(struct __futex_entry *entry) {
-  if (entry != NULL && entry->list == NULL) {
-    __hashmap_delete(get_futex_map(false), entry);
-  }
+static void maybe_release_futex_entry(volatile int *addr, struct __waitlist_node **list) {
+  if (*list != NULL)
+    return;
+  struct __futex_entry key = {
+      .addr = addr,
+      .list = NULL,
+  };
+  __hashmap_delete(get_futex_map(false), &key);
+  free(list);
 }
 
 int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
@@ -367,19 +363,19 @@ int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
   if (*addr != val)
     return 0;
 
-  struct __futex_entry *entry = find_futex_entry(addr, true);
-  if (!entry)
+  struct __waitlist_node **list = find_futex_entry(addr, true);
+  if (!list)
     return ENOMEM;
 
   int rc = 0;
   if (at) {
-    if (!(flags & __WASILIBC_FUTEX_TIMESPEC_ABSOLUTE) &&at->tv_sec < 0)
+    if (!(flags & __WASILIBC_FUTEX_TIMESPEC_ABSOLUTE) && at->tv_sec < 0)
         return -EINVAL;
-    rc = __waitlist_wait_on(&entry->list, clk, at, flags);
+    rc = wait_timeout(list, clk, at, flags);
   } else {
-    wait_indefinitely(&entry->list);
+    wait_indefinitely(list);
   }
-  maybe_release_futex_entry(entry);
+  maybe_release_futex_entry(addr, list);
   return rc ? -rc : 0;
 }
 
@@ -389,11 +385,10 @@ int __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags)
     return -EINVAL;
   }
   int yield = (flags & __WASILIBC_FUTEX_YIELD) != 0;
-  struct __futex_entry *entry;
   volatile int *word = (volatile int *)addr;
 
-  entry = find_futex_entry(word, false);
-  if (!entry)
+  struct __waitlist_node **list = find_futex_entry(word, false);
+  if (!list)
     return 0;
 
   count = (count < 0) ? INT_MAX : count;
@@ -401,9 +396,9 @@ int __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags)
   // "Atomically" dequeue all waiters first, then wake them all up. That way if
   // a waiter re-enqueues themselves we won't see it.
   struct __waitlist_node *to_wake = NULL;
-  while (count > 0 && entry->list) {
-    struct __waitlist_node *node = entry->list;
-    list_remove(&entry->list, node);
+  while (count > 0 && *list) {
+    struct __waitlist_node *node = *list;
+    list_remove(list, node);
     list_insert(&to_wake, node);
     count--;
   }

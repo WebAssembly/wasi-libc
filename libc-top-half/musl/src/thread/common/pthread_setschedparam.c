@@ -3,6 +3,7 @@
 
 int pthread_setschedparam(pthread_t t, int policy, const struct sched_param *param)
 {
+#ifdef __wasilibc_unmodified_upstream
 	int r;
 	sigset_t set;
 	__block_app_sigs(&set);
@@ -11,4 +12,7 @@ int pthread_setschedparam(pthread_t t, int policy, const struct sched_param *par
 	UNLOCK(t->killlock);
 	__restore_sigs(&set);
 	return r;
+#else
+        return ENOTSUP;
+#endif
 }

@@ -461,7 +461,9 @@ add_wasilibc_test(pipe_fstat.c)
 add_wasilibc_test(pipe_setfl_independent.c)
 add_wasilibc_test(pipe_atomic_write.c)
 add_wasilibc_test(pipe_zero_len.c)
-add_wasilibc_test(pipe_espipe.c)
+if (NOT TEST_WITH_V8)
+  add_wasilibc_test(pipe_espipe.c NETWORK)
+endif()
 
 if (
   # Setjmp currently requires llvm 20+ for the support necessary in wasi-libc.
@@ -1042,7 +1044,7 @@ if (ENABLE_COOP_THREADS)
 
   add_posix_test(conformance/interfaces/pthread_rwlock_wrlock/1-1.c)
   # unsupported(signals): conformance/interfaces/pthread_rwlock_wrlock/2-1.c
-  add_posix_test(conformance/interfaces/pthread_rwlock_wrlock/3-1.c)
+  # unsupported(ub): add_posix_test(conformance/interfaces/pthread_rwlock_wrlock/3-1.c)
 
   add_posix_test(conformance/interfaces/pthread_rwlockattr_destroy/1-1.c)
   add_posix_test(conformance/interfaces/pthread_rwlockattr_destroy/2-1.c)

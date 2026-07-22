@@ -1158,7 +1158,6 @@ pthread_getspecific
 pthread_join
 pthread_key_create
 pthread_key_delete
-pthread_kill
 pthread_mutex_consistent
 pthread_mutex_destroy
 pthread_mutex_init

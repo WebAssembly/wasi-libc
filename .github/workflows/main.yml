@@ -307,6 +307,9 @@ jobs:
           - name: wasm32-wasip3
             args: -DTARGET_TRIPLE=wasm32-wasip3
             clang_version: wasi-sdk-32.0
+          - name: wasm32-wasip3 coop-threads
+            args: -DTARGET_TRIPLE=wasm32-wasip3 -DENABLE_COOP_THREADS=ON
+            clang_version: wasi-sdk-34.0-rc.2
     steps:
     - uses: actions/checkout@v6
       with:

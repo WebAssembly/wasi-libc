@@ -1084,12 +1084,30 @@ if (PYTHON_TESTS)
   find_program(MAKE make REQUIRED)
 
   set(cflags "--target=${TARGET_TRIPLE} --sysroot=${SYSROOT}")
+  if(ENABLE_COOP_THREADS)
+    set(cflags "${cflags} -pthread")
+  endif()
   set(ldflags "${cflags} -resource-dir ${tmp_resource_dir}")
   if(WASM_COMPONENT_LD_EXECUTABLE)
     set(ldflags "${ldflags} -fuse-ld=${WASM_COMPONENT_LD_EXECUTABLE}")
   endif()
   cmake_path(GET CMAKE_C_COMPILER PARENT_PATH compiler_dir)
   cmake_path(GET compiler_dir PARENT_PATH wasi_sdk_path)
+
+  set(python_configure_args --config-cache)
+  if (WASI STREQUAL "p1")
+    list(APPEND python_configure_args --disable-ipv6)
+  endif()
+  if (WASI STREQUAL "p1" OR WASI STREQUAL "p2")
+    list(APPEND python_configure_args ac_cv_func_pipe=no ac_cv_func_pipe2=no)
+  endif()
+
+  set(wasmtime_args "")
+  if (ENABLE_COOP_THREADS)
+    set(wasmtime_args "${wasmtime_args} --wasm component-model-threading")
+    set(wasmtime_args "${wasmtime_args} --wasi inherit-network")
+    set(wasmtime_args "${wasmtime_args} --wasi allow-ip-name-lookup")
+  endif()
 
   ExternalProject_Add(
     python
@@ -1149,11 +1167,12 @@ if (PYTHON_TESTS)
         # and if Python is updated we'll have to update this too.
         --host-runner "\
           ${ENGINE} run \
+            ${wasmtime_args} \
             --wasm max-wasm-stack=33554432 \
             --dir <SOURCE_DIR>::/ \
             --env PYTHONPATH=/cross-build/wasm32-wasip1/build/lib.wasi-wasm32-3.14 \
           "
-          -- --config-cache
+          -- ${python_configure_args}
     COMMAND
       ${CMAKE_COMMAND}
         -E env CFLAGS=${cflags} LDFLAGS=${ldflags} WASI_SDK_PATH=${wasi_sdk_path}

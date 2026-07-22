@@ -16,7 +16,7 @@ runs:
       shell: bash
       run: |
         if [ "${{ runner.os }}" == "Linux" ]; then
-          if [ "${{ runner.arch }}" == "x86_64" ]; then
+          if [ "${{ runner.arch }}" == "X64" ]; then
             plat=x86_64-linux
           elif [ "${{ runner.arch }}" == "ARM64" ]; then
             plat=arm64-linux

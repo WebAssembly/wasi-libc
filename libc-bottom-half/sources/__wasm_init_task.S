@@ -7,7 +7,11 @@
   .globl __wasm_set_stack_pointer
 
 #ifdef __wasi_cooperative_threads__
+#ifdef __PIC__
+  .globaltype __init_tls_base, i32
+#else
   .globaltype __init_tls_base, i32, immutable
+#endif
   .functype   __wasm_set_tls_base (i32) -> ()
   .functype   __wasilibc_init_async_task () -> (i32)
   .functype   __wasi_init_tp () -> ()
@@ -32,17 +36,7 @@ __wasm_init_task:
 #ifdef __wasi_cooperative_threads__
   // For synchronous tasks in coop threads they inherit the same TLS as the
   // original "main thread" that started the module.
-  //
-  // FIXME(#819) - the `__init_tls_base` global isn't correct right now, so
-  // use the `__stack_high` symbol as a kludge workaround for test while things
-  // are broken. Note that `__stack_high` isn't defined in PIC mode though, but
-  // coop threads are currently otherwise broken with PIC (#813) so there's
-  // other work to do there.
-#ifdef __PIC__
   global.get   __init_tls_base
-#else
-  i32.const __stack_high
-#endif
   call __wasm_set_tls_base
 #endif
 

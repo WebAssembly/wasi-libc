@@ -143,8 +143,7 @@ function(add_test_executable executable_name src)
   endif()
 
   if (ENABLE_COOP_THREADS)
-    # FIXME(#808): --export-table here shouldn't be necessary
-    target_link_options(${executable_name} PRIVATE -pthread -Wl,--export-table)
+    target_link_options(${executable_name} PRIVATE -pthread)
   endif()
 
   if(arg_SHARED)

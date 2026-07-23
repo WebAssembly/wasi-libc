@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "pthread_impl.h"
 
 /* This lock primitive combines a flag (in the sign bit) and a
@@ -60,3 +61,15 @@ void __unlock(volatile int *l)
 		}
 	}
 }
+
+#ifndef NDEBUG
+void __wasilibc_assert_held_lock(volatile int *lock) {
+  assert(lock);
+  assert(!libc.need_locks || *lock < 0);
+}
+
+void __wasilibc_assert_empty_lock(volatile int *lock) {
+  assert(lock);
+  assert(*lock == 0);
+}
+#endif

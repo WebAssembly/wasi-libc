@@ -235,6 +235,7 @@ set(top_half_sources
   musl/src/network/ntohl.c
   musl/src/network/ntohs.c
   musl/src/stat/futimesat.c
+  musl/src/thread/common/__lock.c
   musl/src/thread/common/__wait.c
   musl/src/thread/common/__timedwait.c
   musl/src/thread/common/default_attr.c
@@ -282,7 +283,52 @@ set(top_half_sources
   musl/src/thread/common/pthread_spin_destroy.c
   musl/src/thread/common/pthread_spin_init.c
   musl/src/thread/common/pthread_testcancel.c
+  musl/src/thread/common/pthread_cond_broadcast.c
+  musl/src/thread/common/pthread_cond_destroy.c
+  musl/src/thread/common/pthread_cond_init.c
+  musl/src/thread/common/pthread_cond_signal.c
+  musl/src/thread/common/pthread_cond_timedwait.c
+  musl/src/thread/common/pthread_cond_wait.c
+  musl/src/thread/common/pthread_mutex_consistent.c
+  musl/src/thread/common/pthread_mutex_getprioceiling.c
+  musl/src/thread/common/pthread_mutex_setprioceiling.c
+  musl/src/thread/common/pthread_mutex_lock.c
+  musl/src/thread/common/pthread_mutex_timedlock.c
+  musl/src/thread/common/pthread_mutex_trylock.c
+  musl/src/thread/common/pthread_mutex_unlock.c
+  musl/src/thread/common/pthread_once.c
+  musl/src/thread/common/pthread_rwlock_rdlock.c
+  musl/src/thread/common/pthread_rwlock_timedrdlock.c
+  musl/src/thread/common/pthread_rwlock_timedwrlock.c
+  musl/src/thread/common/pthread_rwlock_tryrdlock.c
+  musl/src/thread/common/pthread_rwlock_trywrlock.c
+  musl/src/thread/common/pthread_rwlock_unlock.c
+  musl/src/thread/common/pthread_rwlock_wrlock.c
+  musl/src/thread/common/pthread_spin_lock.c
+  musl/src/thread/common/pthread_spin_trylock.c
+  musl/src/thread/common/pthread_spin_unlock.c
+  musl/src/thread/common/pthread_setconcurrency.c
+  musl/src/thread/common/mtx_destroy.c
+  musl/src/thread/common/mtx_init.c
+  musl/src/thread/common/mtx_lock.c
+  musl/src/thread/common/mtx_timedlock.c
+  musl/src/thread/common/mtx_trylock.c
   musl/src/thread/common/thrd_sleep.c
+  musl/src/thread/common/thrd_join.c
+  musl/src/thread/common/thrd_yield.c
+  musl/src/thread/common/sem_destroy.c
+  musl/src/thread/common/sem_getvalue.c
+  musl/src/thread/common/sem_init.c
+  musl/src/thread/common/sem_post.c
+  musl/src/thread/common/sem_timedwait.c
+  musl/src/thread/common/sem_trywait.c
+  musl/src/thread/common/sem_wait.c
+  musl/src/thread/common/sem_open.c
+  musl/src/thread/common/lock_ptc.c
+  musl/src/thread/common/pthread_getcpuclockid.c
+  musl/src/thread/common/pthread_getschedparam.c
+  musl/src/thread/common/pthread_setschedparam.c
+  musl/src/thread/common/pthread_setschedprio.c
   musl/src/time/__month_to_secs.c
   musl/src/time/__secs_to_tm.c
   musl/src/time/__tm_to_secs.c
@@ -383,10 +429,6 @@ list(REMOVE_ITEM globbed_sources
   musl/src/math/sqrtf.c
   musl/src/math/trunc.c
   musl/src/math/truncf.c
-  musl/src/stdio/__lockfile.c
-  musl/src/stdio/flockfile.c
-  musl/src/stdio/ftrylockfile.c
-  musl/src/stdio/funlockfile.c
   musl/src/stdio/gets.c
   musl/src/stdio/pclose.c
   musl/src/stdio/popen.c
@@ -409,140 +451,32 @@ endif()
 if (TARGET_TRIPLE MATCHES "wasip1-threads")
   # pthreads functions needed for actual thread support
   list(APPEND top_half_sources
-    musl/src/stdio/__lockfile.c
-    musl/src/stdio/flockfile.c
-    musl/src/stdio/ftrylockfile.c
-    musl/src/stdio/funlockfile.c
-    musl/src/thread/wasi-threads/__lock.c
     musl/src/thread/wasi-threads/futex.c
-    musl/src/thread/wasi-threads/lock_ptc.c
-    musl/src/thread/wasi-threads/pthread_cond_broadcast.c
-    musl/src/thread/wasi-threads/pthread_cond_destroy.c
-    musl/src/thread/wasi-threads/pthread_cond_init.c
-    musl/src/thread/wasi-threads/pthread_cond_signal.c
-    musl/src/thread/wasi-threads/pthread_cond_timedwait.c
-    musl/src/thread/wasi-threads/pthread_cond_wait.c
     musl/src/thread/wasi-threads/pthread_create.c
     musl/src/thread/wasi-threads/pthread_detach.c
     musl/src/thread/wasi-threads/pthread_join.c
-    musl/src/thread/wasi-threads/pthread_mutex_consistent.c
-    musl/src/thread/wasi-threads/pthread_mutex_getprioceiling.c
-    musl/src/thread/wasi-threads/pthread_mutex_lock.c
-    musl/src/thread/wasi-threads/pthread_mutex_timedlock.c
-    musl/src/thread/wasi-threads/pthread_mutex_trylock.c
-    musl/src/thread/wasi-threads/pthread_mutex_unlock.c
-    musl/src/thread/wasi-threads/pthread_once.c
-    musl/src/thread/wasi-threads/pthread_rwlock_rdlock.c
-    musl/src/thread/wasi-threads/pthread_rwlock_timedrdlock.c
-    musl/src/thread/wasi-threads/pthread_rwlock_timedwrlock.c
-    musl/src/thread/wasi-threads/pthread_rwlock_tryrdlock.c
-    musl/src/thread/wasi-threads/pthread_rwlock_trywrlock.c
-    musl/src/thread/wasi-threads/pthread_rwlock_unlock.c
-    musl/src/thread/wasi-threads/pthread_rwlock_wrlock.c
-    musl/src/thread/wasi-threads/pthread_spin_lock.c
-    musl/src/thread/wasi-threads/pthread_spin_trylock.c
-    musl/src/thread/wasi-threads/pthread_spin_unlock.c
-    musl/src/thread/wasi-threads/sem_destroy.c
-    musl/src/thread/wasi-threads/sem_getvalue.c
-    musl/src/thread/wasi-threads/sem_init.c
-    musl/src/thread/wasi-threads/sem_post.c
-    musl/src/thread/wasi-threads/sem_timedwait.c
-    musl/src/thread/wasi-threads/sem_trywait.c
-    musl/src/thread/wasi-threads/sem_wait.c
     musl/src/thread/wasi-threads/wasi_thread_start.s
     musl/src/thread/wasi-threads/__wasilibc_busywait.c
-    musl/src/thread/common/mtx_timedlock.c
-    musl/src/thread/common/mtx_init.c
-    musl/src/thread/common/mtx_destroy.c
   )
 elseif(ENABLE_COOP_THREADS)
   # cooperative threads implementation for WASI Preview 3
   list(APPEND top_half_sources
     musl/src/internal/hashmap.c
-    musl/src/stdio/__lockfile.c
-    musl/src/stdio/flockfile.c
-    musl/src/stdio/ftrylockfile.c
-    musl/src/stdio/funlockfile.c
-    musl/src/thread/coop-threads/__lock.c
     musl/src/thread/coop-threads/futex.c
     musl/src/thread/coop-threads/__wasi_coop_thread_start.s
-    musl/src/thread/coop-threads/lock_ptc.c
-    musl/src/thread/coop-threads/mtx_lock.c
-    musl/src/thread/coop-threads/mtx_trylock.c
-    musl/src/thread/coop-threads/pthread_cond_broadcast.c
-    musl/src/thread/coop-threads/pthread_cond_destroy.c
-    musl/src/thread/coop-threads/pthread_cond_init.c
-    musl/src/thread/coop-threads/pthread_cond_signal.c
-    musl/src/thread/coop-threads/pthread_cond_timedwait.c
-    musl/src/thread/coop-threads/pthread_cond_wait.c
     musl/src/thread/coop-threads/pthread_create.c
     musl/src/thread/coop-threads/pthread_detach.c
-    musl/src/thread/coop-threads/pthread_getcpuclockid.c
     musl/src/thread/coop-threads/pthread_getname_np.c
-    musl/src/thread/coop-threads/pthread_getschedparam.c
     musl/src/thread/coop-threads/pthread_join.c
-    musl/src/thread/coop-threads/pthread_mutex_consistent.c
-    musl/src/thread/coop-threads/pthread_mutex_lock.c
-    musl/src/thread/coop-threads/pthread_mutex_setprioceiling.c
-    musl/src/thread/coop-threads/pthread_mutex_timedlock.c
-    musl/src/thread/coop-threads/pthread_mutex_trylock.c
-    musl/src/thread/coop-threads/pthread_mutex_unlock.c
-    musl/src/thread/coop-threads/pthread_once.c
-    musl/src/thread/coop-threads/pthread_rwlock_rdlock.c
-    musl/src/thread/coop-threads/pthread_rwlock_timedrdlock.c
-    musl/src/thread/coop-threads/pthread_rwlock_timedwrlock.c
-    musl/src/thread/coop-threads/pthread_rwlock_tryrdlock.c
-    musl/src/thread/coop-threads/pthread_rwlock_trywrlock.c
-    musl/src/thread/coop-threads/pthread_rwlock_unlock.c
-    musl/src/thread/coop-threads/pthread_rwlock_wrlock.c
-    musl/src/thread/coop-threads/pthread_setconcurrency.c
     musl/src/thread/coop-threads/pthread_setname_np.c
-    musl/src/thread/coop-threads/pthread_setschedparam.c
-    musl/src/thread/coop-threads/pthread_setschedprio.c
-    musl/src/thread/coop-threads/pthread_spin_lock.c
-    musl/src/thread/coop-threads/pthread_spin_trylock.c
-    musl/src/thread/coop-threads/pthread_spin_unlock.c
-    musl/src/thread/coop-threads/sem_destroy.c
-    musl/src/thread/coop-threads/sem_getvalue.c
-    musl/src/thread/coop-threads/sem_init.c
-    musl/src/thread/coop-threads/sem_open.c
-    musl/src/thread/coop-threads/sem_post.c
-    musl/src/thread/coop-threads/sem_timedwait.c
-    musl/src/thread/coop-threads/sem_trywait.c
-    musl/src/thread/coop-threads/sem_wait.c
-    musl/src/thread/common/mtx_timedlock.c
-    musl/src/thread/common/mtx_init.c
-    musl/src/thread/common/mtx_destroy.c)
+  )
 else()
   # pthreads stubs for single-threaded environment
   list(APPEND top_half_sources
     musl/src/thread/single-threaded/futex.c
-    musl/src/thread/single-threaded/pthread_cond_broadcast.c
-    musl/src/thread/single-threaded/pthread_cond_destroy.c
-    musl/src/thread/single-threaded/pthread_cond_init.c
-    musl/src/thread/single-threaded/pthread_cond_signal.c
-    musl/src/thread/single-threaded/pthread_cond_timedwait.c
-    musl/src/thread/single-threaded/pthread_cond_wait.c
     musl/src/thread/single-threaded/pthread_create.c
     musl/src/thread/single-threaded/pthread_detach.c
     musl/src/thread/single-threaded/pthread_join.c
-    musl/src/thread/single-threaded/pthread_mutex_consistent.c
-    musl/src/thread/single-threaded/pthread_mutex_getprioceiling.c
-    musl/src/thread/single-threaded/pthread_mutex_lock.c
-    musl/src/thread/single-threaded/pthread_mutex_timedlock.c
-    musl/src/thread/single-threaded/pthread_mutex_trylock.c
-    musl/src/thread/single-threaded/pthread_mutex_unlock.c
-    musl/src/thread/single-threaded/pthread_once.c
-    musl/src/thread/single-threaded/pthread_rwlock_rdlock.c
-    musl/src/thread/single-threaded/pthread_rwlock_timedrdlock.c
-    musl/src/thread/single-threaded/pthread_rwlock_timedwrlock.c
-    musl/src/thread/single-threaded/pthread_rwlock_tryrdlock.c
-    musl/src/thread/single-threaded/pthread_rwlock_trywrlock.c
-    musl/src/thread/single-threaded/pthread_rwlock_unlock.c
-    musl/src/thread/single-threaded/pthread_rwlock_wrlock.c
-    musl/src/thread/single-threaded/pthread_spin_lock.c
-    musl/src/thread/single-threaded/pthread_spin_trylock.c
-    musl/src/thread/single-threaded/pthread_spin_unlock.c
   )
 endif()
 

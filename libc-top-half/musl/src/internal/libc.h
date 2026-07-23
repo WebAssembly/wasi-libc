@@ -21,16 +21,12 @@ struct __libc {
 #ifdef __wasilibc_unmodified_upstream
 	char can_do_threads;
 #endif
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	char threaded;
-#endif
 #ifdef __wasilibc_unmodified_upstream // WASI doesn't currently use any code that needs "secure" mode
 	char secure;
 #endif
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	volatile signed char need_locks;
 	int threads_minus_1;
-#endif
 #ifdef __wasilibc_unmodified_upstream // WASI has no auxv
 	size_t *auxv;
 #endif

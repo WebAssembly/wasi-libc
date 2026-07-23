@@ -1,5 +1,7 @@
 #include <semaphore.h>
+#ifdef __wasilibc_unmodified_upstream
 #include <sys/mman.h>
+#endif
 #include <limits.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -31,6 +33,7 @@ volatile int *const __sem_open_lockptr = lock;
 
 sem_t *sem_open(const char *name, int flags, ...)
 {
+#ifdef __wasilibc_unmodified_upstream
 	va_list ap;
 	mode_t mode;
 	unsigned value;
@@ -163,10 +166,14 @@ fail:
 	semtab[slot].sem = 0;
 	UNLOCK(lock);
 	return SEM_FAILED;
+#else
+        return NULL;
+#endif
 }
 
 int sem_close(sem_t *sem)
 {
+#ifdef __wasilibc_unmodified_upstream
 	int i;
 	LOCK(lock);
 	for (i=0; i<SEM_NSEMS_MAX && semtab[i].sem != sem; i++);
@@ -179,4 +186,7 @@ int sem_close(sem_t *sem)
 	UNLOCK(lock);
 	munmap(sem, sizeof *sem);
 	return 0;
+#else
+        return ENOTSUP;
+#endif
 }

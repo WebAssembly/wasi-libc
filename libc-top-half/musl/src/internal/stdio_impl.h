@@ -10,24 +10,11 @@
 
 #include "lock.h"
 
-#ifdef __wasi_cooperative_threads__
-#define FFINALLOCK(f) __lockfile((f))
-#define FLOCK(f) int __need_unlock = __lockfile((f))
-#define FUNLOCK(f) do { if (__need_unlock) __unlockfile((f)); } while (0)
-#define __STDIO_LOCK_INIT 0
-#define __STDIO_LOCK_RESET(lock) do { (lock) = 0; } while (0)
-#elif defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 #define FFINALLOCK(f) ((f)->lock>=0 ? __lockfile((f)) : 0)
 #define FLOCK(f) int __need_unlock = ((f)->lock>=0 ? __lockfile((f)) : 0)
 #define FUNLOCK(f) do { if (__need_unlock) __unlockfile((f)); } while (0)
 #define __STDIO_LOCK_INIT -1
 #define __STDIO_LOCK_RESET(lock) do { (lock) = -1; } while (0)
-#else
-// No locking needed.
-#define FFINALLOCK(f) ((void)(f))
-#define FLOCK(f) ((void)(f))
-#define FUNLOCK(f) ((void)(f))
-#endif
 
 #define F_PERM 1
 #define F_NORD 4
@@ -56,13 +43,9 @@ struct _IO_FILE {
 #ifdef __wasilibc_unmodified_upstream // WASI has no popen
 	int pipe_pid;
 #endif
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	long lockcount;
-#endif
 	int mode;
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
-	DECLARE_STRONG_LOCK(lock);
-#endif
+	volatile int lock;
 	int lbf;
 	void *cookie;
 	off_t off;
@@ -72,9 +55,7 @@ struct _IO_FILE {
 #endif
 	unsigned char *shend;
 	off_t shlim, shcnt;
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 	FILE *prev_locked, *next_locked;
-#endif
 	struct __locale_struct *locale;
 };
 
@@ -82,10 +63,8 @@ extern hidden FILE *volatile __stdin_used;
 extern hidden FILE *volatile __stdout_used;
 extern hidden FILE *volatile __stderr_used;
 
-#if defined(__wasilibc_unmodified_upstream) || defined(_REENTRANT)
 int __lockfile(FILE *);
 void __unlockfile(FILE *);
-#endif
 
 hidden size_t __stdio_read(FILE *, unsigned char *, size_t);
 hidden size_t __stdio_write(FILE *, const unsigned char *, size_t);

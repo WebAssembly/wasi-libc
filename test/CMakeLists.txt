@@ -1045,7 +1045,7 @@ if (ENABLE_COOP_THREADS)
 
   add_posix_test(conformance/interfaces/pthread_rwlock_wrlock/1-1.c)
   # unsupported(signals): conformance/interfaces/pthread_rwlock_wrlock/2-1.c
-  add_posix_test(conformance/interfaces/pthread_rwlock_wrlock/3-1.c)
+  # unsupported(ub): add_posix_test(conformance/interfaces/pthread_rwlock_wrlock/3-1.c)
 
   add_posix_test(conformance/interfaces/pthread_rwlockattr_destroy/1-1.c)
   add_posix_test(conformance/interfaces/pthread_rwlockattr_destroy/2-1.c)

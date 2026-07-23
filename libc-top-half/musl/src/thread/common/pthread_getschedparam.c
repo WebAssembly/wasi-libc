@@ -3,6 +3,7 @@
 
 int pthread_getschedparam(pthread_t t, int *restrict policy, struct sched_param *restrict param)
 {
+#ifdef __wasilibc_unmodified_upstream
 	int r;
 	sigset_t set;
 	__block_app_sigs(&set);
@@ -18,4 +19,7 @@ int pthread_getschedparam(pthread_t t, int *restrict policy, struct sched_param 
 	UNLOCK(t->killlock);
 	__restore_sigs(&set);
 	return r;
+#else
+        return ENOTSUP;
+#endif
 }

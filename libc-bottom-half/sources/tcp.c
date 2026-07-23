@@ -2,7 +2,6 @@
 
 #ifndef __wasip1__
 
-#include <common/time.h>
 #include <errno.h>
 #include <limits.h>
 #include <netinet/tcp.h>
@@ -1365,22 +1364,12 @@ static int tcp_getsockopt(void *data, int level, int optname,
     case SO_REUSEADDR:
       value = socket->fake_reuseaddr;
       break;
-    case SO_RCVTIMEO: {
-      struct timeval tv = duration_to_timeval(socket->recv_timeout);
-      memcpy(optval, &tv,
-             *optlen < sizeof(struct timeval) ? *optlen
-                                              : sizeof(struct timeval));
-      *optlen = sizeof(struct timeval);
-      return 0;
-    }
-    case SO_SNDTIMEO: {
-      struct timeval tv = duration_to_timeval(socket->send_timeout);
-      memcpy(optval, &tv,
-             *optlen < sizeof(struct timeval) ? *optlen
-                                              : sizeof(struct timeval));
-      *optlen = sizeof(struct timeval);
-      return 0;
-    }
+    case SO_RCVTIMEO:
+      return __wasilibc_getsockopt_timeout(socket->recv_timeout, optval,
+                                           optlen);
+    case SO_SNDTIMEO:
+      return __wasilibc_getsockopt_timeout(socket->send_timeout, optval,
+                                           optlen);
     default:
       errno = ENOPROTOOPT;
       return -1;
@@ -1549,30 +1538,12 @@ static int tcp_setsockopt(void *data, int level, int optname,
       socket->fake_reuseaddr = (intval != 0);
       return 0;
     }
-    case SO_RCVTIMEO: {
-      if (optlen < sizeof(struct timeval)) {
-        errno = EINVAL;
-        return -1;
-      }
-      struct timeval *tv = (struct timeval *)optval;
-      if (!timeval_to_duration(tv, &socket->recv_timeout)) {
-        errno = EINVAL;
-        return -1;
-      }
-      return 0;
-    }
-    case SO_SNDTIMEO: {
-      if (optlen < sizeof(struct timeval)) {
-        errno = EINVAL;
-        return -1;
-      }
-      struct timeval *tv = (struct timeval *)optval;
-      if (!timeval_to_duration(tv, &socket->send_timeout)) {
-        errno = EINVAL;
-        return -1;
-      }
-      return 0;
-    }
+    case SO_RCVTIMEO:
+      return __wasilibc_setsockopt_timeout(optval, optlen,
+                                           &socket->recv_timeout);
+    case SO_SNDTIMEO:
+      return __wasilibc_setsockopt_timeout(optval, optlen,
+                                           &socket->send_timeout);
     default:
       errno = ENOPROTOOPT;
       return -1;

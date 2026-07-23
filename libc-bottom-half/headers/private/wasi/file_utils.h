@@ -39,6 +39,14 @@ static inline int wasip2_handle_write_error(streams_stream_error_t error) {
   errno = EIO;
   return -1;
 }
+
+/// Blocks the current thread until `pollable` is ready, waiting at most
+/// `timeout` nanoseconds for that to happen.
+///
+/// If `timeout` is 0 then this waits indefinitely. Returns `0` if `pollable`
+/// became ready or `-1` with `errno` set if the timeout elapsed first.
+int __wasilibc_pollable_block_on(poll_borrow_pollable_t pollable,
+                                 monotonic_clock_duration_t timeout);
 #endif
 
 #ifdef __wasip2__

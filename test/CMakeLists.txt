@@ -461,7 +461,9 @@ add_wasilibc_test(pipe_fstat.c)
 add_wasilibc_test(pipe_setfl_independent.c)
 add_wasilibc_test(pipe_atomic_write.c)
 add_wasilibc_test(pipe_zero_len.c)
-add_wasilibc_test(pipe_espipe.c)
+if (NOT TEST_WITH_V8)
+  add_wasilibc_test(pipe_espipe.c NETWORK)
+endif()
 
 if (
   # Setjmp currently requires llvm 20+ for the support necessary in wasi-libc.
@@ -589,6 +591,7 @@ if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(sockets-fcntl.c NETWORK)
   add_wasilibc_test(sockets-dup.c NETWORK)
   add_wasilibc_test(sockets-udp-connected.c NETWORK)
+  add_wasilibc_test(sockets-udp-timeout.c NETWORK)
   add_wasilibc_test(getaddrinfo.c NETWORK)
   add_wasilibc_test(getaddrinfo-flags.c NETWORK)
   add_wasilibc_test(getaddrinfo-numeric.c)

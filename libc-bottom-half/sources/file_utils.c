@@ -83,6 +83,46 @@ int wasi_string_from_c(const char *s, wasi_string_t *out) {
   return 0;
 }
 
+#ifdef __wasip2__
+int __wasilibc_pollable_block_on(poll_borrow_pollable_t pollable,
+                                 monotonic_clock_duration_t timeout) {
+  // Without a timeout all that's needed is to block on the pollable itself.
+  if (timeout == 0) {
+    poll_method_pollable_block(pollable);
+    return 0;
+  }
+
+  // Otherwise wait on both `pollable` and a timer, and then afterwards
+  // determine which one of the two it was that became ready. Note that if both
+  // are ready then `pollable` wins as there's no need to report a timeout when
+  // the operation can now make progress.
+  monotonic_clock_own_pollable_t timeout_pollable =
+      monotonic_clock_subscribe_duration(timeout);
+  poll_borrow_pollable_t pollables_ptr[2] = {
+      pollable,
+      poll_borrow_pollable(timeout_pollable),
+  };
+  poll_list_borrow_pollable_t pollables = {
+      .ptr = pollables_ptr,
+      .len = 2,
+  };
+  wasip2_list_u32_t ret;
+  poll_poll(&pollables, &ret);
+  poll_pollable_drop_own(timeout_pollable);
+
+  bool ready = false;
+  for (size_t i = 0; i < ret.len; i++) {
+    if (ret.ptr[i] == 0)
+      ready = true;
+  }
+  wasip2_list_u32_free(&ret);
+  if (ready)
+    return 0;
+  errno = EWOULDBLOCK;
+  return -1;
+}
+#endif
+
 #ifndef __wasip2__
 /// Update `state` with the result of `code` that happened.
 static size_t wasip3_io_update_code(wasip3_io_state_t *state,
@@ -472,35 +512,12 @@ static ssize_t __wasilibc_write_without_offset_update(wasi_write_t *write,
     // Lazily initialize the pollable if one hasn't already been created yet.
     if (write->pollable->__handle == 0)
       *write->pollable = streams_method_output_stream_subscribe(write->output);
-    poll_borrow_pollable_t pollable_borrow =
-        poll_borrow_pollable(*write->pollable);
 
     // Either wait for a timeout or indefinitely for this stream to become
     // writable. Once this is done loop around back to the beginning.
-    if (write->timeout != 0) {
-      monotonic_clock_own_pollable_t timeout_pollable =
-          monotonic_clock_subscribe_duration(write->timeout);
-      poll_list_borrow_pollable_t pollables;
-      poll_borrow_pollable_t pollables_ptr[2];
-      pollables.ptr = pollables_ptr;
-      pollables.ptr[0] = pollable_borrow;
-      pollables.ptr[1] = poll_borrow_pollable(timeout_pollable);
-      pollables.len = 2;
-      wasip2_list_u32_t ret;
-      poll_poll(&pollables, &ret);
-      poll_pollable_drop_own(timeout_pollable);
-      for (size_t i = 0; i < ret.len; i++) {
-        if (ret.ptr[i] == 1) {
-          // Timed out
-          errno = EWOULDBLOCK;
-          wasip2_list_u32_free(&ret);
-          return -1;
-        }
-      }
-      wasip2_list_u32_free(&ret);
-    } else {
-      poll_method_pollable_block(pollable_borrow);
-    }
+    if (__wasilibc_pollable_block_on(poll_borrow_pollable(*write->pollable),
+                                     write->timeout) < 0)
+      return -1;
   }
 #elif defined(__wasip3__)
   wasip3_io_state_t *state = write->state;
@@ -696,34 +713,11 @@ static ssize_t __wasilibc_read_without_offset_update(wasi_read_t *read,
     // Lazily initialize the pollable for this input stream.
     if (read->pollable->__handle == 0)
       *read->pollable = streams_method_input_stream_subscribe(read->input);
-    poll_borrow_pollable_t pollable_borrow =
-        poll_borrow_pollable(*read->pollable);
 
     // Wait either with a timeout or indefinitely for this read to complete.
-    if (read->timeout != 0) {
-      poll_own_pollable_t timeout_pollable =
-          monotonic_clock_subscribe_duration(read->timeout);
-      poll_list_borrow_pollable_t pollables;
-      poll_borrow_pollable_t pollables_ptr[2];
-      pollables.ptr = pollables_ptr;
-      pollables.ptr[0] = pollable_borrow;
-      pollables.ptr[1] = poll_borrow_pollable(timeout_pollable);
-      pollables.len = 2;
-      wasip2_list_u32_t ret;
-      poll_poll(&pollables, &ret);
-      poll_pollable_drop_own(timeout_pollable);
-      for (size_t i = 0; i < ret.len; i++) {
-        if (ret.ptr[i] == 1) {
-          // Timed out
-          errno = EWOULDBLOCK;
-          wasip2_list_u32_free(&ret);
-          return -1;
-        }
-      }
-      wasip2_list_u32_free(&ret);
-    } else {
-      poll_method_pollable_block(pollable_borrow);
-    }
+    if (__wasilibc_pollable_block_on(poll_borrow_pollable(*read->pollable),
+                                     read->timeout) < 0)
+      return -1;
   }
 #elif defined(__wasip3__)
   wasip3_io_state_t *state = read->state;

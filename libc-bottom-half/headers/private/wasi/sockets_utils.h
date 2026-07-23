@@ -91,6 +91,11 @@ int __wasilibc_sockaddr_validate(sockets_ip_address_family_t expected_family,
 void __wasilibc_wasi_to_sockaddr(const sockets_ip_socket_address_t input,
                                  output_sockaddr_t *output);
 
+int __wasilibc_getsockopt_timeout(monotonic_clock_duration_t timeout,
+                                  void *optval, socklen_t *optlen);
+int __wasilibc_setsockopt_timeout(const void *optval, socklen_t optlen,
+                                  monotonic_clock_duration_t *timeout);
+
 int __wasilibc_wasi_family_to_libc(sockets_ip_address_family_t wasi_family);
 void __wasilibc_unspecified_addr(sockets_ip_address_family_t family,
                                  sockets_ip_socket_address_t *out);

@@ -313,6 +313,7 @@ __wasilibc_futex_wake
 __wasilibc_get_environ
 __wasilibc_get_service_entry_by_name
 __wasilibc_get_service_entry_by_port
+__wasilibc_getsockopt_timeout
 __wasilibc_iftodt
 __wasilibc_init_stdio
 __wasilibc_initialize_environ
@@ -338,6 +339,7 @@ __wasilibc_open_nomode
 __wasilibc_parse_port
 __wasilibc_poll_add
 __wasilibc_poll_ready
+__wasilibc_pollable_block_on
 __wasilibc_populate_preopens
 __wasilibc_pthread_self
 __wasilibc_random
@@ -346,6 +348,7 @@ __wasilibc_rename_newat
 __wasilibc_rename_oldat
 __wasilibc_reset_preopens
 __wasilibc_rmdirat
+__wasilibc_setsockopt_timeout
 __wasilibc_sockaddr_to_wasi
 __wasilibc_sockaddr_validate
 __wasilibc_stat

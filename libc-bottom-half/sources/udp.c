@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <wasi/descriptor_table.h>
+#include <wasi/file_utils.h>
 #include <wasi/sockets_utils.h>
 #include <wasi/udp.h>
 #include <wasi/wasip2.h>
@@ -145,6 +146,9 @@ typedef struct {
   bool blocking;
   sockets_ip_address_family_t family;
   udp_socket_state_t state;
+  /// `SO_SNDTIMEO`/`SO_RCVTIMEO`, where 0 means "no timeout configured".
+  monotonic_clock_duration_t send_timeout;
+  monotonic_clock_duration_t recv_timeout;
 } udp_socket_t;
 
 static descriptor_vtable_t udp_vtable;
@@ -746,7 +750,9 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
       return -1;
     }
 
-    poll_method_pollable_block(udp_incoming_pollable(streams));
+    if (__wasilibc_pollable_block_on(udp_incoming_pollable(streams),
+                                     socket->recv_timeout) < 0)
+      return -1;
   }
 #else
   if (wasip3_udp_recv_sync(socket, should_block) < 0)
@@ -777,11 +783,22 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
   // flight.
   if (streams->recv_subtask) {
     if (should_block) {
+      wasip3_event_t event;
+      monotonic_clock_duration_t timeout = socket->recv_timeout;
       wasip3_udp_recv_enter_blocking(socket);
       STRONG_UNLOCK(socket->lock);
-      __wasilibc_subtask_block_on_and_drop(streams->recv_subtask);
+      bool finished =
+          __wasilibc_waitable_block_on(streams->recv_subtask, &event, timeout);
       STRONG_LOCK(socket->lock);
       wasip3_udp_recv_exit_blocking(socket);
+
+      // If this task didn't finish in time then leave it in place but return an
+      // error that we ran out of time.
+      if (!finished) {
+        errno = EWOULDBLOCK;
+        return -1;
+      }
+
       streams->recv_subtask = 0;
       streams->flags |= UDP_STREAMS_RECV_READY;
     } else {
@@ -899,11 +916,23 @@ static int wasip3_send_resolve(udp_socket_t *socket, bool should_block) {
   // to `poll`), so the result processing is split out.
   if (streams->send_subtask) {
     if (should_block) {
+      monotonic_clock_duration_t timeout = socket->send_timeout;
       wasip3_udp_send_enter_blocking(socket);
       STRONG_UNLOCK(socket->lock);
-      __wasilibc_subtask_block_on_and_drop(streams->send_subtask);
+
+      wasip3_event_t event;
+      bool finished =
+          __wasilibc_waitable_block_on(streams->send_subtask, &event, timeout);
       STRONG_LOCK(socket->lock);
       wasip3_udp_send_exit_blocking(socket);
+
+      // If the block didn't finish then this operation has timed out so it'll
+      // return an error. Note that the send subtask is not cancelled here,
+      // however, and it's left in place.
+      if (!finished) {
+        errno = EWOULDBLOCK;
+        return -1;
+      }
       streams->send_subtask = 0;
     } else {
       wasip3_event_t event;
@@ -1070,7 +1099,10 @@ static ssize_t udp_sendto(void *data, const void *buffer, size_t length,
       errno = EWOULDBLOCK;
       return -1;
     }
-    poll_method_pollable_block(udp_outgoing_pollable(streams));
+
+    if (__wasilibc_pollable_block_on(udp_outgoing_pollable(streams),
+                                     socket->send_timeout) < 0)
+      return -1;
   }
 #else
   // First wait/weed out concurrent blocking calls to `sendto`.
@@ -1215,8 +1247,12 @@ static int udp_getsockopt(void *data, int level, int optname, void *optval,
       value = result;
       break;
     }
-    case SO_RCVTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
-    case SO_SNDTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
+    case SO_RCVTIMEO:
+      return __wasilibc_getsockopt_timeout(socket->recv_timeout, optval,
+                                           optlen);
+    case SO_SNDTIMEO:
+      return __wasilibc_getsockopt_timeout(socket->send_timeout, optval,
+                                           optlen);
     default:
       errno = ENOPROTOOPT;
       return -1;
@@ -1319,8 +1355,12 @@ static int udp_setsockopt(void *data, int level, int optname,
 
       return 0;
     }
-    case SO_RCVTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
-    case SO_SNDTIMEO: // TODO wasi-sockets: emulate in wasi-libc itself
+    case SO_RCVTIMEO:
+      return __wasilibc_setsockopt_timeout(optval, optlen,
+                                           &socket->recv_timeout);
+    case SO_SNDTIMEO:
+      return __wasilibc_setsockopt_timeout(optval, optlen,
+                                           &socket->send_timeout);
     default:
       errno = ENOPROTOOPT;
       return -1;

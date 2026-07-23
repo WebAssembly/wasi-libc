@@ -1,7 +1,9 @@
+#include <common/time.h>
 #include <ctype.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 #include <wasi/sockets_utils.h>
 
 // For now favor the naming of wasip3 which uses the "sockets" namespace
@@ -332,6 +334,30 @@ void __wasilibc_wasi_to_sockaddr(const sockets_ip_socket_address_t input,
   default: /* unreachable */
     abort();
   }
+}
+
+int __wasilibc_getsockopt_timeout(monotonic_clock_duration_t timeout,
+                                  void *optval, socklen_t *optlen) {
+  struct timeval tv = duration_to_timeval(timeout);
+  memcpy(optval, &tv,
+         *optlen < sizeof(struct timeval) ? *optlen : sizeof(struct timeval));
+  *optlen = sizeof(struct timeval);
+  return 0;
+}
+
+int __wasilibc_setsockopt_timeout(const void *optval, socklen_t optlen,
+                                  monotonic_clock_duration_t *timeout) {
+  if (optlen < sizeof(struct timeval)) {
+    errno = EINVAL;
+    return -1;
+  }
+  struct timeval tv;
+  memcpy(&tv, optval, sizeof(tv));
+  if (!timeval_to_duration(&tv, timeout)) {
+    errno = EINVAL;
+    return -1;
+  }
+  return 0;
 }
 
 int __wasilibc_wasi_family_to_libc(sockets_ip_address_family_t wasi_family) {

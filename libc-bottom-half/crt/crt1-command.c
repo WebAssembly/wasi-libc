@@ -10,11 +10,13 @@ extern int __main_void(void);
 extern void __wasm_call_dtors(void);
 
 #ifdef __wasm_libcall_thread_context__
-// Force __wasm_init_task and __wasm_init_async_task to be linked in for wasip3
+// Force some symbols to be linked in for wasip3
 extern void __wasm_init_task(void);
 extern void __wasm_init_async_task(void);
+extern void cabi_realloc(void);
 __attribute__((used)) void *__wasm_init_task_ref = __wasm_init_task;
 __attribute__((used)) void *__wasm_init_async_task_ref = __wasm_init_async_task;
+__attribute__((used)) static void *cabi_realloc_ref = cabi_realloc;
 #endif
 
 #if defined(__wasip1__)

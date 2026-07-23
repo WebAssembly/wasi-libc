@@ -135,6 +135,7 @@ set(bottom_half_sources
   sources/reallocarray.c
   sources/sbrk.c
   sources/truncate.c
+  sources/__cabi_realloc_wrapper.S
 )
 
 if (WASI STREQUAL "p1")

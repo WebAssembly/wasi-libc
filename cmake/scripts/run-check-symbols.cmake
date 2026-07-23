@@ -48,7 +48,8 @@ foreach(line IN LISTS defined_symbols)
   # Skip internal debug-only asserts
   if (symbol MATCHES "__wasilibc_assert_.*" OR
       symbol MATCHES "__wasm_(g|s)et_(stack_pointer|tls_base)" OR
-      symbol MATCHES "__wasm_init.*")
+      symbol MATCHES "__wasm_init.*" OR
+      symbol MATCHES "__cabi_realloc_impl")
     continue()
   endif()
   list(APPEND final_defined_symbols ${symbol})
@@ -64,7 +65,8 @@ foreach(line IN LISTS undefined_symbols)
   # Skip internal debug-only asserts
   if (symbol MATCHES "__wasilibc_assert_.*" OR
       symbol MATCHES "__wasm_(g|s)et_(stack_pointer|tls_base)" OR
-      symbol MATCHES "__wasm_init.*")
+      symbol MATCHES "__wasm_init.*" OR
+      symbol MATCHES "__cabi_realloc_impl")
     continue()
   endif()
   list(APPEND final_undefined_symbols ${symbol})

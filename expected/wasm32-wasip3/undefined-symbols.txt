@@ -21,7 +21,6 @@ __heap_end
 __letf2
 __lttf2
 __netf2
-__stack_pointer
 __subtask_cancel
 __subtask_drop
 __subtf3

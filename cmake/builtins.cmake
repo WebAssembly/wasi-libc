@@ -54,7 +54,7 @@ else()
     INSTALL_COMMAND ""
   )
   ExternalProject_Get_Property(wasi-sdk-builtins SOURCE_DIR)
-  if(ENABLE_COOP_THREADS)
+  if(HAVE_WASM_LIBCALL_THREAD_CONTEXT)
     set(builtins_target "wasm32-unknown-wasip3")
   else()
     set(builtins_target "wasm32-unknown-wasip2")

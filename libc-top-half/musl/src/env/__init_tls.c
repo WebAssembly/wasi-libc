@@ -43,7 +43,7 @@ struct stack_bounds {
 
 static inline unsigned char *get_stack_pointer() {
   unsigned char *sp;
-#ifdef __wasi_cooperative_threads__
+#ifdef __wasm_libcall_thread_context__
   __asm__(
       ".functype   __wasm_get_stack_pointer () -> (i32)\n"
       "call __wasm_get_stack_pointer\n"

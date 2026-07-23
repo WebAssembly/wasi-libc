@@ -62,7 +62,6 @@ __imported_wasi_snapshot_preview1_sock_shutdown
 __letf2
 __lttf2
 __netf2
-__stack_pointer
 __subtf3
 __trunctfdf2
 __trunctfsf2

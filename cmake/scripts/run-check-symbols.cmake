@@ -46,7 +46,9 @@ list(FILTER defined_symbols INCLUDE REGEX " [A-Z] ")
 foreach(line IN LISTS defined_symbols)
   string(REGEX REPLACE ".* [A-Z] " "" symbol "${line}")
   # Skip internal debug-only asserts
-  if (symbol MATCHES "__wasilibc_assert_.*")
+  if (symbol MATCHES "__wasilibc_assert_.*" OR
+      symbol MATCHES "__wasm_(g|s)et_(stack_pointer|tls_base)" OR
+      symbol MATCHES "__wasm_init.*")
     continue()
   endif()
   list(APPEND final_defined_symbols ${symbol})
@@ -60,7 +62,9 @@ list(FILTER undefined_symbols INCLUDE REGEX " U ")
 foreach(line IN LISTS undefined_symbols)
   string(REGEX REPLACE ".* U " "" symbol "${line}")
   # Skip internal debug-only asserts
-  if (symbol MATCHES "__wasilibc_assert_.*")
+  if (symbol MATCHES "__wasilibc_assert_.*" OR
+      symbol MATCHES "__wasm_(g|s)et_(stack_pointer|tls_base)" OR
+      symbol MATCHES "__wasm_init.*")
     continue()
   endif()
   list(APPEND final_undefined_symbols ${symbol})
@@ -87,6 +91,11 @@ foreach(symbol IN LISTS final_undefined_symbols)
      NOT symbol STREQUAL "__memory_base" AND
      NOT symbol STREQUAL "__indirect_function_table" AND
      NOT symbol STREQUAL "__wasm_first_page_end" AND
+     NOT symbol MATCHES "__wasm_(g|s)et_(stack_pointer|tls_base)" AND
+     NOT symbol MATCHES "__wasm_init.*" AND
+     NOT symbol MATCHES "__stack_pointer" AND
+     NOT symbol MATCHES "__init_stack_pointer" AND
+     NOT symbol MATCHES "__wasm_component_model_builtin.*" AND
      NOT symbol STREQUAL "__tls_base")
     file(APPEND ${out_undefined_symbols} "${symbol}\n")
   endif()
@@ -141,6 +150,7 @@ execute_process(
     -U__wasm_nontrapping_fptoint__
     -U__wasm_bulk_memory__
     -U__wasm_bulk_memory_opt__
+    -U__wasm_libcall_thread_context__
     # Skip some other macros that vary between compiler versions
     -U__GNUC__
     -U__GNUC_MINOR__

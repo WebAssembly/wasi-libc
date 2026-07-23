@@ -156,6 +156,28 @@ endif()
 set(wasip2-version 0.2.0)
 set(wasip3-version 0.3.0)
 
+# =============================================================================
+# Detection of a libcall thread context for wasip3
+
+include(CheckSourceCompiles)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+check_source_compiles(C [[
+  #ifndef __wasm_libcall_thread_context__
+  #error "missing define"
+  #endif
+]] HAVE_WASM_LIBCALL_THREAD_CONTEXT)
+
+if(ENABLE_COOP_THREADS)
+  if(NOT WASI STREQUAL "p3")
+    message(FATAL_ERROR "Cooperative threads are only supported on WASIp3")
+  endif()
+  if (NOT HAVE_WASM_LIBCALL_THREAD_CONTEXT)
+    message(FATAL_ERROR "Cooperative threads require clang 23 or later")
+  endif()
+  set(__wasi_cooperative_threads__ ON)
+else()
+endif()
+
 include(bindings)
 include(builtins)
 if (NOT (WASI STREQUAL "p1"))
@@ -216,28 +238,6 @@ add_compile_options(
 
 if (ENABLE_WERROR)
   add_compile_options(-Werror)
-endif()
-
-# =============================================================================
-# Detection of a libcall thread context for wasip3
-
-include(CheckSourceCompiles)
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-check_source_compiles(C [[
-  #ifndef __wasm_libcall_thread_context__
-  #error "missing define"
-  #endif
-]] HAVE_WASM_LIBCALL_THREAD_CONTEXT)
-
-if(ENABLE_COOP_THREADS)
-  if(NOT WASI STREQUAL "p3")
-    message(FATAL_ERROR "Cooperative threads are only supported on WASIp3")
-  endif()
-  if (NOT HAVE_WASM_LIBCALL_THREAD_CONTEXT)
-    message(FATAL_ERROR "Cooperative threads require clang 23 or later")
-  endif()
-  set(__wasi_cooperative_threads__ ON)
-else()
 endif()
 
 set(WASILIBC_MULTITHREADING OFF)

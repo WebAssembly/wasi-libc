@@ -405,14 +405,6 @@ __wasilibc_write
 __wasilibc_write_poll
 __wasilibc_write_state_close
 __wasm_call_dtors
-__wasm_get_stack_pointer
-__wasm_get_tls_base
-__wasm_init_async_task
-__wasm_init_async_task_ref
-__wasm_init_task
-__wasm_init_task_ref
-__wasm_set_stack_pointer
-__wasm_set_tls_base
 __wcscoll_l
 __wcsftime_l
 __wcsxfrm_l

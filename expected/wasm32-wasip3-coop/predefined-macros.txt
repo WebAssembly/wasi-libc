@@ -2415,7 +2415,6 @@
 #define _POSIX_REGEXP 1
 #define _POSIX_RE_DUP_MAX 255
 #define _POSIX_RTSIG_MAX 8
-#define _POSIX_SEMAPHORES _POSIX_VERSION
 #define _POSIX_SEM_NSEMS_MAX 256
 #define _POSIX_SEM_VALUE_MAX 32767
 #define _POSIX_SIGQUEUE_MAX 32
@@ -3104,7 +3103,6 @@
 #define __va_copy(d,s) __builtin_va_copy(d, s)
 #define __wasi__ 1
 #define __wasi_api_h 
-#define __wasi_cooperative_threads__ 
 #define __wasi_libc_busywait_h 
 #define __wasi_libc_environ_h 
 #define __wasi_libc_find_relpath_h 
@@ -3178,7 +3176,6 @@
 #define __wasm32 1
 #define __wasm32__ 1
 #define __wasm__ 1
-#define __wasm_libcall_thread_context__ 1
 #define _tolower(a) ((a)|0x20)
 #define _toupper(a) ((a)&0x5f)
 #define acos(x) __tg_real_complex(acos, (x))

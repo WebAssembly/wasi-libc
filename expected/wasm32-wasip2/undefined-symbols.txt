@@ -17,7 +17,6 @@ __heap_end
 __letf2
 __lttf2
 __netf2
-__stack_pointer
 __subtf3
 __trunctfdf2
 __trunctfsf2

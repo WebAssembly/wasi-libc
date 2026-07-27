@@ -15,8 +15,8 @@ if(WIT_BINDGEN_EXECUTABLE)
     OUTPUT_VARIABLE WIT_BINDGEN_VERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  if (NOT (WIT_BINDGEN_VERSION MATCHES "0\\.59\\.0"))
-    message(WARNING "wit-bindgen version 0.59.0 is required, found: ${WIT_BINDGEN_VERSION}")
+  if (NOT (WIT_BINDGEN_VERSION MATCHES "0\\.60\\.0"))
+    message(WARNING "wit-bindgen version 0.60.0 is required, found: ${WIT_BINDGEN_VERSION}")
     set(WIT_BINDGEN_EXECUTABLE "")
   endif()
 endif()
@@ -26,7 +26,7 @@ if (NOT WIT_BINDGEN_EXECUTABLE)
   ba_download(
     wit-bindgen
     "https://github.com/bytecodealliance/wit-bindgen"
-    "0.59.0"
+    "0.60.0"
   )
   ExternalProject_Get_Property(wit-bindgen SOURCE_DIR)
   set(wit_bindgen "${SOURCE_DIR}/wit-bindgen")
@@ -152,6 +152,7 @@ function(wit_bindgen_edit p)
     COMMAND sed ${SED_INPLACE_ARGS} "'s_#include .wasi${p}\.h._#include \"wasi/wasi${p}.h\"_'" ${bottom_half}/sources/wasi${p}.c
     COMMAND sed ${SED_INPLACE_ARGS} "s/extern void exit_exit/_Noreturn extern void exit_exit/" ${bottom_half}/headers/public/wasi/__generated_wasi${p}.h
     COMMAND sed ${SED_INPLACE_ARGS} "s/extern void __wasm_import_exit_exit/_Noreturn extern void __wasm_import_exit_exit/" ${bottom_half}/sources/wasi${p}.c
+    COMMAND sed ${SED_INPLACE_ARGS} "s/__attribute__.*\"cabi_realloc\".*/#include \\\"cabi_realloc_augment.h\\\"/" ${bottom_half}/sources/wasi${p}.c
     DEPENDS bindings-${p}
   )
   add_dependencies(bindings bindings-${p}-edit)

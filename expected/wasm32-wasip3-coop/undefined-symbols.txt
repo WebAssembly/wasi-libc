@@ -27,8 +27,6 @@ __subtask_drop
 __subtf3
 __task_cancel
 __thread_yield
-__tls_align
-__tls_size
 __trunctfdf2
 __trunctfsf2
 __unordtf2
@@ -215,6 +213,8 @@ stream_drop_writable_unit
 stream_new_unit
 stream_read_unit
 stream_write_unit
+wasip3_context_get_1
+wasip3_context_set_1
 wasip3_thread_index
 wasip3_thread_new_indirect
 wasip3_thread_resume_later

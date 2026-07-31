@@ -1,4 +1,3 @@
-#include <__errno.h>
 #include <__errno_values.h>
 #include <__fd_set.h>
 #include <__function___isatty.h>

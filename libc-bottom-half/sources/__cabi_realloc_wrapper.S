@@ -27,11 +27,23 @@
 
 // For coop-threads builds we need to configure TLS to the initial TLS
 // value for all tasks/etc, so import those symbols here.
+//
+// Note that this saves and restores context slot 1 itself rather than this
+// module's TLS base. When several modules are linked together the slot holds an
+// array of per-module base pointers, so clobbering just libc's entry would both
+// leave the other modules pointing at the wrong TLS and scribble through
+// whatever stale pointer the slot happened to contain.
 #ifdef __wasi_cooperative_threads__
-.functype   __wasm_set_tls_base (i32) -> ()
-.functype   __wasm_get_tls_base () -> (i32)
-.type       __wasm_set_tls_base,@function
-.type       __wasm_get_tls_base,@function
+.functype   wasip3_context_set_1 (i32) -> ()
+.functype   wasip3_context_get_1 () -> (i32)
+.functype   __wasilibc_set_task_tls (i32) -> ()
+.type       wasip3_context_set_1,@function
+.type       wasip3_context_get_1,@function
+.type       __wasilibc_set_task_tls,@function
+.import_module wasip3_context_get_1, "$root"
+.import_name wasip3_context_get_1, "[context-get-1]"
+.import_module wasip3_context_set_1, "$root"
+.import_name wasip3_context_set_1, "[context-set-1]"
 .type       __init_tls_base,@global
 #ifdef __PIC__
 .globaltype __init_tls_base, i32
@@ -68,7 +80,7 @@ cabi_realloc:
   call __wasm_get_stack_pointer
   local.set 4
 #ifdef __wasi_cooperative_threads__
-  call __wasm_get_tls_base
+  call wasip3_context_get_1
   local.set 5
 #endif
 
@@ -85,7 +97,7 @@ cabi_realloc:
   // Next up configure TLS. This is only required in coop-threads builds.
 #ifdef __wasi_cooperative_threads__
   global.get   __init_tls_base
-  call __wasm_set_tls_base
+  call __wasilibc_set_task_tls
 #endif
 
   // And finally forward to the actual implementation of `cabi_realloc`
@@ -100,7 +112,7 @@ cabi_realloc:
   call __wasm_set_stack_pointer
 #ifdef __wasi_cooperative_threads__
   local.get 5
-  call __wasm_set_tls_base
+  call wasip3_context_set_1
 #endif
 
   end_function

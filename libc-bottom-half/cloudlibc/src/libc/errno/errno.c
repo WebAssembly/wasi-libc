@@ -86,4 +86,7 @@ static_assert(ETXTBSY == __WASI_ERRNO_TXTBSY, "Value mismatch");
 static_assert(EXDEV == __WASI_ERRNO_XDEV, "Value mismatch");
 #endif
 
+// `<errno.h>` may define `errno` as a call to `__errno_location`, so undo that
+// here where the thread-local it ultimately refers to is defined.
+#undef errno
 thread_local int errno = 0;

@@ -3108,7 +3108,6 @@
 #define __wasi_libc_h 
 #define __wasi_libc_nocwd_h 
 #define __wasi_wasip1_h 
-#define __wasilibc___errno_h 
 #define __wasilibc___errno_values_h 
 #define __wasilibc___fd_set_h 
 #define __wasilibc___function___isatty_h 
@@ -3226,7 +3225,7 @@
 #define dirent64 dirent
 #define erf(x) __tg_real(erf, (x))
 #define erfc(x) __tg_real(erfc, (x))
-#define errno errno
+#define errno (*__errno_location())
 #define exp(x) __tg_real_complex(exp, (x))
 #define exp2(x) __tg_real(exp2, (x))
 #define expm1(x) __tg_real(expm1, (x))
@@ -3258,7 +3257,7 @@
 #define glob64_t glob_t
 #define globfree64 globfree
 #define h_addr h_addr_list[0]
-#define h_errno h_errno
+#define h_errno (*__h_errno_location())
 #define howmany(n,d) (((n)+((d)-1))/(d))
 #define htobe16(x) __bswap16(x)
 #define htobe32(x) __bswap32(x)

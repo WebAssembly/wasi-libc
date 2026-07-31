@@ -21,7 +21,14 @@ static_assert(SOCK_STREAM == __WASI_FILETYPE_SOCKET_STREAM, "value mismatch");
   NETWORK_ERROR_CODE_PERMANENT_RESOLVER_FAILURE
 #endif
 
+// `<netdb.h>` may define `h_errno` as a call to `__h_errno_location`, so undo
+// that here where the thread-local it ultimately refers to is defined.
+#undef h_errno
 _Thread_local int h_errno = 0;
+
+#if !defined(__wasip1__) && !defined(__wasip2__)
+int *__h_errno_location(void) { return &h_errno; }
+#endif
 
 static struct servent global_serv = {0};
 

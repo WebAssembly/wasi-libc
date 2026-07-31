@@ -204,6 +204,17 @@ add_link_options(
   -resource-dir ${tmp_resource_dir}
 )
 
+if (HAVE_WASM_LIBCALL_THREAD_CONTEXT)
+  # TODO: shouldn't have to pass these as it means it's required by all end
+  # users as well. Ideally this would be part of the driver in rustc/clang, but
+  # that's left for a future change.
+  add_link_options(
+    -Wl,--export-if-defined=__wasm_init_tls
+    -Wl,--export-if-defined=__tls_size
+    -Wl,--export-if-defined=__tls_align
+  )
+endif()
+
 # Expose the public headers to the implementation. We use `-isystem` for
 # purpose for two reasons:
 #

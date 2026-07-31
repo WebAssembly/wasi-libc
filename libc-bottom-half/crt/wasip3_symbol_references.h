@@ -16,10 +16,9 @@ __attribute__((used)) static void *__wasm_init_async_task_ref =
 __attribute__((used)) static void *cabi_realloc_ref = cabi_realloc;
 
 // Force `__wasm_{g,s}et_{stack_pointer,tls_base}` to exist as defined symbols.
-// These end up as imported functions which `wit-component` recognizes. Note
-// that for coop threads the tls_base symbols are defined but without coop
-// threads they're defined within libc itself to access a locally-defined
-// global (see `wasip3_non_coop_tls_base.S`).
+// These end up as imported functions which `wit-component` recognizes, and what
+// exactly they're hooked up to will depend on `wit-component` when this is
+// turned into a component.
 __asm__(
 ".globl      __wasm_get_stack_pointer\n"
 ".type       __wasm_get_stack_pointer,@function\n"
@@ -33,7 +32,6 @@ __asm__(
 ".import_module __wasm_set_stack_pointer, \"env\"\n"
 ".import_name __wasm_set_stack_pointer, \"__wasm_set_stack_pointer\"\n"
 
-#ifdef __wasi_cooperative_threads__
 ".globl      __wasm_get_tls_base\n"
 ".type       __wasm_get_tls_base,@function\n"
 ".functype __wasm_get_tls_base () -> (i32)\n"
@@ -45,8 +43,7 @@ __asm__(
 ".functype __wasm_set_tls_base (i32) -> ()\n"
 ".import_module __wasm_set_tls_base, \"env\"\n"
 ".import_name __wasm_set_tls_base, \"__wasm_set_tls_base\"\n"
-#endif
-);
 
+);
 
 #endif

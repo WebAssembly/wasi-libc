@@ -64,8 +64,6 @@ __letf2
 __lttf2
 __netf2
 __subtf3
-__tls_align
-__tls_size
 __trunctfdf2
 __trunctfsf2
 __unordtf2

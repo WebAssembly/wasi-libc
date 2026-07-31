@@ -185,7 +185,7 @@ endif()
 
 if (HAVE_WASM_LIBCALL_THREAD_CONTEXT)
   list(APPEND bottom_half_sources
-    sources/__libcall_thread_context.S
+    sources/wasip3_non_coop_tls_base.S
     sources/__wasm_init_task.S
   )
 endif()

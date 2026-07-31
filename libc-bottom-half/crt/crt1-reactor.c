@@ -3,16 +3,7 @@
 #endif
 extern void __wasm_call_ctors(void);
 
-#ifdef __wasm_libcall_thread_context__
-// Force some symbols to be linked in for wasip3
-extern void __wasm_init_task(void);
-extern void __wasm_init_async_task(void);
-extern void cabi_realloc(void);
-__attribute__((used)) static void *__wasm_init_task_ref = __wasm_init_task;
-__attribute__((used)) static void *__wasm_init_async_task_ref =
-    __wasm_init_async_task;
-__attribute__((used)) static void *cabi_realloc_ref = cabi_realloc;
-#endif
+#include "wasip3_symbol_references.h"
 
 __attribute__((export_name("_initialize"))) void _initialize(void) {
 #if defined(_REENTRANT)

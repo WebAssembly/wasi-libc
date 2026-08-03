@@ -77,6 +77,9 @@ typedef struct streams_stream_error_t {
 // The last operation (a write or flush) failed before completion.
 // 
 // More information is available in the `error` payload.
+// 
+// After this, the stream will be closed. All future operations return
+// `stream-error::closed`.
 #define STREAMS_STREAM_ERROR_LAST_OPERATION_FAILED 0
 // The stream is closed: no more input will be accepted by the
 // stream. A closed output-stream will return this error on all
@@ -241,7 +244,7 @@ typedef uint8_t filesystem_descriptor_flags_t;
 // WASI. At this time, it should be interpreted as a request, and not a
 // requirement.
 #define FILESYSTEM_DESCRIPTOR_FLAGS_DATA_INTEGRITY_SYNC (1 << 3)
-// Requests that reads be performed at the same level of integrety
+// Requests that reads be performed at the same level of integrity
 // requested for writes. This is similar to `O_RSYNC` in POSIX.
 // 
 // The precise semantics of this operation have not yet been defined for
@@ -1065,7 +1068,7 @@ typedef struct {
   uint64_t f1;
 } wasip2_tuple2_u64_u64_t;
 
-// Imported Functions from `wasi:cli/environment@0.2.0`
+// Imported Functions from `wasi:cli/environment@0.2.12`
 // Get the POSIX-style environment variables.
 // 
 // Each environment variable is provided as a pair of string variable names
@@ -1081,11 +1084,20 @@ extern void environment_get_arguments(wasip2_list_string_t *ret);
 // directory, interpreting `.` as shorthand for this.
 extern bool environment_initial_cwd(wasip2_string_t *ret);
 
-// Imported Functions from `wasi:cli/exit@0.2.0`
+// Imported Functions from `wasi:cli/exit@0.2.12`
 // Exit the current instance and any linked instances.
 _Noreturn extern void exit_exit(exit_result_void_void_t *status);
+// Exit the current instance and any linked instances, reporting the
+// specified status code to the host.
+// 
+// The meaning of the code depends on the context, with 0 usually meaning
+// "success", and other values indicating various types of failure.
+// 
+// This function does not return; the effect is analogous to a trap, but
+// without the connotation that something bad has happened.
+_Noreturn extern void exit_exit_with_code(uint8_t status_code);
 
-// Imported Functions from `wasi:io/error@0.2.0`
+// Imported Functions from `wasi:io/error@0.2.12`
 // Returns a string that is suitable to assist humans in debugging
 // this error.
 // 
@@ -1095,7 +1107,7 @@ _Noreturn extern void exit_exit(exit_result_void_void_t *status);
 // hazard.
 extern void io_error_method_error_to_debug_string(io_error_borrow_error_t self, wasip2_string_t *ret);
 
-// Imported Functions from `wasi:io/poll@0.2.0`
+// Imported Functions from `wasi:io/poll@0.2.12`
 // Return the readiness of a pollable. This function never blocks.
 // 
 // Returns `true` when the pollable is ready, and `false` otherwise.
@@ -1114,8 +1126,9 @@ extern void poll_method_pollable_block(poll_borrow_pollable_t self);
 // The result `list<u32>` contains one or more indices of handles in the
 // argument list that is ready for I/O.
 // 
-// If the list contains more elements than can be indexed with a `u32`
-// value, this function traps.
+// This function traps if either:
+// - the list is empty, or:
+// - the list contains more elements than can be indexed with a `u32` value.
 // 
 // A timeout can be implemented by adding a pollable from the
 // wasi-clocks API to the list.
@@ -1123,10 +1136,10 @@ extern void poll_method_pollable_block(poll_borrow_pollable_t self);
 // This function does not return a `result`; polling in itself does not
 // do any I/O so it doesn't fail. If any of the I/O sources identified by
 // the pollables has an error, it is indicated by marking the source as
-// being reaedy for I/O.
+// being ready for I/O.
 extern void poll_poll(poll_list_borrow_pollable_t *in, wasip2_list_u32_t *ret);
 
-// Imported Functions from `wasi:io/streams@0.2.0`
+// Imported Functions from `wasi:io/streams@0.2.12`
 // Perform a non-blocking read from the stream.
 // 
 // When the source of a `read` is binary data, the bytes from the source
@@ -1199,27 +1212,13 @@ extern bool streams_method_output_stream_write(streams_borrow_output_stream_t se
 // Perform a write of up to 4096 bytes, and then flush the stream. Block
 // until all of these operations are complete, or an error occurs.
 // 
-// This is a convenience wrapper around the use of `check-write`,
-// `subscribe`, `write`, and `flush`, and is implemented with the
-// following pseudo-code:
-// 
-// ```text
-// let pollable = this.subscribe();
-// while !contents.is_empty() {
-// // Wait for the stream to become writable
-// pollable.block();
-// let Ok(n) = this.check-write(); // eliding error handling
-// let len = min(n, contents.len());
-// let (chunk, rest) = contents.split_at(len);
-// this.write(chunk  );            // eliding error handling
-// contents = rest;
-// }
-// this.flush();
-// // Wait for completion of `flush`
-// pollable.block();
-// // Check for any errors that arose during `flush`
-// let _ = this.check-write();         // eliding error handling
-// ```
+// Returns success when all of the contents written are successfully
+// flushed to output. If an error occurs at any point before all
+// contents are successfully flushed, that error is returned as soon as
+// possible. If writing and flushing the complete contents causes the
+// stream to become closed, this call should return success, and
+// subsequent calls to check-write or other interfaces should return
+// stream-error::closed.
 extern bool streams_method_output_stream_blocking_write_and_flush(streams_borrow_output_stream_t self, wasip2_list_u8_t *contents, streams_stream_error_t *err);
 // Request to flush buffered output. This function never blocks.
 // 
@@ -1236,7 +1235,7 @@ extern bool streams_method_output_stream_flush(streams_borrow_output_stream_t se
 // and stream is ready for writing again.
 extern bool streams_method_output_stream_blocking_flush(streams_borrow_output_stream_t self, streams_stream_error_t *err);
 // Create a `pollable` which will resolve once the output-stream
-// is ready for more writing, or an error has occured. When this
+// is ready for more writing, or an error has occurred. When this
 // pollable is ready, `check-write` will return `ok(n)` with n>0, or an
 // error.
 // 
@@ -1257,30 +1256,12 @@ extern bool streams_method_output_stream_write_zeroes(streams_borrow_output_stre
 // Block until all of these operations are complete, or an error
 // occurs.
 // 
-// This is a convenience wrapper around the use of `check-write`,
-// `subscribe`, `write-zeroes`, and `flush`, and is implemented with
-// the following pseudo-code:
-// 
-// ```text
-// let pollable = this.subscribe();
-// while num_zeroes != 0 {
-// // Wait for the stream to become writable
-// pollable.block();
-// let Ok(n) = this.check-write(); // eliding error handling
-// let len = min(n, num_zeroes);
-// this.write-zeroes(len);         // eliding error handling
-// num_zeroes -= len;
-// }
-// this.flush();
-// // Wait for completion of `flush`
-// pollable.block();
-// // Check for any errors that arose during `flush`
-// let _ = this.check-write();         // eliding error handling
-// ```
+// Functionality is equivelant to `blocking-write-and-flush` with
+// contents given as a list of len containing only zeroes.
 extern bool streams_method_output_stream_blocking_write_zeroes_and_flush(streams_borrow_output_stream_t self, uint64_t len, streams_stream_error_t *err);
 // Read from one stream and write to another.
 // 
-// The behavior of splice is equivelant to:
+// The behavior of splice is equivalent to:
 // 1. calling `check-write` on the `output-stream`
 // 2. calling `read` on the `input-stream` with the smaller of the
 // `check-write` permitted length and the `len` provided to `splice`
@@ -1299,48 +1280,52 @@ extern bool streams_method_output_stream_splice(streams_borrow_output_stream_t s
 // is ready for reading, before performing the `splice`.
 extern bool streams_method_output_stream_blocking_splice(streams_borrow_output_stream_t self, streams_borrow_input_stream_t src, uint64_t len, uint64_t *ret, streams_stream_error_t *err);
 
-// Imported Functions from `wasi:cli/stdin@0.2.0`
+// Imported Functions from `wasi:cli/stdin@0.2.12`
 extern stdin_own_input_stream_t stdin_get_stdin(void);
 
-// Imported Functions from `wasi:cli/stdout@0.2.0`
+// Imported Functions from `wasi:cli/stdout@0.2.12`
 extern stdout_own_output_stream_t stdout_get_stdout(void);
 
-// Imported Functions from `wasi:cli/stderr@0.2.0`
+// Imported Functions from `wasi:cli/stderr@0.2.12`
 extern stderr_own_output_stream_t stderr_get_stderr(void);
 
-// Imported Functions from `wasi:cli/terminal-stdin@0.2.0`
+// Imported Functions from `wasi:cli/terminal-stdin@0.2.12`
 // If stdin is connected to a terminal, return a `terminal-input` handle
 // allowing further interaction with it.
 extern bool terminal_stdin_get_terminal_stdin(terminal_stdin_own_terminal_input_t *ret);
 
-// Imported Functions from `wasi:cli/terminal-stdout@0.2.0`
+// Imported Functions from `wasi:cli/terminal-stdout@0.2.12`
 // If stdout is connected to a terminal, return a `terminal-output` handle
 // allowing further interaction with it.
 extern bool terminal_stdout_get_terminal_stdout(terminal_stdout_own_terminal_output_t *ret);
 
-// Imported Functions from `wasi:cli/terminal-stderr@0.2.0`
+// Imported Functions from `wasi:cli/terminal-stderr@0.2.12`
 // If stderr is connected to a terminal, return a `terminal-output` handle
 // allowing further interaction with it.
 extern bool terminal_stderr_get_terminal_stderr(terminal_stderr_own_terminal_output_t *ret);
 
-// Imported Functions from `wasi:clocks/monotonic-clock@0.2.0`
+// Imported Functions from `wasi:clocks/monotonic-clock@0.2.12`
 // Read the current value of the clock.
 // 
 // The clock is monotonic, therefore calling this function repeatedly will
 // produce a sequence of non-decreasing values.
+// 
+// For completeness, this function traps if it's not possible to represent
+// the value of the clock in an `instant`. Consequently, implementations
+// should ensure that the starting time is low enough to avoid the
+// possibility of overflow in practice.
 extern monotonic_clock_instant_t monotonic_clock_now(void);
 // Query the resolution of the clock. Returns the duration of time
 // corresponding to a clock tick.
 extern monotonic_clock_duration_t monotonic_clock_resolution(void);
 // Create a `pollable` which will resolve once the specified instant
-// occured.
+// has occurred.
 extern monotonic_clock_own_pollable_t monotonic_clock_subscribe_instant(monotonic_clock_instant_t when);
-// Create a `pollable` which will resolve once the given duration has
-// elapsed, starting at the time at which this function was called.
-// occured.
+// Create a `pollable` that will resolve after the specified duration has
+// elapsed from the time this function is invoked.
 extern monotonic_clock_own_pollable_t monotonic_clock_subscribe_duration(monotonic_clock_duration_t when);
 
-// Imported Functions from `wasi:clocks/wall-clock@0.2.0`
+// Imported Functions from `wasi:clocks/wall-clock@0.2.12`
 // Read the current value of the clock.
 // 
 // This clock is not monotonic, therefore calling this function repeatedly
@@ -1360,7 +1345,7 @@ extern void wall_clock_now(wall_clock_datetime_t *ret);
 // The nanoseconds field of the output is always less than 1000000000.
 extern void wall_clock_resolution(wall_clock_datetime_t *ret);
 
-// Imported Functions from `wasi:filesystem/types@0.2.0`
+// Imported Functions from `wasi:filesystem/types@0.2.12`
 // Return a stream for reading from a file, if available.
 // 
 // May fail with an error-code describing why the file cannot be read.
@@ -1382,7 +1367,7 @@ extern bool filesystem_method_descriptor_write_via_stream(filesystem_borrow_desc
 // May fail with an error-code describing why the file cannot be appended.
 // 
 // Note: This allows using `write-stream`, which is similar to `write` with
-// `O_APPEND` in in POSIX.
+// `O_APPEND` in POSIX.
 extern bool filesystem_method_descriptor_append_via_stream(filesystem_borrow_descriptor_t self, filesystem_own_output_stream_t *ret, filesystem_error_code_t *err);
 // Provide file advisory information on a descriptor.
 // 
@@ -1494,15 +1479,13 @@ extern bool filesystem_method_descriptor_stat_at(filesystem_borrow_descriptor_t 
 extern bool filesystem_method_descriptor_set_times_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t path_flags, wasip2_string_t *path, filesystem_new_timestamp_t *data_access_timestamp, filesystem_new_timestamp_t *data_modification_timestamp, filesystem_error_code_t *err);
 // Create a hard link.
 // 
+// Fails with `error-code::no-entry` if the old path does not exist,
+// with `error-code::exist` if the new path already exists, and
+// `error-code::not-permitted` if the old path is not a file.
+// 
 // Note: This is similar to `linkat` in POSIX.
 extern bool filesystem_method_descriptor_link_at(filesystem_borrow_descriptor_t self, filesystem_path_flags_t old_path_flags, wasip2_string_t *old_path, filesystem_borrow_descriptor_t new_descriptor, wasip2_string_t *new_path, filesystem_error_code_t *err);
 // Open a file or directory.
-// 
-// The returned descriptor is not guaranteed to be the lowest-numbered
-// descriptor not currently open/ it is randomized to prevent applications
-// from depending on making assumptions about indexes, since this is
-// error-prone in multi-threaded contexts. The returned descriptor is
-// guaranteed to be less than 2**31.
 // 
 // If `flags` contains `descriptor-flags::mutate-directory`, and the base
 // descriptor doesn't have `descriptor-flags::mutate-directory` set,
@@ -1560,14 +1543,14 @@ extern bool filesystem_method_descriptor_is_same_object(filesystem_borrow_descri
 // replaced. It may also include a secret value chosen by the
 // implementation and not otherwise exposed.
 // 
-// Implementations are encourated to provide the following properties:
+// Implementations are encouraged to provide the following properties:
 // 
-// - If the file is not modified or replaced, the computed hash value should
-// usually not change.
-// - If the object is modified or replaced, the computed hash value should
-// usually change.
-// - The inputs to the hash should not be easily computable from the
-// computed hash.
+//  - If the file is not modified or replaced, the computed hash value should
+//    usually not change.
+//  - If the object is modified or replaced, the computed hash value should
+//    usually change.
+//  - The inputs to the hash should not be easily computable from the
+//    computed hash.
 // 
 // However, none of these is required.
 extern bool filesystem_method_descriptor_metadata_hash(filesystem_borrow_descriptor_t self, filesystem_metadata_hash_value_t *ret, filesystem_error_code_t *err);
@@ -1590,15 +1573,15 @@ extern bool filesystem_method_directory_entry_stream_read_directory_entry(filesy
 // errors are filesystem-related errors.
 extern bool filesystem_filesystem_error_code(filesystem_borrow_error_t err_, filesystem_error_code_t *ret);
 
-// Imported Functions from `wasi:filesystem/preopens@0.2.0`
-// Return the set of preopened directories, and their path.
+// Imported Functions from `wasi:filesystem/preopens@0.2.12`
+// Return the set of preopened directories, and their paths.
 extern void filesystem_preopens_get_directories(filesystem_preopens_list_tuple2_own_descriptor_string_t *ret);
 
-// Imported Functions from `wasi:sockets/instance-network@0.2.0`
+// Imported Functions from `wasi:sockets/instance-network@0.2.12`
 // Get a handle to the default network.
 extern instance_network_own_network_t instance_network_instance_network(void);
 
-// Imported Functions from `wasi:sockets/udp@0.2.0`
+// Imported Functions from `wasi:sockets/udp@0.2.12`
 // Bind the socket to a specific network on the provided IP address and port.
 // 
 // If the IP address is zero (`0.0.0.0` in IPv4, `::` in IPv6), it is left to the implementation to decide which
@@ -1644,10 +1627,10 @@ extern bool udp_method_udp_socket_finish_bind(udp_borrow_udp_socket_t self, udp_
 // The POSIX equivalent in pseudo-code is:
 // ```text
 // if (was previously connected) {
-// connect(s, AF_UNSPEC)
+// 	connect(s, AF_UNSPEC)
 // }
 // if (remote_address is Some) {
-// connect(s, remote_address)
+// 	connect(s, remote_address)
 // }
 // ```
 // 
@@ -1724,7 +1707,7 @@ extern bool udp_method_udp_socket_send_buffer_size(udp_borrow_udp_socket_t self,
 extern bool udp_method_udp_socket_set_send_buffer_size(udp_borrow_udp_socket_t self, uint64_t value, udp_error_code_t *err);
 // Create a `pollable` which will resolve once the socket is ready for I/O.
 // 
-// Note: this function is here for WASI Preview2 only.
+// Note: this function is here for WASI 0.2 only.
 // It's planned to be removed when `future` is natively supported in Preview3.
 extern udp_own_pollable_t udp_method_udp_socket_subscribe(udp_borrow_udp_socket_t self);
 // Receive messages on the socket.
@@ -1753,7 +1736,7 @@ extern udp_own_pollable_t udp_method_udp_socket_subscribe(udp_borrow_udp_socket_
 extern bool udp_method_incoming_datagram_stream_receive(udp_borrow_incoming_datagram_stream_t self, uint64_t max_results, udp_list_incoming_datagram_t *ret, udp_error_code_t *err);
 // Create a `pollable` which will resolve once the stream is ready to receive again.
 // 
-// Note: this function is here for WASI Preview2 only.
+// Note: this function is here for WASI 0.2 only.
 // It's planned to be removed when `future` is natively supported in Preview3.
 extern udp_own_pollable_t udp_method_incoming_datagram_stream_subscribe(udp_borrow_incoming_datagram_stream_t self);
 // Check readiness for sending. This function never blocks.
@@ -1805,11 +1788,11 @@ extern bool udp_method_outgoing_datagram_stream_check_send(udp_borrow_outgoing_d
 extern bool udp_method_outgoing_datagram_stream_send(udp_borrow_outgoing_datagram_stream_t self, udp_list_outgoing_datagram_t *datagrams, uint64_t *ret, udp_error_code_t *err);
 // Create a `pollable` which will resolve once the stream is ready to send again.
 // 
-// Note: this function is here for WASI Preview2 only.
+// Note: this function is here for WASI 0.2 only.
 // It's planned to be removed when `future` is natively supported in Preview3.
 extern udp_own_pollable_t udp_method_outgoing_datagram_stream_subscribe(udp_borrow_outgoing_datagram_stream_t self);
 
-// Imported Functions from `wasi:sockets/udp-create-socket@0.2.0`
+// Imported Functions from `wasi:sockets/udp-create-socket@0.2.12`
 // Create a new UDP socket.
 // 
 // Similar to `socket(AF_INET or AF_INET6, SOCK_DGRAM, IPPROTO_UDP)` in POSIX.
@@ -1832,7 +1815,7 @@ extern udp_own_pollable_t udp_method_outgoing_datagram_stream_subscribe(udp_borr
 // - <https://man.freebsd.org/cgi/man.cgi?query=socket&sektion=2>
 extern bool udp_create_socket_create_udp_socket(udp_create_socket_ip_address_family_t address_family, udp_create_socket_own_udp_socket_t *ret, udp_create_socket_error_code_t *err);
 
-// Imported Functions from `wasi:sockets/tcp@0.2.0`
+// Imported Functions from `wasi:sockets/tcp@0.2.12`
 // Bind the socket to a specific network on the provided IP address and port.
 // 
 // If the IP address is zero (`0.0.0.0` in IPv4, `::` in IPv6), it is left to the implementation to decide which
@@ -1876,7 +1859,7 @@ extern bool tcp_method_tcp_socket_finish_bind(tcp_borrow_tcp_socket_t self, tcp_
 // Connect to a remote endpoint.
 // 
 // On success:
-// - the socket is transitioned into the `connection` state.
+// - the socket is transitioned into the `connected` state.
 // - a pair of streams is returned that can be used to read & write to the connection
 // 
 // After a failed connection attempt, the socket will be in the `closed`
@@ -2098,23 +2081,23 @@ extern bool tcp_method_tcp_socket_set_send_buffer_size(tcp_borrow_tcp_socket_t s
 // `subscribe` only has to be called once per socket and can then be
 // (re)used for the remainder of the socket's lifetime.
 // 
-// See <https://github.com/WebAssembly/wasi-sockets/TcpSocketOperationalSemantics.md#Pollable-readiness>
-// for a more information.
+// See <https://github.com/WebAssembly/WASI/blob/main/proposals/sockets/TcpSocketOperationalSemantics.md#pollable-readiness>
+// for more information.
 // 
-// Note: this function is here for WASI Preview2 only.
+// Note: this function is here for WASI 0.2 only.
 // It's planned to be removed when `future` is natively supported in Preview3.
 extern tcp_own_pollable_t tcp_method_tcp_socket_subscribe(tcp_borrow_tcp_socket_t self);
 // Initiate a graceful shutdown.
 // 
 // - `receive`: The socket is not expecting to receive any data from
-// the peer. The `input-stream` associated with this socket will be
-// closed. Any data still in the receive queue at time of calling
-// this method will be discarded.
+//   the peer. The `input-stream` associated with this socket will be
+//   closed. Any data still in the receive queue at time of calling
+//   this method will be discarded.
 // - `send`: The socket has no more data to send to the peer. The `output-stream`
-// associated with this socket will be closed and a FIN packet will be sent.
+//   associated with this socket will be closed and a FIN packet will be sent.
 // - `both`: Same effect as `receive` & `send` combined.
 // 
-// This function is idempotent. Shutting a down a direction more than once
+// This function is idempotent; shutting down a direction more than once
 // has no effect and returns `ok`.
 // 
 // The shutdown function does not close (drop) the socket.
@@ -2129,7 +2112,7 @@ extern tcp_own_pollable_t tcp_method_tcp_socket_subscribe(tcp_borrow_tcp_socket_
 // - <https://man.freebsd.org/cgi/man.cgi?query=shutdown&sektion=2>
 extern bool tcp_method_tcp_socket_shutdown(tcp_borrow_tcp_socket_t self, tcp_shutdown_type_t shutdown_type, tcp_error_code_t *err);
 
-// Imported Functions from `wasi:sockets/tcp-create-socket@0.2.0`
+// Imported Functions from `wasi:sockets/tcp-create-socket@0.2.12`
 // Create a new TCP socket.
 // 
 // Similar to `socket(AF_INET or AF_INET6, SOCK_STREAM, IPPROTO_TCP)` in POSIX.
@@ -2152,7 +2135,7 @@ extern bool tcp_method_tcp_socket_shutdown(tcp_borrow_tcp_socket_t self, tcp_shu
 // - <https://man.freebsd.org/cgi/man.cgi?query=socket&sektion=2>
 extern bool tcp_create_socket_create_tcp_socket(tcp_create_socket_ip_address_family_t address_family, tcp_create_socket_own_tcp_socket_t *ret, tcp_create_socket_error_code_t *err);
 
-// Imported Functions from `wasi:sockets/ip-name-lookup@0.2.0`
+// Imported Functions from `wasi:sockets/ip-name-lookup@0.2.12`
 // Returns the next address from the resolver.
 // 
 // This function should be called multiple times. On each call, it will
@@ -2169,7 +2152,7 @@ extern bool tcp_create_socket_create_tcp_socket(tcp_create_socket_ip_address_fam
 extern bool ip_name_lookup_method_resolve_address_stream_resolve_next_address(ip_name_lookup_borrow_resolve_address_stream_t self, ip_name_lookup_option_ip_address_t *ret, ip_name_lookup_error_code_t *err);
 // Create a `pollable` which will resolve once the stream is ready for I/O.
 // 
-// Note: this function is here for WASI Preview2 only.
+// Note: this function is here for WASI 0.2 only.
 // It's planned to be removed when `future` is natively supported in Preview3.
 extern ip_name_lookup_own_pollable_t ip_name_lookup_method_resolve_address_stream_subscribe(ip_name_lookup_borrow_resolve_address_stream_t self);
 // Resolve an internet host name to a list of IP addresses.
@@ -2194,7 +2177,7 @@ extern ip_name_lookup_own_pollable_t ip_name_lookup_method_resolve_address_strea
 // - <https://man.freebsd.org/cgi/man.cgi?query=getaddrinfo&sektion=3>
 extern bool ip_name_lookup_resolve_addresses(ip_name_lookup_borrow_network_t network, wasip2_string_t *name, ip_name_lookup_own_resolve_address_stream_t *ret, ip_name_lookup_error_code_t *err);
 
-// Imported Functions from `wasi:random/random@0.2.0`
+// Imported Functions from `wasi:random/random@0.2.12`
 // Return `len` cryptographically-secure random or pseudo-random bytes.
 // 
 // This function must produce data at least as cryptographically secure and
@@ -2214,7 +2197,7 @@ extern void random_get_random_bytes(uint64_t len, wasip2_list_u8_t *ret);
 // represented as a `u64`.
 extern uint64_t random_get_random_u64(void);
 
-// Imported Functions from `wasi:random/insecure@0.2.0`
+// Imported Functions from `wasi:random/insecure@0.2.12`
 // Return `len` insecure pseudo-random bytes.
 // 
 // This function is not cryptographically secure. Do not use it for
@@ -2230,7 +2213,7 @@ extern void random_insecure_get_insecure_random_bytes(uint64_t len, wasip2_list_
 // `get-insecure-random-bytes`, represented as a `u64`.
 extern uint64_t random_insecure_get_insecure_random_u64(void);
 
-// Imported Functions from `wasi:random/insecure-seed@0.2.0`
+// Imported Functions from `wasi:random/insecure-seed@0.2.12`
 // Return a 128-bit value that may contain a pseudo-random value.
 // 
 // The returned value is not required to be computed from a CSPRNG, and may

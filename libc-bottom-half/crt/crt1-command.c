@@ -18,7 +18,7 @@ __attribute__((export_name("_start"))) void _start(void)
 // doing. Given the special nature of this symbol this skip the typical
 // `wit-bindgen` rigamarole and the signature of this function is simple enough
 // that this shouldn't be too problematic (in theory).
-__attribute__((export_name("wasi:cli/run@0.2.0#run"))) int _start(void)
+__attribute__((export_name("wasi:cli/run@0.2.12#run"))) int _start(void)
 #elif defined(__wasip3__)
 __attribute__((export_name("wasi:cli/run@0.3.0#run"))) int _start(void)
 #else

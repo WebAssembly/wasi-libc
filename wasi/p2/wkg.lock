@@ -7,60 +7,60 @@ name = "wasi:cli"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.2.0"
-version = "0.2.0"
-digest = "sha256:e7e85458e11caf76554b724ebf4f113259decf0f3b1ee2e2930de096f72114a7"
+requirement = "=0.2.12"
+version = "0.2.12"
+digest = "sha256:d548a7ee2a3ff65e29c452e4327b7e625813420f4bdd7e16f7e46d32c5dff8c6"
 
 [[packages]]
 name = "wasi:clocks"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.2.0"
-version = "0.2.0"
-digest = "sha256:51911098e929732f65d1d84f8dc393299f18a9e8de632d854714f37142efe97b"
+requirement = "=0.2.12"
+version = "0.2.12"
+digest = "sha256:29e94d379b2239df6bc23cdfc6232dc69ffeb7cc236349fab2244803c323d92b"
 
 [[packages]]
 name = "wasi:filesystem"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.2.0"
-version = "0.2.0"
-digest = "sha256:39c6e0f5618a6b6c8bdf5c39035a048f666c0ed5f44fe04ed172f010ab0c36d4"
+requirement = "=0.2.12"
+version = "0.2.12"
+digest = "sha256:7f78b3697aba67d1e91aa318e178cede137a1edddbf62e3b6f7e635d180dddce"
 
 [[packages]]
 name = "wasi:http"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.2.0"
-version = "0.2.0"
-digest = "sha256:5a568e6e2d60c1ce51220e1833cdd5b88db9f615720edc762a9b4a6f36b383bd"
+requirement = "=0.2.12"
+version = "0.2.12"
+digest = "sha256:3a782520c155ed68337d77e8a9a03c0ead62b279da962c2fd7c7ca2a4da57fa6"
 
 [[packages]]
 name = "wasi:io"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.2.0"
-version = "0.2.0"
-digest = "sha256:c33b1dbf050f64229ff4decbf9a3d3420e0643a86f5f0cea29f81054820020a6"
+requirement = "=0.2.12"
+version = "0.2.12"
+digest = "sha256:910ed36e3589ab4c16c9942528152b80485e659852297916313318da47b44af8"
 
 [[packages]]
 name = "wasi:random"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.2.0"
-version = "0.2.0"
-digest = "sha256:5d535edc544d06719cf337861b7917c3d565360295e5dc424046dceddb0a0e42"
+requirement = "=0.2.12"
+version = "0.2.12"
+digest = "sha256:27a883ca86f062bf8010a86e0d56a2bc0238125d065f6a4b41a0c3a9d8de66f3"
 
 [[packages]]
 name = "wasi:sockets"
 registry = "wasi.dev"
 
 [[packages.versions]]
-requirement = "=0.2.0"
-version = "0.2.0"
-digest = "sha256:68640584237d98077cec4631264ff28ed74fe04619ce5dcd8020383df5c3969f"
+requirement = "=0.2.12"
+version = "0.2.12"
+digest = "sha256:63568c95cf05361602a64362fe4a68a4263395269a12b0b3e1cc8396eb710714"

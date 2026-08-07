@@ -153,7 +153,7 @@ else()
   message(FATAL_ERROR "Unknown WASI version: ${WASI}")
 endif()
 
-set(wasip2-version 0.2.0)
+set(wasip2-version 0.2.12)
 set(wasip3-version 0.3.0)
 
 # =============================================================================

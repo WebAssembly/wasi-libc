@@ -8,7 +8,7 @@
   do {                                                                         \
     errno = 0;                                                                 \
     if (!(c))                                                                  \
-      t_error("%s failed (errno = %d)\n", #c, errno);                         \
+      t_error("%s failed (errno = %d)\n", #c, errno);                          \
   } while (0)
 
 int main(void) {
@@ -35,8 +35,10 @@ int main(void) {
   int wr_fd;
   TEST((wr_fd = open(tmp, O_WRONLY)) > 2);
   errno = 0;
-  TEST(pread(wr_fd, buf, 5, 0) == -1);
-  TEST(errno != 0);
+  ssize_t rc = pread(wr_fd, buf, 5, 0);
+  int read_errno = errno;
+  TEST(rc == -1);
+  TEST(read_errno != 0);
 
   TEST(close(fd) == 0);
   TEST(close(wr_fd) == 0);

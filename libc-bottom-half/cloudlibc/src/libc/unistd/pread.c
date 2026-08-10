@@ -60,16 +60,16 @@ ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
                                               offset,
                                               &contents,
                                               &error_code);
-  bytes_read = contents.f0.len;
-  // Copy the bytes allocated in the canonical ABI to `buf`
-  memcpy(buf, contents.f0.ptr, bytes_read);
-  wasip2_list_u8_free(&contents.f0);
-
   // Check for errors
   if (!ok) {
     translate_error(&error_code);
     return -1;
   }
+
+  bytes_read = contents.f0.len;
+  // Copy the bytes allocated in the canonical ABI to `buf`
+  memcpy(buf, contents.f0.ptr, bytes_read);
+  wasip2_list_u8_free(&contents.f0);
 
   return bytes_read;
 #elif defined(__wasip3__)

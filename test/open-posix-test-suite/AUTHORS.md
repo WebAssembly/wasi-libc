@@ -1,0 +1,14 @@
+# WASI Fork
+
+sy.brand REMOVE-THIS AT fastly DOT com
+
+# Original Open POSIX Test Suite
+
+geoffrey.r.gustafson REMOVE-THIS AT intel DOT com
+inaky.perez-gonzalez REMOVE-THIS AT intel DOT com
+julie.n.fleischer REMOVE-THIS AT intel DOT com
+majid.awad REMOVE-THIS AT intel DOT com
+rolla.n.selbak REMOVE-THIS AT intel DOT com
+rusty.lynch REMOVE-THIS AT intel DOT com
+salwan.searty REMOVE-THIS AT intel DOT com
+sunyi REMOVE-THIS AT users DOT sourceforge DOT net

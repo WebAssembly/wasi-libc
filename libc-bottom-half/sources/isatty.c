@@ -1,4 +1,3 @@
-#include <__errno.h>
 #include <__function___isatty.h>
 #include <errno.h>
 #include <features.h>

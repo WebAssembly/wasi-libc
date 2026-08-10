@@ -89,6 +89,7 @@ __getdelim
 __getentropy
 __getopt_msg
 __gmtime_r
+__h_errno_location
 __hwcap
 __inet_aton
 __inhibit_ptc

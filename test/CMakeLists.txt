@@ -293,12 +293,81 @@ function(add_test_pair test_name test_file)
   # If shared libraries are enabled, and this test supports shared libraries,
   # then build a version of the test that's linked against `libc.so` and run the
   # test that way. This is skipped on WASIp1 since the format used here requires
-  # components, and WASIp3 coop threads testing is the subject of #813
-  if(NOT arg_NOSHARED AND BUILD_SHARED AND NOT (WASI MATCHES "p1")
-      AND NOT (WASI MATCHES "p3" AND HAVE_WASM_LIBCALL_THREAD_CONTEXT))
+  # components.
+  if(NOT arg_NOSHARED AND BUILD_SHARED AND NOT (WASI MATCHES "p1"))
     add_test_executable("shared_${test_name}" ${test_file} SHARED ${ARGN})
     register_test("shared_${test_name}" "shared_${test_name}" ${ARGN})
   endif()
+endfunction()
+
+# Builds a shared library out of `test/src/shared/${name}.c`
+# for use by `add_shared_library_test` below.
+#
+# Optional arguments:
+#
+# * `NEEDS a b c` - other test shared libraries this one links against
+function(add_test_shared_library name)
+  set(options)
+  set(oneValueArgs)
+  set(multiValueArgs NEEDS)
+  cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
+
+  add_library(${name} SHARED EXCLUDE_FROM_ALL
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/shared/${name}.c")
+  set_pic(${name})
+  target_compile_options(${name} PRIVATE -fvisibility=default)
+  set_target_properties(${name} PROPERTIES NO_SONAME 1)
+  add_dependencies(${name} sysroot builtins)
+  clang_format_target(${name})
+
+  if (ENABLE_COOP_THREADS)
+    target_compile_options(${name} PRIVATE -pthread)
+    target_link_options(${name} PRIVATE -pthread)
+  endif()
+
+  foreach(needed IN LISTS arg_NEEDS)
+    target_link_libraries(${name} PRIVATE ${needed})
+  endforeach()
+endfunction()
+
+# Adds a test which links a program against one or more test shared libraries
+# built by `add_test_shared_library`, in addition to `libc.so`.
+#
+# Unlike `add_test_pair` there is no statically linked counterpart here: the
+# whole point of these tests is to exercise a component built out of several
+# separate modules, which only exists in the shared configuration.
+#
+# * `test_file` is a path relative to the `src` directory.
+# * `LIBS a b c` names the test shared libraries to link against.
+#
+# All other arguments are forwarded to `add_test_executable` and `register_test`.
+function(add_shared_library_test test_file)
+  set(options)
+  set(oneValueArgs)
+  set(multiValueArgs LIBS)
+  cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
+
+  cmake_path(REPLACE_EXTENSION test_file wasm OUTPUT_VARIABLE test_name)
+  set(test_name "shared_${test_name}")
+  set(test_file "${CMAKE_CURRENT_SOURCE_DIR}/src/${test_file}")
+
+  if (NOT BUILD_SHARED OR WASI MATCHES "p1")
+    return()
+  endif()
+
+  set(link_flags)
+  set(link_libs)
+  foreach(lib IN LISTS arg_LIBS)
+    list(APPEND link_flags -l${lib})
+    list(APPEND link_libs "$<TARGET_FILE:${lib}>")
+  endforeach()
+
+  add_test_executable(${test_name} ${test_file} SHARED
+    LDFLAGS -L${CMAKE_CURRENT_BINARY_DIR} ${link_flags}
+    SHARED_LIBS ${link_libs}
+    DEPENDENCIES ${arg_LIBS}
+    ${arg_UNPARSED_ARGUMENTS})
+  register_test(${test_name} ${test_name} ${arg_UNPARSED_ARGUMENTS})
 endfunction()
 
 # Adds a new test from the `libc-test` repository where `test_file` is a
@@ -490,7 +559,8 @@ if (
   if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 23.0)
     set(noshared)
   endif()
-  add_wasilibc_test(setjmp.c SETJMP ${noshared})
+  add_wasilibc_test(setjmp.c SETJMP ${noshared}
+    SHARED_LIBS "${SYSROOT_LIB}/libsetjmp.so")
 endif()
 
 # This test works for single-threaded targets too
@@ -513,6 +583,18 @@ if (TARGET_TRIPLE MATCHES "-threads")
   target_include_directories(pthread_tsd_busywait.wasm PRIVATE ${LIBC_TEST})
   target_include_directories(pthread_mutex_busywait.wasm PRIVATE ${LIBC_TEST})
 endif()
+
+# ========= multiple-shared-library tests ========================
+#
+# Tests for exercising cross-library interactions. All tests are by default
+# executed with shared libraries, but this only exercises interactions between
+# the main program and libc. These tests interactions between libraries
+# themselves.
+
+add_test_shared_library(tls_a)
+add_test_shared_library(tls_b NEEDS tls_a)
+add_test_shared_library(tls_none)
+add_shared_library_test(multi_tls.c LIBS tls_a tls_b tls_none)
 
 # ========= cooperative/not threads related tests ================
 

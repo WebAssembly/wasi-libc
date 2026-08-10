@@ -98,7 +98,7 @@ foreach(symbol IN LISTS final_undefined_symbols)
      NOT symbol MATCHES "__stack_pointer" AND
      NOT symbol MATCHES "__init_stack_pointer" AND
      NOT symbol MATCHES "__wasm_component_model_builtin.*" AND
-     NOT symbol STREQUAL "__tls_base")
+     NOT symbol MATCHES "^__tls_(base|size|align)$")
     file(APPEND ${out_undefined_symbols} "${symbol}\n")
   endif()
 endforeach()

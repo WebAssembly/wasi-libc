@@ -12,7 +12,7 @@
 #else
 .globaltype __init_tls_base, i32, immutable
 #endif
-.functype   __wasm_set_tls_base (i32) -> ()
+.functype   __wasilibc_set_task_tls (i32) -> ()
 #endif
 
 
@@ -30,10 +30,10 @@
 // the same TLS values are used across all tasks, which seem reasonable-enough
 // for now.
 //
-// Note that configuring TLS is only required in coop threads builds since when
-// coop-threads are disabled TLS is routed through a global in wasi-libc which
-// needs no extra handling (unlike coop threads where TLS routes through
-// `context.{get,set}` which needs setting up).
+// Note that configuring TLS is only required in coop threads builds. When
+// threads are disabled TLS is handled by `wit-component`'s synthesis of
+// functions. With coop threads though delegation goes into C in wasi-libc
+// itself to do a bit of detection logic.
 .globl  __wasm_init_task
 .export_name  __wasm_init_task, __wasm_init_task
 .type  __wasm_init_task,@function
@@ -45,7 +45,7 @@ __wasm_init_task:
 
 #ifdef __wasi_cooperative_threads__
   global.get   __init_tls_base
-  call __wasm_set_tls_base
+  call __wasilibc_set_task_tls
 #endif
   end_function
 

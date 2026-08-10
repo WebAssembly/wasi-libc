@@ -42,6 +42,7 @@ function(ba_download target repo version)
   if ((os STREQUAL windows) AND
       ((target STREQUAL wasm-component-ld) OR
       (target STREQUAL wasm-tools) OR
+      (target STREQUAL wit-bindgen) OR
       (target STREQUAL wasmtime)))
     set(fmt zip)
   elseif (target STREQUAL wasmtime)

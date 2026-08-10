@@ -1,0 +1,5 @@
+package wasilibc:test;
+
+world entrypoint {
+  export entrypoint: func();
+}

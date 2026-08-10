@@ -126,9 +126,10 @@ set_source_files_properties("${LIBC_TEST}/src/common/print.c"
 # * `LDFLAGS -a -b -c` - additional flags to pass to the linker
 # * `SHARED` - link to the shared version of libc_test_support
 # * `SHARED_LIBS` - extra libs to pass to `wasm-tools component link`
+# * `WHOLE_ARCHIVE` - extra lib to link via cmake
 function(add_test_executable executable_name src)
   set(options SHARED)
-  set(oneValueArgs)
+  set(oneValueArgs WHOLE_ARCHIVE)
   set(multiValueArgs LDFLAGS CFLAGS SHARED_LIBS INCLUDE DEPENDENCIES)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
@@ -185,6 +186,10 @@ function(add_test_executable executable_name src)
   foreach(dep IN LISTS arg_DEPENDENCIES)
     add_dependencies(${executable_name} ${dep})
   endforeach()
+  foreach(lib IN LISTS arg_WHOLE_ARCHIVE)
+    target_link_libraries(${executable_name} PRIVATE
+      -Wl,--whole-archive ${lib} -Wl,--no-whole-archive)
+  endforeach()
 endfunction()
 
 # Adds a new test to run.
@@ -202,8 +207,8 @@ endfunction()
 # * `SETJMP` - this test requires setjmp/longjmp
 function(register_test test_name executable_name)
   set(options FS NETWORK SETJMP)
-  set(oneValueArgs CLIENT PASS_REGULAR_EXPRESSION)
-  set(multiValueArgs ARGV ENV ENGINE_ARG)
+  set(oneValueArgs CLIENT PASS_REGULAR_EXPRESSION ENGINE_ARG)
+  set(multiValueArgs ARGV ENV)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
   set(wasmtime_args)
@@ -577,6 +582,45 @@ if (WASILIBC_MULTITHREADING AND NOT TEST_WITH_V8)
   add_wasilibc_test(futex_wake_one.c)
   add_wasilibc_test(futex_wake_all.c)
 endif()
+
+# ========= wasi-libc tests for non-main entrypoints =========================
+
+add_custom_command(
+  OUTPUT
+    ${CMAKE_CURRENT_BINARY_DIR}/entrypoint.c
+    ${CMAKE_CURRENT_BINARY_DIR}/entrypoint.h
+    ${CMAKE_CURRENT_BINARY_DIR}/entrypoint_component_type.o
+  COMMAND
+    ${wit_bindgen} c ${CMAKE_CURRENT_SOURCE_DIR}/entrypoint.wit
+      --out-dir ${CMAKE_CURRENT_BINARY_DIR}
+  DEPENDS wit-bindgen ${CMAKE_CURRENT_SOURCE_DIR}/entrypoint.wit
+)
+add_library(entrypoint_bindings STATIC EXCLUDE_FROM_ALL
+  ${CMAKE_CURRENT_BINARY_DIR}/entrypoint.c
+  ${CMAKE_CURRENT_BINARY_DIR}/entrypoint_component_type.o)
+
+function(add_external_entrypoint_test test_file)
+  cmake_path(REPLACE_EXTENSION test_file wasm OUTPUT_VARIABLE test_name)
+  set(test_file "${CMAKE_CURRENT_SOURCE_DIR}/src/${test_file}")
+
+  if (WASI STREQUAL "p1")
+    set(extra_args
+      ENGINE_ARG --invoke=entrypoint
+      LDFLAGS -Wl,--export=entrypoint
+    )
+  else()
+    set(extra_args
+      ENGINE_ARG "--invoke=entrypoint()"
+      WHOLE_ARCHIVE entrypoint_bindings
+    )
+  endif()
+
+  if (NOT TEST_WITH_V8)
+    add_test_pair(${test_name} ${test_file} ${ARGN} ${extra_args})
+  endif()
+endfunction()
+
+add_external_entrypoint_test(external_entrypoint_pthread_tls.c)
 
 # ========= sockets-related tests ===============================
 

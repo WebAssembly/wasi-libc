@@ -442,6 +442,11 @@ add_wasilibc_test(clock_nanosleep.c)
 add_wasilibc_test(chdir.c FS)
 add_wasilibc_test(close.c FS)
 add_wasilibc_test(pread.c FS)
+# Emulated mmap free-on-pread-fail (#866). Links the optional mman library.
+add_wasilibc_test(mmap-pread-fail.c FS
+  CFLAGS -D_WASI_EMULATED_MMAN
+  LDFLAGS -lwasi-emulated-mman
+  SHARED_LIBS "${SYSROOT_LIB}/libwasi-emulated-mman.so")
 add_wasilibc_test(external_env.c ENV VAR1=foo VAR2=bar)
 add_wasilibc_test(fadvise.c FS)
 # I'm not really entirely sure why this test is failing, it seemingly exits with
@@ -689,6 +694,13 @@ add_external_entrypoint_test(external_entrypoint_pthread_tls.c)
 
 # ========= sockets-related tests ===============================
 
+# wasip1 skips the bulk NETWORK suite, but #866 fixed a wasip1-only
+# accept(NULL) crash. Register the focused case outside the p2/p3 block so
+# wasip1 CI also exercises accept-wasip1.c when the engine supports sockets.
+if (WASI STREQUAL "p1" AND NOT TEST_WITH_V8)
+  add_wasilibc_test(sockets-accept-null-addr.c NETWORK)
+endif()
+
 if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(poll-connect.c NETWORK)
   add_wasilibc_test(poll-badfd.c)
@@ -712,6 +724,8 @@ if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(sockets-nonblocking-accept-multiple.c NETWORK)
   add_wasilibc_test(sockets-nonblocking-shutdown.c NETWORK)
   add_wasilibc_test(sockets-select-connecting-rw.c NETWORK)
+  # POSIX accept/accept4 with NULL peer address (#866 wasip1 crash class).
+  add_wasilibc_test(sockets-accept-null-addr.c NETWORK)
   add_wasilibc_test(sockets-listen-backlog.c NETWORK)
   add_wasilibc_test(sockets-sendto-connected.c NETWORK)
   add_wasilibc_test(sockets-recvfrom-connected.c NETWORK)

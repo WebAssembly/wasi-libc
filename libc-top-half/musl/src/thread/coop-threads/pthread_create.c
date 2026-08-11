@@ -164,10 +164,14 @@ static size_t thread_tls_size(size_t *align) {
   size_t result_align = _Alignof(void *);
 
   for (size_t i = 0; i < info->num_libraries; i++) {
-    const struct __wasilibc_library_tls_info *library = &info->library_info[i];
-    size = align_up(size, library->tls_align) + library->tls_size;
-    if (library->tls_align > result_align)
-      result_align = library->tls_align;
+    const struct __wasilibc_library_tls_info *library = info->library_info[i];
+    size_t library_align;
+    size_t library_size = library->tls_size_and_align(&library_align);
+    if (library_size == 0)
+      continue;
+    size = align_up(size, library_align) + library_size;
+    if (library_align > result_align)
+      result_align = library_align;
   }
 
   *align = result_align;
@@ -190,10 +194,14 @@ static void *layout_thread_tls(void *block) {
   void **bases = block;
   uintptr_t next = (uintptr_t)block + info->num_libraries * sizeof(void *);
   for (size_t i = 0; i < info->num_libraries; i++) {
-    const struct __wasilibc_library_tls_info *library = &info->library_info[i];
-    next = align_up(next, library->tls_align);
+    const struct __wasilibc_library_tls_info *library = info->library_info[i];
+    size_t library_align;
+    size_t library_size = library->tls_size_and_align(&library_align);
+    if (library_size == 0)
+      continue;
+    next = align_up(next, library_align);
     bases[i] = (void *)next;
-    next += library->tls_size;
+    next += library_size;
   }
   return bases;
 }
@@ -258,7 +266,7 @@ hidden void __wasi_coop_thread_start_C(struct start_args *args) {
     void **bases = args->tls_layout;
     size_t num_libraries = info->num_libraries;
     for (size_t i = 0; i < num_libraries; i++)
-      info->library_info[i].init_tls(bases[i]);
+      info->library_info[i]->init_tls(bases[i]);
   }
   *__pthread_self() = self_copy;
 

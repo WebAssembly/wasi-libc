@@ -13,14 +13,18 @@
 #ifdef __wasm_libcall_thread_context__
 
 struct __wasilibc_library_tls_info {
-  size_t tls_size;
-  size_t tls_align;
+  // Stores this library's TLS alignment in `*align` and returns its TLS size.
+  //
+  // Note that a library with no thread-local storage at all reports a size of
+  // zero, but `*align` is always at least 1 so that callers can use it as a
+  // divisor/mask without special-casing.
+  size_t (*tls_size_and_align)(size_t *align);
   void (*init_tls)(void *);
 };
 
 struct __wasilibc_program_tls_info {
   size_t num_libraries;
-  const struct __wasilibc_library_tls_info *library_info;
+  const struct __wasilibc_library_tls_info **library_info;
   void **main_thread_tls_base;
 };
 

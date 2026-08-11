@@ -856,7 +856,6 @@ function(add_posix_test test_file)
   string(REPLACE "/" "_" test_name ${test_name})
   set(test_name "open_posix_test_${test_name}")
   set(test_file "${CMAKE_CURRENT_SOURCE_DIR}/open-posix-test-suite/${test_file}")
-  set_source_files_properties(${test_file} PROPERTIES GENERATED TRUE)
 
   add_test_pair(${test_name} ${test_file}
     CFLAGS -Wno-unused-parameter -Wno-unused-variable -Wno-sign-compare -Wno-unused-but-set-global

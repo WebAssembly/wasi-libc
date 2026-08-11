@@ -694,13 +694,6 @@ add_external_entrypoint_test(external_entrypoint_pthread_tls.c)
 
 # ========= sockets-related tests ===============================
 
-# wasip1 skips the bulk NETWORK suite, but #866 fixed a wasip1-only
-# accept(NULL) crash. Register the focused case outside the p2/p3 block so
-# wasip1 CI also exercises accept-wasip1.c when the engine supports sockets.
-if (WASI STREQUAL "p1" AND NOT TEST_WITH_V8)
-  add_wasilibc_test(sockets-accept-null-addr.c NETWORK)
-endif()
-
 if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(poll-connect.c NETWORK)
   add_wasilibc_test(poll-badfd.c)

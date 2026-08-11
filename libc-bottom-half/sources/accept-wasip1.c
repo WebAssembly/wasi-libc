@@ -18,11 +18,16 @@ int accept(int socket, struct sockaddr *restrict addr,
     return -1;
   }
 
-  // Clear sockaddr to indicate undefined address
-  memset(addr, 0, *addrlen);
-  // might be AF_UNIX or AF_INET
-  addr->sa_family = AF_UNSPEC;
-  *addrlen = sizeof(struct sockaddr);
+  // POSIX allows both addr and addrlen to be NULL when the peer address is
+  // unused. wasip2/p3 accept paths use __wasilibc_sockaddr_validate for the
+  // same both-null case.
+  if (addr != NULL && addrlen != NULL) {
+    // Clear sockaddr to indicate undefined address
+    memset(addr, 0, *addrlen);
+    // might be AF_UNIX or AF_INET
+    addr->sa_family = AF_UNSPEC;
+    *addrlen = sizeof(struct sockaddr);
+  }
 
   return ret;
 }
@@ -44,11 +49,13 @@ int accept4(int socket, struct sockaddr *restrict addr,
     return -1;
   }
 
-  // Clear sockaddr to indicate undefined address
-  memset(addr, 0, *addrlen);
-  // might be AF_UNIX or AF_INET
-  addr->sa_family = AF_UNSPEC;
-  *addrlen = sizeof(struct sockaddr);
+  if (addr != NULL && addrlen != NULL) {
+    // Clear sockaddr to indicate undefined address
+    memset(addr, 0, *addrlen);
+    // might be AF_UNIX or AF_INET
+    addr->sa_family = AF_UNSPEC;
+    *addrlen = sizeof(struct sockaddr);
+  }
 
   return ret;
 }

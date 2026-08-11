@@ -20,23 +20,6 @@ ExternalProject_Get_Property(libc-test SOURCE_DIR)
 set(LIBC_TEST "${SOURCE_DIR}")
 message(STATUS "libc-test source directory: ${LIBC_TEST}")
 
-# ======== Clone Open POSIX Test Suite ==========================
-
-set(OPEN_POSIX_TEST_SUITE_COMMIT dc7c7d54fc4f6219bb4c7af348be2290335bf17e)
-ExternalProject_Add(
-  posix-testsuite
-  EXCLUDE_FROM_ALL ON
-  URL "https://github.com/bytecodealliance/open-posix-test-suite/archive/${OPEN_POSIX_TEST_SUITE_COMMIT}.tar.gz"
-  DOWNLOAD_EXTRACT_TIMESTAMP ON
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
-  INSTALL_COMMAND ""
-)
-ExternalProject_Get_Property(posix-testsuite SOURCE_DIR)
-set(POSIX_TESTSUITE "${SOURCE_DIR}")
-message(STATUS "Open POSIX Test Suite source directory: ${POSIX_TESTSUITE}")
-
-
 # ========= Download a test runner =============================
 include(ba-download)
 
@@ -827,13 +810,12 @@ function(add_posix_test test_file)
   cmake_path(REPLACE_EXTENSION test_file wasm OUTPUT_VARIABLE test_name)
   string(REPLACE "/" "_" test_name ${test_name})
   set(test_name "open_posix_test_${test_name}")
-  set(test_file "${POSIX_TESTSUITE}/${test_file}")
+  set(test_file "${CMAKE_CURRENT_SOURCE_DIR}/open-posix-test-suite/${test_file}")
   set_source_files_properties(${test_file} PROPERTIES GENERATED TRUE)
 
   add_test_pair(${test_name} ${test_file}
     CFLAGS -Wno-unused-parameter -Wno-unused-variable -Wno-sign-compare -Wno-unused-but-set-global
-    INCLUDE ${POSIX_TESTSUITE}/include
-    DEPENDENCIES posix-testsuite)
+    INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/open-posix-test-suite/include)
 endfunction()
 
 if (ENABLE_COOP_THREADS)

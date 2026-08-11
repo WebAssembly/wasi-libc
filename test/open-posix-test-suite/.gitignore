@@ -1,0 +1,16 @@
+# Compiled object files
+*.o
+
+# Timeout helper binary and value file (built from t0.c)
+/t0
+/t0.val
+
+# Test run log files
+/logfile
+logfile.*
+
+# Editor backup files
+*~
+
+# Temporary build directories
+.tmp*/

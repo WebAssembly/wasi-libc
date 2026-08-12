@@ -799,8 +799,8 @@ static ssize_t udp_recvfrom(void *data, void *buffer, size_t length, int flags,
         return -1;
       }
 
-      streams->recv_subtask = 0;
-      streams->flags |= UDP_STREAMS_RECV_READY;
+      // Same completion path as nonblocking I/O: drop then clear.
+      wasip3_recv_end(streams, &event);
     } else {
       wasip3_event_t event;
       __wasilibc_poll_waitable(streams->recv_subtask, &event);
@@ -933,7 +933,7 @@ static int wasip3_send_resolve(udp_socket_t *socket, bool should_block) {
         errno = EWOULDBLOCK;
         return -1;
       }
-      streams->send_subtask = 0;
+      // Leave send_subtask set so the shared drop below runs.
     } else {
       wasip3_event_t event;
       __wasilibc_poll_waitable(streams->send_subtask, &event);

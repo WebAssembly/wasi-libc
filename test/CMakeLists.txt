@@ -737,6 +737,7 @@ if (NOT (WASI STREQUAL "p1"))
   add_sockets_test_executable(sockets-client-hangup-while-receiving.c)
   add_sockets_test_executable(sockets-client-hangup-while-sending.c)
   add_sockets_test_executable(sockets-client-udp-blocking.c)
+  add_sockets_test_executable(sockets-client-udp-blocking-roundtrips.c)
   add_sockets_test_executable(sockets-multiple-client.c)
   add_sockets_test_executable(sockets-server.c)
   add_sockets_test_executable(sockets-server-handle-hangups.c)
@@ -745,6 +746,7 @@ if (NOT (WASI STREQUAL "p1"))
   add_sockets_test_executable(sockets-server-hangup-during-recv.c)
   add_sockets_test_executable(sockets-server-hangup-during-send.c)
   add_sockets_test_executable(sockets-server-udp-blocking.c)
+  add_sockets_test_executable(sockets-server-udp-blocking-roundtrips.c)
   add_sockets_test_executable(sockets-multiple-server.c)
 
   function(sockets_test test_name client server)
@@ -768,6 +770,9 @@ if (NOT (WASI STREQUAL "p1"))
   sockets_test(sockets sockets-client.wasm sockets-server.wasm)
   sockets_test(sockets-udp-blocking sockets-client-udp-blocking.wasm
     sockets-server-udp-blocking.wasm)
+  sockets_test(sockets-udp-blocking-roundtrips
+    sockets-client-udp-blocking-roundtrips.wasm
+    sockets-server-udp-blocking-roundtrips.wasm)
   sockets_test(sockets-multiple sockets-multiple-client.wasm sockets-multiple-server.wasm
     NCLIENTS 10)
 

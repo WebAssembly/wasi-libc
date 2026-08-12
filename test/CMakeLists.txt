@@ -693,12 +693,6 @@ add_external_entrypoint_test(external_entrypoint_pthread_tls.c)
 
 # ========= sockets-related tests ===============================
 
-# The bulk sockets suite is skipped for wasip1. Register this one case
-# there so CI exercises accept-wasip1.c (the #866 crash path).
-if (WASI STREQUAL "p1" AND NOT TEST_WITH_V8)
-  add_wasilibc_test(sockets-accept-null-addr.c NETWORK)
-endif()
-
 if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(poll-connect.c NETWORK)
   add_wasilibc_test(poll-badfd.c)

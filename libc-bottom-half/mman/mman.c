@@ -90,6 +90,10 @@ void *mmap(void *addr, size_t length, int prot, int flags, int fd,
       if (nread < 0) {
         if (errno == EINTR)
           continue;
+        // Free the header allocation; pread already set errno.
+        int saved_errno = errno;
+        free(map);
+        errno = saved_errno;
         return MAP_FAILED;
       }
       if (nread == 0)

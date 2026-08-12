@@ -442,6 +442,10 @@ add_wasilibc_test(clock_nanosleep.c)
 add_wasilibc_test(chdir.c FS)
 add_wasilibc_test(close.c FS)
 add_wasilibc_test(pread.c FS)
+add_wasilibc_test(mmap-pread-fail.c FS
+  CFLAGS -D_WASI_EMULATED_MMAN
+  LDFLAGS -lwasi-emulated-mman
+  SHARED_LIBS "${SYSROOT_LIB}/libwasi-emulated-mman.so")
 add_wasilibc_test(external_env.c ENV VAR1=foo VAR2=bar)
 add_wasilibc_test(fadvise.c FS)
 # I'm not really entirely sure why this test is failing, it seemingly exits with
@@ -712,6 +716,7 @@ if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(sockets-nonblocking-accept-multiple.c NETWORK)
   add_wasilibc_test(sockets-nonblocking-shutdown.c NETWORK)
   add_wasilibc_test(sockets-select-connecting-rw.c NETWORK)
+  add_wasilibc_test(sockets-accept-null-addr.c NETWORK)
   add_wasilibc_test(sockets-listen-backlog.c NETWORK)
   add_wasilibc_test(sockets-sendto-connected.c NETWORK)
   add_wasilibc_test(sockets-recvfrom-connected.c NETWORK)

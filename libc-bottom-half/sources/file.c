@@ -81,9 +81,10 @@ static void file_free(void *data) {
   free(file);
 }
 
-// True when `file` refers to a directory. Used to map the host's
-// `bad-descriptor` from `read-via-stream` to POSIX EISDIR. Only called
-// after a read has already failed.
+// True when `file` refers to a directory. Used to return POSIX EISDIR
+// instead of the host's `bad-descriptor`. On wasip2 this runs only after
+// `read-via-stream` fails. On wasip3 that call traps, so the check runs
+// before opening the stream.
 static bool file_is_directory(file_t *file) {
   filesystem_error_code_t error;
 #ifdef __wasip2__
@@ -155,6 +156,12 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
   read->pollable = &file->read_pollable;
 #else
   if (!wasip3_io_state_present(&file->read)) {
+    // wasip3 `read-via-stream` returns a stream, not a result. Wasmtime
+    // traps with ErrorCode::BadDescriptor on a directory. Check first.
+    if (file_is_directory(file)) {
+      errno = EISDIR;
+      return -1;
+    }
     assert(!file->read_result);
     filesystem_tuple2_stream_u8_future_result_void_error_code_t result;
     filesystem_method_descriptor_read_via_stream(

@@ -12,8 +12,8 @@
   } while (0)
 
 // POSIX read() on a directory fd must fail with EISDIR, not EBADF.
-// wasip2 read-via-stream currently surfaces bad-descriptor, which
-// translate_error maps to EBADF.
+// wasip2 read-via-stream fails with bad-descriptor (mapped to EBADF).
+// wasip3 read-via-stream traps with BadDescriptor unless we check type first.
 int main(void) {
   char buf[16];
 

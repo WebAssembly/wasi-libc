@@ -16,10 +16,12 @@
 
 // Many blocking UDP recv/send cycles. On wasip3, each blocking wait that
 // completes a pending subtask must drop that subtask handle. Clearing the
-// handle without drop leaks component-model resources across iterations.
-// The server blocks in recvfrom before each client send so the receive
-// subtask is often still outstanding when the wait completes.
-#define NROUNDS 64
+// handle without drop leaves HostTask entries in wasmtime's concurrent
+// resource table. CI runs this pair with -Smax-resources=128 so a leak
+// fails with "resource table has no free keys" while a correct drop stays
+// under the cap. The server blocks in recvfrom before each client send so
+// the receive subtask is often still outstanding when the wait completes.
+#define NROUNDS 200
 #define BUFSIZE 256
 
 void run_udp_server(void) {

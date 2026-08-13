@@ -751,18 +751,28 @@ if (NOT (WASI STREQUAL "p1"))
 
   function(sockets_test test_name client server)
     set(options)
-    set(oneValueArgs NCLIENTS)
+    set(oneValueArgs NCLIENTS MAX_RESOURCES TIMEOUT_S)
     set(multiValueArgs)
     cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
+
+    set(socket_test_args
+      -DENGINE=${ENGINE}
+      -DSERVER=$<TARGET_FILE:${server}>
+      -DCLIENT=$<TARGET_FILE:${client}>
+      -DNCLIENTS=${arg_NCLIENTS}
+    )
+    if (arg_MAX_RESOURCES)
+      list(APPEND socket_test_args -DMAX_RESOURCES=${arg_MAX_RESOURCES})
+    endif()
+    if (arg_TIMEOUT_S)
+      list(APPEND socket_test_args -DTIMEOUT_S=${arg_TIMEOUT_S})
+    endif()
 
     add_test(
       NAME "${test_name}"
       COMMAND
         ${CMAKE_COMMAND}
-          -DENGINE=${ENGINE}
-          -DSERVER=$<TARGET_FILE:${server}>
-          -DCLIENT=$<TARGET_FILE:${client}>
-          -DNCLIENTS=${arg_NCLIENTS}
+          ${socket_test_args}
           -P ${CMAKE_CURRENT_SOURCE_DIR}/socket-test.cmake
     )
   endfunction()
@@ -770,9 +780,20 @@ if (NOT (WASI STREQUAL "p1"))
   sockets_test(sockets sockets-client.wasm sockets-server.wasm)
   sockets_test(sockets-udp-blocking sockets-client-udp-blocking.wasm
     sockets-server-udp-blocking.wasm)
-  sockets_test(sockets-udp-blocking-roundtrips
-    sockets-client-udp-blocking-roundtrips.wasm
-    sockets-server-udp-blocking-roundtrips.wasm)
+  # wasip3: cap concurrent resources so a missing subtask drop fails the suite
+  # (wasmtime: "resource table has no free keys") while proper drop stays green.
+  # wasip2 has no async subtasks for this path; leave unlimited.
+  if (WASI STREQUAL "p3")
+    sockets_test(sockets-udp-blocking-roundtrips
+      sockets-client-udp-blocking-roundtrips.wasm
+      sockets-server-udp-blocking-roundtrips.wasm
+      MAX_RESOURCES 128
+      TIMEOUT_S 15)
+  else()
+    sockets_test(sockets-udp-blocking-roundtrips
+      sockets-client-udp-blocking-roundtrips.wasm
+      sockets-server-udp-blocking-roundtrips.wasm)
+  endif()
   sockets_test(sockets-multiple sockets-multiple-client.wasm sockets-multiple-server.wasm
     NCLIENTS 10)
 

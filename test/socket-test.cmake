@@ -9,6 +9,28 @@ if (NOT NCLIENTS)
   set(NCLIENTS 1)
 endif()
 
+# Base engine flags for wasip3 dual-process socket tests.
+set(ENGINE_FLAGS
+  -Wcomponent-model-async
+  -Wcomponent-model-threading
+  -Sp3,inherit-network
+)
+
+# Optional cap on wasmtime resource tables. When set, undropped wasip3 subtask
+# HostTask entries accumulate in the concurrent ResourceTable and eventually
+# trap with "resource table has no free keys". Used to make blocking UDP
+# subtask-drop regressions fail before the fix and pass after it.
+if (MAX_RESOURCES)
+  list(APPEND ENGINE_FLAGS -Smax-resources=${MAX_RESOURCES})
+endif()
+
+# Serialize flags for embedding inside bash -c strings below.
+string(JOIN " " ENGINE_FLAGS_STR ${ENGINE_FLAGS})
+
+if (NOT TIMEOUT_S)
+  set(TIMEOUT_S 5)
+endif()
+
 foreach(i RANGE 1 ${NCLIENTS})
   # This is a bit tricky to setup, but the flow is:
   #
@@ -36,15 +58,15 @@ read port  # read the first line of stdin from the previous process
 echo $port # forward this line to the next process, or out to cmake itself
 exec 2>&1  # close our stdout and replace it with stderr
 cat <&0 &  # forward the rest of stdin to stderr so it shows up in cmake
-exec ${ENGINE} -Wcomponent-model-async -Wcomponent-model-threading -Sp3,inherit-network ${CLIENT} \"$port\"
+exec ${ENGINE} ${ENGINE_FLAGS_STR} ${CLIENT} \"$port\"
   ")
   list(APPEND CLIENTS COMMAND bash -c ${client_script})
 endforeach()
 
 execute_process(
-  COMMAND ${ENGINE} -Wcomponent-model-async -Wcomponent-model-threading -Sp3,inherit-network ${SERVER}
+  COMMAND ${ENGINE} ${ENGINE_FLAGS} ${SERVER}
   ${CLIENTS}
-  TIMEOUT 5
+  TIMEOUT ${TIMEOUT_S}
   COMMAND_ERROR_IS_FATAL ANY
   COMMAND_ECHO STDOUT
 )

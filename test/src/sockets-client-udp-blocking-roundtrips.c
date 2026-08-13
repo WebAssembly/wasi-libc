@@ -15,8 +15,10 @@
   } while (0)
 
 // Pair with sockets-server-udp-blocking-roundtrips.c. Many blocking send/recv
-// cycles exercise wasip3 subtask completion on both directions.
-#define NROUNDS 64
+// cycles exercise wasip3 subtask completion on both directions. On wasip3 CI
+// this runs under -Smax-resources=128 so missing subtask drops fail the
+// resource table while correct drops stay green (see server file comment).
+#define NROUNDS 200
 #define BUFSIZE 256
 
 void test_udp_client(int server_port) {

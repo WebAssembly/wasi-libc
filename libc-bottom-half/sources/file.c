@@ -81,6 +81,28 @@ static void file_free(void *data) {
   free(file);
 }
 
+// True when `file` refers to a directory. Used to map the host's
+// `bad-descriptor` from `read-via-stream` to POSIX EISDIR. Only called
+// after a read has already failed.
+static bool file_is_directory(file_t *file) {
+  filesystem_error_code_t error;
+#ifdef __wasip2__
+  filesystem_descriptor_type_t ty;
+  if (!filesystem_method_descriptor_get_type(
+          filesystem_borrow_descriptor(file->file_handle), &ty, &error))
+    return false;
+  return ty == FILESYSTEM_DESCRIPTOR_TYPE_DIRECTORY;
+#else
+  filesystem_descriptor_stat_t st;
+  if (!filesystem_method_descriptor_stat(
+          filesystem_borrow_descriptor(file->file_handle), &st, &error))
+    return false;
+  bool is_dir = st.type.tag == FILESYSTEM_DESCRIPTOR_TYPE_DIRECTORY;
+  filesystem_descriptor_stat_free(&st);
+  return is_dir;
+#endif
+}
+
 #ifndef __wasip2__
 static int file_read_eof(void *data) {
   file_t *file = (file_t *)data;
@@ -94,6 +116,11 @@ static int file_read_eof(void *data) {
     filesystem_future_result_void_error_code_drop_readable(file->read_result);
     file->read_result = 0;
     if (result.is_err) {
+      if (result.val.err.tag == FILESYSTEM_ERROR_CODE_BAD_DESCRIPTOR &&
+          file_is_directory(file)) {
+        errno = EISDIR;
+        return -1;
+      }
       translate_error(&result.val.err);
       return -1;
     }
@@ -115,6 +142,11 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
         filesystem_borrow_descriptor(file->file_handle), file->offset,
         &file->read_stream, &error_code);
     if (!ok) {
+      if (error_code == FILESYSTEM_ERROR_CODE_BAD_DESCRIPTOR &&
+          file_is_directory(file)) {
+        errno = EISDIR;
+        return -1;
+      }
       translate_error(&error_code);
       return -1;
     }

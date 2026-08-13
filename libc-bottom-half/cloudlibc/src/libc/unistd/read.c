@@ -21,6 +21,13 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
   size_t bytes_read;
   __wasi_errno_t error = __wasi_fd_read(fildes, &iov, 1, &bytes_read);
   if (error != 0) {
+    __wasi_fdstat_t fds;
+    if ((error == __WASI_ERRNO_BADF || error == ENOTCAPABLE) &&
+        __wasi_fd_fdstat_get(fildes, &fds) == 0 &&
+        fds.fs_filetype == __WASI_FILETYPE_DIRECTORY) {
+      errno = EISDIR;
+      return -1;
+    }
     errno = error == ENOTCAPABLE ? EBADF : error;
     return -1;
   }

@@ -7,12 +7,9 @@
 #include <wasi/version.h>
 
 // Force some symbols to be linked in for wasip3
-extern void __wasm_init_task(void);
-extern void __wasm_init_async_task(void);
+extern void __wasm_task_hook(uint32_t);
 extern void cabi_realloc(void);
-__attribute__((used)) static void *__wasm_init_task_ref = __wasm_init_task;
-__attribute__((used)) static void *__wasm_init_async_task_ref =
-    __wasm_init_async_task;
+__attribute__((used)) static void *__wasm_task_hook_ref = __wasm_task_hook;
 __attribute__((used)) static void *cabi_realloc_ref = cabi_realloc;
 
 // Force `__wasm_{g,s}et_{stack_pointer,tls_base}` to exist as defined symbols.

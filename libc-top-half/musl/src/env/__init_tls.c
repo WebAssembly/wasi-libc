@@ -15,6 +15,8 @@
 #include "syscall.h"
 #include <wasi/api.h>
 #include "lock.h"
+#include <wasi/version.h>
+#include <wasi/wasip3_tls.h>
 
 DECLARE_WEAK_LOCK(__thread_list_lock);
 
@@ -285,3 +287,105 @@ static void static_init_tls(size_t *aux)
 
 weak_alias(static_init_tls, __init_tls);
 #endif
+
+#ifdef __wasm_libcall_thread_context__
+
+// Whether or not the main program stack is in use by some task/thread in this
+// program.
+static bool init_stack_in_use = false;
+
+// Codes passed to `__wasilibc_task_hook` which are synthesized in the
+// `wit-component` crate in wasm-tools.
+#define SYNC_START 0
+#define SYNC_FINISH 1
+#define ASYNC_START 2
+#define ASYNC_RESUME 3
+#define ASYNC_BLOCK 4
+#define ASYNC_FINISH 5
+#define INITIALIZE_START 6
+#define INITIALIZE_FINISH 7
+#define RESOURCE_DTOR_START 8
+#define RESOURCE_DTOR_FINISH 9
+#define POST_RETURN_START 10
+#define POST_RETURN_FINISH 11
+#define REALLOC_START 12
+#define REALLOC_FINISH 13
+
+// A hook executed by the `__wasm_task_hook` entrypoint defined in an external
+// assembly file. For some more information about context see the documentation
+// on the definition of `__wasm_task_hook`.
+void *__wasilibc_task_hook(int hook, void *init_tls_base, void *init_stack_pointer, void *prev_stack, void *hook_stack) {
+  // For coop threads the TLS for this task needs to be configured.
+  //
+  // With a single module in the component the TLS base is stored directly in
+  // context slot 1, so this module's own initial TLS is what belongs there.
+  // With more than one module the slot instead holds the array of per-module
+  // TLS base pointers, and the main thread's array was populated by each module
+  // as the component was instantiated.
+#ifdef __wasi_cooperative_threads__
+  const struct __wasilibc_program_tls_info *info =
+      __wasilibc_program_tls_info();
+  wasip3_context_set_1(info == NULL ? init_tls_base
+                                    : (void *)info->main_thread_tls_base);
+#endif // __wasi_cooperative_threads__
+
+  // Otherwise with and without coop threads this is a hook which likely needs
+  // to configure the stack. By default the main stack is used which avoids the
+  // need to dynamically allocate a stack, but once the main stack is used
+  // then new stacks are dynamically allocated to get free'd later.
+  //
+  // Hooks happen for entering and leaving wasm and are injected by
+  // wit-component, so this handles both allocation and deallocation of the
+  // stack. Note that this function itself is executing on a small temporary
+  // stack for the duration of the call.
+  switch (hook) {
+    case SYNC_START:
+    case ASYNC_START:
+    case ASYNC_RESUME:
+    case INITIALIZE_START:
+    case RESOURCE_DTOR_START:
+    case POST_RETURN_START:
+      assert(!prev_stack);
+      if (!init_stack_in_use) {
+        init_stack_in_use = true;
+        return init_stack_pointer;
+      }
+
+      struct stack_bounds bounds = get_stack_bounds();
+      void *new_stack = malloc(bounds.size);
+      if (new_stack == NULL)
+        __builtin_trap();
+      return new_stack + bounds.size;
+
+    case SYNC_FINISH:
+    case ASYNC_BLOCK:
+    case ASYNC_FINISH:
+    case INITIALIZE_FINISH:
+    case RESOURCE_DTOR_FINISH:
+    case POST_RETURN_FINISH:
+      if (prev_stack == init_stack_pointer) {
+        init_stack_in_use = false;
+      } else {
+        free(prev_stack - get_stack_bounds().size);
+      }
+      return NULL;
+
+    // For `realloc` we know that it'll return quickly, have bounded stack
+    // usage, and no be reentrant. Use the hook stack we're already executing
+    // on to avoid otherwise allocating a new stack. Without this, for example,
+    // returning a string from an import would always allocate a new stack
+    // which is a bit wasteful.
+    case REALLOC_START:
+      assert(!prev_stack);
+      return hook_stack;
+    case REALLOC_FINISH:
+      assert(prev_stack == hook_stack);
+      return NULL;
+
+    default:
+      __builtin_trap();
+  }
+}
+
+
+#endif // __wasm_libcall_thread_context__

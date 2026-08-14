@@ -1,0 +1,19 @@
+package test:simple;
+
+interface i {
+  resource r {
+    constructor(x: u32);
+    get: func() -> u32;
+    set: func(x: u32);
+  }
+
+  t-status: func() -> u32;
+}
+
+world caller {
+  import i;
+}
+
+world callee {
+  export i;
+}

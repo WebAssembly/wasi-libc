@@ -184,10 +184,7 @@ if (WASI STREQUAL "p3")
 endif()
 
 if (HAVE_WASM_LIBCALL_THREAD_CONTEXT)
-  list(APPEND bottom_half_sources
-    sources/wasip3_tls.c
-    sources/__wasm_init_task.S
-  )
+  list(APPEND bottom_half_sources sources/__wasm_task_hook.S)
 endif()
 
 # Don't export symbols of generated code in shared libraries, so specifically

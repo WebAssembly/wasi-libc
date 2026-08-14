@@ -306,7 +306,7 @@ extern void __wasm_import_random_insecure_seed_get_insecure_seed(uint8_t *);
 
 // Canonical ABI intrinsics
 
-#include "cabi_realloc_augment.h"
+__attribute__((__weak__, __export_name__("cabi_realloc")))
 void *cabi_realloc(void *ptr, size_t old_size, size_t align, size_t new_size) {
   (void) old_size;
   if (new_size == 0) return (void*) align;

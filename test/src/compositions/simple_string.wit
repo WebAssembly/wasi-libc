@@ -1,0 +1,14 @@
+package test:simple;
+
+interface i {
+  hello: func(x: string) -> string;
+  t-status: func() -> u32;
+}
+
+world caller {
+  import i;
+}
+
+world callee {
+  export i;
+}

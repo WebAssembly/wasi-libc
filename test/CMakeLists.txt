@@ -668,6 +668,7 @@ if (ENABLE_COOP_THREADS)
 endif()
 
 add_wasilibc_test(tls_smoke.c)
+add_wasilibc_test(task_tls_basic.c)
 if (TARGET_TRIPLE MATCHES "-threads")
   expect_fail_under_v8(tls_smoke.wasm)
 endif()
@@ -1333,6 +1334,14 @@ add_composition_test(simple)
 add_composition_test(simple_resource)
 add_composition_test(simple_string)
 add_composition_test(barge_in)
+
+# Thes test assert TLS behavior w.r.t. component model tasks, but that's
+# basically only guaranteed on wasip3 targets. On wasip2-and-prior this never
+# worked nor was guaranteed, so it's scoped to just wasip3 here.
+if (HAVE_WASM_LIBCALL_THREAD_CONTEXT)
+  add_composition_test(task_tls_hooks)
+  add_composition_test(task_tls_dtors)
+endif()
 
 # ========= Testing Python =============================
 

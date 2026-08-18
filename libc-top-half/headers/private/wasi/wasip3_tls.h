@@ -12,6 +12,11 @@
 
 #ifdef __wasm_libcall_thread_context__
 
+// Rounds `value` up to a multiple of `align`, which must be a power of two.
+static inline uintptr_t align_up(uintptr_t value, size_t align) {
+  return (value + (align - 1)) & -(uintptr_t)align;
+}
+
 struct __wasilibc_library_tls_info {
   // Stores this library's TLS alignment in `*align` and returns its TLS size.
   //
@@ -39,13 +44,41 @@ __wasilibc_program_tls_info(void) {
   return &__wasm_program_tls_info;
 }
 
-#ifdef __wasi_cooperative_threads__
+// Computes how much memory the thread-local storage of every library in this
+// program requires, storing the required alignment in `*align`.
+//
+// For a single-module program this is just this module's own TLS.
+size_t __wasilibc_tls_size(size_t *align);
 
-// Sets up context slot 1 for the currently running task. Invoked from inline
-// assembly from wrappers of exported functions plus the cabi_realloc export wrapper.
-void __wasilibc_set_task_tls(void *init_tls_base);
+// Installs `layout`, as produced by `__wasilibc_layout_thread_tls`, as the
+// thread-local storage of whatever is currently running and initializes the
+// contents of every library's block within it.
+void __wasilibc_tls_init(void *layout);
 
-#endif // __wasi_cooperative_threads__
+extern void *__wasm_get_tls_base(void);
+extern void __wasm_set_tls_base(void *base);
+
+// Gets the TLS base pointer for the implicit main thread of the program. For
+// dynamic linking scenarios this is provided in `__wasilibc_program_tls_info`
+// and otherwise it's whatever's in `__init_tls_base`, initialized when our
+// module was instantiated via the `wasm-ld`-injected `start` function.
+static inline void *__wasilibc_tls_main_thread_base(void) {
+  const struct __wasilibc_program_tls_info *info =
+      __wasilibc_program_tls_info();
+  if (info != NULL)
+    return (void *)info->main_thread_tls_base;
+  void *ret;
+  __asm__(
+#ifdef __PIC__
+      ".globaltype __init_tls_base, i32\n"
+#else
+      ".globaltype __init_tls_base, i32, immutable\n"
+#endif
+      "global.get __init_tls_base\n"
+      "local.set %0\n"
+      : "=r"(ret));
+  return ret;
+}
 
 #endif // __wasm_libcall_thread_context__
 

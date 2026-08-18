@@ -1,0 +1,18 @@
+package test:simple;
+
+interface i {
+  run-async: async func(a: u32);
+  run-sync: func(a: u32);
+
+  num-dtors: func() -> u32;
+
+  t-status: func() -> u32;
+}
+
+world caller {
+  import i;
+}
+
+world callee {
+  export i;
+}

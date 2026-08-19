@@ -265,13 +265,18 @@ static void wake_node(struct __waitlist_node *node, int yield) {
 // hashmap of futex addresses to waitlists of threads that are waiting on those
 // futexes.
 //
-// Note that the waitlist of each entry is an indirect separately heap-allocated
-// pointer. This ensures that the list itself is stable across hash map
-// reallocations which enables `wait_timeout` and `wait_indefinitely` to rely on
-// the list being valid before and after the operation.
+// Note that the waitlist of each entry is separately heap-allocated. This
+// ensures that the list itself is stable across hash map reallocations which
+// enables `wait_timeout` and `wait_indefinitely` to rely on the list being
+// valid before and after the operation.
+struct __futex_waitlist {
+  struct __waitlist_node *list;
+  size_t refcnt;
+};
+
 struct __futex_entry {
   volatile int *addr;
-  struct __waitlist_node **list;
+  struct __futex_waitlist *waiters;
 };
 
 // The futex map should be accessed through `get_futex_map` to ensure it is lazily initialized. It is never freed.
@@ -301,46 +306,54 @@ static struct hashmap *get_futex_map(bool create) {
   return futex_map;
 }
 
-static struct __waitlist_node **find_futex_entry(volatile int *addr, bool create) {
+static struct __futex_waitlist *find_futex_entry(volatile int *addr,
+                                                bool create) {
   struct hashmap *map = get_futex_map(create);
 
   // Create a temporary key to search for the futex entry in the hashmap;
-  // the `list` field is not used for comparison, so it can be NULL.
+  // the `waiters` field is not used for comparison, so it can be NULL.
   struct __futex_entry key = {
       .addr = addr,
-      .list = NULL,
+      .waiters = NULL,
   };
 
   if (!map)
     return NULL;
 
   struct __futex_entry *entry = (struct __futex_entry *)__hashmap_get(map, &key);
-  if (entry || !create)
-    return entry->list;
-
-  key.list = malloc(sizeof(struct __waitlist_node *));
-  if (!key.list)
+  if (entry)
+    return entry->waiters;
+  if (!create)
     return NULL;
-  *key.list = NULL;
+
+  key.waiters = malloc(sizeof(struct __futex_waitlist));
+  if (!key.waiters)
+    return NULL;
+  key.waiters->list = NULL;
+  key.waiters->refcnt = 0;
 
   if (!__hashmap_set(map, &key) && __hashmap_oom(map)) {
-    free(key.list);
+    free(key.waiters);
     return NULL;
   }
 
-  return key.list;
+  return key.waiters;
 }
 
-// If a futex entry exists for the given address and its waitlist is empty, remove it from the hashmap.
-static void maybe_release_futex_entry(volatile int *addr, struct __waitlist_node **list) {
-  if (*list != NULL)
+// Drops this waiter's reference to `waiters`, removing the futex's entry from
+// the hashmap and deallocating it once nothing is waiting on the address any
+// more.
+static void release_futex_entry(volatile int *addr,
+                                struct __futex_waitlist *waiters) {
+  if (--waiters->refcnt > 0)
     return;
+  assert(waiters->list == NULL);
   struct __futex_entry key = {
       .addr = addr,
-      .list = NULL,
+      .waiters = NULL,
   };
   __hashmap_delete(get_futex_map(false), &key);
-  free(list);
+  free(waiters);
 }
 
 int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
@@ -363,9 +376,11 @@ int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
   if (*addr != val)
     return 0;
 
-  struct __waitlist_node **list = find_futex_entry(addr, true);
-  if (!list)
+  struct __futex_waitlist *waiters = find_futex_entry(addr, true);
+  if (!waiters)
     return ENOMEM;
+  waiters->refcnt++;
+  struct __waitlist_node **list = &waiters->list;
 
   int rc = 0;
   if (at) {
@@ -375,7 +390,7 @@ int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
   } else {
     wait_indefinitely(list);
   }
-  maybe_release_futex_entry(addr, list);
+  release_futex_entry(addr, waiters);
   return rc ? -rc : 0;
 }
 
@@ -387,9 +402,10 @@ int __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags)
   int yield = (flags & __WASILIBC_FUTEX_YIELD) != 0;
   volatile int *word = (volatile int *)addr;
 
-  struct __waitlist_node **list = find_futex_entry(word, false);
-  if (!list)
+  struct __futex_waitlist *waiters = find_futex_entry(word, false);
+  if (!waiters)
     return 0;
+  struct __waitlist_node **list = &waiters->list;
 
   count = (count < 0) ? INT_MAX : count;
 

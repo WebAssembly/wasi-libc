@@ -1,0 +1,16 @@
+package test:simple;
+
+interface i {
+  blocking: async func();
+  barge-in: func();
+  barge-in-with-post-return: func() -> string;
+  t-status: func() -> u32;
+}
+
+world caller {
+  import i;
+}
+
+world callee {
+  export i;
+}

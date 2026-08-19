@@ -152,7 +152,6 @@ function(wit_bindgen_edit p)
     COMMAND sed ${SED_INPLACE_ARGS} "'s_#include .wasi${p}\.h._#include \"wasi/wasi${p}.h\"_'" ${bottom_half}/sources/wasi${p}.c
     COMMAND sed ${SED_INPLACE_ARGS} "s/extern void exit_exit/_Noreturn extern void exit_exit/" ${bottom_half}/headers/public/wasi/__generated_wasi${p}.h
     COMMAND sed ${SED_INPLACE_ARGS} "s/extern void __wasm_import_exit_exit/_Noreturn extern void __wasm_import_exit_exit/" ${bottom_half}/sources/wasi${p}.c
-    COMMAND sed ${SED_INPLACE_ARGS} "s/__attribute__.*\"cabi_realloc\".*/#include \\\"cabi_realloc_augment.h\\\"/" ${bottom_half}/sources/wasi${p}.c
     DEPENDS bindings-${p}
   )
   add_dependencies(bindings bindings-${p}-edit)

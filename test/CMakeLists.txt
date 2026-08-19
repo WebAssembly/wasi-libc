@@ -52,9 +52,19 @@ if(TEST_WITH_V8)
 
 elseif(NOT ENGINE OR ENGINE STREQUAL "")
   # ====== Download Wasmtime as a test runner ==================
-  set(wasmtime_version dev)
+  #
+  # By default a pinned version of Wasmtime is used that's kept relatively
+  # up-to-date. Note though that `wasm32-wasip1-threads` requires an explicitly
+  # older version of Wasmtime as the latest releases no longer support
+  # wasi-threads. Additionally for wasip3's new ABI, e.g.
+  # `HAVE_WASM_LIBCALL_THREAD_CONTEXT`, a currently-unrelated version of
+  # Wasmtime is required which has various bugs fixed in it.
+  set(wasmtime_version v47.0.0)
   if (TARGET_TRIPLE MATCHES "-threads")
-    set(wasmtime_version "v44.0.0")
+    set(wasmtime_version v44.0.0)
+  endif()
+  if (HAVE_WASM_LIBCALL_THREAD_CONTEXT)
+    set(wasmtime_version dev)
   endif()
   ba_download(
     wasmtime
@@ -156,6 +166,19 @@ function(add_test_executable executable_name src)
   else()
     clang_format_target(${executable_name})
     target_link_libraries(${executable_name} PRIVATE c-static)
+
+    if (NOT USE_WASM_COMPONENT_LD AND NOT WASI STREQUAL "p1")
+      target_link_options(${executable_name} PRIVATE -Wl,--skip-wit-component)
+      add_custom_command(
+        TARGET ${executable_name}
+        POST_BUILD
+        COMMAND
+          ${wasm_tools} component new
+            $<TARGET_FILE:${executable_name}>
+            -o ${executable_name}
+      )
+      add_dependencies(${executable_name} wasm-tools)
+    endif()
   endif()
   foreach(flag IN LISTS arg_CFLAGS)
     target_compile_options(${executable_name} PRIVATE ${flag})
@@ -188,9 +211,11 @@ endfunction()
 # * `NETWORK` - this test uses the network and sockets.
 # * `PASS_REGULAR_EXPRESSION` - a regex that must match the test output to pass
 # * `SETJMP` - this test requires setjmp/longjmp
+# * `FILE` - the wasm file to execute. Defaults to the output of
+#   `executable_name`.
 function(register_test test_name executable_name)
   set(options FS NETWORK SETJMP)
-  set(oneValueArgs CLIENT PASS_REGULAR_EXPRESSION ENGINE_ARG)
+  set(oneValueArgs CLIENT PASS_REGULAR_EXPRESSION ENGINE_ARG FILE)
   set(multiValueArgs ARGV ENV)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
@@ -228,12 +253,18 @@ function(register_test test_name executable_name)
     )
   endif()
 
+  if (arg_FILE)
+    set(test_program ${arg_FILE})
+  else()
+    set(test_program $<TARGET_FILE:${executable_name}>)
+  endif()
+
   add_test(
     NAME "${test_name}"
     COMMAND
       ${ENGINE}
         ${wasmtime_args}
-        $<TARGET_FILE:${executable_name}> ${arg_ARGV}
+        ${test_program} ${arg_ARGV}
   )
 
   # Use CTest fixtures to create a the temporary directory before the test
@@ -252,7 +283,7 @@ function(register_test test_name executable_name)
   set_tests_properties(${test_name} PROPERTIES TIMEOUT 10)
 
 
-  add_dependencies(${test_name} engine)
+  add_dependencies(${executable_name} engine)
 endfunction()
 
 # Helper function to add two versions of a test: a statically linked version
@@ -655,19 +686,28 @@ endif()
 
 # ========= wasi-libc tests for non-main entrypoints =========================
 
-add_custom_command(
-  OUTPUT
-    ${CMAKE_CURRENT_BINARY_DIR}/entrypoint.c
-    ${CMAKE_CURRENT_BINARY_DIR}/entrypoint.h
-    ${CMAKE_CURRENT_BINARY_DIR}/entrypoint_component_type.o
-  COMMAND
-    ${wit_bindgen} c ${CMAKE_CURRENT_SOURCE_DIR}/entrypoint.wit
-      --out-dir ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS wit-bindgen ${CMAKE_CURRENT_SOURCE_DIR}/entrypoint.wit
-)
-add_library(entrypoint_bindings STATIC EXCLUDE_FROM_ALL
-  ${CMAKE_CURRENT_BINARY_DIR}/entrypoint.c
-  ${CMAKE_CURRENT_BINARY_DIR}/entrypoint_component_type.o)
+function(add_wit_bindgen_library name wit world out_dir)
+  add_custom_command(
+    OUTPUT
+      ${out_dir}/${world}.c
+      ${out_dir}/${world}.h
+      ${out_dir}/${world}_component_type.o
+    COMMAND
+      ${wit_bindgen} c ${wit} --world ${world} --out-dir ${out_dir}
+    DEPENDS wit-bindgen ${wit}
+  )
+  add_library(${name} STATIC EXCLUDE_FROM_ALL
+    ${out_dir}/${world}.c
+    ${out_dir}/${world}_component_type.o)
+  target_include_directories(${name} PUBLIC ${out_dir})
+  target_compile_options(${name} PRIVATE -fPIC)
+endfunction()
+
+add_wit_bindgen_library(
+  entrypoint_bindings
+  ${CMAKE_CURRENT_SOURCE_DIR}/entrypoint.wit
+  entrypoint
+  ${CMAKE_CURRENT_BINARY_DIR})
 
 function(add_external_entrypoint_test test_file)
   cmake_path(REPLACE_EXTENSION test_file wasm OUTPUT_VARIABLE test_name)
@@ -843,7 +883,6 @@ function(add_posix_test test_file)
   string(REPLACE "/" "_" test_name ${test_name})
   set(test_name "open_posix_test_${test_name}")
   set(test_file "${CMAKE_CURRENT_SOURCE_DIR}/open-posix-test-suite/${test_file}")
-  set_source_files_properties(${test_file} PROPERTIES GENERATED TRUE)
 
   add_test_pair(${test_name} ${test_file}
     CFLAGS -Wno-unused-parameter -Wno-unused-variable -Wno-sign-compare -Wno-unused-but-set-global
@@ -1220,6 +1259,82 @@ if (ENABLE_COOP_THREADS)
 
   # unsupported(cancellation): conformance/interfaces/pthread_testcancel/*
 endif()
+
+# ========= Testing component compositions =============================
+
+function(add_composition_test test_file)
+  if (WASI STREQUAL "p1")
+    return()
+  endif()
+
+  set(bindgen_dir "${CMAKE_CURRENT_BINARY_DIR}/bindgen/${test_file}")
+  set(test_root "${CMAKE_CURRENT_SOURCE_DIR}/src/compositions")
+  set(wit_file "${test_root}/${test_file}.wit")
+  set(caller_src "${test_root}/${test_file}_caller.c")
+  set(callee_src "${test_root}/${test_file}_callee.c")
+  set(composed compose_${test_file}_composed)
+  set(composed_shared shared_compose_${test_file}_composed)
+
+  add_wit_bindgen_library(
+    ${test_file}_caller_bindings
+    ${wit_file}
+    caller
+    ${bindgen_dir}
+  )
+  add_wit_bindgen_library(
+    ${test_file}_callee_bindings
+    ${wit_file}
+    callee
+    ${bindgen_dir}
+  )
+
+  # Note that these use `-` instead of `_` because `wasm-tools compose` derives
+  # component names from file names and requires them to be kebab-case.
+  string(REPLACE "_" "-" kebab ${test_file})
+  set(caller_out compose-${kebab}-caller.wasm)
+  set(callee_out compose-${kebab}-callee.wasm)
+  set(caller_out_shared shared-compose-${kebab}-caller.wasm)
+  set(callee_out_shared shared-compose-${kebab}-callee.wasm)
+
+  add_test_executable(${caller_out} ${caller_src}
+    WHOLE_ARCHIVE ${test_file}_caller_bindings)
+  add_test_executable(${callee_out} ${callee_src}
+    WHOLE_ARCHIVE ${test_file}_callee_bindings)
+  compose_and_register_test(${composed} ${caller_out} ${callee_out})
+
+  if (BUILD_SHARED)
+    add_test_executable(${caller_out_shared} ${caller_src}
+      WHOLE_ARCHIVE ${test_file}_caller_bindings SHARED)
+    add_test_executable(${callee_out_shared} ${callee_src}
+      WHOLE_ARCHIVE ${test_file}_callee_bindings SHARED)
+    compose_and_register_test(${composed_shared}
+      ${caller_out_shared} ${callee_out_shared})
+  endif()
+endfunction()
+
+# Composes `caller` with `callee` into `${name}.wasm` and registers the result
+# as a test named `${name}`.
+#
+# Note that `add_custom_command` only declares how to produce a file, so a
+# custom target is needed both to get the composition built as part of `all`
+# and to give `register_test` something to hang `add_dependencies` off of.
+function(compose_and_register_test name caller callee)
+  set(output "${CMAKE_CURRENT_BINARY_DIR}/${name}.wasm")
+  add_custom_command(
+    OUTPUT ${output}
+    COMMAND ${wasm_tools} compose $<TARGET_FILE:${caller}>
+      -d $<TARGET_FILE:${callee}> -o ${output} --quiet
+    DEPENDS ${caller} ${callee} wasm-tools)
+  add_custom_target(${name} ALL DEPENDS ${output})
+  register_test(${name} ${name} FILE ${output})
+endfunction()
+
+add_composition_test(simple)
+add_composition_test(simple_resource)
+add_composition_test(simple_string)
+add_composition_test(barge_in)
+
+# ========= Testing Python =============================
 
 # If enabled add a copy of Python which is built against `wasi-libc` and run
 # its tests.

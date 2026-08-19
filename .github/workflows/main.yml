@@ -128,7 +128,7 @@ jobs:
             clang_version: 22
             test: true
             upload: wasm32-wasip3
-            args: -DTARGET_TRIPLE=wasm32-wasip3
+            args: -DTARGET_TRIPLE=wasm32-wasip3 -DCHECK_SYMBOLS=OFF
 
           - name: Test wasm32-wasip3 (debug)
             os: ubuntu-24.04

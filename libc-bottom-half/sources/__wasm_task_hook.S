@@ -1,15 +1,15 @@
 #include <wasi/version.h>
 
-// The size, in bytes, of the stack statically allocated for `__wasilibc_task_hook`.
-// This doesn't need to be too big as it's just running `malloc` as defined
-// in wasi-libc. The current number is determined by:
+// The size, in bytes, of the stack statically allocated for
+// `__wasilibc_task_hook`.  This doesn't need to be too big as it's just running
+// `malloc` as defined in wasi-libc. The current number is determined by:
 //
 // * Start with 16 bytes.
 // * Double until tests don't crash in a debug build.
 // * Double again.
 //
 // The goal is to be pretty modest since this is part of every module.
-#define HOOK_STACK_SIZE 512
+#define HOOK_STACK_SIZE 1024
 
 .text
 
@@ -17,18 +17,9 @@
 .functype    __wasm_set_stack_pointer (i32) -> ()
 .globl       __wasm_get_stack_pointer
 .functype    __wasm_get_stack_pointer () -> (i32)
-.functype    __wasilibc_task_hook (i32, i32, i32, i32, i32) -> (i32)
+.functype    __wasilibc_task_hook (i32, i32, i32) -> (i32)
 
-.globaltype  __init_stack_pointer, i32, immutable
 .globaltype  __memory_base, i32, immutable
-
-#ifdef __wasi_cooperative_threads__
-#ifdef __PIC__
-.globaltype __init_tls_base, i32
-#else
-.globaltype __init_tls_base, i32, immutable
-#endif
-#endif
 
 // Hook point for component model task lifecycle events which is invoked by
 // `wit-component`'s componentization process.
@@ -56,17 +47,9 @@ __wasm_task_hook:
   // prep arguments to `__wasilibc_task_hook`, notably:
   //
   // * The hook being configured (this function's argument)
-  // * The TLS base for the main thread (to configure TLS)
-  // * The initial stack pointer for the main thread (if that'll get used)
   // * The current stack pointer (if we're deallocating a stack)
   // * The hook stack pointer (passed further down below)
   local.get 0
-#ifdef __wasi_cooperative_threads__
-  global.get __init_tls_base
-#else
-  i32.const 0
-#endif
-  global.get __init_stack_pointer
   call __wasm_get_stack_pointer
 
   // setup a temporary stack

@@ -1,0 +1,16 @@
+package test:simple;
+
+interface i {
+  count-up: async func();
+  barge-in: func(a: u32);
+
+  t-status: func() -> u32;
+}
+
+world caller {
+  import i;
+}
+
+world callee {
+  export i;
+}

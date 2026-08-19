@@ -115,107 +115,6 @@ void __do_cleanup_pop(struct __ptcb *cb) {
   __pthread_self()->cancelbuf = cb->__next;
 }
 
-// Synthesized by `wasm-ld` for this module; copies libc's TLS image to the
-// given address and makes it libc's TLS base.
-extern void __wasm_init_tls(void *);
-
-// Rounds `value` up to a multiple of `align`, which must be a power of two.
-static uintptr_t align_up(uintptr_t value, size_t align) {
-  return (value + (align - 1)) & -(uintptr_t)align;
-}
-
-// The index of libc's own entry in `__wasm_program_tls_info`, or `SIZE_MAX` if
-// it hasn't been looked up yet.
-//
-// `wit-component` assigns these indices when linking and has no idea which
-// library is libc, so this is discovered by looking for the entry matching
-// libc's current TLS base. Racing threads will all compute the same answer.
-static size_t libc_index = SIZE_MAX;
-
-static size_t libc_tls_index(const struct __wasilibc_program_tls_info *info) {
-  if (libc_index == SIZE_MAX) {
-    void **current = wasip3_context_get_1();
-    void *base = __builtin_wasm_tls_base();
-    for (size_t i = 0; i < info->num_libraries; i++) {
-      if (current[i] == base) {
-        libc_index = i;
-        break;
-      }
-    }
-  }
-  return libc_index;
-}
-
-// Computes the amount of memory a new thread needs for the thread-local storage
-// of every library in the program, storing the required alignment in `*align`.
-//
-// For a single-module program this is just this module's own TLS.
-static size_t thread_tls_size(size_t *align) {
-  const struct __wasilibc_program_tls_info *info =
-      __wasilibc_program_tls_info();
-  if (info == NULL) {
-    *align = __builtin_wasm_tls_align();
-    return __builtin_wasm_tls_size();
-  }
-
-  // The array of per-library TLS base pointers goes first, followed by each
-  // library's own block at its required alignment.
-  uintptr_t size = info->num_libraries * sizeof(void *);
-  size_t result_align = _Alignof(void *);
-
-  for (size_t i = 0; i < info->num_libraries; i++) {
-    const struct __wasilibc_library_tls_info *library = info->library_info[i];
-    size_t library_align;
-    size_t library_size = library->tls_size_and_align(&library_align);
-    if (library_size == 0)
-      continue;
-    size = align_up(size, library_align) + library_size;
-    if (library_align > result_align)
-      result_align = library_align;
-  }
-
-  *align = result_align;
-  return align_up(size, result_align);
-}
-
-// Carves `block`, which must be at least `thread_tls_size()` bytes and suitably
-// aligned, into a TLS region per library.
-//
-// This only computes the layout; no TLS is initialized and the currently
-// running thread is left alone, so this is safe to call from the thread which
-// is spawning a new one. The return value is what context slot 1 takes on for
-// the new thread.
-static void *layout_thread_tls(void *block) {
-  const struct __wasilibc_program_tls_info *info =
-      __wasilibc_program_tls_info();
-  if (info == NULL)
-    return block;
-
-  void **bases = block;
-  uintptr_t next = (uintptr_t)block + info->num_libraries * sizeof(void *);
-  for (size_t i = 0; i < info->num_libraries; i++) {
-    const struct __wasilibc_library_tls_info *library = info->library_info[i];
-    size_t library_align;
-    size_t library_size = library->tls_size_and_align(&library_align);
-    if (library_size == 0)
-      continue;
-    next = align_up(next, library_align);
-    bases[i] = (void *)next;
-    next += library_size;
-  }
-  return bases;
-}
-
-// Returns the base of libc's own TLS within a layout produced by
-// `layout_thread_tls`.
-static void *libc_tls_base_in_layout(void *layout) {
-  const struct __wasilibc_program_tls_info *info =
-      __wasilibc_program_tls_info();
-  if (info == NULL)
-    return layout;
-  return ((void **)layout)[libc_tls_index(info)];
-}
-
 struct start_args {
   // Note that this `stack` member must be first as its offset is referenced
   // from `__wasi_coop_thread_start` within the `__wasi_coop_thread_start.s`
@@ -225,7 +124,7 @@ struct start_args {
   void *stack;
 
   // This new thread's thread-local storage, as laid out by
-  // `layout_thread_tls`. Not yet initialized, but allocated with
+  // `__wasilibc_layout_thread_tls`. Not yet initialized, but allocated with
   // appropriate size and alignment for every library in the program.
   void *tls_layout;
 
@@ -239,12 +138,9 @@ struct start_args {
 };
 
 hidden void __wasi_coop_thread_start_C(struct start_args *args) {
-  const struct __wasilibc_program_tls_info *info =
-      __wasilibc_program_tls_info();
-
   // First thing to do on this new thread is initialize TLS. At the start of a
   // new thread our TLS is not configured at all, so it needs to be set to
-  // `args->tls_layout`. That both installs the layout as this task's TLS and
+  // `args->tls_layout`. That both installs the layout as this thread's TLS and
   // runs each library's `__wasm_init_tls`, which `memory.init`s that library's
   // TLS image into place.
   //
@@ -252,28 +148,58 @@ hidden void __wasi_coop_thread_start_C(struct start_args *args) {
   // TLS block and is already initialized. We don't want the default
   // initialization here as well. The contents of our pthread block are thus
   // saved/restored around the TLS initialization.
-  //
-  // If this is a single-mdoule component, meaning `info` is NULL, then we can
-  // directly use `__wasm_init_tls` to initialize both this thread's TLS block
-  // and the TLS base pointer living in `context.{get,set} 1`. Otherwise
-  // though this manually sets `context.set 1`, which each module's synthesized
-  // accessor reads from (synthesized by `wit-component`).
   struct pthread self_copy = *args->self;
-  if (info == NULL) {
-    __wasm_init_tls(args->tls_layout);
-  } else {
-    wasip3_context_set_1(args->tls_layout);
-    void **bases = args->tls_layout;
-    size_t num_libraries = info->num_libraries;
-    for (size_t i = 0; i < num_libraries; i++)
-      info->library_info[i]->init_tls(bases[i]);
-  }
+  __wasilibc_tls_init(args->tls_layout);
   *__pthread_self() = self_copy;
 
   // Our tid should be configured in `pthread_create`, but double check it.
   assert(__pthread_self()->tid == wasip3_thread_index());
 
   __pthread_exit(args->start_func(args->start_arg));
+}
+
+// Given a freshly allocated block of TLS pointed to by `layout` this function
+// will return the base pointer of the region within `layout` that is used for
+// libc's own TLS.
+static void *libc_tls_base(void *layout) {
+  // If this is a single-module program, then this is just `layout`.
+  const struct __wasilibc_program_tls_info *info =
+      __wasilibc_program_tls_info();
+  if (info == NULL)
+    return layout;
+
+  // For multi-module programs this is a bit more complicated because `layout`
+  // contains every loaded library's space. Somewhere in that space is libc
+  // itself, and we don't know that ahead of time. This performs a bit of a
+  // search where the offset-from-base-of-layout is maintained during the search
+  // to find libc itself. Once libc is found that offset is recorded statically
+  // as the search only needs to happen once.
+  static size_t libc_offset = -1;
+  if (libc_offset == -1) {
+#ifdef __wasi_cooperative_threads__
+    void **current_bases = wasip3_context_get_1();
+#else
+    void **current_bases = info->main_thread_tls_base;
+#endif
+    void *current_libc_base = __builtin_wasm_tls_base();
+    uintptr_t next = info->num_libraries * sizeof(void *);
+    for (size_t i = 0; i < info->num_libraries; i++) {
+      size_t library_align;
+      size_t library_size = info->library_info[i]->tls_size_and_align(&library_align);
+      if (library_size == 0)
+        continue;
+      next = align_up(next, library_align);
+      if (current_bases[i] == current_libc_base) {
+        libc_offset = next;
+        break;
+      }
+      next += library_size;
+    }
+    if (libc_offset == -1)
+      __builtin_trap();
+  }
+
+  return layout + libc_offset;
 }
 
 /*
@@ -306,8 +232,7 @@ int __pthread_create(pthread_t *restrict res,
   pthread_attr_t attr = {0};
 
   size_t tls_align;
-  size_t tls_size = thread_tls_size(&tls_align);
-  void *libc_tls_base = __builtin_wasm_tls_base();
+  size_t tls_size = __wasilibc_tls_size(&tls_align);
   void *new_tls_layout;
   size_t tls_offset;
   /* We'll need to allocate space for a correctly-aligned TLS block,
@@ -317,7 +242,8 @@ int __pthread_create(pthread_t *restrict res,
   self = __pthread_self();
 
   if (!libc.threaded) {
-    self->tsd = (void **)__pthread_tsd_main;
+    if (!self->tsd)
+      self->tsd = (void **)__pthread_tsd_main;
     libc.threaded = 1;
   }
   if (attrp && !c11)
@@ -373,14 +299,12 @@ int __pthread_create(pthread_t *restrict res,
   // below the thread-specific data, so that aligning its base down stays above
   // `stack`.
   void *unaligned_tls_layout_base = tsd - (tls_size - tls_align);
-  new_tls_layout = layout_thread_tls(
-      (void *)(((uintptr_t)unaligned_tls_layout_base) & -tls_align));
+  new_tls_layout = (void *)(((uintptr_t)unaligned_tls_layout_base) & -tls_align);
 
   // Compute pthread struct offset from old TLS base, apply to the new thread's
   // libc TLS base.
-  tls_offset = (uintptr_t)self - (uintptr_t)libc_tls_base;
-  new =
-      (void *)((uintptr_t)libc_tls_base_in_layout(new_tls_layout) + tls_offset);
+  tls_offset = (uintptr_t)self - (uintptr_t)__builtin_wasm_tls_base();
+  new = (void *)((uintptr_t)libc_tls_base(new_tls_layout) + tls_offset);
 
   // Ensure the pthread structure is at least fully initialized.
   memset(new, 0, sizeof(*new));

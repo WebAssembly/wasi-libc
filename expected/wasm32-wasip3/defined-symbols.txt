@@ -370,6 +370,8 @@ __wasilibc_subtask_await_nonblocking
 __wasilibc_subtask_block_on_and_drop
 __wasilibc_task_hook
 __wasilibc_tell
+__wasilibc_tls_init
+__wasilibc_tls_size
 __wasilibc_unlinkat
 __wasilibc_unspecified_addr
 __wasilibc_utimens

@@ -290,9 +290,174 @@ weak_alias(static_init_tls, __init_tls);
 
 #ifdef __wasm_libcall_thread_context__
 
+#ifdef __wasi_cooperative_threads__
+
+// Configure this task's context slot 1 which is the ABI for TLS when coop
+// threads are enabled.
+static void setup_implicit_main_tls(void) {
+  wasip3_context_set_1(__wasilibc_tls_main_thread_base());
+}
+
+// Task context slot 1 is implicitly preserved, so nothing need be done.
+static void *async_tls_preserve(void) {
+  return NULL;
+}
+
+// Task context slot 1 was already preserved by the component runtime, so this
+// is a noop.
+static void async_tls_restore(void *arg) {
+  (void) arg;
+}
+
+static void tls_install(void *base) {
+  __wasilibc_tls_init(base);
+}
+
+static void *tls_uninstall(void) {
+  void *ret = wasip3_context_get_1();
+  setup_implicit_main_tls();
+  return ret;
+}
+
+#else
+
+// The main thread's TLS is ambiently always present in globals/memory, so
+// nothing need be done here.
+static void setup_implicit_main_tls(void) {}
+
+static _Thread_local void *saved_ptr = NULL;
+
+static void *async_tls_preserve(void) {
+  const struct __wasilibc_program_tls_info *info = __wasilibc_program_tls_info();
+  void *main_tls = __wasilibc_tls_main_thread_base();
+
+  // If this is a single-module program then the base pointer of TLS is its own
+  // allocated block for this task, so just return that after restoring it to
+  // the main thread's value.
+  if (info == NULL) {
+    void *ret = __wasm_get_tls_base();
+    __wasm_set_tls_base(saved_ptr);
+    return ret;
+  }
+
+  // If this is a multi-module program then `main_tls` is actually an array base
+  // pointers for each library. Swap that with the old main thread's values in
+  // `saved_ptr`.
+  void **ret = saved_ptr;
+  void **main_tls_block = main_tls;
+  saved_ptr = NULL;
+  for (int i = 0; i < info->num_libraries; i++) {
+    void *tmp = main_tls_block[i];
+    main_tls_block[i] = ret[i];
+    ret[i] = tmp;
+  }
+  return ret;
+}
+
+static void restore_maybe_init(void **tls_block, bool init) {
+  const struct __wasilibc_program_tls_info *info = __wasilibc_program_tls_info();
+
+  if (info == NULL) {
+    void *to_save = __wasm_get_tls_base();
+    __wasm_set_tls_base(tls_block);
+    if (init)
+      __wasilibc_tls_init(tls_block);
+    saved_ptr = to_save;
+    return;
+  }
+
+  void **main_tls_block = info->main_thread_tls_base;
+  for (int i = 0; i < info->num_libraries; i++) {
+    void *tmp = main_tls_block[i];
+    main_tls_block[i] = tls_block[i];
+    tls_block[i] = tmp;
+  }
+  if (init)
+    __wasilibc_tls_init(tls_block);
+  saved_ptr = tls_block;
+}
+
+static void async_tls_restore(void **tls_block) {
+  restore_maybe_init(tls_block, false);
+}
+
+static void tls_install(void *base) {
+  restore_maybe_init(base, true);
+}
+
+static void *tls_uninstall(void) {
+  return async_tls_preserve();
+}
+
+#endif // __wasi_cooperative_threads__
+
+/* pthread_key_create.c overrides these */
+static volatile size_t dummy_tsd_size = 0;
+weak_alias(dummy_tsd_size, __pthread_tsd_size);
+static void dummy_dtors(void) {}
+weak_alias(dummy_dtors, __pthread_tsd_run_dtors);
+
+static void task_tls_alloc(void) {
+  size_t align;
+  size_t size = __wasilibc_tls_size(&align);
+  if (align < sizeof(void*))
+    align = sizeof(void*);
+  size_t tsd_size = __pthread_tsd_size;
+  size_t tsd_offset = align_up(size, align);
+  size_t total_size = tsd_offset + tsd_size;
+
+  void *base;
+  if (posix_memalign(&base, align, total_size) != 0)
+    __builtin_trap();
+  tls_install(base);
+  if (tsd_size > 0) {
+    void *tsd = base + tsd_offset;
+    memset(tsd, 0, tsd_size);
+    __pthread_self()->tsd = tsd;
+  }
+}
+
+static void task_tls_free(void) {
+  __pthread_tsd_run_dtors();
+  free(tls_uninstall());
+}
+
+static void *init_stack_pointer(void) {
+  void *ret;
+  __asm__(".globaltype __init_stack_pointer, i32, immutable\n"
+          "global.get __init_stack_pointer\n"
+          "local.set %0\n"
+          : "=r"(ret));
+  return ret;
+}
+
 // Whether or not the main program stack is in use by some task/thread in this
 // program.
 static bool init_stack_in_use = false;
+
+// Returns a stack to use for a task that's starting, preferring the statically
+// allocated main stack if nothing else is using it at this time.
+static void *task_stack_alloc(void) {
+  if (!init_stack_in_use) {
+    init_stack_in_use = true;
+    return init_stack_pointer();
+  }
+
+  struct stack_bounds bounds = get_stack_bounds();
+  void *new_stack = malloc(bounds.size);
+  if (new_stack == NULL)
+    __builtin_trap();
+  return new_stack + bounds.size;
+}
+
+// Inverse of `task_stack_alloc`.
+static void task_stack_free(void *stack) {
+  if (stack == init_stack_pointer()) {
+    init_stack_in_use = false;
+  } else {
+    free(stack - get_stack_bounds().size);
+  }
+}
 
 // Codes passed to `__wasilibc_task_hook` which are synthesized in the
 // `wit-component` crate in wasm-tools.
@@ -314,78 +479,76 @@ static bool init_stack_in_use = false;
 // A hook executed by the `__wasm_task_hook` entrypoint defined in an external
 // assembly file. For some more information about context see the documentation
 // on the definition of `__wasm_task_hook`.
-void *__wasilibc_task_hook(int hook, void *init_tls_base, void *init_stack_pointer, void *prev_stack, void *hook_stack) {
-  // For coop threads the TLS for this task needs to be configured.
-  //
-  // With a single module in the component the TLS base is stored directly in
-  // context slot 1, so this module's own initial TLS is what belongs there.
-  // With more than one module the slot instead holds the array of per-module
-  // TLS base pointers, and the main thread's array was populated by each module
-  // as the component was instantiated.
-#ifdef __wasi_cooperative_threads__
-  const struct __wasilibc_program_tls_info *info =
-      __wasilibc_program_tls_info();
-  wasip3_context_set_1(info == NULL ? init_tls_base
-                                    : (void *)info->main_thread_tls_base);
-#endif // __wasi_cooperative_threads__
-
-  // Otherwise with and without coop threads this is a hook which likely needs
-  // to configure the stack. By default the main stack is used which avoids the
-  // need to dynamically allocate a stack, but once the main stack is used
-  // then new stacks are dynamically allocated to get free'd later.
-  //
-  // Hooks happen for entering and leaving wasm and are injected by
-  // wit-component, so this handles both allocation and deallocation of the
-  // stack. Note that this function itself is executing on a small temporary
-  // stack for the duration of the call.
+//
+// This is responsible for two pieces of per-task state, the stack and
+// thread-local storage. The two have different lifetimes: a stack is only
+// needed while the task is actually executing, so it's handed back while an
+// async task is blocked, but thread-local storage must stay alive for the
+// entire duration of the task.
+void *__wasilibc_task_hook(int hook, void *prev_context_0, void *hook_stack) {
   switch (hook) {
+    // A task is starting so it gets both a fresh stack and a fresh block of
+    // thread-local storage.
     case SYNC_START:
-    case ASYNC_START:
+    case ASYNC_START: {
+      setup_implicit_main_tls();
+      assert(!prev_context_0);
+      task_tls_alloc();
+      return task_stack_alloc();
+    }
+
+    // An async task is blocking, so deallocate the stack. This will then use
+    // context slot 0, now no longer in use, as possible storage for the TLS
+    // pointer of this task to keep it task-local. Note that in coop threaded
+    // builds this doesn't do anything because that's already stored in slot 1.
+    case ASYNC_BLOCK: {
+      task_stack_free(prev_context_0);
+      return async_tls_preserve();
+    }
+
+    // A blocked async task is running again, so all it needs is a stack after
+    // TLS is restored (depending on build configuration).
     case ASYNC_RESUME:
+      async_tls_restore(prev_context_0);
+      return task_stack_alloc();
+
+    // Work which isn't a task of its own and which runs on the main thread's
+    // thread-local storage. A stack is still required, though.
     case INITIALIZE_START:
     case RESOURCE_DTOR_START:
     case POST_RETURN_START:
-      assert(!prev_stack);
-      if (!init_stack_in_use) {
-        init_stack_in_use = true;
-        return init_stack_pointer;
-      }
+      setup_implicit_main_tls();
+      assert(!prev_context_0);
+      return task_stack_alloc();
 
-      struct stack_bounds bounds = get_stack_bounds();
-      void *new_stack = malloc(bounds.size);
-      if (new_stack == NULL)
-        __builtin_trap();
-      return new_stack + bounds.size;
-
+    // A task is finished for good, so run any destructors registered for its
+    // thread-specific data and then release everything it owns.
     case SYNC_FINISH:
-    case ASYNC_BLOCK:
     case ASYNC_FINISH:
+      task_tls_free();
+      // ... fall through ...
     case INITIALIZE_FINISH:
     case RESOURCE_DTOR_FINISH:
     case POST_RETURN_FINISH:
-      if (prev_stack == init_stack_pointer) {
-        init_stack_in_use = false;
-      } else {
-        free(prev_stack - get_stack_bounds().size);
-      }
+      task_stack_free(prev_context_0);
       return NULL;
 
     // For `realloc` we know that it'll return quickly, have bounded stack
-    // usage, and no be reentrant. Use the hook stack we're already executing
+    // usage, and not be reentrant. Use the hook stack we're already executing
     // on to avoid otherwise allocating a new stack. Without this, for example,
     // returning a string from an import would always allocate a new stack
     // which is a bit wasteful.
     case REALLOC_START:
-      assert(!prev_stack);
+      setup_implicit_main_tls();
+      assert(!prev_context_0);
       return hook_stack;
     case REALLOC_FINISH:
-      assert(prev_stack == hook_stack);
+      assert(prev_context_0 == hook_stack);
       return NULL;
 
     default:
       __builtin_trap();
   }
 }
-
 
 #endif // __wasm_libcall_thread_context__

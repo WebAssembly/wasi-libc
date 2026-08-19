@@ -18,6 +18,7 @@ __global_base
 __gttf2
 __heap_base
 __heap_end
+__init_tls_base
 __letf2
 __lttf2
 __netf2

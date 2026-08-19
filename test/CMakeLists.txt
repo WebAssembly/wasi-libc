@@ -556,6 +556,7 @@ add_wasilibc_test(pipe_atomic_write.c)
 add_wasilibc_test(pipe_zero_len.c)
 if (NOT TEST_WITH_V8)
   add_wasilibc_test(pipe_espipe.c NETWORK)
+  add_wasilibc_test(task_tls_basic.c)
 endif()
 
 if (
@@ -668,7 +669,6 @@ if (ENABLE_COOP_THREADS)
 endif()
 
 add_wasilibc_test(tls_smoke.c)
-add_wasilibc_test(task_tls_basic.c)
 if (TARGET_TRIPLE MATCHES "-threads")
   expect_fail_under_v8(tls_smoke.wasm)
 endif()

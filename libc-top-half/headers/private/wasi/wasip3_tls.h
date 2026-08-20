@@ -69,11 +69,7 @@ static inline void *__wasilibc_tls_main_thread_base(void) {
     return (void *)info->main_thread_tls_base;
   void *ret;
   __asm__(
-#ifdef __PIC__
       ".globaltype __init_tls_base, i32\n"
-#else
-      ".globaltype __init_tls_base, i32, immutable\n"
-#endif
       "global.get __init_tls_base\n"
       "local.set %0\n"
       : "=r"(ret));

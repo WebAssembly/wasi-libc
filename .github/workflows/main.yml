@@ -132,19 +132,19 @@ jobs:
 
           - name: Test wasm32-wasip3 (debug)
             os: ubuntu-24.04
-            clang_version: wasi-sdk-34.0-rc.2
+            clang_version: wasi-sdk-34.0-rc.3
             test: true
             args: -DCMAKE_BUILD_TYPE=Debug -DTARGET_TRIPLE=wasm32-wasip3
 
           - name: Test wasm32-wasip3 coop-threads
             os: ubuntu-24.04
-            clang_version: wasi-sdk-34.0-rc.2
+            clang_version: wasi-sdk-34.0-rc.3
             test: true
             args: -DTARGET_TRIPLE=wasm32-wasip3 -DENABLE_COOP_THREADS=ON
 
           - name: Test wasm32-wasip3 coop-threads (debug)
             os: ubuntu-24.04
-            clang_version: wasi-sdk-34.0-rc.2
+            clang_version: wasi-sdk-34.0-rc.3
             test: true
             args: -DCMAKE_BUILD_TYPE=Debug -DTARGET_TRIPLE=wasm32-wasip3 -DENABLE_COOP_THREADS=ON
 
@@ -309,7 +309,7 @@ jobs:
             clang_version: wasi-sdk-32.0
           - name: wasm32-wasip3 coop-threads
             args: -DTARGET_TRIPLE=wasm32-wasip3 -DENABLE_COOP_THREADS=ON
-            clang_version: wasi-sdk-34.0-rc.2
+            clang_version: wasi-sdk-34.0-rc.3
     steps:
     - uses: actions/checkout@v6
       with:

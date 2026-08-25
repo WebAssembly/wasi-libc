@@ -21,10 +21,10 @@ int __clock_gettime(clockid_t clock_id, struct timespec *tp) {
   if (tp == NULL)
     return 0;
 
-  if (clock_id == CLOCK_MONOTONIC) {
+  if (clock_id->id == CLOCKID_MONOTONIC) {
     monotonic_clock_instant_t ns = monotonic_clock_now();
     *tp = instant_to_timespec(ns);
-  } else if (clock_id == CLOCK_REALTIME) {
+  } else if (clock_id->id == CLOCKID_REALTIME) {
     wasilibc_timestamp_t time_result;
     #ifdef __wasip2__
     wall_clock_now(&time_result);

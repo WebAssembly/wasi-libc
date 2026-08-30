@@ -746,6 +746,8 @@ add_external_entrypoint_test(external_entrypoint_pthread_tls.c)
 
 # ========= sockets-related tests ===============================
 
+add_wasilibc_test(socket-levels.c)
+
 if (NOT (WASI STREQUAL "p1"))
   add_wasilibc_test(poll-connect.c NETWORK)
   add_wasilibc_test(poll-badfd.c)

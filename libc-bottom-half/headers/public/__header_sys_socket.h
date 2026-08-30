@@ -16,6 +16,8 @@
 #define MSG_PEEK __WASI_RIFLAGS_RECV_PEEK
 #define MSG_WAITALL __WASI_RIFLAGS_RECV_WAITALL
 #define MSG_TRUNC __WASI_ROFLAGS_RECV_DATA_TRUNCATED
+#define SOL_TCP 6
+#define SOL_UDP 17
 #elif defined(__wasip2__) || defined(__wasip3__)
 #define MSG_DONTWAIT 0x0040
 #define MSG_NOSIGNAL 0x4000

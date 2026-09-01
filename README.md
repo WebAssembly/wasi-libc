@@ -91,12 +91,29 @@ specified with `-DBUILTINS_LIB=...`.
 
 ## Building in pthread support
 
-The `wasm32-wasip1` and `wasm32-wasip2` targets have pthread-related symbols,
-but they all return an error. For example spawning a thread will return an
-error. Only the `wasm32-wasip1-threads` target supports spawning a thread. Note
-that threading support is experimental at this time and only very lightly
-tested. Much of libc needs to be modified to be threadsafe and this transition
-is not fully complete.
+All targets in wasi-libc have `pthread_*`-related symbols defined. The behavior
+of these symbols differ based on target, however:
+
+* `wasm32-wasip{1,2}` - symbols return an error or trap as appropriate. For
+  example spawning a thread returns an error and blocking on a condition
+  variable traps (as it can't possibly be woken).
+
+* `wasm32-wasip1-threads` - spawning a thread is done with the (now largely
+  deprecated) `wasi-threads` proposal and blocking is done with WebAssembly
+  `memory.atomic.*` instructions.
+
+* `wasm32-wasip3` - at this time this behaves the same as `wasm32-wasip{1,2}` by
+  default. When wasi-libc is built with `-DENABLE_COOP_THREADS=ON` then
+  wasi-libc will use the cooperative multithreading intrinsics of the component
+  model (the 🧵 gate in the [component model explainer][explainer]). This means
+  that in this mode all `pthread_*` symbols are implemented and work as expected
+  and scheduling is implemented with cooperative switches (explicit yields or
+  synchronization points in pthread primitives). For more information see [this
+  documentation in wasi-sdk][pthread-sdk-docs] for how to use a pre-built copy
+  of wasi-libc and avoid needing to build your own sysroot.
+
+[explainer]: https://github.com/WebAssembly/component-model/blob/main/design/mvp/Explainer.md
+[pthread-sdk-docs]: https://github.com/WebAssembly/wasi-sdk/blob/main/CoopThreading.md
 
 ## Arch Linux AUR package
 

@@ -56,15 +56,10 @@ elseif(NOT ENGINE OR ENGINE STREQUAL "")
   # By default a pinned version of Wasmtime is used that's kept relatively
   # up-to-date. Note though that `wasm32-wasip1-threads` requires an explicitly
   # older version of Wasmtime as the latest releases no longer support
-  # wasi-threads. Additionally for wasip3's new ABI, e.g.
-  # `HAVE_WASM_LIBCALL_THREAD_CONTEXT`, a currently-unrelated version of
-  # Wasmtime is required which has various bugs fixed in it.
-  set(wasmtime_version v47.0.0)
+  # wasi-threads.
+  set(wasmtime_version v48.0.1)
   if (TARGET_TRIPLE MATCHES "-threads")
     set(wasmtime_version v44.0.0)
-  endif()
-  if (HAVE_WASM_LIBCALL_THREAD_CONTEXT)
-    set(wasmtime_version dev)
   endif()
   ba_download(
     wasmtime

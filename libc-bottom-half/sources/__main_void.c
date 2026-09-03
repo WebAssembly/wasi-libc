@@ -7,6 +7,9 @@
 #include <wasi/libc-environ.h>
 #endif
 
+// TODO: This file can be dropped when we drop the support of LLVM
+// versions w/o crt2-command.o support.
+
 // The user's `main` function, expecting arguments.
 //
 // Note that we make this a weak symbol so that it will have a

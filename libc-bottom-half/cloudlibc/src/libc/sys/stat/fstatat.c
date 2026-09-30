@@ -20,6 +20,15 @@
 
 int __wasilibc_nocwd_fstatat(int fd, const char *restrict path, struct stat *restrict buf,
                              int flag) {
+  if (path[0] == '\0') {
+    // With AT_EMPTY_PATH an empty path refers to fd itself; otherwise the
+    // WASI path-relative stat calls cannot resolve it, so reject as ENOENT.
+    if (flag & AT_EMPTY_PATH)
+      return fstat(fd, buf);
+    errno = ENOENT;
+    return -1;
+  }
+
 #if defined(__wasip1__)
   __wasi_lookupflags_t lookup_flags = 0;
   if ((flag & AT_SYMLINK_NOFOLLOW) == 0)

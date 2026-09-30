@@ -63,6 +63,7 @@
 #define AT_SYMLINK_NOFOLLOW (0x1)
 #define AT_SYMLINK_FOLLOW (0x2)
 #define AT_REMOVEDIR (0x4)
+#define AT_EMPTY_PATH (0x8)
 
 #define AT_FDCWD (-2)
 

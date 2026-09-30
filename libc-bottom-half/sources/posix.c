@@ -93,6 +93,11 @@ ssize_t readlink(const char *restrict path, char *restrict buf,
 }
 
 int stat(const char *restrict path, struct stat *restrict buf) {
+  if (path[0] == '\0') {
+    errno = ENOENT;
+    return -1;
+  }
+
   char *relative_path;
   int dirfd = find_relpath(path, &relative_path);
 
@@ -106,6 +111,11 @@ int stat(const char *restrict path, struct stat *restrict buf) {
 }
 
 int lstat(const char *restrict path, struct stat *restrict buf) {
+  if (path[0] == '\0') {
+    errno = ENOENT;
+    return -1;
+  }
+
   char *relative_path;
   int dirfd = find_relpath(path, &relative_path);
 
@@ -387,6 +397,11 @@ int __wasilibc_utimens(const char *path, const struct timespec times[2],
 // Like `stat`, but with `fstatat`'s flags argument.
 int __wasilibc_stat(const char *__restrict path, struct stat *__restrict st,
                     int flags) {
+  if (path[0] == '\0') {
+    errno = ENOENT;
+    return -1;
+  }
+
   char *relative_path;
   int dirfd = find_relpath(path, &relative_path);
 

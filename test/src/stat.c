@@ -2,6 +2,7 @@
 
 #include "test.h"
 #include <errno.h>
+#include <fcntl.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,6 +27,20 @@ int main(void) {
   struct stat st;
   FILE *f;
   time_t t;
+
+  TEST(stat("", &st) == -1 && errno == ENOENT, "errno = %s\n", strerror(errno));
+  TEST(lstat("", &st) == -1 && errno == ENOENT, "errno = %s\n",
+       strerror(errno));
+  int dirfd = open(".", O_RDONLY);
+  if (TEST(dirfd >= 0, "errno = %s\n", strerror(errno))) {
+    TEST(fstatat(dirfd, "", &st, 0) == -1 && errno == ENOENT, "errno = %s\n",
+         strerror(errno));
+    if (TEST(fstatat(dirfd, "", &st, AT_EMPTY_PATH) == 0, "errno = %s\n",
+             strerror(errno))) {
+      TEST(S_ISDIR(st.st_mode), "\n");
+    }
+    close(dirfd);
+  }
 
   if (TEST(stat(".", &st) == 0, "errno = %s\n", strerror(errno))) {
     TEST(S_ISDIR(st.st_mode), "\n");

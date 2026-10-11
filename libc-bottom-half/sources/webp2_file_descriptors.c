@@ -25,23 +25,108 @@
 #define LINE_BUF_SIZE 4096
 
 typedef struct line_buffer_t {
-  size_t len;
+  int32_t len;
+  int32_t codepoint_start; // -1 means no current code point
+  int32_t codepoint_remaining;
   uint8_t buf[LINE_BUF_SIZE];
 } line_buffer_t;
 
-static line_buffer_t line_buffers[2];
+static line_buffer_t line_buffers[2] = {
+    (line_buffer_t){.codepoint_start = -1},
+    (line_buffer_t){.codepoint_start = -1},
+};
 
 static bool fd_closed[3];
 
-static void flush_line_buffer(line_buffer_t* buf) {
-  webp2_string_t out = (webp2_string_t){ .ptr = buf->buf, .len = buf->len };
+static void line_buffer_replchar(line_buffer_t *lb);
+
+static void line_buffer_flush(line_buffer_t *lb, bool final) {
+  if (final && lb->codepoint_start >= 0) {
+    // Closing with un-terminated sequence. Rewind and emit replacement
+    // character instead.
+    lb->len = lb->codepoint_start;
+    line_buffer_replchar(lb);
+  }
+
+  webp2_string_t out = (webp2_string_t){.ptr = lb->buf, .len = lb->len};
   webp2_console_log(&out);
-  buf->len = 0;
+  lb->len = 0;
+  lb->codepoint_start = -1;
+  lb->codepoint_remaining = 0;
 }
 
-static bool is_readable(int fd) {
-  return fd == STDIN_FILENO;
+static void line_buffer_replchar(line_buffer_t *lb) {
+  if (LINE_BUF_SIZE - lb->len < 3) {
+    line_buffer_flush(lb, false);
+  }
+  lb->buf[lb->len++] = 0xEF;
+  lb->buf[lb->len++] = 0xBF;
+  lb->buf[lb->len++] = 0xBD;
 }
+
+// Emits a single byte to the line buffer, fixing up UTF-8 problems as it goes.
+static void line_buffer_byte(line_buffer_t *lb, uint8_t b) {
+  bool is_1byte = (b & 0x80) == 0;
+  bool is_continuation = (b & 0xC0) == 0x80;
+  bool is_2byte = (b & 0xE0) == 0xC0;
+  bool is_3byte = (b & 0xF0) == 0xE0;
+  bool is_4byte = (b & 0xF8) == 0xF0;
+
+  if (!is_continuation && lb->codepoint_start >= 0) {
+    // Unexpected non-continuation byte; rewind, emit replacement for the
+    // aborted sequence, and continue with the current byte
+    lb->len = lb->codepoint_start;
+    lb->codepoint_start = -1;
+    line_buffer_replchar(lb);
+  }
+
+  if (is_1byte) {
+    if (b == '\n' || lb->len + 1 > LINE_BUF_SIZE) {
+      line_buffer_flush(lb, false);
+    }
+    if (b != '\n') {
+      lb->buf[lb->len++] = b;
+    }
+  } else if (is_2byte || is_3byte || is_4byte) {
+    int32_t codepoint_length = is_2byte ? 2 : (is_3byte ? 3 : 4);
+    if (lb->len + codepoint_length > LINE_BUF_SIZE) {
+      line_buffer_flush(lb, false);
+    }
+    lb->codepoint_start = lb->len;
+    lb->codepoint_remaining = codepoint_length - 1;
+    lb->buf[lb->len++] = b;
+  } else if (is_continuation) {
+    if (lb->codepoint_start < 0) {
+      // Unexpected continuation byte; emit a replacement char instead
+      line_buffer_replchar(lb);
+    } else {
+      // Expected continuation byte
+      lb->buf[lb->len++] = b;
+      lb->codepoint_remaining -= 1;
+
+      // If done, validate overlong / out-of-range
+      if (lb->codepoint_remaining <= 0) {
+        uint8_t first = lb->buf[lb->codepoint_start];
+        uint8_t second = lb->buf[lb->codepoint_start + 1];
+        bool overlong = first == 0xC0 || first == 0xC1 ||
+                        (first == 0xE0 && second < 0xA0) ||
+                        (first == 0xF0 && second < 0x90);
+        bool toobig = (first == 0xF4 && second >= 0x90) || 0xF5 <= first;
+        bool surrogate = (first == 0xED && second >= 0xA0);
+        if (overlong || toobig || surrogate) {
+          // Rewind to start and write replacement character
+          lb->len = lb->codepoint_start;
+          line_buffer_replchar(lb);
+        }
+        lb->codepoint_start = -1;
+      }
+    }
+  } else {
+    line_buffer_replchar(lb);
+  }
+}
+
+static bool is_readable(int fd) { return fd == STDIN_FILENO; }
 
 static bool is_writable(int fd) {
   return fd == STDOUT_FILENO || fd == STDERR_FILENO;
@@ -54,7 +139,7 @@ static bool iovecs_ok(const struct iovec *iov, int iovcnt, size_t *total_size) {
     *total_size = 0;
   }
   for (int i = 0; i < iovcnt; i++) {
-    const struct iovec* v = &iov[i];
+    const struct iovec *v = &iov[i];
     if (v->iov_len > SSIZE_MAX || _total_size > SSIZE_MAX - v->iov_len) {
       return false;
     }
@@ -83,9 +168,9 @@ int close(int fd) {
   }
   fd_closed[fd] = true;
   if (is_writable(fd)) {
-    line_buffer_t *buf = &line_buffers[fd-1];
+    line_buffer_t *buf = &line_buffers[fd - 1];
     if (buf->len > 0) {
-      flush_line_buffer(buf);
+      line_buffer_flush(buf, true);
     }
   }
   return 0;
@@ -143,19 +228,11 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
     return -1;
   }
 
-  line_buffer_t* line_buffer = &line_buffers[fildes-1];
+  line_buffer_t *line_buffer = &line_buffers[fildes - 1];
   for (size_t i = 0; i < nbyte; i++) {
-    // TODO(webp2): UTF-8
-    uint8_t c = ((uint8_t*)buf)[i];
-    // TODO(webp2): Handle \r
-    if (c == '\n' || line_buffer->len >= LINE_BUF_SIZE) {
-      flush_line_buffer(line_buffer);
-    }
-    if (c != '\n') {
-      line_buffer->buf[line_buffer->len] = c;
-      line_buffer->len++;
-    }
+    line_buffer_byte(line_buffer, ((uint8_t *)buf)[i]);
   }
+
   return nbyte;
 }
 

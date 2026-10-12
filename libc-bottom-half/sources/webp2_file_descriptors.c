@@ -7,6 +7,7 @@
 #include "sys/uio.h"
 #include "wasi/report-error.h"
 #include <__errno_values.h>
+#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -42,11 +43,20 @@ static bool fd_closed[3];
 
 static void line_buffer_replchar(line_buffer_t *lb);
 
-static void line_buffer_flush(line_buffer_t *lb, bool final) {
-  if (final && lb->codepoint_start >= 0) {
-    // Closing with un-terminated sequence. Rewind and emit replacement
-    // character instead.
-    lb->len = lb->codepoint_start;
+static void line_buffer_rewind_current_codepoint(line_buffer_t *lb) {
+  assert(lb->codepoint_start >= 0);
+  lb->len = lb->codepoint_start;
+  lb->codepoint_start = -1;
+}
+
+static void line_buffer_flush(line_buffer_t *lb) {
+  if (lb->codepoint_start >= 0) {
+    // Cannot flush with a code point in progress because we have to hand it
+    // off to console.log. But this should only happen when closing the stream
+    // early, because we always flush early when starting a code point that
+    // would overfill the buffer. Rewind and emit a replacement character to
+    // close things off.
+    line_buffer_rewind_current_codepoint(lb);
     line_buffer_replchar(lb);
   }
 
@@ -58,8 +68,8 @@ static void line_buffer_flush(line_buffer_t *lb, bool final) {
 }
 
 static void line_buffer_replchar(line_buffer_t *lb) {
-  if (LINE_BUF_SIZE - lb->len < 3) {
-    line_buffer_flush(lb, false);
+  if (lb->len + 3 > LINE_BUF_SIZE) {
+    line_buffer_flush(lb);
   }
   lb->buf[lb->len++] = 0xEF;
   lb->buf[lb->len++] = 0xBF;
@@ -77,14 +87,13 @@ static void line_buffer_byte(line_buffer_t *lb, uint8_t b) {
   if (!is_continuation && lb->codepoint_start >= 0) {
     // Unexpected non-continuation byte; rewind, emit replacement for the
     // aborted sequence, and continue with the current byte
-    lb->len = lb->codepoint_start;
-    lb->codepoint_start = -1;
+    line_buffer_rewind_current_codepoint(lb);
     line_buffer_replchar(lb);
   }
 
   if (is_1byte) {
     if (b == '\n' || lb->len + 1 > LINE_BUF_SIZE) {
-      line_buffer_flush(lb, false);
+      line_buffer_flush(lb);
     }
     if (b != '\n') {
       lb->buf[lb->len++] = b;
@@ -92,7 +101,7 @@ static void line_buffer_byte(line_buffer_t *lb, uint8_t b) {
   } else if (is_2byte || is_3byte || is_4byte) {
     int32_t codepoint_length = is_2byte ? 2 : (is_3byte ? 3 : 4);
     if (lb->len + codepoint_length > LINE_BUF_SIZE) {
-      line_buffer_flush(lb, false);
+      line_buffer_flush(lb);
     }
     lb->codepoint_start = lb->len;
     lb->codepoint_remaining = codepoint_length - 1;
@@ -117,7 +126,7 @@ static void line_buffer_byte(line_buffer_t *lb, uint8_t b) {
         bool surrogate = (first == 0xED && second >= 0xA0);
         if (overlong || toobig || surrogate) {
           // Rewind to start and write replacement character
-          lb->len = lb->codepoint_start;
+          line_buffer_rewind_current_codepoint(lb);
           line_buffer_replchar(lb);
         }
         lb->codepoint_start = -1;
@@ -188,10 +197,10 @@ off_t __wasilibc_tell(int fd) {
 
 void __wasilibc_webp2_flush_stdio(void) {
   if (line_buffers[0].len > 0) {
-    line_buffer_flush(&line_buffers[0], true);
+    line_buffer_flush(&line_buffers[0]);
   }
   if (line_buffers[1].len > 0) {
-    line_buffer_flush(&line_buffers[1], true);
+    line_buffer_flush(&line_buffers[1]);
   }
 }
 
@@ -204,7 +213,7 @@ int close(int fd) {
   if (is_writable(fd)) {
     line_buffer_t *buf = &line_buffers[fd - 1];
     if (buf->len > 0) {
-      line_buffer_flush(buf, true);
+      line_buffer_flush(buf);
     }
   }
   return 0;
@@ -324,7 +333,6 @@ int fstat(int fildes, struct stat *buf) {
   buf->st_mode = S_IFCHR;
   return 0;
 }
-
 
 // ============================================================================
 // Stubs

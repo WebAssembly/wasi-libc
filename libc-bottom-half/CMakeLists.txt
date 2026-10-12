@@ -314,7 +314,6 @@ if (WASI STREQUAL "p1")
   )
 elseif(WEB STREQUAL "p2")
   # webp2: crt1-command.o is not necessary
-  # TODO(webp2): Set world like below?
 else()
   if (WASI STREQUAL "p2")
     set(world wasi:cli/command@${wasip2-version})

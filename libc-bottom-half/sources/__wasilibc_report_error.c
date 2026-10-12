@@ -12,6 +12,7 @@ void __wasilibc_report_error(const char *message) {
 
 #ifdef __webp2__
 void __wasilibc_webp2_report_error(const char *message) {
+  __wasilibc_webp2_flush_stdio();
   webp2_string_t msg;
   webp2_string_set(&msg, message);
   webp2_own_error_t err = webp2_constructor_error(&msg, NULL);

@@ -129,7 +129,7 @@ static void line_buffer_byte(line_buffer_t *lb, uint8_t b) {
 }
 
 static bool fd_ok(int fd) {
-  return fd >= STDIN_FILENO && STDERR_FILENO <= fd && !fd_closed[fd];
+  return STDIN_FILENO <= fd && fd <= STDERR_FILENO && !fd_closed[fd];
 }
 
 static bool is_readable(int fd) { return fd == STDIN_FILENO; }
@@ -184,6 +184,15 @@ off_t __wasilibc_tell(int fd) {
   }
   errno = ESPIPE;
   return -1;
+}
+
+void __wasilibc_webp2_flush_stdio(void) {
+  if (line_buffers[0].len > 0) {
+    line_buffer_flush(&line_buffers[0], true);
+  }
+  if (line_buffers[1].len > 0) {
+    line_buffer_flush(&line_buffers[1], true);
+  }
 }
 
 int close(int fd) {

@@ -22,6 +22,7 @@ noreturn void _Exit(int status) {
   }
   // We really don't have any other way to halt execution except to trap. Quite
   // unfortunate that this will manifest as a RuntimeError.
+  __wasilibc_webp2_flush_stdio();
   __builtin_trap();
 #else
 # error "Unknown WASI version"

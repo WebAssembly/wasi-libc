@@ -121,8 +121,8 @@ __attribute__((__weak__, nodebug)) int __main_void(void) {
   if (!__main_argc_argv) {
     return 0;
   }
-  static char *argv[] = {NULL};
-  return __main_argc_argv(0, argv);
+  static char *argv[] = {"./this.program", NULL};
+  return __main_argc_argv(1, argv);
 #else
 #error "Unknown WASI version"
 #endif

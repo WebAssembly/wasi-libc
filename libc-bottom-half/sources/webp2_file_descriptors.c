@@ -8,8 +8,10 @@
 #include "wasi/report-error.h"
 #include <__errno_values.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <poll.h>
+#include <string.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
 #include <sys/stat.h>
@@ -126,6 +128,10 @@ static void line_buffer_byte(line_buffer_t *lb, uint8_t b) {
   }
 }
 
+static bool fd_ok(int fd) {
+  return fd >= STDIN_FILENO && STDERR_FILENO <= fd && !fd_closed[fd];
+}
+
 static bool is_readable(int fd) { return fd == STDIN_FILENO; }
 
 static bool is_writable(int fd) {
@@ -152,7 +158,7 @@ static bool iovecs_ok(const struct iovec *iov, int iovcnt, size_t *total_size) {
 }
 
 int __isatty(int fd) {
-  if (fd < STDIN_FILENO || STDERR_FILENO < fd || fd_closed[fd]) {
+  if (!fd_ok(fd)) {
     errno = EBADF;
     return 0;
   }
@@ -161,8 +167,27 @@ int __isatty(int fd) {
 }
 weak_alias(__isatty, isatty);
 
+off_t __lseek(int fildes, off_t offset, int whence) {
+  if (!fd_ok(fildes)) {
+    errno = EBADF;
+    return -1;
+  }
+  errno = ESPIPE;
+  return -1;
+}
+weak_alias(__lseek, lseek);
+
+off_t __wasilibc_tell(int fd) {
+  if (!fd_ok(fd)) {
+    errno = EBADF;
+    return -1;
+  }
+  errno = ESPIPE;
+  return -1;
+}
+
 int close(int fd) {
-  if (fd < STDIN_FILENO || STDERR_FILENO < fd || fd_closed[fd]) {
+  if (!fd_ok(fd)) {
     errno = EBADF;
     return -1;
   }
@@ -174,6 +199,25 @@ int close(int fd) {
     }
   }
   return 0;
+}
+
+int fcntl(int fildes, int cmd, ...) {
+  if (!fd_ok(fildes)) {
+    errno = EBADF;
+    return -1;
+  }
+  switch (cmd) {
+  case F_GETFD:
+  case F_SETFD:
+    // Don't bother setting FD_CLOEXEC at all. It's totally irrelevant but
+    // there's no reason to crash if trying to set it.
+    return 0;
+  case F_GETFL:
+    return is_readable(fildes) ? O_RDONLY : O_WRONLY;
+  default:
+    errno = EINVAL;
+    return -1;
+  }
 }
 
 ssize_t read(int fildes, void *buf, size_t nbyte) {
@@ -262,16 +306,21 @@ ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
   return total_size;
 }
 
+int fstat(int fildes, struct stat *buf) {
+  if (!fd_ok(fildes)) {
+    errno = EBADF;
+    return -1;
+  }
+  memset(buf, 0, sizeof(*buf));
+  buf->st_mode = S_IFCHR;
+  return 0;
+}
+
+
 // ============================================================================
 // Stubs
 
 int __dup3(int fd, int newfd, int flags) { WEBP2_UNSUPPORTED("__dup3"); }
-
-off_t __lseek(int fildes, off_t offset, int whence) {
-  WEBP2_UNSUPPORTED("__lseek");
-}
-
-off_t __wasilibc_tell(int fd) { WEBP2_UNSUPPORTED("__wasilibc_tell"); }
 
 int dup(int fd) { WEBP2_UNSUPPORTED("dup"); }
 
@@ -279,15 +328,7 @@ int dup2(int fd, int newfd) { WEBP2_UNSUPPORTED("dup2"); }
 
 int dup3(int fd, int newfd, int flags) { WEBP2_UNSUPPORTED("dup3"); }
 
-int fcntl(int fildes, int cmd, ...) { WEBP2_UNSUPPORTED("fcntl"); }
-
-int fstat(int fildes, struct stat *buf) { WEBP2_UNSUPPORTED("fstat"); }
-
 int ioctl(int fildes, int request, ...) { WEBP2_UNSUPPORTED("ioctl"); }
-
-off_t lseek(int fildes, off_t offset, int whence) {
-  WEBP2_UNSUPPORTED("lseek");
-}
 
 int pipe(int fd[2]) { WEBP2_UNSUPPORTED("pipe"); }
 

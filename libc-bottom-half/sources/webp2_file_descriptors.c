@@ -31,6 +31,7 @@ typedef struct line_buffer_t {
   int32_t len;
   int32_t codepoint_start; // -1 means no current code point
   int32_t codepoint_remaining;
+  bool warn;
   uint8_t buf[LINE_BUF_SIZE];
 } line_buffer_t;
 
@@ -61,7 +62,11 @@ static void line_buffer_flush(line_buffer_t *lb) {
   }
 
   webp2_string_t out = (webp2_string_t){.ptr = lb->buf, .len = lb->len};
-  webp2_console_log(&out);
+  if (lb->warn) {
+    webp2_console_warn(&out);
+  } else {
+    webp2_console_log(&out);
+  }
   lb->len = 0;
   lb->codepoint_start = -1;
   lb->codepoint_remaining = 0;

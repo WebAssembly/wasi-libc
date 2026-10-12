@@ -40,6 +40,9 @@ extern int32_t __wasm_import_webp2_get_global_crypto(void);
 __attribute__((__import_module__("wasm:js/console"), __import_name__("log")))
 extern void __wasm_import_webp2_console_log(uint8_t *, size_t);
 
+__attribute__((__import_module__("wasm:js/console"), __import_name__("warn")))
+extern void __wasm_import_webp2_console_warn(uint8_t *, size_t);
+
 // Canonical ABI intrinsics
 
 __attribute__((__weak__, __export_name__("cabi_realloc")))
@@ -284,6 +287,10 @@ webp2_own_crypto_t webp2_get_global_crypto(void) {
 
 void webp2_console_log(webp2_string_t *msg) {
   __wasm_import_webp2_console_log((uint8_t *) (*msg).ptr, (*msg).len);
+}
+
+void webp2_console_warn(webp2_string_t *msg) {
+  __wasm_import_webp2_console_warn((uint8_t *) (*msg).ptr, (*msg).len);
 }
 
 // Ensure that the *_component_type.o object is linked in

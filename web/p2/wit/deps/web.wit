@@ -2,6 +2,7 @@ package wasm:js;
 
 interface console {
     log: func(msg: string);
+    warn: func(msg: string);
 }
 
 interface global {

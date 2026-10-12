@@ -102,6 +102,7 @@ extern webp2_own_crypto_t webp2_get_global_crypto(void);
 
 // Imported Functions from `wasm:js/console`
 extern void webp2_console_log(webp2_string_t *msg);
+extern void webp2_console_warn(webp2_string_t *msg);
 
 // Helper Functions
 

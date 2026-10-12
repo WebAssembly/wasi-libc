@@ -22,6 +22,7 @@ __trunctfdf2
 __trunctfsf2
 __unordtf2
 __wasm_call_ctors
+__wasm_import_webp2_console_log
 __wasm_import_webp2_constructor_error
 __wasm_import_webp2_constructor_uint_8_array
 __wasm_import_webp2_crypto_drop

@@ -332,6 +332,7 @@ __wasilibc_stat
 __wasilibc_tell
 __wasilibc_unlinkat
 __wasilibc_utimens
+__wasilibc_webp2_flush_stdio
 __wasilibc_webp2_report_error
 __wasm_call_dtors
 __wcscoll_l
@@ -1338,6 +1339,7 @@ webp2_borrow_date
 webp2_borrow_error
 webp2_borrow_performance
 webp2_borrow_uint_8_array
+webp2_console_log
 webp2_constructor_error
 webp2_constructor_uint_8_array
 webp2_crypto_drop_own

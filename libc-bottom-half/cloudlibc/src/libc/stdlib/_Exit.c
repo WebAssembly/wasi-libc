@@ -17,15 +17,19 @@ noreturn void _Exit(int status) {
   exit_result_void_void_t exit_status = { .is_err = status != 0 };
   exit_exit(&exit_status);
 #elif defined(__webp2__)
-  if (status != 0) {
-    __wasilibc_report_error("exit with nonzero status");
-  }
   // POSIX says not to flush buffers, so we don't flush musl's buffers, but
   // because our line buffering exists solely for the purpose of pretty
   // console.logs, we do flush those.
   __wasilibc_webp2_flush_stdio(/*also_musl=*/false);
+
   // We really don't have any other way to halt execution except to trap. Quite
   // unfortunate that this will manifest as a RuntimeError.
+  if (status == 0) {
+    const char msg[] = "exit with status 0 (reported as trap)\n";
+    write(STDOUT_FILENO, msg, sizeof(msg) - 1);
+  } else {
+    __wasilibc_report_error("exit with nonzero status");
+  }
   __builtin_trap();
 #else
 # error "Unknown WASI version"

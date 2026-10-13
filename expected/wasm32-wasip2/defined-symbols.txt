@@ -368,6 +368,9 @@ __wasilibc_stat
 __wasilibc_tell
 __wasilibc_unlinkat
 __wasilibc_unspecified_addr
+__wasilibc_utf8_abort_current
+__wasilibc_utf8_reset
+__wasilibc_utf8_write
 __wasilibc_utimens
 __wasilibc_wasi_family_to_libc
 __wasilibc_wasi_to_sockaddr

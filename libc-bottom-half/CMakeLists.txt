@@ -93,6 +93,7 @@ set(bottom_half_sources
   sources/math/math-builtins.c
   sources/reallocarray.c
   sources/sbrk.c
+  sources/utf8.c
   sources/__cabi_realloc_wrapper.S
 )
 

@@ -44,7 +44,7 @@ int fflush(FILE *f)
 
 #ifdef __webp2__
 	if (f->fd == STDOUT_FILENO || f->fd == STDERR_FILENO) {
-		__wasilibc_webp2_fflush(f->fd, /*also_musl=*/false);
+		__wasilibc_webp2_fflush(f->fd);
 	}
 #endif
 

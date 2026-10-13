@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <wasi/__generated_webp2.h>
+#include <wasi/utf8.h>
 
 // unistd.h defines an `lseek` macro that would mangle the definition below.
 #undef lseek
@@ -29,117 +30,27 @@
 #define LINE_BUF_SIZE 4096
 
 typedef struct line_buffer_t {
-  int32_t len;
-  int32_t codepoint_start; // -1 means no current code point
-  int32_t codepoint_remaining;
   bool warn;
   uint8_t buf[LINE_BUF_SIZE];
 } line_buffer_t;
 
 static line_buffer_t line_buffers[2] = {
-    (line_buffer_t){.codepoint_start = -1},
-    (line_buffer_t){.codepoint_start = -1},
+  (line_buffer_t){},
+  (line_buffer_t){ .warn = true },
+};
+static wasilibc_utf8_writer_t utf8_writers[2] = {
+  __wasilibc_make_utf8_writer(line_buffers[0].buf, LINE_BUF_SIZE),
+  __wasilibc_make_utf8_writer(line_buffers[1].buf, LINE_BUF_SIZE),
 };
 
 static bool fd_closed[3];
 
-static void line_buffer_replchar(line_buffer_t *lb);
-
-static void line_buffer_rewind_current_codepoint(line_buffer_t *lb) {
-  assert(lb->codepoint_start >= 0);
-  lb->len = lb->codepoint_start;
-  lb->codepoint_start = -1;
-}
-
-static void line_buffer_flush(line_buffer_t *lb) {
-  if (lb->codepoint_start >= 0) {
-    // Cannot flush with a code point in progress because we have to hand it
-    // off to console.log. But this should only happen when closing the stream
-    // early, because we always flush early when starting a code point that
-    // would overfill the buffer. Rewind and emit a replacement character to
-    // close things off.
-    line_buffer_rewind_current_codepoint(lb);
-    line_buffer_replchar(lb);
-  }
-
-  webp2_string_t out = (webp2_string_t){.ptr = lb->buf, .len = lb->len};
+static void line_buffer_out(line_buffer_t *lb, wasilibc_utf8_writer_t *utf8) {
+  webp2_string_t out = (webp2_string_t){.ptr = utf8->buf, .len = utf8->valid_len};
   if (lb->warn) {
     webp2_console_warn(&out);
   } else {
     webp2_console_log(&out);
-  }
-  lb->len = 0;
-  lb->codepoint_start = -1;
-  lb->codepoint_remaining = 0;
-}
-
-static void line_buffer_replchar(line_buffer_t *lb) {
-  if (lb->len + 3 > LINE_BUF_SIZE) {
-    line_buffer_flush(lb);
-  }
-  lb->buf[lb->len++] = 0xEF;
-  lb->buf[lb->len++] = 0xBF;
-  lb->buf[lb->len++] = 0xBD;
-}
-
-// Emits a single byte to the line buffer, fixing up UTF-8 problems as it goes.
-static void line_buffer_byte(line_buffer_t *lb, uint8_t b) {
-  bool is_1byte = (b & 0x80) == 0;
-  bool is_continuation = (b & 0xC0) == 0x80;
-  bool is_2byte = (b & 0xE0) == 0xC0;
-  bool is_3byte = (b & 0xF0) == 0xE0;
-  bool is_4byte = (b & 0xF8) == 0xF0;
-
-  if (!is_continuation && lb->codepoint_start >= 0) {
-    // Unexpected non-continuation byte; rewind, emit replacement for the
-    // aborted sequence, and continue with the current byte
-    line_buffer_rewind_current_codepoint(lb);
-    line_buffer_replchar(lb);
-  }
-
-  if (is_1byte) {
-    if (b == '\n' || lb->len + 1 > LINE_BUF_SIZE) {
-      line_buffer_flush(lb);
-    }
-    if (b != '\n') {
-      lb->buf[lb->len++] = b;
-    }
-  } else if (is_2byte || is_3byte || is_4byte) {
-    int32_t codepoint_length = is_2byte ? 2 : (is_3byte ? 3 : 4);
-    if (lb->len + codepoint_length > LINE_BUF_SIZE) {
-      line_buffer_flush(lb);
-    }
-    lb->codepoint_start = lb->len;
-    lb->codepoint_remaining = codepoint_length - 1;
-    lb->buf[lb->len++] = b;
-  } else if (is_continuation) {
-    if (lb->codepoint_start < 0) {
-      // Unexpected continuation byte; emit a replacement char instead
-      line_buffer_replchar(lb);
-    } else {
-      // Expected continuation byte
-      lb->buf[lb->len++] = b;
-      lb->codepoint_remaining -= 1;
-
-      // If done, validate overlong / out-of-range
-      if (lb->codepoint_remaining <= 0) {
-        uint8_t first = lb->buf[lb->codepoint_start];
-        uint8_t second = lb->buf[lb->codepoint_start + 1];
-        bool overlong = first == 0xC0 || first == 0xC1 ||
-                        (first == 0xE0 && second < 0xA0) ||
-                        (first == 0xF0 && second < 0x90);
-        bool toobig = (first == 0xF4 && second >= 0x90) || 0xF5 <= first;
-        bool surrogate = (first == 0xED && second >= 0xA0);
-        if (overlong || toobig || surrogate) {
-          // Rewind to start and write replacement character
-          line_buffer_rewind_current_codepoint(lb);
-          line_buffer_replchar(lb);
-        }
-        lb->codepoint_start = -1;
-      }
-    }
-  } else {
-    line_buffer_replchar(lb);
   }
 }
 
@@ -172,6 +83,23 @@ static bool iovecs_ok(const struct iovec *iov, int iovcnt, size_t *total_size) {
   return true;
 }
 
+// Flushes all data in line buffer to the console, replacing any trailing
+// multi-byte code points with the replacement character.
+static void finish_and_flush(int fd) {
+  assert(fd == STDOUT_FILENO || fd == STDERR_FILENO);
+  if (fd_closed[fd]) {
+    return;
+  }
+  wasilibc_utf8_writer_t *utf8 = &utf8_writers[fd - 1];
+  if (!__wasilibc_utf8_abort_current(utf8)) {
+    // Emit what is already valid in the buffer first, and carry over the
+    // in-progress codepoint
+    __wasilibc_webp2_fflush(fd);
+  }
+  __wasilibc_utf8_abort_current(utf8);
+  __wasilibc_webp2_fflush(fd);
+}
+
 int __isatty(int fd) {
   if (!fd_ok(fd)) {
     errno = EBADF;
@@ -201,19 +129,29 @@ off_t __wasilibc_tell(int fd) {
   return -1;
 }
 
-void __wasilibc_webp2_flush_stdio(bool also_musl) {
-  __wasilibc_webp2_fflush(STDOUT_FILENO, also_musl);
-  __wasilibc_webp2_fflush(STDERR_FILENO, also_musl);
+void __wasilibc_webp2_fflush(int fd) {
+  assert(fd == STDOUT_FILENO || fd == STDERR_FILENO);
+  if (fd_closed[fd]) {
+    return;
+  }
+  line_buffer_t *lb = &line_buffers[fd - 1];
+  wasilibc_utf8_writer_t *utf8 = &utf8_writers[fd - 1];
+  if (utf8->valid_len > 0) {
+    line_buffer_out(lb, utf8);
+    __wasilibc_utf8_reset(utf8);
+  }
 }
 
-void __wasilibc_webp2_fflush(int fd, bool also_musl) {
-  assert(fd == STDOUT_FILENO || fd == STDERR_FILENO);
+void __wasilibc_webp2_finish_and_flush_stdio(bool also_musl) {
   if (also_musl) {
-    fflush(fd == STDOUT_FILENO ? stdout : stderr);
+    fflush(stdout);
   }
-  if (line_buffers[fd - 1].len > 0) {
-    line_buffer_flush(&line_buffers[fd - 1]);
+  finish_and_flush(STDOUT_FILENO);
+
+  if (also_musl) {
+    fflush(stderr);
   }
+  finish_and_flush(STDERR_FILENO);
 }
 
 int close(int fd) {
@@ -221,13 +159,11 @@ int close(int fd) {
     errno = EBADF;
     return -1;
   }
-  fd_closed[fd] = true;
   if (is_writable(fd)) {
-    line_buffer_t *buf = &line_buffers[fd - 1];
-    if (buf->len > 0) {
-      line_buffer_flush(buf);
-    }
+    // Don't flush musl's buffers, but do flush everything we have.
+    finish_and_flush(fd);
   }
+  fd_closed[fd] = true;
   return 0;
 }
 
@@ -303,8 +239,30 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
   }
 
   line_buffer_t *line_buffer = &line_buffers[fildes - 1];
+  wasilibc_utf8_writer_t *utf8 = &utf8_writers[fildes - 1];
   for (size_t i = 0; i < nbyte; i++) {
-    line_buffer_byte(line_buffer, ((uint8_t *)buf)[i]);
+    uint8_t b = ((uint8_t *)buf)[i];
+    // First write to the buffer, flushing first if there was no room for the
+    // results (which can occur either because the buffer was completely full
+    // or because there was no room for a replacement char).
+    bool already_logged = false;
+    if (!__wasilibc_utf8_write(utf8, b)) {
+      line_buffer_out(line_buffer, utf8);
+      __wasilibc_utf8_reset(utf8);
+      __wasilibc_utf8_write(utf8, b); // infallible
+      already_logged = true;
+    }
+    // Then, if there was a newline, drop it from the buffer and flush.
+    if (b == '\n') {
+      assert(utf8->valid_len == utf8->raw_len);
+      utf8->raw_len--;
+      utf8->valid_len--;
+      bool skip = utf8->valid_len == 0 && already_logged;
+      if (!skip) {
+        line_buffer_out(line_buffer, utf8);
+      }
+      __wasilibc_utf8_reset(utf8);
+    }
   }
 
   return nbyte;

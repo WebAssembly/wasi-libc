@@ -402,6 +402,9 @@ __wasilibc_tls_init
 __wasilibc_tls_size
 __wasilibc_unlinkat
 __wasilibc_unspecified_addr
+__wasilibc_utf8_abort_current
+__wasilibc_utf8_reset
+__wasilibc_utf8_write
 __wasilibc_utimens
 __wasilibc_waitable_block_on
 __wasilibc_wasi_family_to_libc

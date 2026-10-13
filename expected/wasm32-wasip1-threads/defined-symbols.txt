@@ -405,6 +405,9 @@ __wasilibc_stat
 __wasilibc_tell
 __wasilibc_unlinkat
 __wasilibc_use_busy_futex
+__wasilibc_utf8_abort_current
+__wasilibc_utf8_reset
+__wasilibc_utf8_write
 __wasilibc_utimens
 __wasm_call_dtors
 __wcscoll_l

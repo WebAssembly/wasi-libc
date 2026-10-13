@@ -142,16 +142,18 @@ void __wasilibc_webp2_fflush(int fd) {
   }
 }
 
-void __wasilibc_webp2_finish_and_flush_stdio(bool also_musl) {
+void __wasilibc_webp2_flush_and_close_stdio(bool also_musl) {
   if (also_musl) {
     fflush(stdout);
   }
   finish_and_flush(STDOUT_FILENO);
+  fd_closed[STDOUT_FILENO] = true;
 
   if (also_musl) {
     fflush(stderr);
   }
   finish_and_flush(STDERR_FILENO);
+  fd_closed[STDERR_FILENO] = true;
 }
 
 int close(int fd) {

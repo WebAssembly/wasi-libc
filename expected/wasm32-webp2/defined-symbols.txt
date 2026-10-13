@@ -336,7 +336,7 @@ __wasilibc_utf8_reset
 __wasilibc_utf8_write
 __wasilibc_utimens
 __wasilibc_webp2_fflush
-__wasilibc_webp2_finish_and_flush_stdio
+__wasilibc_webp2_flush_and_close_stdio
 __wasilibc_webp2_report_error
 __wasm_call_dtors
 __wcscoll_l

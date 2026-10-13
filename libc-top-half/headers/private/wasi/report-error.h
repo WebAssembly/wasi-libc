@@ -15,7 +15,7 @@ void __wasilibc_webp2_fflush(int fd);
 
 // Finalizes and flushes the contents of stdout & stderr in preparation for app
 // exit. Optionally also runs `fflush` on musl's stdio streams first.
-void __wasilibc_webp2_finish_and_flush_stdio(bool also_musl);
+void __wasilibc_webp2_flush_and_close_stdio(bool also_musl);
 
 // Reports an error to the console using webp2 bindings.
 void __wasilibc_webp2_report_error(const char* message);

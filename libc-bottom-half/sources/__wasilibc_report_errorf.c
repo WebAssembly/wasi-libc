@@ -11,10 +11,11 @@ void __wasilibc_report_errorf(const char *format, ...) {
 #if defined(__webp2__)
 #define ERROR_MAX_LEN 512
   char format_buf[ERROR_MAX_LEN];
-  uint8_t utf8_buf[ERROR_MAX_LEN+1]; // leave room for nul
+  uint8_t utf8_buf[ERROR_MAX_LEN + 1]; // leave room for nul
 
   int n = vsnprintf(format_buf, sizeof(format_buf), format, ap);
-  wasilibc_utf8_writer_t utf8 = __wasilibc_make_utf8_writer(utf8_buf, ERROR_MAX_LEN);
+  wasilibc_utf8_writer_t utf8 =
+      __wasilibc_make_utf8_writer(utf8_buf, ERROR_MAX_LEN);
 
   // Re-encode as UTF-8 (excluding vnsprintf's nul)
   for (int i = 0; i < n && i < (int)sizeof(format_buf) - 1; i++) {
@@ -26,7 +27,7 @@ void __wasilibc_report_errorf(const char *format, ...) {
 
   // Nul-terminate message and pass along
   utf8_buf[utf8.valid_len] = 0;
-  __wasilibc_report_error((char*)utf8_buf);
+  __wasilibc_report_error((char *)utf8_buf);
 #else
   vfprintf(stderr, format, ap);
   fputc('\n', stderr);

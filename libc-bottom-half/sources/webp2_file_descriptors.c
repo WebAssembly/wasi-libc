@@ -35,18 +35,19 @@ typedef struct line_buffer_t {
 } line_buffer_t;
 
 static line_buffer_t line_buffers[2] = {
-  (line_buffer_t){},
-  (line_buffer_t){ .warn = true },
+    (line_buffer_t){},
+    (line_buffer_t){.warn = true},
 };
 static wasilibc_utf8_writer_t utf8_writers[2] = {
-  __wasilibc_make_utf8_writer(line_buffers[0].buf, LINE_BUF_SIZE),
-  __wasilibc_make_utf8_writer(line_buffers[1].buf, LINE_BUF_SIZE),
+    __wasilibc_make_utf8_writer(line_buffers[0].buf, LINE_BUF_SIZE),
+    __wasilibc_make_utf8_writer(line_buffers[1].buf, LINE_BUF_SIZE),
 };
 
 static bool fd_closed[3];
 
 static void line_buffer_out(line_buffer_t *lb, wasilibc_utf8_writer_t *utf8) {
-  webp2_string_t out = (webp2_string_t){.ptr = utf8->buf, .len = utf8->valid_len};
+  webp2_string_t out =
+      (webp2_string_t){.ptr = utf8->buf, .len = utf8->valid_len};
   if (lb->warn) {
     webp2_console_warn(&out);
   } else {

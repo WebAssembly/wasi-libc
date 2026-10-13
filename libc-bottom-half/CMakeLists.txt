@@ -67,8 +67,11 @@ endforeach()
 # All targets
 set(bottom_half_sources
   cloudlibc/src/libc/errno/errno.c
+  cloudlibc/src/libc/poll/poll.c
   cloudlibc/src/libc/sched/sched_yield.c
   cloudlibc/src/libc/stdlib/_Exit.c
+  cloudlibc/src/libc/sys/select/pselect.c
+  cloudlibc/src/libc/sys/select/select.c
   cloudlibc/src/libc/sys/time/gettimeofday.c
   cloudlibc/src/libc/time/CLOCK_MONOTONIC.c
   cloudlibc/src/libc/time/CLOCK_REALTIME.c
@@ -101,10 +104,7 @@ set(bottom_half_sources
 if (NOT WEB STREQUAL "p2")
   list(APPEND bottom_half_sources
     cloudlibc/src/libc/fcntl/fcntl.c
-    cloudlibc/src/libc/poll/poll.c
     cloudlibc/src/libc/sys/ioctl/ioctl.c
-    cloudlibc/src/libc/sys/select/pselect.c
-    cloudlibc/src/libc/sys/select/select.c
     cloudlibc/src/libc/sys/stat/fstat.c
     cloudlibc/src/libc/sys/uio/readv.c
     cloudlibc/src/libc/sys/uio/writev.c

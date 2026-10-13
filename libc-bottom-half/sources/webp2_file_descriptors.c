@@ -3,6 +3,7 @@
 // supported by routing to console.log, and stdin is supported by immediately
 // returning EOF.
 
+#include "common/time.h"
 #include "features.h"
 #include "sys/uio.h"
 #include "wasi/report-error.h"
@@ -12,6 +13,7 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <poll.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -189,6 +191,80 @@ int fcntl(int fildes, int cmd, ...) {
   }
 }
 
+int fstat(int fildes, struct stat *buf) {
+  if (!fd_ok(fildes)) {
+    errno = EBADF;
+    return -1;
+  }
+  memset(buf, 0, sizeof(*buf));
+  buf->st_mode = S_IFCHR;
+  return 0;
+}
+
+int ioctl(int fildes, int request, ...) {
+  if (!fd_ok(fildes)) {
+    errno = EBADF;
+    return -1;
+  }
+  switch (request) {
+  case FIONREAD: {
+    // There is never anything available to read.
+    va_list ap;
+    va_start(ap, request);
+    int *result = va_arg(ap, int *);
+    va_end(ap);
+    *result = 0;
+    return 0;
+  }
+  case FIONBIO:
+    // There's no difference between "blocking" and "non-blocking" IO for our
+    // stdio implementation, so this does nothing.
+    return 0;
+  default:
+    errno = EINVAL;
+    return -1;
+  }
+}
+
+int ppoll(struct pollfd *fds, nfds_t nfds, const struct timespec *timeout,
+          const sigset_t *sigmask) {
+  if (timeout && (timeout->tv_sec < 0 || timeout->tv_nsec < 0 ||
+                  timeout->tv_nsec >= NSEC_PER_SEC)) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  int ready = 0;
+  for (nfds_t i = 0; i < nfds; i++) {
+    struct pollfd *pollfd = &fds[i];
+    pollfd->revents = 0;
+    if (pollfd->fd < 0) {
+      continue;
+    }
+    if (!fd_ok(pollfd->fd)) {
+      pollfd->revents = POLLNVAL;
+    } else if (is_readable(pollfd->fd)) {
+      // stdin is always readable
+      pollfd->revents = pollfd->events & POLLRDNORM;
+    } else {
+      // stdout and stderr are always writable
+      pollfd->revents = pollfd->events & POLLWRNORM;
+    }
+    if (pollfd->revents != 0) {
+      ready++;
+    }
+  }
+
+  // We cannot actually sit and wait for files to become available, but because
+  // our stdin, stdout, and stderr are always ready, most user code should
+  // never hit this.
+  bool zero_timeout = timeout && timeout->tv_sec == 0 && timeout->tv_nsec == 0;
+  if (ready == 0 && !zero_timeout) {
+    WEBP2_UNSUPPORTED("blocking ppoll");
+  }
+  return ready;
+}
+
 ssize_t read(int fildes, void *buf, size_t nbyte) {
   if (nbyte > SSIZE_MAX) {
     errno = EINVAL;
@@ -297,16 +373,6 @@ ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
   return total_size;
 }
 
-int fstat(int fildes, struct stat *buf) {
-  if (!fd_ok(fildes)) {
-    errno = EBADF;
-    return -1;
-  }
-  memset(buf, 0, sizeof(*buf));
-  buf->st_mode = S_IFCHR;
-  return 0;
-}
-
 // ============================================================================
 // Stubs
 
@@ -318,28 +384,6 @@ int dup2(int fd, int newfd) { WEBP2_UNSUPPORTED("dup2"); }
 
 int dup3(int fd, int newfd, int flags) { WEBP2_UNSUPPORTED("dup3"); }
 
-int ioctl(int fildes, int request, ...) { WEBP2_UNSUPPORTED("ioctl"); }
-
 int pipe(int fd[2]) { WEBP2_UNSUPPORTED("pipe"); }
 
 int pipe2(int fd[2], int flags) { WEBP2_UNSUPPORTED("pipe2"); }
-
-int poll(struct pollfd *fds, nfds_t nfds, int timeout) {
-  WEBP2_UNSUPPORTED("poll");
-}
-
-int ppoll(struct pollfd *fds, nfds_t nfds, const struct timespec *timeout,
-          const sigset_t *sigmask) {
-  WEBP2_UNSUPPORTED("ppoll");
-}
-
-int pselect(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
-            fd_set *restrict errorfds, const struct timespec *restrict timeout,
-            const sigset_t *restrict sigmask) {
-  WEBP2_UNSUPPORTED("pselect");
-}
-
-int select(int nfds, fd_set *restrict readfds, fd_set *restrict writefds,
-           fd_set *restrict errorfds, struct timeval *restrict timeout) {
-  WEBP2_UNSUPPORTED("select");
-}

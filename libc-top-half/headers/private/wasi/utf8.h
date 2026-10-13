@@ -1,3 +1,4 @@
+#include <features.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -22,14 +23,14 @@ typedef struct wasilibc_utf8_writer_t {
 // UTF-8, a replacement character will be written instead. Returns false if
 // it runs out of room in the buffer; in this case, you can either stop or call
 // `wasilibc_utf8_reset` and then try again, which will always succeed.
-bool __wasilibc_utf8_write(wasilibc_utf8_writer_t *w, uint8_t b);
+hidden bool __wasilibc_utf8_write(wasilibc_utf8_writer_t *w, uint8_t b);
 
 // Aborts the current multi-byte code point, if any, emitting a replacement
 // character instead. Returns false if there is no room in the buffer; as with
 // write, you can call `wasilibc_utf8_reset` and try again to guarantee
 // success.
-bool __wasilibc_utf8_abort_current(wasilibc_utf8_writer_t *w);
+hidden bool __wasilibc_utf8_abort_current(wasilibc_utf8_writer_t *w);
 
 // Resets the writer back to the start of its buffer. If there is a multi-byte
 // code point in progress, it will be copied to the start of the buffer.
-void __wasilibc_utf8_reset(wasilibc_utf8_writer_t *w);
+hidden void __wasilibc_utf8_reset(wasilibc_utf8_writer_t *w);

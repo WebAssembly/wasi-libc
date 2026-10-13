@@ -1,4 +1,6 @@
 #include "stdio_impl.h"
+#include "wasi/report-error.h"
+#include <unistd.h>
 
 /* stdout.c will override this if linked */
 static FILE *volatile dummy = 0;
@@ -39,6 +41,12 @@ int fflush(FILE *f)
 	/* Clear read and write modes */
 	f->wpos = f->wbase = f->wend = 0;
 	f->rpos = f->rend = 0;
+
+#ifdef __webp2__
+	if (f->fd == STDOUT_FILENO || f->fd == STDERR_FILENO) {
+		__wasilibc_webp2_fflush(f->fd, /*also_musl=*/false);
+	}
+#endif
 
 	FUNLOCK(f);
 	return 0;

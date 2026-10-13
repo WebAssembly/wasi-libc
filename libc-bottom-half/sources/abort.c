@@ -4,7 +4,7 @@
 void abort(void) {
   // wasm doesn't support signals, so just trap to halt the program.
 #ifdef __webp2__
-  __wasilibc_webp2_flush_stdio();
+  __wasilibc_webp2_flush_stdio(/*also_musl=*/true);
 #endif
   __builtin_trap();
 }

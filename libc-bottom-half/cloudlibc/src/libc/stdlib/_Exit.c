@@ -20,9 +20,12 @@ noreturn void _Exit(int status) {
   if (status != 0) {
     __wasilibc_report_error("exit with nonzero status");
   }
+  // POSIX says not to flush buffers, so we don't flush musl's buffers, but
+  // because our line buffering exists solely for the purpose of pretty
+  // console.logs, we do flush those.
+  __wasilibc_webp2_flush_stdio(/*also_musl=*/false);
   // We really don't have any other way to halt execution except to trap. Quite
   // unfortunate that this will manifest as a RuntimeError.
-  __wasilibc_webp2_flush_stdio();
   __builtin_trap();
 #else
 # error "Unknown WASI version"

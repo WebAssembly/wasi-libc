@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <poll.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
@@ -200,12 +201,18 @@ off_t __wasilibc_tell(int fd) {
   return -1;
 }
 
-void __wasilibc_webp2_flush_stdio(void) {
-  if (line_buffers[0].len > 0) {
-    line_buffer_flush(&line_buffers[0]);
+void __wasilibc_webp2_flush_stdio(bool also_musl) {
+  __wasilibc_webp2_fflush(STDOUT_FILENO, also_musl);
+  __wasilibc_webp2_fflush(STDERR_FILENO, also_musl);
+}
+
+void __wasilibc_webp2_fflush(int fd, bool also_musl) {
+  assert(fd == STDOUT_FILENO || fd == STDERR_FILENO);
+  if (also_musl) {
+    fflush(fd == STDOUT_FILENO ? stdout : stderr);
   }
-  if (line_buffers[1].len > 0) {
-    line_buffer_flush(&line_buffers[1]);
+  if (line_buffers[fd - 1].len > 0) {
+    line_buffer_flush(&line_buffers[fd - 1]);
   }
 }
 

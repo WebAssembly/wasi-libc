@@ -152,8 +152,7 @@ jobs:
             os: ubuntu-24.04
             clang_version: 22
             upload: wasm32-webp2
-            # TODO(webp2): Enable tests once there is a way to run them.
-            test: false
+            test: true
             args: -DTARGET_TRIPLE=wasm32-webp2
 
           - name: Test emmalloc

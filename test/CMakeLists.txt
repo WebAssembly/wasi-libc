@@ -148,16 +148,16 @@ function(add_test_executable executable_name src)
     #
     # Note that `-fvisibility=default` is used to make the generated
     # `__main_void` symbol from clang visible to wasi-libc itself.
-    target_link_options(${executable_name} PRIVATE -Wl,--skip-wit-component,-shared)
+    target_link_options(${executable_name} PRIVATE -Wl,--skip-wit-component,-shared,--entry=_start)
     target_compile_options(${executable_name} PRIVATE -fvisibility=default)
     add_custom_command(
       TARGET ${executable_name}
       POST_BUILD
       COMMAND
         ${wasm_tools} component link
-          $<TARGET_FILE:${executable_name}>
           "${SYSROOT_LIB}/libc.so"
           ${arg_SHARED_LIBS}
+          $<TARGET_FILE:${executable_name}>
           -o ${executable_name}
     )
     add_dependencies(${executable_name} wasm-tools)
@@ -645,6 +645,7 @@ if (NOT WEB)
 endif()
 add_wasilibc_test(chdir.c FS)
 add_wasilibc_test(close.c FS)
+add_wasilibc_test(ctors_run_once.c)
 add_wasilibc_test(pread.c FS)
 add_wasilibc_test(mmap-pread-fail.c FS
   CFLAGS -D_WASI_EMULATED_MMAN

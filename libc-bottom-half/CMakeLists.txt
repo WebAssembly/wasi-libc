@@ -282,10 +282,7 @@ endforeach()
 # "object libraries" with CMake and then they're copied into the final location
 # with adjustments based on WASI versions.
 
-set(crt_sources crt/crt1-reactor.c)
-if (NOT WEB STREQUAL "p2")
-  list(APPEND crt_sources crt/crt1-command.c)
-endif()
+set(crt_sources crt/crt1-reactor.c crt/crt1-command.c)
 
 foreach(file ${crt_sources})
   cmake_path(GET file STEM stem)
@@ -306,15 +303,13 @@ add_custom_command(
   DEPENDS crt1-reactor $<TARGET_OBJECTS:crt1-reactor>
 )
 
-if (WASI STREQUAL "p1")
-  # wasip1: crt1-command.o is a straight copy of what CMake produces
+if (WASI STREQUAL "p1" OR WEB STREQUAL "p2")
+  # crt1-command.o is a straight copy of what CMake produces
   add_custom_command(
     OUTPUT ${crt_sysroot}/crt1-command.o
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:crt1-command> ${crt_sysroot}/crt1-command.o
     DEPENDS crt1-command $<TARGET_OBJECTS:crt1-command>
   )
-elseif(WEB STREQUAL "p2")
-  # webp2: crt1-command.o is not necessary
 else()
   if (WASI STREQUAL "p2")
     set(world wasi:cli/command@${wasip2-version})
@@ -354,21 +349,18 @@ else()
   )
 endif()
 
-set(startup_objects ${crt_sysroot}/crt1-reactor.o)
-if (NOT WEB STREQUAL "p2")
-  # Provide a plain crt1.o for toolchain compatibility, identical to
-  # `crt1-command.c`
-  add_custom_command(
-    OUTPUT ${crt_sysroot}/crt1.o
-    COMMAND ${CMAKE_COMMAND} -E copy ${crt_sysroot}/crt1-command.o ${crt_sysroot}/crt1.o
-    DEPENDS ${crt_sysroot}/crt1-command.o
-  )
+# Provide a plain crt1.o for toolchain compatibility, identical to
+# `crt1-command.c`
+add_custom_command(
+  OUTPUT ${crt_sysroot}/crt1.o
+  COMMAND ${CMAKE_COMMAND} -E copy ${crt_sysroot}/crt1-command.o ${crt_sysroot}/crt1.o
+  DEPENDS ${crt_sysroot}/crt1-command.o
+)
 
-  list(APPEND startup_objects
-    ${crt_sysroot}/crt1-command.o
-    ${crt_sysroot}/crt1.o
-  )
-endif()
-
+set(startup_objects
+  ${crt_sysroot}/crt1-reactor.o
+  ${crt_sysroot}/crt1-command.o
+  ${crt_sysroot}/crt1.o
+)
 add_custom_target(sysroot-startup-objects DEPENDS ${startup_objects})
 add_dependencies(sysroot sysroot-startup-objects)

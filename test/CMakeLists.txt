@@ -139,10 +139,6 @@ function(add_test_executable executable_name src)
     target_link_options(${executable_name} PRIVATE -pthread)
   endif()
 
-  if (WEB)
-    target_link_options(${executable_name} PRIVATE -mexec-model=reactor)
-  endif()
-
   if(arg_SHARED)
     set_pic(${executable_name})
     # Skip wit-component when linking to manually run `wasm-tools component

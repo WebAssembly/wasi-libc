@@ -1,3 +1,4 @@
+#include "wasi/report-error.h"
 #ifdef _REENTRANT
 #include <stdatomic.h>
 #endif
@@ -21,10 +22,15 @@ __attribute__((export_name("_start"))) void _start(void)
 __attribute__((export_name("wasi:cli/run@0.2.12#run"))) int _start(void)
 #elif defined(__wasip3__)
 __attribute__((export_name("wasi:cli/run@0.3.0#run"))) int _start(void)
+#elif defined(__webp2__)
+// On webp2 we export as _initialize so that the linker will call this from a
+// start function instead of being called by the host.
+__attribute__((export_name("_initialize"))) void _start(void)
 #else
 #error "Unsupported WASI version"
 #endif
 {
+#ifndef __webp2__
   // Commands should only be called once per instance. This simple check
   // ensures that the `_start` function isn't started more than once.
   //
@@ -45,6 +51,7 @@ __attribute__((export_name("wasi:cli/run@0.3.0#run"))) int _start(void)
   }
   started = 1;
 #endif
+#endif
 
   // The linker synthesizes this to call constructors.
   __wasm_call_ctors();
@@ -54,18 +61,25 @@ __attribute__((export_name("wasi:cli/run@0.3.0#run"))) int _start(void)
   // arguments and calls `__main_argv_argc`.
   int r = __main_void();
 
+#ifndef __webp2__
   // Call atexit functions, destructors, stdio cleanup, etc.
   __wasm_call_dtors();
+#endif
 
+#if defined(__wasip1__)
   // If main exited successfully, just return, otherwise call
   // `__wasi_proc_exit`.
-#if defined(__wasip1__)
   if (r != 0) {
     __wasi_proc_exit(r);
   }
 #elif defined(__wasip2__) || defined(__wasip3__)
   __wasilibc_assert_no_descriptor_leaks();
   return r != 0;
+#elif defined(__webp2__)
+  if (r != 0) {
+    __wasilibc_webp2_report_error("main exited with nonzero status");
+    __builtin_trap();
+  }
 #else
 #error "Unsupported WASI version"
 #endif

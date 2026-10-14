@@ -353,6 +353,7 @@ _flushlbf
 _initialize
 _pthread_cleanup_pop
 _pthread_cleanup_push
+_start
 a64l
 abort
 abs

@@ -306,6 +306,7 @@ __wait
 __wake
 __wasilibc_access
 __wasilibc_deinitialize_environ
+__wasilibc_descriptor_deallocate
 __wasilibc_dttoif
 __wasilibc_ensure_environ
 __wasilibc_environ
@@ -313,7 +314,9 @@ __wasilibc_futex_wait
 __wasilibc_futex_wake
 __wasilibc_get_environ
 __wasilibc_iftodt
+__wasilibc_init_stdio
 __wasilibc_initialize_environ
+__wasilibc_iovecs_ok
 __wasilibc_link
 __wasilibc_link_newat
 __wasilibc_link_oldat
@@ -511,6 +514,11 @@ ctanhl
 ctanl
 ctime
 ctime_r
+descriptor_table_clear
+descriptor_table_dup
+descriptor_table_get
+descriptor_table_insert
+descriptor_table_remove
 difftime
 dirfd
 dirname

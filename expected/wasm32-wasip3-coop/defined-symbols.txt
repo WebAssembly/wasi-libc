@@ -355,6 +355,7 @@ __wasilibc_getsockopt_timeout
 __wasilibc_iftodt
 __wasilibc_init_stdio
 __wasilibc_initialize_environ
+__wasilibc_iovecs_ok
 __wasilibc_link
 __wasilibc_link_newat
 __wasilibc_link_oldat

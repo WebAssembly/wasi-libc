@@ -123,11 +123,9 @@ set(bottom_half_sources
   sources/at_fdcwd.c
   sources/chdir.c
   sources/complex-builtins.c
-  sources/descriptor_table.c
   sources/dup.c
   sources/environ.c
   sources/errno.c
-  sources/file_utils.c
   sources/getcwd.c
   sources/getentropy.c
   sources/isatty.c
@@ -176,6 +174,8 @@ else()
     sources/accept.c
     sources/bind.c
     sources/connect.c
+    sources/descriptor_table.c
+    sources/file_utils.c
     sources/getsockpeername.c
     sources/listen.c
     sources/recv.c

@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <common/errors.h>
 #include <errno.h>
+#include <limits.h>
 #include <stddef.h>
 #include <stddefer.h>
 #include <string.h>
@@ -72,6 +73,7 @@ static int validate_utf8(const char *ptr_signed) {
   return i;
 }
 
+#if defined(__wasip2__) || defined(__wasip3__)
 int wasi_string_from_c(const char *s, wasi_string_t *out) {
   int len = validate_utf8(s);
   if (len < 0) {
@@ -81,6 +83,26 @@ int wasi_string_from_c(const char *s, wasi_string_t *out) {
   out->ptr = (uint8_t *)s;
   out->len = len;
   return 0;
+}
+#endif // __wasip2__ || __wasip3__
+
+bool __wasilibc_iovecs_ok(const struct iovec *iov, int iovcnt,
+                                size_t *total_size) {
+  size_t _total_size = 0;
+  if (total_size) {
+    *total_size = 0;
+  }
+  for (int i = 0; i < iovcnt; i++) {
+    const struct iovec *v = &iov[i];
+    if (v->iov_len > SSIZE_MAX || _total_size > SSIZE_MAX - v->iov_len) {
+      return false;
+    }
+    _total_size += v->iov_len;
+  }
+  if (total_size) {
+    *total_size = _total_size;
+  }
+  return true;
 }
 
 #ifdef __wasip2__
@@ -121,9 +143,9 @@ int __wasilibc_pollable_block_on(poll_borrow_pollable_t pollable,
   errno = EWOULDBLOCK;
   return -1;
 }
-#endif
+#endif // __wasip2__
 
-#ifndef __wasip2__
+#ifdef __wasip3__
 /// Update `state` with the result of `code` that happened.
 static size_t wasip3_io_update_code(wasip3_io_state_t *state,
                                     wasip3_waitable_status_t code) {
@@ -466,8 +488,9 @@ void wasip3_write_state_close(wasip3_io_state_t *state) {
     filesystem_stream_u8_drop_writable(state->stream);
   memset(state, 0, sizeof(*state));
 }
-#endif
+#endif // __wasip3__
 
+#if defined(__wasip2__) || defined(__wasip3__)
 /// Internal implementation of `__wasilibc_write` except that this doesn't
 /// update `write->offset`. That's done in the wrapper around this.
 static ssize_t __wasilibc_write_without_offset_update(wasi_write_t *write,
@@ -854,8 +877,9 @@ ssize_t __wasilibc_read(wasi_read_t *read, void *buffer, size_t length) {
 #endif
   return result;
 }
+#endif // __wasip2__ || __wasip3__
 
-#ifndef __wasip2__
+#ifdef __wasip3__
 static void wasip3_poll_read_ready(void *data, poll_state_t *state,
                                    wasip3_event_t *event) {
   wasip3_io_state_t *iostate = (wasip3_io_state_t *)data;
@@ -1000,4 +1024,4 @@ int __wasilibc_write_poll(wasip3_io_state_t *iostate, poll_state_t *state) {
   return wasip3_stream_poll(iostate, state, POLLWRNORM,
                             wasip3_poll_write_ready);
 }
-#endif // !__wasip2__
+#endif // __wasip3__

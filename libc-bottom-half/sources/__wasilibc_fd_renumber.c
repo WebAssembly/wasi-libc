@@ -3,9 +3,7 @@
 #include <wasi/api.h>
 #include <wasi/libc.h>
 
-#if defined(__webp2__)
-#include <wasi/webp2_stdio.h>
-#elif !defined(__wasip1__)
+#if !defined(__wasip1__)
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
 #endif
@@ -36,15 +34,9 @@ int close(int fd) {
     errno = error;
     return -1;
   }
-#elif defined(__wasip2__) || defined(__wasip3__)
+#elif defined(__wasip2__) || defined(__wasip3__) || defined(__webp2__)
   if (descriptor_table_remove(fd) < 0)
     return -1;
-#elif defined(__webp2__)
-  if (!__wasilibc_webp2_fd_ok(fd)) {
-    errno = EBADF;
-    return -1;
-  }
-  __wasilibc_webp2_close(fd);
 #else
 #error "Unsupported WASI version"
 #endif // __wasip2__

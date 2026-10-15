@@ -8,6 +8,10 @@
 #include <stdnoreturn.h>
 #include <unistd.h>
 
+#ifdef __webp2__
+#include <wasi/webp2_stdio.h>
+#endif
+
 noreturn void _Exit(int status) {
 #if defined(__wasip1__)
   __wasi_proc_exit(status);

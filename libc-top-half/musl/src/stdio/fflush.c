@@ -2,6 +2,10 @@
 #include "wasi/report-error.h"
 #include <unistd.h>
 
+#ifdef __webp2__
+#include <wasi/webp2_stdio.h>
+#endif
+
 /* stdout.c will override this if linked */
 static FILE *volatile dummy = 0;
 weak_alias(dummy, __stdout_used);
@@ -43,9 +47,7 @@ int fflush(FILE *f)
 	f->rpos = f->rend = 0;
 
 #ifdef __webp2__
-	if (f->fd == STDOUT_FILENO || f->fd == STDERR_FILENO) {
-		__wasilibc_webp2_fflush(f->fd);
-	}
+	__wasilibc_webp2_fflush(f->fd);
 #endif
 
 	FUNLOCK(f);

@@ -7,25 +7,19 @@
 #include <fcntl.h>
 #include <stdarg.h>
 
-#if defined(__webp2__)
-#include <wasi/webp2_stdio.h>
-#elif !defined(__wasip1__)
+#if !defined(__wasip1__)
 #include <stddefer.h>
+#include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #endif
 
 int fcntl(int fildes, int cmd, ...) {
-#if defined(__wasip2__) || defined(__wasip3__)
+#if defined(__wasip2__) || defined(__wasip3__) || defined(__webp2__)
   descriptor_table_entry_t entry;
   if (descriptor_table_get(fildes, &entry) < 0)
     return -1;
   defer descriptor_table_entry_dec(entry);
-#elif defined(__webp2__)
-  if (!__wasilibc_webp2_fd_ok(fildes)) {
-    errno = EBADF;
-    return -1;
-  }
 #endif
 
   switch (cmd) {
@@ -60,14 +54,12 @@ int fcntl(int fildes, int cmd, ...) {
         oflags |= O_SEARCH;
       }
       return oflags;
-#elif defined(__wasip2__) || defined(__wasip3__)
+#elif defined(__wasip2__) || defined(__wasip3__) || defined(__webp2__)
       if (!entry.vtable->fcntl_getfl) {
         errno = EINVAL;
         return -1;
       }
       return entry.vtable->fcntl_getfl(entry.data);
-#elif defined(__webp2__)
-      return __wasilibc_webp2_is_readable(fildes) ? O_RDONLY : O_WRONLY;
 #else
 # error "Unknown WASI version"
 #endif
@@ -87,22 +79,18 @@ int fcntl(int fildes, int cmd, ...) {
         errno = error;
         return -1;
       }
-#elif defined(__wasip2__) || defined(__wasip3__)
+#elif defined(__wasip2__) || defined(__wasip3__) || defined(__webp2__)
       if (!entry.vtable->fcntl_setfl) {
         errno = EINVAL;
         return -1;
       }
       return entry.vtable->fcntl_setfl(entry.data, flags);
-#elif defined(__webp2__)
-      (void)flags;
-      errno = EINVAL;
-      return -1;
 #else
 # error "Unknown WASI version"
 #endif
       return 0;
     }
-#if !defined(__wasip1__) && !defined(__webp2__)
+#if !defined(__wasip1__)
     case F_DUPFD:
     case F_DUPFD_CLOEXEC: {
       va_list ap;

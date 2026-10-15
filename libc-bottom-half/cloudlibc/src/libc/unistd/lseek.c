@@ -7,9 +7,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#if defined(__webp2__)
-#include <wasi/webp2_stdio.h>
-#elif !defined(__wasip1__)
+#if !defined(__wasip1__)
 #include <stddefer.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
@@ -32,7 +30,7 @@ off_t __lseek(int fildes, off_t offset, int whence) {
     return -1;
   }
   return new_offset;
-#elif defined(__wasip2__) || defined(__wasip3__)
+#elif defined(__wasip2__) || defined(__wasip3__) || defined(__webp2__)
   // Look up a stream for fildes
   descriptor_table_entry_t entry;
   if (descriptor_table_get(fildes, &entry) < 0)
@@ -43,15 +41,6 @@ off_t __lseek(int fildes, off_t offset, int whence) {
     return -1;
   }
   return entry.vtable->seek(entry.data, offset, whence);
-#elif defined(__webp2__)
-  (void)offset;
-  (void)whence;
-  if (!__wasilibc_webp2_fd_ok(fildes)) {
-    errno = EBADF;
-    return -1;
-  }
-  errno = ESPIPE;
-  return -1;
 #else
 # error "Unknown WASI version"
 #endif

@@ -1,5 +1,8 @@
-#include "wasi/report-error.h"
 #include <stdlib.h>
+
+#ifdef __webp2__
+#include <wasi/webp2_stdio.h>
+#endif
 
 void abort(void) {
   // wasm doesn't support signals, so just trap to halt the program.

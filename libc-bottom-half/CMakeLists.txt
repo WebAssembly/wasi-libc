@@ -99,8 +99,10 @@ set(bottom_half_sources
   sources/__wasilibc_tell.c
   sources/abort.c
   sources/complex-builtins.c
+  sources/descriptor_table.c
   sources/environ.c
   sources/errno.c
+  sources/file_utils.c
   sources/getentropy.c
   sources/isatty.c
   sources/math/fmin-fmax.c
@@ -118,12 +120,6 @@ if (NOT WEB STREQUAL "p2")
     sources/dup.c
     sources/pipe.c
   )
-  if (WASI STREQUAL "p2" OR WASI STREQUAL "p3")
-    list(APPEND bottom_half_sources
-      sources/descriptor_table.c
-      sources/file_utils.c
-    )
-  endif()
 endif()
 
 # Filesystem

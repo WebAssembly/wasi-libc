@@ -9,20 +9,11 @@
 #include <wasi/api.h>
 #include <wasi/descriptor_table.h>
 
-#if defined(__webp2__)
-#include <wasi/webp2_stdio.h>
-#elif !defined(__wasip1__)
+#if !defined(__wasip1__)
 #include <stddefer.h>
 #endif
 
 int ioctl(int fildes, int request, ...) {
-#if defined(__webp2__)
-  if (!__wasilibc_webp2_fd_ok(fildes)) {
-    errno = EBADF;
-    return -1;
-  }
-#endif
-
   switch (request) {
     case FIONREAD: {
 #if defined(__wasip1__)
@@ -68,18 +59,10 @@ int ioctl(int fildes, int request, ...) {
       // No data available for reading.
       *result = 0;
       return 0;
-#elif defined(__wasip2__) || defined(__wasip3__)
-      // wasip{2,3} doesn't support this operation
+#elif defined(__wasip2__) || defined(__wasip3__) || defined(__webp2__)
+      // wasip{2,3} and webp2 don't support this operation
       errno = ENOTSUP;
       return -1;
-#elif defined(__webp2__)
-      // There is never anything available to read.
-      va_list ap;
-      va_start(ap, request);
-      int *result = va_arg(ap, int *);
-      va_end(ap);
-      *result = 0;
-      return 0;
 #else
 # error "Unknown WASI version"
 #endif
@@ -110,7 +93,7 @@ int ioctl(int fildes, int request, ...) {
         return -1;
       }
       return 0;
-#elif defined(__wasip2__) || defined(__wasip3__)
+#elif defined(__wasip2__) || defined(__wasip3__) || defined(__webp2__)
       descriptor_table_entry_t entry;
       if (descriptor_table_get(fildes, &entry) < 0)
         return -1;
@@ -125,10 +108,6 @@ int ioctl(int fildes, int request, ...) {
         return -1;
       }
       return entry.vtable->set_blocking(entry.data, blocking);
-#elif defined(__webp2__)
-      // There's no difference between "blocking" and "non-blocking" IO for our
-      // stdio implementation, so this does nothing.
-      return 0;
 #else
 # error "Unknown WASI version"
 #endif

@@ -5,15 +5,12 @@
 #include <sys/uio.h>
 
 #include <assert.h>
-#include <wasi/api.h>
 #include <errno.h>
+#include <limits.h>
 #include <stddef.h>
 #include <unistd.h>
-
-#ifdef __webp2__
-#include <limits.h>
-#include <wasi/webp2_stdio.h>
-#endif
+#include <wasi/api.h>
+#include <wasi/file_utils.h>
 
 #ifdef __wasip1__
 static_assert(offsetof(struct iovec, iov_base) ==
@@ -33,7 +30,7 @@ static_assert(sizeof(struct iovec) == sizeof(__wasi_iovec_t),
 #endif
 
 ssize_t readv(int fildes, const struct iovec *iov, int iovcnt) {
-  if (iovcnt < 0) {
+  if (iovcnt < 0 || IOV_MAX < iovcnt) {
     errno = EINVAL;
     return -1;
   }
@@ -46,28 +43,9 @@ ssize_t readv(int fildes, const struct iovec *iov, int iovcnt) {
     return -1;
   }
   return bytes_read;
-#elif defined(__wasip2__) || defined(__wasip3__)
-  // Skip empty iovecs and then delegate to `read` with the first non-empty
-  // iovec.
-  while (iovcnt) {
-    if (iov->iov_len != 0) {
-      return read(fildes, iov->iov_base, iov->iov_len);
-    }
-    iovcnt--;
-    iov++;
-  }
-  return read(fildes, NULL, 0);
-#elif defined(__webp2__)
-  if (IOV_MAX < iovcnt) {
+#elif defined(__wasip2__) || defined(__wasip3__) || defined(__webp2__)
+  if (!__wasilibc_iovecs_ok(iov, iovcnt, NULL)) {
     errno = EINVAL;
-    return -1;
-  }
-  if (!__wasilibc_webp2_iovecs_ok(iov, iovcnt, NULL)) {
-    errno = EINVAL;
-    return -1;
-  }
-  if (!__wasilibc_webp2_is_readable(fildes)) {
-    errno = EBADF;
     return -1;
   }
 

@@ -6,11 +6,12 @@
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
 
+#if !defined(__wasip1__)
+#include <stddefer.h>
+#endif
+
 #if defined(__webp2__)
 #include <wasi/report-error.h>
-#include <wasi/webp2_stdio.h>
-#elif !defined(__wasip1__)
-#include <stddefer.h>
 #endif
 
 #if defined(__wasip1__)
@@ -584,14 +585,17 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds,
     if (pollfd->fd < 0) {
       continue;
     }
-    if (!__wasilibc_webp2_fd_ok(pollfd->fd)) {
+
+    descriptor_table_entry_t entry;
+    if (descriptor_table_get(pollfd->fd, &entry)) {
       pollfd->revents = POLLNVAL;
-    } else if (__wasilibc_webp2_is_readable(pollfd->fd)) {
-      // stdin is always readable
-      pollfd->revents = pollfd->events & POLLRDNORM;
     } else {
-      // stdout and stderr are always writable
-      pollfd->revents = pollfd->events & POLLWRNORM;
+      if (entry.vtable->read) {
+        pollfd->revents = pollfd->events & POLLRDNORM;
+      }
+      if (entry.vtable->write) {
+        pollfd->revents = pollfd->events & POLLWRNORM;
+      }
     }
     if (pollfd->revents != 0) {
       ready++;

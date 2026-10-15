@@ -2,6 +2,10 @@
 #include <wasi/api.h>
 #include <wasi/report-error.h>
 
+#ifdef __webp2__
+#include <wasi/webp2_stdio.h>
+#endif
+
 void __wasilibc_report_error(const char *message) {
 #if defined(__wasip1__) || defined(__wasip2__) || defined(__wasip3__)
   fprintf(stderr, "%s\n", message);

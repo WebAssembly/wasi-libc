@@ -4,9 +4,7 @@
 #include <wasi/api.h>
 #include <wasi/descriptor_table.h>
 
-#if defined(__webp2__)
-#include <wasi/webp2_stdio.h>
-#elif !defined(__wasip1__)
+#if !defined(__wasip1__)
 #include <common/errors.h>
 #include <stddefer.h>
 #include <wasi/file_utils.h>
@@ -30,7 +28,7 @@ int __isatty(int fd) {
   }
 
   return 1;
-#elif defined(__wasip2__) || defined(__wasip3__)
+#elif defined(__wasip2__) || defined(__wasip3__) || defined(__webp2__)
   // Translate the file descriptor into an internal handle
   descriptor_table_entry_t entry;
   if (descriptor_table_get(fd, &entry) < 0)
@@ -42,13 +40,6 @@ int __isatty(int fd) {
   }
 
   return entry.vtable->isatty(entry.data);
-#elif defined(__webp2__)
-  if (!__wasilibc_webp2_fd_ok(fd)) {
-    errno = EBADF;
-    return 0;
-  }
-  errno = ENOTTY;
-  return 0;
 #else
 #error "Unsupported WASI version"
 #endif

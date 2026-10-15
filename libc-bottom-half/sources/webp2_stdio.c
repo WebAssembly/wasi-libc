@@ -1,92 +1,109 @@
 #include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <wasi/__generated_webp2.h>
+#include <wasi/descriptor_table.h>
 #include <wasi/report-error.h>
 #include <wasi/utf8.h>
 #include <wasi/webp2_stdio.h>
 
 #define LINE_BUF_SIZE 4096
 
-typedef struct line_buffer_t {
+typedef struct {
+  // Must be the first field so that descriptor table `data` pointers can have
+  // type `descriptor_refcnt_t *` but be cast to `stdio_t *`.
+  descriptor_refcnt_t refcnt;
   bool warn;
+  bool closed;
+  wasilibc_utf8_writer_t utf8;
   uint8_t buf[LINE_BUF_SIZE];
-} line_buffer_t;
+} stdio_t;
 
-static line_buffer_t line_buffers[2] = {
-    (line_buffer_t){},
-    (line_buffer_t){.warn = true},
-};
-static wasilibc_utf8_writer_t utf8_writers[2] = {
-    __wasilibc_make_utf8_writer(line_buffers[0].buf, LINE_BUF_SIZE),
-    __wasilibc_make_utf8_writer(line_buffers[1].buf, LINE_BUF_SIZE),
-};
+static stdio_t __stdin;
+static stdio_t __stdout;
+static stdio_t __stderr;
 
-static bool fd_closed[3];
-
-static void line_buffer_out(line_buffer_t *lb, wasilibc_utf8_writer_t *utf8) {
+static void stdio_out(stdio_t *stdio) {
   webp2_string_t out =
-      (webp2_string_t){.ptr = utf8->buf, .len = utf8->valid_len};
-  if (lb->warn) {
+      (webp2_string_t){.ptr = stdio->utf8.buf, .len = stdio->utf8.valid_len};
+  if (stdio->warn) {
     webp2_console_warn(&out);
   } else {
     webp2_console_log(&out);
   }
 }
 
+static void stdio_flush(stdio_t *stdio) {
+  if (stdio->utf8.valid_len > 0) {
+    stdio_out(stdio);
+    __wasilibc_utf8_reset(&stdio->utf8);
+  }
+}
+
 // Flushes all data in line buffer to the console, replacing any trailing
 // multi-byte code points with the replacement character.
-static void finish_and_flush(int fd) {
-  assert(fd == STDOUT_FILENO || fd == STDERR_FILENO);
-  if (fd_closed[fd]) {
+static void finish_and_flush(stdio_t *stdio) {
+  if (stdio->closed) {
     return;
   }
-  wasilibc_utf8_writer_t *utf8 = &utf8_writers[fd - 1];
-  if (!__wasilibc_utf8_abort_current(utf8)) {
+  if (!__wasilibc_utf8_abort_current(&stdio->utf8)) {
     // Emit what is already valid in the buffer first, and carry over the
     // in-progress codepoint
-    __wasilibc_webp2_fflush(fd);
+    stdio_flush(stdio);
   }
-  __wasilibc_utf8_abort_current(utf8);
-  __wasilibc_webp2_fflush(fd);
+  __wasilibc_utf8_abort_current(&stdio->utf8);
+  stdio_flush(stdio);
 }
 
-bool __wasilibc_webp2_fd_ok(int fd) {
-  return STDIN_FILENO <= fd && fd <= STDERR_FILENO && !fd_closed[fd];
-}
-
-bool __wasilibc_webp2_is_readable(int fd) {
-  return fd == STDIN_FILENO && !fd_closed[fd];
-}
-
-bool __wasilibc_webp2_is_writable(int fd) {
-  return (fd == STDOUT_FILENO || fd == STDERR_FILENO) && !fd_closed[fd];
-}
-
-bool __wasilibc_webp2_iovecs_ok(const struct iovec *iov, int iovcnt,
-                                size_t *total_size) {
-  size_t _total_size = 0;
-  if (total_size) {
-    *total_size = 0;
+static void stdio_free(void *data) {
+  stdio_t *stdio = (stdio_t *)data;
+  if (stdio == &__stdout || stdio == &__stderr) {
+    // Don't flush musl's buffers, but do flush everything we have.
+    finish_and_flush(stdio);
   }
-  for (int i = 0; i < iovcnt; i++) {
-    const struct iovec *v = &iov[i];
-    if (v->iov_len > SSIZE_MAX || _total_size > SSIZE_MAX - v->iov_len) {
-      return false;
-    }
-    _total_size += v->iov_len;
-  }
-  if (total_size) {
-    *total_size = _total_size;
-  }
-  return true;
+  stdio->closed = true;
 }
 
-void __wasilibc_webp2_write(int fd, const void *buf, size_t nbyte) {
-  assert(__wasilibc_webp2_is_writable(fd));
-  line_buffer_t *line_buffer = &line_buffers[fd - 1];
-  wasilibc_utf8_writer_t *utf8 = &utf8_writers[fd - 1];
+static int stdio_fstat(void *data, struct stat *buf) {
+  (void)data;
+  memset(buf, 0, sizeof(*buf));
+  buf->st_mode = S_IFCHR;
+  return 0;
+}
+
+static int stdio_fcntl_getfl(void *data) {
+  stdio_t *stdio = (stdio_t *)data;
+  if (stdio == &__stdin) {
+    return O_RDONLY;
+  } else {
+    return O_WRONLY;
+  }
+}
+
+static ssize_t stdio_read(void *data, void *buf, size_t nbyte) {
+  (void)data;
+  (void)buf;
+  if (nbyte > SSIZE_MAX) {
+    errno = EINVAL;
+    return -1;
+  }
+  return 0; // immediate EOF
+}
+
+static int stdio_set_blocking(void *data, bool blocking) {
+  // There's no difference between "blocking" and "non-blocking" IO for our
+  // stdio implementation, so this does nothing.
+  (void)data;
+  (void)blocking;
+  return 0;
+}
+
+static ssize_t stdio_write(void *data, const void *buf, size_t nbyte) {
+  stdio_t *stdio = (stdio_t *)data;
+  wasilibc_utf8_writer_t *utf8 = &stdio->utf8;
   for (size_t i = 0; i < nbyte; i++) {
     uint8_t b = ((uint8_t *)buf)[i];
     // First write to the buffer, flushing first if there was no room for the
@@ -94,7 +111,7 @@ void __wasilibc_webp2_write(int fd, const void *buf, size_t nbyte) {
     // or because there was no room for a replacement char).
     bool already_logged = false;
     if (!__wasilibc_utf8_write(utf8, b)) {
-      line_buffer_out(line_buffer, utf8);
+      stdio_out(stdio);
       __wasilibc_utf8_reset(utf8);
       __wasilibc_utf8_write(utf8, b); // infallible
       already_logged = true;
@@ -106,45 +123,75 @@ void __wasilibc_webp2_write(int fd, const void *buf, size_t nbyte) {
       utf8->valid_len--;
       bool skip = utf8->valid_len == 0 && already_logged;
       if (!skip) {
-        line_buffer_out(line_buffer, utf8);
+        stdio_out(stdio);
       }
       __wasilibc_utf8_reset(utf8);
     }
   }
+  return nbyte;
 }
 
-void __wasilibc_webp2_close(int fd) {
-  assert(__wasilibc_webp2_fd_ok(fd));
-  if (__wasilibc_webp2_is_writable(fd)) {
-    // Don't flush musl's buffers, but do flush everything we have.
-    finish_and_flush(fd);
+static descriptor_vtable_t stdin_vtable = {
+    .read = stdio_read,
+    .fstat = stdio_fstat,
+    .fcntl_getfl = stdio_fcntl_getfl,
+    .set_blocking = stdio_set_blocking,
+};
+  
+static descriptor_vtable_t stdouterr_vtable = {
+    .free = stdio_free,
+    .write = stdio_write,
+    .fstat = stdio_fstat,
+    .fcntl_getfl = stdio_fcntl_getfl,
+    .set_blocking = stdio_set_blocking,
+};
+
+static int stdio_add(stdio_t *stdio, descriptor_vtable_t *vtable) {
+  descriptor_table_entry_t entry = (descriptor_table_entry_t) {
+    .data = (descriptor_refcnt_t *)stdio,
+    .vtable = vtable,
+  };
+  return descriptor_table_insert(entry);
+}
+
+int __wasilibc_init_stdio() {
+  if (stdio_add(&__stdin, &stdin_vtable) < 0) {
+    return -1;
   }
-  fd_closed[fd] = true;
+
+  __stdout.utf8 = __wasilibc_make_utf8_writer(__stdout.buf, LINE_BUF_SIZE);
+  if (stdio_add(&__stdout, &stdouterr_vtable) < 0) {
+    return -1;
+  }
+  
+  __stderr.utf8 = __wasilibc_make_utf8_writer(__stderr.buf, LINE_BUF_SIZE);
+  __stderr.warn = true;
+  if (stdio_add(&__stderr, &stdouterr_vtable) < 0) {
+    return -1;
+  }
+
+  return 0;
 }
 
 void __wasilibc_webp2_fflush(int fd) {
-  assert(fd == STDOUT_FILENO || fd == STDERR_FILENO);
-  if (fd_closed[fd]) {
+  descriptor_table_entry_t entry;
+  if (descriptor_table_get(fd, &entry) < 0) {
     return;
   }
-  line_buffer_t *lb = &line_buffers[fd - 1];
-  wasilibc_utf8_writer_t *utf8 = &utf8_writers[fd - 1];
-  if (utf8->valid_len > 0) {
-    line_buffer_out(lb, utf8);
-    __wasilibc_utf8_reset(utf8);
-  }
+  stdio_t *stdio = (stdio_t *)entry.data;
+  stdio_flush(stdio);
 }
 
 void __wasilibc_webp2_flush_and_close_stdio(bool also_musl) {
   if (also_musl) {
     fflush(stdout);
   }
-  finish_and_flush(STDOUT_FILENO);
-  fd_closed[STDOUT_FILENO] = true;
-
+  finish_and_flush(&__stdout);
+  __stdout.closed = true;
+  
   if (also_musl) {
     fflush(stderr);
   }
-  finish_and_flush(STDERR_FILENO);
-  fd_closed[STDERR_FILENO] = true;
+  finish_and_flush(&__stderr);
+  __stderr.closed = true;
 }

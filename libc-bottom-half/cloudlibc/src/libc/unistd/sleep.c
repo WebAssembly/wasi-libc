@@ -6,7 +6,12 @@
 #include <unistd.h>
 #include <wasi/version.h>
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 unsigned int sleep(unsigned int seconds) {
+#if !defined(__webp2__)
   struct timespec ts = {.tv_sec = seconds, .tv_nsec = 0};
   // FIXME(WebAssembly/WASI#857): wasip2/p3 only supports the monotonic clock for
   // sleeping.
@@ -20,4 +25,7 @@ unsigned int sleep(unsigned int seconds) {
   if (clock_nanosleep(clock_id, 0, &ts, NULL) != 0)
     return seconds;
   return 0;
+#else
+  WEBP2_UNSUPPORTED("sleep");
+#endif // !webp2
 }

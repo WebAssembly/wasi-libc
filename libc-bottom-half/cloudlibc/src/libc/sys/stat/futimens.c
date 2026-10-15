@@ -5,12 +5,19 @@
 #include <sys/stat.h>
 #include <wasi/api.h>
 #include <errno.h>
+
+#ifndef __webp2__
 #include "stat_impl.h"
+#endif
 
 #ifndef __wasip1__
 #include <stddefer.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
+#endif
+
+#if defined(__webp2__)
+#include <wasi/report-error.h>
 #endif
 
 int futimens(int fd, const struct timespec *times) {
@@ -55,6 +62,8 @@ int futimens(int fd, const struct timespec *times) {
     translate_error(&error);
     return -1;
   }
+#elif defined(__webp2__)
+  WEBP2_UNSUPPORTED("futimens");
 #else
 # error "Unsupported WASI version"
 #endif

@@ -6,6 +6,10 @@
 
 #include "dirent_impl.h"
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 void seekdir(DIR *dirp, long loc) {
 #if defined(__wasip1__)
   // Update cookie.
@@ -17,6 +21,8 @@ void seekdir(DIR *dirp, long loc) {
   dirent_close_streams(dirp);
   dirp->skip = loc;
   dirp->offset = 0;
+#elif defined(__webp2__)
+  WEBP2_UNSUPPORTED("seekdir");
 #else
 # error "Unsupported WASI version"
 #endif

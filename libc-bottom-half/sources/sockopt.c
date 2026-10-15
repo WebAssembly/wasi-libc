@@ -3,8 +3,13 @@
 #include <stddefer.h>
 #include <wasi/descriptor_table.h>
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 int getsockopt(int sockfd, int level, int optname, void *restrict optval,
                socklen_t *restrict optlen) {
+#if !defined(__webp2__)
   descriptor_table_entry_t entry;
   if (descriptor_table_get(sockfd, &entry) < 0)
     return -1;
@@ -23,10 +28,14 @@ int getsockopt(int sockfd, int level, int optname, void *restrict optval,
   }
 
   return entry.vtable->getsockopt(entry.data, level, optname, optval, optlen);
+#else
+  WEBP2_UNSUPPORTED("getsockopt");
+#endif // !webp2
 }
 
 int setsockopt(int sockfd, int level, int optname, const void *optval,
                socklen_t optlen) {
+#if !defined(__webp2__)
   descriptor_table_entry_t entry;
   if (descriptor_table_get(sockfd, &entry) < 0)
     return -1;
@@ -45,4 +54,7 @@ int setsockopt(int sockfd, int level, int optname, const void *optval,
   }
 
   return entry.vtable->setsockopt(entry.data, level, optname, optval, optlen);
+#else
+  WEBP2_UNSUPPORTED("setsockopt");
+#endif // !webp2
 }

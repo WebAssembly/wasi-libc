@@ -4,10 +4,17 @@
 
 #include "lock.h"
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
+#ifndef __webp2__
 char *__wasilibc_cwd = "/";
 DECLARE_WEAK_LOCK(__wasilibc_cwd_lock);
+#endif
 
 char *getcwd(char *buf, size_t size) {
+#if !defined(__webp2__)
   // Critical section contains no yield points, so we can use weak locks.
   WEAK_LOCK(__wasilibc_cwd_lock);
   if (!buf) {
@@ -28,4 +35,7 @@ char *getcwd(char *buf, size_t size) {
   }
   WEAK_UNLOCK(__wasilibc_cwd_lock);
   return buf;
+#else
+  WEBP2_UNSUPPORTED("getcwd");
+#endif // !webp2
 }

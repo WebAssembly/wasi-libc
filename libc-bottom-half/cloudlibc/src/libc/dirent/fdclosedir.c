@@ -7,7 +7,12 @@
 
 #include "dirent_impl.h"
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 int fdclosedir(DIR *dirp) {
+#if !defined(__webp2__)
   int fd = dirp->fd;
 #ifdef __wasip1__
   free(dirp->buffer);
@@ -16,4 +21,7 @@ int fdclosedir(DIR *dirp) {
   free(dirp->dirent);
   free(dirp);
   return fd;
+#else
+  WEBP2_UNSUPPORTED("fdclosedir");
+#endif // !webp2
 }

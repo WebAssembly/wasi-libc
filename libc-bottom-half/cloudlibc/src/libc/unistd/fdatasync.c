@@ -13,6 +13,10 @@
 #include <common/errors.h>
 #endif
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 int fdatasync(int fildes) {
 #if defined(__wasip1__)
   __wasi_errno_t error = __wasi_fd_datasync(fildes);
@@ -34,6 +38,8 @@ int fdatasync(int fildes) {
     translate_error(&error_code);
     return -1;
   }
+#elif defined(__webp2__)
+  WEBP2_UNSUPPORTED("fdatasync");
 #else
 # error "Unsupported WASI version"
 #endif

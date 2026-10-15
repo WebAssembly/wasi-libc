@@ -9,9 +9,17 @@
 #include <string.h>
 #include <unistd.h>
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 int unlinkat(int fd, const char *path, int flag) {
+#if !defined(__webp2__)
   if ((flag & AT_REMOVEDIR) != 0) {
     return __wasilibc_rmdirat(fd, path);
   }
   return __wasilibc_unlinkat(fd, path);
+#else
+  WEBP2_UNSUPPORTED("unlinkat");
+#endif
 }

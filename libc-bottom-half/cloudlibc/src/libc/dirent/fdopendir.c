@@ -14,6 +14,10 @@
 #else
 #endif
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 #include "dirent_impl.h"
 
 DIR *fdopendir(int fd) {
@@ -85,6 +89,8 @@ DIR *fdopendir(int fd) {
   DIR *ret = dirp;
   dirp = NULL;
   return ret;
+#elif defined(__webp2__)
+  WEBP2_UNSUPPORTED("fdopendir");
 #else
 # error "Unsupported WASI version"
 #endif

@@ -2,7 +2,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#if !defined(__wasip1__) && !defined(__wasip2__)
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
+#if defined(__wasip3__)
 
 #include <limits.h>
 #include <stddefer.h>
@@ -491,9 +495,15 @@ static descriptor_vtable_t pipe_vtable = {
     .poll_register = pipe_poll_register,
 };
 
-#endif // !__wasip1__ && !__wasip2__
+#endif // __wasip3__
 
-int pipe(int fd[2]) { return pipe2(fd, 0); }
+int pipe(int fd[2]) {
+#if !defined(__webp2__)
+  return pipe2(fd, 0);
+#else
+  WEBP2_UNSUPPORTED("pipe");
+#endif
+}
 
 int pipe2(int fd[2], int flags) {
   if ((flags & ~(O_CLOEXEC | O_NONBLOCK)) != 0) {
@@ -504,6 +514,8 @@ int pipe2(int fd[2], int flags) {
   (void)fd;
   errno = ENOTSUP;
   return -1;
+#elif defined(__webp2__)
+  WEBP2_UNSUPPORTED("pipe2");
 #else
   pipe_t *reader = calloc(1, sizeof(pipe_t));
   pipe_t *writer = calloc(1, sizeof(pipe_t));

@@ -64,10 +64,19 @@ endforeach()
 # building bottom-half sources
 #
 
-# All targets
 set(bottom_half_sources
+  cloudlibc/src/libc/dirent/closedir.c
+  cloudlibc/src/libc/dirent/dirfd.c
+  cloudlibc/src/libc/dirent/fdclosedir.c
+  cloudlibc/src/libc/dirent/fdopendir.c
+  cloudlibc/src/libc/dirent/readdir.c
+  cloudlibc/src/libc/dirent/rewinddir.c
+  cloudlibc/src/libc/dirent/seekdir.c
+  cloudlibc/src/libc/dirent/telldir.c
   cloudlibc/src/libc/errno/errno.c
   cloudlibc/src/libc/fcntl/fcntl.c
+  cloudlibc/src/libc/fcntl/posix_fadvise.c
+  cloudlibc/src/libc/fcntl/posix_fallocate.c
   cloudlibc/src/libc/poll/poll.c
   cloudlibc/src/libc/sched/sched_yield.c
   cloudlibc/src/libc/stdlib/_Exit.c
@@ -75,16 +84,29 @@ set(bottom_half_sources
   cloudlibc/src/libc/sys/select/pselect.c
   cloudlibc/src/libc/sys/select/select.c
   cloudlibc/src/libc/sys/stat/fstat.c
+  cloudlibc/src/libc/sys/stat/futimens.c
   cloudlibc/src/libc/sys/time/gettimeofday.c
+  cloudlibc/src/libc/sys/uio/preadv.c
+  cloudlibc/src/libc/sys/uio/pwritev.c
   cloudlibc/src/libc/sys/uio/readv.c
   cloudlibc/src/libc/sys/uio/writev.c
   cloudlibc/src/libc/time/CLOCK_MONOTONIC.c
   cloudlibc/src/libc/time/CLOCK_REALTIME.c
   cloudlibc/src/libc/time/clock_getres.c
   cloudlibc/src/libc/time/clock_gettime.c
+  cloudlibc/src/libc/time/clock_nanosleep.c
+  cloudlibc/src/libc/time/nanosleep.c
   cloudlibc/src/libc/time/time.c
+  cloudlibc/src/libc/unistd/fdatasync.c
+  cloudlibc/src/libc/unistd/fsync.c
+  cloudlibc/src/libc/unistd/ftruncate.c
   cloudlibc/src/libc/unistd/lseek.c
+  cloudlibc/src/libc/unistd/pread.c
+  cloudlibc/src/libc/unistd/pwrite.c
   cloudlibc/src/libc/unistd/read.c
+  cloudlibc/src/libc/unistd/sleep.c
+  cloudlibc/src/libc/unistd/unlinkat.c
+  cloudlibc/src/libc/unistd/usleep.c
   cloudlibc/src/libc/unistd/write.c
   sources/__errno_location.c
   sources/__main_void.c
@@ -98,80 +120,49 @@ set(bottom_half_sources
   sources/__wasilibc_report_errorf.c
   sources/__wasilibc_tell.c
   sources/abort.c
+  sources/at_fdcwd.c
+  sources/chdir.c
   sources/complex-builtins.c
   sources/descriptor_table.c
   sources/dup.c
   sources/environ.c
   sources/errno.c
   sources/file_utils.c
+  sources/getcwd.c
   sources/getentropy.c
   sources/isatty.c
   sources/math/fmin-fmax.c
   sources/math/math-builtins.c
+  sources/pipe.c
+  sources/posix.c
   sources/ppoll.c
+  sources/preopens.c
   sources/reallocarray.c
   sources/sbrk.c
+  sources/truncate.c
   sources/utf8.c
   sources/__cabi_realloc_wrapper.S
 )
 
-# File descriptors
+# On webp2, all of the functions that would call these files will trap.
 if (NOT WEB STREQUAL "p2")
   list(APPEND bottom_half_sources
-    sources/pipe.c
-  )
-endif()
-
-# Filesystem
-if (NOT WEB STREQUAL "p2")
-  list(APPEND bottom_half_sources
-    cloudlibc/src/libc/dirent/closedir.c
-    cloudlibc/src/libc/dirent/dirfd.c
-    cloudlibc/src/libc/dirent/fdclosedir.c
-    cloudlibc/src/libc/dirent/fdopendir.c
     cloudlibc/src/libc/dirent/opendirat.c
-    cloudlibc/src/libc/dirent/readdir.c
-    cloudlibc/src/libc/dirent/rewinddir.c
     cloudlibc/src/libc/dirent/scandirat.c
-    cloudlibc/src/libc/dirent/seekdir.c
-    cloudlibc/src/libc/dirent/telldir.c
     cloudlibc/src/libc/fcntl/openat.c
-    cloudlibc/src/libc/fcntl/posix_fadvise.c
-    cloudlibc/src/libc/fcntl/posix_fallocate.c
     cloudlibc/src/libc/stdio/renameat.c
     cloudlibc/src/libc/sys/stat/fstatat.c
-    cloudlibc/src/libc/sys/stat/futimens.c
     cloudlibc/src/libc/sys/stat/mkdirat.c
     cloudlibc/src/libc/sys/stat/utimensat.c
-    cloudlibc/src/libc/sys/uio/preadv.c
-    cloudlibc/src/libc/sys/uio/pwritev.c
     cloudlibc/src/libc/unistd/faccessat.c
-    cloudlibc/src/libc/unistd/fdatasync.c
-    cloudlibc/src/libc/unistd/fsync.c
-    cloudlibc/src/libc/unistd/ftruncate.c
     cloudlibc/src/libc/unistd/linkat.c
-    cloudlibc/src/libc/unistd/pread.c
-    cloudlibc/src/libc/unistd/pwrite.c
     cloudlibc/src/libc/unistd/readlinkat.c
     cloudlibc/src/libc/unistd/symlinkat.c
-    cloudlibc/src/libc/unistd/unlinkat.c
     sources/__wasilibc_rmdirat.c
     sources/__wasilibc_unlinkat.c
-    sources/at_fdcwd.c
-    sources/chdir.c
-    sources/getcwd.c
-    sources/posix.c
-    sources/preopens.c
-    sources/truncate.c
   )
-  if (WASI STREQUAL "p2" OR WASI STREQUAL "p3")
-    list(APPEND bottom_half_sources
-      sources/file.c
-    )
-  endif()
 endif()
 
-# Sockets
 if (WASI STREQUAL "p1")
   list(APPEND bottom_half_sources
     cloudlibc/src/libc/sys/socket/getsockopt.c
@@ -180,32 +171,28 @@ if (WASI STREQUAL "p1")
     cloudlibc/src/libc/sys/socket/shutdown.c
     sources/accept-wasip1.c
   )
-elseif(WASI STREQUAL "p2" OR WASI STREQUAL "p3")
+else()
   list(APPEND bottom_half_sources
     sources/accept.c
     sources/bind.c
     sources/connect.c
     sources/getsockpeername.c
     sources/listen.c
-    sources/netdb.c
     sources/recv.c
     sources/send.c
     sources/shutdown.c
     sources/socket.c
-    sources/sockets_utils.c
     sources/sockopt.c
-    sources/tcp.c
-    sources/udp.c
   )
 endif()
 
-# Sleep
-if (NOT (WEB STREQUAL "p2"))
+if (WASI STREQUAL "p2" OR WASI STREQUAL "p3")
   list(APPEND bottom_half_sources
-    cloudlibc/src/libc/time/clock_nanosleep.c
-    cloudlibc/src/libc/time/nanosleep.c
-    cloudlibc/src/libc/unistd/sleep.c
-    cloudlibc/src/libc/unistd/usleep.c
+    sources/file.c
+    sources/netdb.c
+    sources/sockets_utils.c
+    sources/tcp.c
+    sources/udp.c
   )
 endif()
 
@@ -231,22 +218,10 @@ if (WASI STREQUAL "p3")
   endif()
 endif()
 
-
 # webp2-specific
 if (WEB STREQUAL "p2")
-  set_source_files_properties(
-    sources/webp2_file_descriptors.c
-    sources/webp2_filesystem.c
-    sources/webp2_sleep.c
-    sources/webp2_socket.c
-    PROPERTIES COMPILE_OPTIONS -Wno-unused-parameter
-  )
   list(APPEND bottom_half_sources
     sources/webp2.c
-    sources/webp2_file_descriptors.c
-    sources/webp2_filesystem.c
-    sources/webp2_sleep.c
-    sources/webp2_socket.c
     sources/webp2_stdio.c
   )
 endif()
@@ -268,6 +243,11 @@ foreach(obj bottom-half-shared bottom-half-static)
     cloudlibc/src
     headers/private
   )
+  if (WEB STREQUAL "p2")
+    # Many functions are unsupported on webp2 and trap without using their
+    # parameters.
+    target_compile_options(${obj} PRIVATE -Wno-unused-parameter)
+  endif()
 endforeach()
 
 

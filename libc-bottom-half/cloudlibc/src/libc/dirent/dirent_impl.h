@@ -32,6 +32,8 @@ struct _DIR {
   bool stream_done;
   size_t skip;
   size_t offset;
+#elif defined(__webp2__)
+  // Directories are not supported on webp2.
 #else
 # error "Unknown WASI version"
 #endif
@@ -42,7 +44,7 @@ struct _DIR {
 };
 
 static inline void dirent_close_streams(DIR *dirp) {
-#if defined(__wasip1__)
+#if defined(__wasip1__) || defined(__webp2__)
   (void) dirp;
   // nothing to close ...
 #elif defined(__wasip2__)

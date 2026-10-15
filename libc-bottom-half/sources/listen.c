@@ -3,7 +3,12 @@
 #include <stddefer.h>
 #include <wasi/descriptor_table.h>
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 int listen(int socket, int backlog) {
+#if !defined(__webp2__)
   descriptor_table_entry_t entry;
   if (descriptor_table_get(socket, &entry) < 0)
     return -1;
@@ -21,4 +26,7 @@ int listen(int socket, int backlog) {
     return -1;
   }
   return entry.vtable->listen(entry.data, backlog);
+#else
+  WEBP2_UNSUPPORTED("listen");
+#endif // !webp2
 }

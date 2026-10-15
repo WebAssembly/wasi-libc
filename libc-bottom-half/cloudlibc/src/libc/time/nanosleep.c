@@ -6,7 +6,12 @@
 #include <time.h>
 #include <wasi/version.h>
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 int nanosleep(const struct timespec *rqtp, struct timespec *rem) {
+#if !defined(__webp2__)
 #if defined(__wasip2__) || defined(__wasip3__)
   // FIXME(WebAssembly/WASI#857): wasip2/p3 only supports the monotonic clock for
   // sleeping.
@@ -20,4 +25,7 @@ int nanosleep(const struct timespec *rqtp, struct timespec *rem) {
     return -1;
   }
   return 0;
+#else
+  WEBP2_UNSUPPORTED("nanosleep");
+#endif // !webp2
 }

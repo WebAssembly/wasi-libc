@@ -36,6 +36,11 @@ static_assert(DT_UNKNOWN == __WASI_FILETYPE_UNKNOWN, "Value mismatch");
 #include <wasi/wasip3_block.h>
 #endif
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
+#ifndef __webp2__
 // Grows a buffer to be large enough to hold a certain amount of data.
 static struct dirent* grow(struct dirent **buffer, size_t *buffer_size, size_t target_size) {
   if (*buffer_size < target_size) {
@@ -52,6 +57,7 @@ static struct dirent* grow(struct dirent **buffer, size_t *buffer_size, size_t t
   }
   return *buffer;
 }
+#endif
 
 #if defined(__wasip1__)
 struct dirent *readdir(DIR *dirp) {
@@ -325,6 +331,10 @@ struct dirent *readdir(DIR *dirp) {
     result = readdir_next(dirp);
   }
   return result;
+}
+#elif defined(__webp2__)
+struct dirent *readdir(DIR *dirp) {
+  WEBP2_UNSUPPORTED("readdir");
 }
 #else
 # error "Unknown WASI version"

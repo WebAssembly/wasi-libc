@@ -12,6 +12,10 @@
 #include <common/errors.h>
 #endif
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 int ftruncate(int fildes, off_t length) {
   if (length < 0) {
     errno = EINVAL;
@@ -38,6 +42,8 @@ int ftruncate(int fildes, off_t length) {
     translate_error(&error_code);
     return -1;
   }
+#elif defined(__webp2__)
+  WEBP2_UNSUPPORTED("ftruncate");
 #else
 # error "Unsupported WASI version"
 #endif

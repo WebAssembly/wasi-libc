@@ -15,6 +15,10 @@ static_assert(TIMER_ABSTIME == __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME,
               "Value mismatch");
 #endif
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
                     struct timespec *rmtp) {
   (void) rmtp;
@@ -66,6 +70,8 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
   }
 #endif
   return 0;
+#elif defined(__webp2__)
+  WEBP2_UNSUPPORTED("clock_nanosleep");
 #else
 # error "Unsupported WASI version"
 #endif

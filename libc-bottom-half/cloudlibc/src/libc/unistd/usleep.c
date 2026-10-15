@@ -7,7 +7,12 @@
 #include <unistd.h>
 #include <wasi/version.h>
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 int usleep(useconds_t useconds) {
+#if !defined(__webp2__)
   struct timespec ts = {.tv_sec = useconds / 1000000,
                         .tv_nsec = useconds % 1000000 * 1000};
 #if defined(__wasip1__)
@@ -25,4 +30,7 @@ int usleep(useconds_t useconds) {
     return -1;
   }
   return 0;
+#else
+  WEBP2_UNSUPPORTED("usleep");
+#endif // !webp2
 }

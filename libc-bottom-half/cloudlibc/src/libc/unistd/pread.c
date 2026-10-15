@@ -17,6 +17,10 @@
 #include <wasi/wasip3_block.h>
 #endif
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
   if (offset < 0) {
     errno = EINVAL;
@@ -107,6 +111,8 @@ ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
     filesystem_future_result_void_error_code_drop_readable(io.f1);
   }
   return ret;
+#elif defined(__webp2__)
+  WEBP2_UNSUPPORTED("pread");
 #else
 # error "Unknown WASI version"
 #endif

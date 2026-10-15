@@ -16,6 +16,10 @@
 #include <wasi/wasip3_block.h>
 #endif
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
   if (offset < 0) {
     errno = EINVAL;
@@ -101,6 +105,8 @@ ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
     return -1;
   }
   return ret;
+#elif defined(__webp2__)
+  WEBP2_UNSUPPORTED("pwrite");
 #else
 # error "Unsupported WASI version"
 #endif

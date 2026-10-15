@@ -13,6 +13,10 @@
 #include <unistd.h>
 #endif
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 ssize_t preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
   if (iovcnt < 0 || offset < 0) {
     errno = EINVAL;
@@ -37,6 +41,8 @@ ssize_t preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
     iov++;
   }
   return pread(fildes, NULL, 0, offset);
+#elif defined(__webp2__)
+  WEBP2_UNSUPPORTED("preadv");
 #else
 # error "Unsupported WASI version"
 #endif

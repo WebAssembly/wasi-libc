@@ -7,6 +7,10 @@
 
 #include "dirent_impl.h"
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 void rewinddir(DIR *dirp) {
 #if defined(__wasip1__)
   // Update cookie.
@@ -17,6 +21,8 @@ void rewinddir(DIR *dirp) {
   dirent_close_streams(dirp);
   dirp->skip = 0;
   dirp->offset = 0;
+#elif defined(__webp2__)
+  WEBP2_UNSUPPORTED("rewinddir");
 #else
 # error "Unknown WASI version"
 #endif

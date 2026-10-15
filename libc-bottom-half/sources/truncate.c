@@ -3,7 +3,12 @@
 #include <unistd.h>
 #include <wasi/libc.h>
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 int truncate(const char *path, off_t length) {
+#if !defined(__webp2__)
   int fd = __wasilibc_open_nomode(path, O_WRONLY | O_CLOEXEC | O_NOCTTY);
   if (fd < 0)
     return -1;
@@ -17,4 +22,7 @@ int truncate(const char *path, off_t length) {
   }
 
   return close(fd);
+#else
+  WEBP2_UNSUPPORTED("truncate");
+#endif // !webp2
 }

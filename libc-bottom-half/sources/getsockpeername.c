@@ -3,8 +3,13 @@
 #include <stddefer.h>
 #include <wasi/descriptor_table.h>
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 int getsockname(int socket, struct sockaddr *__restrict addr,
                 socklen_t *__restrict addrlen) {
+#if !defined(__webp2__)
   descriptor_table_entry_t entry;
   if (descriptor_table_get(socket, &entry) < 0)
     return -1;
@@ -14,10 +19,14 @@ int getsockname(int socket, struct sockaddr *__restrict addr,
     return -1;
   }
   return entry.vtable->getsockname(entry.data, addr, addrlen);
+#else
+  WEBP2_UNSUPPORTED("getsockname");
+#endif // !webp2
 }
 
 int getpeername(int socket, struct sockaddr *__restrict addr,
                 socklen_t *__restrict addrlen) {
+#if !defined(__webp2__)
   descriptor_table_entry_t entry;
   if (descriptor_table_get(socket, &entry) < 0)
     return -1;
@@ -27,4 +36,7 @@ int getpeername(int socket, struct sockaddr *__restrict addr,
     return -1;
   }
   return entry.vtable->getpeername(entry.data, addr, addrlen);
+#else
+  WEBP2_UNSUPPORTED("getpeername");
+#endif // !webp2
 }

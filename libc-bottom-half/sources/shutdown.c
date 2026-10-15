@@ -2,7 +2,12 @@
 #include <stddefer.h>
 #include <wasi/descriptor_table.h>
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 int shutdown(int socket, int how) {
+#if !defined(__webp2__)
   descriptor_table_entry_t entry;
   if (descriptor_table_get(socket, &entry) < 0)
     return -1;
@@ -12,4 +17,7 @@ int shutdown(int socket, int how) {
     return -1;
   }
   return entry.vtable->shutdown(entry.data, how);
+#else
+  WEBP2_UNSUPPORTED("shutdown");
+#endif // !webp2
 }

@@ -6,6 +6,10 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#endif
+
 int posix_fallocate(int fd, off_t offset, off_t len) {
   if (offset < 0 || len < 0)
     return EINVAL;
@@ -15,6 +19,8 @@ int posix_fallocate(int fd, off_t offset, off_t len) {
   (void) fd;
   // Note: this operation isn't supported in wasip{2,3}
   return ENOTSUP;
+#elif defined(__webp2__)
+  WEBP2_UNSUPPORTED("posix_fallocate");
 #else
 # error "Unsupported WASI version"
 #endif

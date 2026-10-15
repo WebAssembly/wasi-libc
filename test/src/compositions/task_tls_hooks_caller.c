@@ -20,7 +20,7 @@ int main(void) {
          CALLER_SUBTASK_STATE(status) == CALLER_SUBTASK_STARTING);
     tasks[i] = CALLER_SUBTASK_HANDLE(status);
 
-    test_simple_i_barge_in(i + N);
+    test_simple_i_barge_in();
   }
 
   caller_waitable_set_t set = caller_waitable_set_new();
@@ -37,6 +37,8 @@ int main(void) {
       caller_subtask_drop(event.waitable);
     }
   }
+
+  TEST(test_simple_i_total() == N * 5);
 
   return t_status + test_simple_i_t_status();
 }

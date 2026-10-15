@@ -338,6 +338,7 @@ __wasilibc_utf8_abort_current
 __wasilibc_utf8_reset
 __wasilibc_utf8_write
 __wasilibc_utimens
+__wasilibc_validate_utf8
 __wasilibc_webp2_fflush
 __wasilibc_webp2_flush_and_close_stdio
 __wasilibc_webp2_report_error

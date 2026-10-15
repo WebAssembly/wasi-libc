@@ -2,6 +2,20 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+// ============================================================================
+// Validation
+
+/**
+ * Validates that `ptr_signed` is a valid utf-8 string.
+ *
+ * Returns the byte-length of the string on success, or -1 if it's invalid
+ * utf-8.
+ */
+hidden int __wasilibc_validate_utf8(const char *ptr_signed);
+
+// ============================================================================
+// Writing
+
 // Writes valid UTF-8 to a buffer. The range [0, valid_len) is always valid
 // even when multi-byte code points are being written.
 //

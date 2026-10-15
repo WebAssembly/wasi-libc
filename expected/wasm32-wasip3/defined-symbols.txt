@@ -381,6 +381,7 @@ __wasilibc_utf8_abort_current
 __wasilibc_utf8_reset
 __wasilibc_utf8_write
 __wasilibc_utimens
+__wasilibc_validate_utf8
 __wasilibc_waitable_block_on
 __wasilibc_wasi_family_to_libc
 __wasilibc_wasi_to_sockaddr

@@ -368,6 +368,8 @@ __wasilibc_stat
 __wasilibc_stream_block_on_timeout
 __wasilibc_subtask_await_nonblocking
 __wasilibc_subtask_block_on_and_drop
+__wasilibc_task_context_get
+__wasilibc_task_context_set
 __wasilibc_task_hook
 __wasilibc_tell
 __wasilibc_tls_init

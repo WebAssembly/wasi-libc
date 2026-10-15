@@ -6,7 +6,10 @@
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
 
-#ifndef __wasip1__
+#if defined(__webp2__)
+#include <wasi/report-error.h>
+#include <wasi/webp2_stdio.h>
+#elif !defined(__wasip1__)
 #include <stddefer.h>
 #endif
 
@@ -569,6 +572,40 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds,
   }
 
   return state.event_count;
+}
+
+#elif defined(__webp2__)
+
+static int ppoll_impl(struct pollfd *fds, size_t nfds,
+                      const struct timespec *timeout) {
+  int ready = 0;
+  for (size_t i = 0; i < nfds; i++) {
+    struct pollfd *pollfd = &fds[i];
+    if (pollfd->fd < 0) {
+      continue;
+    }
+    if (!__wasilibc_webp2_fd_ok(pollfd->fd)) {
+      pollfd->revents = POLLNVAL;
+    } else if (__wasilibc_webp2_is_readable(pollfd->fd)) {
+      // stdin is always readable
+      pollfd->revents = pollfd->events & POLLRDNORM;
+    } else {
+      // stdout and stderr are always writable
+      pollfd->revents = pollfd->events & POLLWRNORM;
+    }
+    if (pollfd->revents != 0) {
+      ready++;
+    }
+  }
+
+  // We cannot actually sit and wait for files to become available, but because
+  // our stdin, stdout, and stderr are always ready, most user code should
+  // never hit this.
+  bool zero_timeout = timeout && timeout->tv_sec == 0 && timeout->tv_nsec == 0;
+  if (ready == 0 && !zero_timeout) {
+    WEBP2_UNSUPPORTED("blocking ppoll");
+  }
+  return ready;
 }
 
 #else

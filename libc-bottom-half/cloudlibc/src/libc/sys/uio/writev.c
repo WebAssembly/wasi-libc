@@ -9,7 +9,10 @@
 #include <stddef.h>
 #include <unistd.h>
 
-#ifndef __wasip1__
+#if defined(__webp2__)
+#include <limits.h>
+#include <wasi/webp2_stdio.h>
+#elif !defined(__wasip1__)
 #include <wasi/descriptor_table.h>
 #include <common/errors.h>
 #endif
@@ -57,6 +60,30 @@ ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
     iov++;
   }
   return write(fildes, NULL, 0);
+#elif defined(__webp2__)
+  if (IOV_MAX < iovcnt) {
+    errno = EINVAL;
+    return -1;
+  }
+  if (!__wasilibc_webp2_is_writable(fildes)) {
+    errno = EBADF;
+    return -1;
+  }
+
+  size_t total_size;
+  if (!__wasilibc_webp2_iovecs_ok(iov, iovcnt, &total_size)) {
+    errno = EINVAL;
+    return -1;
+  }
+  for (int i = 0; i < iovcnt; i++) {
+    const struct iovec *v = &iov[i];
+    int res = write(fildes, v->iov_base, v->iov_len);
+    if (res < 0) {
+      // errno already set
+      return res;
+    }
+  }
+  return total_size;
 #else
 # error "Unsupported WASI version"
 #endif

@@ -67,33 +67,45 @@ endforeach()
 # All targets
 set(bottom_half_sources
   cloudlibc/src/libc/errno/errno.c
+  cloudlibc/src/libc/fcntl/fcntl.c
   cloudlibc/src/libc/poll/poll.c
   cloudlibc/src/libc/sched/sched_yield.c
   cloudlibc/src/libc/stdlib/_Exit.c
+  cloudlibc/src/libc/sys/ioctl/ioctl.c
   cloudlibc/src/libc/sys/select/pselect.c
   cloudlibc/src/libc/sys/select/select.c
+  cloudlibc/src/libc/sys/stat/fstat.c
   cloudlibc/src/libc/sys/time/gettimeofday.c
+  cloudlibc/src/libc/sys/uio/readv.c
+  cloudlibc/src/libc/sys/uio/writev.c
   cloudlibc/src/libc/time/CLOCK_MONOTONIC.c
   cloudlibc/src/libc/time/CLOCK_REALTIME.c
   cloudlibc/src/libc/time/clock_getres.c
   cloudlibc/src/libc/time/clock_gettime.c
   cloudlibc/src/libc/time/time.c
+  cloudlibc/src/libc/unistd/lseek.c
+  cloudlibc/src/libc/unistd/read.c
+  cloudlibc/src/libc/unistd/write.c
   sources/__errno_location.c
   sources/__main_void.c
   sources/__wasilibc_dt.c
   sources/__wasilibc_environ.c
+  sources/__wasilibc_fd_renumber.c
   sources/__wasilibc_initialize_environ.c
   sources/__wasilibc_random.c
   sources/__wasilibc_real.c
   sources/__wasilibc_report_error.c
   sources/__wasilibc_report_errorf.c
+  sources/__wasilibc_tell.c
   sources/abort.c
   sources/complex-builtins.c
   sources/environ.c
   sources/errno.c
   sources/getentropy.c
+  sources/isatty.c
   sources/math/fmin-fmax.c
   sources/math/math-builtins.c
+  sources/ppoll.c
   sources/reallocarray.c
   sources/sbrk.c
   sources/utf8.c
@@ -103,20 +115,8 @@ set(bottom_half_sources
 # File descriptors
 if (NOT WEB STREQUAL "p2")
   list(APPEND bottom_half_sources
-    cloudlibc/src/libc/fcntl/fcntl.c
-    cloudlibc/src/libc/sys/ioctl/ioctl.c
-    cloudlibc/src/libc/sys/stat/fstat.c
-    cloudlibc/src/libc/sys/uio/readv.c
-    cloudlibc/src/libc/sys/uio/writev.c
-    cloudlibc/src/libc/unistd/lseek.c
-    cloudlibc/src/libc/unistd/read.c
-    cloudlibc/src/libc/unistd/write.c
-    sources/__wasilibc_fd_renumber.c
-    sources/__wasilibc_tell.c
     sources/dup.c
-    sources/isatty.c
     sources/pipe.c
-    sources/ppoll.c
   )
   if (WASI STREQUAL "p2" OR WASI STREQUAL "p3")
     list(APPEND bottom_half_sources
@@ -251,6 +251,7 @@ if (WEB STREQUAL "p2")
     sources/webp2_filesystem.c
     sources/webp2_sleep.c
     sources/webp2_socket.c
+    sources/webp2_stdio.c
   )
 endif()
 

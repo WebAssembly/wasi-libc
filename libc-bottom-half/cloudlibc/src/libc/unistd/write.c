@@ -6,7 +6,10 @@
 #include <unistd.h>
 #include <wasi/api.h>
 
-#ifndef __wasip1__
+#if defined(__webp2__)
+#include <limits.h>
+#include <wasi/webp2_stdio.h>
+#elif !defined(__wasip1__)
 #include <stddefer.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
@@ -26,6 +29,17 @@ ssize_t write(int fildes, const void *buf, size_t nbyte) {
     return -1;
   }
   return bytes_written;
+#elif defined(__webp2__)
+  if (nbyte > SSIZE_MAX) {
+    errno = EINVAL;
+    return -1;
+  }
+  if (!__wasilibc_webp2_is_writable(fildes)) {
+    errno = EBADF;
+    return -1;
+  }
+  __wasilibc_webp2_write(fildes, buf, nbyte);
+  return nbyte;
 #else
   descriptor_table_entry_t entry;
   if (descriptor_table_get(fildes, &entry) < 0)

@@ -2,7 +2,9 @@
 #include <sys/types.h>
 #include <wasi/api.h>
 
-#ifndef __wasip1__
+#if defined(__webp2__)
+#include <wasi/webp2_stdio.h>
+#elif !defined(__wasip1__)
 #include <common/errors.h>
 #include <stddefer.h>
 #include <unistd.h>
@@ -31,6 +33,13 @@ off_t __wasilibc_tell(int fildes) {
     return -1;
   }
   return entry.vtable->seek(entry.data, 0, SEEK_CUR);
+#elif defined(__webp2__)
+  if (!__wasilibc_webp2_fd_ok(fildes)) {
+    errno = EBADF;
+    return -1;
+  }
+  errno = ESPIPE;
+  return -1;
 #else
 #error "Unsupported WASI version"
 #endif

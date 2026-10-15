@@ -4,7 +4,9 @@
 #include <wasi/api.h>
 #include <wasi/descriptor_table.h>
 
-#ifndef __wasip1__
+#if defined(__webp2__)
+#include <wasi/webp2_stdio.h>
+#elif !defined(__wasip1__)
 #include <common/errors.h>
 #include <stddefer.h>
 #include <wasi/file_utils.h>
@@ -40,6 +42,13 @@ int __isatty(int fd) {
   }
 
   return entry.vtable->isatty(entry.data);
+#elif defined(__webp2__)
+  if (!__wasilibc_webp2_fd_ok(fd)) {
+    errno = EBADF;
+    return 0;
+  }
+  errno = ENOTTY;
+  return 0;
 #else
 #error "Unsupported WASI version"
 #endif

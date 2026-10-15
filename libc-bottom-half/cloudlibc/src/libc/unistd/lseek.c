@@ -7,7 +7,9 @@
 #include <errno.h>
 #include <unistd.h>
 
-#ifndef __wasip1__
+#if defined(__webp2__)
+#include <wasi/webp2_stdio.h>
+#elif !defined(__wasip1__)
 #include <stddefer.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
@@ -41,6 +43,15 @@ off_t __lseek(int fildes, off_t offset, int whence) {
     return -1;
   }
   return entry.vtable->seek(entry.data, offset, whence);
+#elif defined(__webp2__)
+  (void)offset;
+  (void)whence;
+  if (!__wasilibc_webp2_fd_ok(fildes)) {
+    errno = EBADF;
+    return -1;
+  }
+  errno = ESPIPE;
+  return -1;
 #else
 # error "Unknown WASI version"
 #endif

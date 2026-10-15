@@ -2,13 +2,19 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include "stat_impl.h"
 #include <errno.h>
 #include <sys/stat.h>
 #include <wasi/api.h>
 #include <wasi/descriptor_table.h>
 
-#ifndef __wasip1__
+#if defined(__webp2__)
+#include <string.h>
+#include <wasi/webp2_stdio.h>
+#else
+#include "stat_impl.h"
+#endif
+
+#if !defined(__wasip1__) && !defined(__webp2__)
 #include <stddefer.h>
 #endif
 
@@ -29,6 +35,14 @@ int fstat(int fildes, struct stat *buf) {
     return -1;
   defer descriptor_table_entry_dec(entry);
   return entry.vtable->fstat(entry.data, buf);
+#elif defined(__webp2__)
+  if (!__wasilibc_webp2_fd_ok(fildes)) {
+    errno = EBADF;
+    return -1;
+  }
+  memset(buf, 0, sizeof(*buf));
+  buf->st_mode = S_IFCHR;
+  return 0;
 #else
 # error "Unsupported WASI version"
 #endif

@@ -3,7 +3,9 @@
 #include <wasi/api.h>
 #include <wasi/libc.h>
 
-#ifndef __wasip1__
+#if defined(__webp2__)
+#include <wasi/webp2_stdio.h>
+#elif !defined(__wasip1__)
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
 #endif
@@ -23,8 +25,10 @@ int __wasilibc_fd_renumber(int fd, int newfd) {
 #endif
 
 int close(int fd) {
+#ifndef __webp2__
   // Scan the preopen fds before making any changes.
   __wasilibc_populate_preopens();
+#endif
 
 #if defined(__wasip1__)
   __wasi_errno_t error = __wasi_fd_close(fd);
@@ -35,6 +39,12 @@ int close(int fd) {
 #elif defined(__wasip2__) || defined(__wasip3__)
   if (descriptor_table_remove(fd) < 0)
     return -1;
+#elif defined(__webp2__)
+  if (!__wasilibc_webp2_fd_ok(fd)) {
+    errno = EBADF;
+    return -1;
+  }
+  __wasilibc_webp2_close(fd);
 #else
 #error "Unsupported WASI version"
 #endif // __wasip2__
@@ -42,8 +52,10 @@ int close(int fd) {
   return 0;
 }
 
+#ifndef __webp2__
 weak void __wasilibc_populate_preopens(void) {
   // This version does nothing. It may be overridden by a version which does
   // something if `__wasilibc_find_abspath` or `__wasilibc_find_relpath` are
   // used.
 }
+#endif

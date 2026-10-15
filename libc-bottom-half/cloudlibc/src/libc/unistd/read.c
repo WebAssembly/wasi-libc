@@ -6,7 +6,10 @@
 #include <errno.h>
 #include <unistd.h>
 
-#ifndef __wasip1__
+#if defined(__webp2__)
+#include <limits.h>
+#include <wasi/webp2_stdio.h>
+#elif !defined(__wasip1__)
 #include <stddefer.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
@@ -25,6 +28,17 @@ ssize_t read(int fildes, void *buf, size_t nbyte) {
     return -1;
   }
   return bytes_read;
+#elif defined(__webp2__)
+  (void)buf;
+  if (nbyte > SSIZE_MAX) {
+    errno = EINVAL;
+    return -1;
+  }
+  if (!__wasilibc_webp2_is_readable(fildes)) {
+    errno = EBADF;
+    return -1;
+  }
+  return 0; // immediate EOF
 #else
   descriptor_table_entry_t entry;
   if (descriptor_table_get(fildes, &entry) < 0)

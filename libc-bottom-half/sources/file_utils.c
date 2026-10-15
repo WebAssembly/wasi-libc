@@ -8,6 +8,26 @@
 #include <wasi/file_utils.h>
 #include <wasi/wasip3_block.h>
 
+bool __wasilibc_iovecs_ok(const struct iovec *iov, int iovcnt,
+                                size_t *total_size) {
+  size_t _total_size = 0;
+  if (total_size) {
+    *total_size = 0;
+  }
+  for (int i = 0; i < iovcnt; i++) {
+    const struct iovec *v = &iov[i];
+    if (v->iov_len > SSIZE_MAX || _total_size > SSIZE_MAX - v->iov_len) {
+      return false;
+    }
+    _total_size += v->iov_len;
+  }
+  if (total_size) {
+    *total_size = _total_size;
+  }
+  return true;
+}
+
+#if defined(__wasip2__) || defined(__wasip3__)
 /**
  * Validates that `ptr_signed` is a valid utf-8 string.
  *
@@ -73,7 +93,6 @@ static int validate_utf8(const char *ptr_signed) {
   return i;
 }
 
-#if defined(__wasip2__) || defined(__wasip3__)
 int wasi_string_from_c(const char *s, wasi_string_t *out) {
   int len = validate_utf8(s);
   if (len < 0) {
@@ -85,25 +104,6 @@ int wasi_string_from_c(const char *s, wasi_string_t *out) {
   return 0;
 }
 #endif // __wasip2__ || __wasip3__
-
-bool __wasilibc_iovecs_ok(const struct iovec *iov, int iovcnt,
-                                size_t *total_size) {
-  size_t _total_size = 0;
-  if (total_size) {
-    *total_size = 0;
-  }
-  for (int i = 0; i < iovcnt; i++) {
-    const struct iovec *v = &iov[i];
-    if (v->iov_len > SSIZE_MAX || _total_size > SSIZE_MAX - v->iov_len) {
-      return false;
-    }
-    _total_size += v->iov_len;
-  }
-  if (total_size) {
-    *total_size = _total_size;
-  }
-  return true;
-}
 
 #ifdef __wasip2__
 int __wasilibc_pollable_block_on(poll_borrow_pollable_t pollable,

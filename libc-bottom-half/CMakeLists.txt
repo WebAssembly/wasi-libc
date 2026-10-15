@@ -100,6 +100,7 @@ set(bottom_half_sources
   sources/abort.c
   sources/complex-builtins.c
   sources/descriptor_table.c
+  sources/dup.c
   sources/environ.c
   sources/errno.c
   sources/file_utils.c
@@ -117,7 +118,6 @@ set(bottom_half_sources
 # File descriptors
 if (NOT WEB STREQUAL "p2")
   list(APPEND bottom_half_sources
-    sources/dup.c
     sources/pipe.c
   )
 endif()

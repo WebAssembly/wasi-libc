@@ -150,7 +150,7 @@ int __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags);
 /// The `__wasm_task_hook` function defined in `wasi-libc` will save/restore
 /// this task context at appropriate points to ensure that the pointers
 /// configured here are saved/preserved across tasks.
-void* __wasilibc_task_context_get(void);
+void *__wasilibc_task_context_get(void);
 void __wasilibc_task_context_set(void *ctx);
 
 #endif

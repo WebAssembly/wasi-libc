@@ -36,9 +36,7 @@ exports_test_simple_i_count_up_callback(callee_event_t *event) {
   return CALLEE_CALLBACK_CODE_EXIT;
 }
 
-void exports_test_simple_i_barge_in() {
-  current_value++;
-}
+void exports_test_simple_i_barge_in() { current_value++; }
 
 uint32_t exports_test_simple_i_t_status(void) { return t_status; }
 

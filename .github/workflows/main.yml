@@ -288,9 +288,6 @@ jobs:
     - uses: actions/checkout@v6
       with:
         submodules: true
-    # TODO(webp2): Switch back to a released wit-bindgen once one ships with
-    # getter/setter support (bytecodealliance/wit-bindgen#1726).
-    - run: cargo install wit-bindgen-cli --locked --git https://github.com/bytecodealliance/wit-bindgen --rev 7fb7a6a072a2c7d225fa183b93acfabdc36e744b
     - run: CC=clang cmake -S . -B build -G Ninja
     - run: ninja -C build bindings
     - run: git diff --exit-code

@@ -10,7 +10,7 @@
 // Check if the total size of all iovecs would overflow an ssize_t.
 // `total_size` can be NULL.
 hidden bool __wasilibc_iovecs_ok(const struct iovec *iov, int iovcnt,
-                                       size_t *total_size);
+                                 size_t *total_size);
 
 #if defined(__wasip2__) || defined(__wasip3__)
 

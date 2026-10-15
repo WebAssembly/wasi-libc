@@ -9,7 +9,7 @@
 #include <wasi/wasip3_block.h>
 
 bool __wasilibc_iovecs_ok(const struct iovec *iov, int iovcnt,
-                                size_t *total_size) {
+                          size_t *total_size) {
   size_t _total_size = 0;
   if (total_size) {
     *total_size = 0;

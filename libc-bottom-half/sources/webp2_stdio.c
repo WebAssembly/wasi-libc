@@ -137,7 +137,7 @@ static descriptor_vtable_t stdin_vtable = {
     .fcntl_getfl = stdio_fcntl_getfl,
     .set_blocking = stdio_set_blocking,
 };
-  
+
 static descriptor_vtable_t stdouterr_vtable = {
     .free = stdio_free,
     .write = stdio_write,
@@ -147,9 +147,9 @@ static descriptor_vtable_t stdouterr_vtable = {
 };
 
 static int stdio_add(stdio_t *stdio, descriptor_vtable_t *vtable) {
-  descriptor_table_entry_t entry = (descriptor_table_entry_t) {
-    .data = (descriptor_refcnt_t *)stdio,
-    .vtable = vtable,
+  descriptor_table_entry_t entry = (descriptor_table_entry_t){
+      .data = (descriptor_refcnt_t *)stdio,
+      .vtable = vtable,
   };
   return descriptor_table_insert(entry);
 }
@@ -163,7 +163,7 @@ int __wasilibc_init_stdio() {
   if (stdio_add(&__stdout, &stdouterr_vtable) < 0) {
     return -1;
   }
-  
+
   __stderr.utf8 = __wasilibc_make_utf8_writer(__stderr.buf, LINE_BUF_SIZE);
   __stderr.warn = true;
   if (stdio_add(&__stderr, &stdouterr_vtable) < 0) {
@@ -188,7 +188,7 @@ void __wasilibc_webp2_flush_and_close_stdio(bool also_musl) {
   }
   finish_and_flush(&__stdout);
   __stdout.closed = true;
-  
+
   if (also_musl) {
     fflush(stderr);
   }

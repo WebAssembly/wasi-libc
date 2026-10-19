@@ -154,7 +154,7 @@ else()
 endif()
 
 set(wasip2-version 0.2.12)
-set(wasip3-version 0.3.0)
+set(wasip3-version 0.3.2)
 
 # =============================================================================
 # Detection of a libcall thread context for wasip3

@@ -10,12 +10,11 @@
 #include <unistd.h>
 #include <utime.h>
 #include <wasi/libc.h>
+#include <wasi/report-error.h>
 
 #if !defined(__webp2__)
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc-nocwd.h>
-#else
-#include <wasi/report-error.h>
 #endif
 
 #ifndef __webp2__

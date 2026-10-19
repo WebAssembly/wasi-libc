@@ -19,6 +19,8 @@ int connect(int fd, const struct sockaddr *addr, socklen_t addrlen) {
   }
   return entry.vtable->connect(entry.data, addr, addrlen);
 #else
-  WEBP2_UNSUPPORTED("connect");
+  WASILIBC_LOG_UNSUPPORTED("connect");
+  errno = ENOSYS;
+  return -1;
 #endif // !webp2
 }

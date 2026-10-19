@@ -90,7 +90,9 @@ DIR *fdopendir(int fd) {
   dirp = NULL;
   return ret;
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("fdopendir");
+  WASILIBC_LOG_UNSUPPORTED("fdopendir");
+  errno = ENOSYS;
+  return NULL;
 #else
 # error "Unsupported WASI version"
 #endif

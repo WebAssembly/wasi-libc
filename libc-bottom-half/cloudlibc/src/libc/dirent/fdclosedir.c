@@ -8,6 +8,7 @@
 #include "dirent_impl.h"
 
 #if defined(__webp2__)
+#include <errno.h>
 #include <wasi/report-error.h>
 #endif
 
@@ -22,6 +23,8 @@ int fdclosedir(DIR *dirp) {
   free(dirp);
   return fd;
 #else
-  WEBP2_UNSUPPORTED("fdclosedir");
+  WASILIBC_LOG_UNSUPPORTED("fdclosedir");
+  errno = ENOSYS;
+  return -1;
 #endif // !webp2
 }

@@ -71,7 +71,8 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
 #endif
   return 0;
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("clock_nanosleep");
+  WASILIBC_LOG_UNSUPPORTED("clock_nanosleep");
+  return ENOTSUP;
 #else
 # error "Unsupported WASI version"
 #endif

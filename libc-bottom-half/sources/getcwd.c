@@ -36,6 +36,8 @@ char *getcwd(char *buf, size_t size) {
   WEAK_UNLOCK(__wasilibc_cwd_lock);
   return buf;
 #else
-  WEBP2_UNSUPPORTED("getcwd");
+  WASILIBC_LOG_UNSUPPORTED("getcwd");
+  errno = ENOENT;
+  return NULL;
 #endif // !webp2
 }

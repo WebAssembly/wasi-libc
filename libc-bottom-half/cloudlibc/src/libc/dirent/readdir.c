@@ -334,7 +334,9 @@ struct dirent *readdir(DIR *dirp) {
 }
 #elif defined(__webp2__)
 struct dirent *readdir(DIR *dirp) {
-  WEBP2_UNSUPPORTED("readdir");
+  WASILIBC_LOG_UNSUPPORTED("readdir");
+  errno = EBADF; // It is impossible to open a DIR anyway.
+  return NULL;
 }
 #else
 # error "Unknown WASI version"

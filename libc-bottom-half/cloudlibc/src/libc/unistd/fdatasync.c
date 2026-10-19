@@ -39,7 +39,9 @@ int fdatasync(int fildes) {
     return -1;
   }
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("fdatasync");
+  WASILIBC_LOG_UNSUPPORTED("fdatasync");
+  errno = EINVAL;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

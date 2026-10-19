@@ -11,7 +11,9 @@ ssize_t send(int socket, const void *buffer, size_t length, int flags) {
 #if !defined(__webp2__)
   return sendto(socket, buffer, length, flags, NULL, 0);
 #else
-  WEBP2_UNSUPPORTED("send");
+  WASILIBC_LOG_UNSUPPORTED("send");
+  errno = ENOTSOCK;
+  return -1;
 #endif
 }
 
@@ -34,6 +36,8 @@ ssize_t sendto(int socket, const void *buffer, size_t length, int flags,
   }
   return entry.vtable->sendto(entry.data, buffer, length, flags, addr, addrlen);
 #else
-  WEBP2_UNSUPPORTED("sendto");
+  WASILIBC_LOG_UNSUPPORTED("sendto");
+  errno = ENOTSOCK;
+  return -1;
 #endif // !webp2
 }

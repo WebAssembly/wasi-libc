@@ -53,13 +53,9 @@ static int find_relpath_alt(const char *path, char **relative) {
 #endif // !webp2
 
 int open(const char *path, int oflag, ...) {
-#if !defined(__webp2__)
   // WASI libc's `openat` ignores the mode argument, so call a special
   // entrypoint which avoids the varargs calling convention.
   return __wasilibc_open_nomode(path, oflag);
-#else
-  WEBP2_UNSUPPORTED("open");
-#endif
 }
 
 // See the documentation in libc.h
@@ -76,8 +72,10 @@ int __wasilibc_open_nomode(const char *path, int oflag) {
 
   return __wasilibc_nocwd_openat_nomode(dirfd, relative_path, oflag);
 #else
-  WEBP2_UNSUPPORTED("__wasilibc_open_nomode");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("open");
+  errno = (oflag & O_CREAT) ? EACCES : ENOENT;
+  return -1;
+#endif
 }
 
 int access(const char *path, int amode) {
@@ -93,8 +91,10 @@ int access(const char *path, int amode) {
 
   return __wasilibc_nocwd_faccessat(dirfd, relative_path, amode, 0);
 #else
-  WEBP2_UNSUPPORTED("access");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("access");
+  errno = ENOENT;
+  return -1;
+#endif
 }
 
 ssize_t readlink(const char *restrict path, char *restrict buf,
@@ -111,8 +111,10 @@ ssize_t readlink(const char *restrict path, char *restrict buf,
 
   return __wasilibc_nocwd_readlinkat(dirfd, relative_path, buf, bufsize);
 #else
-  WEBP2_UNSUPPORTED("readlink");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("readlink");
+  errno = ENOENT;
+  return -1;
+#endif
 }
 
 int stat(const char *restrict path, struct stat *restrict buf) {
@@ -133,8 +135,10 @@ int stat(const char *restrict path, struct stat *restrict buf) {
 
   return __wasilibc_nocwd_fstatat(dirfd, relative_path, buf, 0);
 #else
-  WEBP2_UNSUPPORTED("stat");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("stat");
+  errno = ENOENT;
+  return -1;
+#endif
 }
 
 int lstat(const char *restrict path, struct stat *restrict buf) {
@@ -156,8 +160,10 @@ int lstat(const char *restrict path, struct stat *restrict buf) {
   return __wasilibc_nocwd_fstatat(dirfd, relative_path, buf,
                                   AT_SYMLINK_NOFOLLOW);
 #else
-  WEBP2_UNSUPPORTED("lstat");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("lstat");
+  errno = ENOENT;
+  return -1;
+#endif
 }
 
 int utime(const char *path, const struct utimbuf *times) {
@@ -178,8 +184,10 @@ int utime(const char *path, const struct utimbuf *times) {
             : NULL,
       0);
 #else
-  WEBP2_UNSUPPORTED("utime");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("utime");
+  errno = ENOENT;
+  return -1;
+#endif
 }
 
 int utimes(const char *path, const struct timeval times[2]) {
@@ -203,8 +211,10 @@ int utimes(const char *path, const struct timeval times[2]) {
           : NULL,
       0);
 #else
-  WEBP2_UNSUPPORTED("utimes");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("utimes");
+  errno = ENOENT;
+  return -1;
+#endif
 }
 
 int unlink(const char *path) {
@@ -223,8 +233,10 @@ int unlink(const char *path) {
   // just imports `__wasi_path_unlink_file`.
   return __wasilibc_nocwd___wasilibc_unlinkat(dirfd, relative_path);
 #else
-  WEBP2_UNSUPPORTED("unlink");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("unlink");
+  errno = ENOENT;
+  return -1;
+#endif
 }
 
 int rmdir(const char *path) {
@@ -240,8 +252,10 @@ int rmdir(const char *path) {
 
   return __wasilibc_nocwd___wasilibc_rmdirat(dirfd, relative_path);
 #else
-  WEBP2_UNSUPPORTED("rmdir");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("rmdir");
+  errno = ENOENT;
+  return -1;
+#endif
 }
 
 int remove(const char *path) {
@@ -268,8 +282,10 @@ int remove(const char *path) {
   }
   return r;
 #else
-  WEBP2_UNSUPPORTED("remove");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("remove");
+  errno = ENOENT;
+  return -1;
+#endif
 }
 
 int mkdir(const char *path, mode_t mode) {
@@ -286,8 +302,10 @@ int mkdir(const char *path, mode_t mode) {
 
   return __wasilibc_nocwd_mkdirat_nomode(dirfd, relative_path);
 #else
-  WEBP2_UNSUPPORTED("mkdir");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("mkdir");
+  errno = EACCES;
+  return -1;
+#endif
 }
 
 DIR *opendir(const char *dirname) {
@@ -303,8 +321,10 @@ DIR *opendir(const char *dirname) {
 
   return __wasilibc_nocwd_opendirat(dirfd, relative_path);
 #else
-  WEBP2_UNSUPPORTED("opendir");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("opendir");
+  errno = ENOENT;
+  return NULL;
+#endif
 }
 
 int scandir(const char *restrict dir, struct dirent ***restrict namelist,
@@ -323,8 +343,10 @@ int scandir(const char *restrict dir, struct dirent ***restrict namelist,
   return __wasilibc_nocwd_scandirat(dirfd, relative_path, namelist, filter,
                                     compar);
 #else
-  WEBP2_UNSUPPORTED("scandir");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("scandir");
+  errno = ENOENT;
+  return -1;
+#endif
 }
 
 int symlink(const char *target, const char *linkpath) {
@@ -340,8 +362,10 @@ int symlink(const char *target, const char *linkpath) {
 
   return __wasilibc_nocwd_symlinkat(target, dirfd, relative_path);
 #else
-  WEBP2_UNSUPPORTED("symlink");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("symlink");
+  errno = EACCES;
+  return -1;
+#endif
 }
 
 int link(const char *old, const char *new) {
@@ -362,8 +386,10 @@ int link(const char *old, const char *new) {
   errno = ENOENT;
   return -1;
 #else
-  WEBP2_UNSUPPORTED("link");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("link");
+  errno = ENOENT;
+  return -1;
+#endif
 }
 
 int rename(const char *old, const char *new) {
@@ -384,40 +410,35 @@ int rename(const char *old, const char *new) {
   errno = ENOENT;
   return -1;
 #else
-  WEBP2_UNSUPPORTED("rename");
-#endif // !webp2
+  WASILIBC_LOG_UNSUPPORTED("rename");
+  errno = ENOENT;
+  return -1;
+#endif
 }
 
 int chmod(const char *path, mode_t mode) {
-#if !defined(__webp2__)
   (void)path;
   (void)mode;
   // TODO: We plan to support this eventually in WASI, but not yet.
   // Meanwhile, we provide a stub so that libc++'s `<filesystem>`
   // implementation will build unmodified.
+  WASILIBC_LOG_UNSUPPORTED("chmod");
   errno = ENOSYS;
   return -1;
-#else
-  WEBP2_UNSUPPORTED("chmod");
-#endif // !webp2
 }
 
 int fchmod(int fd, mode_t mode) {
-#if !defined(__webp2__)
   (void)fd;
   (void)mode;
   // TODO: We plan to support this eventually in WASI, but not yet.
   // Meanwhile, we provide a stub so that libc++'s `<filesystem>`
   // implementation will build unmodified.
+  WASILIBC_LOG_UNSUPPORTED("fchmod");
   errno = ENOSYS;
   return -1;
-#else
-  WEBP2_UNSUPPORTED("fchmod");
-#endif // !webp2
 }
 
 int fchmodat(int fd, const char *path, mode_t mode, int flag) {
-#if !defined(__webp2__)
   (void)fd;
   (void)path;
   (void)mode;
@@ -425,44 +446,36 @@ int fchmodat(int fd, const char *path, mode_t mode, int flag) {
   // TODO: We plan to support this eventually in WASI, but not yet.
   // Meanwhile, we provide a stub so that libc++'s `<filesystem>`
   // implementation will build unmodified.
+  WASILIBC_LOG_UNSUPPORTED("fchmodat");
   errno = ENOSYS;
   return -1;
-#else
-  WEBP2_UNSUPPORTED("fchmodat");
-#endif // !webp2
 }
 
 int statvfs(const char *__restrict path, struct statvfs *__restrict buf) {
-#if !defined(__webp2__)
   (void)path;
   (void)buf;
   // TODO: We plan to support this eventually in WASI, but not yet.
   // Meanwhile, we provide a stub so that libc++'s `<filesystem>`
   // implementation will build unmodified.
+  WASILIBC_LOG_UNSUPPORTED("statvfs");
   errno = ENOSYS;
   return -1;
-#else
-  WEBP2_UNSUPPORTED("statvfs");
-#endif // !webp2
 }
 
 int fstatvfs(int fd, struct statvfs *buf) {
-#if !defined(__webp2__)
   (void)fd;
   (void)buf;
   // TODO: We plan to support this eventually in WASI, but not yet.
   // Meanwhile, we provide a stub so that libc++'s `<filesystem>`
   // implementation will build unmodified.
+  WASILIBC_LOG_UNSUPPORTED("fstatvfs");
   errno = ENOSYS;
   return -1;
-#else
-  WEBP2_UNSUPPORTED("fstatvfs");
-#endif // !webp2
 }
 
+#if !defined(__webp2__)
 // Like `access`, but with `faccessat`'s flags argument.
 int __wasilibc_access(const char *path, int mode, int flags) {
-#if !defined(__webp2__)
   char *relative_path;
   int dirfd = find_relpath(path, &relative_path);
 
@@ -473,15 +486,11 @@ int __wasilibc_access(const char *path, int mode, int flags) {
   }
 
   return __wasilibc_nocwd_faccessat(dirfd, relative_path, mode, flags);
-#else
-  WEBP2_UNSUPPORTED("__wasilibc_access");
-#endif // !webp2
 }
 
 // Like `utimensat`, but without the `at` part.
 int __wasilibc_utimens(const char *path, const struct timespec times[2],
                        int flags) {
-#if !defined(__webp2__)
   char *relative_path;
   int dirfd = find_relpath(path, &relative_path);
 
@@ -492,15 +501,11 @@ int __wasilibc_utimens(const char *path, const struct timespec times[2],
   }
 
   return __wasilibc_nocwd_utimensat(dirfd, relative_path, times, flags);
-#else
-  WEBP2_UNSUPPORTED("__wasilibc_utimens");
-#endif // !webp2
 }
 
 // Like `stat`, but with `fstatat`'s flags argument.
 int __wasilibc_stat(const char *__restrict path, struct stat *__restrict st,
                     int flags) {
-#if !defined(__webp2__)
   if (path[0] == '\0') {
     errno = ENOENT;
     return -1;
@@ -516,14 +521,10 @@ int __wasilibc_stat(const char *__restrict path, struct stat *__restrict st,
   }
 
   return __wasilibc_nocwd_fstatat(dirfd, relative_path, st, flags);
-#else
-  WEBP2_UNSUPPORTED("__wasilibc_stat");
-#endif // !webp2
 }
 
 // Like `link`, but with `linkat`'s flags argument.
 int __wasilibc_link(const char *oldpath, const char *newpath, int flags) {
-#if !defined(__webp2__)
   char *old_relative_path;
   char *new_relative_path;
   int old_dirfd = find_relpath(oldpath, &old_relative_path);
@@ -537,15 +538,11 @@ int __wasilibc_link(const char *oldpath, const char *newpath, int flags) {
 
   return __wasilibc_nocwd_linkat(old_dirfd, old_relative_path, new_dirfd,
                                  new_relative_path, flags);
-#else
-  WEBP2_UNSUPPORTED("__wasilibc_link");
-#endif // !webp2
 }
 
 // Like `__wasilibc_link`, but oldpath is relative to olddirfd.
 int __wasilibc_link_oldat(int olddirfd, const char *oldpath,
                           const char *newpath, int flags) {
-#if !defined(__webp2__)
   char *new_relative_path;
   int new_dirfd = find_relpath(newpath, &new_relative_path);
 
@@ -557,15 +554,11 @@ int __wasilibc_link_oldat(int olddirfd, const char *oldpath,
 
   return __wasilibc_nocwd_linkat(olddirfd, oldpath, new_dirfd,
                                  new_relative_path, flags);
-#else
-  WEBP2_UNSUPPORTED("__wasilibc_link_oldat");
-#endif // !webp2
 }
 
 // Like `__wasilibc_link`, but newpath is relative to newdirfd.
 int __wasilibc_link_newat(const char *oldpath, int newdirfd,
                           const char *newpath, int flags) {
-#if !defined(__webp2__)
   char *old_relative_path;
   int old_dirfd = find_relpath(oldpath, &old_relative_path);
 
@@ -577,14 +570,10 @@ int __wasilibc_link_newat(const char *oldpath, int newdirfd,
 
   return __wasilibc_nocwd_linkat(old_dirfd, old_relative_path, newdirfd,
                                  newpath, flags);
-#else
-  WEBP2_UNSUPPORTED("__wasilibc_link_newat");
-#endif // !webp2
 }
 
 // Like `rename`, but from is relative to fromdirfd.
 int __wasilibc_rename_oldat(int fromdirfd, const char *from, const char *to) {
-#if !defined(__webp2__)
   char *to_relative_path;
   int to_dirfd = find_relpath(to, &to_relative_path);
 
@@ -595,14 +584,10 @@ int __wasilibc_rename_oldat(int fromdirfd, const char *from, const char *to) {
   }
 
   return __wasilibc_nocwd_renameat(fromdirfd, from, to_dirfd, to_relative_path);
-#else
-  WEBP2_UNSUPPORTED("__wasilibc_rename_oldat");
-#endif // !webp2
 }
 
 // Like `rename`, but to is relative to todirfd.
 int __wasilibc_rename_newat(const char *from, int todirfd, const char *to) {
-#if !defined(__webp2__)
   char *from_relative_path;
   int from_dirfd = find_relpath(from, &from_relative_path);
 
@@ -613,7 +598,5 @@ int __wasilibc_rename_newat(const char *from, int todirfd, const char *to) {
   }
 
   return __wasilibc_nocwd_renameat(from_dirfd, from_relative_path, todirfd, to);
-#else
-  WEBP2_UNSUPPORTED("__wasilibc_rename_newat");
-#endif // !webp2
 }
+#endif // !webp2

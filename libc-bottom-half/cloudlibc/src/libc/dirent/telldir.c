@@ -6,6 +6,7 @@
 #include "dirent_impl.h"
 
 #if defined(__webp2__)
+#include <errno.h>
 #include <wasi/report-error.h>
 #endif
 
@@ -15,7 +16,9 @@ long telldir(DIR *dirp) {
 #elif defined(__wasip2__) || defined(__wasip3__)
   return dirp->offset + dirp->skip;
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("telldir");
+  WASILIBC_LOG_UNSUPPORTED("telldir");
+  errno = ENOSYS;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

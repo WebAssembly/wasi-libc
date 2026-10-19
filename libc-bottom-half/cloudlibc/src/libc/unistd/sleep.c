@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
+#include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 #include <wasi/version.h>
@@ -26,6 +27,14 @@ unsigned int sleep(unsigned int seconds) {
     return seconds;
   return 0;
 #else
-  WEBP2_UNSUPPORTED("sleep");
+  if (seconds == 0) {
+    return 0;
+  }
+
+  // TODO(webp2): If we actually return from this, we risk user code going into
+  // an infinite loop as it fruitlessly tries to sleep the night away.
+  // Therefore we noisily exit.
+  __wasilibc_report_error("sleep is not supported");
+  exit(1);
 #endif // !webp2
 }

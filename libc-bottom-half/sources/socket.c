@@ -70,6 +70,8 @@ int socket(int domain, int type, int protocol) {
     return -1;
   }
 #else
-  WEBP2_UNSUPPORTED("socket");
+  WASILIBC_LOG_UNSUPPORTED("socket");
+  errno = ENOSYS;
+  return -1;
 #endif // !webp2
 }

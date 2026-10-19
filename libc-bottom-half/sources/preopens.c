@@ -405,7 +405,7 @@ oserr:
 software:
   _Exit(EX_SOFTWARE);
 #else
-  WEBP2_UNSUPPORTED("__wasilibc_populate_preopens");
+  WASILIBC_LOG_UNSUPPORTED("__wasilibc_populate_preopens");
 #endif // !webp2
 }
 
@@ -434,6 +434,6 @@ void __wasilibc_reset_preopens(void) {
 
   STRONG_UNLOCK(lock);
 #else
-  WEBP2_UNSUPPORTED("__wasilibc_reset_preopens");
+  WASILIBC_LOG_UNSUPPORTED("__wasilibc_reset_preopens");
 #endif // !webp2
 }

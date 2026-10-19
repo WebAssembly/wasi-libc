@@ -106,7 +106,9 @@ ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
   }
   return ret;
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("pwrite");
+  WASILIBC_LOG_UNSUPPORTED("pwrite");
+  errno = ENOSYS;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

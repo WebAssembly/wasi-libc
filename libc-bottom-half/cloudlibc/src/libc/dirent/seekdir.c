@@ -22,7 +22,7 @@ void seekdir(DIR *dirp, long loc) {
   dirp->skip = loc;
   dirp->offset = 0;
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("seekdir");
+  WASILIBC_LOG_UNSUPPORTED("seekdir");
 #else
 # error "Unsupported WASI version"
 #endif

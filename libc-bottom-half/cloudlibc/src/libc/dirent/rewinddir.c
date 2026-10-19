@@ -8,6 +8,7 @@
 #include "dirent_impl.h"
 
 #if defined(__webp2__)
+#include <errno.h>
 #include <wasi/report-error.h>
 #endif
 
@@ -22,7 +23,8 @@ void rewinddir(DIR *dirp) {
   dirp->skip = 0;
   dirp->offset = 0;
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("rewinddir");
+  WASILIBC_LOG_UNSUPPORTED("rewinddir");
+  errno = ENOSYS;
 #else
 # error "Unknown WASI version"
 #endif

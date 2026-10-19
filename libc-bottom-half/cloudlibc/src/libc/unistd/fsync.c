@@ -38,7 +38,9 @@ int fsync(int fildes) {
     return -1;
   }
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("fsync");
+  WASILIBC_LOG_UNSUPPORTED("fsync");
+  errno = EINVAL;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

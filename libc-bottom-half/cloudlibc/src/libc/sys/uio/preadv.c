@@ -42,7 +42,9 @@ ssize_t preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
   }
   return pread(fildes, NULL, 0, offset);
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("preadv");
+  WASILIBC_LOG_UNSUPPORTED("preadv");
+  errno = ENOSYS;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

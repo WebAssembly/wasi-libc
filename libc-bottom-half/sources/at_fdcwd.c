@@ -17,6 +17,7 @@
 #if !defined(__webp2__)
 #include <wasi/libc-nocwd.h>
 #else
+#include <errno.h>
 #include <wasi/report-error.h>
 #endif
 
@@ -33,7 +34,9 @@ int openat(int dirfd, const char *pathname, int flags, ...) {
 
   return __wasilibc_nocwd_openat_nomode(dirfd, pathname, flags);
 #else
-  WEBP2_UNSUPPORTED("openat");
+  WASILIBC_LOG_UNSUPPORTED("openat");
+  errno = (flags & O_CREAT) ? EACCES : ENOENT;
+  return -1;
 #endif
 }
 
@@ -45,7 +48,9 @@ int symlinkat(const char *target, int dirfd, const char *linkpath) {
 
   return __wasilibc_nocwd_symlinkat(target, dirfd, linkpath);
 #else
-  WEBP2_UNSUPPORTED("symlinkat");
+  WASILIBC_LOG_UNSUPPORTED("symlinkat");
+  errno = EACCES;
+  return -1;
 #endif
 }
 
@@ -58,7 +63,9 @@ ssize_t readlinkat(int dirfd, const char *__restrict pathname,
 
   return __wasilibc_nocwd_readlinkat(dirfd, pathname, buf, bufsiz);
 #else
-  WEBP2_UNSUPPORTED("readlinkat");
+  WASILIBC_LOG_UNSUPPORTED("readlinkat");
+  errno = ENOENT;
+  return -1;
 #endif
 }
 
@@ -70,7 +77,9 @@ int mkdirat(int dirfd, const char *pathname, mode_t mode) {
 
   return __wasilibc_nocwd_mkdirat_nomode(dirfd, pathname);
 #else
-  WEBP2_UNSUPPORTED("mkdirat");
+  WASILIBC_LOG_UNSUPPORTED("mkdirat");
+  errno = EACCES;
+  return -1;
 #endif
 }
 
@@ -82,7 +91,9 @@ DIR *opendirat(int dirfd, const char *path) {
 
   return __wasilibc_nocwd_opendirat(dirfd, path);
 #else
-  WEBP2_UNSUPPORTED("opendirat");
+  WASILIBC_LOG_UNSUPPORTED("opendirat");
+  errno = ENOENT;
+  return NULL;
 #endif
 }
 
@@ -96,7 +107,9 @@ int scandirat(int dirfd, const char *dirp, struct dirent ***namelist,
 
   return __wasilibc_nocwd_scandirat(dirfd, dirp, namelist, filter, compar);
 #else
-  WEBP2_UNSUPPORTED("scandirat");
+  WASILIBC_LOG_UNSUPPORTED("scandirat");
+  errno = ENOENT;
+  return -1;
 #endif
 }
 
@@ -108,7 +121,9 @@ int faccessat(int dirfd, const char *pathname, int mode, int flags) {
 
   return __wasilibc_nocwd_faccessat(dirfd, pathname, mode, flags);
 #else
-  WEBP2_UNSUPPORTED("faccessat");
+  WASILIBC_LOG_UNSUPPORTED("faccessat");
+  errno = ENOENT;
+  return -1;
 #endif
 }
 
@@ -121,7 +136,9 @@ int fstatat(int dirfd, const char *__restrict pathname,
 
   return __wasilibc_nocwd_fstatat(dirfd, pathname, statbuf, flags);
 #else
-  WEBP2_UNSUPPORTED("fstatat");
+  WASILIBC_LOG_UNSUPPORTED("fstatat");
+  errno = ENOENT;
+  return -1;
 #endif
 }
 
@@ -134,7 +151,9 @@ int utimensat(int dirfd, const char *pathname, const struct timespec times[2],
 
   return __wasilibc_nocwd_utimensat(dirfd, pathname, times, flags);
 #else
-  WEBP2_UNSUPPORTED("utimensat");
+  WASILIBC_LOG_UNSUPPORTED("utimensat");
+  errno = ENOENT;
+  return -1;
 #endif
 }
 
@@ -154,7 +173,9 @@ int linkat(int olddirfd, const char *oldpath, int newdirfd, const char *newpath,
 
   return __wasilibc_nocwd_linkat(olddirfd, oldpath, newdirfd, newpath, flags);
 #else
-  WEBP2_UNSUPPORTED("linkat");
+  WASILIBC_LOG_UNSUPPORTED("linkat");
+  errno = ENOENT;
+  return -1;
 #endif // !webp2
 }
 
@@ -174,7 +195,9 @@ int renameat(int olddirfd, const char *oldpath, int newdirfd,
 
   return __wasilibc_nocwd_renameat(olddirfd, oldpath, newdirfd, newpath);
 #else
-  WEBP2_UNSUPPORTED("renameat");
+  WASILIBC_LOG_UNSUPPORTED("renameat");
+  errno = ENOENT;
+  return -1;
 #endif // !webp2
 }
 
@@ -186,7 +209,9 @@ int __wasilibc_unlinkat(int dirfd, const char *path) {
 
   return __wasilibc_nocwd___wasilibc_unlinkat(dirfd, path);
 #else
-  WEBP2_UNSUPPORTED("__wasilibc_unlinkat");
+  WASILIBC_LOG_UNSUPPORTED("__wasilibc_unlinkat");
+  errno = ENOENT;
+  return -1;
 #endif
 }
 
@@ -198,6 +223,8 @@ int __wasilibc_rmdirat(int dirfd, const char *path) {
 
   return __wasilibc_nocwd___wasilibc_rmdirat(dirfd, path);
 #else
-  WEBP2_UNSUPPORTED("__wasilibc_rmdirat");
+  WASILIBC_LOG_UNSUPPORTED("__wasilibc_rmdirat");
+  errno = ENOENT;
+  return -1;
 #endif
 }

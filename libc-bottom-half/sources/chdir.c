@@ -77,7 +77,9 @@ int chdir(const char *path) {
   __wasilibc_cwd_mallocd = 1;
   return 0;
 #else
-  WEBP2_UNSUPPORTED("chdir");
+  WASILIBC_LOG_UNSUPPORTED("chdir");
+  errno = ENOENT;
+  return -1;
 #endif // !webp2
 }
 

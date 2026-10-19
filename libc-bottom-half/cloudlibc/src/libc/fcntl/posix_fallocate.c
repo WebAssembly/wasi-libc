@@ -20,7 +20,8 @@ int posix_fallocate(int fd, off_t offset, off_t len) {
   // Note: this operation isn't supported in wasip{2,3}
   return ENOTSUP;
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("posix_fallocate");
+  WASILIBC_LOG_UNSUPPORTED("posix_fallocate");
+  return ENOSYS;
 #else
 # error "Unsupported WASI version"
 #endif

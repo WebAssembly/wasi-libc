@@ -20,6 +20,8 @@ int unlinkat(int fd, const char *path, int flag) {
   }
   return __wasilibc_unlinkat(fd, path);
 #else
-  WEBP2_UNSUPPORTED("unlinkat");
+  WASILIBC_LOG_UNSUPPORTED("unlinkat");
+  errno = ENOENT;
+  return -1;
 #endif
 }

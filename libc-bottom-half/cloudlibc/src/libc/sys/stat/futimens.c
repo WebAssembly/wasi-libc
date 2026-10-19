@@ -63,7 +63,9 @@ int futimens(int fd, const struct timespec *times) {
     return -1;
   }
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("futimens");
+  WASILIBC_LOG_UNSUPPORTED("futimens");
+  errno = ENOSYS;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

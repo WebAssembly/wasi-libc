@@ -79,7 +79,7 @@ int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
   }
   return 0;
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("posix_fadvise");
+  return 0;
 #else
 # error "Unsupported WASI version"
 #endif

@@ -43,7 +43,9 @@ ssize_t pwritev(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
   }
   return pwrite(fildes, NULL, 0, offset);
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("pwritev");
+  WASILIBC_LOG_UNSUPPORTED("pwritev");
+  errno = ENOSYS;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

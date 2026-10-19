@@ -19,6 +19,8 @@ int bind(int socket, const struct sockaddr *addr, socklen_t addrlen) {
   }
   return entry.vtable->bind(entry.data, addr, addrlen);
 #else
-  WEBP2_UNSUPPORTED("bind");
+  WASILIBC_LOG_UNSUPPORTED("bind");
+  errno = ENOSYS;
+  return -1;
 #endif // !webp2
 }

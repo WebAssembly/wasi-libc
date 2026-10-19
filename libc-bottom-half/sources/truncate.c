@@ -23,6 +23,8 @@ int truncate(const char *path, off_t length) {
 
   return close(fd);
 #else
-  WEBP2_UNSUPPORTED("truncate");
+  WASILIBC_LOG_UNSUPPORTED("truncate");
+  errno = ENOENT;
+  return -1;
 #endif // !webp2
 }

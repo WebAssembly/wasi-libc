@@ -26,6 +26,8 @@ int nanosleep(const struct timespec *rqtp, struct timespec *rem) {
   }
   return 0;
 #else
-  WEBP2_UNSUPPORTED("nanosleep");
+  WASILIBC_LOG_UNSUPPORTED("nanosleep");
+  errno = ENOSYS;
+  return -1;
 #endif // !webp2
 }

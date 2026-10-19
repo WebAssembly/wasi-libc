@@ -43,7 +43,9 @@ int ftruncate(int fildes, off_t length) {
     return -1;
   }
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("ftruncate");
+  WASILIBC_LOG_UNSUPPORTED("ftruncate");
+  errno = ENOSYS;
+  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

@@ -112,7 +112,9 @@ ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
   }
   return ret;
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("pread");
+  WASILIBC_LOG_UNSUPPORTED("pread");
+  errno = ENOSYS;
+  return -1;
 #else
 # error "Unknown WASI version"
 #endif

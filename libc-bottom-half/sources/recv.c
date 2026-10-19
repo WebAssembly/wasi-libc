@@ -11,7 +11,9 @@ ssize_t recv(int socket, void *restrict buffer, size_t length, int flags) {
 #if !defined(__webp2__)
   return recvfrom(socket, buffer, length, flags, NULL, NULL);
 #else
-  WEBP2_UNSUPPORTED("recv");
+  WASILIBC_LOG_UNSUPPORTED("recv");
+  errno = ENOSYS;
+  return -1;
 #endif
 }
 
@@ -35,6 +37,8 @@ ssize_t recvfrom(int socket, void *__restrict buffer, size_t length, int flags,
   return entry.vtable->recvfrom(entry.data, buffer, length, flags, addr,
                                 addrlen);
 #else
-  WEBP2_UNSUPPORTED("recvfrom");
+  WASILIBC_LOG_UNSUPPORTED("recvfrom");
+  errno = ENOSYS;
+  return -1;
 #endif // !webp2
 }

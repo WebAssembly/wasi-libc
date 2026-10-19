@@ -66,6 +66,7 @@ option(CHECK_SYMBOLS "Whether or not to check the exported symbols of libc.a" OF
 set(WASI_SDK_VERSION "" CACHE STRING "Version information for wasi-sdk to embed in headers")
 option(ENABLE_WERROR "Whether to compile with `-Werror`" OFF)
 option(ENABLE_COOP_THREADS "Whether to compile with cooperative threads support" OFF)
+option(LOG_UNSUPPORTED_CALLS "Whether to log error messages when calling unsupported APIs" OFF)
 
 if(TARGET_TRIPLE MATCHES "-threads$")
   set(WASI p1)
@@ -150,6 +151,10 @@ endif()
 if(SIMD)
   add_compile_options(-msimd128 -mrelaxed-simd -mbulk-memory
     -D__wasilibc_simd_string)
+endif()
+
+if(LOG_UNSUPPORTED_CALLS)
+  add_compile_definitions(WASILIBC_LOG_UNSUPPORTED_CALLS)
 endif()
 
 if(WASI STREQUAL "p1")

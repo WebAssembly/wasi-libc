@@ -31,6 +31,8 @@ int usleep(useconds_t useconds) {
   }
   return 0;
 #else
-  WEBP2_UNSUPPORTED("usleep");
+  WASILIBC_LOG_UNSUPPORTED("usleep");
+  errno = ENOSYS;
+  return -1;
 #endif // !webp2
 }

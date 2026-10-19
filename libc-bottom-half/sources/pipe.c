@@ -501,7 +501,9 @@ int pipe(int fd[2]) {
 #if !defined(__webp2__)
   return pipe2(fd, 0);
 #else
-  WEBP2_UNSUPPORTED("pipe");
+  WASILIBC_LOG_UNSUPPORTED("pipe");
+  errno = ENOTSUP;
+  return -1;
 #endif
 }
 
@@ -515,7 +517,9 @@ int pipe2(int fd[2], int flags) {
   errno = ENOTSUP;
   return -1;
 #elif defined(__webp2__)
-  WEBP2_UNSUPPORTED("pipe2");
+  WASILIBC_LOG_UNSUPPORTED("pipe2");
+  errno = ENOTSUP;
+  return -1;
 #else
   pipe_t *reader = calloc(1, sizeof(pipe_t));
   pipe_t *writer = calloc(1, sizeof(pipe_t));

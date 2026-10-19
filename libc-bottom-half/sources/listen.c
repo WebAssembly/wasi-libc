@@ -27,6 +27,8 @@ int listen(int socket, int backlog) {
   }
   return entry.vtable->listen(entry.data, backlog);
 #else
-  WEBP2_UNSUPPORTED("listen");
+  WASILIBC_LOG_UNSUPPORTED("listen");
+  errno = ENOSYS;
+  return -1;
 #endif // !webp2
 }

@@ -18,6 +18,8 @@ int shutdown(int socket, int how) {
   }
   return entry.vtable->shutdown(entry.data, how);
 #else
-  WEBP2_UNSUPPORTED("shutdown");
+  WASILIBC_LOG_UNSUPPORTED("shutdown");
+  errno = ENOSYS;
+  return -1;
 #endif // !webp2
 }

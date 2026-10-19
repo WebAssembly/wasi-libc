@@ -12,7 +12,9 @@ int accept(int socket, struct sockaddr *restrict addr,
 #if !defined(__webp2__)
   return accept4(socket, addr, addrlen, 0);
 #else
-  WEBP2_UNSUPPORTED("accept");
+  WASILIBC_LOG_UNSUPPORTED("accept");
+  errno = ENOSYS;
+  return -1;
 #endif
 }
 
@@ -29,6 +31,8 @@ int accept4(int socket, struct sockaddr *restrict addr,
   }
   return entry.vtable->accept4(entry.data, addr, addrlen, flags);
 #else
-  WEBP2_UNSUPPORTED("accept4");
+  WASILIBC_LOG_UNSUPPORTED("accept4");
+  errno = ENOSYS;
+  return -1;
 #endif // !webp2
 }

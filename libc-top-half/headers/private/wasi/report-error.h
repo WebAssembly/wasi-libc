@@ -6,6 +6,8 @@
 
 // Reports an error using the system's typical error output.
 hidden void __wasilibc_report_error(const char* message);
+hidden void __wasilibc_report_errorf(const char *format, ...)
+    __attribute__((__format__(__printf__, 1, 2)));
 
 #ifdef WASILIBC_LOG_UNSUPPORTED_CALLS
 #define WASILIBC_LOG_UNSUPPORTED(name) __wasilibc_report_error(name " is not supported");

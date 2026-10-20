@@ -117,7 +117,6 @@ set(bottom_half_sources
   sources/__wasilibc_random.c
   sources/__wasilibc_real.c
   sources/__wasilibc_report_error.c
-  sources/__wasilibc_report_errorf.c
   sources/__wasilibc_tell.c
   sources/abort.c
   sources/at_fdcwd.c

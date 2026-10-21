@@ -7,6 +7,20 @@
 #include <wasi/file_utils.h>
 #include <wasi/wasip3_block.h>
 
+#ifdef __wasip2__
+void __wasilibc_set_stream_errno(streams_own_error_t error) {
+  filesystem_error_code_t code;
+
+  if (filesystem_filesystem_error_code(io_error_borrow_error(error), &code)) {
+    translate_error(&code);
+  } else {
+    errno = EIO;
+  }
+
+  io_error_error_drop_own(error);
+}
+#endif
+
 /**
  * Validates that `ptr_signed` is a valid utf-8 string.
  *

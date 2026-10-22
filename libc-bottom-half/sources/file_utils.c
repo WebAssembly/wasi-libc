@@ -9,7 +9,7 @@
 #include <wasi/utf8.h>
 #include <wasi/wasip3_block.h>
 
-#if defined(__wasip2__) || defined(__wasip3__)
+#ifdef __wasip2__
 void __wasilibc_set_stream_errno(streams_own_error_t error) {
   filesystem_error_code_t code;
 
@@ -21,7 +21,9 @@ void __wasilibc_set_stream_errno(streams_own_error_t error) {
 
   io_error_error_drop_own(error);
 }
+#endif
 
+#if defined(__wasip2__) || defined(__wasip3__)
 int wasi_string_from_c(const char *s, wasi_string_t *out) {
   int len = __wasilibc_validate_utf8(s);
   if (len < 0) {

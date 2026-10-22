@@ -168,8 +168,13 @@
 #include <wasi/api.h>
 #include <wasi/libc-busywait.h>
 #include <wasi/libc-environ.h>
+#include <wasi/libc-find-relpath.h>
+#include <wasi/libc-nocwd.h>
 #include <wasi/libc.h>
 #include <wasi/version.h>
+#include <wasi/wasip1.h>
+#include <wasi/wasip2.h>
+#include <wasi/wasip3.h>
 #include <wasi/webp2.h>
 #include <wchar.h>
 #include <wctype.h>

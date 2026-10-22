@@ -2,17 +2,18 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <assert.h>
-#include <wasi/api.h>
 #include <dirent.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <wasi/api.h>
+#include <wasi/report-error.h>
 
 #ifndef __wasip1__
 #include <stddefer.h>
@@ -34,10 +35,6 @@ static_assert(DT_UNKNOWN == __WASI_FILETYPE_UNKNOWN, "Value mismatch");
 
 #ifdef __wasip3__
 #include <wasi/wasip3_block.h>
-#endif
-
-#if defined(__webp2__)
-#include <wasi/report-error.h>
 #endif
 
 #ifndef __webp2__
@@ -334,6 +331,7 @@ struct dirent *readdir(DIR *dirp) {
 }
 #elif defined(__webp2__)
 struct dirent *readdir(DIR *dirp) {
+  (void)dirp;
   WASILIBC_LOG_UNSUPPORTED("readdir");
   errno = EBADF; // It is impossible to open a DIR anyway.
   return NULL;

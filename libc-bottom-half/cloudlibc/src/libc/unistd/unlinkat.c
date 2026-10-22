@@ -2,26 +2,17 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <wasi/api.h>
-#include <wasi/libc.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
-
-#if defined(__webp2__)
+#include <wasi/api.h>
+#include <wasi/libc.h>
 #include <wasi/report-error.h>
-#endif
 
 int unlinkat(int fd, const char *path, int flag) {
-#if !defined(__webp2__)
   if ((flag & AT_REMOVEDIR) != 0) {
     return __wasilibc_rmdirat(fd, path);
   }
   return __wasilibc_unlinkat(fd, path);
-#else
-  WASILIBC_LOG_UNSUPPORTED("unlinkat");
-  errno = ENOENT;
-  return -1;
-#endif
 }

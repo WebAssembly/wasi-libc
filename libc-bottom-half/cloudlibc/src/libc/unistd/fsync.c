@@ -2,18 +2,15 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <wasi/api.h>
 #include <errno.h>
 #include <unistd.h>
+#include <wasi/api.h>
+#include <wasi/report-error.h>
 
 #ifndef __wasip1__
 #include <stddefer.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
-#endif
-
-#if defined(__webp2__)
-#include <wasi/report-error.h>
 #endif
 
 int fsync(int fildes) {
@@ -38,6 +35,7 @@ int fsync(int fildes) {
     return -1;
   }
 #elif defined(__webp2__)
+  (void)fildes;
   WASILIBC_LOG_UNSUPPORTED("fsync");
   errno = EINVAL;
   return -1;

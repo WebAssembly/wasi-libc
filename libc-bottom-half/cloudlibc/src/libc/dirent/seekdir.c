@@ -3,12 +3,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <dirent.h>
+#include <wasi/report-error.h>
 
 #include "dirent_impl.h"
-
-#if defined(__webp2__)
-#include <wasi/report-error.h>
-#endif
 
 void seekdir(DIR *dirp, long loc) {
 #if defined(__wasip1__)
@@ -22,6 +19,8 @@ void seekdir(DIR *dirp, long loc) {
   dirp->skip = loc;
   dirp->offset = 0;
 #elif defined(__webp2__)
+  (void)dirp;
+  (void)loc;
   WASILIBC_LOG_UNSUPPORTED("seekdir");
 #else
 # error "Unsupported WASI version"

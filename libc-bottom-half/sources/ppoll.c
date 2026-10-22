@@ -5,13 +5,10 @@
 #include <wasi/api.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file_utils.h>
+#include <wasi/report-error.h>
 
 #if !defined(__wasip1__)
 #include <stddefer.h>
-#endif
-
-#if defined(__webp2__)
-#include <wasi/report-error.h>
 #endif
 
 #if defined(__wasip1__)

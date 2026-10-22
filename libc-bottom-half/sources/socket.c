@@ -1,14 +1,10 @@
 #include <errno.h>
 #include <netinet/in.h>
 #include <wasi/descriptor_table.h>
-
-#if !defined(__webp2__)
+#include <wasi/report-error.h>
 #include <wasi/sockets_utils.h>
 #include <wasi/tcp.h>
 #include <wasi/udp.h>
-#else
-#include <wasi/report-error.h>
-#endif
 
 #ifdef __wasip2__
 #define sockets_static_tcp_socket_create tcp_create_socket_create_tcp_socket
@@ -38,7 +34,7 @@ static int udp_socket(sockets_ip_address_family_t family, bool blocking) {
 #endif // !webp2
 
 int socket(int domain, int type, int protocol) {
-#if !defined(__webp2__)
+#if defined(__wasip1__) || defined(__wasip2__) || defined(__wasip3__)
   sockets_ip_address_family_t family;
   switch (domain) {
   case PF_INET:
@@ -69,9 +65,14 @@ int socket(int domain, int type, int protocol) {
     errno = EPROTONOSUPPORT;
     return -1;
   }
-#else
+#elif defined(__webp2__)
+  (void)domain;
+  (void)type;
+  (void)protocol;
   WASILIBC_LOG_UNSUPPORTED("socket");
   errno = ENOSYS;
   return -1;
-#endif // !webp2
+#else
+#error "Unknown WASI version"
+#endif
 }

@@ -2,19 +2,16 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <wasi/api.h>
-#include <errno.h>
+#include <wasi/report-error.h>
 
 #ifndef __wasip1__
 #include <wasi/file_utils.h>
 #include <common/errors.h>
 #include <unistd.h>
-#endif
-
-#if defined(__webp2__)
-#include <wasi/report-error.h>
 #endif
 
 ssize_t preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
@@ -30,7 +27,7 @@ ssize_t preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
     errno = error;
     return -1;
   }
-#elif defined(__wasip2__) || defined(__wasip3__)
+#elif defined(__wasip2__) || defined(__wasip3__) || defined(__webp2__)
   // Skip empty iovecs and then delegate to `pread` with the first non-empty
   // iovec.
   while (iovcnt) {
@@ -41,10 +38,6 @@ ssize_t preadv(int fildes, const struct iovec *iov, int iovcnt, off_t offset) {
     iov++;
   }
   return pread(fildes, NULL, 0, offset);
-#elif defined(__webp2__)
-  WASILIBC_LOG_UNSUPPORTED("preadv");
-  errno = ENOSYS;
-  return -1;
 #else
 # error "Unsupported WASI version"
 #endif

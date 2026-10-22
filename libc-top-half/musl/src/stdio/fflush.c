@@ -1,10 +1,7 @@
 #include "stdio_impl.h"
 #include "wasi/report-error.h"
 #include <unistd.h>
-
-#ifdef __webp2__
 #include <wasi/webp2_stdio.h>
-#endif
 
 /* stdout.c will override this if linked */
 static FILE *volatile dummy = 0;

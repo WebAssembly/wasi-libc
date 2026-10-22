@@ -2,11 +2,8 @@
 #include <stdio.h>
 #include <wasi/api.h>
 #include <wasi/report-error.h>
-
-#ifdef __webp2__
 #include <wasi/utf8.h>
 #include <wasi/webp2_stdio.h>
-#endif
 
 void __wasilibc_report_error(const char *message) {
 #if defined(__wasip1__) || defined(__wasip2__) || defined(__wasip3__)
@@ -20,7 +17,7 @@ void __wasilibc_report_errorf(const char *format, ...) {
   va_list ap;
   va_start(ap, format);
 
-#if defined(__wasi__)
+#if defined(__wasip1__) || defined(__wasip2__) || defined(__wasip3__)
   vfprintf(stderr, format, ap);
   fputc('\n', stderr);
 #elif defined(__webp2__)

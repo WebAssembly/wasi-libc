@@ -8,12 +8,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <wasi/libc.h>
-
-#if !defined(__webp2__)
 #include <wasi/libc-find-relpath.h>
-#else
 #include <wasi/report-error.h>
-#endif
 
 #ifndef __webp2__
 DECLARE_WEAK_LOCK(__wasilibc_cwd_lock, extern);
@@ -22,7 +18,7 @@ static int __wasilibc_cwd_mallocd = 0;
 #endif
 
 int chdir(const char *path) {
-#if !defined(__webp2__)
+#if defined(__wasip1__) || defined(__wasip2__) || defined(__wasip3__)
   static char *relative_buf = NULL;
   static size_t relative_buf_len = 0;
 
@@ -76,11 +72,14 @@ int chdir(const char *path) {
     free(prev_cwd);
   __wasilibc_cwd_mallocd = 1;
   return 0;
-#else
+#elif defined(__webp2__)
+  (void)path;
   WASILIBC_LOG_UNSUPPORTED("chdir");
   errno = ENOENT;
   return -1;
-#endif // !webp2
+#else
+#error "Unknown WASI version"
+#endif
 }
 
 #ifndef __webp2__

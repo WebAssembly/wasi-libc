@@ -6,16 +6,12 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <wasi/api.h>
+#include <wasi/report-error.h>
 
 #ifndef __wasip1__
 #include <stddefer.h>
 #include <wasi/file_utils.h>
 #include <common/errors.h>
-#else
-#endif
-
-#if defined(__webp2__)
-#include <wasi/report-error.h>
 #endif
 
 #include "dirent_impl.h"
@@ -90,6 +86,7 @@ DIR *fdopendir(int fd) {
   dirp = NULL;
   return ret;
 #elif defined(__webp2__)
+  (void)fd;
   WASILIBC_LOG_UNSUPPORTED("fdopendir");
   errno = ENOSYS;
   return NULL;

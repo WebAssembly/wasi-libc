@@ -2,15 +2,12 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <wasi/api.h>
 #include <dirent.h>
+#include <errno.h>
+#include <wasi/api.h>
+#include <wasi/report-error.h>
 
 #include "dirent_impl.h"
-
-#if defined(__webp2__)
-#include <errno.h>
-#include <wasi/report-error.h>
-#endif
 
 void rewinddir(DIR *dirp) {
 #if defined(__wasip1__)
@@ -23,6 +20,7 @@ void rewinddir(DIR *dirp) {
   dirp->skip = 0;
   dirp->offset = 0;
 #elif defined(__webp2__)
+  (void)dirp;
   WASILIBC_LOG_UNSUPPORTED("rewinddir");
   errno = ENOSYS;
 #else

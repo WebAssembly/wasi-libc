@@ -2,15 +2,12 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
-#include <wasi/api.h>
-#include <wasi/report-error.h>
 #include <_/cdefs.h>
 #include <stdnoreturn.h>
 #include <unistd.h>
-
-#ifdef __webp2__
+#include <wasi/api.h>
+#include <wasi/report-error.h>
 #include <wasi/webp2_stdio.h>
-#endif
 
 noreturn void _Exit(int status) {
 #if defined(__wasip1__)

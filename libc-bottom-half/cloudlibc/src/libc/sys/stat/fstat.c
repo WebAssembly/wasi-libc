@@ -7,13 +7,11 @@
 #include <wasi/api.h>
 #include <wasi/descriptor_table.h>
 
-#ifndef __webp2__
-#include "stat_impl.h"
-#endif
-
 #if !defined(__wasip1__)
 #include <stddefer.h>
 #endif
+
+#include "stat_impl.h"
 
 int fstat(int fildes, struct stat *buf) {
 #if defined(__wasip1__)

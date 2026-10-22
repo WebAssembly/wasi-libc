@@ -25,10 +25,6 @@ static_assert(POSIX_FADV_WILLNEED == __WASI_ADVICE_WILLNEED,
               "Value mismatch");
 #endif
 
-#if defined(__webp2__)
-#include <wasi/report-error.h>
-#endif
-
 int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
   if (offset < 0 || len < 0)
     return EINVAL;
@@ -79,6 +75,8 @@ int posix_fadvise(int fd, off_t offset, off_t len, int advice) {
   }
   return 0;
 #elif defined(__webp2__)
+  (void)fd;
+  (void)advice;
   return 0;
 #else
 # error "Unsupported WASI version"

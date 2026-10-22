@@ -2,21 +2,18 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
+#include <assert.h>
 #include <common/clock.h>
 #include <common/time.h>
-#include <assert.h>
-#include <wasi/api.h>
 #include <errno.h>
 #include <time.h>
+#include <wasi/api.h>
+#include <wasi/report-error.h>
 #include <wasi/wasip3_block.h>
 
 #ifdef __wasip1__
 static_assert(TIMER_ABSTIME == __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME,
               "Value mismatch");
-#endif
-
-#if defined(__webp2__)
-#include <wasi/report-error.h>
 #endif
 
 int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
@@ -40,10 +37,10 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
   __wasi_event_t ev;
   __wasi_errno_t error = __wasi_poll_oneoff(&sub, &ev, 1, &nevents);
   return error == 0 && ev.error == 0 ? 0 : ENOTSUP;
-#elif defined(__wasip2__) || defined(__wasip3__)
+#elif defined(__wasip2__) || defined(__wasip3__) || defined(__webp2__)
 
   if (clock_id != CLOCK_MONOTONIC) {
-    // wasip{2,3} only provide a pollable for monotonic clocks
+    // wasip{2,3} and webp2 only provide a pollable for monotonic clocks
     return ENOTSUP;
   }
 
@@ -62,17 +59,20 @@ int clock_nanosleep(clockid_t clock_id, int flags, const struct timespec *rqtp,
   poll_method_pollable_block(poll_borrow_pollable(pollable));
 
   poll_pollable_drop_own(pollable);
-#else // defined(__wasip3__)
+#elif defined(__wasip3__)
   if (flags & TIMER_ABSTIME) {
     __wasilibc_subtask_await(monotonic_clock_wait_until(duration));
   } else {
     __wasilibc_subtask_await(monotonic_clock_wait_for(duration));
   }
+#else // defined(__webp2__)
+  // Allow zero-length sleeps but otherwise return an error.
+  if (duration != 0) {
+    WASILIBC_LOG_UNSUPPORTED("clock_nanosleep");
+    return ENOSYS;
+  }
 #endif
   return 0;
-#elif defined(__webp2__)
-  WASILIBC_LOG_UNSUPPORTED("clock_nanosleep");
-  return ENOTSUP;
 #else
 # error "Unsupported WASI version"
 #endif

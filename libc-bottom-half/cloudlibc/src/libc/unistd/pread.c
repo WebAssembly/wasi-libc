@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <wasi/api.h>
+#include <wasi/report-error.h>
 
 #ifndef __wasip1__
 #include <stddefer.h>
@@ -15,10 +16,6 @@
 
 #ifdef __wasip3__
 #include <wasi/wasip3_block.h>
-#endif
-
-#if defined(__webp2__)
-#include <wasi/report-error.h>
 #endif
 
 ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
@@ -112,6 +109,9 @@ ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
   }
   return ret;
 #elif defined(__webp2__)
+  (void)fildes;
+  (void)buf;
+  (void)nbyte;
   WASILIBC_LOG_UNSUPPORTED("pread");
   errno = ENOSYS;
   return -1;

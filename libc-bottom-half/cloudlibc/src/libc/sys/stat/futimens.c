@@ -2,13 +2,11 @@
 //
 // SPDX-License-Identifier: BSD-2-Clause
 
+#include <errno.h>
 #include <sys/stat.h>
 #include <wasi/api.h>
-#include <errno.h>
-
-#ifndef __webp2__
-#include "stat_impl.h"
-#endif
+#include <wasi/descriptor_table.h>
+#include <wasi/report-error.h>
 
 #ifndef __wasip1__
 #include <stddefer.h>
@@ -16,9 +14,7 @@
 #include <common/errors.h>
 #endif
 
-#if defined(__webp2__)
-#include <wasi/report-error.h>
-#endif
+#include "stat_impl.h"
 
 int futimens(int fd, const struct timespec *times) {
 #if defined(__wasip1__)
@@ -63,6 +59,8 @@ int futimens(int fd, const struct timespec *times) {
     return -1;
   }
 #elif defined(__webp2__)
+  (void)fd;
+  (void)times;
   WASILIBC_LOG_UNSUPPORTED("futimens");
   errno = ENOSYS;
   return -1;

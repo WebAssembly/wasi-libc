@@ -13,6 +13,8 @@
 #include <sysexits.h>
 #include <wasi/api.h>
 #include <wasi/libc.h>
+#include <wasi/libc-find-relpath.h>
+#include <wasi/report-error.h>
 
 #if defined(__wasip2__) || defined(__wasip3__)
 #include <wasi/descriptor_table.h>
@@ -20,13 +22,7 @@
 #include <wasi/file_utils.h>
 #endif
 
-#if !defined(__webp2__)
-#include <wasi/libc-find-relpath.h>
-#else
-#include <wasi/report-error.h>
-#endif
-
-#ifndef __webp2__
+#if defined(__wasip1__) || defined(__wasip2__) || defined(__wasip3__)
 /// Access to the the above preopen must be protected in the presence of
 /// threads.
 DECLARE_STRONG_LOCK(lock, static);
@@ -311,10 +307,8 @@ int __wasilibc_find_abspath(const char *path, const char **abs_prefix,
   *relative_path = computed;
   return fd;
 }
-#endif // !webp2
 
 void __wasilibc_populate_preopens(void) {
-#if !defined(__webp2__)
   // Fast path: If the preopens are already initialized, do nothing.
   if (preopens_populated) {
     return;
@@ -404,13 +398,9 @@ oserr:
 #endif
 software:
   _Exit(EX_SOFTWARE);
-#else
-  WASILIBC_LOG_UNSUPPORTED("__wasilibc_populate_preopens");
-#endif // !webp2
 }
 
 void __wasilibc_reset_preopens(void) {
-#if !defined(__webp2__)
   STRONG_LOCK(lock);
 
   if (num_preopens) {
@@ -433,7 +423,15 @@ void __wasilibc_reset_preopens(void) {
 #endif
 
   STRONG_UNLOCK(lock);
-#else
-  WASILIBC_LOG_UNSUPPORTED("__wasilibc_reset_preopens");
-#endif // !webp2
 }
+#elif defined(__webp2__)
+void __wasilibc_populate_preopens(void) {
+  WASILIBC_LOG_UNSUPPORTED("__wasilibc_populate_preopens");
+}
+
+void __wasilibc_reset_preopens(void) {
+  WASILIBC_LOG_UNSUPPORTED("__wasilibc_reset_preopens");
+}
+#else
+#error "Unknown WASI version"
+#endif

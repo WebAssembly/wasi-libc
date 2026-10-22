@@ -1,10 +1,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
-
-#if defined(__webp2__)
 #include <wasi/report-error.h>
-#endif
 
 #if defined(__wasip3__)
 
@@ -498,13 +495,7 @@ static descriptor_vtable_t pipe_vtable = {
 #endif // __wasip3__
 
 int pipe(int fd[2]) {
-#if !defined(__webp2__)
   return pipe2(fd, 0);
-#else
-  WASILIBC_LOG_UNSUPPORTED("pipe");
-  errno = ENOTSUP;
-  return -1;
-#endif
 }
 
 int pipe2(int fd[2], int flags) {
@@ -512,11 +503,8 @@ int pipe2(int fd[2], int flags) {
     errno = EINVAL;
     return -1;
   }
-#if defined(__wasip1__) || defined(__wasip2__)
+#if defined(__wasip1__) || defined(__wasip2__) || defined(__webp2__)
   (void)fd;
-  errno = ENOTSUP;
-  return -1;
-#elif defined(__webp2__)
   WASILIBC_LOG_UNSUPPORTED("pipe2");
   errno = ENOTSUP;
   return -1;

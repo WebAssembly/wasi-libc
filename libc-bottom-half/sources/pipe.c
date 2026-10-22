@@ -494,9 +494,7 @@ static descriptor_vtable_t pipe_vtable = {
 
 #endif // __wasip3__
 
-int pipe(int fd[2]) {
-  return pipe2(fd, 0);
-}
+int pipe(int fd[2]) { return pipe2(fd, 0); }
 
 int pipe2(int fd[2], int flags) {
   if ((flags & ~(O_CLOEXEC | O_NONBLOCK)) != 0) {

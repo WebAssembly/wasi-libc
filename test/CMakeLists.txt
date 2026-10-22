@@ -57,12 +57,8 @@ elseif(NOT ENGINE OR ENGINE STREQUAL "")
   # up-to-date. Note though that `wasm32-wasip1-threads` requires an explicitly
   # older version of Wasmtime as the latest releases no longer support
   # wasi-threads.
-  #
-  # TODO(webp2): Switch to v50.0.0 once it's released.
-  set(wasmtime_version v48.0.1)
-  if (WEB)
-    set(wasmtime_version v50.0.0-rc.1)
-  elseif (TARGET_TRIPLE MATCHES "-threads")
+  set(wasmtime_version v50.0.0)
+  if (TARGET_TRIPLE MATCHES "-threads")
     set(wasmtime_version v44.0.0)
   endif()
   ba_download(

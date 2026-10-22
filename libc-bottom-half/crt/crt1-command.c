@@ -1,10 +1,10 @@
-#include "wasi/report-error.h"
 #ifdef _REENTRANT
 #include <stdatomic.h>
 #endif
 
 #include <wasi/api.h>
 #include <wasi/descriptor_table.h>
+#include <wasi/report-error.h>
 
 extern void __wasm_call_ctors(void);
 extern int __main_void(void);

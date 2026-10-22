@@ -12,8 +12,8 @@
 #include <string.h>
 #include <sysexits.h>
 #include <wasi/api.h>
-#include <wasi/libc.h>
 #include <wasi/libc-find-relpath.h>
+#include <wasi/libc.h>
 #include <wasi/report-error.h>
 
 #if defined(__wasip2__) || defined(__wasip3__)

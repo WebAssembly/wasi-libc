@@ -9,9 +9,9 @@
 #include <sys/statvfs.h>
 #include <unistd.h>
 #include <utime.h>
-#include <wasi/libc.h>
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc-nocwd.h>
+#include <wasi/libc.h>
 #include <wasi/report-error.h>
 
 #if defined(__wasip1__) || defined(__wasip2__) || defined(__wasip3__)
@@ -76,7 +76,7 @@ int __wasilibc_open_nomode(const char *path, int oflag) {
 
   char *relative_path;
   int dirfd = find_relpath(path, &relative_path);
-  
+
   // If we can't find a preopen for it, fail as if we can't find the path.
   if (dirfd == -1) {
     errno = ENOENT;

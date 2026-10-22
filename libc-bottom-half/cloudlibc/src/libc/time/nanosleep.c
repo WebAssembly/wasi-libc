@@ -4,7 +4,6 @@
 
 #include <errno.h>
 #include <time.h>
-#include <wasi/report-error.h>
 #include <wasi/version.h>
 
 int nanosleep(const struct timespec *rqtp, struct timespec *rem) {

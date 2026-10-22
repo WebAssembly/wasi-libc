@@ -1,10 +1,6 @@
 #ifndef __wasi_file_utils_h
 #define __wasi_file_utils_h
 
-#include <features.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <sys/uio.h>
 #include <wasi/version.h>
 
 #if defined(__wasip2__) || defined(__wasip3__)

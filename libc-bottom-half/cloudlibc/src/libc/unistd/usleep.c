@@ -5,7 +5,6 @@
 #include <errno.h>
 #include <time.h>
 #include <unistd.h>
-#include <wasi/report-error.h>
 #include <wasi/version.h>
 
 int usleep(useconds_t useconds) {

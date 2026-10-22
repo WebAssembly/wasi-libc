@@ -7,8 +7,8 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <wasi/libc.h>
 #include <wasi/libc-find-relpath.h>
+#include <wasi/libc.h>
 #include <wasi/report-error.h>
 
 #ifndef __webp2__

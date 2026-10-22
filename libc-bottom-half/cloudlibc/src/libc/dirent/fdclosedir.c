@@ -3,9 +3,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <dirent.h>
-#include <errno.h>
 #include <stdlib.h>
-#include <wasi/report-error.h>
 
 #include "dirent_impl.h"
 

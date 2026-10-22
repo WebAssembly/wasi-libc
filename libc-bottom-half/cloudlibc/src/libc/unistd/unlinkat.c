@@ -8,7 +8,6 @@
 #include <unistd.h>
 #include <wasi/api.h>
 #include <wasi/libc.h>
-#include <wasi/report-error.h>
 
 int unlinkat(int fd, const char *path, int flag) {
   if ((flag & AT_REMOVEDIR) != 0) {

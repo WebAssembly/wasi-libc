@@ -110,7 +110,6 @@ set(bottom_half_sources
   cloudlibc/src/libc/unistd/unlinkat.c
   cloudlibc/src/libc/unistd/usleep.c
   cloudlibc/src/libc/unistd/write.c
-  sources/__cabi_realloc_wrapper.S
   sources/__errno_location.c
   sources/__main_void.c
   sources/__wasilibc_dt.c
@@ -143,6 +142,7 @@ set(bottom_half_sources
   sources/sbrk.c
   sources/truncate.c
   sources/utf8.c
+  sources/__cabi_realloc_wrapper.S
 )
 
 if (WASI STREQUAL "p1")
@@ -195,11 +195,6 @@ if (WASI STREQUAL "p3")
     sources/wasip3_block_on.c
     sources/wasip3_stdio.c
   )
-  if (HAVE_WASM_LIBCALL_THREAD_CONTEXT)
-    list(APPEND bottom_half_sources sources/__wasm_task_hook.S
-      sources/wasip3_tls.c
-    )
-  endif()
 endif()
 
 # webp2-specific
@@ -207,6 +202,13 @@ if (WEB STREQUAL "p2")
   list(APPEND bottom_half_sources
     sources/webp2.c
     sources/webp2_stdio.c
+  )
+endif()
+
+if (HAVE_WASM_LIBCALL_THREAD_CONTEXT)
+  list(APPEND bottom_half_sources
+    sources/__wasm_task_hook.S
+    sources/wasip3_tls.c
   )
 endif()
 

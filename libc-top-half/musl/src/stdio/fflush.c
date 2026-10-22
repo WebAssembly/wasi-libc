@@ -1,6 +1,4 @@
 #include "stdio_impl.h"
-#include "wasi/report-error.h"
-#include <unistd.h>
 #include <wasi/webp2_stdio.h>
 
 /* stdout.c will override this if linked */

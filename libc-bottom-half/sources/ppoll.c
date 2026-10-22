@@ -604,8 +604,8 @@ static int ppoll_impl(struct pollfd *fds, size_t nfds,
   // never hit this.
   bool zero_timeout = timeout && timeout->tv_sec == 0 && timeout->tv_nsec == 0;
   if (ready == 0 && !zero_timeout) {
-    // TODO(webp2): If we actually return from this, we risk user code going
-    // into an infinite loop. Therefore we noisily exit.
+    // If we actually return from this, we risk user code going into an
+    // infinite loop. Therefore we noisily exit.
     __wasilibc_report_error("blocking ppoll is not supported");
     exit(1);
   }

@@ -13,9 +13,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <wasi/libc-nocwd.h>
 #include <wasi/libc.h>
 #include <wasi/report-error.h>
-#include <wasi/libc-nocwd.h>
 
 // If the platform doesn't define O_TMPFILE, we don't need to worry about it.
 #ifndef O_TMPFILE
@@ -23,15 +23,15 @@
 #endif
 
 int openat(int dirfd, const char *pathname, int flags, ...) {
-  if(dirfd == AT_FDCWD || pathname[0] == '/') {
+  if (dirfd == AT_FDCWD || pathname[0] == '/') {
     return open(pathname, flags);
   }
-  
+
   return __wasilibc_nocwd_openat_nomode(dirfd, pathname, flags);
 }
 
 int symlinkat(const char *target, int dirfd, const char *linkpath) {
-  if(dirfd == AT_FDCWD || linkpath[0] == '/') {
+  if (dirfd == AT_FDCWD || linkpath[0] == '/') {
     return symlink(target, linkpath);
   }
 
@@ -40,7 +40,7 @@ int symlinkat(const char *target, int dirfd, const char *linkpath) {
 
 ssize_t readlinkat(int dirfd, const char *__restrict pathname,
                    char *__restrict buf, size_t bufsiz) {
-  if(dirfd == AT_FDCWD || pathname[0] == '/') {
+  if (dirfd == AT_FDCWD || pathname[0] == '/') {
     return readlink(pathname, buf, bufsiz);
   }
 
@@ -48,7 +48,7 @@ ssize_t readlinkat(int dirfd, const char *__restrict pathname,
 }
 
 int mkdirat(int dirfd, const char *pathname, mode_t mode) {
-  if(dirfd == AT_FDCWD || pathname[0] == '/') {
+  if (dirfd == AT_FDCWD || pathname[0] == '/') {
     return mkdir(pathname, mode);
   }
 
@@ -56,7 +56,7 @@ int mkdirat(int dirfd, const char *pathname, mode_t mode) {
 }
 
 DIR *opendirat(int dirfd, const char *path) {
-  if(dirfd == AT_FDCWD || path[0] == '/') {
+  if (dirfd == AT_FDCWD || path[0] == '/') {
     return opendir(path);
   }
 
@@ -66,7 +66,7 @@ DIR *opendirat(int dirfd, const char *path) {
 int scandirat(int dirfd, const char *dirp, struct dirent ***namelist,
               int (*filter)(const struct dirent *),
               int (*compar)(const struct dirent **, const struct dirent **)) {
-  if(dirfd == AT_FDCWD || dirp[0] == '/') {
+  if (dirfd == AT_FDCWD || dirp[0] == '/') {
     return scandir(dirp, namelist, filter, compar);
   }
 
@@ -74,7 +74,7 @@ int scandirat(int dirfd, const char *dirp, struct dirent ***namelist,
 }
 
 int faccessat(int dirfd, const char *pathname, int mode, int flags) {
-  if(dirfd == AT_FDCWD || pathname[0] == '/') {
+  if (dirfd == AT_FDCWD || pathname[0] == '/') {
     return __wasilibc_access(pathname, mode, flags);
   }
 
@@ -83,7 +83,7 @@ int faccessat(int dirfd, const char *pathname, int mode, int flags) {
 
 int fstatat(int dirfd, const char *__restrict pathname,
             struct stat *__restrict statbuf, int flags) {
-  if(dirfd == AT_FDCWD || pathname[0] == '/') {
+  if (dirfd == AT_FDCWD || pathname[0] == '/') {
     return __wasilibc_stat(pathname, statbuf, flags);
   }
 
@@ -92,7 +92,7 @@ int fstatat(int dirfd, const char *__restrict pathname,
 
 int utimensat(int dirfd, const char *pathname, const struct timespec times[2],
               int flags) {
-  if(dirfd == AT_FDCWD || pathname[0] == '/') {
+  if (dirfd == AT_FDCWD || pathname[0] == '/') {
     return __wasilibc_utimens(pathname, times, flags);
   }
 
@@ -101,7 +101,7 @@ int utimensat(int dirfd, const char *pathname, const struct timespec times[2],
 
 int linkat(int olddirfd, const char *oldpath, int newdirfd, const char *newpath,
            int flags) {
-  if((olddirfd == AT_FDCWD || oldpath[0] == '/') &&
+  if ((olddirfd == AT_FDCWD || oldpath[0] == '/') &&
       (newdirfd == AT_FDCWD || newpath[0] == '/')) {
     return __wasilibc_link(oldpath, newpath, flags);
   }
@@ -117,7 +117,7 @@ int linkat(int olddirfd, const char *oldpath, int newdirfd, const char *newpath,
 
 int renameat(int olddirfd, const char *oldpath, int newdirfd,
              const char *newpath) {
-  if((olddirfd == AT_FDCWD || oldpath[0] == '/') &&
+  if ((olddirfd == AT_FDCWD || oldpath[0] == '/') &&
       (newdirfd == AT_FDCWD || newpath[0] == '/')) {
     return rename(oldpath, newpath);
   }
@@ -132,7 +132,7 @@ int renameat(int olddirfd, const char *oldpath, int newdirfd,
 }
 
 int __wasilibc_unlinkat(int dirfd, const char *path) {
-  if(dirfd == AT_FDCWD || path[0] == '/') {
+  if (dirfd == AT_FDCWD || path[0] == '/') {
     return unlink(path);
   }
 
@@ -140,7 +140,7 @@ int __wasilibc_unlinkat(int dirfd, const char *path) {
 }
 
 int __wasilibc_rmdirat(int dirfd, const char *path) {
-  if(dirfd == AT_FDCWD || path[0] == '/') {
+  if (dirfd == AT_FDCWD || path[0] == '/') {
     return rmdir(path);
   }
 

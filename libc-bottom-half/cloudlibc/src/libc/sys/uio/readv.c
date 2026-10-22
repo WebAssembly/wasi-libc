@@ -10,7 +10,6 @@
 #include <stddef.h>
 #include <unistd.h>
 #include <wasi/api.h>
-#include <wasi/file_utils.h>
 
 #ifdef __wasip1__
 static_assert(offsetof(struct iovec, iov_base) ==
@@ -44,25 +43,16 @@ ssize_t readv(int fildes, const struct iovec *iov, int iovcnt) {
   }
   return bytes_read;
 #elif defined(__wasip2__) || defined(__wasip3__) || defined(__webp2__)
-  if (!__wasilibc_iovecs_ok(iov, iovcnt, NULL)) {
-    errno = EINVAL;
-    return -1;
-  }
-
-  size_t bytes_read = 0;
-  for (int i = 0; i < iovcnt; i++) {
-    const struct iovec *v = &iov[i];
-    ssize_t res = read(fildes, v->iov_base, v->iov_len);
-    if (res < 0) {
-      // errno already set
-      return res;
+  // Skip empty iovecs and then delegate to `read` with the first non-empty
+  // iovec.
+  while (iovcnt) {
+    if (iov->iov_len != 0) {
+      return read(fildes, iov->iov_base, iov->iov_len);
     }
-    bytes_read += res;
-    if ((size_t)res < v->iov_len) {
-      break;
-    }
+    iovcnt--;
+    iov++;
   }
-  return bytes_read;
+  return read(fildes, NULL, 0);
 #else
 # error "Unsupported WASI version"
 #endif

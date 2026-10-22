@@ -3,15 +3,15 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include <sys/uio.h>
+
 #include <assert.h>
-#include <wasi/api.h>
 #include <errno.h>
 #include <limits.h>
 #include <stddef.h>
 #include <unistd.h>
+#include <wasi/api.h>
 
-#if !defined(__wasip1__)
-#include <wasi/file_utils.h>
+#ifndef __wasip1__
 #include <wasi/descriptor_table.h>
 #include <common/errors.h>
 #endif
@@ -49,20 +49,16 @@ ssize_t writev(int fildes, const struct iovec *iov, int iovcnt) {
   }
   return bytes_written;
 #elif defined(__wasip2__) || defined(__wasip3__) || defined(__webp2__)
-  size_t total_size;
-  if (!__wasilibc_iovecs_ok(iov, iovcnt, &total_size)) {
-    errno = EINVAL;
-    return -1;
-  }
-  for (int i = 0; i < iovcnt; i++) {
-    const struct iovec *v = &iov[i];
-    int res = write(fildes, v->iov_base, v->iov_len);
-    if (res < 0) {
-      // errno already set
-      return res;
+  // Skip empty iovecs and then delegate to `read` with the first non-empty
+  // iovec.
+  while (iovcnt) {
+    if (iov->iov_len != 0) {
+      return write(fildes, iov->iov_base, iov->iov_len);
     }
+    iovcnt--;
+    iov++;
   }
-  return total_size;
+  return write(fildes, NULL, 0);
 #else
 # error "Unsupported WASI version"
 #endif

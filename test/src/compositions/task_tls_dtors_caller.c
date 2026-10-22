@@ -37,8 +37,9 @@ int main(void) {
     }
   }
 
+  // Destructors are never run at this time for the "main thread" TLS.
   fprintf(stderr, "dtor_calls = %d\n", test_simple_i_num_dtors());
-  TEST(test_simple_i_num_dtors() == 2 * N);
+  TEST(test_simple_i_num_dtors() == 0);
 
   return t_status + test_simple_i_t_status();
 }

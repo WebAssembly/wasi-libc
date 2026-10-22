@@ -129,6 +129,32 @@ int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clock,
 /// In single-threaded builds, this function is a no-op.
 int __wasilibc_futex_wake(volatile int *addr, int count, unsigned flags);
 
+#ifdef __wasm_libcall_thread_context__
+
+/// Get/set functions for a "task context" slot of component-model task-local
+/// storage.
+///
+/// These functions will preserve a pointer's worth of storage for the lifetime
+/// of a component model task. This is only defined for wasip3-and-later targets
+/// at this time (the `__wasm_libcall_thread_context__` guard) since other
+/// targets can use thread locals or context slot 0 directly.
+///
+/// For the wasip3 target however TLS is shared across all implicit threads
+/// created by component model tasks starting. This means that bindings
+/// generators otherwise have nowhere to store task-local information. These
+/// functions provided a blessed location to store one pointer's worth of
+/// information which is eventually saved in context slot 0 of component model
+/// tasks. For wasip3 targets though context slot 0 is typically the linear
+/// memory stack pointer, hence the need for these intrinsics.
+///
+/// The `__wasm_task_hook` function defined in `wasi-libc` will save/restore
+/// this task context at appropriate points to ensure that the pointers
+/// configured here are saved/preserved across tasks.
+void *__wasilibc_task_context_get(void);
+void __wasilibc_task_context_set(void *ctx);
+
+#endif
+
 #ifdef __cplusplus
 }
 #endif

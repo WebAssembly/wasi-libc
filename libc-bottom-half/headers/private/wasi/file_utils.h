@@ -14,17 +14,20 @@
 #include <wasi/wasip2.h>
 
 #ifdef __wasip2__
+// Sets errno for a failed stream operation and releases its error resource.
+void __wasilibc_set_stream_errno(streams_own_error_t error);
+
 /// Handles a `wasi:io/streams.stream-error` for a `read`-style operation.
 ///
 /// If the error indicates "closed" then 0 is returned to mean EOF. Otherwise
-/// the last-operation-failed handle is closed and errno is set to EIO.
+/// the last-operation-failed handle is closed and errno is set to the
+/// corresponding filesystem errno when available, else EIO.
 static inline int wasip2_handle_read_error(streams_stream_error_t error) {
   if (error.tag == STREAMS_STREAM_ERROR_CLOSED) {
     return 0;
   }
   assert(error.tag == STREAMS_STREAM_ERROR_LAST_OPERATION_FAILED);
-  io_error_error_drop_own(error.val.last_operation_failed);
-  errno = EIO;
+  __wasilibc_set_stream_errno(error.val.last_operation_failed);
   return -1;
 }
 
@@ -36,8 +39,7 @@ static inline int wasip2_handle_write_error(streams_stream_error_t error) {
     return -1;
   }
   assert(error.tag == STREAMS_STREAM_ERROR_LAST_OPERATION_FAILED);
-  io_error_error_drop_own(error.val.last_operation_failed);
-  errno = EIO;
+  __wasilibc_set_stream_errno(error.val.last_operation_failed);
   return -1;
 }
 

@@ -21,7 +21,7 @@ __attribute__((export_name("_start"))) void _start(void)
 // that this shouldn't be too problematic (in theory).
 __attribute__((export_name("wasi:cli/run@0.2.12#run"))) int _start(void)
 #elif defined(__wasip3__)
-__attribute__((export_name("wasi:cli/run@0.3.0#run"))) int _start(void)
+__attribute__((export_name("wasi:cli/run@0.3.2#run"))) int _start(void)
 #elif defined(__webp2__)
 // On webp2 we export as _initialize so that the linker will call this from a
 // start function instead of being called by the host.

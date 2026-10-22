@@ -209,6 +209,7 @@ if (HAVE_WASM_LIBCALL_THREAD_CONTEXT)
   list(APPEND bottom_half_sources
     sources/__wasm_task_hook.S
     sources/wasip3_tls.c
+    sources/task_context.c
   )
 endif()
 

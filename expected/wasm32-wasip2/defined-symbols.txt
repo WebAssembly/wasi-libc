@@ -361,6 +361,7 @@ __wasilibc_report_error
 __wasilibc_report_errorf
 __wasilibc_reset_preopens
 __wasilibc_rmdirat
+__wasilibc_set_stream_errno
 __wasilibc_setsockopt_timeout
 __wasilibc_sockaddr_to_wasi
 __wasilibc_sockaddr_validate

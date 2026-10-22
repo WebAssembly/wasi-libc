@@ -24,6 +24,8 @@ typedef struct {
   stdin_future_result_void_error_code_t input_result;
   // tristate: zero=unknown, valid handle=yes, -1=no
   terminal_input_own_terminal_input_t terminal_in;
+  // O_NONBLOCK, set with fcntl(F_SETFL) or ioctl(FIONBIO).
+  bool nonblocking;
 } stdin3_t;
 
 typedef struct {
@@ -38,6 +40,8 @@ typedef struct {
   stdout_stream_func_t stream_func;
   // function to determine whether this is a terminal (delayed)
   bool (*terminal_func)(terminal_stdout_own_terminal_output_t *ret);
+  // O_NONBLOCK, set with fcntl(F_SETFL) or ioctl(FIONBIO).
+  bool nonblocking;
 } stdout3_t;
 
 static void translate_error(wasi_cli_types_error_code_t err) {
@@ -115,7 +119,7 @@ static int stdout3_get_write_stream(void *data, wasi_write_t *out) {
     wasip3_io_state_init(&stdio->output, writer, stdio->lock);
   }
   out->offset = NULL;
-  out->blocking = true;
+  out->blocking = !stdio->nonblocking;
   out->timeout = 0;
   out->state = &stdio->output;
   out->eof = stdout3_write_eof;
@@ -157,7 +161,7 @@ static int stdin3_get_read_stream(void *data, wasi_read_t *read) {
   }
   read->state = &stdio->input;
   read->offset = NULL;
-  read->blocking = true;
+  read->blocking = !stdio->nonblocking;
   read->timeout = 0;
   read->eof_data = data;
   read->eof = stdin3_read_eof;
@@ -171,13 +175,43 @@ static int stdio3_fstat(void *data, struct stat *buf) {
 }
 
 static int stdin3_fcntl_getfl(void *data) {
-  (void)data;
-  return O_RDONLY;
+  stdin3_t *stdio = (stdin3_t *)data;
+  STRONG_LOCK(stdio->lock);
+  defer STRONG_UNLOCK(stdio->lock);
+  return O_RDONLY | (stdio->nonblocking ? O_NONBLOCK : 0);
 }
 
 static int stdout3_fcntl_getfl(void *data) {
-  (void)data;
-  return O_WRONLY;
+  stdout3_t *stdio = (stdout3_t *)data;
+  STRONG_LOCK(stdio->lock);
+  defer STRONG_UNLOCK(stdio->lock);
+  return O_WRONLY | (stdio->nonblocking ? O_NONBLOCK : 0);
+}
+
+// Only O_NONBLOCK can change, as for a file; the other status flags
+// (O_APPEND) mean nothing for a stream and are ignored.
+static int stdin3_set_blocking(void *data, bool blocking) {
+  stdin3_t *stdio = (stdin3_t *)data;
+  STRONG_LOCK(stdio->lock);
+  defer STRONG_UNLOCK(stdio->lock);
+  stdio->nonblocking = !blocking;
+  return 0;
+}
+
+static int stdin3_fcntl_setfl(void *data, int flags) {
+  return stdin3_set_blocking(data, (flags & O_NONBLOCK) == 0);
+}
+
+static int stdout3_set_blocking(void *data, bool blocking) {
+  stdout3_t *stdio = (stdout3_t *)data;
+  STRONG_LOCK(stdio->lock);
+  defer STRONG_UNLOCK(stdio->lock);
+  stdio->nonblocking = !blocking;
+  return 0;
+}
+
+static int stdout3_fcntl_setfl(void *data, int flags) {
+  return stdout3_set_blocking(data, (flags & O_NONBLOCK) == 0);
 }
 
 static int stdin3_isatty(void *data) {
@@ -207,16 +241,20 @@ static int stdout3_isatty(void *data) {
 static descriptor_vtable_t stdin3_vtable = {
     .free = stdin3_free,
     .get_read_stream = stdin3_get_read_stream,
+    .set_blocking = stdin3_set_blocking,
     .fstat = stdio3_fstat,
     .fcntl_getfl = stdin3_fcntl_getfl,
+    .fcntl_setfl = stdin3_fcntl_setfl,
     .isatty = stdin3_isatty,
 };
 
 static descriptor_vtable_t stdout3_vtable = {
     .free = stdout3_free,
     .get_write_stream = stdout3_get_write_stream,
+    .set_blocking = stdout3_set_blocking,
     .fstat = stdio3_fstat,
     .fcntl_getfl = stdout3_fcntl_getfl,
+    .fcntl_setfl = stdout3_fcntl_setfl,
     .isatty = stdout3_isatty,
 };
 

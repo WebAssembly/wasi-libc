@@ -4,10 +4,10 @@
 #include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <wasi/__generated_webp2.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/report-error.h>
 #include <wasi/utf8.h>
+#include <wasi/webp2.h>
 #include <wasi/webp2_stdio.h>
 
 #define LINE_BUF_SIZE 4096

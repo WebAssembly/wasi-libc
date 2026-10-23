@@ -29,7 +29,8 @@ void __wasilibc_report_errorf(const char *format, ...) {
   wasilibc_utf8_writer_t utf8 =
       __wasilibc_make_utf8_writer(utf8_buf, ERROR_MAX_LEN);
 
-  // Re-encode as UTF-8 (excluding vnsprintf's nul)
+  // Re-encode as UTF-8 (excluding vnsprintf's nul). Non-UTF-8 data can slip in
+  // via __FILE__ or function names at a minimum.
   for (int i = 0; i < n && i < (int)sizeof(format_buf) - 1; i++) {
     if (!__wasilibc_utf8_write(&utf8, format_buf[i])) {
       break;

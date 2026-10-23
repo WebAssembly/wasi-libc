@@ -10,8 +10,8 @@
 #include <stddef.h>
 #include <sys/uio.h>
 
-// Flush all valid content in one of our linebuffers (leaving trailing
-// multibyte content alone to be completed later).
+// Flush content in our output buffers to the output device (i.e. the console).
+// Trailing multi-byte UTF-8 content will remain in the buffer for later.
 hidden void __wasilibc_webp2_fflush(int fd);
 
 // Finalizes and flushes the contents of stdout & stderr in preparation for app

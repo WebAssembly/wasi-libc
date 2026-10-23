@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <stddefer.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <wasi/descriptor_table.h>
@@ -26,7 +27,7 @@ static stdio_t __stdin;
 static stdio_t __stdout;
 static stdio_t __stderr;
 
-static void stdio_out(stdio_t *stdio) {
+static void stdio_console_out(stdio_t *stdio) {
   webp2_string_t out =
       (webp2_string_t){.ptr = stdio->utf8.buf, .len = stdio->utf8.valid_len};
   if (stdio->warn) {
@@ -36,9 +37,10 @@ static void stdio_out(stdio_t *stdio) {
   }
 }
 
-static void stdio_flush(stdio_t *stdio) {
+static void stdio_flush_to_console(void *data) {
+  stdio_t *stdio = (stdio_t *)data;
   if (stdio->utf8.valid_len > 0) {
-    stdio_out(stdio);
+    stdio_console_out(stdio);
     __wasilibc_utf8_reset(&stdio->utf8);
   }
 }
@@ -52,10 +54,10 @@ static void finish_and_flush(stdio_t *stdio) {
   if (!__wasilibc_utf8_abort_current(&stdio->utf8)) {
     // Emit what is already valid in the buffer first, and carry over the
     // in-progress codepoint
-    stdio_flush(stdio);
+    stdio_flush_to_console(stdio);
   }
   __wasilibc_utf8_abort_current(&stdio->utf8);
-  stdio_flush(stdio);
+  stdio_flush_to_console(stdio);
 }
 
 static void stdio_free(void *data) {
@@ -111,7 +113,7 @@ static ssize_t stdio_write(void *data, const void *buf, size_t nbyte) {
     // or because there was no room for a replacement char).
     bool already_logged = false;
     if (!__wasilibc_utf8_write(utf8, b)) {
-      stdio_out(stdio);
+      stdio_console_out(stdio);
       __wasilibc_utf8_reset(utf8);
       __wasilibc_utf8_write(utf8, b); // infallible
       already_logged = true;
@@ -123,7 +125,7 @@ static ssize_t stdio_write(void *data, const void *buf, size_t nbyte) {
       utf8->valid_len--;
       bool skip = utf8->valid_len == 0 && already_logged;
       if (!skip) {
-        stdio_out(stdio);
+        stdio_console_out(stdio);
       }
       __wasilibc_utf8_reset(utf8);
     }
@@ -141,6 +143,7 @@ static descriptor_vtable_t stdin_vtable = {
 static descriptor_vtable_t stdouterr_vtable = {
     .free = stdio_free,
     .write = stdio_write,
+    .fflush = stdio_flush_to_console,
     .fstat = stdio_fstat,
     .fcntl_getfl = stdio_fcntl_getfl,
     .set_blocking = stdio_set_blocking,
@@ -178,8 +181,10 @@ void __wasilibc_webp2_fflush(int fd) {
   if (descriptor_table_get(fd, &entry) < 0) {
     return;
   }
-  stdio_t *stdio = (stdio_t *)entry.data;
-  stdio_flush(stdio);
+  defer descriptor_table_entry_dec(entry);
+  if (entry.vtable->fflush) {
+    entry.vtable->fflush(entry.data);
+  }
 }
 
 void __wasilibc_webp2_flush_and_close_stdio(bool also_musl) {

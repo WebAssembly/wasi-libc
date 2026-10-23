@@ -210,6 +210,9 @@ typedef struct descriptor_vtable_t {
   ssize_t (*read)(void *, void *buf, size_t nbyte);
   /// Implementation of `write`-the-function.
   ssize_t (*write)(void *, const void *buf, size_t nbyte);
+  /// The bottom half of the `fflush` function, flushing content to the output
+  /// device (i.e. the console).
+  void (*fflush)(void *);
 #endif
 
   /// Sets the nonblocking flag for this object to the specified value.

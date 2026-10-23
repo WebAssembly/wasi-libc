@@ -3,6 +3,7 @@
 
 #include <features.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 // ============================================================================
@@ -25,9 +26,9 @@ hidden int __wasilibc_validate_utf8(const char *ptr_signed);
 // `cap` must be at least 8.
 typedef struct wasilibc_utf8_writer_t {
   uint8_t *buf;
-  int32_t cap;
-  int32_t raw_len, valid_len;
-  int32_t codepoint_remaining;
+  size_t cap;
+  size_t raw_len, valid_len;
+  size_t codepoint_remaining;
 } wasilibc_utf8_writer_t;
 
 #define __wasilibc_make_utf8_writer(_buf, _cap) \

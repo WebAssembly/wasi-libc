@@ -103,7 +103,7 @@ bool __wasilibc_utf8_write(wasilibc_utf8_writer_t *w, uint8_t b) {
     w->buf[w->raw_len++] = b;
     w->valid_len = w->raw_len;
   } else if (is_2byte || is_3byte || is_4byte) {
-    int32_t codepoint_length = is_2byte ? 2 : (is_3byte ? 3 : 4);
+    size_t codepoint_length = is_2byte ? 2 : (is_3byte ? 3 : 4);
     if (w->raw_len + codepoint_length > w->cap) {
       return false;
     }
@@ -120,7 +120,7 @@ bool __wasilibc_utf8_write(wasilibc_utf8_writer_t *w, uint8_t b) {
       w->codepoint_remaining -= 1;
 
       // If done, validate overlong / out-of-range
-      if (w->codepoint_remaining <= 0) {
+      if (w->codepoint_remaining == 0) {
         uint8_t first = w->buf[w->valid_len];
         uint8_t second = w->buf[w->valid_len + 1];
         bool overlong = first == 0xC0 || first == 0xC1 ||

@@ -30,7 +30,6 @@ __attribute__((export_name("_initialize"))) void _start(void)
 #error "Unsupported WASI version"
 #endif
 {
-#ifndef __webp2__
   // Commands should only be called once per instance. This simple check
   // ensures that the `_start` function isn't started more than once.
   //
@@ -51,7 +50,6 @@ __attribute__((export_name("_initialize"))) void _start(void)
   }
   started = 1;
 #endif
-#endif
 
   // The linker synthesizes this to call constructors.
   __wasm_call_ctors();
@@ -61,6 +59,9 @@ __attribute__((export_name("_initialize"))) void _start(void)
   // arguments and calls `__main_argv_argc`.
   int r = __main_void();
 
+  // On webp2 we don't run destructors because main is used as a start function
+  // rather than the entire program. Everything about the application state
+  // must therefore be ok after main exits.
 #ifndef __webp2__
   // Call atexit functions, destructors, stdio cleanup, etc.
   __wasm_call_dtors();

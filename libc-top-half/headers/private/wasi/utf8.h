@@ -1,3 +1,6 @@
+#ifndef __WASI_UTF8_H
+#define __WASI_UTF8_H
+
 #include <features.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -48,3 +51,5 @@ hidden bool __wasilibc_utf8_abort_current(wasilibc_utf8_writer_t *w);
 // Resets the writer back to the start of its buffer. If there is a multi-byte
 // code point in progress, it will be copied to the start of the buffer.
 hidden void __wasilibc_utf8_reset(wasilibc_utf8_writer_t *w);
+
+#endif // __WASI_UTF8_H

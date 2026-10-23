@@ -150,6 +150,20 @@ static inline pthread_t __pthread_self() {
 }
 #endif
 
+#ifndef __wasilibc_unmodified_upstream
+// The tid of the main thread in single-threaded and cooperative-threads
+// builds, which is used for lock ownership. All implicit component model
+// threads (one per component model task) share the main thread's TLS block,
+// and they're all modeled as this same libc thread. With cooperative threads,
+// explicitly spawned threads use their component model thread index as their
+// tid, which must be strictly less than this value.
+//
+// Note that this must be non-zero, fit within the 30 bits of owner in
+// mutexes, and must not be 0x3fffffff, which is used to indicate an
+// unrecoverable robust mutex.
+#define MAIN_THREAD_TID 0x3ffffffe
+#endif
+
 #ifndef tls_mod_off_t
 #define tls_mod_off_t size_t
 #endif

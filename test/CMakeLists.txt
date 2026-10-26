@@ -515,6 +515,11 @@ add_wasilibc_test(pselect.c FS)
 add_wasilibc_test(preadvwritev.c FS)
 add_wasilibc_test(preadwrite.c FS)
 add_wasilibc_test(readlink.c FS)
+# realpath() under a preopen mounted below the root, with nothing preopened at
+# "/": the test's directory is /work/app.
+set(realpath_dir ${CMAKE_CURRENT_BINARY_DIR}/tmp/realpath)
+file(MAKE_DIRECTORY ${realpath_dir})
+add_wasilibc_test(realpath.c ENGINE_ARG --dir=${realpath_dir}::/work/app)
 add_wasilibc_test(readv.c FS)
 add_wasilibc_test(rename.c FS)
 add_wasilibc_test(rmdir.c FS)

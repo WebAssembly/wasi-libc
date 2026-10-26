@@ -306,6 +306,63 @@ int __wasilibc_find_abspath(const char *path, const char **abs_prefix,
   return fd;
 }
 
+/// Where the absolute path `path` (`len` bytes, slash-separated, with no `.`
+/// or `..` component) stands among the preopens, for `realpath` (see
+/// libc-top-half/musl/src/misc/realpath.c):
+///
+///  * 2 - a preopen is mounted there or below it: `/` always, a preopen's
+///    own path, and every directory above one. The program sees a directory
+///    there, which no host call can ask about: a host may refuse `readlink`
+///    on a preopen itself, and nothing is opened above one.
+///  * 1 - the path lies below a preopen and no preopen is mounted at it or
+///    below it, so the host resolves it through that preopen.
+///  * 0 - no preopen reaches the path: the program has no such file.
+__attribute__((__visibility__("hidden"))) int
+__wasilibc_preopen_kind(const char *path, size_t len);
+
+#define PREOPEN_OUTSIDE 0
+#define PREOPEN_INSIDE 1
+#define PREOPEN_MOUNT 2
+
+int __wasilibc_preopen_kind(const char *path, size_t len) {
+  __wasilibc_populate_preopens();
+
+  // Compare without the leading `/`, as the prefixes are stored.
+  while (len > 0 && *path == '/') {
+    path++;
+    len--;
+  }
+  // The root holds every preopen.
+  if (len == 0)
+    return PREOPEN_MOUNT;
+
+  int kind = PREOPEN_OUTSIDE;
+  STRONG_LOCK(lock);
+  for (size_t i = 0; i < num_preopens; ++i) {
+    const char *prefix = preopens[i].prefix;
+    size_t prefix_len = strlen(prefix);
+    // Ignore trailing slashes in directory names.
+    while (prefix_len > 0 && prefix[prefix_len - 1] == '/')
+      --prefix_len;
+
+    if (prefix_len >= len) {
+      // `path` names this preopen, or a directory above it.
+      if (memcmp(prefix, path, len) == 0 &&
+          (prefix_len == len || prefix[len] == '/')) {
+        kind = PREOPEN_MOUNT;
+        break;
+      }
+    } else if (prefix_len == 0 || (memcmp(prefix, path, prefix_len) == 0 &&
+                                   path[prefix_len] == '/')) {
+      // `path` lies below this preopen. Keep looking: another preopen may
+      // be mounted at `path` or below it.
+      kind = PREOPEN_INSIDE;
+    }
+  }
+  STRONG_UNLOCK(lock);
+  return kind;
+}
+
 void __wasilibc_populate_preopens(void) {
   // Fast path: If the preopens are already initialized, do nothing.
   if (preopens_populated) {

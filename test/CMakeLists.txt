@@ -520,6 +520,11 @@ add_wasilibc_test(readlink.c FS)
 set(realpath_dir ${CMAKE_CURRENT_BINARY_DIR}/tmp/realpath)
 file(MAKE_DIRECTORY ${realpath_dir})
 add_wasilibc_test(realpath.c ENGINE_ARG --dir=${realpath_dir}::/work/app)
+# FS supplies /; this second preopen overlaps a symlink reachable through it.
+set(realpath_overlap_dir ${CMAKE_CURRENT_BINARY_DIR}/tmp/realpath-overlap)
+file(MAKE_DIRECTORY ${realpath_overlap_dir})
+add_wasilibc_test(realpath_overlap.c FS
+  ENGINE_ARG --dir=${realpath_overlap_dir}::/work/app/canon/link/sub)
 add_wasilibc_test(readv.c FS)
 add_wasilibc_test(rename.c FS)
 add_wasilibc_test(rmdir.c FS)

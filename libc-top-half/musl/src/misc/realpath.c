@@ -170,9 +170,9 @@ toolong:
  *
  * Here a relative path is joined to the cwd first, and each prefix of the
  * resulting absolute path is placed among the preopens
- * (__wasilibc_preopen_kind): the root, a preopen's own path and every
- * directory above a preopen are directories the host is not asked about;
- * below a preopen, the host is asked through that preopen (lstat, then
+ * (__wasilibc_preopen_kind): the root, a preopen's own path and ancestors
+ * unreachable through any broader preopen are synthetic directories;
+ * below a preopen, even above a nested one, the host is asked (lstat, then
  * readlink for a symlink), so symlinks resolve as they do natively and a
  * symlink to an absolute path starts the walk again at the root; a path no
  * preopen reaches does not exist (ENOENT, as for open). ".." takes the last

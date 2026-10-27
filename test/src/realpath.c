@@ -79,11 +79,14 @@ int main(void) {
   TEST(mkdir(at("/dir/sub"), 0755) == 0);
   TEST((fd = open(at("/dir/file.txt"), O_CREAT | O_WRONLY, 0644)) >= 0);
   TEST(close(fd) == 0);
-  TEST(symlink("dir", at("/link")) == 0);
-  TEST(symlink("..", at("/dir/up")) == 0);
-  TEST(symlink("sub/../file.txt", at("/dir/filelink")) == 0);
-  TEST(symlink("loop", at("/loop")) == 0);
-  TEST(symlink("missing", at("/dangling")) == 0);
+  // Some hosts cannot create every symlink form used below (for
+  // example, directory or dangling symlinks on Windows). Skip the
+  // assertions for a link the host would not create.
+  int dirlink = symlink("dir", at("/link")) == 0;
+  int uplink = symlink("..", at("/dir/up")) == 0;
+  int filelink = symlink("sub/../file.txt", at("/dir/filelink")) == 0;
+  int looplink = symlink("loop", at("/loop")) == 0;
+  int dangling = symlink("missing", at("/dangling")) == 0;
   // A host may refuse a symlink to an absolute path.
   int abslink = symlink(at("/dir"), at("/abslink")) == 0;
 
@@ -95,17 +98,21 @@ int main(void) {
   expect(at("/dir/file.txt"), at("/dir/file.txt"));
   expect(at("//dir/./sub/"), at("/dir/sub"));
   // Symlinks resolve, and before a ".." that follows them.
-  expect(at("/link"), at("/dir"));
-  expect(at("/link/file.txt"), at("/dir/file.txt"));
-  expect(at("/link/../dir/sub"), at("/dir/sub"));
-  expect(at("/link/sub/.."), at("/dir"));
-  expect(at("/dir/up/dir/file.txt"), at("/dir/file.txt"));
-  expect(at("/dir/filelink"), at("/dir/file.txt"));
-  expect(at("/dir/sub/../file.txt"), at("/dir/file.txt"));
-  if (abslink) {
-    expect(at("/abslink/sub"), at("/dir/sub"));
-    expect(at("/abslink/../link"), at("/dir"));
+  if (dirlink) {
+    expect(at("/link"), at("/dir"));
+    expect(at("/link/file.txt"), at("/dir/file.txt"));
+    expect(at("/link/../dir/sub"), at("/dir/sub"));
+    expect(at("/link/sub/.."), at("/dir"));
   }
+  if (uplink)
+    expect(at("/dir/up/dir/file.txt"), at("/dir/file.txt"));
+  if (filelink)
+    expect(at("/dir/filelink"), at("/dir/file.txt"));
+  expect(at("/dir/sub/../file.txt"), at("/dir/file.txt"));
+  if (abslink)
+    expect(at("/abslink/sub"), at("/dir/sub"));
+  if (abslink && dirlink)
+    expect(at("/abslink/../link"), at("/dir"));
   // Above the preopen: directories, which the host is not asked about.
   expect(ROOT "/..", "/work");
   expect("/work", "/work");
@@ -118,13 +125,16 @@ int main(void) {
   // Errors, as natively.
   expect_err(at("/missing"), ENOENT);
   expect_err(at("/missing/.."), ENOENT);
-  expect_err(at("/dangling"), ENOENT);
-  expect_err(at("/loop"), ELOOP);
+  if (dangling)
+    expect_err(at("/dangling"), ENOENT);
+  if (looplink)
+    expect_err(at("/loop"), ELOOP);
   expect_err(at("/dir/file.txt/"), ENOTDIR);
   expect_err(at("/dir/file.txt/."), ENOTDIR);
   expect_err(at("/dir/file.txt/.."), ENOTDIR);
   expect_err(at("/dir/file.txt/x"), ENOTDIR);
-  expect_err(at("/dir/filelink/"), ENOTDIR);
+  if (filelink)
+    expect_err(at("/dir/filelink/"), ENOTDIR);
   expect_err("", ENOENT);
   // Paths no preopen reaches.
   expect_err("/elsewhere", ENOENT);
@@ -137,7 +147,8 @@ int main(void) {
   expect("file.txt", at("/dir/file.txt"));
   expect("./sub/../file.txt", at("/dir/file.txt"));
   expect("..", base);
-  expect("../link/sub", at("/dir/sub"));
+  if (dirlink)
+    expect("../link/sub", at("/dir/sub"));
   expect("../../..", "/work");
   expect_err("nope", ENOENT);
 
@@ -151,11 +162,16 @@ int main(void) {
   // Leave the preopen as it was.
   TEST(chdir(ROOT) == 0);
   unlink(at("/abslink"));
-  TEST(unlink(at("/dangling")) == 0);
-  TEST(unlink(at("/loop")) == 0);
-  TEST(unlink(at("/link")) == 0);
-  TEST(unlink(at("/dir/filelink")) == 0);
-  TEST(unlink(at("/dir/up")) == 0);
+  if (dangling)
+    TEST(unlink(at("/dangling")) == 0);
+  if (looplink)
+    TEST(unlink(at("/loop")) == 0);
+  if (dirlink)
+    TEST(unlink(at("/link")) == 0);
+  if (filelink)
+    TEST(unlink(at("/dir/filelink")) == 0);
+  if (uplink)
+    TEST(unlink(at("/dir/up")) == 0);
   TEST(unlink(at("/dir/file.txt")) == 0);
   TEST(rmdir(at("/dir/sub")) == 0);
   TEST(rmdir(at("/dir")) == 0);

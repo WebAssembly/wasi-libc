@@ -1,0 +1,20 @@
+package test:simple;
+
+interface i {
+  hold: async func();
+  release: func();
+  barge-in: func();
+  spawn-later: async func();
+  lock: func();
+  release-spawn: func();
+
+  t-status: func() -> u32;
+}
+
+world caller {
+  import i;
+}
+
+world callee {
+  export i;
+}

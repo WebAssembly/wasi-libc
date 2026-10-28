@@ -221,6 +221,11 @@ weak_alias(dummy_file, __stdin_used);
 weak_alias(dummy_file, __stdout_used);
 weak_alias(dummy_file, __stderr_used);
 
+static void init_file_lock(FILE *f) {
+  if (f && f->lock < 0)
+    f->lock = 0;
+}
+
 int __pthread_create(pthread_t *restrict res,
                      const pthread_attr_t *restrict attrp,
                      void *(*entry)(void *), void *restrict arg) {
@@ -242,6 +247,12 @@ int __pthread_create(pthread_t *restrict res,
   self = __pthread_self();
 
   if (!libc.threaded) {
+    for (FILE *f = *__ofl_lock(); f; f = f->next)
+      init_file_lock(f);
+    __ofl_unlock();
+    init_file_lock(__stdin_used);
+    init_file_lock(__stdout_used);
+    init_file_lock(__stderr_used);
     if (!self->tsd)
       self->tsd = (void **)__pthread_tsd_main;
     libc.threaded = 1;
@@ -351,6 +362,12 @@ int __pthread_create(pthread_t *restrict res,
   /* Instead of `__clone`, WASIP3 uses a host API to instantiate a new version
    * of the current module and start executing the entry function.  */
   ret = wasip3_thread_new_indirect(__wasi_coop_thread_start, (void *)args);
+
+  // Can't collide with the implicit thread ID of the main thread, and musl
+  // doesn't support tids higher than that, so if that pops out then just trap.
+  // In theory this is pretty unlikely to hit...
+  if (ret >= MAIN_THREAD_TID)
+    __builtin_trap();
 
   new->tid = ret;
 

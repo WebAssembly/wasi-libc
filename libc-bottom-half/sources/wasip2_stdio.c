@@ -18,6 +18,7 @@ typedef struct {
   // Lazily initialized pollables derived from input/output.
   poll_own_pollable_t input_pollable;
   poll_own_pollable_t output_pollable;
+  bool nonblocking;
 } stdio_t;
 
 static void stdio_free(void *data) {
@@ -49,7 +50,7 @@ static int stdio_get_read_stream(void *data, wasi_read_t *read) {
   read->offset = NULL;
   read->pollable = &stdio->input_pollable;
   read->timeout = 0;
-  read->blocking = true;
+  read->blocking = !stdio->nonblocking;
   return 0;
 }
 
@@ -68,7 +69,7 @@ static int stdio_get_write_stream(void *data, wasi_write_t *write) {
   write->output = streams_borrow_output_stream(stdio->output);
   write->offset = NULL;
   write->pollable = &stdio->output_pollable;
-  write->blocking = true;
+  write->blocking = !stdio->nonblocking;
   write->timeout = 0;
   return 0;
 }
@@ -81,11 +82,26 @@ static int stdio_fstat(void *data, struct stat *buf) {
 
 static int stdio_fcntl_getfl(void *data) {
   stdio_t *stdio = (stdio_t *)data;
+  int flags = stdio->nonblocking ? O_NONBLOCK : 0;
   if (stdio->fd == 0) {
-    return O_RDONLY;
+    return O_RDONLY | flags;
   } else {
-    return O_WRONLY;
+    return O_WRONLY | flags;
   }
+}
+
+// Only O_NONBLOCK can change, as for a file; the other status flags
+// (O_APPEND) mean nothing for a stream and are ignored.
+static int stdio_fcntl_setfl(void *data, int flags) {
+  stdio_t *stdio = (stdio_t *)data;
+  stdio->nonblocking = (flags & O_NONBLOCK) != 0;
+  return 0;
+}
+
+static int stdio_set_blocking(void *data, bool blocking) {
+  stdio_t *stdio = (stdio_t *)data;
+  stdio->nonblocking = !blocking;
+  return 0;
 }
 
 static int stdio_isatty(void *data) {
@@ -124,8 +140,10 @@ static descriptor_vtable_t stdio_vtable = {
     .free = stdio_free,
     .get_read_stream = stdio_get_read_stream,
     .get_write_stream = stdio_get_write_stream,
+    .set_blocking = stdio_set_blocking,
     .fstat = stdio_fstat,
     .fcntl_getfl = stdio_fcntl_getfl,
+    .fcntl_setfl = stdio_fcntl_setfl,
     .isatty = stdio_isatty,
 };
 

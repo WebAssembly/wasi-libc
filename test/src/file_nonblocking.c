@@ -51,12 +51,6 @@ int main(void) {
   TEST(fcntl(1, F_GETFL) == O_WRONLY);
   TEST(fcntl(2, F_GETFL) == O_WRONLY);
 #endif
-  TEST(fcntl(0, F_SETFL, O_APPEND) == -1);
-  TEST(fcntl(1, F_SETFL, O_APPEND) == -1);
-  TEST(fcntl(2, F_SETFL, O_APPEND) == -1);
-  TEST(fcntl(0, F_SETFL, O_NONBLOCK) == -1);
-  TEST(fcntl(1, F_SETFL, O_NONBLOCK) == -1);
-  TEST(fcntl(2, F_SETFL, O_NONBLOCK) == -1);
 
   return t_status;
 }

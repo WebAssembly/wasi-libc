@@ -665,9 +665,6 @@ if (ENABLE_COOP_THREADS)
 endif()
 
 add_wasilibc_test(tls_smoke.c)
-if (TARGET_TRIPLE MATCHES "-threads")
-  expect_fail_under_v8(tls_smoke.wasm)
-endif()
 add_wasilibc_test(cwd_relative_threads.c FS)
 
 add_wasilibc_test(futex_wait_in_past.c)

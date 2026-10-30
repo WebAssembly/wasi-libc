@@ -11,6 +11,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#define LONG_TIMEOUT_MS 10000
+
 #define TEST(c)                                                                \
   do {                                                                         \
     errno = 0;                                                                 \
@@ -114,6 +116,7 @@ static void test_recv_timeout(void) {
               (const struct sockaddr *)&addr,
               sizeof(addr)) == (ssize_t)strlen(message) + 1);
 
+  set_timeout_ms(fd, SO_RCVTIMEO, LONG_TIMEOUT_MS);
   socklen_t fromlen = sizeof(from);
   TEST(recvfrom(fd, buffer, sizeof(buffer), 0, (struct sockaddr *)&from,
                 &fromlen) == sizeof(message));
@@ -133,7 +136,7 @@ static void test_recv_no_timeout(void) {
   char buffer[256];
   const char message[] = "hello";
 
-  set_timeout_ms(fd, SO_RCVTIMEO, 10000);
+  set_timeout_ms(fd, SO_RCVTIMEO, LONG_TIMEOUT_MS);
   TEST(sendto(peer, message, strlen(message) + 1, 0,
               (const struct sockaddr *)&addr,
               sizeof(addr)) == (ssize_t)strlen(message) + 1);
@@ -187,8 +190,10 @@ static void test_recv_timeout_connected(void) {
   TEST(sendto(server, message, strlen(message) + 1, 0,
               (const struct sockaddr *)&client_addr,
               sizeof(client_addr)) == (ssize_t)strlen(message) + 1);
+  set_timeout_ms(client, SO_RCVTIMEO, LONG_TIMEOUT_MS);
   TEST(recv(client, buffer, sizeof(buffer), 0) == sizeof(message));
   TEST(memcmp(buffer, message, sizeof(message)) == 0);
+  set_timeout_ms(client, SO_RCVTIMEO, 5);
 
   TEST(connect(client, (struct sockaddr *)&server_addr, sizeof(server_addr)) ==
        0);
@@ -216,6 +221,7 @@ static void test_recv_timeout_after_poll(void) {
   TEST(sendto(peer, message, strlen(message) + 1, 0,
               (const struct sockaddr *)&addr,
               sizeof(addr)) == (ssize_t)strlen(message) + 1);
+  set_timeout_ms(fd, SO_RCVTIMEO, LONG_TIMEOUT_MS);
   TEST(recv(fd, buffer, sizeof(buffer), 0) == sizeof(message));
   TEST(memcmp(buffer, message, sizeof(message)) == 0);
 

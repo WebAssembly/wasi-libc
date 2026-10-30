@@ -24,7 +24,6 @@ typedef struct {
   stdin_future_result_void_error_code_t input_result;
   // tristate: zero=unknown, valid handle=yes, -1=no
   terminal_input_own_terminal_input_t terminal_in;
-  // O_NONBLOCK, set with fcntl(F_SETFL) or ioctl(FIONBIO).
   bool nonblocking;
 } stdin3_t;
 
@@ -40,7 +39,6 @@ typedef struct {
   stdout_stream_func_t stream_func;
   // function to determine whether this is a terminal (delayed)
   bool (*terminal_func)(terminal_stdout_own_terminal_output_t *ret);
-  // O_NONBLOCK, set with fcntl(F_SETFL) or ioctl(FIONBIO).
   bool nonblocking;
 } stdout3_t;
 

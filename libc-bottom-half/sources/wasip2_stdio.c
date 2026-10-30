@@ -18,8 +18,6 @@ typedef struct {
   // Lazily initialized pollables derived from input/output.
   poll_own_pollable_t input_pollable;
   poll_own_pollable_t output_pollable;
-  // O_NONBLOCK, set with fcntl(F_SETFL) or ioctl(FIONBIO): reads and writes
-  // return EWOULDBLOCK instead of waiting for the stream.
   bool nonblocking;
 } stdio_t;
 

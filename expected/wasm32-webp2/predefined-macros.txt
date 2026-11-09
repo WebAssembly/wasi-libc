@@ -2588,6 +2588,7 @@
 #define __DEFINED_pthread_rwlockattr_t 
 #define __DEFINED_pthread_spinlock_t 
 #define __DEFINED_pthread_t 
+#define __DEFINED_reclen_t 
 #define __DEFINED_register_t 
 #define __DEFINED_regoff_t 
 #define __DEFINED_sa_family_t 
@@ -2752,6 +2753,7 @@
 #define __NEED_pthread_rwlockattr_t 
 #define __NEED_pthread_spinlock_t 
 #define __NEED_pthread_t 
+#define __NEED_reclen_t 
 #define __NEED_register_t 
 #define __NEED_regoff_t 
 #define __NEED_sa_family_t 

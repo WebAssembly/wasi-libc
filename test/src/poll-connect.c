@@ -166,7 +166,18 @@ int main() {
       data[i] = 42;
     }
 
-    // Write until we hit backpressure
+    // The socket may not be immediately writable here since the host may
+    // still be flushing the previous `send` above, so wait for it to become
+    // writable.
+    {
+      struct pollfd fd = {
+          .fd = server_client, .events = POLLWRNORM, .revents = 0};
+      errno = 0;
+      TEST2(poll(&fd, 1, 5000) == 1);
+    }
+
+    // Write until we hit backpressure, keeping track of how much was written.
+    size_t write_total = 0;
     while (1) {
       if (t_status)
         exit(t_status);
@@ -177,19 +188,22 @@ int main() {
         TEST2(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS);
         break;
       }
+      write_total += count;
     }
+    TEST2(write_total > 0);
 
     fds[0].events = POLLRDNORM;
 
-    // Read what we wrote
-    ssize_t read_total = 0;
-    while (1) {
+    // Read everything that was written. All of it is guaranteed to arrive, so
+    // use a generous poll timeout to avoid spurious failures on slow hosts.
+    size_t read_total = 0;
+    while (read_total < write_total) {
       if (t_status)
         exit(t_status);
 
       {
         errno = 0;
-        int count = poll(fds, 1, 100);
+        int count = poll(fds, 1, 5000);
         TEST2(count == 1);
         ASSERT((fds[0].revents & POLLRDNORM) != 0);
       }
@@ -204,11 +218,13 @@ int main() {
         for (ssize_t i = 0; i < count; ++i) {
           ASSERT(received[i] == 42);
         }
-        if ((size_t)read_total == data_len) {
-          break;
-        }
       }
     }
+    ASSERT(read_total == write_total);
+
+    // Nothing more should be readable.
+    TEST(read(client, received, data_len) == -1 &&
+         (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINPROGRESS));
   }
 
   return t_status;

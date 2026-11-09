@@ -138,12 +138,12 @@ int __pthread_cond_timedwait(pthread_cond_t *restrict c, pthread_mutex_t *restri
 		 * via the futex notify below. */
 
 		lock(&c->_c_lock);
-		
+
 		if (c->_c_head == &node) c->_c_head = node.next;
 		else if (node.prev) node.prev->next = node.next;
 		if (c->_c_tail == &node) c->_c_tail = node.prev;
 		else if (node.next) node.next->prev = node.prev;
-		
+
 		unlock(&c->_c_lock);
 
 		if (node.notify) {
@@ -173,7 +173,7 @@ relock:
 		if (val>0) a_cas(&m->_m_lock, val, val|0x80000000);
 		unlock_requeue(&node.prev->barrier, &m->_m_lock, m->_m_type & (8|128));
 	} else if (!(m->_m_type & 8)) {
-		a_dec(&m->_m_waiters);		
+		a_dec(&m->_m_waiters);
 	}
 
 	/* Since a signal was consumed, cancellation is not permitted. */

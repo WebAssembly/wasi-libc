@@ -18,6 +18,9 @@ typedef struct {
   // type `descriptor_refcnt_t *` but be cast to `stdio_t *`.
   descriptor_refcnt_t refcnt;
   bool warn;
+  // There's no difference between "blocking" and "nonblocking" for our stdio
+  // implementation, but we can still handle the flag.
+  bool nonblocking;
   bool closed;
   wasilibc_utf8_writer_t utf8;
   uint8_t buf[LINE_BUF_SIZE];
@@ -78,11 +81,18 @@ static int stdio_fstat(void *data, struct stat *buf) {
 
 static int stdio_fcntl_getfl(void *data) {
   stdio_t *stdio = (stdio_t *)data;
+  int flags = stdio->nonblocking ? O_NONBLOCK : 0;
   if (stdio == &__stdin) {
-    return O_RDONLY;
+    return O_RDONLY | flags;
   } else {
-    return O_WRONLY;
+    return O_WRONLY | flags;
   }
+}
+
+static int stdio_fcntl_setfl(void *data, int flags) {
+  stdio_t *stdio = (stdio_t *)data;
+  stdio->nonblocking = (flags & O_NONBLOCK) != 0;
+  return 0;
 }
 
 static ssize_t stdio_read(void *data, void *buf, size_t nbyte) {
@@ -96,10 +106,8 @@ static ssize_t stdio_read(void *data, void *buf, size_t nbyte) {
 }
 
 static int stdio_set_blocking(void *data, bool blocking) {
-  // There's no difference between "blocking" and "non-blocking" IO for our
-  // stdio implementation, so this does nothing.
-  (void)data;
-  (void)blocking;
+  stdio_t *stdio = (stdio_t *)data;
+  stdio->nonblocking = !blocking;
   return 0;
 }
 
@@ -137,6 +145,7 @@ static descriptor_vtable_t stdin_vtable = {
     .read = stdio_read,
     .fstat = stdio_fstat,
     .fcntl_getfl = stdio_fcntl_getfl,
+    .fcntl_setfl = stdio_fcntl_setfl,
     .set_blocking = stdio_set_blocking,
 };
 
@@ -146,6 +155,7 @@ static descriptor_vtable_t stdouterr_vtable = {
     .fflush = stdio_flush_to_console,
     .fstat = stdio_fstat,
     .fcntl_getfl = stdio_fcntl_getfl,
+    .fcntl_setfl = stdio_fcntl_setfl,
     .set_blocking = stdio_set_blocking,
 };
 

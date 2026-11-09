@@ -95,6 +95,13 @@ static int stdio_fcntl_setfl(void *data, int flags) {
   return 0;
 }
 
+static int stdio_isatty(void *data) {
+  // This function is only used on stdout and stderr, both of which are
+  // considered to be ttys because of musl's buffering behavior.
+  (void)data;
+  return 1;
+}
+
 static ssize_t stdio_read(void *data, void *buf, size_t nbyte) {
   (void)data;
   (void)buf;
@@ -156,6 +163,7 @@ static descriptor_vtable_t stdouterr_vtable = {
     .fstat = stdio_fstat,
     .fcntl_getfl = stdio_fcntl_getfl,
     .fcntl_setfl = stdio_fcntl_setfl,
+    .isatty = stdio_isatty,
     .set_blocking = stdio_set_blocking,
 };
 

@@ -30,7 +30,7 @@ noreturn void _Exit(int status) {
     webp2_string_set(&msg, "exit with status 0 (reported as trap)");
     webp2_console_log(&msg);
   } else {
-    __wasilibc_report_error("exit with nonzero status");
+    __wasilibc_report_errorf("exit with status %d", status);
   }
   __builtin_trap();
 #else

@@ -30,7 +30,7 @@ static size_t fill_pipe(int wr) {
 }
 
 int main(void) {
-#if defined(__wasip1__) || defined(__wasip2__)
+#if defined(__wasip1__) || defined(__wasip2__) || defined(__webp2__)
   if (1)
     return t_status;
 #endif

@@ -482,6 +482,17 @@ if (WEB)
       --rename wasm:js/global=global
       --rename wasm:js/console=console)
 
+  # Link with the same `wasm-component-ld` as everything else, since the one
+  # bundled with the compiler may be too old for the adapter's WIT.
+  set(web_adapter_link_flags)
+  set(web_adapter_link_deps)
+  if (WASM_COMPONENT_LD_EXECUTABLE)
+    list(APPEND web_adapter_link_flags -fuse-ld=${WASM_COMPONENT_LD_EXECUTABLE})
+    if (TARGET wasm-component-ld)
+      list(APPEND web_adapter_link_deps wasm-component-ld)
+    endif()
+  endif()
+
   # The actual adapter, which is a wasm32-wasip2 program to be run against
   # wasmtime. CMAKE_C_COMPILER must have component support.
   set(WEB_ADAPTER ${web_adapter_dir}/web-adapter.wasm)
@@ -489,6 +500,7 @@ if (WEB)
     OUTPUT ${WEB_ADAPTER}
     COMMAND
       ${CMAKE_C_COMPILER} --target=wasm32-wasip2 -mexec-model=reactor
+        ${web_adapter_link_flags}
         -Wall -Wextra -Werror -g -I${web_adapter_dir}
         ${web_adapter_src}/adapter.c
         ${web_adapter_dir}/adapter.c
@@ -499,6 +511,7 @@ if (WEB)
       ${web_adapter_dir}/adapter.c
       ${web_adapter_dir}/adapter.h
       ${web_adapter_dir}/adapter_component_type.o
+      ${web_adapter_link_deps}
   )
   add_custom_target(web-adapter DEPENDS ${WEB_ADAPTER})
 endif()

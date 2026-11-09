@@ -11,6 +11,11 @@
   } while (0)
 
 int main(void) {
+#if defined(__webp2__)
+  if (1)
+    return t_status;
+#endif
+
   pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
   pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
   struct timespec now;

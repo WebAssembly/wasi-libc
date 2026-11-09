@@ -31,6 +31,9 @@ int __wasilibc_futex_wait(volatile int *addr, int val, clockid_t clk,
     int r = __clock_nanosleep(clk, flags2, at, NULL);
     if (r == 0)
       return -ETIMEDOUT;
+    // If sleeping is unsupported, we should just trap.
+    if (r == ENOSYS)
+      __builtin_trap();
     return -r;
   }
 

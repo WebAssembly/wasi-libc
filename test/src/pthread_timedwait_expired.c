@@ -38,6 +38,11 @@ static void sem_timedwait_expired(const struct timespec *deadline) {
 }
 
 int main(void) {
+#if defined(__webp2__)
+  if (1)
+    return t_status;
+#endif
+
   struct timespec negative = {.tv_sec = -1, .tv_nsec = 0};
   struct timespec negative_nsec = {.tv_sec = -1, .tv_nsec = 999999999};
 

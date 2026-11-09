@@ -27,6 +27,10 @@ static void inc_ns(struct timespec *ts, long ns) {
 }
 
 int main(void) {
+#if defined(__webp2__)
+  if (1)
+    return t_status;
+#endif
 
   struct timespec realtime, monotonic;
   TEST(clock_gettime(CLOCK_REALTIME, &realtime) == 0);

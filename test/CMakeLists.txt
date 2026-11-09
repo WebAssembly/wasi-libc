@@ -482,75 +482,13 @@ if (WEB)
       --rename wasm:js/global=global
       --rename wasm:js/console=console)
 
-  # The adapter is a `wasm32-wasip2` program, not linked against the webp2 libc
-  # under test, so it's built against a sysroot and compiler-rt downloaded from
-  # wasi-sdk. This way the compiler doesn't need to have its own wasip2 sysroot.
-  set(web_adapter_wasi_sdk_version 34)
-  set(web_adapter_wasi_sdk_url
-    "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${web_adapter_wasi_sdk_version}")
-  ExternalProject_Add(
-    web-adapter-sysroot
-    EXCLUDE_FROM_ALL ON
-    URL "${web_adapter_wasi_sdk_url}/wasi-sysroot-${web_adapter_wasi_sdk_version}.0.tar.gz"
-    DOWNLOAD_EXTRACT_TIMESTAMP ON
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-  )
-  ExternalProject_Get_Property(web-adapter-sysroot SOURCE_DIR)
-  set(web_adapter_sysroot ${SOURCE_DIR})
-  ExternalProject_Add(
-    web-adapter-builtins
-    EXCLUDE_FROM_ALL ON
-    URL "${web_adapter_wasi_sdk_url}/libclang_rt-${web_adapter_wasi_sdk_version}.0.tar.gz"
-    DOWNLOAD_EXTRACT_TIMESTAMP ON
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-  )
-  ExternalProject_Get_Property(web-adapter-builtins SOURCE_DIR)
-  set(web_adapter_builtins_src ${SOURCE_DIR}/wasm32-unknown-wasip2/libclang_rt.builtins.a)
-
-  # Place compiler-rt wherever the compiler expects to find it for wasip2
-  # within a custom resource dir, the same as `cmake/builtins.cmake` does.
-  execute_process(
-    COMMAND ${CMAKE_C_COMPILER} --target=wasm32-wasip2 --print-libgcc-file-name
-    OUTPUT_VARIABLE web_adapter_system_builtins
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-  cmake_path(
-    RELATIVE_PATH web_adapter_system_builtins
-    BASE_DIRECTORY ${system_resource_dir}
-    OUTPUT_VARIABLE web_adapter_builtins_rel
-  )
-  set(web_adapter_resource_dir ${web_adapter_dir}/resource-dir)
-  set(web_adapter_builtins ${web_adapter_resource_dir}/${web_adapter_builtins_rel})
-  add_custom_command(
-    OUTPUT ${web_adapter_builtins}
-    COMMAND ${CMAKE_COMMAND} -E copy ${web_adapter_builtins_src} ${web_adapter_builtins}
-    COMMAND ${CMAKE_COMMAND} -E create_symlink ${system_resource_dir}/include ${web_adapter_resource_dir}/include
-    DEPENDS web-adapter-builtins
-  )
-
-  set(web_adapter_link_flags)
-  set(web_adapter_link_deps)
-  if (WASM_COMPONENT_LD_EXECUTABLE)
-    list(APPEND web_adapter_link_flags -fuse-ld=${WASM_COMPONENT_LD_EXECUTABLE})
-    if (TARGET wasm-component-ld)
-      list(APPEND web_adapter_link_deps wasm-component-ld)
-    endif()
-  endif()
-
-  # The adapter itself. The compiler is invoked directly to avoid all the flags
-  # configured above for tests.
+  # The actual adapter, which is a wasm32-wasip2 program to be run against
+  # wasmtime. CMAKE_C_COMPILER must have component support.
   set(WEB_ADAPTER ${web_adapter_dir}/web-adapter.wasm)
   add_custom_command(
     OUTPUT ${WEB_ADAPTER}
     COMMAND
       ${CMAKE_C_COMPILER} --target=wasm32-wasip2 -mexec-model=reactor
-        --sysroot=${web_adapter_sysroot}
-        -resource-dir ${web_adapter_resource_dir}
-        ${web_adapter_link_flags}
         -Wall -Wextra -Werror -g -I${web_adapter_dir}
         ${web_adapter_src}/adapter.c
         ${web_adapter_dir}/adapter.c
@@ -561,9 +499,6 @@ if (WEB)
       ${web_adapter_dir}/adapter.c
       ${web_adapter_dir}/adapter.h
       ${web_adapter_dir}/adapter_component_type.o
-      ${web_adapter_builtins}
-      web-adapter-sysroot
-      ${web_adapter_link_deps}
   )
   add_custom_target(web-adapter DEPENDS ${WEB_ADAPTER})
 endif()

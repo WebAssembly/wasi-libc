@@ -150,7 +150,8 @@ jobs:
 
           - name: Test wasm32-webp2
             os: ubuntu-24.04
-            clang_version: 22
+            # wasi-sdk is required to build the wasip2 web adapter for tests.
+            clang_version: wasi-sdk-34.0-rc.3
             upload: wasm32-webp2
             test: true
             args: -DTARGET_TRIPLE=wasm32-webp2

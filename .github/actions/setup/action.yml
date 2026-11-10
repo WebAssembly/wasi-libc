@@ -31,8 +31,13 @@ runs:
           exit 1
         fi
         tag=$(echo ${{ inputs.clang_version }} | sed 's/\.0//')
-        curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/$tag/${{ inputs.clang_version }}-$plat.tar.gz | tar xzf -
-        CLANG_DIR=`pwd`/${{ inputs.clang_version }}-$plat/bin
+        sdk="${{ inputs.clang_version }}-$plat"
+        curl --connect-timeout 30 --max-time 540 --retry 2 --retry-max-time 60 \
+          --remove-on-error -fsSL -o "$sdk.tar.gz" \
+          "https://github.com/WebAssembly/wasi-sdk/releases/download/$tag/$sdk.tar.gz"
+        tar xzf "$sdk.tar.gz"
+        rm "$sdk.tar.gz"
+        CLANG_DIR="$PWD/$sdk/bin"
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV
@@ -42,8 +47,12 @@ runs:
     - name: Install LLVM tools (Windows)
       shell: bash
       run: |
-        curl -fsSLO https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.clang_version }}/LLVM-${{ inputs.clang_version }}-win64.exe
-        7z x LLVM-${{ inputs.clang_version }}-win64.exe -y -o"llvm"
+        installer="LLVM-${{ inputs.clang_version }}-win64.exe"
+        curl --connect-timeout 30 --max-time 540 --retry 2 --retry-max-time 60 \
+          --remove-on-error -fsSL -o "$installer" \
+          "https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.clang_version }}/$installer"
+        7z x "$installer" -y -o"llvm"
+        rm "$installer"
         echo "$(pwd)/llvm/bin" >> $GITHUB_PATH
         echo "CC=$(pwd)/llvm/bin/clang.exe" >> $GITHUB_ENV
         echo "AR=$(pwd)/llvm/bin/llvm-ar.exe" >> $GITHUB_ENV
@@ -62,8 +71,13 @@ runs:
     - name: Install LLVM tools (MacOS)
       shell: bash
       run: |
-        curl -sSfL https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.clang_version }}/clang+llvm-${{ inputs.clang_version }}-${{ inputs.llvm_asset_suffix }}.tar.xz | tar xJf -
-        CLANG_DIR=`pwd`/clang+llvm-${{ inputs.clang_version }}-${{ inputs.llvm_asset_suffix }}/bin
+        llvm="clang+llvm-${{ inputs.clang_version }}-${{ inputs.llvm_asset_suffix }}"
+        curl --connect-timeout 30 --max-time 540 --retry 2 --retry-max-time 60 \
+          --remove-on-error -fsSL -o "$llvm.tar.xz" \
+          "https://github.com/llvm/llvm-project/releases/download/llvmorg-${{ inputs.clang_version }}/$llvm.tar.xz"
+        tar xJf "$llvm.tar.xz"
+        rm "$llvm.tar.xz"
+        CLANG_DIR="$PWD/$llvm/bin"
         echo "$CLANG_DIR" >> $GITHUB_PATH
         echo "CC=$CLANG_DIR/clang" >> $GITHUB_ENV
         echo "AR=$CLANG_DIR/llvm-ar" >> $GITHUB_ENV

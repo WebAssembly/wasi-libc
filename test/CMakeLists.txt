@@ -598,6 +598,9 @@ add_wasilibc_test(mmap-pread-fail.c FS
   CFLAGS -D_WASI_EMULATED_MMAN
   LDFLAGS -lwasi-emulated-mman
   SHARED_LIBS "${SYSROOT_LIB}/libwasi-emulated-mman.so")
+if (NOT TEST_WITH_V8)
+  add_wasilibc_test(environ-reset.c ENV WASI_ENV_TEST=original WASI_ENV_EMPTY=)
+endif()
 add_wasilibc_test(external_env.c ENV VAR1=foo VAR2=bar)
 add_wasilibc_test(fadvise.c FS)
 # I'm not really entirely sure why this test is failing, it seemingly exits with

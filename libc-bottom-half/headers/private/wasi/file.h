@@ -8,6 +8,7 @@
 #include <wasi/api.h>
 
 // Adds a new file handle to the descriptor table, returning the new `fd`.
+// On failure, releases the handle before returning -1.
 int __wasilibc_add_file(filesystem_own_descriptor_t file_handle, int oflag);
 
 #endif // __wasip2__

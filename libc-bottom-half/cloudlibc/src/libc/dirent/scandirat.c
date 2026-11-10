@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***res,
                                int (*sel)(const struct dirent *),
@@ -22,7 +23,11 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***res,
 	size_t cnt=0, len=0;
 	int old_errno = errno;
 
-	if (!d) return -1;
+	if (!d) {
+		close(dirfd);
+		errno = old_errno;
+		return -1;
+	}
 
 	while ((errno=0), (de = readdir(d))) {
 		if (sel && !sel(de)) continue;

@@ -26,8 +26,18 @@ void __wasilibc_ensure_environ(void) {
 static char *empty_environ[1] = {NULL};
 
 // Keep ownership separate from the environment array that callers can change.
-static char *initial_environ_buf;
 static char **initial_environ;
+#if defined(__wasip1__)
+static char *initial_environ_buf;
+#else
+static void free_environ_strings(char **strings) {
+  if (strings == NULL)
+    return;
+  for (char **p = strings; *p != NULL; ++p)
+    free(*p);
+  free(strings);
+}
+#endif
 
 // See the comments in libc-environ.h.
 void __wasilibc_initialize_environ(void) {
@@ -105,55 +115,40 @@ software:
     return;
   }
 
-  // Add 1 for the NULL pointer to mark the end, and check for overflow.
+  char **strings = NULL;
   size_t num_ptrs = environ_count + 1;
-  if (num_ptrs == 0) {
+  if (num_ptrs == 0)
     goto software;
-  }
 
-  size_t environ_buf_size = 0;
+  // Allocate both pointer arrays together. Keep the first one for cleanup.
+  strings = calloc(num_ptrs, 2 * sizeof(char *));
+  if (strings == NULL)
+    goto software;
+  char **environ_ptrs = strings + num_ptrs;
+
   for (size_t i = 0; i < environ_count; i++) {
     tuple2_string_string_t pair = wasi_environment.ptr[i];
     size_t size;
     if (__builtin_add_overflow(pair.f0.len, pair.f1.len, &size) ||
-        __builtin_add_overflow(size, 2, &size) ||
-        __builtin_add_overflow(environ_buf_size, size, &environ_buf_size))
+        __builtin_add_overflow(size, 2, &size))
       goto software;
-  }
-  // Allocate memory for the array of pointers. This uses `calloc` both to
-  // handle overflow and to initialize the NULL pointer at the end.
-  char **environ_ptrs = calloc(num_ptrs, sizeof(char *));
-  if (!environ_ptrs)
-    goto software;
 
-  char *environ_buf = malloc(environ_buf_size);
-  if (!environ_buf) {
-    free(environ_ptrs);
-    goto software;
+    char *entry = malloc(size);
+    if (entry == NULL)
+      goto software;
+    strings[i] = environ_ptrs[i] = entry;
+    memcpy(entry, pair.f0.ptr, pair.f0.len);
+    entry[pair.f0.len] = '=';
+    memcpy(entry + pair.f0.len + 1, pair.f1.ptr, pair.f1.len);
+    entry[size - 1] = '\0';
   }
 
-  // Copy the strings into one owned buffer, independently of environ entries.
-  char *next = environ_buf;
-  for (size_t i = 0; i < environ_count; i++) {
-    tuple2_string_string_t pair = wasi_environment.ptr[i];
-    environ_ptrs[i] = next;
-    memcpy(next, pair.f0.ptr, pair.f0.len);
-    next += pair.f0.len;
-    *next++ = '=';
-    memcpy(next, pair.f1.ptr, pair.f1.len);
-    next += pair.f1.len;
-    *next++ = '\0';
-  }
-
-  // Free the WASI environment list
   list_tuple2_string_string_free(&wasi_environment);
-
-  // Initialize the environment from the created array
-  initial_environ_buf = environ_buf;
-  initial_environ = environ_ptrs;
+  initial_environ = strings;
   __wasilibc_environ = environ_ptrs;
   return;
 software:
+  free_environ_strings(strings);
   list_tuple2_string_string_free(&wasi_environment);
   _Exit(EX_SOFTWARE);
 #else
@@ -166,9 +161,13 @@ void __wasilibc_deinitialize_environ(void) {
   if (__wasilibc_environ != (char **)-1) {
     // Release strings added by setenv before freeing the initial storage.
     clearenv();
+#if defined(__wasip1__)
     free(initial_environ_buf);
-    free(initial_environ);
     initial_environ_buf = NULL;
+    free(initial_environ);
+#else
+    free_environ_strings(initial_environ);
+#endif
     initial_environ = NULL;
     // Set the pointer to the special init value.
     __wasilibc_environ = (char **)-1;

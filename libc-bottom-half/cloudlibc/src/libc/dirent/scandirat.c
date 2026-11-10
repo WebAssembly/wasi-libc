@@ -24,9 +24,8 @@ int __wasilibc_nocwd_scandirat(int dirfd, const char *dir, struct dirent ***res,
 	int old_errno = errno;
 
 	if (!d) {
-		int saved_errno = errno;
 		close(dirfd);
-		errno = saved_errno;
+		errno = old_errno;
 		return -1;
 	}
 

@@ -24,6 +24,11 @@ else()
   message(FATAL_ERROR "Unknown target triple: ${TARGET_TRIPLE}")
 endif()
 
+# Skip the compiler check.
+# We usually don't set CMAKE_C_COMPILER_TARGET correctly. Even if we do,
+# the check requires more than what we actually require. (eg. crt objects)
+set(CMAKE_C_COMPILER_WORKS 1)
+
 # I'm not entirely sure why this is necessary on Windows. This may be a bug in
 # CMake, I'm not sure. The problem is that, at least on CI, CMake detects that
 # the compiler in use is clang but doesn't understand the `SYSTEM` header

@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdint.h>
 
 #ifdef __wasm_simd128__
 #include <wasm_simd128.h>
@@ -6,6 +7,8 @@
 
 int memcmp(const void *vl, const void *vr, size_t n)
 {
+	const unsigned char *l=vl, *r=vr;
+
 #if defined(__wasm_simd128__) && defined(__wasilibc_simd_string)
 	if (n >= sizeof(v128_t)) {
 		// memcmp is allowed to read up to n bytes from each object.
@@ -35,9 +38,25 @@ int memcmp(const void *vl, const void *vr, size_t n)
 		}
 		return 0;
 	}
+#else
+	// Compare 8 bytes at a time.
+	if (n >= sizeof(uint64_t)) {
+		do {
+			uint64_t a, b;
+			__builtin_memcpy(&a, l, sizeof(a));
+			__builtin_memcpy(&b, r, sizeof(b));
+			if (a != b) {
+				// The lowest set bit is in the first byte that differs.
+				int shift = __builtin_ctzll(a ^ b) & ~7;
+				return (int)((a >> shift) & 0xff) - (int)((b >> shift) & 0xff);
+			}
+			l += sizeof(a);
+			r += sizeof(b);
+			n -= sizeof(a);
+		} while (n >= sizeof(uint64_t));
+	}
 #endif
 
-	const unsigned char *l=vl, *r=vr;
 	for (; n && *l == *r; n--, l++, r++);
 	return n ? *l-*r : 0;
 }

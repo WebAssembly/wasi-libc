@@ -1584,3 +1584,49 @@ if (PYTHON_TESTS)
   )
   ExternalProject_Add_StepDependencies(python configure sysroot engine)
 endif()
+
+# ========= Benchmarks ==========================================
+#
+# Run all benchmarks with `cmake --build build --target bench` (optional flags
+# via `-DBENCH_ARGS="-filter memcmp -count 5"`).
+
+set(BENCH_ARGS "" CACHE STRING "Extra arguments passed to benchmark executables")
+separate_arguments(bench_extra_args NATIVE_COMMAND "${BENCH_ARGS}")
+
+add_custom_target(bench)
+clang_format_file("${CMAKE_CURRENT_SOURCE_DIR}/bench/bench.h")
+
+function(add_wasilibc_bench bench_file)
+  cmake_path(REPLACE_EXTENSION bench_file "" OUTPUT_VARIABLE bench_stem)
+  set(bench_name "bench_${bench_stem}.wasm")
+  set(bench_src "${CMAKE_CURRENT_SOURCE_DIR}/bench/${bench_file}")
+
+  add_test_executable(${bench_name} ${bench_src}
+    INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/bench"
+    ${ARGN})
+  add_dependencies(${bench_name} engine)
+
+  if (NOT WEB AND NOT TEST_WITH_V8)
+    register_test(${bench_name} ${bench_name} ARGV -ms 1)
+  endif()
+
+  set(wasmtime_args)
+  if (TARGET_TRIPLE MATCHES "-threads")
+    list(APPEND wasmtime_args --wasi threads --wasm shared-memory)
+  endif()
+  if (ENABLE_COOP_THREADS)
+    list(APPEND wasmtime_args --wasm component-model-threading)
+  endif()
+  if (WEB)
+    list(APPEND wasmtime_args --wasm component-model-implements,component-model-accessors)
+  endif()
+
+  add_custom_target("run_${bench_name}"
+    COMMAND ${ENGINE} ${wasmtime_args} $<TARGET_FILE:${bench_name}> ${bench_extra_args}
+    DEPENDS ${bench_name} engine
+    USES_TERMINAL
+  )
+  add_dependencies(bench "run_${bench_name}")
+endfunction()
+
+add_wasilibc_bench(memcmp.c)

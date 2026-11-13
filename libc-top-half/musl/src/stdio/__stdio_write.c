@@ -41,3 +41,10 @@ size_t __stdio_write(FILE *f, const unsigned char *buf, size_t len)
 		iov[0].iov_len -= cnt;
 	}
 }
+
+#ifndef __wasilibc_unmodified_upstream
+hidden FILE *__stdio_write_needs_stderr(void)
+{
+	return &__stderr_FILE;
+}
+#endif

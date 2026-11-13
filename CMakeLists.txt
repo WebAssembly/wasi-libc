@@ -107,7 +107,12 @@ endif()
 if(TARGET_TRIPLE MATCHES "-threads$")
   add_compile_options(-mthread-model posix -pthread -ftls-model=local-exec -matomics)
 elseif(ENABLE_COOP_THREADS)
-  add_compile_options(-mthread-model posix -pthread -ftls-model=local-exec)
+  # Atomics are required even though the memory is not shared: the component
+  # model runs multiple guest threads in parallel on host threads that all
+  # touch the same linear memory. Without `-matomics`, clang lowers
+  # `__sync_*` builtins to plain (non-atomic) loads/stores and musl/dlmalloc
+  # synchronization silently corrupts state under parallel fibers.
+  add_compile_options(-mthread-model posix -pthread -ftls-model=local-exec -matomics)
 else()
   add_compile_options(-mthread-model single)
 endif()

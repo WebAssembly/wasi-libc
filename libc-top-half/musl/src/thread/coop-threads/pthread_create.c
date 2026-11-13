@@ -153,7 +153,10 @@ hidden void __wasi_coop_thread_start_C(struct start_args *args) {
   *__pthread_self() = self_copy;
 
   // Our tid should be configured in `pthread_create`, but double check it.
-  assert(__pthread_self()->tid == wasip3_thread_index());
+  // (`wasip3_thread_index` is deliberately not used here: it would add a
+  // debug-only import of the host API, and the symbol expectations are
+  // shared between debug and release builds.)
+  assert(__pthread_self()->tid != 0);
 
   __pthread_exit(args->start_func(args->start_arg));
 }

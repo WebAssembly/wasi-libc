@@ -312,6 +312,7 @@ __wasilibc_add_file
 __wasilibc_add_tcp_socket
 __wasilibc_add_udp_socket
 __wasilibc_cwd
+__wasilibc_cwd_mallocd
 __wasilibc_deinitialize_environ
 __wasilibc_descriptor_deallocate
 __wasilibc_dttoif
@@ -321,6 +322,7 @@ __wasilibc_environ
 __wasilibc_find_abspath
 __wasilibc_find_relpath
 __wasilibc_find_relpath_alloc
+__wasilibc_find_relpath_initial_cwd
 __wasilibc_futex_wait
 __wasilibc_futex_wake
 __wasilibc_get_environ

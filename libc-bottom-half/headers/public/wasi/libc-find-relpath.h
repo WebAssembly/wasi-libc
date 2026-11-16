@@ -1,8 +1,6 @@
 #ifndef __wasi_libc_find_relpath_h
 #define __wasi_libc_find_relpath_h
 
-#include <wasi/version.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -28,7 +26,8 @@ extern "C" {
  *  * ENOMEM - failed to allocate memory for internal routines.
  *  * ENOENT - the `path` could not be found relative to any preopened dir.
  *  * ERANGE - the `relative_path` buffer is too small to hold the relative
- * path.
+ * path. On WASIp2 and WASIp3, if `chdir` isn't linked and the cwd isn't `/`,
+ * the buffer must instead hold the cwd joined with `path`.
  */
 int __wasilibc_find_relpath(const char *path,
                             const char **__restrict__ abs_prefix,
@@ -61,21 +60,16 @@ int __wasilibc_find_abspath(const char *abspath,
  * `relative` as a malloc'd buffer that will be `realloc`'d to the appropriate
  * size to contain the relative path.
  *
- * On WASIp1 this is a weak symbol and if it's not defined you can use
+ * Note that this is a weak symbol and if it's not defined you can use
  * `__wasilibc_find_relpath`. The weak-nature of this symbols means that if it's
  * not otherwise included in the compilation then `chdir` wasn't used an there's
- * no need for this symbol. On WASIp2 and WASIp3 it's always defined since the
- * initial working directory may not be `/`.
+ * no need for this symbol.
  *
  * See documentation on `__wasilibc_find_relpath` for more information.
  */
 int __wasilibc_find_relpath_alloc(const char *path, const char **abs,
                                   char **relative, size_t *relative_len,
-                                  int can_realloc)
-#ifdef __wasip1__
-    __attribute__((__weak__))
-#endif
-    ;
+                                  int can_realloc) __attribute__((__weak__));
 
 #ifdef __cplusplus
 }

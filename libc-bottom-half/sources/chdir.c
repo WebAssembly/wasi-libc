@@ -3,12 +3,10 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <lock.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <wasi/api.h>
 #include <wasi/cwd.h>
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc.h>
@@ -17,68 +15,9 @@
 #ifndef __webp2__
 DECLARE_WEAK_LOCK(__wasilibc_cwd_lock, extern);
 extern char *__wasilibc_cwd;
+#endif
+#ifdef __wasip1__
 static int __wasilibc_cwd_mallocd = 0;
-#endif
-
-#if defined(__wasip2__) || defined(__wasip3__)
-static _Atomic _Bool cwd_initialized = false;
-
-// Hosts that don't provide an absolute initial cwd leave the cwd at `/`.
-//
-// The host's path is used even if no preopen covers it, in which case relative
-// paths fail with `ENOENT` instead of silently resolving against `/`.
-int __wasilibc_ensure_cwd(void) {
-  if (cwd_initialized)
-    return 0;
-
-#ifdef __wasip2__
-  wasip2_string_t initial;
-  bool is_some = environment_initial_cwd(&initial);
-#else
-  wasip3_string_t initial;
-  bool is_some = environment_get_initial_cwd(&initial);
-#endif
-  char *cwd = NULL;
-  if (is_some) {
-    bool absolute = initial.len > 0 && initial.ptr[0] == '/';
-    if (absolute)
-      cwd = strndup((const char *)initial.ptr, initial.len);
-#ifdef __wasip2__
-    wasip2_string_free(&initial);
-#else
-    wasip3_string_free(&initial);
-#endif
-    if (absolute && cwd == NULL) {
-      errno = ENOMEM;
-      return -1;
-    }
-  }
-
-  WEAK_LOCK(__wasilibc_cwd_lock);
-  if (cwd_initialized) {
-    // Another thread got here first.
-    WEAK_UNLOCK(__wasilibc_cwd_lock);
-    free(cwd);
-    return 0;
-  }
-  if (cwd != NULL) {
-    __wasilibc_cwd = cwd;
-    __wasilibc_cwd_mallocd = 1;
-  }
-  cwd_initialized = true;
-  WEAK_UNLOCK(__wasilibc_cwd_lock);
-  return 0;
-}
-
-void __wasilibc_reset_cwd(void) {
-  WEAK_LOCK(__wasilibc_cwd_lock);
-  if (__wasilibc_cwd_mallocd)
-    free(__wasilibc_cwd);
-  __wasilibc_cwd = "/";
-  __wasilibc_cwd_mallocd = 0;
-  cwd_initialized = false;
-  WEAK_UNLOCK(__wasilibc_cwd_lock);
-}
 #endif
 
 int chdir(const char *path) {

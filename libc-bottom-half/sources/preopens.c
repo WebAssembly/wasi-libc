@@ -17,6 +17,7 @@
 #include <wasi/report-error.h>
 
 #if defined(__wasip2__) || defined(__wasip3__)
+#include <stddefer.h>
 #include <wasi/cwd.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file.h>
@@ -248,18 +249,61 @@ int __wasilibc_register_preopened_fd(int fd, const char *prefix) {
 int __wasilibc_find_relpath(const char *path, const char **abs_prefix,
                             char **relative_path, size_t relative_path_len) {
   // If `chdir` is linked, whose object file defines this symbol, then we
-  // call that. Otherwise if the program can't `chdir` then `path` is
-  // absolute (or relative to the root dir), so we delegate to `find_abspath`.
-  // On WASIp2 and WASIp3 the initial cwd may not be the root dir, so this is
-  // always linked.
-#ifdef __wasip1__
-  if (!__wasilibc_find_relpath_alloc)
-    return __wasilibc_find_abspath(path, abs_prefix,
-                                   (const char **)relative_path);
+  // call that. Otherwise the program can't `chdir`, so `path` is absolute or
+  // relative to the initial cwd. That's the root dir on WASIp1, so we delegate
+  // to `find_abspath`, and the host's initial cwd on WASIp2 and WASIp3.
+  if (__wasilibc_find_relpath_alloc)
+    return __wasilibc_find_relpath_alloc(path, abs_prefix, relative_path,
+                                         &relative_path_len, 0);
+#if defined(__wasip2__) || defined(__wasip3__)
+  char *buf = *relative_path;
+  return __wasilibc_find_relpath_initial_cwd(path, abs_prefix,
+                                             (const char **)relative_path, &buf,
+                                             &relative_path_len, 0);
+#else
+  return __wasilibc_find_abspath(path, abs_prefix,
+                                 (const char **)relative_path);
 #endif
-  return __wasilibc_find_relpath_alloc(path, abs_prefix, relative_path,
-                                       &relative_path_len, 0);
 }
+
+#if defined(__wasip2__) || defined(__wasip3__)
+// See the documentation in wasi/cwd.h.
+int __wasilibc_find_relpath_initial_cwd(const char *path,
+                                        const char **abs_prefix,
+                                        const char **relative_path, char **buf,
+                                        size_t *buf_len, int can_realloc) {
+  if (__wasilibc_ensure_cwd() < 0)
+    return -1;
+  WEAK_LOCK(__wasilibc_cwd_lock);
+  defer WEAK_UNLOCK(__wasilibc_cwd_lock);
+
+  // Relative paths are resolved against the cwd unless that's `/`, in which
+  // case `find_abspath` handles them as-is.
+  if (path[0] != '/' && strcmp(__wasilibc_cwd, "/") != 0) {
+    size_t cwd_len = strlen(__wasilibc_cwd);
+    size_t path_len = strlen(path);
+    size_t len = cwd_len + 1 + path_len + 1;
+    if (len > *buf_len) {
+      if (!can_realloc) {
+        errno = ERANGE;
+        return -1;
+      }
+      char *tmp = realloc(*buf, len);
+      if (tmp == NULL) {
+        errno = ENOMEM;
+        return -1;
+      }
+      *buf = tmp;
+      *buf_len = len;
+    }
+    memcpy(*buf, __wasilibc_cwd, cwd_len);
+    (*buf)[cwd_len] = '/';
+    memcpy(*buf + cwd_len + 1, path, path_len + 1);
+    path = *buf;
+  }
+  return __wasilibc_find_abspath(path, abs_prefix, relative_path);
+}
+#endif
 
 // See the documentation in libc-find-relpath.h.
 int __wasilibc_find_abspath(const char *path, const char **abs_prefix,

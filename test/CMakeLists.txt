@@ -591,6 +591,14 @@ if (NOT WEB)
   add_wasilibc_test(clock_nanosleep.c)
 endif()
 add_wasilibc_test(chdir.c FS)
+# The cwd starts at `/` unless the host says otherwise via
+# `wasi:cli/environment.initial-cwd`, which only WASIp2 and later have.
+add_test_pair(initial_cwd_default.wasm
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/initial_cwd_getcwd.c FS ARGV /)
+if (NOT WASI STREQUAL "p1")
+  add_wasilibc_test(initial_cwd.c FS ARGV /sub ENGINE_ARG -Scwd=/sub)
+  add_wasilibc_test(initial_cwd_getcwd.c FS ARGV /sub ENGINE_ARG -Scwd=/sub)
+endif()
 add_wasilibc_test(close.c FS)
 add_wasilibc_test(ctors_run_once.c)
 add_wasilibc_test(pread.c FS)

@@ -3,10 +3,13 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <lock.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sysexits.h>
 #include <unistd.h>
+#include <wasi/api.h>
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc.h>
 #include <wasi/report-error.h>
@@ -15,6 +18,57 @@
 DECLARE_WEAK_LOCK(__wasilibc_cwd_lock, extern);
 extern char *__wasilibc_cwd;
 static int __wasilibc_cwd_mallocd = 0;
+#endif
+
+#if defined(__wasip2__) || defined(__wasip3__)
+static _Atomic _Bool cwd_initialized = false;
+
+// Starts the cwd at `wasi:cli/environment.initial-cwd` the first time the cwd
+// is needed. Hosts that don't provide an absolute path leave the cwd at `/`.
+//
+// The host's path is used even if no preopen covers it, in which case relative
+// paths fail with `ENOENT` instead of silently resolving against `/`.
+//
+// The caller must not hold `__wasilibc_cwd_lock`.
+void __wasilibc_ensure_cwd(void) {
+  if (cwd_initialized)
+    return;
+
+#ifdef __wasip2__
+  wasip2_string_t initial;
+  bool is_some = environment_initial_cwd(&initial);
+#else
+  wasip3_string_t initial;
+  bool is_some = environment_get_initial_cwd(&initial);
+#endif
+  char *cwd = NULL;
+  if (is_some) {
+    if (initial.len > 0 && initial.ptr[0] == '/') {
+      cwd = strndup((const char *)initial.ptr, initial.len);
+      if (cwd == NULL)
+        _Exit(EX_SOFTWARE);
+    }
+#ifdef __wasip2__
+    wasip2_string_free(&initial);
+#else
+    wasip3_string_free(&initial);
+#endif
+  }
+
+  WEAK_LOCK(__wasilibc_cwd_lock);
+  if (cwd_initialized) {
+    // Another thread got here first.
+    WEAK_UNLOCK(__wasilibc_cwd_lock);
+    free(cwd);
+    return;
+  }
+  if (cwd != NULL) {
+    __wasilibc_cwd = cwd;
+    __wasilibc_cwd_mallocd = 1;
+  }
+  cwd_initialized = true;
+  WEAK_UNLOCK(__wasilibc_cwd_lock);
+}
 #endif
 
 int chdir(const char *path) {
@@ -144,6 +198,9 @@ static const char *make_absolute(const char *path) {
 int __wasilibc_find_relpath_alloc(const char *path, const char **abs_prefix,
                                   char **relative_buf, size_t *relative_buf_len,
                                   int can_realloc) {
+#if defined(__wasip2__) || defined(__wasip3__)
+  __wasilibc_ensure_cwd();
+#endif
   WEAK_LOCK(__wasilibc_cwd_lock);
 
   // First, make our path absolute taking the cwd into account.

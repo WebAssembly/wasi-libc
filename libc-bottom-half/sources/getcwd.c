@@ -10,8 +10,15 @@ char *__wasilibc_cwd = "/";
 DECLARE_WEAK_LOCK(__wasilibc_cwd_lock);
 #endif
 
+#if defined(__wasip2__) || defined(__wasip3__)
+void __wasilibc_ensure_cwd(void);
+#endif
+
 char *getcwd(char *buf, size_t size) {
 #if defined(__wasip1__) || defined(__wasip2__) || defined(__wasip3__)
+#if defined(__wasip2__) || defined(__wasip3__)
+  __wasilibc_ensure_cwd();
+#endif
   // Critical section contains no yield points, so we can use weak locks.
   WEAK_LOCK(__wasilibc_cwd_lock);
   if (!buf) {

@@ -246,7 +246,7 @@ static int file_fstat(void *data, struct stat *buf) {
   return 0;
 }
 
-static int file_seek_end(file_t *file) {
+static int file_size(file_t *file, off_t *size) {
   STRONG_ASSERT_HELD(file->lock);
   filesystem_descriptor_stat_t stat;
   filesystem_error_code_t error;
@@ -256,7 +256,7 @@ static int file_seek_end(file_t *file) {
     translate_error(&error);
     return -1;
   }
-  file->offset = (off_t)stat.size;
+  *size = (off_t)stat.size;
   return 0;
 }
 
@@ -279,9 +279,10 @@ static off_t file_seek(void *data, off_t offset, int whence) {
   }
 #endif
 
-  // If this file is in append mode, reset our knowledge of the current cursor
-  // to the current end of the file.
-  if ((file->oflag & O_APPEND) && file_seek_end(file) < 0)
+  // The current position of the cursor. If this file is in append mode, reset
+  // our knowledge of the current cursor to the current end of the file.
+  off_t cur = file->offset;
+  if ((file->oflag & O_APPEND) && file_size(file, &cur) < 0)
     return -1;
 
   off_t result;
@@ -290,14 +291,15 @@ static off_t file_seek(void *data, off_t offset, int whence) {
     result = offset;
     break;
   case SEEK_CUR:
-    result = file->offset + offset;
+    result = cur + offset;
     break;
   case SEEK_END: {
-    // If we're in append mode we already reset to the end, but if we're not
-    // in append mode then do the reset to the end here.
-    if (!(file->oflag & O_APPEND) && file_seek_end(file) < 0)
+    // If we're in append mode `cur` is already the end of the file, but if
+    // we're not in append mode then learn where the end is here.
+    off_t end = cur;
+    if (!(file->oflag & O_APPEND) && file_size(file, &end) < 0)
       return -1;
-    result = file->offset + offset;
+    result = end + offset;
     break;
   }
   default:

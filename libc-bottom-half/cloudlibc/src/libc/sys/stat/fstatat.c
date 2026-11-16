@@ -62,7 +62,7 @@ int __wasilibc_nocwd_fstatat(int fd, const char *restrict path, struct stat *res
   // Get the metadata hash for this file
   filesystem_metadata_hash_value_t metadata;
   filesystem_error_code_t error;
-  filesystem_path_flags_t path_flags = (flag | AT_SYMLINK_NOFOLLOW) ? 0
+  filesystem_path_flags_t path_flags = (flag & AT_SYMLINK_NOFOLLOW) ? 0
     : FILESYSTEM_PATH_FLAGS_SYMLINK_FOLLOW;
   if (!filesystem_method_descriptor_metadata_hash_at(file_handle,
                                                      path_flags,

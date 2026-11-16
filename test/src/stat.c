@@ -63,5 +63,25 @@ int main(void) {
     fclose(f);
   }
 
+  const char *link_path = "temp_file_symlink";
+  if (TEST(symlink("temp_file", link_path) == 0, "errno = %s\n",
+           strerror(errno))) {
+    struct stat target_stat, followed_stat, link_stat;
+    if (TEST(stat("temp_file", &target_stat) == 0, "errno = %s\n",
+             strerror(errno))) {
+      if (TEST(stat(link_path, &followed_stat) == 0, "errno = %s\n",
+               strerror(errno))) {
+        TEST(followed_stat.st_ino == target_stat.st_ino, "%ju != %ju\n",
+             (uintmax_t)followed_stat.st_ino, (uintmax_t)target_stat.st_ino);
+      }
+      if (TEST(lstat(link_path, &link_stat) == 0, "errno = %s\n",
+               strerror(errno))) {
+        TEST(S_ISLNK(link_stat.st_mode), "mode = %jo\n",
+             (uintmax_t)link_stat.st_mode);
+      }
+    }
+    TEST(unlink(link_path) == 0, "errno = %s\n", strerror(errno));
+  }
+
   return t_status;
 }

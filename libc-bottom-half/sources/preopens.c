@@ -17,6 +17,7 @@
 #include <wasi/report-error.h>
 
 #if defined(__wasip2__) || defined(__wasip3__)
+#include <wasi/cwd.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/file.h>
 #include <wasi/file_utils.h>
@@ -406,6 +407,13 @@ software:
 }
 
 void __wasilibc_reset_preopens(void) {
+#ifndef __wasip1__
+  // The cwd may have come from the host's initial cwd, so forget it too. This
+  // is done before taking `lock` since path resolution takes the cwd lock
+  // first.
+  __wasilibc_reset_cwd();
+#endif
+
   STRONG_LOCK(lock);
 
   if (num_preopens) {

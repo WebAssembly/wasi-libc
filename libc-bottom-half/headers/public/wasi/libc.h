@@ -25,6 +25,9 @@ void __wasilibc_populate_preopens(void);
 /// This is appropriate to call just prior to snapshotting the guest state so
 /// that it can be resumed on another runtime, in which case any
 /// previously-opened handles will no longer be valid.
+///
+/// On WASIp2 and WASIp3 this also resets the current working directory, so
+/// that it starts again from the runtime's `wasi:cli/environment.initial-cwd`.
 void __wasilibc_reset_preopens();
 
 #ifndef __wasip2__

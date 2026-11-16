@@ -7,9 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sysexits.h>
 #include <unistd.h>
 #include <wasi/api.h>
+#include <wasi/cwd.h>
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc.h>
 #include <wasi/report-error.h>
@@ -23,16 +23,13 @@ static int __wasilibc_cwd_mallocd = 0;
 #if defined(__wasip2__) || defined(__wasip3__)
 static _Atomic _Bool cwd_initialized = false;
 
-// Starts the cwd at `wasi:cli/environment.initial-cwd` the first time the cwd
-// is needed. Hosts that don't provide an absolute path leave the cwd at `/`.
+// Hosts that don't provide an absolute initial cwd leave the cwd at `/`.
 //
 // The host's path is used even if no preopen covers it, in which case relative
 // paths fail with `ENOENT` instead of silently resolving against `/`.
-//
-// The caller must not hold `__wasilibc_cwd_lock`.
-void __wasilibc_ensure_cwd(void) {
+int __wasilibc_ensure_cwd(void) {
   if (cwd_initialized)
-    return;
+    return 0;
 
 #ifdef __wasip2__
   wasip2_string_t initial;
@@ -43,16 +40,18 @@ void __wasilibc_ensure_cwd(void) {
 #endif
   char *cwd = NULL;
   if (is_some) {
-    if (initial.len > 0 && initial.ptr[0] == '/') {
+    bool absolute = initial.len > 0 && initial.ptr[0] == '/';
+    if (absolute)
       cwd = strndup((const char *)initial.ptr, initial.len);
-      if (cwd == NULL)
-        _Exit(EX_SOFTWARE);
-    }
 #ifdef __wasip2__
     wasip2_string_free(&initial);
 #else
     wasip3_string_free(&initial);
 #endif
+    if (absolute && cwd == NULL) {
+      errno = ENOMEM;
+      return -1;
+    }
   }
 
   WEAK_LOCK(__wasilibc_cwd_lock);
@@ -60,13 +59,24 @@ void __wasilibc_ensure_cwd(void) {
     // Another thread got here first.
     WEAK_UNLOCK(__wasilibc_cwd_lock);
     free(cwd);
-    return;
+    return 0;
   }
   if (cwd != NULL) {
     __wasilibc_cwd = cwd;
     __wasilibc_cwd_mallocd = 1;
   }
   cwd_initialized = true;
+  WEAK_UNLOCK(__wasilibc_cwd_lock);
+  return 0;
+}
+
+void __wasilibc_reset_cwd(void) {
+  WEAK_LOCK(__wasilibc_cwd_lock);
+  if (__wasilibc_cwd_mallocd)
+    free(__wasilibc_cwd);
+  __wasilibc_cwd = "/";
+  __wasilibc_cwd_mallocd = 0;
+  cwd_initialized = false;
   WEAK_UNLOCK(__wasilibc_cwd_lock);
 }
 #endif
@@ -199,7 +209,8 @@ int __wasilibc_find_relpath_alloc(const char *path, const char **abs_prefix,
                                   char **relative_buf, size_t *relative_buf_len,
                                   int can_realloc) {
 #if defined(__wasip2__) || defined(__wasip3__)
-  __wasilibc_ensure_cwd();
+  if (__wasilibc_ensure_cwd() < 0)
+    return -1;
 #endif
   WEAK_LOCK(__wasilibc_cwd_lock);
 

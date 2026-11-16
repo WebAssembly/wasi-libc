@@ -62,5 +62,40 @@ int main(void) {
 
   TEST(close(fd) == 0);
 
+  // Seeking to the end of the file after a write must actually move the
+  // write cursor, even when the offset passed to `lseek` is 0.
+  TEST((fd = open("c.txt", O_RDWR | O_CREAT | O_TRUNC, 0644)) >= 0);
+  TEST(write(fd, "abcdefghijklmnop", 16) == 16);
+  TEST(lseek(fd, 0, SEEK_SET) == 0);
+  TEST(write(fd, "Q", 1) == 1);
+  TEST(lseek(fd, 0, SEEK_END) == 16);
+  TEST(write(fd, "Z", 1) == 1);
+  TEST(lseek(fd, 0, SEEK_CUR) == 17);
+  TEST(lseek(fd, 0, SEEK_SET) == 0);
+  char contents[18] = {0};
+  TEST(read(fd, contents, 17) == 17);
+  TEST(memcmp(contents, "QbcdefghijklmnopZ", 17) == 0);
+
+  // Same as above, but with a read stream that needs to be repositioned.
+  TEST(lseek(fd, 0, SEEK_SET) == 0);
+  TEST(read(fd, buf, 1) == 1);
+  TEST(buf[0] == 'Q');
+  TEST(lseek(fd, -1, SEEK_END) == 16);
+  TEST(read(fd, buf, 1) == 1);
+  TEST(buf[0] == 'Z');
+  TEST(close(fd) == 0);
+
+  // Same as above, but in append mode a read stream at the previous position
+  // must not be reused after seeking to the end.
+  TEST((fd = open("c.txt", O_RDWR | O_APPEND)) >= 0);
+  TEST(read(fd, buf, 1) == 1);
+  TEST(buf[0] == 'Q');
+  TEST(lseek(fd, 0, SEEK_END) == 17);
+  TEST(read(fd, buf, 1) == 0);
+  TEST(lseek(fd, -2, SEEK_END) == 15);
+  TEST(read(fd, buf, 2) == 2);
+  TEST(memcmp(buf, "pZ", 2) == 0);
+  TEST(close(fd) == 0);
+
   return t_status;
 }

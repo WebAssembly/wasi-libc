@@ -97,5 +97,25 @@ int main(void) {
   TEST(memcmp(buf, "pZ", 2) == 0);
   TEST(close(fd) == 0);
 
+  // Interleaved reads and writes without an intervening seek share a single
+  // file offset, so neither stream may be reused at a stale position.
+  TEST((fd = open("d.txt", O_RDWR | O_CREAT | O_TRUNC, 0644)) >= 0);
+  TEST(write(fd, "abcdefghijklmnop", 16) == 16);
+  TEST(lseek(fd, 0, SEEK_SET) == 0);
+  TEST(read(fd, buf, 1) == 1);
+  TEST(buf[0] == 'a');
+  TEST(write(fd, "A", 1) == 1);
+  TEST(lseek(fd, 0, SEEK_CUR) == 2);
+  TEST(read(fd, buf, 1) == 1);
+  TEST(buf[0] == 'c');
+  TEST(write(fd, "D", 1) == 1);
+  TEST(lseek(fd, 0, SEEK_CUR) == 4);
+  TEST(read(fd, buf, 2) == 2);
+  TEST(memcmp(buf, "ef", 2) == 0);
+  TEST(lseek(fd, 0, SEEK_SET) == 0);
+  TEST(read(fd, contents, 16) == 16);
+  TEST(memcmp(contents, "aAcDefghijklmnop", 16) == 0);
+  TEST(close(fd) == 0);
+
   return t_status;
 }

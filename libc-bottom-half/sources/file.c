@@ -36,8 +36,7 @@ typedef struct {
 #endif
 } file_t;
 
-static void file_close_streams(void *data) {
-  file_t *file = (file_t *)data;
+static void file_close_read_stream(file_t *file) {
   STRONG_ASSERT_HELD(file->lock);
 
 #ifdef __wasip2__
@@ -45,30 +44,44 @@ static void file_close_streams(void *data) {
     poll_pollable_drop_own(file->read_pollable);
     file->read_pollable.__handle = 0;
   }
-  if (file->write_pollable.__handle != 0) {
-    poll_pollable_drop_own(file->write_pollable);
-    file->write_pollable.__handle = 0;
-  }
   if (file->read_stream.__handle != 0) {
     streams_input_stream_drop_own(file->read_stream);
     file->read_stream.__handle = 0;
+  }
+#else
+  wasip3_read_state_close(&file->read);
+  if (file->read_result != 0) {
+    filesystem_future_result_void_error_code_drop_readable(file->read_result);
+    file->read_result = 0;
+  }
+#endif
+}
+
+static void file_close_write_stream(file_t *file) {
+  STRONG_ASSERT_HELD(file->lock);
+
+#ifdef __wasip2__
+  if (file->write_pollable.__handle != 0) {
+    poll_pollable_drop_own(file->write_pollable);
+    file->write_pollable.__handle = 0;
   }
   if (file->write_stream.__handle != 0) {
     streams_output_stream_drop_own(file->write_stream);
     file->write_stream.__handle = 0;
   }
 #else
-  wasip3_read_state_close(&file->read);
   wasip3_write_state_close(&file->write);
-  if (file->read_result != 0) {
-    filesystem_future_result_void_error_code_drop_readable(file->read_result);
-    file->read_result = 0;
-  }
   if (file->write_result != 0) {
     filesystem_future_result_void_error_code_drop_readable(file->write_result);
     file->write_result = 0;
   }
 #endif
+}
+
+static void file_close_streams(void *data) {
+  file_t *file = (file_t *)data;
+  file_close_read_stream(file);
+  file_close_write_stream(file);
 }
 
 static void file_free(void *data) {
@@ -106,7 +119,26 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
   file_t *file = (file_t *)data;
   STRONG_LOCK(file->lock);
   // .. intentionally don't unlock `file->lock` as this function lets the
-  // caller do that (see `descriptor_table.h` for details of this callback).
+  // caller do that (see `descriptor_table.h` for details of this callback),
+  // except in an error where this is unlocked.
+
+  // Reads and writes share a single file offset, but the read and write
+  // streams each track their own position. Only one direction's stream is
+  // kept open at a time, so close any write stream here to ensure that the
+  // read stream, once opened, stays in sync with `file->offset`.
+  //
+  // Rationalizing a concurrent write elsewhere with a read is left for later so
+  // an error is returned in that case. Fixing this case would need to somehow
+  // handle a reasonable cursor update in that situation and both sides would
+  // have to somehow be aware of the other or something like that.
+#ifndef __wasip2__
+  if (wasip3_io_state_blocked(&file->write)) {
+    STRONG_UNLOCK(file->lock);
+    errno = EOPNOTSUPP;
+    return -1;
+  }
+#endif
+  file_close_write_stream(file);
 
 #ifdef __wasip2__
   if (file->read_stream.__handle == 0) {
@@ -116,6 +148,7 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
         &file->read_stream, &error_code);
     if (!ok) {
       translate_error(&error_code);
+      STRONG_UNLOCK(file->lock);
       return -1;
     }
   }
@@ -169,6 +202,16 @@ static int file_get_write_stream(void *data, wasi_write_t *write) {
   // .. intentionally don't unlock `file->lock` as this function lets the
   // caller do that (see `descriptor_table.h` for details of this callback).
 
+  // See `file_get_read_stream` for why the opposite stream is closed here.
+#ifndef __wasip2__
+  if (wasip3_io_state_blocked(&file->read)) {
+    STRONG_UNLOCK(file->lock);
+    errno = EOPNOTSUPP;
+    return -1;
+  }
+#endif
+  file_close_read_stream(file);
+
 #ifdef __wasip2__
   if (file->write_stream.__handle == 0) {
     filesystem_error_code_t error_code;
@@ -185,6 +228,7 @@ static int file_get_write_stream(void *data, wasi_write_t *write) {
     }
     if (!ok) {
       translate_error(&error_code);
+      STRONG_UNLOCK(file->lock);
       return -1;
     }
   }

@@ -80,6 +80,9 @@ ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset) {
     return -1;
   defer descriptor_table_entry_dec(entry);
 
+  if (nbyte > WASIP3_STREAM_MAX_LENGTH)
+    nbyte = WASIP3_STREAM_MAX_LENGTH;
+
   // Use `read-via-stream` to acquire a stream of data at this specified file
   // offset, then issue a read and wait for it to finish.
   filesystem_tuple2_stream_u8_future_result_void_error_code_t io;

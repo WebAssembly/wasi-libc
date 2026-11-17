@@ -76,6 +76,9 @@ ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset) {
     return -1;
   defer descriptor_table_entry_dec(entry);
 
+  if (nbyte > WASIP3_STREAM_MAX_LENGTH)
+    nbyte = WASIP3_STREAM_MAX_LENGTH;
+
   // Create a read/write stream, use `write-via-stream` to start writing,
   // then perform the write to see how much was accepted.
   filesystem_stream_u8_writer_t writer;

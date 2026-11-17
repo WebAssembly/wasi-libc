@@ -142,6 +142,11 @@ dir_entry_type_to_d_type(filesystem_descriptor_type_t *ty) {
 }
 
 #ifndef __wasip2__
+/// The most elements one stream read or write may transfer, from the
+/// canonical ABI's `Buffer.MAX_LENGTH`. Hosts trap on a larger count, so
+/// larger requests are clamped and complete as short reads/writes.
+#define WASIP3_STREAM_MAX_LENGTH ((size_t)(1 << 28) - 1)
+
 /// Starts the process of `poll` for `iostate` assuming it's backed by a
 /// readable stream.
 ///

@@ -5,7 +5,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <wasi/libc.h>
 
 #define TEST(c)                                                                \
   do {                                                                         \
@@ -47,10 +46,6 @@ int main(void) {
   // `chdir` is relative to the initial cwd.
   TEST(chdir("x") == 0);
   check_cwd("/sub/x");
-
-  // Resetting, as done before snapshotting, goes back to the initial cwd.
-  __wasilibc_reset_preopens();
-  check_cwd("/sub");
 
   return t_status;
 }

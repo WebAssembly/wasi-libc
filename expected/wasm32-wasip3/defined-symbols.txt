@@ -316,13 +316,11 @@ __wasilibc_cwd_mallocd
 __wasilibc_deinitialize_environ
 __wasilibc_descriptor_deallocate
 __wasilibc_dttoif
-__wasilibc_ensure_cwd
 __wasilibc_ensure_environ
 __wasilibc_environ
 __wasilibc_find_abspath
 __wasilibc_find_relpath
 __wasilibc_find_relpath_alloc
-__wasilibc_find_relpath_initial_cwd
 __wasilibc_futex_wait
 __wasilibc_futex_wake
 __wasilibc_future_block_on_timeout
@@ -365,7 +363,6 @@ __wasilibc_rename_newat
 __wasilibc_rename_oldat
 __wasilibc_report_error
 __wasilibc_report_errorf
-__wasilibc_reset_cwd
 __wasilibc_reset_preopens
 __wasilibc_rmdirat
 __wasilibc_setsockopt_timeout

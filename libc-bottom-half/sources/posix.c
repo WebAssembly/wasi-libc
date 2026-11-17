@@ -1,5 +1,5 @@
 //! POSIX-like functions supporting absolute path arguments, implemented in
-//! terms of `__wasilibc_find_relpath` and `*at`-style functions.
+//! terms of `__wasilibc_find_relpath_alloc` and `*at`-style functions.
 
 #include <dirent.h>
 #include <errno.h>
@@ -9,43 +9,26 @@
 #include <sys/statvfs.h>
 #include <unistd.h>
 #include <utime.h>
-#include <wasi/cwd.h>
 #include <wasi/libc-find-relpath.h>
 #include <wasi/libc-nocwd.h>
 #include <wasi/libc.h>
 #include <wasi/report-error.h>
 
 #if defined(__wasip1__) || defined(__wasip2__) || defined(__wasip3__)
-// `cwd_buf` is only used on WASIp2 and WASIp3 when `chdir` isn't linked, to
-// hold the absolute path built from the initial cwd.
 static int find_relpath2(const char *path, char **relative,
-                         size_t *relative_len, char **cwd_buf,
-                         size_t *cwd_buf_len) {
-  // See comments in `preopens.c` for what this trick is doing.
+                         size_t *relative_len) {
   const char *abs;
-  if (__wasilibc_find_relpath_alloc)
-    return __wasilibc_find_relpath_alloc(path, &abs, relative, relative_len, 1);
-#if defined(__wasip2__) || defined(__wasip3__)
-  return __wasilibc_find_relpath_initial_cwd(
-      path, &abs, (const char **)relative, cwd_buf, cwd_buf_len, 1);
-#else
-  (void)cwd_buf;
-  (void)cwd_buf_len;
-  return __wasilibc_find_relpath(path, &abs, relative, *relative_len);
-#endif
+  return __wasilibc_find_relpath_alloc(path, &abs, relative, relative_len, 1);
 }
 
-// Helper to call `__wasilibc_find_relpath` and return an already-managed
+// Helper to call `__wasilibc_find_relpath_alloc` and return an already-managed
 // pointer for the `relative` path. This function is not reentrant since the
 // `relative` pointer will point to static data that cannot be reused until
 // `relative` is no longer used.
 static int find_relpath(const char *path, char **relative) {
   static __thread char *relative_buf = NULL;
   static __thread size_t relative_buf_len = 0;
-  static __thread char *cwd_buf = NULL;
-  static __thread size_t cwd_buf_len = 0;
-  int fd = find_relpath2(path, &relative_buf, &relative_buf_len, &cwd_buf,
-                         &cwd_buf_len);
+  int fd = find_relpath2(path, &relative_buf, &relative_buf_len);
   // find_relpath2 can update relative_buf, so assign it after the call
   *relative = relative_buf;
   return fd;
@@ -55,10 +38,7 @@ static int find_relpath(const char *path, char **relative) {
 static int find_relpath_alt(const char *path, char **relative) {
   static __thread char *relative_buf = NULL;
   static __thread size_t relative_buf_len = 0;
-  static __thread char *cwd_buf = NULL;
-  static __thread size_t cwd_buf_len = 0;
-  int fd = find_relpath2(path, &relative_buf, &relative_buf_len, &cwd_buf,
-                         &cwd_buf_len);
+  int fd = find_relpath2(path, &relative_buf, &relative_buf_len);
   // find_relpath2 can update relative_buf, so assign it after the call
   *relative = relative_buf;
   return fd;

@@ -476,6 +476,9 @@ static ssize_t __wasilibc_write_without_offset_update(wasi_write_t *write,
 #elif defined(__wasip3__)
   wasip3_io_state_t *state = write->state;
 
+  if (length > WASIP3_STREAM_MAX_LENGTH)
+    length = WASIP3_STREAM_MAX_LENGTH;
+
   if (wasip3_io_sync(state, write->blocking) < 0)
     return -1;
 
@@ -676,6 +679,9 @@ static ssize_t __wasilibc_read_without_offset_update(wasi_read_t *read,
 #elif defined(__wasip3__)
   wasip3_io_state_t *state = read->state;
   wasip3_event_t event;
+
+  if (length > WASIP3_STREAM_MAX_LENGTH)
+    length = WASIP3_STREAM_MAX_LENGTH;
 
   if (wasip3_io_sync(state, read->blocking) < 0)
     return -1;

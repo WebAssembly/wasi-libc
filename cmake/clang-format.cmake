@@ -41,6 +41,10 @@ function(clang_format_file file)
 
   string(REPLACE "/" "_" source_target ${file})
   string(REPLACE ":" "_" source_target ${source_target})
+  # A source may be shared by several tests.
+  if (TARGET format-${source_target})
+    return()
+  endif()
   add_custom_target(format-${source_target}
     COMMAND ${CLANG_FORMAT} -i ${src})
   add_custom_target(format-check-${source_target}

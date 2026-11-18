@@ -221,6 +221,7 @@ endfunction()
 # Optional arguments:
 #
 # * `FS` - this test requires a temporary directory mounted as `/`
+# * `DIR host::guest` - additional directories to preopen
 # * `ARGV arg1 arg2` - additional arguments to pass to the test at runtime
 # * `ENV a=b b=c` - set env vars for when executing this test
 # * `NETWORK` - this test uses the network and sockets.
@@ -231,7 +232,7 @@ endfunction()
 function(register_test test_name executable_name)
   set(options FS NETWORK SETJMP)
   set(oneValueArgs CLIENT PASS_REGULAR_EXPRESSION ENGINE_ARG FILE)
-  set(multiValueArgs ARGV ENV)
+  set(multiValueArgs ARGV ENV DIR)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
   set(wasmtime_args)
@@ -243,6 +244,9 @@ function(register_test test_name executable_name)
   if (arg_NETWORK)
     list(APPEND wasmtime_args -Sinherit-network,allow-ip-name-lookup)
   endif()
+  foreach(dir IN LISTS arg_DIR)
+    list(APPEND wasmtime_args --dir ${dir})
+  endforeach()
   foreach(env IN LISTS arg_ENV)
     list(APPEND wasmtime_args --env ${env})
   endforeach()
@@ -591,6 +595,24 @@ if (NOT WEB)
   add_wasilibc_test(clock_nanosleep.c)
 endif()
 add_wasilibc_test(chdir.c FS)
+# The cwd starts at `/` unless the host says otherwise via
+# `wasi:cli/environment.initial-cwd`, which only WASIp2 and later have. The
+# host's cwd is used as-is, except that a relative one gets a leading `/`.
+set(initial_cwd_src ${CMAKE_CURRENT_SOURCE_DIR}/src/initial_cwd.c)
+add_test_pair(initial_cwd_default.wasm ${initial_cwd_src} FS ARGV /)
+if (NOT WASI STREQUAL "p1" AND NOT WEB)
+  add_test_pair(initial_cwd.wasm ${initial_cwd_src} FS ARGV /sub
+    ENGINE_ARG -Scwd=/sub)
+  add_test_pair(initial_cwd_relative.wasm ${initial_cwd_src} FS ARGV /sub
+    ENGINE_ARG -Scwd=sub)
+  add_test_pair(initial_cwd_dot_sub.wasm ${initial_cwd_src} FS ARGV /./sub /sub
+    ENGINE_ARG -Scwd=./sub)
+  add_test_pair(initial_cwd_dot.wasm ${initial_cwd_src} FS ARGV /. /
+    ENGINE_ARG -Scwd=.)
+  add_wasilibc_test(initial_cwd_chdir.c FS ENGINE_ARG -Scwd=/sub)
+  add_wasilibc_test(initial_cwd_uncovered.c ENGINE_ARG -Scwd=/nowhere
+    DIR ${CMAKE_CURRENT_SOURCE_DIR}/src::/src)
+endif()
 add_wasilibc_test(close.c FS)
 add_wasilibc_test(ctors_run_once.c)
 add_wasilibc_test(pread.c FS)

@@ -338,6 +338,7 @@ __wasilibc_add_file
 __wasilibc_add_tcp_socket
 __wasilibc_add_udp_socket
 __wasilibc_cwd
+__wasilibc_cwd_mallocd
 __wasilibc_deinitialize_environ
 __wasilibc_descriptor_deallocate
 __wasilibc_dttoif

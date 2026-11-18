@@ -596,8 +596,8 @@ if (NOT WEB)
 endif()
 add_wasilibc_test(chdir.c FS)
 # The cwd starts at `/` unless the host says otherwise via
-# `wasi:cli/environment.initial-cwd`, which only WASIp2 and later have. A
-# relative initial cwd is resolved against `/`, where `..` is `/`.
+# `wasi:cli/environment.initial-cwd`, which only WASIp2 and later have. The
+# host's cwd is used as-is, except that a relative one gets a leading `/`.
 set(initial_cwd_src ${CMAKE_CURRENT_SOURCE_DIR}/src/initial_cwd.c)
 add_test_pair(initial_cwd_default.wasm ${initial_cwd_src} FS ARGV /)
 if (NOT WASI STREQUAL "p1" AND NOT WEB)
@@ -605,12 +605,10 @@ if (NOT WASI STREQUAL "p1" AND NOT WEB)
     ENGINE_ARG -Scwd=/sub)
   add_test_pair(initial_cwd_relative.wasm ${initial_cwd_src} FS ARGV /sub
     ENGINE_ARG -Scwd=sub)
-  add_test_pair(initial_cwd_dot.wasm ${initial_cwd_src} FS ARGV /
+  add_test_pair(initial_cwd_dot_sub.wasm ${initial_cwd_src} FS ARGV /./sub /sub
+    ENGINE_ARG -Scwd=./sub)
+  add_test_pair(initial_cwd_dot.wasm ${initial_cwd_src} FS ARGV /. /
     ENGINE_ARG -Scwd=.)
-  add_test_pair(initial_cwd_dotdot.wasm ${initial_cwd_src} FS ARGV /
-    ENGINE_ARG -Scwd=..)
-  add_test_pair(initial_cwd_dotdot_sub.wasm ${initial_cwd_src} FS ARGV /sub
-    ENGINE_ARG -Scwd=../sub)
   add_wasilibc_test(initial_cwd_chdir.c FS ENGINE_ARG -Scwd=/sub)
   add_wasilibc_test(initial_cwd_uncovered.c ENGINE_ARG -Scwd=/nowhere
     DIR ${CMAKE_CURRENT_SOURCE_DIR}/src::/src)

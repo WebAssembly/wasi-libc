@@ -29,9 +29,13 @@ static _Atomic _Bool cwd_initialized = false;
 // case a later call tries again. The caller must not hold
 // `__wasilibc_cwd_lock`.
 //
-// The initial cwd is resolved against `/`, so `.` and the empty string mean
-// `/`. The host's path is used even if no preopen covers it, in which case
-// relative paths fail with `ENOENT` instead of silently resolving against `/`.
+// The host's path is used as-is, except that a `/` is prepended if it doesn't
+// start with one, since `getcwd` must return an absolute path. Components like
+// `.` and `..` are left alone, as they are everywhere else in wasi-libc's path
+// handling, and it's up to the host to resolve them. An empty path leaves the
+// cwd at `/`. The host's path is used even if no preopen covers it, in which
+// case relative paths fail with `ENOENT` instead of silently resolving against
+// `/`.
 static int ensure_cwd(void) {
   if (cwd_initialized)
     return 0;
@@ -50,30 +54,18 @@ static int ensure_cwd(void) {
 #else
     defer wasip3_string_free(&initial);
 #endif
-    // Skip leading `/`, `.` and `..` components, since `/..` is `/`, then add
-    // back a single `/`.
-    const char *rel = (const char *)initial.ptr;
+    const char *path = (const char *)initial.ptr;
     size_t len = initial.len;
-    while (len > 0) {
-      size_t skip = 0;
-      if (rel[0] == '/' || (rel[0] == '.' && (len == 1 || rel[1] == '/')))
-        skip = 1;
-      else if (rel[0] == '.' && rel[1] == '.' && (len == 2 || rel[2] == '/'))
-        skip = 2;
-      if (skip == 0)
-        break;
-      rel += skip;
-      len -= skip;
-    }
     if (len > 0) {
-      cwd = malloc(len + 2);
+      size_t slash = path[0] == '/' ? 0 : 1;
+      cwd = malloc(slash + len + 1);
       if (cwd == NULL) {
         errno = ENOMEM;
         return -1;
       }
       cwd[0] = '/';
-      memcpy(cwd + 1, rel, len);
-      cwd[len + 1] = 0;
+      memcpy(cwd + slash, path, len);
+      cwd[slash + len] = 0;
     }
   }
 

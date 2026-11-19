@@ -249,6 +249,7 @@ __stdio_exit_needed
 __stdio_read
 __stdio_seek
 __stdio_write
+__stdio_write_needs_stderr
 __stdout_FILE
 __stdout_used
 __stdout_write

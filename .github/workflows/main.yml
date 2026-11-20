@@ -3,7 +3,8 @@ on: [push, pull_request]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.run_attempt == '1' }}
+  queue: ${{ github.run_attempt == '1' && 'single' || 'max' }}
 
 defaults:
   run:
@@ -11,6 +12,7 @@ defaults:
 
 jobs:
   buildlibc:
+    timeout-minutes: 45
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -211,7 +213,7 @@ jobs:
 
     - name: Test
       if: matrix.test
-      run: ctest --test-dir build/test --output-on-failure -j4
+      run: ctest --test-dir build/test --output-on-failure --no-tests=error -j4
 
     - uses: actions/upload-artifact@v6
       if: matrix.upload
@@ -250,6 +252,7 @@ jobs:
       working-directory: tools/wasi-headers
 
   clang-format:
+    timeout-minutes: 20
     name: Clang Format
     runs-on: ubuntu-26.04
     steps:
@@ -271,6 +274,7 @@ jobs:
     - run: ninja -C build format-check
 
   rustfmt:
+    timeout-minutes: 10
     name: Rustfmt
     runs-on: ubuntu-26.04
     steps:
@@ -283,6 +287,7 @@ jobs:
       working-directory: tools/wasi-headers
 
   bindings:
+    timeout-minutes: 20
     name: Ensure wit-bingen bindings are up-to-date
     runs-on: ubuntu-26.04
     steps:
@@ -299,6 +304,7 @@ jobs:
   # the end this runs at least some Python tests against a from-source-built
   # copy of wasi-libc.
   python:
+    timeout-minutes: 60
     name: Test Python ${{ matrix.name }}
     runs-on: ubuntu-26.04-arm
     strategy:
@@ -352,6 +358,7 @@ jobs:
   # fail on cancellation to ensure that the dependency failures are propagated
   # correctly.
   ci-status:
+    timeout-minutes: 5
     name: Record the result of this workflow
     runs-on: ubuntu-26.04
     needs:

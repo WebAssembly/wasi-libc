@@ -4105,7 +4105,15 @@ static void* sys_alloc(mstate m, size_t nb) {
     msegmentptr ss = (m->top == 0)? 0 : segment_holding(m, (char*)m->top);
     ACQUIRE_MALLOC_GLOBAL_LOCK();
 
+#ifdef __wasilibc_unmodified_upstream
     if (ss == 0) {  /* First time through or recovery */
+#else
+    // In wasi-libc, this branch should never be taken as CALL_MORECORE(0) may
+    // lead to incorrect allocations. See try_init_allocator() for more
+    // information.
+    assert(ss != 0);
+    if (0) {
+#endif
       char* base = (char*)CALL_MORECORE(0);
       if (base != CMFAIL) {
         size_t fp;
@@ -4139,6 +4147,7 @@ static void* sys_alloc(mstate m, size_t nb) {
             ssize < nb + SYS_ALLOC_PADDING) {
           size_t esize = granularity_align(nb + SYS_ALLOC_PADDING - ssize);
           if (esize < HALF_MAX_SIZE_T) {
+#ifdef __wasilibc_unmodified_upstream
             char* end = (char*)CALL_MORECORE(esize);
             if (end != CMFAIL)
               ssize += esize;
@@ -4146,6 +4155,15 @@ static void* sys_alloc(mstate m, size_t nb) {
               (void) CALL_MORECORE(-ssize);
               br = CMFAIL;
             }
+#else
+            // After calling CALL_MORECORE(ssize) above to try to extend the
+            // current contiguous space another thread could have called
+            // memory.grow. If we then took the result CALL_MORECORE(esize) as
+            // the end of the region, we would assume that all space allocated
+            // by the call to memory.grow from the other thread belongs to us.
+            // This is a similar issue as described in try_init_allocator().
+            br = CMFAIL;
+#endif
           }
         }
       }
@@ -4175,7 +4193,16 @@ static void* sys_alloc(mstate m, size_t nb) {
       char* end = CMFAIL;
       ACQUIRE_MALLOC_GLOBAL_LOCK();
       br = (char*)(CALL_MORECORE(asize));
+#ifdef __wasilibc_unmodified_upstream
       end = (char*)(CALL_MORECORE(0));
+#else
+      // It can happen that between two calls to CALL_MORECORE another thread
+      // executes memory.grow. This then usually leads to corrupted memory.
+      // We know that asize must be a multiple of the WebAssembly page size,
+      // otherwise CALL_MORECORE would have failed. So, end must just be br +
+      // asize.
+      end = br + asize;
+#endif
       RELEASE_MALLOC_GLOBAL_LOCK();
       if (br != CMFAIL && end != CMFAIL && br < end) {
         size_t ssize = end - br;

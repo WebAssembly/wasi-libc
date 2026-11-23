@@ -67,7 +67,7 @@ index 3e04c344a0d..fb1288c2536 100644
          # assume all other platforms have working thread support.
          return True
 diff --git a/Lib/test/test_asyncio/test_base_events.py b/Lib/test/test_asyncio/test_base_events.py
-index 1b727f3b1fe..e08a2ef8167 100644
+index 1b727f3b1fe..818dce6eefe 100644
 --- a/Lib/test/test_asyncio/test_base_events.py
 +++ b/Lib/test/test_asyncio/test_base_events.py
 @@ -331,6 +331,8 @@ def cb():
@@ -115,6 +115,17 @@ index 1b727f3b1fe..e08a2ef8167 100644
      def test_create_datagram_endpoint_sockopts(self):
          # Socket options should not be applied unless asked for.
          # SO_REUSEPORT is not available on all platforms.
+@@ -2048,6 +2058,10 @@ def test_log_slow_callbacks(self, m_logger):
+             loop.stop()
+ 
+         asyncio.set_event_loop(self.loop)
++        if support.is_wasi:
++            # The self-pipe may spuriously report readable on its first poll,
++            # queueing _read_from_self after the callbacks below.
++            test_utils.run_briefly(self.loop)
+         self.loop.set_debug(True)
+         self.loop.slow_callback_duration = 0.0
+ 
 diff --git a/Lib/test/test_asyncio/test_events.py b/Lib/test/test_asyncio/test_events.py
 index 919d543b032..6776d4600d2 100644
 --- a/Lib/test/test_asyncio/test_events.py

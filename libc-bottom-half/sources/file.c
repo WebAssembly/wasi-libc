@@ -88,7 +88,7 @@ static int file_size(file_t *file, off_t *size);
 
 // Sentinel value for `file_t::offset` indicating that the offset is the end of
 // the file, but its exact value isn't known.
-#define OFFSET_AT_EOF ((off_t)-1)
+#define OFFSET_AT_EOF ((off_t) - 1)
 
 // Resolves `OFFSET_AT_EOF`, if present, to the current size of the file.
 static int file_resolve_offset(file_t *file) {

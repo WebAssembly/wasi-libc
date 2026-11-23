@@ -56,12 +56,9 @@ elseif(NOT ENGINE OR ENGINE STREQUAL "")
   # By default a pinned version of Wasmtime is used that's kept relatively
   # up-to-date. Note though that `wasm32-wasip1-threads` requires an explicitly
   # older version of Wasmtime as the latest releases no longer support
-  # wasi-threads, and web targets require sufficiently new versions of wasmtime
-  # that support new component model features.
-  set(wasmtime_version v48.0.1)
-  if (WEB)
-    set(wasmtime_version v50.0.0)
-  elseif (TARGET_TRIPLE MATCHES "-threads")
+  # wasi-threads.
+  set(wasmtime_version v51.0.0)
+  if (TARGET_TRIPLE MATCHES "-threads")
     set(wasmtime_version v44.0.0)
   endif()
   ba_download(
@@ -258,6 +255,10 @@ function(register_test test_name executable_name)
   endif()
   if (ENABLE_COOP_THREADS)
     list(APPEND wasmtime_args --wasm component-model-threading)
+    # Wasmtime 51.0.0's default here is too low for tests, so increase it.
+    # Note that bytecodealliance/wasmtime#15437 will remove the need to pass
+    # this.
+    list(APPEND wasmtime_args -Smax-fibers=20000)
   endif()
   if (arg_SETJMP)
     list(APPEND wasmtime_args --wasm exceptions)

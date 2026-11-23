@@ -37,6 +37,12 @@ static void tcp_loopback_pair(int *server_conn, int *client) {
   int sfd = accept(lfd, NULL, NULL);
   TEST(sfd >= 0);
 
+  // Force both sockets into a state where they know there's no data to read,
+  // otherwise `poll` may spuriously report them as readable.
+  char c;
+  TEST(recv(sfd, &c, 1, MSG_DONTWAIT) == -1 && errno == EWOULDBLOCK);
+  TEST(recv(cfd, &c, 1, MSG_DONTWAIT) == -1 && errno == EWOULDBLOCK);
+
   TEST(close(lfd) == 0);
   *server_conn = sfd;
   *client = cfd;

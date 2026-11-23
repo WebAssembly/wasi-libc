@@ -46,7 +46,9 @@ int main(void) {
   iov.iov_len = 0;
   iov.iov_base = NULL;
   TEST(pwritev(fd, &iov, 1, 0) == 0);
+#ifndef __wasip1__ // FIXME(bytecodealliance/wasmtime#15436)
   TEST(preadv(fd, &iov, 1, 0) == 0);
+#endif
 
   close(fd);
 

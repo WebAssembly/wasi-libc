@@ -255,6 +255,10 @@ function(register_test test_name executable_name)
   endif()
   if (ENABLE_COOP_THREADS)
     list(APPEND wasmtime_args --wasm component-model-threading)
+    # Wasmtime 51.0.0's default here is too low for tests, so increase it.
+    # Note that bytecodealliance/wasmtime#15437 will remove the need to pass
+    # this.
+    list(APPEND wasmtime_args -Smax-fibers=20000)
   endif()
   if (arg_SETJMP)
     list(APPEND wasmtime_args --wasm exceptions)

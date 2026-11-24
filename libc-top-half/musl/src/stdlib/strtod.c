@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <errno.h>
 #ifdef __wasilibc_unmodified_upstream // Changes to optimize printf/scanf when long double isn't needed
 #else
 #include "printscan.h"
@@ -41,7 +42,9 @@ double strtod(const char *restrict s, char **restrict p)
 long double strtold(const char *restrict s, char **restrict p)
 {
 #if defined(__wasilibc_printscan_no_long_double)
-	long_double_not_supported();
+	if (p) *p = (char *)s;
+	errno = EINVAL;
+	return 0;
 #else
 	return strtox(s, p, 2);
 #endif

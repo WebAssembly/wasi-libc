@@ -5,6 +5,7 @@
 #include "shgetc.h"
 #include "floatscan.h"
 #include "stdio_impl.h"
+#include <errno.h>
 #include <wchar.h>
 #include <wctype.h>
 
@@ -75,7 +76,9 @@ double wcstod(const wchar_t *restrict s, wchar_t **restrict p)
 long double wcstold(const wchar_t *restrict s, wchar_t **restrict p)
 {
 #if defined(__wasilibc_printscan_no_long_double)
-	long_double_not_supported();
+	if (p) *p = (wchar_t *)s;
+	errno = EINVAL;
+	return 0;
 #else
 	return wcstox(s, p, 2);
 #endif

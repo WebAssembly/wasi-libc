@@ -135,15 +135,9 @@ static void pop_arg(union arg *arg, int type, va_list *ap)
 	break; case UMAX:	arg->i = va_arg(*ap, uintmax_t);
 	break; case PDIFF:	arg->i = va_arg(*ap, ptrdiff_t);
 	break; case UIPTR:	arg->i = (uintptr_t)va_arg(*ap, void *);
-#if defined(__wasilibc_printscan_no_floating_point)
-	break; case DBL:
-	       case LDBL:
-	floating_point_not_supported();
-#else
+#if !defined(__wasilibc_printscan_no_floating_point)
 	break; case DBL:	arg->f = va_arg(*ap, double);
-#if defined(__wasilibc_printscan_no_long_double)
-	break; case LDBL:	long_double_not_supported();
-#else
+#if !defined(__wasilibc_printscan_no_long_double)
 	break; case LDBL:	arg->f = va_arg(*ap, long double);
 #endif
 #endif
@@ -552,6 +546,8 @@ static int printf_core(FILE *f, const char *fmt, va_list *ap, union arg *nl_arg,
 			st=states[st]S(*s++);
 		} while (st-1<STOP);
 		if (!st) goto inval;
+
+		if (__wasilibc_printscan_unsupported_arg(st)) goto inval;
 
 		/* Check validity of argument type (nl/normal) */
 		if (st==NOARG) {

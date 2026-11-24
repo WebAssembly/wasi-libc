@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
+#include <errno.h>
 #include <ctype.h>
 #include <wchar.h>
 #include <wctype.h>
@@ -312,6 +313,13 @@ int vfscanf(FILE *restrict f, const char *restrict fmt, va_list ap)
 		case 'e': case 'E':
 		case 'f': case 'F':
 		case 'g': case 'G':
+#if defined(__wasilibc_printscan_no_long_double)
+			/* `%Lf` needs long double support */
+			if (size == SIZE_L) {
+				errno = EINVAL;
+				goto fmt_fail;
+			}
+#endif
 			y = __floatscan(f, size, 0);
 			if (!shcnt(f)) goto match_fail;
 			if (dest) switch (size) {
@@ -321,13 +329,11 @@ int vfscanf(FILE *restrict f, const char *restrict fmt, va_list ap)
 			case SIZE_l:
 				*(double *)dest = y;
 				break;
+#if !defined(__wasilibc_printscan_no_long_double)
 			case SIZE_L:
-#if defined(__wasilibc_printscan_no_long_double)
-				long_double_not_supported();
-#else
 				*(long double *)dest = y;
-#endif
 				break;
+#endif
 			}
 			break;
 		}

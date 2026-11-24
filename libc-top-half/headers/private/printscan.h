@@ -1,18 +1,21 @@
 #if defined(__wasilibc_printscan_no_floating_point)
+#define __wasilibc_printscan_has_double 0
+#define __wasilibc_printscan_has_long_double 0
+#elif defined(__wasilibc_printscan_no_long_double)
+#define __wasilibc_printscan_has_double 1
+#define __wasilibc_printscan_has_long_double 0
+#else
+#define __wasilibc_printscan_has_double 1
+#define __wasilibc_printscan_has_long_double 1
+#endif
 
-#include <stdio.h>
+#define __wasilibc_printscan_unsupported_arg(type)        \
+  (((type) == DBL && !__wasilibc_printscan_has_double) || \
+   ((type) == LDBL && !__wasilibc_printscan_has_long_double))
 
-__attribute__((__cold__, __noreturn__))
-static void floating_point_not_supported(void) {
-    void abort(void) __attribute__((__noreturn__));
-    fputs("Support for floating-point formatting is currently disabled.\n"
-          "To enable it, " __wasilibc_printscan_floating_point_support_option ".\n", stderr);
-    abort();
-}
+#if defined(__wasilibc_printscan_no_floating_point)
 
 #elif defined(__wasilibc_printscan_no_long_double)
-
-#include <stdio.h>
 
 typedef double long_double;
 #undef LDBL_TRUE_MIN
@@ -43,13 +46,6 @@ typedef double long_double;
 #define fmodl(x, y) fmod(x, y)
 #undef scalbnl
 #define scalbnl(arg, exp) scalbn(arg, exp)
-__attribute__((__cold__, __noreturn__))
-static void long_double_not_supported(void) {
-    void abort(void) __attribute__((__noreturn__));
-    fputs("Support for formatting long double values is currently disabled.\n"
-          "To enable it, " __wasilibc_printscan_full_support_option ".\n", &__stderr_FILE);
-    abort();
-}
 
 #else
 

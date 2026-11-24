@@ -50,9 +50,9 @@ int main(void) {
   // An unsignaled wait with a monotonic deadline 2ms out must actually wait
   // ~2ms before reporting ETIMEDOUT.
   {
+    uint64_t start = monotonic_ns();
     struct timespec deadline = monotonic_deadline_ns(2 * 1000 * 1000);
     TEST(pthread_mutex_lock(&m) == 0);
-    uint64_t start = monotonic_ns();
     int rc = 0;
     while (!go && rc == 0)
       rc = pthread_cond_timedwait(&c, &m, &deadline);

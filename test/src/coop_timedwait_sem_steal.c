@@ -33,8 +33,8 @@ static uint64_t monotonic_ns(void) {
 
 static void *stolen_waiter(void *arg) {
   (void)arg;
-  struct timespec deadline = deadline_ns(4 * 1000 * 1000);
   uint64_t start = monotonic_ns();
+  struct timespec deadline = deadline_ns(4 * 1000 * 1000);
   errno = 0;
   TEST(sem_timedwait(&sem, &deadline) == -1);
   TEST(errno == ETIMEDOUT);

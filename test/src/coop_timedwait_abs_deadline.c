@@ -20,6 +20,8 @@ static uint64_t monotonic_ns(void) {
 static void *contender(void *arg) {
   (void)arg;
 
+  uint64_t start = monotonic_ns();
+
   // Deadline 2ms from now.
   struct timespec deadline;
   TEST(clock_gettime(CLOCK_REALTIME, &deadline) == 0);
@@ -29,7 +31,6 @@ static void *contender(void *arg) {
     deadline.tv_sec += 1;
   }
 
-  uint64_t start = monotonic_ns();
   TEST(pthread_mutex_timedlock(&lock, &deadline) == ETIMEDOUT);
   uint64_t elapsed = monotonic_ns() - start;
 

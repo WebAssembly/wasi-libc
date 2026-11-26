@@ -15,7 +15,7 @@ typedef struct {
   DECLARE_STRONG_LOCK(lock);
   filesystem_own_descriptor_t file_handle;
   // Current position in stream, relative to the beginning of the
-  // *file_handle*, measured in bytes
+  // *file_handle*, measured in bytes, or `OFFSET_AT_EOF`.
   off_t offset;
   int oflag;
 #ifdef __wasip2__
@@ -84,6 +84,24 @@ static void file_close_streams(void *data) {
   file_close_write_stream(file);
 }
 
+static int file_size(file_t *file, off_t *size);
+
+// Sentinel value for `file_t::offset` indicating that the offset is the end of
+// the file, but its exact value isn't known.
+#define OFFSET_AT_EOF ((off_t) - 1)
+
+// Resolves `OFFSET_AT_EOF`, if present, to the current size of the file.
+static int file_resolve_offset(file_t *file) {
+  STRONG_ASSERT_HELD(file->lock);
+  if (file->offset != OFFSET_AT_EOF)
+    return 0;
+  off_t end;
+  if (file_size(file, &end) < 0)
+    return -1;
+  file->offset = end;
+  return 0;
+}
+
 static void file_free(void *data) {
   file_t *file = (file_t *)data;
   STRONG_ASSERT_EMPTY(file->lock);
@@ -139,6 +157,10 @@ static int file_get_read_stream(void *data, wasi_read_t *read) {
   }
 #endif
   file_close_write_stream(file);
+  if (file_resolve_offset(file) < 0) {
+    STRONG_UNLOCK(file->lock);
+    return -1;
+  }
 
 #ifdef __wasip2__
   if (file->read_stream.__handle == 0) {
@@ -211,6 +233,9 @@ static int file_get_write_stream(void *data, wasi_write_t *write) {
   }
 #endif
   file_close_read_stream(file);
+  if (file->oflag & O_APPEND)
+    file->offset = OFFSET_AT_EOF;
+  assert(file->offset != OFFSET_AT_EOF || (file->oflag & O_APPEND));
 
 #ifdef __wasip2__
   if (file->write_stream.__handle == 0) {
@@ -253,7 +278,7 @@ static int file_get_write_stream(void *data, wasi_write_t *write) {
   write->eof = file_write_eof;
   write->eof_data = data;
 #endif
-  write->offset = &file->offset;
+  write->offset = (file->oflag & O_APPEND) ? NULL : &file->offset;
   write->timeout = 0;
   write->blocking = true;
   return 0;
@@ -323,11 +348,11 @@ static off_t file_seek(void *data, off_t offset, int whence) {
   }
 #endif
 
-  // The current position of the cursor. If this file is in append mode, reset
-  // our knowledge of the current cursor to the current end of the file.
-  off_t cur = file->offset;
-  if ((file->oflag & O_APPEND) && file_size(file, &cur) < 0)
+  // Ensure `file->offset` is an actual byte count, handling O_APPEND writes
+  // that may have previously happened.
+  if (file_resolve_offset(file) < 0)
     return -1;
+  off_t cur = file->offset;
 
   off_t result;
   switch (whence) {
@@ -338,10 +363,8 @@ static off_t file_seek(void *data, off_t offset, int whence) {
     result = cur + offset;
     break;
   case SEEK_END: {
-    // If we're in append mode `cur` is already the end of the file, but if
-    // we're not in append mode then learn where the end is here.
-    off_t end = cur;
-    if (!(file->oflag & O_APPEND) && file_size(file, &end) < 0)
+    off_t end;
+    if (file_size(file, &end) < 0)
       return -1;
     result = end + offset;
     break;
@@ -410,6 +433,23 @@ static int file_fcntl_setfl(void *data, int flags) {
   defer STRONG_UNLOCK(file->lock);
 
   flags &= O_NONBLOCK | O_APPEND;
+
+  // The write stream, if open, was created in either append or positional
+  // mode based on the old value of `O_APPEND`. If that's changing then the
+  // stream needs to be closed so the next write opens one in the new mode.
+  if ((file->oflag ^ flags) & O_APPEND) {
+#ifndef __wasip2__
+    // See `file_seek` for why this is disallowed.
+    if (wasip3_io_state_blocked(&file->write)) {
+      errno = EOPNOTSUPP;
+      return -1;
+    }
+#endif
+    if (file_resolve_offset(file) < 0)
+      return -1;
+    file_close_write_stream(file);
+  }
+
   file->oflag = (file->oflag & ~(O_NONBLOCK | O_APPEND)) | flags;
   return 0;
 }

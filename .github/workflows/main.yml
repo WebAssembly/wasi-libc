@@ -32,7 +32,7 @@ jobs:
             clang_version: 15.0.7
             llvm_asset_suffix: arm64-apple-darwin22.0
             upload: macos-clang-15
-            args: -DBUILD_SHARED=OFF -DCMAKE_C_COMPILER_WORKS=ON
+            args: -DBUILD_SHARED=OFF
           - name: Build on Windows x86_64
             os: windows-2025
             clang_version: 20.1.8

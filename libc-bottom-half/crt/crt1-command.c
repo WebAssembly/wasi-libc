@@ -5,6 +5,9 @@
 #include <wasi/api.h>
 #include <wasi/descriptor_table.h>
 #include <wasi/report-error.h>
+#if defined(__wasip2__) || defined(__wasip3__)
+#include <stdlib.h>
+#endif
 
 extern void __wasm_call_ctors(void);
 extern int __main_void(void);
@@ -75,7 +78,14 @@ __attribute__((export_name("_initialize"))) void _start(void)
   }
 #elif defined(__wasip2__) || defined(__wasip3__)
   __wasilibc_assert_no_descriptor_leaks();
-  return r != 0;
+  // If main exited successfully, just return, otherwise report its exit
+  // status via `_Exit`, which uses `exit-with-code` for 0-255. Returning
+  // `r != 0` from `run` would report every nonzero status as 1. Destructors
+  // have already run above, so `_Exit` rather than `exit`.
+  if (r != 0) {
+    _Exit(r);
+  }
+  return 0;
 #elif defined(__webp2__)
   if (r != 0) {
     __wasilibc_webp2_report_error("main exited with nonzero status");

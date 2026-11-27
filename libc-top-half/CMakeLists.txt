@@ -448,7 +448,7 @@ if (WASI STREQUAL "p2" OR WASI STREQUAL "p3")
   )
 endif()
 
-if (TARGET_TRIPLE MATCHES "wasip1-threads")
+if (TARGET_TRIPLE MATCHES "wasi(p1)?-threads")
   # pthreads functions needed for actual thread support
   list(APPEND top_half_sources
     musl/src/thread/wasi-threads/futex.c
